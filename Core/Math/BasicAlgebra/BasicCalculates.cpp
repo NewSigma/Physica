@@ -82,96 +82,100 @@ RealNumberA* factorial(const RealNumber* n) {
  * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
  */
 RealNumberA* cos(const RealNumber* n) {
-    auto MachinePrecision = const_1->MachinePrecision;
-    auto ONE = const_1->ONE;
-
     auto result = getOne();
-    auto square_n = *n * *n;
-    auto temp_1 = *n * *n;
-    auto temp_2 = getTwo();
-    auto rank = getTwo();
-    bool sign = false;
+    if(*n != *const_1->ZERO) {
+        auto MachinePrecision = const_1->MachinePrecision;
+        auto ONE = const_1->ONE;
 
-    while(true) {
-        //Calculate one term of the taylor series.
-        auto temp = *temp_1 / *temp_2;
-        temp->sign = sign;
-        *result += *temp;
-        //Here the temp means the criteria of break.
-        *temp *= *n;
-        *rank += *ONE;
-        *temp /= *rank;
-        int temp_power = temp->power;
-        delete temp;
+        auto square_n = *n * *n;
+        auto temp_1 = *n * *n;
+        auto temp_2 = getTwo();
+        auto rank = getTwo();
+        bool sign = false;
 
-        if(result->power - temp_power >= MachinePrecision)
-            break;
-        //Prepare for next calculate.
-        sign = !sign;
-        *temp_1 *= *square_n;
-        *temp_2 *= *rank;
-        *rank += *ONE;
-        *temp_2 *= *rank;
+        while(true) {
+            //Calculate one term of the taylor series.
+            auto temp = *temp_1 / *temp_2;
+            temp->sign = sign;
+            *result += *temp;
+            //Here the temp means the criteria of break.
+            *temp *= *n;
+            *rank += *ONE;
+            *temp /= *rank;
+            int temp_power = temp->power;
+            delete temp;
+
+            if(result->power - temp_power >= MachinePrecision)
+                break;
+            //Prepare for next calculate.
+            sign = !sign;
+            *temp_1 *= *square_n;
+            *temp_2 *= *rank;
+            *rank += *ONE;
+            *temp_2 *= *rank;
+        }
+
+        auto byte = new unsigned char[MachinePrecision];
+        memcpy(byte, result->byte, MachinePrecision * sizeof(char));
+        delete[] result->byte;
+        result->byte = byte;
+        result->length = MachinePrecision;
+        result->a = 1;
+
+        delete square_n;
+        delete temp_1;
+        delete temp_2;
+        delete rank;
     }
-
-    auto byte = new unsigned char[MachinePrecision];
-    memcpy(byte, result->byte, MachinePrecision * sizeof(char));
-    delete[] result->byte;
-    result->byte = byte;
-    result->length = MachinePrecision;
-    result->a = 1;
-
-    delete square_n;
-    delete temp_1;
-    delete temp_2;
-    delete rank;
     return result;
 }
 
 RealNumberA* sin(const RealNumber* n) {
-    auto MachinePrecision = const_1->MachinePrecision;
-    auto ONE = const_1->ONE;
-
     auto result = getZero();
-    auto square_n = *n * *n;
-    auto temp_1 = new RealNumberA(n);
-    auto temp_2 = getOne();
-    auto rank = getOne();
-    bool sign = true;
+    if(*n != *const_1->ZERO) {
+        auto MachinePrecision = const_1->MachinePrecision;
+        auto ONE = const_1->ONE;
 
-    while(true) {
-        //Calculate one term of the taylor series.
-        auto temp = *temp_1 / *temp_2;
-        temp->sign = sign;
-        *result += *temp;
-        //Here the temp means the criteria of break.
-        *temp *= *n;
-        *rank += *ONE;
-        *temp /= *rank;
-        int temp_power = temp->power;
-        delete temp;
+        auto square_n = *n * *n;
+        auto temp_1 = new RealNumberA(n);
+        auto temp_2 = getOne();
+        auto rank = getOne();
+        bool sign = true;
 
-        if(result->power - temp_power >= MachinePrecision)
-            break;
-        //Prepare for next calculate.
-        sign = !sign;
-        *temp_1 *= *square_n;
-        *temp_2 *= *rank;
-        *rank += *ONE;
-        *temp_2 *= *rank;
+        while(true) {
+            //Calculate one term of the taylor series.
+            auto temp = *temp_1 / *temp_2;
+            temp->sign = sign;
+            *result += *temp;
+            //Here the temp means the criteria of break.
+            *temp *= *n;
+            *rank += *ONE;
+            *temp /= *rank;
+            int temp_power = temp->power;
+            delete temp;
+
+            if(result->power - temp_power >= MachinePrecision)
+                break;
+            //Prepare for next calculate.
+            sign = !sign;
+            *temp_1 *= *square_n;
+            *temp_2 *= *rank;
+            *rank += *ONE;
+            *temp_2 *= *rank;
+        }
+
+        auto byte = new unsigned char[MachinePrecision];
+        memcpy(byte, result->byte, MachinePrecision * sizeof(char));
+        delete[] result->byte;
+        result->byte = byte;
+        result->length = MachinePrecision;
+        result->a = 1;
+
+        delete square_n;
+        delete temp_1;
+        delete temp_2;
+        delete rank;
     }
-
-    auto byte = new unsigned char[MachinePrecision];
-    memcpy(byte, result->byte, MachinePrecision * sizeof(char));
-    delete[] result->byte;
-    result->byte = byte;
-    result->length = MachinePrecision;
-    result->a = 1;
-
-    delete square_n;
-    delete temp_1;
-    delete temp_2;
-    delete rank;
     return result;
 }
 
