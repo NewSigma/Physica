@@ -1,0 +1,4 @@
+/home/sigma/Documents/Coding/Physica/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/sigma/Documents/Coding/Physica/cmake-build-debug/CMakeFiles/Physica.dir
+/home/sigma/Documents/Coding/Physica/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/sigma/Documents/Coding/Physica/cmake-build-debug/CMakeFiles/Physica_autogen.dir
