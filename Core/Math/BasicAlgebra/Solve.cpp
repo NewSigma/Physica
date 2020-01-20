@@ -1,0 +1,86 @@
+#include <iostream>
+#include "../../Header/Solve.h"
+#include "../../Header/Const.h"
+/*
+ * Find the numerical root of algebra equation.
+ * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ */
+extern const Const_1* const_1;
+/*
+ * y1 = func(x1), y2 = func(x2)
+ * Solve the x when n = func(x)
+ */
+RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2)    {
+    auto y1 = func(x1);
+    auto y2 = func(x2);
+    auto result = bisectionMethod(func, n, x1, x2, y1, y2);
+    delete y1;
+    delete y2;
+    return result;
+}
+
+RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2, const RealNumber* y1, const RealNumber* y2) {
+    auto delta_left = *n - *y1;
+    auto delta_right = *n - *y2;
+    if(delta_left->sign == delta_right->sign) {
+        std::cout << "[Solve: bisectionMethod] Existence of root is uncertain." << std::endl;
+        return nullptr;
+    }
+    delete delta_left;
+    delete delta_right;
+
+    auto TWO = const_1->TWO;
+    int MachinePrecision = const_1->MachinePrecision;
+
+    auto result = *x1 + *x2;
+    *result /= *TWO;
+    RealNumber* y_result;
+
+    auto error = *y1 - *y2;
+    error->sign = true;
+    *error /= *TWO;
+
+    auto x_left = new RealNumber(x1);
+    auto x_right = new RealNumber(x2);
+    auto y_left = new RealNumber(y1);
+
+    delta_left = *n - *y_left;
+    bool delta_left_sign = delta_left->sign;
+    bool delta_right_sign;
+    delete delta_left;
+
+    do {
+        y_result = func(result);
+        delta_right = *n - *y_result;
+        delta_right_sign = delta_right->sign;
+        delete delta_right;
+
+        if(delta_left_sign == delta_right_sign) {
+            delete x_left;
+            delete y_left;
+            x_left = result;
+            y_left = y_result;
+
+            delta_left = *n - *y_left;
+            delta_left_sign = delta_left->sign;
+            delete delta_left;
+        }
+        else {
+            delete x_right;
+            delete y_result;
+            x_right = result;
+        }
+
+        result = *x_left + *x_right;
+        *result /= *TWO;
+        *error /= *TWO;
+    } while(result->power - error->power < MachinePrecision);
+    result->a = 1;
+
+    delete x_left;
+    delete x_right;
+    delete y_left;
+    delete error;
+
+    return (RealNumberA*)result;
+}
