@@ -46,7 +46,6 @@ public:
     void print() const;
     RealNumberA& operator= (const RealNumberA& n);
 };
-
 //////////////////////////////////Operators///////////////////////////////////////
 RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2);
 RealNumber* operator- (const RealNumber& n1, const RealNumber& n2);

@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     int exit_code = QApplication::exec();
     */
     auto a = getZero();
-    sin(a)->print();
+    arccos(a)->print();
 
     delete const_1;
     delete const_2;
