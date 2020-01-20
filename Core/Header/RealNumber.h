@@ -7,8 +7,7 @@
  *
  * They can be convented to each other safely.
  */
-class RealNumber
-{
+class RealNumber {
 public:
     //Store effective digits.
     unsigned char* byte;
@@ -16,7 +15,7 @@ public:
     int length;
     //Number = (x0 +- a * 10^(1-length)) * 10^power
     int power;
-    //True if positive and false if negative.
+    //True if RealNumber > 0 and false if RealNumber < 0. (RealNumber != 0)
     bool sign;
     //Accuracy
     unsigned char a = 0;
@@ -27,6 +26,9 @@ public:
     RealNumber(unsigned char* byte, int length, int power, bool sign);
     explicit RealNumber(const RealNumber* n);
     ~RealNumber();
+    bool isZero() const { return byte[0] == 0; }
+    bool isPositive() const { return !isZero() && sign; }
+    bool isNegative() const { return !isZero() && !sign; }
 
     void print() const;
     explicit operator double() const;
@@ -35,11 +37,10 @@ public:
 /*
  * Real number with accuracy.
  */
-class RealNumberA : public RealNumber
-{
+class RealNumberA : public RealNumber {
 public:
     RealNumberA();
-    RealNumberA(double d, char acc = 0);
+    explicit RealNumberA(double d, unsigned char acc = 0);
     RealNumberA(const RealNumberA& n);
     RealNumberA(unsigned char* byte, int length, int power, bool sign, unsigned char acc = 0);
     explicit RealNumberA(const RealNumber* n, unsigned char a = 0);

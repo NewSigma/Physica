@@ -174,45 +174,83 @@ void operator/= (RealNumber& n1, const RealNumber& n2) {
 }
 
 bool operator> (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = p_result->sign;
-    delete p_result;
+    //Judge from sign.
+    if(n1.isPositive()) {
+        if(n2.isZero() || n2.isNegative())
+            return true;
+    }
+    else if(n1.isZero())
+        return n2.isNegative();
+    else {
+        if(n2.isPositive() || n2.isZero())
+            return false;
+    }
+    //If we cannot get a result, judge from power
+    bool result;
+    if(n1.power > n2.power)
+        result = true;
+    else if(n1.power < n2.power)
+        result = false;
+    else {
+        //The only method left.
+        RealNumber* p_result = n1 - n2;
+        result = p_result->sign;
+        delete p_result;
+    }
     return result;
 }
 
 bool operator< (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = !p_result->sign;
-    delete p_result;
+    //Judge from sign.
+    if(n1.isPositive()) {
+        if(n2.isZero() || n2.isNegative())
+            return false;
+    }
+    else if(n1.isZero())
+        return n2.isPositive();
+    else {
+        if(n2.isPositive() || n2.isZero())
+            return true;
+    }
+    //If we cannot get a result, judge from power
+    bool result;
+    if(n1.power > n2.power)
+        result = false;
+    else if(n1.power < n2.power)
+        result = true;
+    else {
+        //The only method left.
+        RealNumber* p_result = n1 - n2;
+        result = p_result->isNegative();
+        delete p_result;
+    }
     return result;
 }
 
 bool operator>= (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = p_result->sign || p_result->byte[0] == 0;
-    delete p_result;
-    return result;
+    return !(n1 < n2);
 }
 
 bool operator<= (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = !p_result->sign || p_result->byte[0] == 0;
-    delete p_result;
-    return result;
+    return !(n1 > n2);
 }
 
 bool operator== (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = p_result->byte[0] == 0;
-    delete p_result;
-    return result;
+    if(n1.power != n2.power)
+        return false;
+    if(n1.sign != n2.sign)
+        return false;
+    if(n1.length != n2.length)
+        return false;
+    for(int i = 0; i < n1.length; ++i) {
+        if(n1.byte[i] != n2.byte[i])
+            return false;
+    }
+    return true;
 }
 
 bool operator!= (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    bool result = p_result->byte[0] != 0;
-    delete p_result;
-    return result;
+    return !(n1 == n2);
 }
 //TODO not completed. n2 should be a float number
 RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
@@ -243,13 +281,9 @@ RealNumber* operator- (const RealNumber& n) {
     return result;
 }
 ///////////////////////////////////////RealNumberA/////////////////////////////////////////
-RealNumberA::RealNumberA() {
-    byte = nullptr;
-    length = power = 0;
-    this->sign = true;
-}
+RealNumberA::RealNumberA() = default;
 
-RealNumberA::RealNumberA(double d, char acc) : RealNumber(d) {
+RealNumberA::RealNumberA(double d, unsigned char acc) : RealNumber(d) {
     a = acc;
 }
 
@@ -514,7 +548,11 @@ bool isInteger(const RealNumber* n) {
  */
 RealNumber* add (const RealNumber* n1, const RealNumber* n2) {
     RealNumber* result;
-    if (n1->sign != n2->sign) {
+    if(n1->isZero())
+        result = new RealNumber(n2);
+    else if(n2->isZero())
+        result = new RealNumber(n1);
+    else if (n1->sign != n2->sign) {
         RealNumber* shallow_copy;
         if (n1->sign) {
             shallow_copy = new RealNumber(n2->byte, n2->length, n2->power, true);
@@ -579,8 +617,12 @@ RealNumber* add (const RealNumber* n1, const RealNumber* n2) {
 RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
     RealNumber* result;
     ///////////////////////////////////Deal with Binderies////////////////////////////////
-    RealNumber* shallow_copy;
-    if (n1->sign) {
+    RealNumber* shallow_copy = nullptr;
+    if(n1->isZero())
+        result = -*n2;
+    else if(n2->isZero())
+        result = new RealNumber(n1);
+    else if (n1->sign) {
         if (!n2->sign) {
             shallow_copy = new RealNumber(n2->byte, n2->length, n2->power, true);
             result = *n1 + *shallow_copy;
@@ -633,9 +675,9 @@ RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
             delete shallow_copy_1;
         }
         shallow_copy->byte = nullptr;
-        delete shallow_copy;
     }
     ////////////////////////////////////Out put////////////////////////////////////////
+    delete shallow_copy;
     return result;
 }
 
@@ -691,7 +733,8 @@ RealNumber* multiply (const RealNumber* n1, const RealNumber* n2) {
 RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
     if(n2->byte[0] == 0)
         throw std::invalid_argument("[RealNumber] Can not divide by zero!");
-
+    if(n1->isZero() || n2->isZero())
+        return getZero();
     auto n1_copy = new RealNumber(n1);
     auto n2_copy = new RealNumber(n2);
     n1_copy->sign = true;
@@ -704,14 +747,19 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
      */
     int length = const_1->MachinePrecision + 1;
     int power = n1_copy->power - n2_copy->power - 1;
-    auto temp = new unsigned char[length];
+    auto temp = new unsigned char[length]{0};
     n1_copy->power = n2_copy->power + 1;
     for (int i = 0; i < length; ++i) {
         char unit = 0;
         while(true) {
             *n1_copy -= *n2_copy;
-            if(n1_copy->sign)
+            if(n1_copy->isPositive())
                 unit += 1;
+            else if(n1_copy->isZero()) {
+                temp[i] = unit;
+                //Do we have better choice?
+                goto double_break;
+            }
             else {
                 *n1_copy += *n2_copy;
                 break;
@@ -720,6 +768,7 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
         ++n1_copy->power;
         temp[i] = unit;
     }
+double_break:
     delete n1_copy;
     delete n2_copy;
     ////////////////////////////////////Out put////////////////////////////////////////
