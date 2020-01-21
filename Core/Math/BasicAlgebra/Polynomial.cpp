@@ -3,6 +3,9 @@
  */
 #include <iostream>
 #include "../../Header/Polynomial.h"
+#include "../../Header/Const.h"
+
+extern const Const_1* const_1;
 /*
  * A polynomial equals to a0 + a1 * x + a2 * x^2 + ... + an * x^n.
  * Here length = n, variable = x, coefficients is a array of a1, a2, ..., an.
@@ -25,7 +28,7 @@ void Polynomial::addCoefficients(int index, const RealNumber* n) {
 }
 
 RealNumber* Polynomial::calculate() {
-    auto result = getZero();
+    auto result = const_1->getZero();
     for(int i = length - 1; i > 0; --i) {
         *result += *coefficients[i];
         *result *= *variable;

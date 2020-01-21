@@ -10,11 +10,22 @@ extern const Const_1* const_1;
 Const_1::Const_1() {
     MachinePrecision = 16;
     R_MAX = new RealNumberA(new unsigned char[10]{2,1,4,7,4,8,3,6,4,7}, 10, 9, true);
+
     ZERO = new RealNumberA(new unsigned char[1]{0}, 1, 0, true);
+
+    RealNumberA* temp;
     ONE = new RealNumberA(new unsigned char[1]{1}, 1, 0, true);
-    MINUS_ONE = new RealNumberA(new unsigned char[1]{1}, 1, 0, false);
+
+    temp = new RealNumberA(ONE);
+    temp->sign = false;
+    MINUS_ONE = temp;
+
     TWO = new RealNumberA(new unsigned char[1]{2}, 1, 0, true);
-    MINUS_TWO = new RealNumberA(new unsigned char[1]{2}, 1, 0, false);
+
+    temp = new RealNumberA(TWO);
+    temp->sign = false;
+    MINUS_TWO = temp;
+
     PI = new RealNumberA(new unsigned char[16]{3,1,4,1,5,9,2,6,5,3,5,8,9,7,9,3}, 16, 0, true);
 }
 

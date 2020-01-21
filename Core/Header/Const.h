@@ -16,6 +16,10 @@ public:
 
     Const_1();
     ~Const_1();
+
+    RealNumberA* getZero() const { return new RealNumberA(ZERO); }
+    RealNumberA* getOne() const { return new RealNumberA(ONE); }
+    RealNumberA* getTwo() const { return new RealNumberA(TWO); }
 };
 
 class Const_2 {

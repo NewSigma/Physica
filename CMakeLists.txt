@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Physica VERSION 0.0.1)
 #############################################Settings#############################################
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CUDA_COMPILER /usr/local/cuda-10.1/bin/nvcc)
 set(CMAKE_PREFIX_PATH "~/Qt5.13.2/5.13.2/gcc_64/lib/cmake")
 set(CMAKE_AUTOMOC ON)
@@ -26,13 +27,16 @@ file(GLOB_RECURSE SOURCES Core/*.* Gui/*.* Utils/*.*)
 file(GLOB_RECURSE RESOURCES Resources/*.*)
 add_executable(${PROJECT_NAME} Physica.cpp Kernel.cu ${SOURCES} ${RESOURCES})
 #############################################Options##############################################
+set(OPTIMIZE_LEVEL 3)
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
-        -O0
+        -O${OPTIMIZE_LEVEL}
         >)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
-        --gpu-architecture=sm_35
+        --std=c++14
+        --gpu-architecture=sm_50
+        --optimize ${OPTIMIZE_LEVEL}
         --use_fast_math
         --relocatable-device-code=true
         >)

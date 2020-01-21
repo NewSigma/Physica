@@ -3,6 +3,8 @@
 #include <cstring>
 #include <cmath>
 #include "../../Header/Const.h"
+#include "../../Header/BasicCalculates.h"
+
 /*
  *
  * Useful formulas:
@@ -27,6 +29,7 @@ RealNumber::RealNumber() {
 RealNumber::RealNumber(double d) {
     sign = d >= 0;
     d = sign ? d : -d;
+    auto copy_d = d;
 
     length = power = 0;
     if(d < 1) {
@@ -42,18 +45,16 @@ RealNumber::RealNumber(double d) {
         } while(d >= 10);
     }
 
-    auto copy_f = d;
     do {
-        copy_f -= (float)((int)copy_f);
-        copy_f *= 10;
+        copy_d -= double(int(copy_d));
+        copy_d *= 10;
         ++length;
-    } while(copy_f != 0);
-    length = length > const_1->MachinePrecision ? const_1->MachinePrecision : length;
+    } while(copy_d != 0 && length <= const_1->MachinePrecision);
 
     byte = new unsigned char[length];
     for(int i = 0; i < length; ++i) {
         byte[i] = (char)d;
-        d -= (float)((int)d);
+        d -= double(int(d));
         d *= 10;
     }
 }
@@ -108,7 +109,29 @@ RealNumber::~RealNumber() {
 }
 
 void RealNumber::print() const {
-    std::cout << (double)(*this) << "\tLength = " << length << "\tPower = " << power;
+    if(power < 0) {
+        std::cout << "0.";
+        for(int i = -power - 1; i > 0; --i)
+            std::cout << "0";
+        for(int i = 0; i < length; ++i)
+            std::cout << (int)byte[i];
+    }
+    else {
+        if(length > power) {
+            for(int i = 0; i < power + 1; ++i)
+                std::cout << (int)byte[i];
+            std::cout << ".";
+            for(int i = power + 1; i < length; ++i)
+                std::cout << (int)byte[i];
+        }
+        else {
+            for(int i = 0; i < length; ++i)
+                std::cout << (int)byte[i];
+            for(int i = power - length + 1; i > 0; --i)
+                std::cout << "0";
+        }
+    }
+    std::cout << "\tLength = " << length << "\tPower = " << power;
 }
 
 RealNumber& RealNumber::operator= (const RealNumber& n) {
@@ -240,10 +263,23 @@ bool operator== (const RealNumber& n1, const RealNumber& n2) {
         return false;
     if(n1.sign != n2.sign)
         return false;
-    if(n1.length != n2.length)
-        return false;
-    for(int i = 0; i < n1.length; ++i) {
-        if(n1.byte[i] != n2.byte[i])
+    const RealNumber* longer;
+    const RealNumber* shorter;
+    if(n1.length > n2.length) {
+        longer = &n1;
+        shorter = &n2;
+    }
+    else {
+        longer = &n2;
+        shorter = &n1;
+    }
+    for(int i = 0; i < shorter->length; ++i) {
+        if(shorter->byte[i] != longer->byte[i])
+            return false;
+    }
+    //Extra parts should be zero.
+    for(int i = shorter->length; i < longer->length; ++i) {
+        if(longer->byte[i] != 0)
             return false;
     }
     return true;
@@ -252,20 +288,43 @@ bool operator== (const RealNumber& n1, const RealNumber& n2) {
 bool operator!= (const RealNumber& n1, const RealNumber& n2) {
     return !(n1 == n2);
 }
-//TODO not completed. n2 should be a float number
+//Using Newton's method
 RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* result = nullptr;
-    if(isInteger(&n2)) {
-        auto n1_copy = new RealNumber(n1);
-
-        result = getOne();
-        while(*n1_copy != *const_1->ZERO) {
-            *n1_copy -= *const_1->ONE;
-            *result *= n1;
-        }
-        delete n1_copy;
+    RealNumberA* result = nullptr;
+    if(n1.isZero()) {
+        if(!n2.isZero())
+            result = const_1->getZero();
     }
+    else if(n1.isPositive()) {
+        if(isInteger(&n2)) {
+            auto n2_copy = new RealNumber(n2);
 
+            result = const_1->getOne();
+            while(*n2_copy != *const_1->ZERO) {
+                *n2_copy -= *const_1->ONE;
+                *result *= (RealNumberA&)n1;
+            }
+            delete n2_copy;
+        }
+        else {
+            auto temp_result = const_1->getOne();
+            auto temp_1 = ln(&n1);
+            *temp_1 *= n2;
+            *temp_1 += *const_1->ONE;
+            bool go_on;
+            do {
+                result = ln(temp_result);
+                result->sign = !result->sign;
+                *result += *temp_1;
+                *result *= *temp_result;
+                go_on = *result == *temp_result;
+                delete temp_result;
+                temp_result = result;
+            } while(go_on);
+            result->a += 1;
+            delete temp_1;
+        }
+    }
     return result;
 }
 
@@ -302,24 +361,21 @@ RealNumberA::RealNumberA(const RealNumber* n, unsigned char acc) : RealNumber(n)
 void RealNumberA::print() const {
     RealNumber::print();
     std::cout << "\tAccuracy = ";
+    int temp = power - length +1;
     if(a == 0)
         std::cout << "0.";
     else {
-        if(power > 0) {
+        if(temp < 0) {
+            std::cout << "0.";
+            for(; temp < -1; ++temp)
+                std::cout << "0";
             std::cout << (int)a;
-            for(int i = 0; i < power; ++i)
+        }
+        else {
+            std::cout << (int)a;
+            for(; temp > 0; --temp)
                 std::cout << "0";
             std::cout << ".";
-        }
-        else if(power == 0)
-            std::cout << (int)a << ".";
-        else {
-            std::cout << "0.";
-            for (int i = 0; i > power + 1; --i)
-            {
-                std::cout << "0";
-            }
-            std::cout << (int)a;
         }
     }
 }
@@ -334,34 +390,31 @@ RealNumberA& RealNumberA::operator= (const RealNumberA& n) {
 
 RealNumberA* operator+ (const RealNumberA& n1, const RealNumberA& n2) {
     auto raw_result = add(&n1, &n2);
-    unsigned char a = cutArray(raw_result);
+    unsigned char acc = cutArray(raw_result);
     RealNumberA* result;
     if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, a);
+        result = new RealNumberA(raw_result, acc);
     else {
         //Get a
         int length = raw_result->length;
         if(n1.length - n1.power == n2.length - n2.power)
-            a += n1.a + n2.a;
+            acc += n1.a + n2.a;
         else
-            a += n1.length - n1.power > n2.length - n2.power ? n2.a + 1 : n1.a + 1;
+            acc += n1.length - n1.power > n2.length - n2.power ? n2.a + 1 : n1.a + 1;
 
-        if(a > 9) {
-            if(length == 1) {
+        if(acc > 9) {
+            if(length < 2) {
                 std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                exit(EXIT_FAILURE);
+                return nullptr;
             }
-            a = 2;
+            acc += raw_result->byte[length - 1];
+            acc = acc / 10 + acc % 10 != 0;
             --length;
-            if(raw_result->byte[raw_result->length - 1] >= 5)
-                raw_result->byte[raw_result->length - 2] += 1;
         }
         //Get byte
         auto byte = new unsigned char[length];
         memcpy(byte, raw_result->byte, length * sizeof(char));
-        int power = raw_result->power;
-        bool sign = raw_result->sign;
-        result = new RealNumberA(byte, length, power, sign, a);
+        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
     delete raw_result;
     return result;
@@ -369,34 +422,30 @@ RealNumberA* operator+ (const RealNumberA& n1, const RealNumberA& n2) {
 
 RealNumberA* operator- (const RealNumberA& n1, const RealNumberA& n2) {
     auto raw_result = subtract(&n1, &n2);
-    unsigned char a = cutArray(raw_result);
+    unsigned char acc = cutArray(raw_result);
     RealNumberA* result;
     if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, a);
+        result = new RealNumberA(raw_result, acc);
     else {
         //Get a
         int length = raw_result->length;
         if(n1.length - n1.power == n2.length - n2.power)
-            a += n1.a + n2.a;
+            acc += n1.a + n2.a;
         else
-            a += n1.length - n1.power > n2.length - n2.power ? (n2.a + 1) : (n1.a + 1);
-        if(a > 9) {
-            if(length == 1) {
+            acc += n1.length - n1.power > n2.length - n2.power ? (n2.a + 1) : (n1.a + 1);
+        if(acc > 9) {
+            if(length < 2) {
                 std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                exit(EXIT_FAILURE);
+                return nullptr;
             }
-            a += 5;
-            a = a / 10 + a % 10 != 0;
+            acc += raw_result->byte[length - 1];
+            acc = acc / 10 + ((acc % 10) != 0);
             --length;
-            if(raw_result->byte[raw_result->length - 1] >= 5)
-                raw_result->byte[raw_result->length - 2] += 1;
         }
         //Get byte
         auto byte = new unsigned char[length];
         memcpy(byte, raw_result->byte, length * sizeof(char));
-        int power = raw_result->power;
-        bool sign = raw_result->sign;
-        result = new RealNumberA(byte, length, power, sign, a);
+        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
     delete raw_result;
     return result;
@@ -404,43 +453,53 @@ RealNumberA* operator- (const RealNumberA& n1, const RealNumberA& n2) {
 
 RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
     auto raw_result = multiply(&n1, &n2);
-    unsigned char a = cutArray(raw_result);
+    unsigned char acc = cutArray(raw_result);
     RealNumberA* result;
     if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, a);
+        result = new RealNumberA(raw_result, acc);
     else {
         //Get a
-        auto copy_byte_1 = new unsigned char[n1.length];
-        memcpy(copy_byte_1, n1.byte, n1.length);
-        auto copy_byte_2 = new unsigned char[n2.length];
-        memcpy(copy_byte_2, n2.byte, n2.length);
-        auto n1_a = RealNumber(copy_byte_1, 1, -(n1.length - n1.power - 1), true);
-        auto n2_a = RealNumber(copy_byte_2, 1, -(n2.length - n2.power - 1), true);
+        auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, n1.power - n1.length + 1);
+        auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, n2.power - n2.length + 1);
         auto error = n1 * n2_a;
         auto error_1 = n2 * n1_a;
         auto error_2 = n1_a * n2_a;
         *error += *error_1;
         *error += *error_2;
 
-        a += error->byte[0] + 1;
         int length = raw_result->length;
-        if(a > 9) {
-            if(length == 1) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                exit(EXIT_FAILURE);
+        //raw_result->power - raw_result->length + 1 - (error->power - error->length + 1)
+        int temp = raw_result->power - raw_result->length + 1 - error->power;
+        if(temp > 0)
+            acc += 1;
+        else {
+            if(temp < 0) {
+                auto error_3 = RealNumber(new unsigned char[1]{acc}, 1, raw_result->power - raw_result->length + 1);
+                *error += error_3;
+                length += temp;
             }
-            a = 2;
+            if(error->length == 1)
+                acc += error->byte[0];
+            else
+                acc += error->byte[0] + 1;
+        }
+
+        if(acc > 9) {
+            if(length < 2) {
+                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
+                return nullptr;
+            }
+            acc = 2;
             --length;
         }
+
         delete error;
         delete error_1;
         delete error_2;
         //Get byte
         auto byte = new unsigned char[length];
         memcpy(byte, raw_result->byte, length * sizeof(char));
-        int power = raw_result->power;
-        bool sign = raw_result->sign;
-        result = new RealNumberA(byte, length, power, sign, a);
+        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
     delete raw_result;
     return result;
@@ -448,13 +507,12 @@ RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
 
 RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
     auto raw_result = divide(&n1, &n2);
-    unsigned char a = cutArray(raw_result);
+    unsigned char acc = raw_result->a + cutArray(raw_result);
     RealNumberA* result;
     if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, a);
+        result = new RealNumberA(raw_result, acc);
     else {
         //Get a
-        RealNumber* error;
         auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, -(n1.length - n1.power - 1), true);
         auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, -(n2.length - n2.power - 1), true);
         auto numerator = n1 * n2_a;
@@ -462,18 +520,34 @@ RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
         *numerator += *numerator_1;
         auto denominator = n2 - n2_a;
         *denominator *= n2;
-        error = *numerator / *denominator;
+        auto error = *numerator / *denominator;
 
-        a += error->byte[0] + 1;
         int length = raw_result->length;
-        if(a > 9) {
-            if(length == 1) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                exit(EXIT_FAILURE);
+        //raw_result->power - raw_result->length + 1 - (error->power - error->length + 1)
+        int temp = raw_result->power - raw_result->length + 1 - error->power;
+        if(temp > 0)
+            acc += 1;
+        else {
+            if(temp < 0) {
+                auto error_3 = RealNumber(new unsigned char[1]{acc}, 1, raw_result->power - raw_result->length + 1);
+                *error += error_3;
+                length += temp;
             }
-            a = 2;
+            if(error->length == 1)
+                acc += error->byte[0];
+            else
+                acc += error->byte[0] + 1;
+        }
+
+        if(acc > 9) {
+            if(length < 2) {
+                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
+                return nullptr;
+            }
+            acc = 2;
             --length;
         }
+
         delete numerator;
         delete numerator_1;
         delete denominator;
@@ -481,9 +555,7 @@ RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
         //Get byte
         auto byte = new unsigned char[length];
         memcpy(byte, raw_result->byte, length * sizeof(char));
-        int power = raw_result->power;
-        bool sign = raw_result->sign;
-        result = new RealNumberA(byte, length, power, sign, a);
+        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
     delete raw_result;
     return result;
@@ -682,108 +754,124 @@ RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
 }
 
 RealNumber* multiply (const RealNumber* n1, const RealNumber* n2) {
-    //In this case, big has more digits after the dot.
-    const RealNumber* big;
-    const RealNumber* small;
-    if (n1->length - n1->power > n2->length - n2->power) {
-        big = n1;
-        small = n2;
-    }
+    RealNumber* result;
+    if(*n1 == *const_1->ONE)
+        result = new RealNumber(n2);
+    else if(*n2 == *const_1->ONE)
+        result = new RealNumber(n1);
     else {
-        big = n2;
-        small = n1;
-    }
-    ////////////////////////////////Calculate cursory first//////////////////////////////////////
-    //Estimate the ed of result first. we will calculate it accurately later.
-    int length = n1->length + n2->length - 1;
-    auto temp = new unsigned char[length]{0};
-    for (int i = small->length - 1; i >= 0; --i) {
-        for(int j=big->length - 1; j >= 0; --j) {
-            int index = i + j;
-            temp[index] += small->byte[i] * big->byte[j];
-            //Carry bit.
-            if (temp[index] > 9 && index > 0) {
-                int tens = temp[index] / 10;
-                temp[index - 1] += tens;
-                temp[index] -= tens * 10;
+        //In this case, big has more digits after the dot.
+        const RealNumber* big;
+        const RealNumber* small;
+        if (n1->length - n1->power > n2->length - n2->power) {
+            big = n1;
+            small = n2;
+        }
+        else {
+            big = n2;
+            small = n1;
+        }
+        ////////////////////////////////Calculate cursory first//////////////////////////////////////
+        //Estimate the ed of result first. we will calculate it accurately later.
+        int length = n1->length + n2->length - 1;
+        auto temp = new unsigned char[length]{0};
+        for (int i = small->length - 1; i >= 0; --i) {
+            for(int j=big->length - 1; j >= 0; --j) {
+                int index = i + j;
+                temp[index] += small->byte[i] * big->byte[j];
+                //Carry bit.
+                if (temp[index] > 9 && index > 0) {
+                    int tens = temp[index] / 10;
+                    temp[index - 1] += tens;
+                    temp[index] -= tens * 10;
+                }
             }
         }
+        ///////////////////////////////////////Get byte, length and power//////////////////////////
+        unsigned char* byte;
+        int power = n1->power + n2->power;
+        if (temp[0] > 9) {
+            ++length;
+            ++power;
+            int tens = temp[0] / 10;
+            byte = new unsigned char[length];
+            byte[0] = tens;
+            byte[1] = temp[0] - tens * 10;
+            memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
+        }
+        else {
+            byte = new unsigned char[length];
+            memcpy(byte, temp, length * sizeof(char));
+        }
+        delete[] temp;
+        ////////////////////////////////////Out put////////////////////////////////////////
+        result = new RealNumber(byte, length, power, n1->sign == n2->sign);
     }
-    ///////////////////////////////////////Get byte, length and power//////////////////////////
-    unsigned char* byte;
-    int power = n1->power + n2->power;
-    if (temp[0] > 9) {
-        ++length;
-        ++power;
-        int tens = temp[0] / 10;
-        byte = new unsigned char[length];
-        byte[0] = tens;
-        byte[1] = temp[0] - tens * 10;
-        memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-    }
-    else {
-        byte = new unsigned char[length];
-        memcpy(byte, temp, length * sizeof(char));
-    }
-    delete[] temp;
-    ////////////////////////////////////Out put////////////////////////////////////////
-    return new RealNumber(byte, length, power, n1->sign == n2->sign);
+    return result;
 }
 
 RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
     if(n2->byte[0] == 0)
         throw std::invalid_argument("[RealNumber] Can not divide by zero!");
+
+    RealNumber* result;
     if(n1->isZero() || n2->isZero())
-        return getZero();
-    auto n1_copy = new RealNumber(n1);
-    auto n2_copy = new RealNumber(n2);
-    n1_copy->sign = true;
-    n2_copy->sign = true;
-    ////////////////////////////////Calculate cursory first//////////////////////////////////////
-    //Estimate the ed of result first, we will calculate it accurately later.
-    /*
-     * Here we add 1 to length, making it convenient to cutArray to judge whether the calculate is stopped
-     * by the limitation of precision.
-     */
-    int length = const_1->MachinePrecision + 1;
-    int power = n1_copy->power - n2_copy->power - 1;
-    auto temp = new unsigned char[length]{0};
-    n1_copy->power = n2_copy->power + 1;
-    for (int i = 0; i < length; ++i) {
-        char unit = 0;
-        while(true) {
-            *n1_copy -= *n2_copy;
-            if(n1_copy->isPositive())
-                unit += 1;
-            else if(n1_copy->isZero()) {
-                temp[i] = unit;
-                //Do we have better choice?
-                goto double_break;
+        result = const_1->getZero();
+    else {
+        result = new RealNumber();
+        auto n1_copy = new RealNumber(n1);
+        auto n2_copy = new RealNumber(n2);
+        n1_copy->sign = true;
+        n2_copy->sign = true;
+        ////////////////////////////////Calculate cursory first//////////////////////////////////////
+        //Estimate the ed of result first, we will calculate it accurately later.
+        int length = const_1->MachinePrecision;
+        int power = n1_copy->power - n2_copy->power - 1;
+        auto temp = new unsigned char[length]{0};
+        n1_copy->power = n2_copy->power + 1;
+        for (int i = 0; i < length; ++i) {
+            char unit = 0;
+            while(true) {
+                *n1_copy -= *n2_copy;
+                if(n1_copy->isNegative()) {
+                    *n1_copy += *n2_copy;
+                    break;
+                }
+                else {
+                    unit += 1;
+                    if(n1_copy->isZero()) {
+                        temp[i] = unit;
+                        //Do we have better choice?
+                        goto double_break;
+                    }
+                }
             }
-            else {
-                *n1_copy += *n2_copy;
-                break;
-            }
+            ++n1_copy->power;
+            temp[i] = unit;
         }
-        ++n1_copy->power;
-        temp[i] = unit;
+        //1 comes from algorithm of divide()
+        result->a = 1;
+        double_break:
+        delete n1_copy;
+        delete n2_copy;
+        ////////////////////////////////////Out put////////////////////////////////////////
+        unsigned char* byte;
+        if(temp[0] > 9) {
+            ++power;
+            byte = new unsigned char[length];
+            byte[0] = temp[0] / 10;
+            byte[1] = temp[0] - byte[0] * 10;
+            memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
+            delete[] temp;
+        }
+        else
+            byte = temp;
+        result->byte = byte;
+        result->length = length;
+        result->power = power;
+        result->sign = n1->sign == n2->sign;
     }
-double_break:
-    delete n1_copy;
-    delete n2_copy;
-    ////////////////////////////////////Out put////////////////////////////////////////
-    unsigned char* byte;
-    if(temp[0] > 9) {
-        ++power;
-        byte = new unsigned char[length];
-        byte[0] = temp[0] / 10;
-        byte[1] = temp[0] - byte[0] * 10;
-        memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-        delete[] temp;
-    }
-    else
-        byte = temp;
-    return new RealNumber(byte, length, power, n1->sign == n2->sign);
+    return result;
 }
 /*
  * Zero on both sides will be cut,

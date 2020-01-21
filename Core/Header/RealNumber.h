@@ -23,7 +23,7 @@ public:
     RealNumber();
     explicit RealNumber(double d);
     RealNumber(const RealNumber& n);
-    RealNumber(unsigned char* byte, int length, int power, bool sign);
+    RealNumber(unsigned char* byte, int length, int power, bool sign = true);
     explicit RealNumber(const RealNumber* n);
     ~RealNumber();
     bool isZero() const { return byte[0] == 0; }
@@ -42,7 +42,7 @@ public:
     RealNumberA();
     explicit RealNumberA(double d, unsigned char acc = 0);
     RealNumberA(const RealNumberA& n);
-    RealNumberA(unsigned char* byte, int length, int power, bool sign, unsigned char acc = 0);
+    RealNumberA(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit RealNumberA(const RealNumber* n, unsigned char a = 0);
     void print() const;
     RealNumberA& operator= (const RealNumberA& n);
@@ -79,10 +79,6 @@ RealNumberA* operator- (const RealNumberA& n);
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);
 bool isInteger(const RealNumber* n);
-//Be used to spawn common integers.
-inline RealNumberA* getZero() { return new RealNumberA(new unsigned char[1]{0}, 1, 0, true); }
-inline RealNumberA* getOne() { return new RealNumberA(new unsigned char[1]{1}, 1, 0, true); }
-inline RealNumberA* getTwo() { return new RealNumberA(new unsigned char[1]{2}, 1, 0, true); }
 //////////////////////////////Process functions////////////////////////////////////////
 RealNumber* add (const RealNumber* n1, const RealNumber* n2);
 RealNumber* subtract (const RealNumber* n1, const RealNumber* n2);

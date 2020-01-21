@@ -1,4 +1,5 @@
 #include "../../Header/ClimbMountainAlgorithm.h"
+#include "../../Header/Const.h"
 #include <iostream>
 /*
  * The climb mountain algorithm should only be used in simple situation external point to get a global best solution.
@@ -12,12 +13,14 @@
  *
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.
  */
+extern const Const_1* const_1;
 //TODO Optional: Auto step-size
-ClimbMountainAlgorithm::ClimbMountainAlgorithm(RealNumber* f(RealNumber*), RealNumber* init, RealNumber* size) {
+ClimbMountainAlgorithm::ClimbMountainAlgorithm(RealNumberA* f(RealNumber*), RealNumber* init, RealNumber* size) {
 	func = f;
 	x_initial = init;
 	stepSize = size;
-	minStep = new RealNumber(new unsigned char[1]{1}, 1, -16, true);
+	minStep = const_1->getOne();
+	minStep->length = -const_1->MachinePrecision;
 }
 
 ClimbMountainAlgorithm::~ClimbMountainAlgorithm() {

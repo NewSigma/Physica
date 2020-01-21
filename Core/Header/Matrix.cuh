@@ -7,17 +7,15 @@ class Matrix
 {
 public:
 	double* matrix;
-	int* row, * column;
+	int row, column;
 
-	Matrix(int* row, int* column);
+	Matrix(int r, int c);
 };
 
 Matrix* multiply(const Matrix* m1, const Matrix* m2, bool inner);
-__global__ void threadMultiply(double* result, double* m1, double* m2, int resultColumn, int elements, int count);
+__global__ void threadMultiply(double* result, const double* m1, const double* m2, int resultColumn, long elements, int count);
 
 Matrix* add(const Matrix* m1, const Matrix* m2, bool inner);
-__global__ void threadAdd(double* result, double* m1, double* m2, int elements);
-////////////////////////////////helper function///////////////////////////////
-void initializeMatrix(Matrix* m);
+__global__ void threadAdd(double* result, const double* m1, const double* m2, long elements);
 
 #endif
