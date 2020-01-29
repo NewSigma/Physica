@@ -46,6 +46,11 @@ public:
     explicit RealNumberA(const RealNumber* n, unsigned char a = 0);
     void print() const;
     RealNumberA& operator= (const RealNumberA& n);
+    //Helper functions
+    RealNumber* getAccuracy() const;
+    RealNumber* getMaximum() const;
+    RealNumber* getMinimum() const;
+    bool applyError(const RealNumber* copy_error);
 };
 //////////////////////////////////Operators///////////////////////////////////////
 RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2);
@@ -78,7 +83,7 @@ RealNumberA* operator- (const RealNumberA& n);
 ////////////////////////////////Helper functions/////////////////////////////////////
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);
-bool isInteger(const RealNumber* n);
+inline bool isInteger(const RealNumber* n) { return n->length == n->power + 1; };
 //////////////////////////////Process functions////////////////////////////////////////
 RealNumber* add (const RealNumber* n1, const RealNumber* n2);
 RealNumber* subtract (const RealNumber* n1, const RealNumber* n2);

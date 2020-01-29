@@ -313,7 +313,7 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
             *temp_1 += *const_1->ONE;
             bool go_on;
             do {
-                result = ln(temp_result);
+                result = (RealNumberA*)ln(temp_result);
                 result->sign = !result->sign;
                 *result += *temp_1;
                 *result *= *temp_result;
@@ -387,77 +387,96 @@ RealNumberA& RealNumberA::operator= (const RealNumberA& n) {
     a = n.a;
     return *this;
 }
+//Return accuracy in class RealNumber.
+RealNumber* RealNumberA::getAccuracy() const {
+    return new RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+}
+//Return this + accuracy
+RealNumber* RealNumberA::getMaximum() const {
+    auto acc = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+    auto result = new RealNumber(this);
+    *result += acc;
+    return result;
+}
+//Return this - accuracy
+RealNumber* RealNumberA::getMinimum() const {
+    auto acc = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+    auto result = new RealNumber(this);
+    *result -= acc;
+    return result;
+}
+//Add error to this and adjust this->length as well as this-> byte.
+bool RealNumberA::applyError(const RealNumber* error) {
+    int temp = power - length + 1 - error->power;
+    if(temp > 0)
+        a += 1;
+    else {
+        RealNumber error_1;
+        if(temp < 0) {
+            error_1 = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+            error_1 += *error;
+            length += temp;
+        }
+        else
+            error_1 = RealNumber(error);
+
+        if(error_1.length == 1)
+            a += error_1.byte[0];
+        else
+            a += error_1.byte[0] + 1;
+    }
+
+    if(a > 9) {
+        a = 2;
+        --length;
+    }
+
+    if(length < 1) {
+        std::cout << "[RealNumber] Warn: Accumulated too many errors.";
+        return true;
+    }
+
+    auto new_byte = new unsigned char[length];
+    memcpy(new_byte, byte, length * sizeof(char));
+    delete[] byte;
+    byte = new_byte;
+    return false;
+}
 
 RealNumberA* operator+ (const RealNumberA& n1, const RealNumberA& n2) {
-    auto raw_result = add(&n1, &n2);
-    unsigned char acc = cutArray(raw_result);
-    RealNumberA* result;
-    if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, acc);
-    else {
-        //Get a
-        int length = raw_result->length;
-        if(n1.length - n1.power == n2.length - n2.power)
-            acc += n1.a + n2.a;
-        else
-            acc += n1.length - n1.power > n2.length - n2.power ? n2.a + 1 : n1.a + 1;
-
-        if(acc > 9) {
-            if(length < 2) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                return nullptr;
-            }
-            acc += raw_result->byte[length - 1];
-            acc = acc / 10 + acc % 10 != 0;
-            --length;
-        }
-        //Get byte
-        auto byte = new unsigned char[length];
-        memcpy(byte, raw_result->byte, length * sizeof(char));
-        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
+    auto result = (RealNumberA*)add(&n1, &n2);
+    result->a = cutArray(result);
+    if(!(n1.a == 0 && n2.a == 0)) {
+        auto n1_a = n1.getAccuracy();
+        auto n2_a = n2.getAccuracy();
+        auto error = *n1_a + *n2_a;
+        result->applyError(error);
+        delete n1_a;
+        delete n2_a;
+        delete error;
     }
-    delete raw_result;
     return result;
 }
 
 RealNumberA* operator- (const RealNumberA& n1, const RealNumberA& n2) {
-    auto raw_result = subtract(&n1, &n2);
-    unsigned char acc = cutArray(raw_result);
-    RealNumberA* result;
-    if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, acc);
-    else {
-        //Get a
-        int length = raw_result->length;
-        if(n1.length - n1.power == n2.length - n2.power)
-            acc += n1.a + n2.a;
-        else
-            acc += n1.length - n1.power > n2.length - n2.power ? (n2.a + 1) : (n1.a + 1);
-        if(acc > 9) {
-            if(length < 2) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                return nullptr;
-            }
-            acc += raw_result->byte[length - 1];
-            acc = acc / 10 + ((acc % 10) != 0);
-            --length;
-        }
-        //Get byte
-        auto byte = new unsigned char[length];
-        memcpy(byte, raw_result->byte, length * sizeof(char));
-        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
+    auto result = (RealNumberA*)subtract(&n1, &n2);
+    result->a = cutArray(result);
+    if(!(n1.a == 0 && n2.a == 0)) {
+        auto n1_a = n1.getAccuracy();
+        auto n2_a = n2.getAccuracy();
+        auto error = *n1_a + *n2_a;
+        result->applyError(error);
+        delete n1_a;
+        delete n2_a;
+        delete error;
     }
-    delete raw_result;
     return result;
 }
 
 RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
-    auto raw_result = multiply(&n1, &n2);
-    unsigned char acc = cutArray(raw_result);
-    RealNumberA* result;
-    if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, acc);
-    else {
+    auto result = (RealNumberA*)multiply(&n1, &n2);
+    result->a = cutArray(result);
+    if(!(n1.a == 0 && n2.a == 0)) {
         //Get a
         auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, n1.power - n1.length + 1);
         auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, n2.power - n2.length + 1);
@@ -467,51 +486,19 @@ RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
         *error += *error_1;
         *error += *error_2;
 
-        int length = raw_result->length;
-        //raw_result->power - raw_result->length + 1 - (error->power - error->length + 1)
-        int temp = raw_result->power - raw_result->length + 1 - error->power;
-        if(temp > 0)
-            acc += 1;
-        else {
-            if(temp < 0) {
-                auto error_3 = RealNumber(new unsigned char[1]{acc}, 1, raw_result->power - raw_result->length + 1);
-                *error += error_3;
-                length += temp;
-            }
-            if(error->length == 1)
-                acc += error->byte[0];
-            else
-                acc += error->byte[0] + 1;
-        }
-
-        if(acc > 9) {
-            if(length < 2) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                return nullptr;
-            }
-            acc = 2;
-            --length;
-        }
+        result->applyError(error);
 
         delete error;
         delete error_1;
         delete error_2;
-        //Get byte
-        auto byte = new unsigned char[length];
-        memcpy(byte, raw_result->byte, length * sizeof(char));
-        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
-    delete raw_result;
     return result;
 }
 
 RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
-    auto raw_result = divide(&n1, &n2);
-    unsigned char acc = raw_result->a + cutArray(raw_result);
-    RealNumberA* result;
-    if(n1.a == 0 && n2.a == 0)
-        result = new RealNumberA(raw_result, acc);
-    else {
+    auto result = (RealNumberA*)divide(&n1, &n2);
+    result->a += cutArray(result);
+    if(!(n1.a == 0 && n2.a == 0)) {
         //Get a
         auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, -(n1.length - n1.power - 1), true);
         auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, -(n2.length - n2.power - 1), true);
@@ -522,42 +509,14 @@ RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
         *denominator *= n2;
         auto error = *numerator / *denominator;
 
-        int length = raw_result->length;
-        //raw_result->power - raw_result->length + 1 - (error->power - error->length + 1)
-        int temp = raw_result->power - raw_result->length + 1 - error->power;
-        if(temp > 0)
-            acc += 1;
-        else {
-            if(temp < 0) {
-                auto error_3 = RealNumber(new unsigned char[1]{acc}, 1, raw_result->power - raw_result->length + 1);
-                *error += error_3;
-                length += temp;
-            }
-            if(error->length == 1)
-                acc += error->byte[0];
-            else
-                acc += error->byte[0] + 1;
-        }
-
-        if(acc > 9) {
-            if(length < 2) {
-                std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-                return nullptr;
-            }
-            acc = 2;
-            --length;
-        }
+        if(result->applyError(error))
+            return nullptr;
 
         delete numerator;
         delete numerator_1;
         delete denominator;
         delete error;
-        //Get byte
-        auto byte = new unsigned char[length];
-        memcpy(byte, raw_result->byte, length * sizeof(char));
-        result = new RealNumberA(byte, length, raw_result->power, raw_result->sign, acc);
     }
-    delete raw_result;
     return result;
 }
 
@@ -609,10 +568,6 @@ RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound) {
     delete random;
 
     return result;
-}
-
-bool isInteger(const RealNumber* n) {
-    return n->length == n->power + 1;
 }
 //////////////////////////////Process functions////////////////////////////////////////
 /*

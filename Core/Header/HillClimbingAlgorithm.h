@@ -3,10 +3,10 @@
 
 #include "RealNumber.h"
 
-class ClimbMountainAlgorithm {
+class HillClimbingAlgorithm {
 public:
-    ClimbMountainAlgorithm(RealNumberA* func(RealNumber*), RealNumber* x_initial, RealNumber* stepSize);
-	~ClimbMountainAlgorithm();
+    HillClimbingAlgorithm(RealNumberA* func(RealNumber*), RealNumber* x_initial, RealNumber* stepSize);
+	~HillClimbingAlgorithm();
     void getExtremal();
     RealNumber* getMinStep();
 	void setMinStep(RealNumber* minStep);

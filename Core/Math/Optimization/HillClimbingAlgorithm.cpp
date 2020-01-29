@@ -1,4 +1,4 @@
-#include "../../Header/ClimbMountainAlgorithm.h"
+#include "../../Header/HillClimbingAlgorithm.h"
 #include "../../Header/Const.h"
 #include <iostream>
 /*
@@ -9,13 +9,13 @@
  *
  * Operators that need memory free : func(arg)
  *
- * Usage: new ClimbMountainAlgorithm(args)->getExtremal();
+ * Usage: new HillClimbingAlgorithm(args)->getExtremal();
  *
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.
  */
 extern const Const_1* const_1;
 //TODO Optional: Auto step-size
-ClimbMountainAlgorithm::ClimbMountainAlgorithm(RealNumberA* f(RealNumber*), RealNumber* init, RealNumber* size) {
+HillClimbingAlgorithm::HillClimbingAlgorithm(RealNumberA* f(RealNumber*), RealNumber* init, RealNumber* size) {
 	func = f;
 	x_initial = init;
 	stepSize = size;
@@ -23,11 +23,11 @@ ClimbMountainAlgorithm::ClimbMountainAlgorithm(RealNumberA* f(RealNumber*), Real
 	minStep->length = -const_1->MachinePrecision;
 }
 
-ClimbMountainAlgorithm::~ClimbMountainAlgorithm() {
+HillClimbingAlgorithm::~HillClimbingAlgorithm() {
     delete minStep;
 }
 
-void ClimbMountainAlgorithm::getExtremal() {
+void HillClimbingAlgorithm::getExtremal() {
 	RealNumber* y_initial = func(x_initial);
     auto x = new RealNumber();
     auto y = new RealNumber();
@@ -88,7 +88,7 @@ void ClimbMountainAlgorithm::getExtremal() {
         }
     }
     //Print final result.
-    std::cout << "[ClimbMountainAlgorithm] ";
+    std::cout << "[HillClimbingAlgorithm] ";
     if (positiveUsable || negativeUsable) {
         std::cout << "External got: (";
         x_result->print();
@@ -108,11 +108,11 @@ void ClimbMountainAlgorithm::getExtremal() {
 	delete y_result;
 }
 
-RealNumber* ClimbMountainAlgorithm::getMinStep() {
+RealNumber* HillClimbingAlgorithm::getMinStep() {
 	return minStep;
 }
 
-void ClimbMountainAlgorithm::setMinStep(RealNumber* step) {
+void HillClimbingAlgorithm::setMinStep(RealNumber* step) {
     delete minStep;
 	minStep = step;
 }

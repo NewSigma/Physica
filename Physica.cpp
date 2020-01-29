@@ -4,7 +4,6 @@
 #include "Core/Header/Const.h"
 #include "Gui/Header/MainWindow.h"
 #include "Core/Header/BasicCalculates.h"
-
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
@@ -26,8 +25,9 @@ int main(int argc, char** argv) {
 
     int exit_code = QApplication::exec();
     */
-    auto a = const_1->getZero();
-    sin(a)->print();
+    auto a = new RealNumberA(new unsigned char[2]{1,0},2,1,true,5);
+    auto result = sin(a);
+    result->print();
 
     delete const_1;
     delete const_2;

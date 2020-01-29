@@ -3,15 +3,15 @@
 
 #include "RealNumber.h"
 
-RealNumberA* reciprocal(const RealNumber* n);
-RealNumberA* sqrt(const RealNumber* n);
-RealNumberA* factorial(const RealNumber* n);
-RealNumberA* cos(const RealNumber* n);
-RealNumberA* sin(const RealNumber* n);
-RealNumberA* tan(const RealNumber* n);
-RealNumberA* arccos(const RealNumber* n);
-RealNumberA* arcsin(const RealNumber* n);
-RealNumberA* ln(const RealNumber* n);
-RealNumberA* log(const RealNumber* n, const RealNumber* a);
+RealNumber* reciprocal(const RealNumber* n);
+RealNumber* sqrt(const RealNumber* n, bool checkAcc = true);
+RealNumber* factorial(const RealNumber* n);
+RealNumber* cos(const RealNumber* n);
+RealNumber* sin(const RealNumber* n);
+RealNumber* tan(const RealNumber* n);
+RealNumber* arccos(const RealNumber* n);
+RealNumber* arcsin(const RealNumber* n);
+RealNumber* ln(const RealNumber* n);
+RealNumber* log(const RealNumber* n, const RealNumber* a);
 
 #endif

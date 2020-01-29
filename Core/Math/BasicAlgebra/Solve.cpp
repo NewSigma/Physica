@@ -10,7 +10,7 @@ extern const Const_1* const_1;
  * y1 = func(x1), y2 = func(x2)
  * Solve the x when n = func(x)
  */
-RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2)    {
+RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2)    {
     auto y1 = func(x1);
     auto y2 = func(x2);
     auto result = bisectionMethod(func, n, x1, x2, y1, y2);
@@ -19,7 +19,7 @@ RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNum
     return result;
 }
 
-RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2, const RealNumber* y1, const RealNumber* y2) {
+RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2, const RealNumber* y1, const RealNumber* y2) {
     auto delta_left = *n - *y1;
     auto delta_right = *n - *y2;
     if(delta_left->sign == delta_right->sign) {
@@ -82,5 +82,5 @@ RealNumberA* bisectionMethod(RealNumberA* func(const RealNumber*), const RealNum
     delete y_left;
     delete error;
 
-    return (RealNumberA*)result;
+    return result;
 }
