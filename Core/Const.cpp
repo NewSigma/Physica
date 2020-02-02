@@ -2,6 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Header/Const.h"
+#include <malloc.h>
 
 extern const Const_1* const_1;
 /*
@@ -9,24 +10,58 @@ extern const Const_1* const_1;
  */
 Const_1::Const_1() {
     MachinePrecision = 16;
-    R_MAX = new RealNumberA(new unsigned char[10]{2,1,4,7,4,8,3,6,4,7}, 10, 9, true);
+    auto byte = (unsigned char*)malloc(10 * sizeof(char));
+    byte[0] = 2;
+    byte[1] = 1;
+    byte[2] = 4;
+    byte[3] = 7;
+    byte[4] = 4;
+    byte[5] = 8;
+    byte[6] = 3;
+    byte[7] = 6;
+    byte[8] = 4;
+    byte[9] = 7;
+    R_MAX = new RealNumberA(byte, 10, 9, true);
 
-    ZERO = new RealNumberA(new unsigned char[1]{0}, 1, 0, true);
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 0;
+    ZERO = new RealNumberA(byte, 1, 0, true);
 
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 1;
     RealNumberA* temp;
-    ONE = new RealNumberA(new unsigned char[1]{1}, 1, 0, true);
+    ONE = new RealNumberA(byte, 1, 0, true);
 
     temp = new RealNumberA(ONE);
     temp->sign = false;
     MINUS_ONE = temp;
 
-    TWO = new RealNumberA(new unsigned char[1]{2}, 1, 0, true);
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 2;
+    TWO = new RealNumberA(byte, 1, 0, true);
 
     temp = new RealNumberA(TWO);
     temp->sign = false;
     MINUS_TWO = temp;
 
-    PI = new RealNumberA(new unsigned char[16]{3,1,4,1,5,9,2,6,5,3,5,8,9,7,9,3}, 16, 0, true);
+    byte = (unsigned char*)malloc(16 * sizeof(char));
+    byte[0] = 3;
+    byte[1] = 1;
+    byte[2] = 4;
+    byte[3] = 1;
+    byte[4] = 5;
+    byte[5] = 9;
+    byte[6] = 2;
+    byte[7] = 6;
+    byte[8] = 5;
+    byte[9] = 3;
+    byte[10] = 5;
+    byte[11] = 8;
+    byte[12] = 9;
+    byte[13] = 7;
+    byte[14] = 9;
+    byte[15] = 3;
+    PI = new RealNumberA(byte, 16, 0, true);
 }
 
 Const_1::~Const_1() {

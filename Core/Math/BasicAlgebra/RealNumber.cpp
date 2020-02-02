@@ -51,7 +51,7 @@ RealNumber::RealNumber(double d) {
         ++length;
     } while(copy_d != 0 && length <= const_1->MachinePrecision);
 
-    byte = new unsigned char[length];
+    byte = (unsigned char*)malloc(length * sizeof(char));
     for(int i = 0; i < length; ++i) {
         byte[i] = (char)d;
         d -= double(int(d));
@@ -85,7 +85,7 @@ RealNumber::RealNumber(const RealNumber& n) {
     length = n.length;
     power = n.power;
     sign = n.sign;
-    byte = new unsigned char[length];
+    byte = (unsigned char*)malloc(length * sizeof(char));
     memcpy(byte, n.byte, length * sizeof(char));
 }
 
@@ -100,12 +100,12 @@ RealNumber::RealNumber(const RealNumber* n) {
     length = n->length;
     power = n->power;
     sign = n->sign;
-    byte = new unsigned char[length];
+    byte = (unsigned char*)malloc(length * sizeof(char));
     memcpy(byte, n->byte, length * sizeof(char));
 }
 
 RealNumber::~RealNumber() {
-    delete[] byte;
+    free(byte);
 }
 
 void RealNumber::print() const {
@@ -137,8 +137,7 @@ void RealNumber::print() const {
 RealNumber& RealNumber::operator= (const RealNumber& n) {
     if(this == &n)
         return *this;
-    delete[] byte;
-    byte = new unsigned char[n.length];
+    byte = (unsigned char*)realloc(byte, n.length * sizeof(char));
     memcpy(byte, n.byte, n.length * sizeof(char));
     length = n.length;
     power = n.power;
@@ -383,24 +382,30 @@ void RealNumberA::print() const {
 RealNumberA& RealNumberA::operator= (const RealNumberA& n) {
     if(this == &n)
         return *this;
-    *(RealNumber*)this = (RealNumber)n;
+    *(RealNumber*)this = n;
     a = n.a;
     return *this;
 }
 //Return accuracy in class RealNumber.
 RealNumber* RealNumberA::getAccuracy() const {
-    return new RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+    auto byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = a;
+    return new RealNumber(byte, 1, power - length + 1);
 }
 //Return this + accuracy
 RealNumber* RealNumberA::getMaximum() const {
-    auto acc = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+    auto byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = a;
+    auto acc = RealNumber(byte, 1, power - length + 1);
     auto result = new RealNumber(this);
     *result += acc;
     return result;
 }
 //Return this - accuracy
 RealNumber* RealNumberA::getMinimum() const {
-    auto acc = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+    auto byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = a;
+    auto acc = RealNumber(byte, 1, power - length + 1);
     auto result = new RealNumber(this);
     *result -= acc;
     return result;
@@ -413,7 +418,9 @@ bool RealNumberA::applyError(const RealNumber* error) {
     else {
         RealNumber error_1;
         if(temp < 0) {
-            error_1 = RealNumber(new unsigned char[1]{a}, 1, power - length + 1);
+            auto byte = (unsigned char*)malloc(sizeof(char));
+            byte[0] = a;
+            error_1 = RealNumber(byte, 1, power - length + 1);
             error_1 += *error;
             length += temp;
         }
@@ -436,10 +443,7 @@ bool RealNumberA::applyError(const RealNumber* error) {
         return true;
     }
 
-    auto new_byte = new unsigned char[length];
-    memcpy(new_byte, byte, length * sizeof(char));
-    delete[] byte;
-    byte = new_byte;
+    byte = (unsigned char*)realloc(byte, length * sizeof(char));
     return false;
 }
 
@@ -478,8 +482,12 @@ RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
     result->a = cutArray(result);
     if(!(n1.a == 0 && n2.a == 0)) {
         //Get a
-        auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, n1.power - n1.length + 1);
-        auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, n2.power - n2.length + 1);
+        auto byte_1 = (unsigned char*)malloc(sizeof(char));
+        byte_1[0] = n1.a;
+        auto byte_2 = (unsigned char*)malloc(sizeof(char));
+        byte_2[0] = n2.a;
+        auto n1_a = RealNumber(byte_1, 1, n1.power - n1.length + 1);
+        auto n2_a = RealNumber(byte_2, 1, n2.power - n2.length + 1);
         auto error = n1 * n2_a;
         auto error_1 = n2 * n1_a;
         auto error_2 = n1_a * n2_a;
@@ -500,8 +508,12 @@ RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
     result->a += cutArray(result);
     if(!(n1.a == 0 && n2.a == 0)) {
         //Get a
-        auto n1_a = RealNumber(new unsigned char[1]{n1.a}, 1, -(n1.length - n1.power - 1), true);
-        auto n2_a = RealNumber(new unsigned char[1]{n2.a}, 1, -(n2.length - n2.power - 1), true);
+        auto byte_1 = (unsigned char*)malloc(sizeof(char));
+        byte_1[0] = n1.a;
+        auto byte_2 = (unsigned char*)malloc(sizeof(char));
+        byte_2[0] = n2.a;
+        auto n1_a = RealNumber(byte_1, 1, -(n1.length - n1.power - 1), true);
+        auto n2_a = RealNumber(byte_2, 1, -(n2.length - n2.power - 1), true);
         auto numerator = n1 * n2_a;
         auto numerator_1 = n2 * n1_a;
         *numerator += *numerator_1;
@@ -542,12 +554,6 @@ void operator/= (RealNumberA& n1, const RealNumberA& n2) {
     RealNumberA* p_result = n1 / n2;
     n1 = *p_result;
     delete p_result;
-}
-
-RealNumberA* operator- (const RealNumberA& n) {
-    auto result = new RealNumberA(n);
-    result->sign = !result->sign;
-    return result;
 }
 ////////////////////////////////Helper functions/////////////////////////////////////
 //Return a real number between 0 and 1.
@@ -607,7 +613,7 @@ RealNumber* add (const RealNumber* n1, const RealNumber* n2) {
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, will calculate it accurately later.
         int length = big->power + std::max(big->length - big->power,small->length - small->power);
-        auto temp = new unsigned char[length];
+        auto temp = (unsigned char*)malloc(length * sizeof(char));
         memcpy(temp, big->byte, big->length * sizeof(char));
         memset(temp + big->length, 0, (length - big->length) * sizeof(char));
         for (int i = small->length - 1; i >= 0; --i) {
@@ -625,16 +631,14 @@ RealNumber* add (const RealNumber* n1, const RealNumber* n2) {
         if (temp[0] > 9) {
             ++length;
             ++power;
-            byte = new unsigned char[length];
+            byte = (unsigned char*)malloc(length * sizeof(char));
             byte[0] = 1;
             byte[1] = temp[0] - 10;
             memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
+            free(temp);
         }
-        else {
-            byte = new unsigned char[length];
-            memcpy(byte, temp, length * sizeof(char));
-        }
-        delete[] temp;
+        else
+            byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
         result = new RealNumber(byte, length, power, big->sign);
     }
@@ -662,7 +666,7 @@ RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
             int start = unitIndex - n1->power;
             //Estimate the ed of result first, will calculate it accurately later.
             int length = unitIndex + std::max(n1->length - n1->power, n2->length - n2->power);
-            auto byte = new char[length];
+            auto byte = (char*)malloc(length * sizeof(char));
             memset(byte, 0, start * sizeof(char));
             memcpy(byte + start, n1->byte, n1->length * sizeof(char));
             memset(byte + start + n1->length, 0, (length - start - n1->length) * sizeof(char));
@@ -681,7 +685,7 @@ RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
             }
             //If n1 - n2 < 0, we have to change our method.
             if(byte[0] < 0) {
-                delete[] byte;
+                free(byte);
                 result = *n2 - *n1;
                 result->sign = false;
             }
@@ -729,7 +733,8 @@ RealNumber* multiply (const RealNumber* n1, const RealNumber* n2) {
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first. we will calculate it accurately later.
         int length = n1->length + n2->length - 1;
-        auto temp = new unsigned char[length]{0};
+        auto temp = (unsigned char*)malloc(length * sizeof(char));
+        memset(temp, 0, length * sizeof(char));
         for (int i = small->length - 1; i >= 0; --i) {
             for(int j=big->length - 1; j >= 0; --j) {
                 int index = i + j;
@@ -749,16 +754,14 @@ RealNumber* multiply (const RealNumber* n1, const RealNumber* n2) {
             ++length;
             ++power;
             int tens = temp[0] / 10;
-            byte = new unsigned char[length];
+            byte = (unsigned char*)malloc(length * sizeof(char));
             byte[0] = tens;
             byte[1] = temp[0] - tens * 10;
             memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
+            free(temp);
         }
-        else {
-            byte = new unsigned char[length];
-            memcpy(byte, temp, length * sizeof(char));
-        }
-        delete[] temp;
+        else
+            byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
         result = new RealNumber(byte, length, power, n1->sign == n2->sign);
     }
@@ -782,7 +785,8 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
         //Estimate the ed of result first, we will calculate it accurately later.
         int length = const_1->MachinePrecision;
         int power = n1_copy->power - n2_copy->power - 1;
-        auto temp = new unsigned char[length]{0};
+        auto temp = (unsigned char*)malloc(length * sizeof(char));
+        memset(temp, 0, length * sizeof(char));
         n1_copy->power = n2_copy->power + 1;
         for (int i = 0; i < length; ++i) {
             char unit = 0;
@@ -813,11 +817,11 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
         unsigned char* byte;
         if(temp[0] > 9) {
             ++power;
-            byte = new unsigned char[length];
+            byte = (unsigned char*)malloc(length * sizeof(char));
             byte[0] = temp[0] / 10;
             byte[1] = temp[0] - byte[0] * 10;
             memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-            delete[] temp;
+            free(temp);
         }
         else
             byte = temp;
@@ -838,11 +842,10 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
 bool cutArray(RealNumber* n) {
     int MachinePrecision = const_1->MachinePrecision;
     bool result = false;
-    unsigned char* byte = n->byte;
     int firstCutIndex = 0;
     int lastCutIndex = n->length;
     //Ignore zeros from the first index.
-    while(byte[firstCutIndex] == 0 && firstCutIndex < lastCutIndex - 1)
+    while(n->byte[firstCutIndex] == 0 && firstCutIndex < lastCutIndex - 1)
         firstCutIndex += 1;
 
     int maxIndex = firstCutIndex + MachinePrecision;
@@ -854,9 +857,9 @@ bool cutArray(RealNumber* n) {
     if(firstCutIndex != 0 || lastCutIndex != n->length) {
         n->length = lastCutIndex - firstCutIndex;
 
-        auto new_array = new unsigned char[n->length];
-        memcpy(new_array, byte + firstCutIndex, n->length * sizeof(char));
-        delete[] byte;
+        auto new_array = (unsigned char*)malloc(n->length * sizeof(char));
+        memcpy(new_array, n->byte + firstCutIndex, n->length * sizeof(char));
+        free(n->byte);
         n->byte = new_array;
 
         if(n->byte[0] == 0)

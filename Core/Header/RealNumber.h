@@ -79,7 +79,6 @@ void operator+= (RealNumberA& n1, const RealNumberA& n2);
 void operator-= (RealNumberA& n1, const RealNumberA& n2);
 void operator*= (RealNumberA& n1, const RealNumberA& n2);
 void operator/= (RealNumberA& n1, const RealNumberA& n2);
-RealNumberA* operator- (const RealNumberA& n);
 ////////////////////////////////Helper functions/////////////////////////////////////
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);
