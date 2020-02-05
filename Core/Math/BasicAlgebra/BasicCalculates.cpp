@@ -15,10 +15,8 @@ RealNumber* reciprocal(const RealNumber* n) {
 }
 
 RealNumber* sqrt(const RealNumber* n, bool checkAcc) {
-    if(!n->sign) {
-        std::cout << "[BasicCalculates] Error: Cannot solve the square root of a minus value." << std::endl;
+    if(!n->sign)
         return nullptr;
-    }
     auto MachinePrecision = const_1->MachinePrecision;
     auto copy_n = new RealNumberA(n);
     //Let n < 1 so as to control error.
@@ -34,8 +32,8 @@ RealNumber* sqrt(const RealNumber* n, bool checkAcc) {
         }
     }
 
-    auto result = const_1->getOne();
-    RealNumberA* temp;
+    RealNumber* result = const_1->getOne();
+    RealNumber* temp;
     //3.33 is the big approximate value of ln(10)/ln(2)
     for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
         temp = *copy_n / *result;
@@ -45,25 +43,31 @@ RealNumber* sqrt(const RealNumber* n, bool checkAcc) {
     }
     delete copy_n;
     result->power += add_power;
+    result->a = 1;
 
     if(checkAcc) {
-        auto n_min = ((RealNumberA*)n)->getMinimum();
+        auto n_error = ((RealNumberA*)n)->getMinimum();
+        auto error = sqrt(n_error, false);
+        if(error == nullptr) {
+            delete n_error;
+            n_error = ((RealNumberA*)n)->getMaximum();
+            error = ln(n_error, false);
+        }
         auto n_a = ((RealNumberA*)n)->getAccuracy();
-        auto error = sqrt(n_min, false);
         *error -= *result;
         error->sign = true;
         *error += *n_a;
 
-        result->applyError(error);
+        ((RealNumberA*)result)->applyError(error);
 
-        delete n_min;
-        delete n_a;
+        delete n_error;
         delete error;
+        delete n_a;
     }
-
     return result;
 }
 //TODO not completed: Use gamma function.
+
 RealNumber* factorial(const RealNumber* n) {
     if(!n->sign) {
         std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
@@ -186,34 +190,92 @@ RealNumber* sin(const RealNumber* n) {
 }
 
 RealNumber* tan(const RealNumber* n) {
-    auto sin_n = (RealNumberA*)sin(n);
     auto cos_n = (RealNumberA*)cos(n);
+    if(cos_n == nullptr)
+        return nullptr;
+    auto sin_n = (RealNumberA*)sin(n);
     *sin_n /= *cos_n;
     delete cos_n;
     return sin_n;
 }
 
+RealNumber* sec(const RealNumber* n) {
+    auto cos_n = cos(n);
+    auto result = reciprocal(cos_n);
+    delete cos_n;
+    return result;
+}
+
+RealNumber* csc(const RealNumber* n) {
+    auto sin_n = sin(n);
+    auto result = reciprocal(sin_n);
+    delete sin_n;
+    return result;
+}
+
+RealNumber* cot(const RealNumber* n) {
+    auto sin_n = (RealNumberA*)sin(n);
+    if(sin_n == nullptr)
+        return nullptr;
+    auto cos_n = (RealNumberA*)cos(n);
+    *cos_n /= *sin_n;
+    delete sin_n;
+    return cos_n;
+}
+
 RealNumber* arccos(const RealNumber* n) {
-    if(*n == *const_1->ONE)
-        return const_1->getZero();
-    if(*n == *const_1->MINUS_ONE)
-        return new RealNumberA(const_1->PI);
     return bisectionMethod(cos, n, const_1->ZERO, const_1->PI, const_1->ONE, const_1->MINUS_ONE);
 }
 
 RealNumber* arcsin(const RealNumber* n) {
-    if(*n == *const_1->ONE)
-        return new RealNumberA(const_2->PI_DIVIDE_TWO);
-    if(*n == *const_1->MINUS_ONE)
-        return new RealNumberA(const_2->MINUS_PI_DIVIDE_TWO);
     return bisectionMethod(sin, n, const_2->MINUS_PI_DIVIDE_TWO, const_2->PI_DIVIDE_TWO, const_1->MINUS_ONE, const_1->ONE);
 }
 
-RealNumber* ln(const RealNumber* n) {
-    if(!n->sign) {
-        std::cout << "[BasicCalculates] Error: Cannot solve the logarithm of a minus value." << std::endl;
+RealNumber* arctan(const RealNumber* n) {
+    auto temp = *(RealNumberA*)n * *(RealNumberA*)n;
+    *temp += *const_1->ONE;
+    auto sqrt_temp = sqrt(temp);
+    delete temp;
+    
+    temp = *(RealNumberA*)n / *(RealNumberA*)sqrt_temp;
+    delete sqrt_temp;
+    
+    auto result = arcsin(temp);
+    result->sign = n->sign;
+    delete temp;
+    return result;
+}
+
+RealNumber* arcsec(const RealNumber* n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arccos(temp);
+    delete temp;
+    return result;
+}
+
+RealNumber* arccsc(const RealNumber* n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arcsin(temp);
+    delete temp;
+    return result;
+}
+
+RealNumber* arccot(const RealNumber* n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arctan(temp);
+    delete temp;
+    return result;
+}
+
+RealNumber* ln(const RealNumber* n, bool checkAcc) {
+    if(!n->isPositive())
         return nullptr;
-    }
     auto result = const_1->getZero();
     if(*n != *const_1->ONE) {
         auto ONE = const_1->ONE;
@@ -257,16 +319,42 @@ RealNumber* ln(const RealNumber* n) {
         delete copy_temp_1;
         delete temp_2;
     }
+
+    if(checkAcc) {
+        auto n_error = ((RealNumberA*)n)->getMinimum();
+        auto error = ln(n_error, false);
+        if(error == nullptr) {
+            delete n_error;
+            n_error = ((RealNumberA*)n)->getMaximum();
+            error = ln(n_error, false);
+        }
+        auto n_a = ((RealNumberA*)n)->getAccuracy();
+        *error -= *result;
+        error->sign = true;
+        *error += *n_a;
+
+        ((RealNumberA*)result)->applyError(error);
+
+        delete n_error;
+        delete error;
+        delete n_a;
+    }
     return result;
 }
 //Return log_a n
 RealNumber* log(const RealNumber* n, const RealNumber* a) {
-    if(*a == *const_1->ONE) {
-        std::cout << "[BasicCalculates] Error: Invalid logarithm." << std::endl;
+    if(*a == *const_1->ONE)
+        return nullptr;
+
+    auto ln_n = (RealNumberA*)ln(n);
+    if(ln_n == nullptr)
+        return nullptr;
+
+    auto ln_a = (RealNumberA*)ln(a);
+    if(ln_a == nullptr) {
+        delete ln_n;
         return nullptr;
     }
-    auto ln_n = (RealNumberA*)ln(n);
-    auto ln_a = (RealNumberA*)ln(a);
     *ln_n /= *ln_a;
     delete ln_a;
     return ln_n;

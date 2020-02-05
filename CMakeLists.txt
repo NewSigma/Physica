@@ -4,7 +4,6 @@ project(Physica VERSION 0.0.1)
 #############################################Settings#############################################
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CUDA_COMPILER /usr/local/cuda-10.1/bin/nvcc)
 ##############################################Libs################################################
 enable_language(CUDA)
 find_package(OpenCV REQUIRED)
@@ -23,7 +22,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
         -O${OPTIMIZE_LEVEL}
         >)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
-        --std=c++14
         --gpu-architecture=sm_50
         --optimize ${OPTIMIZE_LEVEL}
         --use_fast_math

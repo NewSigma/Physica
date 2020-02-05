@@ -10,11 +10,11 @@ public:
 	double* d_determinate;
 	int rank;
 
-	Determinate(double* determinate, int rank);
+	Determinate(double* determinate, int r);
 	void print();
 	double detGPU();
-	void rowAddMutiply(int i1, int i2, double times);
-	void rowNumMutiply(int i1, double times);
+	void rowAddMultiply(int i1, int i2, double times);
+	void rowNumMultiply(int i1, double times);
 	void rowReplace(int i1, int i2);
 	void cpyDetToDevice();
 	void cpyDetToHost();

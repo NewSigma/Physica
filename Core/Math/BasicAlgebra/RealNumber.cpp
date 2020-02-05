@@ -165,7 +165,8 @@ RealNumber* operator* (const RealNumber& n1, const RealNumber& n2) {
 
 RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
     auto result = divide(&n1, &n2);
-    cutArray(result);
+    if(result != nullptr)
+        cutArray(result);
     return result;
 }
 /*
@@ -188,9 +189,15 @@ void operator*= (RealNumber& n1, const RealNumber& n2) {
     n1 = *p_result;
     delete p_result;
 }
-
+/*
+ * n2 mustn't be zero.
+ */
 void operator/= (RealNumber& n1, const RealNumber& n2) {
     RealNumber* p_result = n1 / n2;
+    if(p_result == nullptr) {
+        std::cout << "[RealNumber] Can not divide by zero.";
+        exit(EXIT_FAILURE);
+    }
     n1 = *p_result;
     delete p_result;
 }
@@ -287,7 +294,10 @@ bool operator== (const RealNumber& n1, const RealNumber& n2) {
 bool operator!= (const RealNumber& n1, const RealNumber& n2) {
     return !(n1 == n2);
 }
-//Using Newton's method
+/*
+ * Using Newton's method
+ * May return nullptr.
+ */
 RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
     RealNumberA* result = nullptr;
     if(n1.isZero()) {
@@ -505,6 +515,8 @@ RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
 
 RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
     auto result = (RealNumberA*)divide(&n1, &n2);
+    if(result == nullptr)
+        return result;
     result->a += cutArray(result);
     if(!(n1.a == 0 && n2.a == 0)) {
         //Get a
@@ -549,9 +561,15 @@ void operator*= (RealNumberA& n1, const RealNumberA& n2) {
     n1 = *p_result;
     delete p_result;
 }
-
+/*
+ * n2 mustn't be zero.
+ */
 void operator/= (RealNumberA& n1, const RealNumberA& n2) {
     RealNumberA* p_result = n1 / n2;
+    if(p_result == nullptr) {
+        std::cout << "[RealNumber] Can not divide by zero.";
+        exit(EXIT_FAILURE);
+    }
     n1 = *p_result;
     delete p_result;
 }
@@ -770,7 +788,7 @@ RealNumber* multiply (const RealNumber* n1, const RealNumber* n2) {
 
 RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
     if(n2->byte[0] == 0)
-        throw std::invalid_argument("[RealNumber] Can not divide by zero!");
+        return nullptr;
 
     RealNumber* result;
     if(n1->isZero() || n2->isZero())

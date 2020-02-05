@@ -9,9 +9,16 @@ RealNumber* factorial(const RealNumber* n);
 RealNumber* cos(const RealNumber* n);
 RealNumber* sin(const RealNumber* n);
 RealNumber* tan(const RealNumber* n);
+RealNumber* sec(const RealNumber* n);
+RealNumber* csc(const RealNumber* n);
+RealNumber* cot(const RealNumber* n);
 RealNumber* arccos(const RealNumber* n);
 RealNumber* arcsin(const RealNumber* n);
-RealNumber* ln(const RealNumber* n);
+RealNumber* arctan(const RealNumber* n);
+RealNumber* arcsec(const RealNumber* n);
+RealNumber* arccsc(const RealNumber* n);
+RealNumber* arccot(const RealNumber* n);
+RealNumber* ln(const RealNumber* n, bool checkAcc = true);
 RealNumber* log(const RealNumber* n, const RealNumber* a);
 
 #endif

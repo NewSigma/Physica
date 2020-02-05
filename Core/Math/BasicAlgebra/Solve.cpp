@@ -9,6 +9,7 @@ extern const Const_1* const_1;
 /*
  * y1 = func(x1), y2 = func(x2)
  * Solve the x when n = func(x)
+ * May return nullptr.
  */
 RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2)    {
     auto y1 = func(x1);
@@ -18,14 +19,17 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumbe
     delete y2;
     return result;
 }
-
+//May return nullptr.
 RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumber* n, const RealNumber* x1, const RealNumber* x2, const RealNumber* y1, const RealNumber* y2) {
+    if(*n == *y1)
+        return new RealNumber(x1);
+    if(*n == *y2)
+        return new RealNumber(x2);
+
     auto delta_left = *n - *y1;
     auto delta_right = *n - *y2;
-    if(delta_left->sign == delta_right->sign) {
-        std::cout << "[Solve: bisectionMethod] Existence of root is uncertain." << std::endl;
+    if(delta_left->sign == delta_right->sign)
         return nullptr;
-    }
     delete delta_left;
     delete delta_right;
 
