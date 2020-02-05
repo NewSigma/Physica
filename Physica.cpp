@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     */
     auto a = new RealNumberA(new unsigned char[2]{1,0},2,1,true,5);
     auto result = sin(a);
-    result->print();
+    std::cout << *result;
 
     delete const_1;
     delete const_2;

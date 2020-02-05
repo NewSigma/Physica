@@ -135,10 +135,7 @@ void GeneAlgorithm::print() {
         for (int i = 0; i < population; i++) {
             RealNumber* point = points[i];
             RealNumber* value = fitnessFunction(point);
-            point->print();
-            std::cout << " ";
-            value->print();
-            std::cout << "\n";
+            std::cout << *point << " " << *value << std::endl;
             delete value;
         }
         delete[] points;

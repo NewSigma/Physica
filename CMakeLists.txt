@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 ##############################################Libs################################################
 enable_language(CUDA)
-find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
+find_package(OpenCV REQUIRED)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 #############################################Project##############################################
 add_subdirectory(Gui)

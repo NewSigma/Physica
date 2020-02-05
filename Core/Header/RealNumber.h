@@ -1,5 +1,7 @@
 #ifndef _Physica_C_ReakNumber_H
 #define _Physica_C_ReakNumber_H
+
+#include <ostream>
 /*
  * The following two classes have the same statistics. The differences between them are their method to
  * handle the statistics. RealNumber will not consider the accuracy because it thinks the statistics is
@@ -30,7 +32,7 @@ public:
     bool isPositive() const { return !isZero() && sign; }
     bool isNegative() const { return !isZero() && !sign; }
 
-    void print() const;
+    friend std::ostream& operator<<(std::ostream& os, const RealNumber& n);
     explicit operator double() const;
     RealNumber& operator= (const RealNumber& n);
 };
@@ -44,7 +46,7 @@ public:
     RealNumberA(const RealNumberA& n);
     RealNumberA(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit RealNumberA(const RealNumber* n, unsigned char a = 0);
-    void print() const;
+    friend std::ostream& operator<<(std::ostream& os, const RealNumberA& n);
     RealNumberA& operator= (const RealNumberA& n);
     //Helper functions
     RealNumber* getAccuracy() const;

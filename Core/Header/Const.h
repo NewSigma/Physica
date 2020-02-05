@@ -12,6 +12,8 @@ public:
     const RealNumberA* MINUS_ONE;
     const RealNumberA* TWO;
     const RealNumberA* MINUS_TWO;
+    const RealNumberA* THREE;
+    const RealNumberA* MINUS_THREE;
     const RealNumberA* PI;
 
     Const_1();
@@ -26,6 +28,7 @@ class Const_2 {
 public:
     const RealNumberA* PI_DIVIDE_TWO;
     const RealNumberA* MINUS_PI_DIVIDE_TWO;
+    const RealNumberA* E;
 
     Const_2();
     ~Const_2();

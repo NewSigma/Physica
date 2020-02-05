@@ -4,7 +4,8 @@
 #include "RealNumber.h"
 
 RealNumber* reciprocal(const RealNumber* n);
-RealNumber* sqrt(const RealNumber* n, bool checkAcc = true);
+RealNumber* sqrt_noCheck(const RealNumber* n);
+RealNumber* sqrt(const RealNumber* n);
 RealNumber* factorial(const RealNumber* n);
 RealNumber* cos(const RealNumber* n);
 RealNumber* sin(const RealNumber* n);
@@ -18,7 +19,8 @@ RealNumber* arctan(const RealNumber* n);
 RealNumber* arcsec(const RealNumber* n);
 RealNumber* arccsc(const RealNumber* n);
 RealNumber* arccot(const RealNumber* n);
-RealNumber* ln(const RealNumber* n, bool checkAcc = true);
+RealNumber* ln_noCheck(const RealNumber* n);
+RealNumber* ln(const RealNumber* n);
 RealNumber* log(const RealNumber* n, const RealNumber* a);
 
 #endif

@@ -108,30 +108,31 @@ RealNumber::~RealNumber() {
     free(byte);
 }
 
-void RealNumber::print() const {
-    if(power < 0) {
-        std::cout << "0.";
-        for(int i = -power - 1; i > 0; --i)
-            std::cout << "0";
-        for(int i = 0; i < length; ++i)
-            std::cout << (int)byte[i];
+std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
+    if(n.power < 0) {
+        os << "0.";
+        for(int i = -n.power - 1; i > 0; --i)
+            os << "0";
+        for(int i = 0; i < n.length; ++i)
+            os << (int)n.byte[i];
     }
     else {
-        if(length > power) {
-            for(int i = 0; i < power + 1; ++i)
-                std::cout << (int)byte[i];
-            std::cout << ".";
-            for(int i = power + 1; i < length; ++i)
-                std::cout << (int)byte[i];
+        if(n.length > n.power) {
+            for(int i = 0; i < n.power + 1; ++i)
+                os << (int)n.byte[i];
+            os << ".";
+            for(int i = n.power + 1; i < n.length; ++i)
+                os << (int)n.byte[i];
         }
         else {
-            for(int i = 0; i < length; ++i)
-                std::cout << (int)byte[i];
-            for(int i = power - length + 1; i > 0; --i)
-                std::cout << "0";
+            for(int i = 0; i < n.length; ++i)
+                os << (int)n.byte[i];
+            for(int i = n.power - n.length + 1; i > 0; --i)
+                os << "0";
         }
     }
-    std::cout << "\tLength = " << length << "\tPower = " << power;
+    os << "\tLength = " << n.length << "\tPower = " << n.power;
+    return os;
 }
 
 RealNumber& RealNumber::operator= (const RealNumber& n) {
@@ -367,26 +368,26 @@ RealNumberA::RealNumberA(const RealNumber* n, unsigned char acc) : RealNumber(n)
     a = acc;
 }
 
-void RealNumberA::print() const {
-    RealNumber::print();
-    std::cout << "\tAccuracy = ";
-    int temp = power - length +1;
-    if(a == 0)
-        std::cout << "0.";
+std::ostream& operator<<(std::ostream& os, const RealNumberA& n) {
+    os << (RealNumber&)n << "\tAccuracy = ";
+    int temp = n.power - n.length +1;
+    if(n.a == 0)
+        os << "0.";
     else {
         if(temp < 0) {
-            std::cout << "0.";
+            os << "0.";
             for(; temp < -1; ++temp)
-                std::cout << "0";
-            std::cout << (int)a;
+                os << "0";
+            os << (int)n.a;
         }
         else {
-            std::cout << (int)a;
+            os << (int)n.a;
             for(; temp > 0; --temp)
-                std::cout << "0";
-            std::cout << ".";
+                os << "0";
+            os << ".";
         }
     }
+    return os;
 }
 
 RealNumberA& RealNumberA::operator= (const RealNumberA& n) {

@@ -89,13 +89,8 @@ void HillClimbingAlgorithm::getExtremal() {
     }
     //Print final result.
     std::cout << "[HillClimbingAlgorithm] ";
-    if (positiveUsable || negativeUsable) {
-        std::cout << "External got: (";
-        x_result->print();
-        std::cout << ", ";
-        y_result->print();
-        std::cout << ")" <<  std::endl;
-    }
+    if (positiveUsable || negativeUsable)
+        std::cout << "External got: (" << *x_result << ", " << *y_result << ")" << std::endl;
     else
         std::cout << "Failed to fetch a external!";
 

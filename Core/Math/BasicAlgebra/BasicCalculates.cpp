@@ -14,7 +14,7 @@ RealNumber* reciprocal(const RealNumber* n) {
     return *const_1->ONE / *(RealNumberA*)n;
 }
 
-RealNumber* sqrt(const RealNumber* n, bool checkAcc) {
+RealNumber* sqrt_noCheck(const RealNumber* n) {
     if(!n->sign)
         return nullptr;
     auto MachinePrecision = const_1->MachinePrecision;
@@ -45,25 +45,29 @@ RealNumber* sqrt(const RealNumber* n, bool checkAcc) {
     result->power += add_power;
     result->a = 1;
 
-    if(checkAcc) {
-        auto n_error = ((RealNumberA*)n)->getMinimum();
-        auto error = sqrt(n_error, false);
-        if(error == nullptr) {
-            delete n_error;
-            n_error = ((RealNumberA*)n)->getMaximum();
-            error = ln(n_error, false);
-        }
-        auto n_a = ((RealNumberA*)n)->getAccuracy();
-        *error -= *result;
-        error->sign = true;
-        *error += *n_a;
+    return result;
+}
 
-        ((RealNumberA*)result)->applyError(error);
-
+RealNumber* sqrt(const RealNumber* n) {
+    auto result  = sqrt_noCheck(n);
+    auto n_error = ((RealNumberA*)n)->getMinimum();
+    auto error = sqrt_noCheck(n_error);
+    if(error == nullptr) {
         delete n_error;
-        delete error;
-        delete n_a;
+        n_error = ((RealNumberA*)n)->getMaximum();
+        error = sqrt_noCheck(n_error);
     }
+    auto n_a = ((RealNumberA*)n)->getAccuracy();
+    *error -= *result;
+    error->sign = true;
+    *error += *n_a;
+
+    ((RealNumberA*)result)->applyError(error);
+
+    delete n_error;
+    delete error;
+    delete n_a;
+
     return result;
 }
 //TODO not completed: Use gamma function.
@@ -273,7 +277,7 @@ RealNumber* arccot(const RealNumber* n) {
     return result;
 }
 
-RealNumber* ln(const RealNumber* n, bool checkAcc) {
+RealNumber* ln_noCheck(const RealNumber* n) {
     if(!n->isPositive())
         return nullptr;
     auto result = const_1->getZero();
@@ -319,26 +323,30 @@ RealNumber* ln(const RealNumber* n, bool checkAcc) {
         delete copy_temp_1;
         delete temp_2;
     }
+    return result;
+}
 
-    if(checkAcc) {
-        auto n_error = ((RealNumberA*)n)->getMinimum();
-        auto error = ln(n_error, false);
-        if(error == nullptr) {
-            delete n_error;
-            n_error = ((RealNumberA*)n)->getMaximum();
-            error = ln(n_error, false);
-        }
-        auto n_a = ((RealNumberA*)n)->getAccuracy();
-        *error -= *result;
-        error->sign = true;
-        *error += *n_a;
+RealNumber* ln(const RealNumber* n) {
+    auto result = ln_noCheck(n);
 
-        ((RealNumberA*)result)->applyError(error);
-
+    auto n_error = ((RealNumberA*)n)->getMinimum();
+    auto error = ln_noCheck(n_error);
+    if(error == nullptr) {
         delete n_error;
-        delete error;
-        delete n_a;
+        n_error = ((RealNumberA*)n)->getMaximum();
+        error = ln_noCheck(n_error);
     }
+    auto n_a = ((RealNumberA*)n)->getAccuracy();
+    *error -= *result;
+    error->sign = true;
+    *error += *n_a;
+
+    ((RealNumberA*)result)->applyError(error);
+
+    delete n_error;
+    delete error;
+    delete n_a;
+
     return result;
 }
 //Return log_a n

@@ -2,6 +2,8 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Header/Const.h"
+#include "Header/Solve.h"
+#include "Header/BasicCalculates.h"
 #include <malloc.h>
 
 extern const Const_1* const_1;
@@ -44,6 +46,14 @@ Const_1::Const_1() {
     temp->sign = false;
     MINUS_TWO = temp;
 
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 3;
+    THREE = new RealNumberA(byte, 1, 0, true);
+
+    temp = new RealNumberA(THREE);
+    temp->sign = false;
+    MINUS_THREE = temp;
+
     byte = (unsigned char*)malloc(16 * sizeof(char));
     byte[0] = 3;
     byte[1] = 1;
@@ -71,6 +81,8 @@ Const_1::~Const_1() {
     delete MINUS_ONE;
     delete TWO;
     delete MINUS_TWO;
+    delete THREE;
+    delete MINUS_THREE;
     delete PI;
 }
 /*
@@ -82,9 +94,12 @@ Const_2::Const_2() {
     auto temp = new RealNumberA(PI_DIVIDE_TWO);
     temp->sign = false;
     MINUS_PI_DIVIDE_TWO = temp;
+    //TODO Slow and not accurate
+    E = (RealNumberA*)bisectionMethod(ln_noCheck, const_1->ONE, const_1->TWO, const_1->THREE);
 }
 
 Const_2::~Const_2() {
     delete PI_DIVIDE_TWO;
     delete MINUS_PI_DIVIDE_TWO;
+    delete E;
 }
