@@ -12,7 +12,7 @@ const Const_2* const_2;
 
 int main(int argc, char** argv) {
     const_1 = new Const_1();
-    const_2 = new Const_2();
+    //const_2 = new Const_2();
     /*
     QApplication app(argc, argv);
     QApplication::setApplicationName("Physica");
@@ -25,12 +25,14 @@ int main(int argc, char** argv) {
 
     int exit_code = QApplication::exec();
     */
-    auto a = new RealNumberA(new unsigned char[2]{1,0},2,1,true,5);
-    auto result = sin(a);
+    auto a = const_1->getTwo();
+    a->power = -1;
+    auto result = ln(a);
     std::cout << *result;
+    //std::cout << *const_2->PI;
 
     delete const_1;
-    delete const_2;
+    //delete const_2;
 
     return 0;
 }

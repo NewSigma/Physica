@@ -23,36 +23,24 @@ public:
     unsigned char a = 0;
 
     RealNumber();
-    explicit RealNumber(double d);
+    explicit RealNumber(double d, unsigned char acc = 0);
     RealNumber(const RealNumber& n);
-    RealNumber(unsigned char* byte, int length, int power, bool sign = true);
+    RealNumber(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit RealNumber(const RealNumber* n);
     ~RealNumber();
-    bool isZero() const { return byte[0] == 0; }
-    bool isPositive() const { return !isZero() && sign; }
-    bool isNegative() const { return !isZero() && !sign; }
 
     friend std::ostream& operator<<(std::ostream& os, const RealNumber& n);
+    void operator<<(RealNumber& n);
     explicit operator double() const;
     RealNumber& operator= (const RealNumber& n);
-};
-/*
- * Real number with accuracy.
- */
-class RealNumberA : public RealNumber {
-public:
-    RealNumberA();
-    explicit RealNumberA(double d, unsigned char acc = 0);
-    RealNumberA(const RealNumberA& n);
-    RealNumberA(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
-    explicit RealNumberA(const RealNumber* n, unsigned char a = 0);
-    friend std::ostream& operator<<(std::ostream& os, const RealNumberA& n);
-    RealNumberA& operator= (const RealNumberA& n);
-    //Helper functions
     RealNumber* getAccuracy() const;
     RealNumber* getMaximum() const;
     RealNumber* getMinimum() const;
     bool applyError(const RealNumber* copy_error);
+    bool isZero() const { return byte[0] == 0; }
+    bool isPositive() const { return !isZero() && sign; }
+    bool isNegative() const { return !isZero() && !sign; }
+    bool isInteger() const { return length == power + 1; }
 };
 //////////////////////////////////Operators///////////////////////////////////////
 RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2);
@@ -72,24 +60,15 @@ bool operator!= (const RealNumber& n1, const RealNumber& n2);
 RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2);
 void operator^= (RealNumber& n1, const RealNumber& n2);
 RealNumber* operator- (const RealNumber& n);
-
-RealNumberA* operator+ (const RealNumberA& n1, const RealNumberA& n2);
-RealNumberA* operator- (const RealNumberA& n1, const RealNumberA& n2);
-RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2);
-RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2);
-void operator+= (RealNumberA& n1, const RealNumberA& n2);
-void operator-= (RealNumberA& n1, const RealNumberA& n2);
-void operator*= (RealNumberA& n1, const RealNumberA& n2);
-void operator/= (RealNumberA& n1, const RealNumberA& n2);
 ////////////////////////////////Helper functions/////////////////////////////////////
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);
-inline bool isInteger(const RealNumber* n) { return n->length == n->power + 1; };
 //////////////////////////////Process functions////////////////////////////////////////
 RealNumber* add (const RealNumber* n1, const RealNumber* n2);
 RealNumber* subtract (const RealNumber* n1, const RealNumber* n2);
 RealNumber* multiply (const RealNumber* n1, const RealNumber* n2);
 RealNumber* divide (const RealNumber* n1, const RealNumber* n2);
-bool cutArray(RealNumber* n);
+bool cutLength(RealNumber* n);
+void cutZero(RealNumber* n);
 
 #endif

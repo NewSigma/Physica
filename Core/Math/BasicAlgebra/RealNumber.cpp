@@ -20,13 +20,13 @@ extern const Const_1* const_1;
 ////////////////////////////////RealNumber////////////////////////////////
 RealNumber::RealNumber() {
     byte = nullptr;
-    length = power = 0;
+    length = power = a = 0;
     sign = true;
 }
 /*
  * May not be very accurate.
  */
-RealNumber::RealNumber(double d) {
+RealNumber::RealNumber(double d, unsigned char acc) {
     sign = d >= 0;
     d = sign ? d : -d;
     auto copy_d = d;
@@ -57,6 +57,8 @@ RealNumber::RealNumber(double d) {
         d -= double(int(d));
         d *= 10;
     }
+
+    a = acc;
 }
 /*
  * Not very accurate either.
@@ -87,13 +89,15 @@ RealNumber::RealNumber(const RealNumber& n) {
     sign = n.sign;
     byte = (unsigned char*)malloc(length * sizeof(char));
     memcpy(byte, n.byte, length * sizeof(char));
+    a = n.a;
 }
 
-RealNumber::RealNumber(unsigned char* b, int len, int pow, bool s) {
+RealNumber::RealNumber(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
     byte = b;
     length = len;
     power = pow;
     sign = s;
+    a = acc;
 }
 
 RealNumber::RealNumber(const RealNumber* n) {
@@ -102,6 +106,7 @@ RealNumber::RealNumber(const RealNumber* n) {
     sign = n->sign;
     byte = (unsigned char*)malloc(length * sizeof(char));
     memcpy(byte, n->byte, length * sizeof(char));
+    a = n->a;
 }
 
 RealNumber::~RealNumber() {
@@ -109,10 +114,12 @@ RealNumber::~RealNumber() {
 }
 
 std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
+    if(!n.sign)
+        os << '-';
     if(n.power < 0) {
         os << "0.";
         for(int i = -n.power - 1; i > 0; --i)
-            os << "0";
+            os << '0';
         for(int i = 0; i < n.length; ++i)
             os << (int)n.byte[i];
     }
@@ -120,7 +127,7 @@ std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
         if(n.length > n.power) {
             for(int i = 0; i < n.power + 1; ++i)
                 os << (int)n.byte[i];
-            os << ".";
+            os << '.';
             for(int i = n.power + 1; i < n.length; ++i)
                 os << (int)n.byte[i];
         }
@@ -128,11 +135,40 @@ std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
             for(int i = 0; i < n.length; ++i)
                 os << (int)n.byte[i];
             for(int i = n.power - n.length + 1; i > 0; --i)
-                os << "0";
+                os << '0';
         }
     }
-    os << "\tLength = " << n.length << "\tPower = " << n.power;
+    os << "\tLength = " << n.length << "\tPower = " << n.power << "\tAccuracy = ";
+
+    int temp = n.power - n.length +1;
+    if(n.a == 0)
+        os << "0.";
+    else {
+        if(temp < 0) {
+            os << "0.";
+            for(; temp < -1; ++temp)
+                os << '0';
+            os << (int)n.a;
+        }
+        else {
+            os << (int)n.a;
+            for(; temp > 0; --temp)
+                os << '0';
+            os << '.';
+        }
+    }
     return os;
+}
+//Move operator, which moves this to n.
+void RealNumber::operator<<(RealNumber& n) {
+    free(byte);
+    byte = n.byte;
+    length = n.length;
+    power = n.power;
+    sign = n.sign;
+    a = n.a;
+    n.byte = nullptr;
+    delete &n;
 }
 
 RealNumber& RealNumber::operator= (const RealNumber& n) {
@@ -143,31 +179,186 @@ RealNumber& RealNumber::operator= (const RealNumber& n) {
     length = n.length;
     power = n.power;
     sign = n.sign;
+    a = n.a;
     return *this;
+}
+
+//Return accuracy in class RealNumber.
+RealNumber* RealNumber::getAccuracy() const {
+    auto b = (unsigned char*)malloc(sizeof(char));
+    b[0] = a;
+    return new RealNumber(b, 1, power - length + 1);
+}
+//Return this + accuracy
+RealNumber* RealNumber::getMaximum() const {
+    auto acc = getAccuracy();
+    auto result = add(this, acc);
+    delete acc;
+    return result;
+}
+//Return this - accuracy
+RealNumber* RealNumber::getMinimum() const {
+    auto acc = getAccuracy();
+    auto result = subtract(this, acc);
+    delete acc;
+    return result;
+}
+//Add error to this and adjust this->length as well as this-> byte.
+bool RealNumber::applyError(const RealNumber* error) {
+    int temp = power - length + 1 - error->power;
+    if(temp <= 0) {
+        RealNumber error_1;
+        if(temp < 0) {
+            auto b = (unsigned char*)malloc(sizeof(char));
+            b[0] = a;
+            error_1 = RealNumber(b, 1, power - length + 1);
+            error_1 += *error;
+            length += temp;
+        }
+        else
+            error_1 = RealNumber(error);
+        a += error_1.byte[0];
+    }
+
+    if(a > 9) {
+        a = 1;
+        --length;
+    }
+
+    if(length < 1) {
+        std::cout << "[RealNumber] Warn: Accumulated too many errors.";
+        return true;
+    }
+
+    byte = (unsigned char*)realloc(byte, length * sizeof(char));
+    return false;
 }
 
 RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2) {
     auto result = add(&n1, &n2);
-    cutArray(result);
+    result->a = cutLength(result);
+    if(n1.a != 0 || n2.a != 0) {
+        RealNumber* error;
+        if(n1.a == 0)
+            error = n2.getAccuracy();
+        else if(n2.a == 0)
+            error = n1.getAccuracy();
+        else {
+            auto n1_a = n1.getAccuracy();
+            auto n2_a = n2.getAccuracy();
+            error = add(n1_a, n2_a);
+            delete n1_a;
+            delete n2_a;
+        }
+        result->applyError(error);
+        delete error;
+    }
     return result;
 }
 
 RealNumber* operator- (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* result = subtract(&n1, &n2);
-    cutArray(result);
+    auto result = subtract(&n1, &n2);
+    result->a = cutLength(result);
+    if(n1.a != 0 || n2.a != 0) {
+        RealNumber* error;
+        if(n1.a == 0)
+            error = n2.getAccuracy();
+        else if(n2.a == 0)
+            error = n1.getAccuracy();
+        else {
+            auto n1_a = n1.getAccuracy();
+            auto n2_a = n2.getAccuracy();
+            error = add(n1_a, n2_a);
+            delete n1_a;
+            delete n2_a;
+        }
+        result->applyError(error);
+        delete error;
+    }
     return result;
 }
 
 RealNumber* operator* (const RealNumber& n1, const RealNumber& n2) {
     auto result = multiply(&n1, &n2);
-    cutArray(result);
+    result->a = cutLength(result);
+    if(n1.a != 0 || n2.a != 0) {
+        RealNumber* error;
+        if(n1.a == 0) {
+            auto n2_a = n2.getAccuracy();
+            error = multiply(&n1, n2_a);
+            delete n2_a;
+        }
+        else if(n2.a == 0) {
+            auto n1_a = n1.getAccuracy();
+            error = multiply(&n2, n1_a);
+            delete n1_a;
+        }
+        else {
+            auto n1_a = n1.getAccuracy();
+            auto n2_a = n2.getAccuracy();
+            auto temp_1 = multiply(&n1, n2_a);
+            auto temp_2 = multiply(&n2, n1_a);
+            auto temp_3 = multiply(n1_a, n2_a);
+            auto temp_4 = add(temp_1, temp_2);
+            error = add(temp_3, temp_4);
+            delete n1_a;
+            delete n2_a;
+            delete temp_1;
+            delete temp_2;
+            delete temp_3;
+            delete temp_4;
+        }
+        result->applyError(error);
+        delete error;
+    }
     return result;
 }
 
 RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
     auto result = divide(&n1, &n2);
-    if(result != nullptr)
-        cutArray(result);
+    if(result == nullptr)
+        return result;
+    result->a += cutLength(result);
+    if(n1.a != 0 || n2.a != 0) {
+        RealNumber* error;
+        if(n1.a == 0) {
+            auto n2_a = n2.getAccuracy();
+            auto temp_1 = multiply(&n1, n2_a);
+            auto temp_2 = subtract(&n2, n2_a);
+            auto temp_3 = multiply(&n2, temp_2);
+            error = divide(temp_1, temp_3);
+            delete n2_a;
+            delete temp_1;
+            delete temp_2;
+            delete temp_3;
+        }
+        else if(n2.a == 0) {
+            auto n1_a = n1.getAccuracy();
+            error = divide(n1_a, &n2);
+            delete n1_a;
+        }
+        else {
+            auto n1_a = n1.getAccuracy();
+            auto n2_a = n2.getAccuracy();
+            auto temp_1 = multiply(&n1, n2_a);
+            auto temp_2 = multiply(&n2, n1_a);
+            auto temp_3 = add(temp_1, temp_2);
+            auto temp_4 = subtract(&n2, n2_a);
+            auto temp_5 = multiply(&n2, temp_4);
+            error = divide(temp_3, temp_5);
+            delete n1_a;
+            delete n2_a;
+            delete temp_1;
+            delete temp_2;
+            delete temp_3;
+            delete temp_4;
+            delete temp_5;
+        }
+        auto boolean = result->applyError(error);
+        delete error;
+        if(boolean)
+            return nullptr;
+    }
     return result;
 }
 /*
@@ -175,19 +366,37 @@ RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
  */
 void operator+= (RealNumber& n1, const RealNumber& n2) {
     RealNumber* p_result = n1 + n2;
-    n1 = *p_result;
+    free(n1.byte);
+    n1.byte = p_result->byte;
+    n1.length = p_result->length;
+    n1.power = p_result->power;
+    n1.sign = p_result->sign;
+    n1.a = p_result->a;
+    p_result->byte = nullptr;
     delete p_result;
 }
 
 void operator-= (RealNumber& n1, const RealNumber& n2) {
     RealNumber* p_result = n1 - n2;
-    n1 = *p_result;
+    free(n1.byte);
+    n1.byte = p_result->byte;
+    n1.length = p_result->length;
+    n1.power = p_result->power;
+    n1.sign = p_result->sign;
+    n1.a = p_result->a;
+    p_result->byte = nullptr;
     delete p_result;
 }
 
 void operator*= (RealNumber& n1, const RealNumber& n2) {
     RealNumber* p_result = n1 * n2;
-    n1 = *p_result;
+    free(n1.byte);
+    n1.byte = p_result->byte;
+    n1.length = p_result->length;
+    n1.power = p_result->power;
+    n1.sign = p_result->sign;
+    n1.a = p_result->a;
+    p_result->byte = nullptr;
     delete p_result;
 }
 /*
@@ -195,11 +404,13 @@ void operator*= (RealNumber& n1, const RealNumber& n2) {
  */
 void operator/= (RealNumber& n1, const RealNumber& n2) {
     RealNumber* p_result = n1 / n2;
-    if(p_result == nullptr) {
-        std::cout << "[RealNumber] Can not divide by zero.";
-        exit(EXIT_FAILURE);
-    }
-    n1 = *p_result;
+    free(n1.byte);
+    n1.byte = p_result->byte;
+    n1.length = p_result->length;
+    n1.power = p_result->power;
+    n1.sign = p_result->sign;
+    n1.a = p_result->a;
+    p_result->byte = nullptr;
     delete p_result;
 }
 
@@ -270,6 +481,8 @@ bool operator== (const RealNumber& n1, const RealNumber& n2) {
         return false;
     if(n1.sign != n2.sign)
         return false;
+    if(n1.a != n2.a)
+        return false;
     const RealNumber* longer;
     const RealNumber* shorter;
     if(n1.length > n2.length) {
@@ -300,30 +513,39 @@ bool operator!= (const RealNumber& n1, const RealNumber& n2) {
  * May return nullptr.
  */
 RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
-    RealNumberA* result = nullptr;
+    RealNumber* result = nullptr;
     if(n1.isZero()) {
         if(!n2.isZero())
             result = const_1->getZero();
     }
     else if(n1.isPositive()) {
-        if(isInteger(&n2)) {
+        if(n2.isInteger()) {
             auto n2_copy = new RealNumber(n2);
 
             result = const_1->getOne();
-            while(*n2_copy != *const_1->ZERO) {
-                *n2_copy -= *const_1->ONE;
-                *result *= (RealNumberA&)n1;
+            if(n2.isNegative()) {
+                while(*n2_copy != *const_1->ZERO) {
+                    *n2_copy -= *const_1->ONE;
+                    *result /= n1;
+                }
+            }
+            else {
+                while(*n2_copy != *const_1->ZERO) {
+                    *n2_copy -= *const_1->ONE;
+                    *result *= n1;
+                }
             }
             delete n2_copy;
         }
         else {
+            //Do not have to use RealNumberA
             auto temp_result = const_1->getOne();
             auto temp_1 = ln(&n1);
             *temp_1 *= n2;
             *temp_1 += *const_1->ONE;
             bool go_on;
             do {
-                result = (RealNumberA*)ln(temp_result);
+                result = ln(temp_result);
                 result->sign = !result->sign;
                 *result += *temp_1;
                 *result *= *temp_result;
@@ -349,231 +571,6 @@ RealNumber* operator- (const RealNumber& n) {
     result->sign = !result->sign;
     return result;
 }
-///////////////////////////////////////RealNumberA/////////////////////////////////////////
-RealNumberA::RealNumberA() = default;
-
-RealNumberA::RealNumberA(double d, unsigned char acc) : RealNumber(d) {
-    a = acc;
-}
-
-RealNumberA::RealNumberA(const RealNumberA& n)  : RealNumber(n) {
-    a = n.a;
-}
-
-RealNumberA::RealNumberA(unsigned char* byte, int length, int power, bool sign, unsigned char acc) : RealNumber(byte, length, power, sign) {
-    a = acc;
-}
-
-RealNumberA::RealNumberA(const RealNumber* n, unsigned char acc) : RealNumber(n) {
-    a = acc;
-}
-
-std::ostream& operator<<(std::ostream& os, const RealNumberA& n) {
-    os << (RealNumber&)n << "\tAccuracy = ";
-    int temp = n.power - n.length +1;
-    if(n.a == 0)
-        os << "0.";
-    else {
-        if(temp < 0) {
-            os << "0.";
-            for(; temp < -1; ++temp)
-                os << "0";
-            os << (int)n.a;
-        }
-        else {
-            os << (int)n.a;
-            for(; temp > 0; --temp)
-                os << "0";
-            os << ".";
-        }
-    }
-    return os;
-}
-
-RealNumberA& RealNumberA::operator= (const RealNumberA& n) {
-    if(this == &n)
-        return *this;
-    *(RealNumber*)this = n;
-    a = n.a;
-    return *this;
-}
-//Return accuracy in class RealNumber.
-RealNumber* RealNumberA::getAccuracy() const {
-    auto byte = (unsigned char*)malloc(sizeof(char));
-    byte[0] = a;
-    return new RealNumber(byte, 1, power - length + 1);
-}
-//Return this + accuracy
-RealNumber* RealNumberA::getMaximum() const {
-    auto byte = (unsigned char*)malloc(sizeof(char));
-    byte[0] = a;
-    auto acc = RealNumber(byte, 1, power - length + 1);
-    auto result = new RealNumber(this);
-    *result += acc;
-    return result;
-}
-//Return this - accuracy
-RealNumber* RealNumberA::getMinimum() const {
-    auto byte = (unsigned char*)malloc(sizeof(char));
-    byte[0] = a;
-    auto acc = RealNumber(byte, 1, power - length + 1);
-    auto result = new RealNumber(this);
-    *result -= acc;
-    return result;
-}
-//Add error to this and adjust this->length as well as this-> byte.
-bool RealNumberA::applyError(const RealNumber* error) {
-    int temp = power - length + 1 - error->power;
-    if(temp > 0)
-        a += 1;
-    else {
-        RealNumber error_1;
-        if(temp < 0) {
-            auto byte = (unsigned char*)malloc(sizeof(char));
-            byte[0] = a;
-            error_1 = RealNumber(byte, 1, power - length + 1);
-            error_1 += *error;
-            length += temp;
-        }
-        else
-            error_1 = RealNumber(error);
-
-        if(error_1.length == 1)
-            a += error_1.byte[0];
-        else
-            a += error_1.byte[0] + 1;
-    }
-
-    if(a > 9) {
-        a = 2;
-        --length;
-    }
-
-    if(length < 1) {
-        std::cout << "[RealNumber] Warn: Accumulated too many errors.";
-        return true;
-    }
-
-    byte = (unsigned char*)realloc(byte, length * sizeof(char));
-    return false;
-}
-
-RealNumberA* operator+ (const RealNumberA& n1, const RealNumberA& n2) {
-    auto result = (RealNumberA*)add(&n1, &n2);
-    result->a = cutArray(result);
-    if(!(n1.a == 0 && n2.a == 0)) {
-        auto n1_a = n1.getAccuracy();
-        auto n2_a = n2.getAccuracy();
-        auto error = *n1_a + *n2_a;
-        result->applyError(error);
-        delete n1_a;
-        delete n2_a;
-        delete error;
-    }
-    return result;
-}
-
-RealNumberA* operator- (const RealNumberA& n1, const RealNumberA& n2) {
-    auto result = (RealNumberA*)subtract(&n1, &n2);
-    result->a = cutArray(result);
-    if(!(n1.a == 0 && n2.a == 0)) {
-        auto n1_a = n1.getAccuracy();
-        auto n2_a = n2.getAccuracy();
-        auto error = *n1_a + *n2_a;
-        result->applyError(error);
-        delete n1_a;
-        delete n2_a;
-        delete error;
-    }
-    return result;
-}
-
-RealNumberA* operator* (const RealNumberA& n1, const RealNumberA& n2) {
-    auto result = (RealNumberA*)multiply(&n1, &n2);
-    result->a = cutArray(result);
-    if(!(n1.a == 0 && n2.a == 0)) {
-        //Get a
-        auto byte_1 = (unsigned char*)malloc(sizeof(char));
-        byte_1[0] = n1.a;
-        auto byte_2 = (unsigned char*)malloc(sizeof(char));
-        byte_2[0] = n2.a;
-        auto n1_a = RealNumber(byte_1, 1, n1.power - n1.length + 1);
-        auto n2_a = RealNumber(byte_2, 1, n2.power - n2.length + 1);
-        auto error = n1 * n2_a;
-        auto error_1 = n2 * n1_a;
-        auto error_2 = n1_a * n2_a;
-        *error += *error_1;
-        *error += *error_2;
-
-        result->applyError(error);
-
-        delete error;
-        delete error_1;
-        delete error_2;
-    }
-    return result;
-}
-
-RealNumberA* operator/ (const RealNumberA& n1, const RealNumberA& n2) {
-    auto result = (RealNumberA*)divide(&n1, &n2);
-    if(result == nullptr)
-        return result;
-    result->a += cutArray(result);
-    if(!(n1.a == 0 && n2.a == 0)) {
-        //Get a
-        auto byte_1 = (unsigned char*)malloc(sizeof(char));
-        byte_1[0] = n1.a;
-        auto byte_2 = (unsigned char*)malloc(sizeof(char));
-        byte_2[0] = n2.a;
-        auto n1_a = RealNumber(byte_1, 1, -(n1.length - n1.power - 1), true);
-        auto n2_a = RealNumber(byte_2, 1, -(n2.length - n2.power - 1), true);
-        auto numerator = n1 * n2_a;
-        auto numerator_1 = n2 * n1_a;
-        *numerator += *numerator_1;
-        auto denominator = n2 - n2_a;
-        *denominator *= n2;
-        auto error = *numerator / *denominator;
-
-        if(result->applyError(error))
-            return nullptr;
-
-        delete numerator;
-        delete numerator_1;
-        delete denominator;
-        delete error;
-    }
-    return result;
-}
-
-void operator+= (RealNumberA& n1, const RealNumberA& n2) {
-    RealNumberA* p_result = n1 + n2;
-    n1 = *p_result;
-    delete p_result;
-}
-
-void operator-= (RealNumberA& n1, const RealNumberA& n2) {
-    RealNumberA* p_result = n1 - n2;
-    n1 = *p_result;
-    delete p_result;
-}
-
-void operator*= (RealNumberA& n1, const RealNumberA& n2) {
-    RealNumberA* p_result = n1 * n2;
-    n1 = *p_result;
-    delete p_result;
-}
-/*
- * n2 mustn't be zero.
- */
-void operator/= (RealNumberA& n1, const RealNumberA& n2) {
-    RealNumberA* p_result = n1 / n2;
-    if(p_result == nullptr) {
-        std::cout << "[RealNumber] Can not divide by zero.";
-        exit(EXIT_FAILURE);
-    }
-    n1 = *p_result;
-    delete p_result;
-}
 ////////////////////////////////Helper functions/////////////////////////////////////
 //Return a real number between 0 and 1.
 RealNumber* randomRealNumber() {
@@ -596,7 +593,8 @@ RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound) {
 }
 //////////////////////////////Process functions////////////////////////////////////////
 /*
- * The following four functions are public parts owned by RealNumber and RealNumberA.
+ * The following four functions simply calculate the result while operator functions will
+ * consider the accuracy.
  */
 RealNumber* add (const RealNumber* n1, const RealNumber* n2) {
     RealNumber* result;
@@ -710,6 +708,7 @@ RealNumber* subtract (const RealNumber* n1, const RealNumber* n2) {
             }
             else
                 result = new RealNumber((unsigned char*)byte, length, unitIndex, true);
+            cutZero(result);
         }
     }
     else {
@@ -794,29 +793,35 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
     RealNumber* result;
     if(n1->isZero() || n2->isZero())
         result = const_1->getZero();
+    else if(*n2 == *const_1->ONE)
+        result = new RealNumber(n1);
     else {
         result = new RealNumber();
         auto n1_copy = new RealNumber(n1);
         auto n2_copy = new RealNumber(n2);
-        n1_copy->sign = true;
-        n2_copy->sign = true;
+        n1_copy->sign = n2_copy->sign = true;
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, we will calculate it accurately later.
         int length = const_1->MachinePrecision;
         int power = n1_copy->power - n2_copy->power - 1;
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memset(temp, 0, length * sizeof(char));
+
+        auto n1_copy_old = n1_copy;
         n1_copy->power = n2_copy->power + 1;
         for (int i = 0; i < length; ++i) {
             char unit = 0;
             while(true) {
-                *n1_copy -= *n2_copy;
+                n1_copy = subtract(n1_copy, n2_copy);
                 if(n1_copy->isNegative()) {
-                    *n1_copy += *n2_copy;
+                    delete n1_copy;
+                    n1_copy = n1_copy_old;
                     break;
                 }
                 else {
-                    unit += 1;
+                    ++unit;
+                    delete n1_copy_old;
+                    n1_copy_old = n1_copy;
                     if(n1_copy->isZero()) {
                         temp[i] = unit;
                         //Do we have better choice?
@@ -829,7 +834,7 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
         }
         //1 comes from algorithm of divide()
         result->a = 1;
-        double_break:
+double_break:
         delete n1_copy;
         delete n2_copy;
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -848,33 +853,40 @@ RealNumber* divide (const RealNumber* n1, const RealNumber* n2) {
         result->length = length;
         result->power = power;
         result->sign = n1->sign == n2->sign;
+        cutZero(result);
     }
     return result;
 }
 /*
- * Zero on both sides will be cut,
- * Elements whose indexes satisfy firstCutIndex <= index < lastCutIndex is not zero.
  * If the length of new array is larger than MachinePrecision, it will be set to MachinePrecision.
- *
- * Return true if the length of new array is larger than MachinePrecision and we will cut it.
+ * Return true array is cut.
  */
-bool cutArray(RealNumber* n) {
-    int MachinePrecision = const_1->MachinePrecision;
+bool cutLength(RealNumber* n) {;
     bool result = false;
-    int firstCutIndex = 0;
     int lastCutIndex = n->length;
-    //Ignore zeros from the first index.
-    while(n->byte[firstCutIndex] == 0 && firstCutIndex < lastCutIndex - 1)
-        firstCutIndex += 1;
 
-    int maxIndex = firstCutIndex + MachinePrecision;
-    if(n->length > maxIndex) {
-        lastCutIndex = maxIndex;
+    if(n->length > const_1->MachinePrecision) {
+        lastCutIndex = const_1->MachinePrecision;
         result = true;
     }
 
-    if(firstCutIndex != 0 || lastCutIndex != n->length) {
-        n->length = lastCutIndex - firstCutIndex;
+    if(lastCutIndex != n->length) {
+        n->length = lastCutIndex;
+        n->byte = (unsigned char*)realloc(n->byte, lastCutIndex * sizeof(char));
+    }
+    return result;
+}
+/*
+ * Cut zeros from the beginning.
+ */
+void cutZero(RealNumber* n) {
+    int firstCutIndex = 0;
+    //Ignore zeros from the first index.
+    while(n->byte[firstCutIndex] == 0 && firstCutIndex < n->length - 1)
+        ++firstCutIndex;
+
+    if(firstCutIndex != 0) {
+        n->length -= firstCutIndex;
 
         auto new_array = (unsigned char*)malloc(n->length * sizeof(char));
         memcpy(new_array, n->byte + firstCutIndex, n->length * sizeof(char));
@@ -886,5 +898,4 @@ bool cutArray(RealNumber* n) {
         else
             n->power -= firstCutIndex;
     }
-    return result;
 }

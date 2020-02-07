@@ -15,7 +15,7 @@
  */
 extern const Const_1* const_1;
 //TODO Optional: Auto step-size
-HillClimbingAlgorithm::HillClimbingAlgorithm(RealNumberA* f(RealNumber*), RealNumber* init, RealNumber* size) {
+HillClimbingAlgorithm::HillClimbingAlgorithm(RealNumber* f(RealNumber*), RealNumber* init, RealNumber* size) {
 	func = f;
 	x_initial = init;
 	stepSize = size;

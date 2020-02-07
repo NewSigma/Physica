@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../../Header/Solve.h"
 #include "../../Header/Const.h"
 /*
@@ -26,36 +25,33 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumbe
     if(*n == *y2)
         return new RealNumber(x2);
 
-    auto delta_left = *n - *y1;
-    auto delta_right = *n - *y2;
+    auto delta_left = subtract(n, y1);
+    auto delta_right = subtract(n, y2);
     if(delta_left->sign == delta_right->sign)
         return nullptr;
     delete delta_left;
     delete delta_right;
 
-    auto TWO = const_1->TWO;
-    int MachinePrecision = const_1->MachinePrecision;
-
-    auto result = *x1 + *x2;
-    *result /= *TWO;
+    auto result = add(x1, x2);
+    *result /= *const_1->TWO;
     RealNumber* y_result;
 
-    auto error = *y1 - *y2;
+    auto error = subtract(y1, y2);
     error->sign = true;
-    *error /= *TWO;
+    *error << *divide(error, const_1->TWO);
 
     auto x_left = new RealNumber(x1);
     auto x_right = new RealNumber(x2);
     auto y_left = new RealNumber(y1);
 
-    delta_left = *n - *y_left;
+    delta_left = subtract(n, y_left);
     bool delta_left_sign = delta_left->sign;
     bool delta_right_sign;
     delete delta_left;
 
     do {
         y_result = func(result);
-        delta_right = *n - *y_result;
+        delta_right = subtract(n, y_result);
         delta_right_sign = delta_right->sign;
         delete delta_right;
 
@@ -65,7 +61,7 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumbe
             x_left = result;
             y_left = y_result;
 
-            delta_left = *n - *y_left;
+            delta_left = subtract(n, y_left);
             delta_left_sign = delta_left->sign;
             delete delta_left;
         }
@@ -74,11 +70,10 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber*), const RealNumbe
             delete y_result;
             x_right = result;
         }
-
-        result = *x_left + *x_right;
-        *result /= *TWO;
-        *error /= *TWO;
-    } while(result->power - error->power < MachinePrecision);
+        result = add(x_left, x_right);
+        *result << *divide(result, const_1->TWO);
+        *error << *divide(error, const_1->TWO);
+    } while(result->power - error->power < const_1->MachinePrecision);
     result->a = 1;
 
     delete x_left;

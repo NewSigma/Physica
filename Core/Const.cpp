@@ -23,38 +23,64 @@ Const_1::Const_1() {
     byte[7] = 6;
     byte[8] = 4;
     byte[9] = 7;
-    R_MAX = new RealNumberA(byte, 10, 9, true);
+    R_MAX = new RealNumber(byte, 10, 9);
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 0;
-    ZERO = new RealNumberA(byte, 1, 0, true);
+    ZERO = new RealNumber(byte, 1, 0);
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
-    RealNumberA* temp;
-    ONE = new RealNumberA(byte, 1, 0, true);
+    ONE = new RealNumber(byte, 1, 0);
 
-    temp = new RealNumberA(ONE);
+    auto temp = new RealNumber(ONE);
     temp->sign = false;
     MINUS_ONE = temp;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 2;
-    TWO = new RealNumberA(byte, 1, 0, true);
+    TWO = new RealNumber(byte, 1, 0);
 
-    temp = new RealNumberA(TWO);
+    temp = new RealNumber(TWO);
     temp->sign = false;
     MINUS_TWO = temp;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 3;
-    THREE = new RealNumberA(byte, 1, 0, true);
+    THREE = new RealNumber(byte, 1, 0);
 
-    temp = new RealNumberA(THREE);
+    temp = new RealNumber(THREE);
     temp->sign = false;
     MINUS_THREE = temp;
 
-    byte = (unsigned char*)malloc(16 * sizeof(char));
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 4;
+    FOUR = new RealNumber(byte, 1, 0);
+
+    temp = new RealNumber(FOUR);
+    temp->sign = false;
+    MINUS_FOUR = temp;
+}
+
+Const_1::~Const_1() {
+    delete R_MAX;
+    delete ZERO;
+    delete ONE;
+    delete MINUS_ONE;
+    delete TWO;
+    delete MINUS_TWO;
+    delete THREE;
+    delete MINUS_THREE;
+    delete FOUR;
+    delete MINUS_FOUR;
+}
+/*
+ * Consts that need some calculates.
+ * Should call new to Const_1 so as to make calculates available.
+ */
+Const_2::Const_2() {
+    //TODO Slow and not accurate
+    auto byte = (unsigned char*)malloc(16 * sizeof(char));
     byte[0] = 3;
     byte[1] = 1;
     byte[2] = 4;
@@ -71,35 +97,18 @@ Const_1::Const_1() {
     byte[13] = 7;
     byte[14] = 9;
     byte[15] = 3;
-    PI = new RealNumberA(byte, 16, 0, true);
-}
+    PI = new RealNumber(byte, 16, 0);
+    E = bisectionMethod(ln_noCheck, const_1->ONE, const_1->TWO, const_1->THREE);
 
-Const_1::~Const_1() {
-    delete R_MAX;
-    delete ZERO;
-    delete ONE;
-    delete MINUS_ONE;
-    delete TWO;
-    delete MINUS_TWO;
-    delete THREE;
-    delete MINUS_THREE;
-    delete PI;
-}
-/*
- * Consts that need some calculates.
- * Should call new to Const_1 so as to make calculates available.
- */
-Const_2::Const_2() {
-    PI_DIVIDE_TWO = *const_1->PI / *const_1->TWO;
-    auto temp = new RealNumberA(PI_DIVIDE_TWO);
+    PI_DIVIDE_TWO = *PI / *const_1->TWO;
+    auto temp = new RealNumber(PI_DIVIDE_TWO);
     temp->sign = false;
     MINUS_PI_DIVIDE_TWO = temp;
-    //TODO Slow and not accurate
-    E = (RealNumberA*)bisectionMethod(ln_noCheck, const_1->ONE, const_1->TWO, const_1->THREE);
 }
 
 Const_2::~Const_2() {
+    delete PI;
+    delete E;
     delete PI_DIVIDE_TWO;
     delete MINUS_PI_DIVIDE_TWO;
-    delete E;
 }

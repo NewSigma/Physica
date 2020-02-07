@@ -5,13 +5,13 @@
 
 class HillClimbingAlgorithm {
 public:
-    HillClimbingAlgorithm(RealNumberA* func(RealNumber*), RealNumber* x_initial, RealNumber* stepSize);
+    HillClimbingAlgorithm(RealNumber* func(RealNumber*), RealNumber* x_initial, RealNumber* stepSize);
 	~HillClimbingAlgorithm();
     void getExtremal();
     RealNumber* getMinStep();
 	void setMinStep(RealNumber* minStep);
 private:
-    RealNumberA* (*func)(RealNumber*);
+    RealNumber* (*func)(RealNumber*);
     RealNumber* x_initial;
     RealNumber* stepSize;
     RealNumber* minStep;
