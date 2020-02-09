@@ -207,17 +207,17 @@ RealNumber* RealNumber::getMinimum() const {
 bool RealNumber::applyError(const RealNumber* error) {
     int temp = power - length + 1 - error->power;
     if(temp <= 0) {
-        RealNumber error_1;
         if(temp < 0) {
             auto b = (unsigned char*)malloc(sizeof(char));
             b[0] = a;
-            error_1 = RealNumber(b, 1, power - length + 1);
-            error_1 += *error;
+            auto error_1 = new RealNumber(b, 1, power - length + 1);
+            *error_1 << *add(error_1, error);
             length += temp;
+            a += error_1->byte[0];
+            delete error_1;
         }
         else
-            error_1 = RealNumber(error);
-        a += error_1.byte[0];
+            a += error->byte[0];
     }
 
     if(a > 9) {
@@ -226,7 +226,9 @@ bool RealNumber::applyError(const RealNumber* error) {
     }
 
     if(length < 1) {
-        std::cout << "[RealNumber] Warn: Accumulated too many errors.";
+        std::cout << "[RealNumber] Warn: Accumulated too many errors." << std::endl;
+        power += 1 - length;
+        length = 1;
         return true;
     }
 

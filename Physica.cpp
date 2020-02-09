@@ -12,7 +12,7 @@ const Const_2* const_2;
 
 int main(int argc, char** argv) {
     const_1 = new Const_1();
-    //const_2 = new Const_2();
+    const_2 = new Const_2();
     /*
     QApplication app(argc, argv);
     QApplication::setApplicationName("Physica");
@@ -28,11 +28,10 @@ int main(int argc, char** argv) {
     auto a = const_1->getTwo();
     a->power = -1;
     auto result = ln(a);
-    std::cout << *result;
-    //std::cout << *const_2->PI;
+    std::cout << *result << std::endl << *const_2->PI;
 
     delete const_1;
-    //delete const_2;
+    delete const_2;
 
     return 0;
 }

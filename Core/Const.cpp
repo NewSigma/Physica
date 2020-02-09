@@ -80,24 +80,7 @@ Const_1::~Const_1() {
  */
 Const_2::Const_2() {
     //TODO Slow and not accurate
-    auto byte = (unsigned char*)malloc(16 * sizeof(char));
-    byte[0] = 3;
-    byte[1] = 1;
-    byte[2] = 4;
-    byte[3] = 1;
-    byte[4] = 5;
-    byte[5] = 9;
-    byte[6] = 2;
-    byte[7] = 6;
-    byte[8] = 5;
-    byte[9] = 3;
-    byte[10] = 5;
-    byte[11] = 8;
-    byte[12] = 9;
-    byte[13] = 7;
-    byte[14] = 9;
-    byte[15] = 3;
-    PI = new RealNumber(byte, 16, 0);
+    PI = bisectionMethod(sin, const_1->ZERO, const_1->THREE, const_1->FOUR);
     E = bisectionMethod(ln_noCheck, const_1->ONE, const_1->TWO, const_1->THREE);
 
     PI_DIVIDE_TWO = *PI / *const_1->TWO;
