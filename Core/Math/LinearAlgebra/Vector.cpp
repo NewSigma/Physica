@@ -3,6 +3,11 @@
 
 extern Const_1 const_1;
 
+Vector::Vector() {
+    numbers = nullptr;
+    length = 0;
+}
+
 Vector::Vector(RealNumber** n, int l) {
     numbers = n;
     length = l;
@@ -14,7 +19,13 @@ Vector::~Vector() {
     delete[] numbers;
 }
 
-Vector& Vector::operator+(Vector& v) {
+RealNumber* Vector::operator[](int i) {
+    if(i >= length)
+        return nullptr;
+    return numbers[i];
+}
+
+Vector* Vector::operator+(Vector& v) {
     Vector* longer;
     int longer_len;
     int shorter_len;
@@ -34,10 +45,10 @@ Vector& Vector::operator+(Vector& v) {
         arr[i] = *numbers[i] + *v.numbers[i];
     for(int j = shorter_len; j < longer_len; ++j)
         arr[j] = new RealNumber(longer->numbers[j]);
-    return *new Vector(arr, longer_len);
+    return new Vector(arr, longer_len);
 }
 
-Vector& Vector::operator-(Vector& v) {
+Vector* Vector::operator-(Vector& v) {
     Vector* longer;
     int longer_len;
     int shorter_len;
@@ -57,33 +68,21 @@ Vector& Vector::operator-(Vector& v) {
         arr[i] = *numbers[i] - *v.numbers[i];
     for(int j = shorter_len; j < longer_len; ++j)
         arr[j] = new RealNumber(longer->numbers[j]);
-    return *new Vector(arr, longer_len);
+    return new Vector(arr, longer_len);
 }
 
-Vector& Vector::operator*(Vector& v) {
-    Vector* longer;
-    int longer_len;
-    int shorter_len;
-    if(length > v.length) {
-        longer = this;
-        longer_len = length;
-        shorter_len = v.length;
+RealNumber* Vector::operator*(Vector& v) {
+    int shorter_len = length > v.length ? v.length : length;
+    auto result = const_1.getZero();
+    for(int i = 0; i < shorter_len; ++i){
+        auto temp = *numbers[i] * *v.numbers[i];
+        *result += *temp;
+        delete temp;
     }
-    else {
-        longer = &v;
-        longer_len = v.length;
-        shorter_len = length;
-    }
-
-    auto arr = new RealNumber*[longer_len];
-    for(int i = 0; i < shorter_len; ++i)
-        arr[i] = *numbers[i] * *v.numbers[i];
-    for(int j = shorter_len; j < longer_len; ++j)
-        arr[j] = new RealNumber(longer->numbers[j]);
-    return *new Vector(arr, longer_len);
+    return result;
 }
 //Here the operator/ means cross product.
-Vector& Vector::operator/(Vector& v) {
+Vector* Vector::operator/(Vector& v) {
     if(length == v.length) {
         if(length == 2) {
             auto arr = new RealNumber*[3];
@@ -94,7 +93,7 @@ Vector& Vector::operator/(Vector& v) {
             arr[2] = *temp_1 - *temp_2;
             delete temp_1;
             delete temp_2;
-            return *new Vector(arr, 3);
+            return new Vector(arr, 3);
         }
 
         if(length == 3) {
@@ -116,8 +115,8 @@ Vector& Vector::operator/(Vector& v) {
             arr[2] = *temp_1 - *temp_2;
             delete temp_1;
             delete temp_2;
-            return *new Vector(arr, 3);
+            return new Vector(arr, 3);
         }
     }
-    return *new Vector(nullptr, 0);
+    return nullptr;
 }

@@ -226,7 +226,7 @@ bool RealNumber::applyError(const RealNumber* error) {
     }
 
     if(length < 1) {
-        std::cout << "[RealNumber] Warn: Accumulated too many errors." << std::endl;
+        std::cout << "[RealNumber] Warn: Accumulated too many errors.\n";
         power += 1 - length;
         length = 1;
         return true;

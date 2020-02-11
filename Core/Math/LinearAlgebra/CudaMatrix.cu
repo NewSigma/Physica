@@ -4,10 +4,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
-#include "../../Header/Matrix.cuh"
+#include "../../Header/CudaMatrix.cuh"
 #include "../../../Utils/Header/CudaUtil.cuh"
 
-Matrix::Matrix(int r, int c)
+CudaMatrix::CudaMatrix(int r, int c)
 {
     matrix = new double[r * c]{0};
     row = r;
@@ -20,14 +20,14 @@ Matrix::Matrix(int r, int c)
 \param inner: when is true, return a Matrix whose matrix is a pointer that points to GPU memory so that we can use it
                        to do following calculate in GPU and avoid some memory copy.
 */
-Matrix* multiply(const Matrix* m1, const Matrix* m2, bool inner) {
-    Matrix* result;
+CudaMatrix* multiply(const CudaMatrix* m1, const CudaMatrix* m2, bool inner) {
+    CudaMatrix* result;
     if (m1->column != m2->row) {
         printf("Error: Unmultipliable matrixes (%s: %d)", __FILE__, __LINE__);
         result = nullptr;
     }
     else {
-        result = new Matrix(m1->row, m2->column);
+        result = new CudaMatrix(m1->row, m2->column);
         size_t size = m1->row * m2->column;
         size_t mem = size * sizeof(double);
         size_t mem_1 = m1->row * m1->column * sizeof(double);
@@ -63,14 +63,14 @@ void threadMultiply(double* m, const double* m1, const double* m2, int resultCol
         m[threadIdx.y * resultColumn + threadIdx.x] += m1[threadIdx.y * resultColumn + count] * m2[count * resultColumn + threadIdx.x];
 }
 //////////////////////////////////////add/////////////////////////////////////////////
-Matrix* add(const Matrix* m1, const Matrix* m2, bool inner) {
-    Matrix* result;
+CudaMatrix* add(const CudaMatrix* m1, const CudaMatrix* m2, bool inner) {
+    CudaMatrix* result;
     if (m1->row != m2->row || m1->column != m2->column) {
         printf("Error: Unaddable matrixes (%s: %d)", __FILE__, __LINE__);
         result = nullptr;
     }
     else {
-        result = new Matrix(m1->row, m1->column);
+        result = new CudaMatrix(m1->row, m1->column);
 
         int size = m1->row * m1->column;
         size_t mem = size * sizeof(double);
