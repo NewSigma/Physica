@@ -138,7 +138,7 @@ void Matrix::toColMatrix() {
         }
         new_vectors[i] = new Vector(arr, row);
     }
-    Matrix::~Matrix();
+    this->~Matrix();
     vectors = new_vectors;
     type = COLUMN;
 }
@@ -154,7 +154,7 @@ void Matrix::toRowMatrix() {
             }
             new_vectors[i] = new Vector(arr, col);
         }
-        Matrix::~Matrix();
+        this->~Matrix();
         vectors = new_vectors;
         type = ROW;
     }

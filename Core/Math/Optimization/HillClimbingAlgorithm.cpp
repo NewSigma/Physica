@@ -19,8 +19,7 @@ HillClimbingAlgorithm::HillClimbingAlgorithm(RealNumber* f(RealNumber*), RealNum
 	func = f;
 	x_initial = init;
 	stepSize = size;
-	minStep = const_1->getOne();
-	minStep->length = -const_1->MachinePrecision;
+	minStep = new RealNumber(const_1->StepSize);
 }
 
 HillClimbingAlgorithm::~HillClimbingAlgorithm() {
@@ -52,7 +51,7 @@ void HillClimbingAlgorithm::getExtremal() {
                 *y_last = *y;
             }
             else {
-                stepSize->power -= 1;
+                --stepSize->power;
                 if (*stepSize < *minStep) {
                     *x_result = *x_last;
                     *y_result = *y_last;

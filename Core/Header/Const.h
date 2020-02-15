@@ -6,6 +6,7 @@
 class Const_1 {
 public:
     int MachinePrecision;
+    const RealNumber* StepSize;
     const RealNumber* R_MAX;
     const RealNumber* ZERO;
     const RealNumber* ONE;

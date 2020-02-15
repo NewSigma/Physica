@@ -1,29 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 project(Physica VERSION 0.0.1)
 #############################################Settings#############################################
+set(OPTIMIZE_LEVEL 0)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 ##############################################Libs################################################
-enable_language(CUDA)
-find_package(Boost REQUIRED)
-find_package(OpenCV REQUIRED)
-include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 #############################################Project##############################################
+add_subdirectory(Core)
 add_subdirectory(Gui)
-file(GLOB_RECURSE SOURCES Physica.cpp Kernel.cu Core/*.* Utils/*.*)
-file(GLOB_RECURSE RESOURCES Resources/*.*)
-add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
+add_executable(Physica Physica.cpp)
 #############################################Options##############################################
-set(OPTIMIZE_LEVEL 0)
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_Gui)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
+target_compile_options(Physica PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
         -O${OPTIMIZE_LEVEL}
         >)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
-        --gpu-architecture=sm_50
-        --optimize ${OPTIMIZE_LEVEL}
-        --use_fast_math
-        --relocatable-device-code=true
-        >)
+target_link_libraries(Physica Physica_Core)
+target_link_libraries(Physica Physica_Gui)

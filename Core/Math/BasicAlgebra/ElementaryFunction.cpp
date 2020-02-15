@@ -1,6 +1,5 @@
 #include <iostream>
-#include <cstring>
-#include "../../Header/BasicCalculates.h"
+#include "../../Header/ElementaryFunction.h"
 #include "../../Header/Const.h"
 #include "../../Header/Solve.h"
 //TODO Debug accuracy
@@ -10,12 +9,12 @@
 extern const Const_1* const_1;
 extern const Const_2* const_2;
 
-RealNumber* reciprocal(const RealNumber* n) {
-    return *const_1->ONE / *n;
+RealNumber* reciprocal(const RealNumber& n) {
+    return *const_1->ONE / n;
 }
 
-RealNumber* sqrt_noCheck(const RealNumber* n) {
-    if(!n->sign)
+RealNumber* sqrt_noCheck(const RealNumber& n) {
+    if(!n.sign)
         return nullptr;
     auto MachinePrecision = const_1->MachinePrecision;
     auto copy_n = new RealNumber(n);
@@ -36,7 +35,7 @@ RealNumber* sqrt_noCheck(const RealNumber* n) {
     RealNumber* temp;
     //3.33 is the big approximate value of ln(10)/ln(2)
     for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
-        temp = divide(copy_n, result);
+        temp = divide(*copy_n, *result);
         *result += *temp;
         *result /= *const_1->TWO;
         delete temp;
@@ -48,15 +47,15 @@ RealNumber* sqrt_noCheck(const RealNumber* n) {
     return result;
 }
 
-RealNumber* sqrt(const RealNumber* n) {
+RealNumber* sqrt(const RealNumber& n) {
     auto result  = sqrt_noCheck(n);
-    if(n->a != 0) {
-        auto n_error = n->getMinimum();
-        auto error = sqrt_noCheck(n_error);
+    if(n.a != 0) {
+        auto n_error = n.getMinimum();
+        auto error = sqrt_noCheck(*n_error);
         if(error == nullptr) {
             delete n_error;
-            n_error = n->getMaximum();
-            error = sqrt_noCheck(n_error);
+            n_error = n.getMaximum();
+            error = sqrt_noCheck(*n_error);
         }
         *error -= *result;
         error->sign = true;
@@ -69,17 +68,17 @@ RealNumber* sqrt(const RealNumber* n) {
     return result;
 }
 //TODO not completed: Use gamma function.
-RealNumber* factorial(const RealNumber* n) {
-    if(!n->sign) {
+RealNumber* factorial(const RealNumber& n) {
+    if(!n.sign) {
         std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
         return nullptr;
     }
 
     RealNumber* result;
-    if(n->isInteger()) {
+    if(n.isInteger()) {
         result = const_1->getOne();
         auto temp = const_1->getOne();
-        while(*temp < *n) {
+        while(*temp < n) {
             *temp += *const_1->ONE;
             *result *= *temp;
         }
@@ -92,13 +91,13 @@ RealNumber* factorial(const RealNumber* n) {
  * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
  * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
  */
-RealNumber* cos(const RealNumber* n) {
+RealNumber* cos(const RealNumber& n) {
     auto result = const_1->getOne();
-    if(*n != *const_1->ZERO) {
+    if(n != *const_1->ZERO) {
         auto MachinePrecision = const_1->MachinePrecision;
         auto ONE = const_1->ONE;
 
-        auto square_n = *n * *n;
+        auto square_n = n * n;
         auto temp_1 = new RealNumber(square_n);
         auto temp_2 = const_1->getTwo();
         auto rank = const_1->getTwo();
@@ -110,7 +109,7 @@ RealNumber* cos(const RealNumber* n) {
             temp->sign = sign;
             *result += *temp;
             //Here the temp means the criteria of break.
-            *temp *= *n;
+            *temp *= n;
             *rank += *ONE;
             *temp /= *rank;
             int temp_power = temp->power;
@@ -133,13 +132,13 @@ RealNumber* cos(const RealNumber* n) {
     return result;
 }
 
-RealNumber* sin(const RealNumber* n) {
+RealNumber* sin(const RealNumber& n) {
     auto result = const_1->getZero();
-    if(*n != *const_1->ZERO) {
+    if(n != *const_1->ZERO) {
         auto MachinePrecision = const_1->MachinePrecision;
         auto ONE = const_1->ONE;
 
-        auto square_n = *n * *n;
+        auto square_n = n * n;
         auto temp_1 = new RealNumber(n);
         auto temp_2 = const_1->getOne();
         auto rank = const_1->getOne();
@@ -151,7 +150,7 @@ RealNumber* sin(const RealNumber* n) {
             temp->sign = sign;
             *result += *temp;
             //Here the temp means the criteria of break.
-            *temp *= *n;
+            *temp *= n;
             *rank += *ONE;
             *temp /= *rank;
             int temp_power = temp->power;
@@ -174,7 +173,7 @@ RealNumber* sin(const RealNumber* n) {
     return result;
 }
 
-RealNumber* tan(const RealNumber* n) {
+RealNumber* tan(const RealNumber& n) {
     auto cos_n = cos(n);
     if(cos_n == nullptr)
         return nullptr;
@@ -184,21 +183,21 @@ RealNumber* tan(const RealNumber* n) {
     return sin_n;
 }
 
-RealNumber* sec(const RealNumber* n) {
+RealNumber* sec(const RealNumber& n) {
     auto cos_n = cos(n);
-    auto result = reciprocal(cos_n);
+    auto result = reciprocal(*cos_n);
     delete cos_n;
     return result;
 }
 
-RealNumber* csc(const RealNumber* n) {
+RealNumber* csc(const RealNumber& n) {
     auto sin_n = sin(n);
-    auto result = reciprocal(sin_n);
+    auto result = reciprocal(*sin_n);
     delete sin_n;
     return result;
 }
 
-RealNumber* cot(const RealNumber* n) {
+RealNumber* cot(const RealNumber& n) {
     auto sin_n = sin(n);
     if(sin_n == nullptr)
         return nullptr;
@@ -208,63 +207,63 @@ RealNumber* cot(const RealNumber* n) {
     return cos_n;
 }
 
-RealNumber* arccos(const RealNumber* n) {
-    return bisectionMethod(cos, n, const_1->ZERO, const_2->PI, const_1->ONE, const_1->MINUS_ONE);
+RealNumber* arccos(const RealNumber& n) {
+    return bisectionMethod(cos, n, *const_1->ZERO, *const_2->PI, *const_1->ONE, *const_1->MINUS_ONE);
 }
 
-RealNumber* arcsin(const RealNumber* n) {
-    return bisectionMethod(sin, n, const_2->MINUS_PI_DIVIDE_TWO, const_2->PI_DIVIDE_TWO, const_1->MINUS_ONE, const_1->ONE);
+RealNumber* arcsin(const RealNumber& n) {
+    return bisectionMethod(sin, n, *const_2->MINUS_PI_DIVIDE_TWO, *const_2->PI_DIVIDE_TWO, *const_1->MINUS_ONE, *const_1->ONE);
 }
 
-RealNumber* arctan(const RealNumber* n) {
-    auto temp = *n * *n;
+RealNumber* arctan(const RealNumber& n) {
+    auto temp = n * n;
     *temp += *const_1->ONE;
-    auto sqrt_temp = sqrt(temp);
+    auto sqrt_temp = sqrt(*temp);
     delete temp;
     
-    temp = *n / *sqrt_temp;
+    temp = n / *sqrt_temp;
     delete sqrt_temp;
     
-    auto result = arcsin(temp);
-    result->sign = n->sign;
+    auto result = arcsin(*temp);
+    result->sign = n.sign;
     delete temp;
     return result;
 }
 
-RealNumber* arcsec(const RealNumber* n) {
+RealNumber* arcsec(const RealNumber& n) {
     auto temp = reciprocal(n);
     if(temp == nullptr)
         return temp;
-    auto result = arccos(temp);
+    auto result = arccos(*temp);
     delete temp;
     return result;
 }
 
-RealNumber* arccsc(const RealNumber* n) {
+RealNumber* arccsc(const RealNumber& n) {
     auto temp = reciprocal(n);
     if(temp == nullptr)
         return temp;
-    auto result = arcsin(temp);
+    auto result = arcsin(*temp);
     delete temp;
     return result;
 }
 
-RealNumber* arccot(const RealNumber* n) {
+RealNumber* arccot(const RealNumber& n) {
     auto temp = reciprocal(n);
     if(temp == nullptr)
         return temp;
-    auto result = arctan(temp);
+    auto result = arctan(*temp);
     delete temp;
     return result;
 }
 
-RealNumber* ln_noCheck(const RealNumber* n) {
-    if(!n->isPositive())
+RealNumber* ln_noCheck(const RealNumber& n) {
+    if(!n.isPositive())
         return nullptr;
     auto result = const_1->getZero();
-    if(*n != *const_1->ONE) {
-        auto temp_0 = *n + *const_1->ONE;
-        auto temp_1 = *n - *const_1->ONE;
+    if(n != *const_1->ONE) {
+        auto temp_0 = n + *const_1->ONE;
+        auto temp_1 = n - *const_1->ONE;
         *temp_1 /= *temp_0;
         auto copy_temp_1 = new RealNumber(temp_1);
         auto temp_2 = const_1->getOne();
@@ -296,15 +295,15 @@ RealNumber* ln_noCheck(const RealNumber* n) {
     return result;
 }
 
-RealNumber* ln(const RealNumber* n) {
+RealNumber* ln(const RealNumber& n) {
     auto result = ln_noCheck(n);
-    if(n->a != 0) {
-        auto n_error = n->getMinimum();
-        auto error = ln_noCheck(n_error);
+    if(n.a != 0) {
+        auto n_error = n.getMinimum();
+        auto error = ln_noCheck(*n_error);
         if(error == nullptr) {
             delete n_error;
-            n_error = n->getMaximum();
-            error = ln_noCheck(n_error);
+            n_error = n.getMaximum();
+            error = ln_noCheck(*n_error);
         }
         *error -= *result;
         error->sign = true;
@@ -317,8 +316,8 @@ RealNumber* ln(const RealNumber* n) {
     return result;
 }
 //Return log_a n
-RealNumber* log(const RealNumber* n, const RealNumber* a) {
-    if(*a == *const_1->ONE)
+RealNumber* log(const RealNumber& n, const RealNumber& a) {
+    if(a == *const_1->ONE)
         return nullptr;
 
     auto ln_n = ln(n);

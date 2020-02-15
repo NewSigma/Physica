@@ -64,10 +64,10 @@ RealNumber* operator- (const RealNumber& n);
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);
 //////////////////////////////Process functions////////////////////////////////////////
-RealNumber* add (const RealNumber* n1, const RealNumber* n2);
-RealNumber* subtract (const RealNumber* n1, const RealNumber* n2);
-RealNumber* multiply (const RealNumber* n1, const RealNumber* n2);
-RealNumber* divide (const RealNumber* n1, const RealNumber* n2);
+RealNumber* add (const RealNumber& n1, const RealNumber& n2);
+RealNumber* subtract (const RealNumber& n1, const RealNumber& n2);
+RealNumber* multiply (const RealNumber& n1, const RealNumber& n2);
+RealNumber* divide (const RealNumber& n1, const RealNumber& n2);
 bool cutLength(RealNumber* n);
 void cutZero(RealNumber* n);
 

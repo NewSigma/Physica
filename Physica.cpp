@@ -1,9 +1,6 @@
-#include <QtWidgets/QApplication>
-#include <QtGui/QSurfaceFormat>
 #include <iostream>
 #include "Core/Header/Const.h"
-#include "Gui/Header/MainWindow.h"
-#include "Core/Header/BasicCalculates.h"
+#include "Core/Header/ElementaryFunction.h"
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
@@ -27,7 +24,7 @@ int main(int argc, char** argv) {
     */
     auto a = const_1->getTwo();
     a->power = -1;
-    auto result = ln(a);
+    auto result = ln(*a);
     std::cout << *result << std::endl << *const_2->PI;
 
     delete const_1;

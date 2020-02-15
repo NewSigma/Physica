@@ -3,7 +3,7 @@
  */
 #include "Header/Const.h"
 #include "Header/Solve.h"
-#include "Header/BasicCalculates.h"
+#include "Header/ElementaryFunction.h"
 #include <malloc.h>
 
 extern const Const_1* const_1;
@@ -12,7 +12,12 @@ extern const Const_1* const_1;
  */
 Const_1::Const_1() {
     MachinePrecision = 16;
-    auto byte = (unsigned char*)malloc(10 * sizeof(char));
+
+    auto byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 1;
+    StepSize = new RealNumber(byte, 1, -MachinePrecision);
+
+    byte = (unsigned char*)malloc(10 * sizeof(char));
     byte[0] = 2;
     byte[1] = 1;
     byte[2] = 4;
@@ -63,6 +68,7 @@ Const_1::Const_1() {
 }
 
 Const_1::~Const_1() {
+    delete StepSize;
     delete R_MAX;
     delete ZERO;
     delete ONE;
@@ -80,8 +86,8 @@ Const_1::~Const_1() {
  */
 Const_2::Const_2() {
     //TODO Slow and not accurate
-    PI = bisectionMethod(sin, const_1->ZERO, const_1->THREE, const_1->FOUR);
-    E = bisectionMethod(ln_noCheck, const_1->ONE, const_1->TWO, const_1->THREE);
+    PI = bisectionMethod(sin, *const_1->ZERO, *const_1->THREE, *const_1->FOUR);
+    E = bisectionMethod(ln_noCheck, *const_1->ONE, *const_1->TWO, *const_1->THREE);
 
     PI_DIVIDE_TWO = *PI / *const_1->TWO;
     auto temp = new RealNumber(PI_DIVIDE_TWO);

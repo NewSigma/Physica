@@ -1,5 +1,5 @@
 #include "../../Header/Determinate.cuh"
-#include "../../../Utils/Header/CudaUtil.cuh"
+#include "../../Header/CudaUtil.cuh"
 #include <device_launch_parameters.h>
 #include <cmath>
 #include <iostream>

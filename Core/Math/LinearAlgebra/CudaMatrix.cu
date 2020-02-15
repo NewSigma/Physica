@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstring>
 #include "../../Header/CudaMatrix.cuh"
-#include "../../../Utils/Header/CudaUtil.cuh"
+#include "../../Header/CudaUtil.cuh"
 
 CudaMatrix::CudaMatrix(int r, int c)
 {
