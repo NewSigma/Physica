@@ -1,26 +1,27 @@
 #include "Header/MainWindow.h"
-#include "Header/CubePlayer.h"
-#include <QGuiApplication>
-#include <QScreen>
 
 MainWindow::MainWindow() {
-    QRect primaryScreenRec = QGuiApplication::primaryScreen()->geometry();
-    resize(primaryScreenRec.width(), primaryScreenRec.height());
+    //Basic settings
     setWindowTitle("Physica");
-    icon = new QIcon("../Resources/icon.png");
+    setWindowState(Qt::WindowMaximized);
+    icon = new QIcon(":/icon.png");
     setWindowIcon(*icon);
 
-    format = new QSurfaceFormat();
-    format->setSamples(4);
-    QSurfaceFormat::setDefaultFormat(*format);
+    button = new QPushButton("Calculator");
+    setCentralWidget(button);
+    calculator = nullptr;
+    connect(button, SIGNAL(clicked()), SLOT(on_clicked()));
 
-    plotter = new CubePlayer(this);
-    plotter->reloadTimer(20);
-    setCentralWidget(plotter);
+    show();
 }
 
 MainWindow::~MainWindow() {
     delete icon;
-    delete format;
-    destroy();
+    delete button;
+    delete calculator;
+}
+
+void MainWindow::on_clicked() {
+    if(!calculator)
+        calculator = new Calculator();
 }

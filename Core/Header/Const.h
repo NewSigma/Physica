@@ -5,7 +5,7 @@
 
 class Const_1 {
 public:
-    int MachinePrecision;
+    int GlobalPrecision;
     const RealNumber* StepSize;
     const RealNumber* R_MAX;
     const RealNumber* ZERO;

@@ -23,6 +23,41 @@ RealNumber::RealNumber() {
     length = power = a = 0;
     sign = true;
 }
+
+RealNumber::RealNumber(std::string s, unsigned char acc) {
+    byte = new unsigned char[s.size()];
+    sign = true;
+    a = acc;
+    int index = 0, id_byte = 0, start_eff_num = 0, point_id = s.size();
+    for(; index < s.size(); ++index) {
+        switch(s[index]) {
+            case '-':
+                sign = false;
+                break;
+            case '.':
+                point_id = index;
+            case '0':
+                break;
+            default:
+                start_eff_num = index;
+                goto double_break;
+        }
+    }
+double_break:
+    for(; index < s.size(); ++index) {
+        switch(s[index]) {
+            case '.':
+                point_id = index;
+                break;
+            default:
+                byte[id_byte] = s[index] - 48;
+                ++id_byte;
+        }
+    }
+    length = id_byte > const_1->GlobalPrecision ? const_1->GlobalPrecision : id_byte;
+    power = point_id - start_eff_num + (point_id > start_eff_num ? -1 : 0);
+    byte = (unsigned char*)realloc(byte, length);
+}
 /*
  * May not be very accurate.
  */
@@ -49,7 +84,7 @@ RealNumber::RealNumber(double d, unsigned char acc) {
         copy_d -= double(int(copy_d));
         copy_d *= 10;
         ++length;
-    } while(copy_d != 0 && length <= const_1->MachinePrecision);
+    } while(copy_d != 0 && length <= const_1->GlobalPrecision);
 
     byte = (unsigned char*)malloc(length * sizeof(char));
     for(int i = 0; i < length; ++i) {
@@ -113,32 +148,38 @@ RealNumber::~RealNumber() {
     free(byte);
 }
 
-std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
-    if(!n.sign)
-        os << '-';
-    if(n.power < 0) {
-        os << "0.";
-        for(int i = -n.power - 1; i > 0; --i)
-            os << '0';
-        for(int i = 0; i < n.length; ++i)
-            os << (int)n.byte[i];
+std::string RealNumber::toString() const {
+    std::string result;
+    if(isNegative())
+        result.push_back('-');
+    if(power < 0) {
+        result += "0.";
+        for(int i = -power - 1; i > 0; --i)
+            result.push_back('0');
+        for(int i = 0; i < length; ++i)
+            //48 is the ascii code of 0.
+            result.push_back(byte[i] + 48);
     }
     else {
-        if(n.length > n.power) {
-            for(int i = 0; i < n.power + 1; ++i)
-                os << (int)n.byte[i];
-            os << '.';
-            for(int i = n.power + 1; i < n.length; ++i)
-                os << (int)n.byte[i];
+        if(length > power) {
+            for (int i = 0; i < power + 1; ++i)
+                result.push_back(byte[i] + 48);
+            result.push_back('.');
+            for(int i = power + 1; i < length; ++i)
+                result.push_back(byte[i] + 48);
         }
         else {
-            for(int i = 0; i < n.length; ++i)
-                os << (int)n.byte[i];
-            for(int i = n.power - n.length + 1; i > 0; --i)
-                os << '0';
+            for(int i = 0; i < length; ++i)
+                result.push_back(byte[i] + 48);
+            for(int i = power - length + 1; i > 0; --i)
+                result.push_back('0');
         }
     }
-    os << "\tLength = " << n.length << "\tPower = " << n.power << "\tAccuracy = ";
+    return result;
+}
+
+std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
+    os << n.toString() << "\tLength = " << n.length << "\tPower = " << n.power << "\tAccuracy = ";
 
     int temp = n.power - n.length +1;
     if(n.a == 0)
@@ -318,48 +359,48 @@ RealNumber* operator* (const RealNumber& n1, const RealNumber& n2) {
 
 RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
     auto result = divide(n1, n2);
-    if(result == nullptr)
-        return result;
-    result->a += cutLength(result);
-    if(n1.a != 0 || n2.a != 0) {
-        RealNumber* error;
-        if(n1.a == 0) {
-            auto n2_a = n2.getAccuracy();
-            auto temp_1 = multiply(n1, *n2_a);
-            auto temp_2 = subtract(n2, *n2_a);
-            auto temp_3 = multiply(n2, *temp_2);
-            error = divide(*temp_1, *temp_3);
-            delete n2_a;
-            delete temp_1;
-            delete temp_2;
-            delete temp_3;
+    if(result != nullptr) {
+        result->a += cutLength(result);
+        if(n1.a != 0 || n2.a != 0) {
+            RealNumber* error;
+            if(n1.a == 0) {
+                auto n2_a = n2.getAccuracy();
+                auto temp_1 = multiply(n1, *n2_a);
+                auto temp_2 = subtract(n2, *n2_a);
+                auto temp_3 = multiply(n2, *temp_2);
+                error = divide(*temp_1, *temp_3);
+                delete n2_a;
+                delete temp_1;
+                delete temp_2;
+                delete temp_3;
+            }
+            else if(n2.a == 0) {
+                auto n1_a = n1.getAccuracy();
+                error = divide(*n1_a, n2);
+                delete n1_a;
+            }
+            else {
+                auto n1_a = n1.getAccuracy();
+                auto n2_a = n2.getAccuracy();
+                auto temp_1 = multiply(n1, *n2_a);
+                auto temp_2 = multiply(n2, *n1_a);
+                auto temp_3 = add(*temp_1, *temp_2);
+                auto temp_4 = subtract(n2, *n2_a);
+                auto temp_5 = multiply(n2, *temp_4);
+                error = divide(*temp_3, *temp_5);
+                delete n1_a;
+                delete n2_a;
+                delete temp_1;
+                delete temp_2;
+                delete temp_3;
+                delete temp_4;
+                delete temp_5;
+            }
+            auto boolean = result->applyError(error);
+            delete error;
+            if(boolean)
+                return nullptr;
         }
-        else if(n2.a == 0) {
-            auto n1_a = n1.getAccuracy();
-            error = divide(*n1_a, n2);
-            delete n1_a;
-        }
-        else {
-            auto n1_a = n1.getAccuracy();
-            auto n2_a = n2.getAccuracy();
-            auto temp_1 = multiply(n1, *n2_a);
-            auto temp_2 = multiply(n2, *n1_a);
-            auto temp_3 = add(*temp_1, *temp_2);
-            auto temp_4 = subtract(n2, *n2_a);
-            auto temp_5 = multiply(n2, *temp_4);
-            error = divide(*temp_3, *temp_5);
-            delete n1_a;
-            delete n2_a;
-            delete temp_1;
-            delete temp_2;
-            delete temp_3;
-            delete temp_4;
-            delete temp_5;
-        }
-        auto boolean = result->applyError(error);
-        delete error;
-        if(boolean)
-            return nullptr;
     }
     return result;
 }
@@ -526,10 +567,12 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
 
             result = const_1->getOne();
             if(n2.isNegative()) {
+                auto temp = reciprocal(n1);
                 while(*n2_copy != *const_1->ZERO) {
                     *n2_copy -= *const_1->ONE;
-                    *result /= n1;
+                    *result *= *temp;
                 }
+                delete temp;
             }
             else {
                 while(*n2_copy != *const_1->ZERO) {
@@ -540,7 +583,6 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
             delete n2_copy;
         }
         else {
-            //Do not have to use RealNumberA
             auto temp_result = const_1->getOne();
             auto temp_1 = ln(n1);
             *temp_1 *= n2;
@@ -804,7 +846,7 @@ RealNumber* divide (const RealNumber& n1, const RealNumber& n2) {
         n1_copy->sign = n2_copy->sign = true;
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, we will calculate it accurately later.
-        int length = const_1->MachinePrecision;
+        int length = const_1->GlobalPrecision;
         int power = n1_copy->power - n2_copy->power - 1;
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memset(temp, 0, length * sizeof(char));
@@ -860,15 +902,15 @@ double_break:
     return result;
 }
 /*
- * If the length of new array is larger than MachinePrecision, it will be set to MachinePrecision.
+ * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
  * Return true array is cut.
  */
 bool cutLength(RealNumber* n) {
     bool result = false;
     int lastCutIndex = n->length;
 
-    if(n->length > const_1->MachinePrecision) {
-        lastCutIndex = const_1->MachinePrecision;
+    if(n->length > const_1->GlobalPrecision) {
+        lastCutIndex = const_1->GlobalPrecision;
         result = true;
     }
 

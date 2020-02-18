@@ -11,11 +11,11 @@ extern const Const_1* const_1;
  * Basic consts that initialize directly.
  */
 Const_1::Const_1() {
-    MachinePrecision = 16;
+    GlobalPrecision = 16;
 
     auto byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
-    StepSize = new RealNumber(byte, 1, -MachinePrecision);
+    StepSize = new RealNumber(byte, 1, 1 - GlobalPrecision);
 
     byte = (unsigned char*)malloc(10 * sizeof(char));
     byte[0] = 2;

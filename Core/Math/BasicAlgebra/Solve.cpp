@@ -73,7 +73,7 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumbe
         result = add(*x_left, *x_right);
         *result << *divide(*result, *const_1->TWO);
         *error << *divide(*error, *const_1->TWO);
-    } while(result->power - error->power < const_1->MachinePrecision);
+    } while(result->power - error->power < const_1->GlobalPrecision);
     result->a = 1;
 
     delete x_left;

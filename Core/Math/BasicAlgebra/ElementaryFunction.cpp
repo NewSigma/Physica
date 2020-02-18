@@ -16,7 +16,7 @@ RealNumber* reciprocal(const RealNumber& n) {
 RealNumber* sqrt_noCheck(const RealNumber& n) {
     if(!n.sign)
         return nullptr;
-    auto MachinePrecision = const_1->MachinePrecision;
+    auto MachinePrecision = const_1->GlobalPrecision;
     auto copy_n = new RealNumber(n);
     //Let n < 1 so as to control error.
     char add_power = 0;
@@ -94,7 +94,7 @@ RealNumber* factorial(const RealNumber& n) {
 RealNumber* cos(const RealNumber& n) {
     auto result = const_1->getOne();
     if(n != *const_1->ZERO) {
-        auto MachinePrecision = const_1->MachinePrecision;
+        auto MachinePrecision = const_1->GlobalPrecision;
         auto ONE = const_1->ONE;
 
         auto square_n = n * n;
@@ -135,7 +135,7 @@ RealNumber* cos(const RealNumber& n) {
 RealNumber* sin(const RealNumber& n) {
     auto result = const_1->getZero();
     if(n != *const_1->ZERO) {
-        auto MachinePrecision = const_1->MachinePrecision;
+        auto MachinePrecision = const_1->GlobalPrecision;
         auto ONE = const_1->ONE;
 
         auto square_n = n * n;
@@ -262,15 +262,17 @@ RealNumber* ln_noCheck(const RealNumber& n) {
         return nullptr;
     auto result = const_1->getZero();
     if(n != *const_1->ONE) {
-        auto temp_0 = n + *const_1->ONE;
-        auto temp_1 = n - *const_1->ONE;
+        auto temp_0 = add(n, *const_1->ONE);
+        auto temp_1 = subtract(n, *const_1->ONE);
         *temp_1 /= *temp_0;
         auto copy_temp_1 = new RealNumber(temp_1);
         auto temp_2 = const_1->getOne();
 
+        copy_temp_1->a = temp_1->a = 0;
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
+            temp->a = 0;
             *result += *temp;
             delete temp;
             //Here the temp means the criteria of break.
@@ -280,7 +282,7 @@ RealNumber* ln_noCheck(const RealNumber& n) {
             int temp_power = temp->power;
             delete temp;
 
-            if(result->power - temp_power >= const_1->MachinePrecision)
+            if(result->power - temp_power >= const_1->GlobalPrecision)
                 break;
             //Prepare for next calculate.
             *temp_1 *= *copy_temp_1;

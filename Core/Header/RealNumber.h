@@ -24,11 +24,13 @@ public:
 
     RealNumber();
     explicit RealNumber(double d, unsigned char acc = 0);
+    explicit RealNumber(std::string s, unsigned char acc = 0);
     RealNumber(const RealNumber& n);
     RealNumber(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit RealNumber(const RealNumber* n);
     ~RealNumber();
 
+    std::string toString() const;
     friend std::ostream& operator<<(std::ostream& os, const RealNumber& n);
     void operator<<(RealNumber& n);
     explicit operator double() const;
