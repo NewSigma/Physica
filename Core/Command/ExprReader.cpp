@@ -11,7 +11,7 @@ ExprReader::ExprReader(const std::string& s) {
         switch(c) {
             case '-':
                 clearString(temp);
-                while(stack.top() == '*' || stack.top() == '/') {
+                while(!stack.empty() && (stack.top() == '*' || stack.top() == '/')) {
                     std::string temp1;
                     temp1.push_back(stack.top());
                     anti_poland.push_back(temp1);
@@ -70,35 +70,40 @@ ExprReader::ExprReader(const std::string& s) {
 RealNumber* ExprReader::calc() {
     std::stack<RealNumber*> stack{};
     for(auto& str : anti_poland) {
-        if(str == "+" && stack.size() > 1) {
-            auto n1 = stack.top();
-            stack.pop();
-            auto n2 = stack.top();
-            stack.pop();
-            stack.push(*n1 + *n2);
-            delete n1;
-            delete n2;
+        RealNumber* n1 = nullptr, *n2 = nullptr;
+        switch(str.front()) {
+            case '+':
+                if(stack.size() > 1) {
+                    n1 = stack.top();
+                    stack.pop();
+                    n2 = stack.top();
+                    stack.pop();
+                    stack.push(*n1 + *n2);
+                }
+                break;
+            case '*':
+                if(stack.size() > 1) {
+                    n1 = stack.top();
+                    stack.pop();
+                    n2 = stack.top();
+                    stack.pop();
+                    stack.push(*n1 * *n2);
+                }
+                break;
+            case '/':
+                if(stack.size() > 1) {
+                    n1 = stack.top();
+                    stack.pop();
+                    n2 = stack.top();
+                    stack.pop();
+                    stack.push(*n1 / *n2);
+                }
+                break;
+            default:
+                stack.push(new RealNumber(str));
         }
-        else if(str == "*" && stack.size() > 1) {
-            auto n1 = stack.top();
-            stack.pop();
-            auto n2 = stack.top();
-            stack.pop();
-            stack.push(*n1 * *n2);
-            delete n1;
-            delete n2;
-        }
-        else if(str == "/" && stack.size() > 1) {
-            auto n1 = stack.top();
-            stack.pop();
-            auto n2 = stack.top();
-            stack.pop();
-            stack.push(*n2 / *n1);
-            delete n1;
-            delete n2;
-        }
-        else
-            stack.push(new RealNumber(str));
+        delete n1;
+        delete n2;
     }
     return stack.top();
 }

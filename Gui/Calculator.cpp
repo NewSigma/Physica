@@ -2,6 +2,7 @@
 #include "../Core/Header/ExprReader.h"
 #include <QGuiApplication>
 #include <QScreen>
+#include <QKeyEvent>
 #include "../Core/Header/ElementaryFunction.h"
 
 Calculator::Calculator() {
@@ -19,7 +20,7 @@ Calculator::Calculator() {
     //Editor
     editor_top = new QLineEdit();
     editor_top->setFixedSize(760, 46);
-    editor_top->setStyleSheet("color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
+    editor_top->setStyleSheet("border:0px; color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
     editor_top->setAlignment(Qt::AlignRight);
     editor_top->setReadOnly(true);
     editor_top->setFocusPolicy(Qt::NoFocus);
@@ -28,7 +29,9 @@ Calculator::Calculator() {
     editor_bottom = new QLineEdit();
     editor_bottom->setFixedSize(760, 93);
     editor_bottom->setFont(font);
-    editor_bottom->setStyleSheet("color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
+    editor_bottom->setStyleSheet("border:0px; color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
+    editor_bottom->setReadOnly(true);
+    editor_bottom->setFocusPolicy(Qt::NoFocus);
     editor_bottom->setAlignment(Qt::AlignRight);
     default_layout->addWidget(editor_bottom);
     /* Buttons */ {
@@ -198,37 +201,74 @@ Calculator::Calculator() {
     show();
 }
 
-Calculator::~Calculator() {
-    delete default_layout;
-    delete editor_bottom;
-    delete layout;
-    delete num0;
-    delete num1;
-    delete num2;
-    delete num3;
-    delete num4;
-    delete num5;
-    delete num6;
-    delete num7;
-    delete num8;
-    delete num9;
-    delete dot;
-    delete imagine;
-    delete add;
-    delete subtract;
-    delete multiply;
-    delete divide;
-    delete equal;
-    delete del;
-    delete clear;
-    delete clear_entry;
-    delete left_bracket;
-    delete right_bracket;
-    delete sqroot;
-    delete square;
-    delete percent;
+void Calculator::keyPressEvent(QKeyEvent* event) {
+    switch(event->key()) {
+        case Qt::Key_0:
+            on_click_num0();
+            break;
+        case Qt::Key_1:
+            on_click_num1();
+            break;
+        case Qt::Key_2:
+            on_click_num2();
+            break;
+        case Qt::Key_3:
+            on_click_num3();
+            break;
+        case Qt::Key_4:
+            on_click_num4();
+            break;
+        case Qt::Key_5:
+            on_click_num5();
+            break;
+        case Qt::Key_6:
+            on_click_num6();
+            break;
+        case Qt::Key_7:
+            on_click_num7();
+            break;
+        case Qt::Key_8:
+            on_click_num8();
+            break;
+        case Qt::Key_9:
+            on_click_num9();
+            break;
+        case Qt::Key_Period:
+            on_click_dot();
+            break;
+        case Qt::Key_I:
+            on_click_imagine();
+            break;
+        case Qt::Key_Plus:
+            on_click_add();
+            break;
+        case Qt::Key_Minus:
+            on_click_subtract();
+            break;
+        case Qt::Key_Asterisk:
+            on_click_multiply();
+            break;
+        case Qt::Key_Slash:
+            on_click_divide();
+            break;
+        case Qt::Key_Equal:
+        case Qt::Key_Return:
+            on_click_equal();
+            break;
+        case Qt::Key_Backspace:
+            on_click_del();
+            break;
+        case Qt::Key_ParenLeft:
+            on_click_left_bracket();
+            break;
+        case Qt::Key_ParenRight:
+            on_click_right_bracket();
+            break;
+        case Qt::Key_Percent:
+            on_click_percent();
+            break;
+    }
 }
-
 ////////////////////////////////////// On click buttons //////////////////////////////
 void Calculator::on_click_num0() {
     editor_bottom->setText(editor_bottom->text() + num0->text());

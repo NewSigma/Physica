@@ -1,5 +1,4 @@
 #include <QtWidgets/QApplication>
-#include <iostream>
 #include "Core/Header/Const.h"
 #include "Gui/Header/MainWindow.h"
 
@@ -13,9 +12,14 @@ int main(int argc, char** argv) {
     const_1 = new Const_1();
     const_2 = new Const_2();
 
-    QApplication app(argc, argv);
     QApplication::setApplicationName("Physica");
     QApplication::setApplicationVersion("0.0.1");
+    QApplication::setOrganizationName("NewSigma@163.com");
+
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    QApplication app(argc, argv);
 
     new MainWindow();
 

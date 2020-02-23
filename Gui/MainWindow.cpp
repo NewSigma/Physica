@@ -3,7 +3,7 @@
 MainWindow::MainWindow() {
     //Basic settings
     setWindowTitle("Physica");
-    setWindowState(Qt::WindowMaximized);
+    resize(1440, 810);
     icon = new QIcon(":/icon.png");
     setWindowIcon(*icon);
 

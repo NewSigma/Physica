@@ -7,9 +7,6 @@
 
 class Calculator : public QWidget {
     Q_OBJECT
-public:
-    Calculator();
-    ~Calculator() override;
 private:
     QVBoxLayout* default_layout;
     QLineEdit* editor_top;
@@ -41,6 +38,10 @@ private:
     QPushButton* sqroot;
     QPushButton* square;
     QPushButton* percent;
+public:
+    Calculator();
+private:
+    void keyPressEvent(QKeyEvent* event) override;
 private Q_SLOTS:
     void on_click_num0();
     void on_click_num1();

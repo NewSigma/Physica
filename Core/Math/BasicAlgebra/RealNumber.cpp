@@ -150,29 +150,31 @@ RealNumber::~RealNumber() {
 
 std::string RealNumber::toString() const {
     std::string result;
-    if(isNegative())
-        result.push_back('-');
-    if(power < 0) {
-        result += "0.";
-        for(int i = -power - 1; i > 0; --i)
-            result.push_back('0');
-        for(int i = 0; i < length; ++i)
-            //48 is the ascii code of 0.
-            result.push_back(byte[i] + 48);
-    }
-    else {
-        if(length > power) {
-            for (int i = 0; i < power + 1; ++i)
-                result.push_back(byte[i] + 48);
-            result.push_back('.');
-            for(int i = power + 1; i < length; ++i)
+    if(byte != nullptr) {
+        if(isNegative())
+            result.push_back('-');
+        if(power < 0) {
+            result += "0.";
+            for(int i = -power - 1; i > 0; --i)
+                result.push_back('0');
+            for(int i = 0; i < length; ++i)
+                //48 is the ascii code of 0.
                 result.push_back(byte[i] + 48);
         }
         else {
-            for(int i = 0; i < length; ++i)
-                result.push_back(byte[i] + 48);
-            for(int i = power - length + 1; i > 0; --i)
-                result.push_back('0');
+            if(length > power) {
+                for (int i = 0; i < power + 1; ++i)
+                    result.push_back(byte[i] + 48);
+                result.push_back('.');
+                for(int i = power + 1; i < length; ++i)
+                    result.push_back(byte[i] + 48);
+            }
+            else {
+                for(int i = 0; i < length; ++i)
+                    result.push_back(byte[i] + 48);
+                for(int i = power - length + 1; i > 0; --i)
+                    result.push_back('0');
+            }
         }
     }
     return result;
@@ -684,6 +686,13 @@ RealNumber* add (const RealNumber& n1, const RealNumber& n2) {
             if (temp[index] > 9 && index > 0) {
                 ++temp[index - 1];
                 temp[index] -= 10;
+            }
+        }
+
+        for(int i = big->power - small->power - 1; i > 0; --i) {
+            if(temp[i] > 9) {
+                ++temp[i - 1];
+                temp[i] -= 10;
             }
         }
         ///////////////////////////////////////Get byte, length and power//////////////////////////
