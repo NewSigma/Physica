@@ -96,7 +96,7 @@ RealNumber* ExprReader::calc() {
                     stack.pop();
                     n2 = stack.top();
                     stack.pop();
-                    stack.push(*n1 / *n2);
+                    stack.push(*n2 / *n1);
                 }
                 break;
             default:

@@ -2,11 +2,11 @@
 #define PHYSICA_VECTOR_H
 
 #include "RealNumber.h"
-#include "Matrix.h"
 
 class Vector {
-private:
+public:
     RealNumber** numbers;
+private:
     int length;
 public:
     Vector();
@@ -20,9 +20,6 @@ public:
     Vector* operator/(Vector& v);
     int getLength() { return length; };
     bool isEmpty() { return length == 0; };
-//////////////////////////////friends///////////////////////////////////
-    friend void Matrix::toColMatrix();
-    friend void Matrix::toRowMatrix();
 };
 
 #endif

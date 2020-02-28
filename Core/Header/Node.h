@@ -1,17 +1,17 @@
 #ifndef PHYSICA_NODE_H
 #define PHYSICA_NODE_H
 
-#include "RealNumber.h"
+#include "Vector.h"
 
 class Node {
-private:
-    RealNumber* a;
-    RealNumber* b;
 public:
-    Node();
-    Node(RealNumber* a, RealNumber* b);
+    Vector* vector;
+    RealNumber* constant;
+    RealNumber* result;
+
+    Node(int size);
     ~Node();
-    RealNumber* calculate(RealNumber* n);
+    void update(Vector* variables);
 };
 
 #endif

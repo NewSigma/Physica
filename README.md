@@ -1,5 +1,6 @@
 # Physica
-Physica is a scientific computing engine. There are still a lot of work to do.
+Physica is a the Mathematica-like computational physics engine. This project is created to learn and
+there are still a lot of work to do.
 #Develop environment
 Ubuntu 18.04\
 CMAKE 3.15.3\

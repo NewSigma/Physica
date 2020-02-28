@@ -7,7 +7,8 @@ enum DifferentialMethod{
     Identify
 };
 
-RealNumber* derivative_right(RealNumber* func(const RealNumber&), const RealNumber& x0);
-RealNumber* derivative_left(RealNumber* func(const RealNumber&), const RealNumber& x0);
+RealNumber* D_double_point(RealNumber* func(const RealNumber&), const RealNumber& x0);
+RealNumber* D_right(RealNumber* func(const RealNumber&), const RealNumber& x0);
+RealNumber* D_left(RealNumber* func(const RealNumber&), const RealNumber& x0);
 
 #endif

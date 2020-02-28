@@ -3,17 +3,23 @@
 
 extern Const_1 const_1;
 
-Node::Node() : Node(randomRealNumber(), randomRealNumber()) {}
-
-Node::Node(RealNumber* a, RealNumber* b) : a(a), b(b) {}
-
-Node::~Node() {
-    delete a;
-    delete b;
+Node::Node(int size) {
+    auto arr = new RealNumber*[size];
+    for(int i = 0; i < size; ++i)
+        arr[i] = randomRealNumber();
+    vector = new Vector(arr, size);
+    constant = randomRealNumber();
+    result = nullptr;
 }
 
-RealNumber* Node::calculate(RealNumber* n) {
-    auto result = *a * *n;
-    *result += *b;
-    return result;
+Node::~Node() {
+    delete vector;
+    delete constant;
+    delete result;
+}
+
+void Node::update(Vector* variables) {
+    delete result;
+    result = *vector * *variables;
+    *result += *constant;
 }
