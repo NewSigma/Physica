@@ -13,6 +13,13 @@ Vector::Vector(RealNumber** n, int l) {
     length = l;
 }
 
+Vector::Vector(Vector& vector) {
+    length = vector.length;
+    numbers = new RealNumber*[length];
+    for(int i = 0; i < length; ++i)
+        numbers[i] = new RealNumber(vector.numbers[i]);
+}
+
 Vector::~Vector() {
     for(int i = 0; i < length; ++i)
         delete numbers[i];
@@ -23,6 +30,15 @@ RealNumber* Vector::operator[](int i) {
     if(i >= length)
         return nullptr;
     return numbers[i];
+}
+//Move operator
+void Vector::operator<<(Vector& v) {
+    this->~Vector();
+    numbers = v.numbers;
+    length = v.length;
+    v.numbers = nullptr;
+    v.length = 0;
+    delete &v;
 }
 
 Vector* Vector::operator+(Vector& v) {
@@ -69,6 +85,13 @@ Vector* Vector::operator-(Vector& v) {
     for(int j = shorter_len; j < longer_len; ++j)
         arr[j] = new RealNumber(longer->numbers[j]);
     return new Vector(arr, longer_len);
+}
+
+Vector* Vector::operator*(RealNumber& n) {
+    auto arr = new RealNumber*[length];
+    for(int i = 0; i < length; ++i)
+        arr[i] = *numbers[i] * n;
+    return new Vector(arr, length);
 }
 
 RealNumber* Vector::operator*(Vector& v) {
@@ -119,4 +142,27 @@ Vector* Vector::operator/(Vector& v) {
         }
     }
     return nullptr;
+}
+
+void Vector::operator+=(Vector& v) {
+    *this << *(*this + v);
+}
+
+void Vector::operator-=(Vector& v) {
+    *this << *(*this - v);
+}
+
+void Vector::operator/=(Vector& v) {
+    auto divide = *this / v;
+    if(divide == nullptr) {
+        this->~Vector();
+        numbers = nullptr;
+        length = 0;
+    }
+    else
+        *this << *divide;
+}
+
+void Vector::operator*=(RealNumber& n) {
+    *this << *(*this * n);
 }

@@ -4,15 +4,26 @@
 
 extern const Const_1 const_1;
 
-ExprReader::ExprReader(const std::string& s) {
-    std::stack<char> stack{};
-    std::string temp;
+ExprReader::ExprReader(const std::wstring& s) {
+    std::stack<wchar_t> stack{};
+    std::wstring temp;
     for(auto c : s) {
         switch(c) {
+            case '+':
+                clearString(temp);
+                while(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
+                    std::wstring temp1;
+                    temp1.push_back(stack.top());
+                    anti_poland.push_back(temp1);
+                    stack.pop();
+                }
+                if(!anti_poland.empty())
+                    stack.push('+');
+                break;
             case '-':
                 clearString(temp);
-                while(!stack.empty() && (stack.top() == '*' || stack.top() == '/')) {
-                    std::string temp1;
+                while(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
+                    std::wstring temp1;
                     temp1.push_back(stack.top());
                     anti_poland.push_back(temp1);
                     stack.pop();
@@ -21,18 +32,10 @@ ExprReader::ExprReader(const std::string& s) {
                     stack.push('+');
                 temp.push_back(c);
                 break;
-            case '+':
+            case L'×':
                 clearString(temp);
-                while(!stack.empty() && (stack.top() == '*' || stack.top() == '/')) {
-                    std::string temp1;
-                    temp1.push_back(stack.top());
-                    anti_poland.push_back(temp1);
-                    stack.pop();
-                }
-                if(!anti_poland.empty())
-                    stack.push('+');
+                stack.push(L'×');
                 break;
-            case '*':
             case '/':
             case '(':
                 clearString(temp);
@@ -45,13 +48,17 @@ ExprReader::ExprReader(const std::string& s) {
                         stack.pop();
                         break;
                     }
-                    std::string temp1;
+                    std::wstring temp1;
                     temp1.push_back(stack.top());
                     anti_poland.push_back(temp1);
                     stack.pop();
                 }
                 break;
             case ' ':
+                if(stack.top() != ' ') {
+                    clearString(temp);
+                    stack.push(L'×');
+                }
                 break;
             default:
                 temp.push_back(c);
@@ -60,7 +67,7 @@ ExprReader::ExprReader(const std::string& s) {
     anti_poland.push_back(temp);
 
     while(!stack.empty()) {
-        std::string temp1;
+        std::wstring temp1;
         temp1.push_back(stack.top());
         anti_poland.push_back(temp1);
         stack.pop();
@@ -69,8 +76,8 @@ ExprReader::ExprReader(const std::string& s) {
 
 RealNumber* ExprReader::calc() {
     std::stack<RealNumber*> stack{};
+    RealNumber* n1 = nullptr, *n2 = nullptr;
     for(auto& str : anti_poland) {
-        RealNumber* n1 = nullptr, *n2 = nullptr;
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
@@ -81,7 +88,7 @@ RealNumber* ExprReader::calc() {
                     stack.push(*n1 + *n2);
                 }
                 break;
-            case '*':
+            case L'×':
                 if(stack.size() > 1) {
                     n1 = stack.top();
                     stack.pop();
@@ -108,7 +115,7 @@ RealNumber* ExprReader::calc() {
     return stack.top();
 }
 //Only be used in construct function ExprReader(). Check the temp string and store the useful data.
-void ExprReader::clearString(std::string& s) {
+void ExprReader::clearString(std::wstring& s) {
     if(!s.empty()) {
         anti_poland.push_back(s);
         s.clear();

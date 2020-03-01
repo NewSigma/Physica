@@ -6,6 +6,7 @@ class Vector;
 
 class Matrix {
 private:
+    //When Type = COLUMN, vectors stores column vectors.
     enum Type {
         ROW,
         COLUMN
@@ -13,22 +14,30 @@ private:
 
     Vector** vectors;
     int col, row;
-    //When type = COLUMN, vectors stores column vectors.
+    //if(type) <==> if(type == COLUMN)
     Type type;
 public:
     Matrix();
     Matrix(Vector** vectors, int length, Type type = COLUMN);
+    Matrix(Matrix& matrix);
     ~Matrix();
 
     Vector* operator[](int index);
+    void operator<<(Matrix& m);
     Matrix* operator+(Matrix& m);
     Matrix* operator-(Matrix& m);
     Matrix* operator*(Matrix& m);
     Matrix* operator/(Matrix& m);
+    Matrix* operator*(RealNumber& n);
+    void operator+=(Matrix& m);
+    void operator-=(Matrix& m);
+    void operator*=(Matrix& m);
+    void operator/=(Matrix& m);
+    void operator*=(RealNumber& n);
 
     int getRow() { return row; };
     int getCol() { return col; };
-    int getLength() { if(type == COLUMN) return row; else return col; };
+    int getLength() { if(type) return row; else return col; };
     bool isEmpty() { return row == 0; };
     RealNumber* get(int c, int r);
     void toColMatrix();

@@ -1,6 +1,7 @@
 #include <QtWidgets/QApplication>
+#include <iostream>
 #include "Core/Header/Const.h"
-#include "Gui/Header/MainWindow.h"
+#include "Gui/Header/PhysicaMain.h"
 
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
@@ -21,7 +22,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
-    new MainWindow();
+    new PhysicaMain();
 
     int exit_code = QApplication::exec();
 

@@ -20,6 +20,16 @@ Matrix::Matrix(Vector** arr, int length, Type t) {
     }
 }
 
+Matrix::Matrix(Matrix& matrix) {
+    type = matrix.type;
+    col = matrix.col;
+    row = matrix.row;
+    int length = getLength();
+    vectors = new Vector*[length];
+    for(int i = 0; i < length; ++i)
+        vectors[i] = new Vector(*matrix.vectors[i]);
+}
+
 Matrix::~Matrix() {
     int length = getLength();
     for(int i = 0; i < length; ++i)
@@ -31,6 +41,17 @@ Vector* Matrix::operator[](int i) {
     if(i >= getLength())
         return nullptr;
     return vectors[i];
+}
+
+void Matrix::operator<<(Matrix& m) {
+    this->~Matrix();
+    vectors = m.vectors;
+    col = m.col;
+    row = m.row;
+    type = m.type;
+    m.vectors = nullptr;
+    m.col = m.row = 0;
+    delete &m;
 }
 
 Matrix* Matrix::operator+(Matrix& m) {
@@ -114,9 +135,46 @@ Matrix* Matrix::operator*(Matrix& m) {
 //Here the operator/ means inverse.
 Matrix* Matrix::operator/(Matrix& m) {
     Matrix* inv = m.inverse();
+    if(inv == nullptr)
+        return nullptr;
     Matrix* result = *this * *inv;
     delete inv;
     return result;
+}
+
+Matrix* Matrix::operator*(RealNumber& n) {
+    int length = getLength();
+    auto arr = new Vector*[length];
+    for(int i = 0; i < length; ++i)
+        arr[i] = *vectors[i] * n;
+    return new Matrix(arr, length, type);
+}
+
+void Matrix::operator+=(Matrix& m) {
+    *this << *(*this + m);
+}
+
+void Matrix::operator-=(Matrix& m) {
+    *this << *(*this - m);
+}
+
+void Matrix::operator*=(Matrix& m) {
+    *this << *(*this * m);
+}
+
+void Matrix::operator/=(Matrix& m) {
+    auto divide = *this / m;
+    if(divide == nullptr) {
+        this->~Matrix();
+        vectors = nullptr;
+        col = row = 0;
+    }
+    else
+        *this << *divide;
+}
+
+void Matrix::operator*=(RealNumber& n) {
+    *this << *(*this * n);
 }
 
 RealNumber* Matrix::get(int c, int r) {

@@ -1,7 +1,5 @@
 #include "Header/Calculator.h"
 #include "../Core/Header/ExprReader.h"
-#include <QGuiApplication>
-#include <QScreen>
 #include <QKeyEvent>
 #include "../Core/Header/ElementaryFunction.h"
 
@@ -9,8 +7,8 @@ Calculator::Calculator() {
     //Const
     QFont font;
     font.setPointSize(20);
-
     //Main
+    setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle("Calculator");
     setFixedSize(800,675);
     setWindowOpacity(0.9);
@@ -327,7 +325,9 @@ void Calculator::on_click_subtract() {
 }
 
 void Calculator::on_click_multiply() {
-    editor_bottom->setText(editor_bottom->text() + '*');
+    auto str = editor_bottom->text().toStdWString();
+    str += L'×';
+    editor_bottom->setText(QString::fromStdWString(str));
 }
 
 void Calculator::on_click_divide() {
@@ -335,7 +335,7 @@ void Calculator::on_click_divide() {
 }
 
 void Calculator::on_click_equal() {
-    ExprReader reader(editor_bottom->text().toStdString());
+    ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
     editor_top->setText(editor_bottom->text());
     editor_bottom->setText(QString::fromStdString(result->toString()));
@@ -365,7 +365,7 @@ void Calculator::on_click_right_bracket() {
 }
 
 void Calculator::on_click_sqrt() {
-    ExprReader reader(editor_bottom->text().toStdString());
+    ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
     auto temp = *result * *result;
     editor_top->setText(editor_bottom->text());
@@ -377,7 +377,7 @@ void Calculator::on_click_sqrt() {
 }
 
 void Calculator::on_click_square() {
-    ExprReader reader(editor_bottom->text().toStdString());
+    ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
     auto temp = sqrt(*result);
     editor_top->setText(editor_bottom->text());

@@ -24,7 +24,7 @@ RealNumber::RealNumber() {
     sign = true;
 }
 
-RealNumber::RealNumber(std::string s, unsigned char acc) {
+RealNumber::RealNumber(std::wstring s, unsigned char acc) {
     byte = new unsigned char[s.size()];
     sign = true;
     a = acc;
@@ -153,12 +153,20 @@ std::string RealNumber::toString() const {
     if(byte != nullptr) {
         if(isNegative())
             result.push_back('-');
-        if(power < 0) {
+        if(abs(power) > const_1->GlobalPrecision) {
+            //48 is the ascii code of 0.
+            result.push_back(byte[0] + 48);
+            result.push_back('.');
+            for(int i = 1; i < length; ++i)
+                result.push_back(byte[i] + 48);
+            result += "×10^";
+            result += std::to_string(power);
+        }
+        else if(power < 0) {
             result += "0.";
             for(int i = -power - 1; i > 0; --i)
                 result.push_back('0');
             for(int i = 0; i < length; ++i)
-                //48 is the ascii code of 0.
                 result.push_back(byte[i] + 48);
         }
         else {

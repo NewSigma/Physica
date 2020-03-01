@@ -6,13 +6,13 @@
 
 class ExprReader {
 private:
-    std::list<std::string> anti_poland;
+    std::list<std::wstring> anti_poland;
 public:
-    ExprReader(const std::string& s);
+    ExprReader(const std::wstring& s);
 
     RealNumber* calc();
 private:
-    void clearString(std::string& s);
+    void clearString(std::wstring& s);
 };
 
 #endif

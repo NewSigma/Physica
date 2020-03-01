@@ -2,6 +2,7 @@
 #define _Physica_C_ReakNumber_H
 
 #include <ostream>
+#include "Number.h"
 /*
  * The following two classes have the same statistics. The differences between them are their method to
  * handle the statistics. RealNumber will not consider the accuracy because it thinks the statistics is
@@ -9,7 +10,7 @@
  *
  * They can be convented to each other safely.
  */
-class RealNumber {
+class RealNumber : private Number {
 public:
     //Store effective digits.
     unsigned char* byte;
@@ -24,7 +25,7 @@ public:
 
     RealNumber();
     explicit RealNumber(double d, unsigned char acc = 0);
-    explicit RealNumber(std::string s, unsigned char acc = 0);
+    explicit RealNumber(std::wstring s, unsigned char acc = 0);
     RealNumber(const RealNumber& n);
     RealNumber(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit RealNumber(const RealNumber* n);
