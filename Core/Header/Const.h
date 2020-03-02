@@ -5,33 +5,35 @@
 
 class Const_1 {
 public:
+    //_1 stands by integer 1.
     int GlobalPrecision;
     const RealNumber* StepSize;
     const RealNumber* R_MAX;
-    const RealNumber* ZERO;
-    const RealNumber* ONE;
-    const RealNumber* MINUS_ONE;
-    const RealNumber* TWO;
-    const RealNumber* MINUS_TWO;
-    const RealNumber* THREE;
-    const RealNumber* MINUS_THREE;
-    const RealNumber* FOUR;
-    const RealNumber* MINUS_FOUR;
+    const RealNumber* _0;
+    const RealNumber* _1;
+    const RealNumber* Minus_1;
+    const RealNumber* _2;
+    const RealNumber* Minus_2;
+    const RealNumber* _3;
+    const RealNumber* Minus_3;
+    const RealNumber* _4;
+    const RealNumber* Minus_4;
 
     Const_1();
     ~Const_1();
 
-    RealNumber* getZero() const { return new RealNumber(ZERO); }
-    RealNumber* getOne() const { return new RealNumber(ONE); }
-    RealNumber* getTwo() const { return new RealNumber(TWO); }
+    RealNumber* getZero() const { return new RealNumber(_0); }
+    RealNumber* getOne() const { return new RealNumber(_1); }
+    RealNumber* getTwo() const { return new RealNumber(_2); }
 };
 
 class Const_2 {
 public:
     const RealNumber* PI;
     const RealNumber* E;
-    const RealNumber* PI_DIVIDE_TWO;
-    const RealNumber* MINUS_PI_DIVIDE_TWO;
+    //Here PI_2 stands by PI / 2.
+    const RealNumber* PI_2;
+    const RealNumber* Minus_PI_2;
 
     Const_2();
     ~Const_2();

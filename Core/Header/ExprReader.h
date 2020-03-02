@@ -8,11 +8,10 @@ class ExprReader {
 private:
     std::list<std::wstring> anti_poland;
 public:
-    ExprReader(const std::wstring& s);
-
+    ExprReader(const std::wstring& str);
     RealNumber* calc();
 private:
-    void clearString(std::wstring& s);
+    static bool isSign(wchar_t c);
 };
 
 #endif

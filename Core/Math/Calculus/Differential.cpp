@@ -9,7 +9,7 @@ RealNumber* D_double_point(RealNumber* func(const RealNumber&), const RealNumber
     auto x2 = x0 - *const_1.StepSize;
     auto y2 = func(*x2);
     auto result = *y1 - *y2;
-    auto derivative = *const_1.TWO * *const_1.StepSize;
+    auto derivative = *const_1._2 * *const_1.StepSize;
     *result /= *derivative;
     delete x1;
     delete y1;

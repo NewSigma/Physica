@@ -10,7 +10,7 @@ extern const Const_1* const_1;
 extern const Const_2* const_2;
 
 RealNumber* reciprocal(const RealNumber& n) {
-    return *const_1->ONE / n;
+    return *const_1->_1 / n;
 }
 
 RealNumber* sqrt_noCheck(const RealNumber& n) {
@@ -37,7 +37,7 @@ RealNumber* sqrt_noCheck(const RealNumber& n) {
     for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
         temp = divide(*copy_n, *result);
         *result += *temp;
-        *result /= *const_1->TWO;
+        *result /= *const_1->_2;
         delete temp;
     }
     delete copy_n;
@@ -79,7 +79,7 @@ RealNumber* factorial(const RealNumber& n) {
         result = const_1->getOne();
         auto temp = const_1->getOne();
         while(*temp < n) {
-            *temp += *const_1->ONE;
+            *temp += *const_1->_1;
             *result *= *temp;
         }
         delete temp;
@@ -93,9 +93,9 @@ RealNumber* factorial(const RealNumber& n) {
  */
 RealNumber* cos(const RealNumber& n) {
     auto result = const_1->getOne();
-    if(n != *const_1->ZERO) {
+    if(n != *const_1->_0) {
         auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->ONE;
+        auto ONE = const_1->_1;
 
         auto square_n = n * n;
         auto temp_1 = new RealNumber(square_n);
@@ -134,9 +134,9 @@ RealNumber* cos(const RealNumber& n) {
 
 RealNumber* sin(const RealNumber& n) {
     auto result = const_1->getZero();
-    if(n != *const_1->ZERO) {
+    if(n != *const_1->_0) {
         auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->ONE;
+        auto ONE = const_1->_1;
 
         auto square_n = n * n;
         auto temp_1 = new RealNumber(n);
@@ -208,16 +208,16 @@ RealNumber* cot(const RealNumber& n) {
 }
 
 RealNumber* arccos(const RealNumber& n) {
-    return bisectionMethod(cos, n, *const_1->ZERO, *const_2->PI, *const_1->ONE, *const_1->MINUS_ONE);
+    return bisectionMethod(cos, n, *const_1->_0, *const_2->PI, *const_1->_1, *const_1->Minus_1);
 }
 
 RealNumber* arcsin(const RealNumber& n) {
-    return bisectionMethod(sin, n, *const_2->MINUS_PI_DIVIDE_TWO, *const_2->PI_DIVIDE_TWO, *const_1->MINUS_ONE, *const_1->ONE);
+    return bisectionMethod(sin, n, *const_2->Minus_PI_2, *const_2->PI_2, *const_1->Minus_1, *const_1->_1);
 }
 
 RealNumber* arctan(const RealNumber& n) {
     auto temp = n * n;
-    *temp += *const_1->ONE;
+    *temp += *const_1->_1;
     auto sqrt_temp = sqrt(*temp);
     delete temp;
     
@@ -261,9 +261,9 @@ RealNumber* ln_noCheck(const RealNumber& n) {
     if(!n.isPositive())
         return nullptr;
     auto result = const_1->getZero();
-    if(n != *const_1->ONE) {
-        auto temp_0 = add(n, *const_1->ONE);
-        auto temp_1 = subtract(n, *const_1->ONE);
+    if(n != *const_1->_1) {
+        auto temp_0 = add(n, *const_1->_1);
+        auto temp_1 = subtract(n, *const_1->_1);
         *temp_1 /= *temp_0;
         auto copy_temp_1 = new RealNumber(temp_1);
         auto temp_2 = const_1->getOne();
@@ -277,7 +277,7 @@ RealNumber* ln_noCheck(const RealNumber& n) {
             delete temp;
             //Here the temp means the criteria of break.
             *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->ONE;
+            *temp_2 += *const_1->_1;
             temp = *temp_1 / *temp_2;
             int temp_power = temp->power;
             delete temp;
@@ -286,9 +286,9 @@ RealNumber* ln_noCheck(const RealNumber& n) {
                 break;
             //Prepare for next calculate.
             *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->ONE;
+            *temp_2 += *const_1->_1;
         }
-        *result *= *const_1->TWO;
+        *result *= *const_1->_2;
         delete temp_0;
         delete temp_1;
         delete copy_temp_1;
@@ -319,7 +319,7 @@ RealNumber* ln(const RealNumber& n) {
 }
 //Return log_a n
 RealNumber* log(const RealNumber& n, const RealNumber& a) {
-    if(a == *const_1->ONE)
+    if(a == *const_1->_1)
         return nullptr;
 
     auto ln_n = ln(n);

@@ -578,15 +578,15 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
             result = const_1->getOne();
             if(n2.isNegative()) {
                 auto temp = reciprocal(n1);
-                while(*n2_copy != *const_1->ZERO) {
-                    *n2_copy -= *const_1->ONE;
+                while(*n2_copy != *const_1->_0) {
+                    *n2_copy -= *const_1->_1;
                     *result *= *temp;
                 }
                 delete temp;
             }
             else {
-                while(*n2_copy != *const_1->ZERO) {
-                    *n2_copy -= *const_1->ONE;
+                while(*n2_copy != *const_1->_0) {
+                    *n2_copy -= *const_1->_1;
                     *result *= n1;
                 }
             }
@@ -596,7 +596,7 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
             auto temp_result = const_1->getOne();
             auto temp_1 = ln(n1);
             *temp_1 *= n2;
-            *temp_1 += *const_1->ONE;
+            *temp_1 += *const_1->_1;
             bool go_on;
             do {
                 result = ln(*temp_result);
@@ -793,9 +793,9 @@ RealNumber* subtract (const RealNumber& n1, const RealNumber& n2) {
 
 RealNumber* multiply (const RealNumber& n1, const RealNumber& n2) {
     RealNumber* result;
-    if(n1 == *const_1->ONE)
+    if(n1 == *const_1->_1)
         result = new RealNumber(n2);
-    else if(n2 == *const_1->ONE)
+    else if(n2 == *const_1->_1)
         result = new RealNumber(n1);
     else {
         //In this case, big has more digits after the dot.
@@ -854,7 +854,7 @@ RealNumber* divide (const RealNumber& n1, const RealNumber& n2) {
     RealNumber* result;
     if(n1.isZero() || n2.isZero())
         result = const_1->getZero();
-    else if(n2 == *const_1->ONE)
+    else if(n2 == *const_1->_1)
         result = new RealNumber(n1);
     else {
         result = new RealNumber();

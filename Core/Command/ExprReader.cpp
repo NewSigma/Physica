@@ -4,67 +4,71 @@
 
 extern const Const_1 const_1;
 
-ExprReader::ExprReader(const std::wstring& s) {
+ExprReader::ExprReader(const std::wstring& str) {
+    int pointer = 0;
     std::stack<wchar_t> stack{};
     std::wstring temp;
-    for(auto c : s) {
-        switch(c) {
-            case '+':
-                clearString(temp);
-                while(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
-                    std::wstring temp1;
-                    temp1.push_back(stack.top());
-                    anti_poland.push_back(temp1);
-                    stack.pop();
-                }
-                if(!anti_poland.empty())
-                    stack.push('+');
-                break;
-            case '-':
-                clearString(temp);
-                while(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
-                    std::wstring temp1;
-                    temp1.push_back(stack.top());
-                    anti_poland.push_back(temp1);
-                    stack.pop();
-                }
-                if(!anti_poland.empty())
-                    stack.push('+');
-                temp.push_back(c);
-                break;
-            case L'×':
-                clearString(temp);
-                stack.push(L'×');
-                break;
-            case '/':
-            case '(':
-                clearString(temp);
-                stack.push(c);
-                break;
-            case ')':
-                clearString(temp);
-                while(!stack.empty()) {
-                    if(stack.top() == '(') {
-                        stack.pop();
-                        break;
+    while(pointer != str.size()) {
+        if(isSign(str[pointer])) {
+            bool got_sign = false;
+            while(isSign(str[pointer])) {
+                if(!got_sign) {
+                    switch(str[pointer]) {
+                        case '-':
+                            temp.push_back('-');
+                        case '+':
+                            got_sign = true;
+                            while(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
+                                std::wstring temp1;
+                                temp1.push_back(stack.top());
+                                anti_poland.push_back(temp1);
+                                stack.pop();
+                            }
+                            if(!anti_poland.empty())
+                                stack.push('+');
+                            break;
+                        case L'×':
+                        case '/':
+                            got_sign = true;
+                        case '(':
+                            stack.push(str[pointer]);
+                            break;
+                        case ')':
+                            got_sign = true;
+                            while(!stack.empty()) {
+                                if(stack.top() == '(') {
+                                    stack.pop();
+                                    break;
+                                }
+                                std::wstring temp1;
+                                temp1.push_back(stack.top());
+                                anti_poland.push_back(temp1);
+                                stack.pop();
+                            }
+                            break;
+                        default:;
                     }
-                    std::wstring temp1;
-                    temp1.push_back(stack.top());
-                    anti_poland.push_back(temp1);
+                }
+                ++pointer;
+            }
+            //If got_sign is false, we mean we only have ' ' or '(', where we should do multiply.
+            if(!got_sign) {
+                if(stack.top() == '(') {
                     stack.pop();
-                }
-                break;
-            case ' ':
-                if(stack.top() != ' ') {
-                    clearString(temp);
                     stack.push(L'×');
+                    stack.push('(');
                 }
-                break;
-            default:
-                temp.push_back(c);
+            }
+        }
+        else {
+            while(pointer != str.size() && !isSign(str[pointer])) {
+                temp.push_back(str[pointer]);
+                ++pointer;
+            }
+            anti_poland.push_back(temp);
+            temp.clear();
         }
     }
-    anti_poland.push_back(temp);
 
     while(!stack.empty()) {
         std::wstring temp1;
@@ -76,8 +80,8 @@ ExprReader::ExprReader(const std::wstring& s) {
 
 RealNumber* ExprReader::calc() {
     std::stack<RealNumber*> stack{};
-    RealNumber* n1 = nullptr, *n2 = nullptr;
     for(auto& str : anti_poland) {
+        RealNumber* n1 = nullptr, *n2 = nullptr;
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
@@ -114,10 +118,18 @@ RealNumber* ExprReader::calc() {
     }
     return stack.top();
 }
-//Only be used in construct function ExprReader(). Check the temp string and store the useful data.
-void ExprReader::clearString(std::wstring& s) {
-    if(!s.empty()) {
-        anti_poland.push_back(s);
-        s.clear();
+
+bool ExprReader::isSign(wchar_t c) {
+    switch(c) {
+        case '+':
+        case '-':
+        case L'×':
+        case '/':
+        case '(':
+        case ')':
+        case ' ':
+            return true;
+        default:
+            return false;
     }
 }

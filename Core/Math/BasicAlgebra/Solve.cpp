@@ -33,12 +33,12 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumbe
     delete delta_right;
 
     auto result = add(x1, x2);
-    *result /= *const_1->TWO;
+    *result /= *const_1->_2;
     RealNumber* y_result;
 
     auto error = subtract(y1, y2);
     error->sign = true;
-    *error << *divide(*error, *const_1->TWO);
+    *error << *divide(*error, *const_1->_2);
 
     auto x_left = new RealNumber(x1);
     auto x_right = new RealNumber(x2);
@@ -71,8 +71,8 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumbe
             x_right = result;
         }
         result = add(*x_left, *x_right);
-        *result << *divide(*result, *const_1->TWO);
-        *error << *divide(*error, *const_1->TWO);
+        *result << *divide(*result, *const_1->_2);
+        *error << *divide(*error, *const_1->_2);
     } while(result->power - error->power < const_1->GlobalPrecision);
     result->a = 1;
 
