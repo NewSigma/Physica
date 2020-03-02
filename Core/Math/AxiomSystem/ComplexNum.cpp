@@ -3,7 +3,8 @@
  */
 #include "../../Header/ComplexNum.h"
 
-ComplexNum::ComplexNum(RealNumber* r, RealNumber* i) {
+ComplexNum::ComplexNum(class RealNumber* r, class RealNumber* i) {
+    type = Number::ComplexNumber;
     real = r;
     imagine = i;
 }

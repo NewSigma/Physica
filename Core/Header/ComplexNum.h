@@ -9,10 +9,10 @@
 
 class ComplexNum : public Number{
 private:
-    RealNumber* real;
-    RealNumber* imagine;
+    class RealNumber* real;
+    class RealNumber* imagine;
 public:
-    ComplexNum(RealNumber* real, RealNumber* imagine);
+    ComplexNum(class RealNumber* real, class RealNumber* imagine);
     ~ComplexNum();
 };
 

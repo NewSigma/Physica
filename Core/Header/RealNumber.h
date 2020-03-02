@@ -10,7 +10,7 @@
  *
  * They can be convented to each other safely.
  */
-class RealNumber : private Number {
+class RealNumber : public Number {
 public:
     //Store effective digits.
     unsigned char* byte;
@@ -32,10 +32,29 @@ public:
     ~RealNumber();
 
     std::string toString() const;
+    explicit operator double() const;
+
     friend std::ostream& operator<<(std::ostream& os, const RealNumber& n);
     void operator<<(RealNumber& n);
-    explicit operator double() const;
     RealNumber& operator= (const RealNumber& n);
+    RealNumber* operator+ (const RealNumber& n) const;
+    RealNumber* operator- (const RealNumber& n) const;
+    RealNumber* operator* (const RealNumber& n) const;
+    RealNumber* operator/ (const RealNumber& n) const;
+    void operator+= (const RealNumber& n);
+    void operator-= (const RealNumber& n);
+    void operator*= (const RealNumber& n);
+    void operator/= (const RealNumber& n);
+    bool operator> (const RealNumber& n) const;
+    bool operator< (const RealNumber& n) const;
+    bool operator>= (const RealNumber& n) const;
+    bool operator<= (const RealNumber& n) const;
+    bool operator== (const RealNumber& n) const;
+    bool operator!= (const RealNumber& n) const;
+    RealNumber* operator^ (const RealNumber& n) const;
+    void operator^= (const RealNumber& n);
+    RealNumber* operator- () const;
+
     RealNumber* getAccuracy() const;
     RealNumber* getMaximum() const;
     RealNumber* getMinimum() const;
@@ -45,24 +64,6 @@ public:
     bool isNegative() const { return !isZero() && !sign; }
     bool isInteger() const { return length == power + 1; }
 };
-//////////////////////////////////Operators///////////////////////////////////////
-RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2);
-RealNumber* operator- (const RealNumber& n1, const RealNumber& n2);
-RealNumber* operator* (const RealNumber& n1, const RealNumber& n2);
-RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2);
-void operator+= (RealNumber& n1, const RealNumber& n2);
-void operator-= (RealNumber& n1, const RealNumber& n2);
-void operator*= (RealNumber& n1, const RealNumber& n2);
-void operator/= (RealNumber& n1, const RealNumber& n2);
-bool operator> (const RealNumber& n1, const RealNumber& n2);
-bool operator< (const RealNumber& n1, const RealNumber& n2);
-bool operator>= (const RealNumber& n1, const RealNumber& n2);
-bool operator<= (const RealNumber& n1, const RealNumber& n2);
-bool operator== (const RealNumber& n1, const RealNumber& n2);
-bool operator!= (const RealNumber& n1, const RealNumber& n2);
-RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2);
-void operator^= (RealNumber& n1, const RealNumber& n2);
-RealNumber* operator- (const RealNumber& n);
 ////////////////////////////////Helper functions/////////////////////////////////////
 RealNumber* randomRealNumber();
 RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound);

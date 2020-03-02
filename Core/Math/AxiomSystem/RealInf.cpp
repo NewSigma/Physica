@@ -3,3 +3,8 @@
  */
 
 #include "../../Header/RealInf.h"
+
+RealInf::RealInf(bool b) {
+    type = Number::RealInf;
+    sign = b;
+}

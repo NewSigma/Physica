@@ -7,7 +7,8 @@
 #include "Number.h"
 
 class Indeterminate : public Number {
-
+public:
+    Indeterminate();
 };
 
 #endif

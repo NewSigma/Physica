@@ -10,7 +10,7 @@ class RealInf : public Number {
 private:
     bool sign;
 public:
-    RealInf(bool b) { sign = b; }
+    RealInf(bool b);
 };
 
 #endif

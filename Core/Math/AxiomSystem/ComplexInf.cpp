@@ -4,7 +4,7 @@
 #include "../../Header/ComplexInf.h"
 
 ComplexInf::ComplexInf(bool rsign, bool isign) {
+    type = Number::ComplexInf;
     real_sign = rsign;
     imagine_sign = isign;
 }
-

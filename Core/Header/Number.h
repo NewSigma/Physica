@@ -7,7 +7,20 @@
 //Number is a abstract class.
 class Number {
 public:
-
+    enum NumberType {
+        AbstractNumber,
+        RealNumber,
+        ComplexNumber,
+        RealInf,
+        ComplexInf,
+        Indeterminate
+    };
+    NumberType getType();
+protected:
+    Number() {}
+    ~Number() = default;
+    Number(const Number& n) = delete;
+    NumberType type;
 };
 
 #endif

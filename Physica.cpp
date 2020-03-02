@@ -1,11 +1,10 @@
-#include <QtWidgets/QApplication>
-#include <iostream>
-#include "Core/Header/Const.h"
-#include "Gui/Header/PhysicaMain.h"
-
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
+#include <QtWidgets/QApplication>
+#include "Core/Header/Const.h"
+#include "Gui/Header/PhysicaMain.h"
+
 const Const_1* const_1;
 const Const_2* const_2;
 

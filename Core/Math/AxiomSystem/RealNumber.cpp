@@ -19,6 +19,7 @@
 extern const Const_1* const_1;
 ////////////////////////////////RealNumber////////////////////////////////
 RealNumber::RealNumber() {
+    type = Number::RealNumber;
     byte = nullptr;
     length = power = a = 0;
     sign = true;
@@ -287,18 +288,18 @@ bool RealNumber::applyError(const RealNumber* error) {
     return false;
 }
 
-RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2) {
-    auto result = add(n1, n2);
+RealNumber* RealNumber::operator+ (const RealNumber& n) const {
+    auto result = add(*this, n);
     result->a = cutLength(result);
-    if(n1.a != 0 || n2.a != 0) {
+    if(a != 0 || n.a != 0) {
         RealNumber* error;
-        if(n1.a == 0)
-            error = n2.getAccuracy();
-        else if(n2.a == 0)
-            error = n1.getAccuracy();
+        if(a == 0)
+            error = n.getAccuracy();
+        else if(n.a == 0)
+            error = getAccuracy();
         else {
-            auto n1_a = n1.getAccuracy();
-            auto n2_a = n2.getAccuracy();
+            auto n1_a = getAccuracy();
+            auto n2_a = n.getAccuracy();
             error = add(*n1_a, *n2_a);
             delete n1_a;
             delete n2_a;
@@ -309,18 +310,18 @@ RealNumber* operator+ (const RealNumber& n1, const RealNumber& n2) {
     return result;
 }
 
-RealNumber* operator- (const RealNumber& n1, const RealNumber& n2) {
-    auto result = subtract(n1, n2);
+RealNumber* RealNumber::operator- (const RealNumber& n) const {
+    auto result = subtract(*this, n);
     result->a = cutLength(result);
-    if(n1.a != 0 || n2.a != 0) {
+    if(a != 0 || n.a != 0) {
         RealNumber* error;
-        if(n1.a == 0)
-            error = n2.getAccuracy();
-        else if(n2.a == 0)
-            error = n1.getAccuracy();
+        if(a == 0)
+            error = n.getAccuracy();
+        else if(n.a == 0)
+            error = getAccuracy();
         else {
-            auto n1_a = n1.getAccuracy();
-            auto n2_a = n2.getAccuracy();
+            auto n1_a = getAccuracy();
+            auto n2_a = n.getAccuracy();
             error = add(*n1_a, *n2_a);
             delete n1_a;
             delete n2_a;
@@ -331,26 +332,26 @@ RealNumber* operator- (const RealNumber& n1, const RealNumber& n2) {
     return result;
 }
 
-RealNumber* operator* (const RealNumber& n1, const RealNumber& n2) {
-    auto result = multiply(n1, n2);
+RealNumber* RealNumber::operator* (const RealNumber& n) const {
+    auto result = multiply(*this, n);
     result->a = cutLength(result);
-    if(n1.a != 0 || n2.a != 0) {
+    if(a != 0 || n.a != 0) {
         RealNumber* error;
-        if(n1.a == 0) {
-            auto n2_a = n2.getAccuracy();
-            error = multiply(n1, *n2_a);
+        if(a == 0) {
+            auto n2_a = n.getAccuracy();
+            error = multiply(*this, *n2_a);
             delete n2_a;
         }
-        else if(n2.a == 0) {
-            auto n1_a = n1.getAccuracy();
-            error = multiply(n2, *n1_a);
+        else if(n.a == 0) {
+            auto n1_a = getAccuracy();
+            error = multiply(n, *n1_a);
             delete n1_a;
         }
         else {
-            auto n1_a = n1.getAccuracy();
-            auto n2_a = n2.getAccuracy();
-            auto temp_1 = multiply(n1, *n2_a);
-            auto temp_2 = multiply(n2, *n1_a);
+            auto n1_a = getAccuracy();
+            auto n2_a = n.getAccuracy();
+            auto temp_1 = multiply(*this, *n2_a);
+            auto temp_2 = multiply(n, *n1_a);
             auto temp_3 = multiply(*n1_a, *n2_a);
             auto temp_4 = add(*temp_1, *temp_2);
             error = add(*temp_3, *temp_4);
@@ -367,36 +368,36 @@ RealNumber* operator* (const RealNumber& n1, const RealNumber& n2) {
     return result;
 }
 
-RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
-    auto result = divide(n1, n2);
+RealNumber* RealNumber::operator/ (const RealNumber& n) const {
+    auto result = divide(*this, n);
     if(result != nullptr) {
         result->a += cutLength(result);
-        if(n1.a != 0 || n2.a != 0) {
+        if(a != 0 || n.a != 0) {
             RealNumber* error;
-            if(n1.a == 0) {
-                auto n2_a = n2.getAccuracy();
-                auto temp_1 = multiply(n1, *n2_a);
-                auto temp_2 = subtract(n2, *n2_a);
-                auto temp_3 = multiply(n2, *temp_2);
+            if(a == 0) {
+                auto n2_a = n.getAccuracy();
+                auto temp_1 = multiply(*this, *n2_a);
+                auto temp_2 = subtract(n, *n2_a);
+                auto temp_3 = multiply(n, *temp_2);
                 error = divide(*temp_1, *temp_3);
                 delete n2_a;
                 delete temp_1;
                 delete temp_2;
                 delete temp_3;
             }
-            else if(n2.a == 0) {
-                auto n1_a = n1.getAccuracy();
-                error = divide(*n1_a, n2);
+            else if(n.a == 0) {
+                auto n1_a = getAccuracy();
+                error = divide(*n1_a, n);
                 delete n1_a;
             }
             else {
-                auto n1_a = n1.getAccuracy();
-                auto n2_a = n2.getAccuracy();
-                auto temp_1 = multiply(n1, *n2_a);
-                auto temp_2 = multiply(n2, *n1_a);
+                auto n1_a = getAccuracy();
+                auto n2_a = n.getAccuracy();
+                auto temp_1 = multiply(*this, *n2_a);
+                auto temp_2 = multiply(n, *n1_a);
                 auto temp_3 = add(*temp_1, *temp_2);
-                auto temp_4 = subtract(n2, *n2_a);
-                auto temp_5 = multiply(n2, *temp_4);
+                auto temp_4 = subtract(n, *n2_a);
+                auto temp_5 = multiply(n, *temp_4);
                 error = divide(*temp_3, *temp_5);
                 delete n1_a;
                 delete n2_a;
@@ -417,134 +418,134 @@ RealNumber* operator/ (const RealNumber& n1, const RealNumber& n2) {
 /*
  * Warning: n1 can not be temp object.
  */
-void operator+= (RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 + n2;
-    free(n1.byte);
-    n1.byte = p_result->byte;
-    n1.length = p_result->length;
-    n1.power = p_result->power;
-    n1.sign = p_result->sign;
-    n1.a = p_result->a;
+void RealNumber::operator+= (const RealNumber& n) {
+    RealNumber* p_result = *this + n;
+    free(byte);
+    byte = p_result->byte;
+    length = p_result->length;
+    power = p_result->power;
+    sign = p_result->sign;
+    a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
 }
 
-void operator-= (RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 - n2;
-    free(n1.byte);
-    n1.byte = p_result->byte;
-    n1.length = p_result->length;
-    n1.power = p_result->power;
-    n1.sign = p_result->sign;
-    n1.a = p_result->a;
+void RealNumber::operator-= (const RealNumber& n) {
+    RealNumber* p_result = *this - n;
+    free(byte);
+    byte = p_result->byte;
+    length = p_result->length;
+    power = p_result->power;
+    sign = p_result->sign;
+    a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
 }
 
-void operator*= (RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 * n2;
-    free(n1.byte);
-    n1.byte = p_result->byte;
-    n1.length = p_result->length;
-    n1.power = p_result->power;
-    n1.sign = p_result->sign;
-    n1.a = p_result->a;
+void RealNumber::operator*= (const RealNumber& n) {
+    RealNumber* p_result = *this * n;
+    free(byte);
+    byte = p_result->byte;
+    length = p_result->length;
+    power = p_result->power;
+    sign = p_result->sign;
+    a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
 }
 /*
  * n2 mustn't be zero.
  */
-void operator/= (RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 / n2;
-    free(n1.byte);
-    n1.byte = p_result->byte;
-    n1.length = p_result->length;
-    n1.power = p_result->power;
-    n1.sign = p_result->sign;
-    n1.a = p_result->a;
+void RealNumber::operator/= (const RealNumber& n) {
+    RealNumber* p_result = *this / n;
+    free(byte);
+    byte = p_result->byte;
+    length = p_result->length;
+    power = p_result->power;
+    sign = p_result->sign;
+    a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
 }
 
-bool operator> (const RealNumber& n1, const RealNumber& n2) {
+bool RealNumber::operator> (const RealNumber& n) const {
     //Judge from sign.
-    if(n1.isPositive()) {
-        if(n2.isZero() || n2.isNegative())
+    if(isPositive()) {
+        if(n.isZero() || n.isNegative())
             return true;
     }
-    else if(n1.isZero())
-        return n2.isNegative();
+    else if(isZero())
+        return n.isNegative();
     else {
-        if(n2.isPositive() || n2.isZero())
+        if(n.isPositive() || n.isZero())
             return false;
     }
     //If we cannot get a result, judge from power
     bool result;
-    if(n1.power > n2.power)
+    if(power > n.power)
         result = true;
-    else if(n1.power < n2.power)
+    else if(power < n.power)
         result = false;
     else {
         //The only method left.
-        RealNumber* p_result = n1 - n2;
+        RealNumber* p_result = *this - n;
         result = p_result->sign;
         delete p_result;
     }
     return result;
 }
 
-bool operator< (const RealNumber& n1, const RealNumber& n2) {
+bool RealNumber::operator< (const RealNumber& n) const {
     //Judge from sign.
-    if(n1.isPositive()) {
-        if(n2.isZero() || n2.isNegative())
+    if(isPositive()) {
+        if(n.isZero() || n.isNegative())
             return false;
     }
-    else if(n1.isZero())
-        return n2.isPositive();
+    else if(isZero())
+        return n.isPositive();
     else {
-        if(n2.isPositive() || n2.isZero())
+        if(n.isPositive() || n.isZero())
             return true;
     }
     //If we cannot get a result, judge from power
     bool result;
-    if(n1.power > n2.power)
+    if(power > n.power)
         result = false;
-    else if(n1.power < n2.power)
+    else if(power < n.power)
         result = true;
     else {
         //The only method left.
-        RealNumber* p_result = n1 - n2;
+        RealNumber* p_result = *this - n;
         result = p_result->isNegative();
         delete p_result;
     }
     return result;
 }
 
-bool operator>= (const RealNumber& n1, const RealNumber& n2) {
-    return !(n1 < n2);
+bool RealNumber::operator>= (const RealNumber& n) const {
+    return !(*this < n);
 }
 
-bool operator<= (const RealNumber& n1, const RealNumber& n2) {
-    return !(n1 > n2);
+bool RealNumber::operator<= (const RealNumber& n) const {
+    return !(*this > n);
 }
 
-bool operator== (const RealNumber& n1, const RealNumber& n2) {
-    if(n1.power != n2.power)
+bool RealNumber::operator== (const RealNumber& n) const {
+    if(power != n.power)
         return false;
-    if(n1.sign != n2.sign)
+    if(sign != n.sign)
         return false;
-    if(n1.a != n2.a)
+    if(a != n.a)
         return false;
     const RealNumber* longer;
     const RealNumber* shorter;
-    if(n1.length > n2.length) {
-        longer = &n1;
-        shorter = &n2;
+    if(length > n.length) {
+        longer = this;
+        shorter = &n;
     }
     else {
-        longer = &n2;
-        shorter = &n1;
+        longer = &n;
+        shorter = this;
     }
     for(int i = 0; i < shorter->length; ++i) {
         if(shorter->byte[i] != longer->byte[i])
@@ -558,26 +559,26 @@ bool operator== (const RealNumber& n1, const RealNumber& n2) {
     return true;
 }
 
-bool operator!= (const RealNumber& n1, const RealNumber& n2) {
-    return !(n1 == n2);
+bool RealNumber::operator!= (const RealNumber& n) const {
+    return !(*this == n);
 }
 /*
  * Using Newton's method
  * May return nullptr.
  */
-RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
+RealNumber* RealNumber::operator^ (const RealNumber& n) const {
     RealNumber* result = nullptr;
-    if(n1.isZero()) {
-        if(!n2.isZero())
+    if(isZero()) {
+        if(!n.isZero())
             result = const_1->getZero();
     }
-    else if(n1.isPositive()) {
-        if(n2.isInteger()) {
-            auto n2_copy = new RealNumber(n2);
+    else if(isPositive()) {
+        if(n.isInteger()) {
+            auto n2_copy = new RealNumber(n);
 
             result = const_1->getOne();
-            if(n2.isNegative()) {
-                auto temp = reciprocal(n1);
+            if(n.isNegative()) {
+                auto temp = reciprocal(*this);
                 while(*n2_copy != *const_1->_0) {
                     *n2_copy -= *const_1->_1;
                     *result *= *temp;
@@ -587,15 +588,15 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
             else {
                 while(*n2_copy != *const_1->_0) {
                     *n2_copy -= *const_1->_1;
-                    *result *= n1;
+                    *result *= *this;
                 }
             }
             delete n2_copy;
         }
         else {
             auto temp_result = const_1->getOne();
-            auto temp_1 = ln(n1);
-            *temp_1 *= n2;
+            auto temp_1 = ln(*this);
+            *temp_1 *= n;
             *temp_1 += *const_1->_1;
             bool go_on;
             do {
@@ -614,14 +615,14 @@ RealNumber* operator^ (const RealNumber& n1, const RealNumber& n2) {
     return result;
 }
 
-void operator^= (RealNumber& n1, const RealNumber& n2) {
-    RealNumber* p_result = n1 ^ n2;
-    n1 = *p_result;
+void RealNumber::operator^= (const RealNumber& n) {
+    RealNumber* p_result = *this ^ n;
+    *this << *p_result;
     delete p_result;
 }
 
-RealNumber* operator- (const RealNumber& n) {
-    auto result = new RealNumber(n);
+RealNumber* RealNumber::operator- () const {
+    auto result = new RealNumber(this);
     result->sign = !result->sign;
     return result;
 }

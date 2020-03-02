@@ -10,9 +10,9 @@ Number* Integrate(Number* func(Number*), Number* x0, Number* x1, IntegrateMethod
 }
 
 Number* rectangular(Number* func(Number*), Number* x0, Number* x1) {
-
+    return nullptr;
 }
 
 Number* ladder(Number* func(Number*), Number* x0, Number* x1) {
-
+    return nullptr;
 }
