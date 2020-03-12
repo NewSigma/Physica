@@ -2,12 +2,13 @@
 #define PHYSICA_NODE_H
 
 #include "Vector.h"
+#include "RealNum.h"
 
 class Node {
 public:
     Vector* vector;
-    RealNumber* constant;
-    RealNumber* result;
+    RealNum* constant;
+    RealNum* result;
 
     Node(int size);
     ~Node();

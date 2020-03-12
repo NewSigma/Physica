@@ -1,7 +1,7 @@
 #include "Header/Calculator.h"
 #include "../Core/Header/ExprReader.h"
 #include <QKeyEvent>
-#include "../Core/Header/ElementaryFunction.h"
+#include "../Core//Header/Numerical.h"
 
 Calculator::Calculator() {
     //Const

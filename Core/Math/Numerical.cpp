@@ -1,10 +1,12 @@
-#include "../../Header/RealNumber.h"
-#include <iostream>
+/*
+ * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ */
+#include "../Header/Numerical.h"
+#include "../Header/Solve.h"
 #include <cstring>
 #include <cmath>
-#include "../../Header/Const.h"
-#include "../../Header/ElementaryFunction.h"
 
+extern const Const_2* const_2;
 /*
  *
  * Useful formulas:
@@ -12,20 +14,18 @@
  *     Number of digits between the unit and the last digit. (Both included)
  *
  * Operators that do not need to free memory : = += -= *= /= > <
- * Operators that need memory free : new + - * / toRealNumber() randomRealNumber()
+ * Operators that need memory free : new + - * / toNumericalber() randomNumericalber()
  *
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-extern const Const_1* const_1;
-////////////////////////////////RealNumber////////////////////////////////
-RealNumber::RealNumber() {
-    type = Number::RealNumber;
+////////////////////////////////Numerical////////////////////////////////
+Numerical::Numerical() {
     byte = nullptr;
     length = power = a = 0;
     sign = true;
 }
 
-RealNumber::RealNumber(std::wstring s, unsigned char acc) {
+Numerical::Numerical(std::wstring s, unsigned char acc) {
     byte = new unsigned char[s.size()];
     sign = true;
     a = acc;
@@ -44,7 +44,7 @@ RealNumber::RealNumber(std::wstring s, unsigned char acc) {
                 goto double_break;
         }
     }
-double_break:
+    double_break:
     for(; index < s.size(); ++index) {
         switch(s[index]) {
             case '.':
@@ -62,7 +62,7 @@ double_break:
 /*
  * May not be very accurate.
  */
-RealNumber::RealNumber(double d, unsigned char acc) {
+Numerical::Numerical(double d, unsigned char acc) {
     sign = d >= 0;
     d = sign ? d : -d;
     auto copy_d = d;
@@ -99,7 +99,7 @@ RealNumber::RealNumber(double d, unsigned char acc) {
 /*
  * Not very accurate either.
  */
-RealNumber::operator double() const {
+Numerical::operator double() const {
     double result_integer = 0;
     double result_float = 0;
 
@@ -119,7 +119,7 @@ RealNumber::operator double() const {
     return result_integer + result_float;
 }
 
-RealNumber::RealNumber(const RealNumber& n) {
+Numerical::Numerical(const Numerical& n) {
     length = n.length;
     power = n.power;
     sign = n.sign;
@@ -128,7 +128,7 @@ RealNumber::RealNumber(const RealNumber& n) {
     a = n.a;
 }
 
-RealNumber::RealNumber(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
+Numerical::Numerical(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
     byte = b;
     length = len;
     power = pow;
@@ -136,7 +136,7 @@ RealNumber::RealNumber(unsigned char* b, int len, int pow, bool s, unsigned char
     a = acc;
 }
 
-RealNumber::RealNumber(const RealNumber* n) {
+Numerical::Numerical(const Numerical* n) {
     length = n->length;
     power = n->power;
     sign = n->sign;
@@ -145,11 +145,11 @@ RealNumber::RealNumber(const RealNumber* n) {
     a = n->a;
 }
 
-RealNumber::~RealNumber() {
+Numerical::~Numerical() {
     free(byte);
 }
 
-std::string RealNumber::toString() const {
+std::string Numerical::toString() const {
     std::string result;
     if(byte != nullptr) {
         if(isNegative())
@@ -189,7 +189,7 @@ std::string RealNumber::toString() const {
     return result;
 }
 
-std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
+std::ostream& operator<<(std::ostream& os, const Numerical& n) {
     os << n.toString() << "\tLength = " << n.length << "\tPower = " << n.power << "\tAccuracy = ";
 
     int temp = n.power - n.length +1;
@@ -212,7 +212,7 @@ std::ostream& operator<<(std::ostream& os, const RealNumber& n) {
     return os;
 }
 //Move operator, which moves this to n.
-void RealNumber::operator<<(RealNumber& n) {
+void Numerical::operator<<(Numerical& n) {
     free(byte);
     byte = n.byte;
     length = n.length;
@@ -223,7 +223,7 @@ void RealNumber::operator<<(RealNumber& n) {
     delete &n;
 }
 
-RealNumber& RealNumber::operator= (const RealNumber& n) {
+Numerical& Numerical::operator= (const Numerical& n) {
     if(this == &n)
         return *this;
     byte = (unsigned char*)realloc(byte, n.length * sizeof(char));
@@ -235,34 +235,34 @@ RealNumber& RealNumber::operator= (const RealNumber& n) {
     return *this;
 }
 
-//Return accuracy in class RealNumber.
-RealNumber* RealNumber::getAccuracy() const {
+//Return accuracy in class Numerical.
+Numerical* Numerical::getAccuracy() const {
     auto b = (unsigned char*)malloc(sizeof(char));
     b[0] = a;
-    return new RealNumber(b, 1, power - length + 1);
+    return new Numerical(b, 1, power - length + 1);
 }
 //Return this + accuracy
-RealNumber* RealNumber::getMaximum() const {
+Numerical* Numerical::getMaximum() const {
     auto acc = getAccuracy();
     auto result = add(*this, *acc);
     delete acc;
     return result;
 }
 //Return this - accuracy
-RealNumber* RealNumber::getMinimum() const {
+Numerical* Numerical::getMinimum() const {
     auto acc = getAccuracy();
     auto result = subtract(*this, *acc);
     delete acc;
     return result;
 }
 //Add error to this and adjust this->length as well as this-> byte.
-bool RealNumber::applyError(const RealNumber* error) {
+bool Numerical::applyError(const Numerical* error) {
     int temp = power - length + 1 - error->power;
     if(temp <= 0) {
         if(temp < 0) {
             auto b = (unsigned char*)malloc(sizeof(char));
             b[0] = a;
-            auto error_1 = new RealNumber(b, 1, power - length + 1);
+            auto error_1 = new Numerical(b, 1, power - length + 1);
             *error_1 << *add(*error_1, *error);
             length += temp;
             a += error_1->byte[0];
@@ -278,7 +278,7 @@ bool RealNumber::applyError(const RealNumber* error) {
     }
 
     if(length < 1) {
-        std::cout << "[RealNumber] Warn: Accumulated too many errors.\n";
+        std::cout << "[Numerical] Warn: Accumulated too many errors.\n";
         power += 1 - length;
         length = 1;
         return true;
@@ -288,11 +288,11 @@ bool RealNumber::applyError(const RealNumber* error) {
     return false;
 }
 
-RealNumber* RealNumber::operator+ (const RealNumber& n) const {
+Numerical* Numerical::operator+ (const Numerical& n) const {
     auto result = add(*this, n);
     result->a = cutLength(result);
     if(a != 0 || n.a != 0) {
-        RealNumber* error;
+        Numerical* error;
         if(a == 0)
             error = n.getAccuracy();
         else if(n.a == 0)
@@ -310,11 +310,11 @@ RealNumber* RealNumber::operator+ (const RealNumber& n) const {
     return result;
 }
 
-RealNumber* RealNumber::operator- (const RealNumber& n) const {
+Numerical* Numerical::operator- (const Numerical& n) const {
     auto result = subtract(*this, n);
     result->a = cutLength(result);
     if(a != 0 || n.a != 0) {
-        RealNumber* error;
+        Numerical* error;
         if(a == 0)
             error = n.getAccuracy();
         else if(n.a == 0)
@@ -332,11 +332,11 @@ RealNumber* RealNumber::operator- (const RealNumber& n) const {
     return result;
 }
 
-RealNumber* RealNumber::operator* (const RealNumber& n) const {
+Numerical* Numerical::operator* (const Numerical& n) const {
     auto result = multiply(*this, n);
     result->a = cutLength(result);
     if(a != 0 || n.a != 0) {
-        RealNumber* error;
+        Numerical* error;
         if(a == 0) {
             auto n2_a = n.getAccuracy();
             error = multiply(*this, *n2_a);
@@ -368,12 +368,12 @@ RealNumber* RealNumber::operator* (const RealNumber& n) const {
     return result;
 }
 
-RealNumber* RealNumber::operator/ (const RealNumber& n) const {
+Numerical* Numerical::operator/ (const Numerical& n) const {
     auto result = divide(*this, n);
     if(result != nullptr) {
         result->a += cutLength(result);
         if(a != 0 || n.a != 0) {
-            RealNumber* error;
+            Numerical* error;
             if(a == 0) {
                 auto n2_a = n.getAccuracy();
                 auto temp_1 = multiply(*this, *n2_a);
@@ -416,10 +416,62 @@ RealNumber* RealNumber::operator/ (const RealNumber& n) const {
     return result;
 }
 /*
+ * Using Newton's method
+ * May return nullptr.
+ */
+Numerical* Numerical::operator^ (const Numerical& n) const {
+    Numerical* result = nullptr;
+    if(isZero()) {
+        if(!n.isZero())
+            result = getZero();
+    }
+    else if(isPositive()) {
+        if(n.isInteger()) {
+            auto n2_copy = new Numerical(n);
+
+            result = getOne();
+            if(n.isNegative()) {
+                auto temp = reciprocal(*this);
+                while(*n2_copy != *const_1->_0) {
+                    *n2_copy -= *const_1->_1;
+                    *result *= *temp;
+                }
+                delete temp;
+            }
+            else {
+                while(*n2_copy != *const_1->_0) {
+                    *n2_copy -= *const_1->_1;
+                    *result *= *this;
+                }
+            }
+            delete n2_copy;
+        }
+        else {
+            auto temp_result = getOne();
+            auto temp_1 = ln(*this);
+            *temp_1 *= n;
+            *temp_1 += *const_1->_1;
+            bool go_on;
+            do {
+                result = ln(*temp_result);
+                result->sign = !result->sign;
+                *result += *temp_1;
+                *result *= *temp_result;
+                go_on = *result == *temp_result;
+                delete temp_result;
+                temp_result = result;
+            } while(go_on);
+            result->a += 1;
+            delete temp_1;
+        }
+    }
+    return result;
+}
+/*
  * Warning: n1 can not be temp object.
  */
-void RealNumber::operator+= (const RealNumber& n) {
-    RealNumber* p_result = *this + n;
+void Numerical::operator+= (const Numerical& n) {
+    Numerical* p_result = *this + n;
     free(byte);
     byte = p_result->byte;
     length = p_result->length;
@@ -430,8 +482,8 @@ void RealNumber::operator+= (const RealNumber& n) {
     delete p_result;
 }
 
-void RealNumber::operator-= (const RealNumber& n) {
-    RealNumber* p_result = *this - n;
+void Numerical::operator-= (const Numerical& n) {
+    Numerical* p_result = *this - n;
     free(byte);
     byte = p_result->byte;
     length = p_result->length;
@@ -442,8 +494,8 @@ void RealNumber::operator-= (const RealNumber& n) {
     delete p_result;
 }
 
-void RealNumber::operator*= (const RealNumber& n) {
-    RealNumber* p_result = *this * n;
+void Numerical::operator*= (const Numerical& n) {
+    Numerical* p_result = *this * n;
     free(byte);
     byte = p_result->byte;
     length = p_result->length;
@@ -456,8 +508,8 @@ void RealNumber::operator*= (const RealNumber& n) {
 /*
  * n2 mustn't be zero.
  */
-void RealNumber::operator/= (const RealNumber& n) {
-    RealNumber* p_result = *this / n;
+void Numerical::operator/= (const Numerical& n) {
+    Numerical* p_result = *this / n;
     free(byte);
     byte = p_result->byte;
     length = p_result->length;
@@ -468,7 +520,13 @@ void RealNumber::operator/= (const RealNumber& n) {
     delete p_result;
 }
 
-bool RealNumber::operator> (const RealNumber& n) const {
+void Numerical::operator^= (const Numerical& n) {
+    Numerical* p_result = *this ^ n;
+    *this << *p_result;
+    delete p_result;
+}
+
+bool Numerical::operator> (const Numerical& n) const {
     //Judge from sign.
     if(isPositive()) {
         if(n.isZero() || n.isNegative())
@@ -488,14 +546,14 @@ bool RealNumber::operator> (const RealNumber& n) const {
         result = false;
     else {
         //The only method left.
-        RealNumber* p_result = *this - n;
+        Numerical* p_result = *this - n;
         result = p_result->sign;
         delete p_result;
     }
     return result;
 }
 
-bool RealNumber::operator< (const RealNumber& n) const {
+bool Numerical::operator< (const Numerical& n) const {
     //Judge from sign.
     if(isPositive()) {
         if(n.isZero() || n.isNegative())
@@ -515,30 +573,30 @@ bool RealNumber::operator< (const RealNumber& n) const {
         result = true;
     else {
         //The only method left.
-        RealNumber* p_result = *this - n;
+        Numerical* p_result = *this - n;
         result = p_result->isNegative();
         delete p_result;
     }
     return result;
 }
 
-bool RealNumber::operator>= (const RealNumber& n) const {
+bool Numerical::operator>= (const Numerical& n) const {
     return !(*this < n);
 }
 
-bool RealNumber::operator<= (const RealNumber& n) const {
+bool Numerical::operator<= (const Numerical& n) const {
     return !(*this > n);
 }
 
-bool RealNumber::operator== (const RealNumber& n) const {
+bool Numerical::operator== (const Numerical& n) const {
     if(power != n.power)
         return false;
     if(sign != n.sign)
         return false;
     if(a != n.a)
         return false;
-    const RealNumber* longer;
-    const RealNumber* shorter;
+    const Numerical* longer;
+    const Numerical* shorter;
     if(length > n.length) {
         longer = this;
         shorter = &n;
@@ -559,121 +617,55 @@ bool RealNumber::operator== (const RealNumber& n) const {
     return true;
 }
 
-bool RealNumber::operator!= (const RealNumber& n) const {
+bool Numerical::operator!= (const Numerical& n) const {
     return !(*this == n);
 }
-/*
- * Using Newton's method
- * May return nullptr.
- */
-RealNumber* RealNumber::operator^ (const RealNumber& n) const {
-    RealNumber* result = nullptr;
-    if(isZero()) {
-        if(!n.isZero())
-            result = const_1->getZero();
-    }
-    else if(isPositive()) {
-        if(n.isInteger()) {
-            auto n2_copy = new RealNumber(n);
 
-            result = const_1->getOne();
-            if(n.isNegative()) {
-                auto temp = reciprocal(*this);
-                while(*n2_copy != *const_1->_0) {
-                    *n2_copy -= *const_1->_1;
-                    *result *= *temp;
-                }
-                delete temp;
-            }
-            else {
-                while(*n2_copy != *const_1->_0) {
-                    *n2_copy -= *const_1->_1;
-                    *result *= *this;
-                }
-            }
-            delete n2_copy;
-        }
-        else {
-            auto temp_result = const_1->getOne();
-            auto temp_1 = ln(*this);
-            *temp_1 *= n;
-            *temp_1 += *const_1->_1;
-            bool go_on;
-            do {
-                result = ln(*temp_result);
-                result->sign = !result->sign;
-                *result += *temp_1;
-                *result *= *temp_result;
-                go_on = *result == *temp_result;
-                delete temp_result;
-                temp_result = result;
-            } while(go_on);
-            result->a += 1;
-            delete temp_1;
-        }
-    }
-    return result;
-}
-
-void RealNumber::operator^= (const RealNumber& n) {
-    RealNumber* p_result = *this ^ n;
-    *this << *p_result;
-    delete p_result;
-}
-
-RealNumber* RealNumber::operator- () const {
-    auto result = new RealNumber(this);
+Numerical* Numerical::operator- () const {
+    auto result = new Numerical(this);
     result->sign = !result->sign;
     return result;
 }
 ////////////////////////////////Helper functions/////////////////////////////////////
-//Return a real number between 0 and 1.
-RealNumber* randomRealNumber() {
-    srand(clock());
-    srand(random());
-    auto result = new RealNumber((double)random());
-    *result /= *const_1->R_MAX;
-
-    return result;
+Numerical* getZero() {
+    return new Numerical(const_1->_0);
 }
-//Return a real number lowerBound and upperBound.
-RealNumber* randomRealNumber(RealNumber* lowerBound, RealNumber* upperBound) {
-    RealNumber* random = randomRealNumber();
-    auto result = *lowerBound - *upperBound;
-    *random *= *random;
-    *result += *lowerBound;
-    delete random;
 
-    return result;
+Numerical* getOne() {
+    return new Numerical(const_1->_1);
+}
+
+Numerical* getTwo() {
+    return new Numerical(const_1->_2);
 }
 //////////////////////////////Process functions////////////////////////////////////////
 /*
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
  */
-RealNumber* add (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* result;
+Numerical* add (const Numerical& n1, const Numerical& n2) {
+    Numerical* result;
     if(n1.isZero())
-        result = new RealNumber(n2);
+        result = new Numerical(n2);
     else if(n2.isZero())
-        result = new RealNumber(n1);
+        result = new Numerical(n1);
     else if (n1.sign != n2.sign) {
-        RealNumber* shallow_copy;
+        Numerical* shallow_copy;
         if (n1.sign) {
-            shallow_copy = new RealNumber(n2.byte, n2.length, n2.power, true);
+            shallow_copy = new Numerical(n2.byte, n2.length, n2.power, true);
             result = n1 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
         else {
-            shallow_copy = new RealNumber(n1.byte, n1.length, n1.power, true);
+            shallow_copy = new Numerical(n1.byte, n1.length, n1.power, true);
             result = n2 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
         delete shallow_copy;
     }
     else {
-        const RealNumber* big;
-        const RealNumber* small;
+        const Numerical* big;
+        const Numerical* small;
         if (n1.power > n2.power) {
             big = &n1;
             small = &n2;
@@ -719,22 +711,22 @@ RealNumber* add (const RealNumber& n1, const RealNumber& n2) {
         else
             byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
-        result = new RealNumber(byte, length, power, big->sign);
+        result = new Numerical(byte, length, power, big->sign);
     }
     return result;
 }
 
-RealNumber* subtract (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* result;
+Numerical* subtract (const Numerical& n1, const Numerical& n2) {
+    Numerical* result;
     ///////////////////////////////////Deal with Binderies////////////////////////////////
-    RealNumber* shallow_copy = nullptr;
+    Numerical* shallow_copy = nullptr;
     if(n1.isZero())
         result = -n2;
     else if(n2.isZero())
-        result = new RealNumber(n1);
+        result = new Numerical(n1);
     else if (n1.sign) {
         if (!n2.sign) {
-            shallow_copy = new RealNumber(n2.byte, n2.length, n2.power, true);
+            shallow_copy = new Numerical(n2.byte, n2.length, n2.power, true);
             result = n1 + *shallow_copy;
             shallow_copy->byte = nullptr;
         }
@@ -769,18 +761,18 @@ RealNumber* subtract (const RealNumber& n1, const RealNumber& n2) {
                 result->sign = false;
             }
             else
-                result = new RealNumber((unsigned char*)byte, length, unitIndex, true);
+                result = new Numerical((unsigned char*)byte, length, unitIndex, true);
             cutZero(result);
         }
     }
     else {
-        shallow_copy = new RealNumber(n1.byte, n1.length, n1.power, true);
+        shallow_copy = new Numerical(n1.byte, n1.length, n1.power, true);
         if (n2.sign) {
             result = *shallow_copy + n2;
             result->sign = false;
         }
         else {
-            auto shallow_copy_1 = new RealNumber(n2.byte, n2.length, n2.power, true);
+            auto shallow_copy_1 = new Numerical(n2.byte, n2.length, n2.power, true);
             result = *shallow_copy_1 - *shallow_copy;
             shallow_copy_1->byte = nullptr;
             delete shallow_copy_1;
@@ -792,16 +784,16 @@ RealNumber* subtract (const RealNumber& n1, const RealNumber& n2) {
     return result;
 }
 
-RealNumber* multiply (const RealNumber& n1, const RealNumber& n2) {
-    RealNumber* result;
+Numerical* multiply (const Numerical& n1, const Numerical& n2) {
+    Numerical* result;
     if(n1 == *const_1->_1)
-        result = new RealNumber(n2);
+        result = new Numerical(n2);
     else if(n2 == *const_1->_1)
-        result = new RealNumber(n1);
+        result = new Numerical(n1);
     else {
         //In this case, big has more digits after the dot.
-        const RealNumber* big;
-        const RealNumber* small;
+        const Numerical* big;
+        const Numerical* small;
         if (n1.length - n1.power > n2.length - n2.power) {
             big = &n1;
             small = &n2;
@@ -843,24 +835,24 @@ RealNumber* multiply (const RealNumber& n1, const RealNumber& n2) {
         else
             byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
-        result = new RealNumber(byte, length, power, n1.sign == n2.sign);
+        result = new Numerical(byte, length, power, n1.sign == n2.sign);
     }
     return result;
 }
 
-RealNumber* divide (const RealNumber& n1, const RealNumber& n2) {
+Numerical* divide (const Numerical& n1, const Numerical& n2) {
     if(n2.byte[0] == 0)
         return nullptr;
 
-    RealNumber* result;
+    Numerical* result;
     if(n1.isZero() || n2.isZero())
-        result = const_1->getZero();
+        result = getZero();
     else if(n2 == *const_1->_1)
-        result = new RealNumber(n1);
+        result = new Numerical(n1);
     else {
-        result = new RealNumber();
-        auto n1_copy = new RealNumber(n1);
-        auto n2_copy = new RealNumber(n2);
+        result = new Numerical();
+        auto n1_copy = new Numerical(n1);
+        auto n2_copy = new Numerical(n2);
         n1_copy->sign = n2_copy->sign = true;
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, we will calculate it accurately later.
@@ -896,7 +888,7 @@ RealNumber* divide (const RealNumber& n1, const RealNumber& n2) {
         }
         //1 comes from algorithm of divide()
         result->a = 1;
-double_break:
+        double_break:
         delete n1_copy;
         delete n2_copy;
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -923,7 +915,7 @@ double_break:
  * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
  * Return true array is cut.
  */
-bool cutLength(RealNumber* n) {
+bool cutLength(Numerical* n) {
     bool result = false;
     int lastCutIndex = n->length;
 
@@ -941,7 +933,7 @@ bool cutLength(RealNumber* n) {
 /*
  * Cut zeros from the beginning.
  */
-void cutZero(RealNumber* n) {
+void cutZero(Numerical* n) {
     int firstCutIndex = 0;
     //Ignore zeros from the first index.
     while(n->byte[firstCutIndex] == 0 && firstCutIndex < n->length - 1)
@@ -960,4 +952,492 @@ void cutZero(RealNumber* n) {
         else
             n->power -= firstCutIndex;
     }
+}
+//////////////////////////////Basic Operations////////////////////////////////////////
+//Return a real number between 0 and 1.
+Numerical* randomNumerical() {
+    srand(clock());
+    srand(random());
+    auto result = new Numerical((double)random());
+    *result /= *const_1->R_MAX;
+
+    return result;
+}
+//Return a real number lowerBound and upperBound.
+Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound) {
+    Numerical* random = randomNumerical();
+    auto result = *lowerBound - *upperBound;
+    *random *= *random;
+    *result += *lowerBound;
+    delete random;
+
+    return result;
+}
+
+Numerical* reciprocal(const Numerical& n) {
+    return *const_1->_1 / n;
+}
+/*
+ * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
+ * (sqrt(n + a) - sqrt(n)) for error.
+ */
+Numerical* sqrt_light(const Numerical& n) {
+    if(!n.sign)
+        return nullptr;
+    auto MachinePrecision = const_1->GlobalPrecision;
+    auto copy_n = new Numerical(n);
+    //Let n < 1 so as to control error.
+    char add_power = 0;
+    if(copy_n->power > 0) {
+        if(copy_n->power % 2 == 0) {
+            add_power = char(copy_n->power / 2 + 1);
+            copy_n->power = -2;
+        }
+        else {
+            add_power = char((copy_n->power + 1) / 2);
+            copy_n->power = -1;
+        }
+    }
+
+    Numerical* result = getOne();
+    Numerical* temp;
+    //3.33 is the big approximate value of ln(10)/ln(2)
+    for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
+        temp = divide(*copy_n, *result);
+        *result += *temp;
+        *result /= *const_1->_2;
+        delete temp;
+    }
+    delete copy_n;
+    result->power += add_power;
+    result->a = 1;
+
+    return result;
+}
+
+Numerical* sqrt(const Numerical& n) {
+    auto result  = sqrt_light(n);
+    if(n.a != 0) {
+        auto n_error = n.getMinimum();
+        auto error = sqrt_light(*n_error);
+        if(error == nullptr) {
+            delete n_error;
+            n_error = n.getMaximum();
+            error = sqrt_light(*n_error);
+        }
+        *error -= *result;
+        error->sign = true;
+
+        result->applyError(error);
+
+        delete n_error;
+        delete error;
+    }
+    return result;
+}
+//TODO not completed: Use gamma function.
+Numerical* factorial(const Numerical& n) {
+    if(!n.sign) {
+        std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
+        return nullptr;
+    }
+
+    Numerical* result;
+    if(n.isInteger()) {
+        result = getOne();
+        auto temp = getOne();
+        while(*temp < n) {
+            *temp += *const_1->_1;
+            *result *= *temp;
+        }
+        delete temp;
+        return result;
+    }
+    return nullptr;
+}
+
+Numerical* ln_light(const Numerical& n) {
+    if(!n.isPositive())
+        return nullptr;
+    auto result = getZero();
+    if(n != *const_1->_1) {
+        auto temp_0 = add(n, *const_1->_1);
+        auto temp_1 = subtract(n, *const_1->_1);
+        *temp_1 /= *temp_0;
+        auto copy_temp_1 = new Numerical(temp_1);
+        auto temp_2 = getOne();
+
+        copy_temp_1->a = temp_1->a = 0;
+        while(true) {
+            //Calculate one term of the taylor series.
+            auto temp = *temp_1 / *temp_2;
+            temp->a = 0;
+            *result += *temp;
+            delete temp;
+            //Here the temp means the criteria of break.
+            *temp_1 *= *copy_temp_1;
+            *temp_2 += *const_1->_1;
+            temp = *temp_1 / *temp_2;
+            int temp_power = temp->power;
+            delete temp;
+
+            if(result->power - temp_power >= const_1->GlobalPrecision)
+                break;
+            //Prepare for next calculate.
+            *temp_1 *= *copy_temp_1;
+            *temp_2 += *const_1->_1;
+        }
+        *result *= *const_1->_2;
+        delete temp_0;
+        delete temp_1;
+        delete copy_temp_1;
+        delete temp_2;
+    }
+    return result;
+}
+
+Numerical* ln(const Numerical& n) {
+    auto result = ln_light(n);
+    if(n.a != 0) {
+        auto n_error = n.getMinimum();
+        auto error = ln_light(*n_error);
+        if(error == nullptr) {
+            delete n_error;
+            n_error = n.getMaximum();
+            error = ln_light(*n_error);
+        }
+        *error -= *result;
+        error->sign = true;
+
+        result->applyError(error);
+
+        delete n_error;
+        delete error;
+    }
+    return result;
+}
+//Return log_a n
+Numerical* log(const Numerical& n, const Numerical& a) {
+    if(a == *const_1->_1)
+        return nullptr;
+
+    auto ln_n = ln(n);
+    if(ln_n == nullptr)
+        return nullptr;
+
+    auto ln_a = ln(a);
+    if(ln_a == nullptr) {
+        delete ln_n;
+        return nullptr;
+    }
+    *ln_n /= *ln_a;
+    delete ln_a;
+    return ln_n;
+}
+
+Numerical* exp(const Numerical& n) {
+    auto result = getOne();
+    auto temp = new Numerical(n);
+    auto rank = getOne();
+    while(true) {
+        *temp /= *rank;
+        if(*temp < *const_1->StepSize)
+            break;
+        *result += *temp;
+        *temp *= n;
+        *rank += *const_1->_1;
+    }
+    return result;
+}
+
+Numerical* pow(const Numerical& n, const Numerical& a) {
+    auto result = ln(n);
+    *result *= a;
+    *result << *exp(*result);
+    return result;
+}
+/*
+ * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
+ * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
+ */
+Numerical* cos(const Numerical& n) {
+    auto result = getOne();
+    if(n != *const_1->_0) {
+        auto MachinePrecision = const_1->GlobalPrecision;
+        auto ONE = const_1->_1;
+
+        auto square_n = n * n;
+        auto temp_1 = new Numerical(square_n);
+        auto temp_2 = getTwo();
+        auto rank = getTwo();
+        bool sign = false;
+
+        while(true) {
+            //Calculate one term of the taylor series.
+            auto temp = *temp_1 / *temp_2;
+            temp->sign = sign;
+            *result += *temp;
+            //Here the temp means the criteria of break.
+            *temp *= n;
+            *rank += *ONE;
+            *temp /= *rank;
+            int temp_power = temp->power;
+            delete temp;
+
+            if(result->power - temp_power >= MachinePrecision)
+                break;
+            //Prepare for next calculate.
+            sign = !sign;
+            *temp_1 *= *square_n;
+            *temp_2 *= *rank;
+            *rank += *ONE;
+            *temp_2 *= *rank;
+        }
+        delete square_n;
+        delete temp_1;
+        delete temp_2;
+        delete rank;
+    }
+    return result;
+}
+
+Numerical* sin(const Numerical& n) {
+    auto result = getZero();
+    if(n != *const_1->_0) {
+        auto MachinePrecision = const_1->GlobalPrecision;
+        auto ONE = const_1->_1;
+
+        auto square_n = n * n;
+        auto temp_1 = new Numerical(n);
+        auto temp_2 = getOne();
+        auto rank = getOne();
+        bool sign = true;
+
+        while(true) {
+            //Calculate one term of the taylor series.
+            auto temp = *temp_1 / *temp_2;
+            temp->sign = sign;
+            *result += *temp;
+            //Here the temp means the criteria of break.
+            *temp *= n;
+            *rank += *ONE;
+            *temp /= *rank;
+            int temp_power = temp->power;
+            delete temp;
+
+            if(result->power - temp_power >= MachinePrecision)
+                break;
+            //Prepare for next calculate.
+            sign = !sign;
+            *temp_1 *= *square_n;
+            *temp_2 *= *rank;
+            *rank += *ONE;
+            *temp_2 *= *rank;
+        }
+        delete square_n;
+        delete temp_1;
+        delete temp_2;
+        delete rank;
+    }
+    return result;
+}
+
+Numerical* tan(const Numerical& n) {
+    auto cos_n = cos(n);
+    if(cos_n == nullptr)
+        return nullptr;
+    auto sin_n = sin(n);
+    *sin_n /= *cos_n;
+    delete cos_n;
+    return sin_n;
+}
+
+Numerical* sec(const Numerical& n) {
+    auto cos_n = cos(n);
+    auto result = reciprocal(*cos_n);
+    delete cos_n;
+    return result;
+}
+
+Numerical* csc(const Numerical& n) {
+    auto sin_n = sin(n);
+    auto result = reciprocal(*sin_n);
+    delete sin_n;
+    return result;
+}
+
+Numerical* cot(const Numerical& n) {
+    auto sin_n = sin(n);
+    if(sin_n == nullptr)
+        return nullptr;
+    auto cos_n = cos(n);
+    *cos_n /= *sin_n;
+    delete sin_n;
+    return cos_n;
+}
+
+Numerical* arccos(const Numerical& n) {
+    return bisectionMethod(cos, n, *const_1->_0, *const_2->PI, *const_1->_1, *const_1->Minus_1);
+}
+
+Numerical* arcsin(const Numerical& n) {
+    return bisectionMethod(sin, n, *const_2->Minus_PI_2, *const_2->PI_2, *const_1->Minus_1, *const_1->_1);
+}
+
+Numerical* arctan(const Numerical& n) {
+    auto temp = n * n;
+    *temp += *const_1->_1;
+    auto sqrt_temp = sqrt(*temp);
+    delete temp;
+
+    temp = n / *sqrt_temp;
+    delete sqrt_temp;
+
+    auto result = arcsin(*temp);
+    result->sign = n.sign;
+    delete temp;
+    return result;
+}
+
+Numerical* arcsec(const Numerical& n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arccos(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arccsc(const Numerical& n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arcsin(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arccot(const Numerical& n) {
+    auto temp = reciprocal(n);
+    if(temp == nullptr)
+        return temp;
+    auto result = arctan(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* cosh(const Numerical& n) {
+    auto result = exp(n);
+    auto temp = reciprocal(*result);
+    *result += *temp;
+    *result /= *const_1->_2;
+    delete temp;
+    return result;
+}
+
+Numerical* sinh(const Numerical& n) {
+    auto result = exp(n);
+    auto temp = reciprocal(*result);
+    *result -= *temp;
+    *result /= *const_1->_2;
+    delete temp;
+    return result;
+}
+
+Numerical* tanh(const Numerical& n) {
+    auto result = exp(n);
+    auto temp = reciprocal(*result);
+    auto temp1 = *result + *temp;
+    *result -= *temp;
+    *result /= *temp1;
+    delete temp;
+    delete temp1;
+    return result;
+}
+
+Numerical* sech(const Numerical& n) {
+    auto result = getTwo();
+    auto temp = exp(n);
+    auto temp1 = reciprocal(*temp);
+    *temp += *temp1;
+    *result /= *temp;
+    delete temp;
+    delete temp1;
+    return result;
+}
+
+Numerical* csch(const Numerical& n) {
+    auto result = getTwo();
+    auto temp = exp(n);
+    auto temp1 = reciprocal(*temp);
+    *temp -= *temp1;
+    *result /= *temp;
+    delete temp;
+    delete temp1;
+    return result;
+}
+
+Numerical* coth(const Numerical& n) {
+    auto result = exp(n);
+    auto temp = reciprocal(*result);
+    auto temp1 = *result - *temp;
+    *result += *temp;
+    *result /= *temp1;
+    delete temp;
+    delete temp1;
+    return result;
+}
+
+Numerical* arccosh(const Numerical& n) {
+    auto temp = n * n;
+    *temp -= *const_1->_1;
+    *temp << *sqrt(*temp);
+    *temp += n;
+    auto result = ln(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arcsinh(const Numerical& n) {
+    auto temp = n * n;
+    *temp += *const_1->_1;
+    *temp << *sqrt(*temp);
+    *temp += n;
+    auto result = ln(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arctanh(const Numerical& n) {
+    auto result = *const_1->_1 + n;
+    auto temp = *const_1->_1 - n;
+    *result /= *temp;
+    *result << *ln(*result);
+    *result /= *const_1->_2;
+    delete temp;
+    return result;
+}
+
+Numerical* arcsech(const Numerical& n) {
+    auto temp = reciprocal(n);
+    auto result = arccosh(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arccsch(const Numerical& n) {
+    auto temp = reciprocal(n);
+    auto result = arcsinh(*temp);
+    delete temp;
+    return result;
+}
+
+Numerical* arccoth(const Numerical& n) {
+    auto result = n + *const_1->_1;
+    auto temp = n - *const_1->_1;
+    *result /= *temp;
+    *result << *ln(*result);
+    *result /= *const_1->_2;
+    delete temp;
+    return result;
 }

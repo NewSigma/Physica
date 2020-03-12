@@ -4,11 +4,22 @@
 #ifndef PHYSICA_INDETERMINATE_H
 #define PHYSICA_INDETERMINATE_H
 
-#include "Number.h"
+#include "AbstractNum.h"
 
-class Indeterminate : public Number {
+class Indeterminate : public AbstractNum {
 public:
+    static Indeterminate* getInstance();
+    virtual AbstractNum* operator+(const AbstractNum& n) const;
+    virtual AbstractNum* operator-(const AbstractNum& n) const;
+    virtual AbstractNum* operator*(const AbstractNum& n) const;
+    virtual AbstractNum* operator/(const AbstractNum& n) const;
+    virtual AbstractNum* operator^(const AbstractNum& n) const;
+    virtual AbstractNum* operator-() const;
+    virtual bool operator== (const AbstractNum& n) const;
+private:
+    static Indeterminate* instance;
     Indeterminate();
+    virtual ~Indeterminate();
 };
 
 #endif

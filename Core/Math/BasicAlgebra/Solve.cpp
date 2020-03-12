@@ -10,7 +10,7 @@ extern const Const_1* const_1;
  * Solve the x when n = func(x)
  * May return nullptr.
  */
-RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumber& n, const RealNumber& x1, const RealNumber& x2)    {
+Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n, const Numerical& x1, const Numerical& x2)    {
     auto y1 = func(x1);
     auto y2 = func(x2);
     auto result = bisectionMethod(func, n, x1, x2, *y1, *y2);
@@ -19,11 +19,11 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumbe
     return result;
 }
 //May return nullptr.
-RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumber& n, const RealNumber& x1, const RealNumber& x2, const RealNumber& y1, const RealNumber& y2) {
+Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n, const Numerical& x1, const Numerical& x2, const Numerical& y1, const Numerical& y2) {
     if(n == y1)
-        return new RealNumber(x1);
+        return new Numerical(x1);
     if(n == y2)
-        return new RealNumber(x2);
+        return new Numerical(x2);
 
     auto delta_left = subtract(n, y1);
     auto delta_right = subtract(n, y2);
@@ -34,15 +34,15 @@ RealNumber* bisectionMethod(RealNumber* func(const RealNumber&), const RealNumbe
 
     auto result = add(x1, x2);
     *result /= *const_1->_2;
-    RealNumber* y_result;
+    Numerical* y_result;
 
     auto error = subtract(y1, y2);
     error->sign = true;
     *error << *divide(*error, *const_1->_2);
 
-    auto x_left = new RealNumber(x1);
-    auto x_right = new RealNumber(x2);
-    auto y_left = new RealNumber(y1);
+    auto x_left = new Numerical(x1);
+    auto x_right = new Numerical(x2);
+    auto y_left = new Numerical(y1);
 
     delta_left = subtract(n, *y_left);
     bool delta_left_sign = delta_left->sign;

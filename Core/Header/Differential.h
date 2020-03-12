@@ -1,14 +1,10 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "RealNumber.h"
+#include "AbstractNum.h"
 
-enum DifferentialMethod{
-    Identify
-};
-
-RealNumber* D_double_point(RealNumber* func(const RealNumber&), const RealNumber& x0);
-RealNumber* D_right(RealNumber* func(const RealNumber&), const RealNumber& x0);
-RealNumber* D_left(RealNumber* func(const RealNumber&), const RealNumber& x0);
+AbstractNum* D_double_point(AbstractNum* func(const AbstractNum&), const AbstractNum& x0);
+AbstractNum* D_right(AbstractNum* func(const AbstractNum&), const AbstractNum& x0);
+AbstractNum* D_left(AbstractNum* func(const AbstractNum&), const AbstractNum& x0);
 
 #endif

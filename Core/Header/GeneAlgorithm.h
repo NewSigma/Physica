@@ -2,7 +2,7 @@
 #define _Physica_C_GeneAlgorithm_H
 
 #include <ctime>
-#include "RealNumber.h"
+#include "Numerical.h"
 
 class GeneAlgorithm {
 public:
@@ -10,11 +10,11 @@ public:
         LinearChoose,
         RandomChoose
     };
-	GeneAlgorithm(int population, RealNumber* crossoverRate, RealNumber* mutationRate);
+	GeneAlgorithm(int population, Numerical* crossoverRate, Numerical* mutationRate);
     ~GeneAlgorithm();
 
-	void initFunction(RealNumber* func(RealNumber*), RealNumber* lower, RealNumber* upper, ChooseMode mode);
-	RealNumber** getExtremalPoint();
+	void initFunction(Numerical* func(Numerical*), Numerical* lower, Numerical* upper, ChooseMode mode);
+	Numerical** getExtremalPoint();
 	void setMaxGenerations(int maxGenerations);
 	void setMaxTime(int maxTime);
 	void print();
@@ -23,15 +23,15 @@ private:
 	//Algorithm basic args.
 	//The size of initial points we should choose.
 	int population;
-    RealNumber* crossoverRate;
-    RealNumber* mutationRate;
+    Numerical* crossoverRate;
+    Numerical* mutationRate;
 	//Function args.
-    RealNumber* (*fitnessFunction)(RealNumber*);
-    RealNumber* lowerBound;
-    RealNumber* upperBound;
-    RealNumber* regionLength;
+    Numerical* (*fitnessFunction)(Numerical*);
+    Numerical* lowerBound;
+    Numerical* upperBound;
+    Numerical* regionLength;
 	//Save
-    RealNumber** points;
+    Numerical** points;
 	//Stopping args
 	int generations;
 	clock_t startTime{};

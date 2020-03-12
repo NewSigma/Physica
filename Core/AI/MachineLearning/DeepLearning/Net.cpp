@@ -1,4 +1,6 @@
 #include "../../../Header/Net.h"
+#include "../../../Header/Numerical.h"
+
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
@@ -60,7 +62,7 @@ void Net::Connections::disconnect(int from_layer, int from_node, int to_layer, i
                 ite->second.erase(temp_ite);
                 break;
             }
-        ((Node*)to)->vector->numbers[inter] = randomRealNumber();
+        ((Node*)to)->vector->numbers[inter] = new RealNum(randomNumerical());
     }
 }
 //structure[i] is number of nodes of the i th layer. This net has structure.size() layers.

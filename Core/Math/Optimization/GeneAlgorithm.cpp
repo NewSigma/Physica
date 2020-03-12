@@ -1,15 +1,16 @@
 #include "../../Header/GeneAlgorithm.h"
+#include "../../Header/Numerical.h"
 #include <iostream>
 /*
  * Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.
  */
 //TODO Debug
-GeneAlgorithm::GeneAlgorithm(int pop, RealNumber* crossover, RealNumber* mutation) {
+GeneAlgorithm::GeneAlgorithm(int pop, Numerical* crossover, Numerical* mutation) {
 	population = pop;
 	crossoverRate = crossover;
 	mutationRate = mutation;
-	points = new RealNumber*[population];
+	points = new Numerical*[population];
     generations = 0;
     maxGenerations = 100;
     maxTime = 600000;
@@ -20,22 +21,22 @@ GeneAlgorithm::~GeneAlgorithm() {
     delete regionLength;
 }
 
-void GeneAlgorithm::initFunction(RealNumber* func(RealNumber*), RealNumber* lower, RealNumber* upper, ChooseMode mode) {
+void GeneAlgorithm::initFunction(Numerical* func(Numerical*), Numerical* lower, Numerical* upper, ChooseMode mode) {
 	fitnessFunction = func;
 	lowerBound = lower;
 	upperBound = upper;
-    regionLength = *upperBound - *lowerBound;
+    regionLength = (Numerical*)(*upperBound - *lowerBound);
 	//In case upperBound < lowerBound.
 	regionLength->sign = true;
 
-	RealNumber* element;
+	Numerical* element;
 	if (mode == LinearChoose) {
-        auto number_pop = new RealNumber(population);
+        auto number_pop = new Numerical(new Numerical(population));
         auto stepLength = *regionLength / *number_pop;
-        RealNumber* number_i;
+        Numerical* number_i;
 		for (int i = 0; i < population; i++) {
-		    number_i = new RealNumber(i);
-		    element = *stepLength * *number_i;
+		    number_i = new Numerical(i);
+		    element = (Numerical*)(*stepLength * *number_i);
 		    *element += *lowerBound;
             points[i] = element;
             delete number_i;
@@ -45,15 +46,15 @@ void GeneAlgorithm::initFunction(RealNumber* func(RealNumber*), RealNumber* lowe
 	}
 	else if (mode == RandomChoose) {
 		for (int i = 0; i < population; i++) {
-			element = randomRealNumber();
+			element = new Numerical(randomNumerical());
 			*element *= *regionLength;
 			*element += *lowerBound;
 			points[i] = element;
 		}
 	}
 }
-//Get the maximum point. Mutiply the function by a -1 to get the minimum.
-RealNumber** GeneAlgorithm::getExtremalPoint() {
+//Get the maximum point. Multiply the function by a -1 to get the minimum.
+Numerical** GeneAlgorithm::getExtremalPoint() {
 	if (fitnessFunction == nullptr) {
 		std::cout << "Uninitialized function.\n";
 		return nullptr;
@@ -69,7 +70,7 @@ RealNumber** GeneAlgorithm::getExtremalPoint() {
 
 void GeneAlgorithm::overCross() {
 	for (int i = 0; i < population; i++) {
-        auto r = randomRealNumber();
+        auto r = randomNumerical();
 		if (*crossoverRate > *r) {
 			long randomIndex1 = random() % population;
 			long randomIndex2 = random() % population;
@@ -77,7 +78,7 @@ void GeneAlgorithm::overCross() {
             auto random2 = points[randomIndex2];
 
             delete r;
-			r = randomRealNumber();
+			r = randomNumerical();
             //Whether random2 > random1 or not is not important.
             auto child = *random2 - *random1;
             *child *= *r;
@@ -100,10 +101,10 @@ void GeneAlgorithm::overCross() {
 }
 
 void GeneAlgorithm::mutation() {
-    RealNumber* r = randomRealNumber();
+    Numerical* r = randomNumerical();
 	if (*mutationRate > *r) {
 		long randomIndex = random() % population;
-		*points[randomIndex] = *randomRealNumber();
+		*points[randomIndex] = *randomNumerical();
         *points[randomIndex] *= *regionLength;
         *points[randomIndex] += *lowerBound;
 	}
@@ -133,8 +134,8 @@ void GeneAlgorithm::setMaxTime(int time) {
 void GeneAlgorithm::print() {
 	if(fitnessFunction != nullptr) {
         for (int i = 0; i < population; i++) {
-            RealNumber* point = points[i];
-            RealNumber* value = fitnessFunction(point);
+            Numerical* point = points[i];
+            Numerical* value = fitnessFunction(point);
             std::cout << *point << " " << *value << std::endl;
             delete value;
         }

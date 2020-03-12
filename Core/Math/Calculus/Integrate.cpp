@@ -1,6 +1,6 @@
 #include "../../Header/Integrate.h"
 
-Number* Integrate(Number* func(Number*), Number* x0, Number* x1, IntegrateMethod method) {
+AbstractNum* Integrate(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1, IntegrateMethod method) {
     switch(method) {
         case Ladder:
             return ladder(func, x0, x1);
@@ -9,10 +9,10 @@ Number* Integrate(Number* func(Number*), Number* x0, Number* x1, IntegrateMethod
     }
 }
 
-Number* rectangular(Number* func(Number*), Number* x0, Number* x1) {
+AbstractNum* rectangular(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1) {
     return nullptr;
 }
 
-Number* ladder(Number* func(Number*), Number* x0, Number* x1) {
+AbstractNum* ladder(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1) {
     return nullptr;
 }

@@ -1,337 +1,121 @@
-#include <iostream>
-#include "../../Header/ElementaryFunction.h"
-#include "../../Header/Const.h"
-#include "../../Header/Solve.h"
-//TODO Debug accuracy
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-extern const Const_1* const_1;
+#include "../../Header/Numerical.h"
+#include "../../Header/ElementaryFunction.h"
+#include "../../Header/Indeterminate.h"
+#include "../../Header/ComplexInf.h"
+#include "../../Header/RealInf.h"
+
 extern const Const_2* const_2;
 
-RealNumber* reciprocal(const RealNumber& n) {
-    return *const_1->_1 / n;
+AbstractNum* reciprocal(const AbstractNum& n) {
+    return *const_2->_1 / n;
 }
 
-RealNumber* sqrt_noCheck(const RealNumber& n) {
-    if(!n.sign)
-        return nullptr;
-    auto MachinePrecision = const_1->GlobalPrecision;
-    auto copy_n = new RealNumber(n);
-    //Let n < 1 so as to control error.
-    char add_power = 0;
-    if(copy_n->power > 0) {
-        if(copy_n->power % 2 == 0) {
-            add_power = char(copy_n->power / 2 + 1);
-            copy_n->power = -2;
+AbstractNum* sqrt(const AbstractNum& n) {
+    switch(n.getType()) {
+        case AbstractNum::ComplexNumber: {
+            auto vec = ((ComplexNum&)n).toVector();
+            auto norm = vec->toNorm();
+            *((RealNum*)norm)->real << *sqrt(*((RealNum*)norm)->real);
+
+            auto arg = vec->toArg(0);
+            *((RealNum*)arg)->real /= *const_1->_2;
+            auto new_real = cos(*((RealNum*)arg)->real);
+            *new_real *= *((RealNum*)norm)->real;
+            auto new_imagine = sin(*((RealNum*)arg)->real);
+            *new_imagine *= *((RealNum*)norm)->real;
+            delete vec;
+            delete norm;
+            delete arg;
+            return new ComplexNum(new_real, new_imagine);
         }
-        else {
-            add_power = char((copy_n->power + 1) / 2);
-            copy_n->power = -1;
-        }
+        case AbstractNum::RealNumber:
+            return new RealNum(sqrt(*((RealNum&)n).real));
+        case AbstractNum::ComplexInfinity:
+            return ComplexInf::getInstance();
+        case AbstractNum::RealInfinity:
+            return RealInf::getInstance(((RealInf&)n).getSign());
+        case AbstractNum::DirectedInfinity:
+            if(((DirectedInf&)n).direction->getLength() == 2) {
+                auto arg = ((DirectedInf&)n).direction->toArg(0);
+                *((RealNum*)arg)->real /= *const_1->_2;
+                auto unit_vec_x = new RealNum(cos(*((RealNum*)arg)->real));
+                auto unit_vec_y = new RealNum(sin(*((RealNum*)arg)->real));
+                auto result = new DirectedInf(new Vector(unit_vec_x, unit_vec_y));
+                delete arg;
+                return result;
+            }
+        case AbstractNum::Indeterminate:
+            return Indeterminate::getInstance();
     }
-
-    RealNumber* result = const_1->getOne();
-    RealNumber* temp;
-    //3.33 is the big approximate value of ln(10)/ln(2)
-    for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
-        temp = divide(*copy_n, *result);
-        *result += *temp;
-        *result /= *const_1->_2;
-        delete temp;
-    }
-    delete copy_n;
-    result->power += add_power;
-    result->a = 1;
-
-    return result;
 }
 
-RealNumber* sqrt(const RealNumber& n) {
-    auto result  = sqrt_noCheck(n);
-    if(n.a != 0) {
-        auto n_error = n.getMinimum();
-        auto error = sqrt_noCheck(*n_error);
-        if(error == nullptr) {
-            delete n_error;
-            n_error = n.getMaximum();
-            error = sqrt_noCheck(*n_error);
-        }
-        *error -= *result;
-        error->sign = true;
+AbstractNum* factorial(const AbstractNum& n) {
 
-        result->applyError(error);
-
-        delete n_error;
-        delete error;
-    }
-    return result;
-}
-//TODO not completed: Use gamma function.
-RealNumber* factorial(const RealNumber& n) {
-    if(!n.sign) {
-        std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
-        return nullptr;
-    }
-
-    RealNumber* result;
-    if(n.isInteger()) {
-        result = const_1->getOne();
-        auto temp = const_1->getOne();
-        while(*temp < n) {
-            *temp += *const_1->_1;
-            *result *= *temp;
-        }
-        delete temp;
-        return result;
-    }
-    return nullptr;
-}
-/*
- * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
- * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
- */
-RealNumber* cos(const RealNumber& n) {
-    auto result = const_1->getOne();
-    if(n != *const_1->_0) {
-        auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->_1;
-
-        auto square_n = n * n;
-        auto temp_1 = new RealNumber(square_n);
-        auto temp_2 = const_1->getTwo();
-        auto rank = const_1->getTwo();
-        bool sign = false;
-
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->sign = sign;
-            *result += *temp;
-            //Here the temp means the criteria of break.
-            *temp *= n;
-            *rank += *ONE;
-            *temp /= *rank;
-            int temp_power = temp->power;
-            delete temp;
-
-            if(result->power - temp_power >= MachinePrecision)
-                break;
-            //Prepare for next calculate.
-            sign = !sign;
-            *temp_1 *= *square_n;
-            *temp_2 *= *rank;
-            *rank += *ONE;
-            *temp_2 *= *rank;
-        }
-        delete square_n;
-        delete temp_1;
-        delete temp_2;
-        delete rank;
-    }
-    return result;
 }
 
-RealNumber* sin(const RealNumber& n) {
-    auto result = const_1->getZero();
-    if(n != *const_1->_0) {
-        auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->_1;
+AbstractNum* cos(const AbstractNum& n) {
 
-        auto square_n = n * n;
-        auto temp_1 = new RealNumber(n);
-        auto temp_2 = const_1->getOne();
-        auto rank = const_1->getOne();
-        bool sign = true;
-
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->sign = sign;
-            *result += *temp;
-            //Here the temp means the criteria of break.
-            *temp *= n;
-            *rank += *ONE;
-            *temp /= *rank;
-            int temp_power = temp->power;
-            delete temp;
-
-            if(result->power - temp_power >= MachinePrecision)
-                break;
-            //Prepare for next calculate.
-            sign = !sign;
-            *temp_1 *= *square_n;
-            *temp_2 *= *rank;
-            *rank += *ONE;
-            *temp_2 *= *rank;
-        }
-        delete square_n;
-        delete temp_1;
-        delete temp_2;
-        delete rank;
-    }
-    return result;
 }
 
-RealNumber* tan(const RealNumber& n) {
-    auto cos_n = cos(n);
-    if(cos_n == nullptr)
-        return nullptr;
-    auto sin_n = sin(n);
-    *sin_n /= *cos_n;
-    delete cos_n;
-    return sin_n;
+AbstractNum* sin(const AbstractNum& n) {
+
 }
 
-RealNumber* sec(const RealNumber& n) {
-    auto cos_n = cos(n);
-    auto result = reciprocal(*cos_n);
-    delete cos_n;
-    return result;
+AbstractNum* tan(const AbstractNum& n) {
+
 }
 
-RealNumber* csc(const RealNumber& n) {
-    auto sin_n = sin(n);
-    auto result = reciprocal(*sin_n);
-    delete sin_n;
-    return result;
+AbstractNum* sec(const AbstractNum& n) {
+
 }
 
-RealNumber* cot(const RealNumber& n) {
-    auto sin_n = sin(n);
-    if(sin_n == nullptr)
-        return nullptr;
-    auto cos_n = cos(n);
-    *cos_n /= *sin_n;
-    delete sin_n;
-    return cos_n;
+AbstractNum* csc(const AbstractNum& n) {
+
 }
 
-RealNumber* arccos(const RealNumber& n) {
-    return bisectionMethod(cos, n, *const_1->_0, *const_2->PI, *const_1->_1, *const_1->Minus_1);
+AbstractNum* cot(const AbstractNum& n) {
+
 }
 
-RealNumber* arcsin(const RealNumber& n) {
-    return bisectionMethod(sin, n, *const_2->Minus_PI_2, *const_2->PI_2, *const_1->Minus_1, *const_1->_1);
+AbstractNum* arccos(const AbstractNum& n) {
+
 }
 
-RealNumber* arctan(const RealNumber& n) {
-    auto temp = n * n;
-    *temp += *const_1->_1;
-    auto sqrt_temp = sqrt(*temp);
-    delete temp;
-    
-    temp = n / *sqrt_temp;
-    delete sqrt_temp;
-    
-    auto result = arcsin(*temp);
-    result->sign = n.sign;
-    delete temp;
-    return result;
+AbstractNum* arcsin(const AbstractNum& n) {
+
 }
 
-RealNumber* arcsec(const RealNumber& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arccos(*temp);
-    delete temp;
-    return result;
+AbstractNum* arctan(const AbstractNum& n) {
+
 }
 
-RealNumber* arccsc(const RealNumber& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arcsin(*temp);
-    delete temp;
-    return result;
+AbstractNum* arcsec(const AbstractNum& n) {
+
 }
 
-RealNumber* arccot(const RealNumber& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arctan(*temp);
-    delete temp;
-    return result;
+AbstractNum* arccsc(const AbstractNum& n) {
+
 }
 
-RealNumber* ln_noCheck(const RealNumber& n) {
-    if(!n.isPositive())
-        return nullptr;
-    auto result = const_1->getZero();
-    if(n != *const_1->_1) {
-        auto temp_0 = add(n, *const_1->_1);
-        auto temp_1 = subtract(n, *const_1->_1);
-        *temp_1 /= *temp_0;
-        auto copy_temp_1 = new RealNumber(temp_1);
-        auto temp_2 = const_1->getOne();
+AbstractNum* arccot(const AbstractNum& n) {
 
-        copy_temp_1->a = temp_1->a = 0;
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->a = 0;
-            *result += *temp;
-            delete temp;
-            //Here the temp means the criteria of break.
-            *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->_1;
-            temp = *temp_1 / *temp_2;
-            int temp_power = temp->power;
-            delete temp;
-
-            if(result->power - temp_power >= const_1->GlobalPrecision)
-                break;
-            //Prepare for next calculate.
-            *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->_1;
-        }
-        *result *= *const_1->_2;
-        delete temp_0;
-        delete temp_1;
-        delete copy_temp_1;
-        delete temp_2;
-    }
-    return result;
 }
 
-RealNumber* ln(const RealNumber& n) {
-    auto result = ln_noCheck(n);
-    if(n.a != 0) {
-        auto n_error = n.getMinimum();
-        auto error = ln_noCheck(*n_error);
-        if(error == nullptr) {
-            delete n_error;
-            n_error = n.getMaximum();
-            error = ln_noCheck(*n_error);
-        }
-        *error -= *result;
-        error->sign = true;
+AbstractNum* ln(const AbstractNum& n) {
 
-        result->applyError(error);
-
-        delete n_error;
-        delete error;
-    }
-    return result;
 }
-//Return log_a n
-RealNumber* log(const RealNumber& n, const RealNumber& a) {
-    if(a == *const_1->_1)
-        return nullptr;
 
-    auto ln_n = ln(n);
-    if(ln_n == nullptr)
-        return nullptr;
+AbstractNum* log(const AbstractNum& n, const AbstractNum& a) {
 
-    auto ln_a = ln(a);
-    if(ln_a == nullptr) {
-        delete ln_n;
-        return nullptr;
-    }
-    *ln_n /= *ln_a;
-    delete ln_a;
-    return ln_n;
+}
+
+AbstractNum* exp(const AbstractNum& n) {
+
+}
+
+AbstractNum* pow(const AbstractNum& n, const AbstractNum& a) {
+
 }

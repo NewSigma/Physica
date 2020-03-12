@@ -4,18 +4,18 @@
 #ifndef PHYSICA_POLYNOMIAL_H
 #define PHYSICA_POLYNOMIAL_H
 
-#include "RealNumber.h"
+#include "Numerical.h"
 
 class Polynomial {
 private:
     int length;
-    const RealNumber* variable;
-    const RealNumber** coefficients;
+    const Numerical* variable;
+    const Numerical** coefficients;
 public:
-    Polynomial(int length, const RealNumber* variable);
+    Polynomial(int length, const Numerical* variable);
     ~Polynomial();
-    void addCoefficients(int index, const RealNumber* n);
-    RealNumber* calculate();
+    void addCoefficients(int index, const Numerical* n);
+    Numerical* calculate();
 };
 
 #endif

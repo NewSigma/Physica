@@ -4,13 +4,30 @@
 #ifndef PHYSICA_REALINF_H
 #define PHYSICA_REALINF_H
 
-#include "Number.h"
+#include "DirectedInf.h"
+#include "RealNum.h"
+#include "Numerical.h"
+#include "Const.h"
 
-class RealInf : public Number {
-private:
-    bool sign;
+extern const Const_1* const_1;
+
+class RealInf : public DirectedInf {
 public:
+    bool getSign() const { return *((RealNum*)(*direction)[0])->real == *const_1->_1; }
+    static RealInf* getInstance(bool b);
+
+    virtual AbstractNum* operator+(const AbstractNum& n) const;
+    virtual AbstractNum* operator-(const AbstractNum& n) const;
+    virtual AbstractNum* operator*(const AbstractNum& n) const;
+    virtual AbstractNum* operator/(const AbstractNum& n) const;
+    virtual AbstractNum* operator^(const AbstractNum& n) const;
+    virtual AbstractNum* operator-() const;
+    virtual bool operator== (const AbstractNum& n) const;
+private:
+    static RealInf* positive;
+    static RealInf* negative;
     RealInf(bool b);
+    ~RealInf();
 };
 
 #endif

@@ -1,14 +1,13 @@
 #include "../../../Header/Node.h"
 #include "../../../Header/Const.h"
-
-extern Const_1 const_1;
+#include "../../../Header/Numerical.h"
 
 Node::Node(int size) {
-    auto arr = new RealNumber*[size];
+    auto arr = new AbstractNum*[size];
     for(int i = 0; i < size; ++i)
-        arr[i] = randomRealNumber();
+        arr[i] = new RealNum(randomNumerical());
     vector = new Vector(arr, size);
-    constant = randomRealNumber();
+    constant = new RealNum(randomNumerical());
     result = nullptr;
 }
 
@@ -20,6 +19,6 @@ Node::~Node() {
 
 void Node::update(Vector* variables) {
     delete result;
-    result = *vector * *variables;
-    *result += *constant;
+    auto temp = (RealNum*)(*vector * *variables);
+    result = (RealNum*)(*temp + *constant);
 }

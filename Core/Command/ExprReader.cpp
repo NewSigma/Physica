@@ -1,8 +1,5 @@
 #include <stack>
 #include "../Header/ExprReader.h"
-#include "../Header/Const.h"
-
-extern const Const_1 const_1;
 
 ExprReader::ExprReader(const std::wstring& str) {
     int pointer = 0;
@@ -78,10 +75,10 @@ ExprReader::ExprReader(const std::wstring& str) {
     }
 }
 
-RealNumber* ExprReader::calc() {
-    std::stack<RealNumber*> stack{};
+Numerical* ExprReader::calc() {
+    std::stack<Numerical*> stack{};
     for(auto& str : anti_poland) {
-        RealNumber* n1 = nullptr, *n2 = nullptr;
+        Numerical* n1 = nullptr, *n2 = nullptr;
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
@@ -111,7 +108,7 @@ RealNumber* ExprReader::calc() {
                 }
                 break;
             default:
-                stack.push(new RealNumber(str));
+                stack.push(new Numerical(str));
         }
         delete n1;
         delete n2;

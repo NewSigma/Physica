@@ -1,20 +1,20 @@
 #ifndef _Physica_C_ClimbMountainAlgorithm_H
 #define _Physica_C_ClimbMountainAlgorithm_H
 
-#include "RealNumber.h"
+#include "Numerical.h"
 
 class HillClimbingAlgorithm {
 public:
-    HillClimbingAlgorithm(RealNumber* func(RealNumber*), RealNumber* x_initial, RealNumber* stepSize);
+    HillClimbingAlgorithm(Numerical* func(Numerical*), Numerical* x_initial, Numerical* stepSize);
 	~HillClimbingAlgorithm();
     void getExtremal();
-    RealNumber* getMinStep();
-	void setMinStep(RealNumber* minStep);
+    Numerical* getMinStep();
+	void setMinStep(Numerical* minStep);
 private:
-    RealNumber* (*func)(RealNumber*);
-    RealNumber* x_initial;
-    RealNumber* stepSize;
-    RealNumber* minStep;
+    Numerical* (*func)(Numerical*);
+    Numerical* x_initial;
+    Numerical* stepSize;
+    Numerical* minStep;
 };
 
 #endif

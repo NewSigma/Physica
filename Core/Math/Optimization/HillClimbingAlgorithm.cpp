@@ -1,5 +1,4 @@
 #include "../../Header/HillClimbingAlgorithm.h"
-#include "../../Header/Const.h"
 #include <iostream>
 /*
  * The climb mountain algorithm should only be used in simple situation external point to get a global best solution.
@@ -15,11 +14,11 @@
  */
 extern const Const_1* const_1;
 //TODO Optional: Auto step-size
-HillClimbingAlgorithm::HillClimbingAlgorithm(RealNumber* f(RealNumber*), RealNumber* init, RealNumber* size) {
+HillClimbingAlgorithm::HillClimbingAlgorithm(Numerical* f(Numerical*), Numerical* init, Numerical* size) {
 	func = f;
 	x_initial = init;
 	stepSize = size;
-	minStep = new RealNumber(const_1->StepSize);
+	minStep = new Numerical(const_1->StepSize);
 }
 
 HillClimbingAlgorithm::~HillClimbingAlgorithm() {
@@ -27,13 +26,13 @@ HillClimbingAlgorithm::~HillClimbingAlgorithm() {
 }
 
 void HillClimbingAlgorithm::getExtremal() {
-	RealNumber* y_initial = func(x_initial);
-    auto x = new RealNumber();
-    auto y = new RealNumber();
-    auto x_last = new RealNumber();
-    auto y_last = new RealNumber();
-    auto x_result = new RealNumber();
-    auto y_result = new RealNumber();
+	Numerical* y_initial = func(x_initial);
+    auto x = new Numerical();
+    auto y = new Numerical();
+    auto x_last = new Numerical();
+    auto y_last = new Numerical();
+    auto x_result = new Numerical();
+    auto y_result = new Numerical();
 	bool positiveUsable = false;
 	bool negativeUsable = false;
 
@@ -102,11 +101,11 @@ void HillClimbingAlgorithm::getExtremal() {
 	delete y_result;
 }
 
-RealNumber* HillClimbingAlgorithm::getMinStep() {
+Numerical* HillClimbingAlgorithm::getMinStep() {
 	return minStep;
 }
 
-void HillClimbingAlgorithm::setMinStep(RealNumber* step) {
+void HillClimbingAlgorithm::setMinStep(Numerical* step) {
     delete minStep;
 	minStep = step;
 }

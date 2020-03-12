@@ -1,46 +1,111 @@
 #include "../../Header/Differential.h"
 #include "../../Header/Const.h"
+#include "../../Header/RealNum.h"
+#include "../../Header/Numerical.h"
 
-extern Const_1 const_1;
+AbstractNum* D_double_point(AbstractNum* func(const AbstractNum&), const AbstractNum& x0) {
+    auto step = new RealNum(new Numerical(const_1->StepSize));
+    AbstractNum* result1 = nullptr, *temp = nullptr;
+    //Handle result1 and temp alternatively.
+    bool handle = true;
+    do {
+        delete result1;
+        delete temp;
+        auto x1 = x0 + *step;
+        auto x2 = x0 - *step;
+        auto y1 = func(*x1);
+        auto y2 = func(*x2);
+        auto numerator = *y2 - *y1;
+        auto denominator = *x2 - *x1;
+        if(handle)
+            result1 = *numerator / *denominator;
+        else
+            temp = *numerator / *denominator;
 
-RealNumber* D_double_point(RealNumber* func(const RealNumber&), const RealNumber& x0) {
-    auto x1 = x0 + *const_1.StepSize;
-    auto y1 = func(*x1);
-    auto x2 = x0 - *const_1.StepSize;
-    auto y2 = func(*x2);
-    auto result = *y1 - *y2;
-    auto derivative = *const_1._2 * *const_1.StepSize;
-    *result /= *derivative;
-    delete x1;
-    delete y1;
-    delete x2;
-    delete y2;
-    delete derivative;
-    return result;
+        delete x1;
+        delete x2;
+        delete y1;
+        delete y2;
+        delete numerator;
+        delete denominator;
+
+        --step->real->power;
+        handle = !handle;
+    } while(!handle || *result1 != *temp);
+
+    if(result1->getType() == AbstractNum::RealNumber)
+        ((RealNum*)result1)->real->applyError(((RealNum*)temp)->real);
+    delete step;
+    delete temp;
+    return result1;
 }
 
-RealNumber* D_right(RealNumber* func(const RealNumber&), const RealNumber& x0) {
-    auto x1 = x0 + *const_1.StepSize;
+AbstractNum* D_right(AbstractNum* func(const AbstractNum&), const AbstractNum& x0) {
+    auto step = new RealNum(new Numerical(const_1->StepSize));
     auto y0 = func(x0);
-    auto y1 = func(*x1);
-    auto result = *y1 - *y0;
-    *result /= *const_1.StepSize;
+    AbstractNum* result1 = nullptr, *temp = nullptr;
+    //Handle result1 and temp alternatively.
+    bool handle = true;
+    do {
+        delete result1;
+        delete temp;
+        auto x1 = x0 + *step;
+        auto y1 = func(*x1);
+        auto numerator = *y1 - *y0;
+        auto denominator = *x1 - x0;
+        if(handle)
+            result1 = *numerator / *denominator;
+        else
+            temp = *numerator / *denominator;
 
-    delete x1;
+        delete x1;
+        delete y1;
+        delete numerator;
+        delete denominator;
+
+        --step->real->power;
+        handle = !handle;
+    } while(!handle || *result1 != *temp);
+
+    if(result1->getType() == AbstractNum::RealNumber)
+        ((RealNum*)result1)->real->applyError(((RealNum*)temp)->real);
+    delete step;
     delete y0;
-    delete y1;
-    return result;
+    delete temp;
+    return result1;
 }
 
-RealNumber* D_left(RealNumber* func(const RealNumber&), const RealNumber& x0) {
-    auto x1 = x0 - *const_1.StepSize;
+AbstractNum* D_left(AbstractNum* func(const AbstractNum&), const AbstractNum& x0) {
+    auto step = new RealNum(new Numerical(const_1->StepSize));
     auto y0 = func(x0);
-    auto y1 = func(*x1);
-    auto result = *y0 - *y1;
-    *result /= *const_1.StepSize;
+    AbstractNum* result1 = nullptr, *temp = nullptr;
+    //Handle result1 and temp alternatively.
+    bool handle = true;
+    do {
+        delete result1;
+        delete temp;
+        auto x1 = x0 - *step;
+        auto y1 = func(*x1);
+        auto numerator = *y1 - *y0;
+        auto denominator = *x1 - x0;
+        if(handle)
+            result1 = *numerator / *denominator;
+        else
+            temp = *numerator / *denominator;
 
-    delete x1;
+        delete x1;
+        delete y1;
+        delete numerator;
+        delete denominator;
+
+        --step->real->power;
+        handle = !handle;
+    } while(!handle || *result1 != *temp);
+
+    if(result1->getType() == AbstractNum::RealNumber)
+        ((RealNum*)result1)->real->applyError(((RealNum*)temp)->real);
+    delete step;
     delete y0;
-    delete y1;
-    return result;
+    delete temp;
+    return result1;
 }

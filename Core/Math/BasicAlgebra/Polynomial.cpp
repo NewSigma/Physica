@@ -3,32 +3,30 @@
  */
 #include <iostream>
 #include "../../Header/Polynomial.h"
-#include "../../Header/Const.h"
-
-extern const Const_1* const_1;
+#include "../../Header/Numerical.h"
 /*
  * A polynomial equals to a0 + a1 * x + a2 * x^2 + ... + an * x^n.
  * Here length = n, variable = x, coefficients is a array of a1, a2, ..., an.
  */
-Polynomial::Polynomial(int len, const RealNumber* var) {
+Polynomial::Polynomial(int len, const Numerical* var) {
     length = len;
     variable = var;
-    coefficients = new const RealNumber*[length];
+    coefficients = new const Numerical*[length];
 }
 
 Polynomial::~Polynomial() {
    delete[] coefficients;
 }
 
-void Polynomial::addCoefficients(int index, const RealNumber* n) {
+void Polynomial::addCoefficients(int index, const Numerical* n) {
     if(index > -1 && index < length)
         coefficients[index] = n;
     else
         std::cout << "[Polynomial] Invalid coefficient index." << std::endl;
 }
 
-RealNumber* Polynomial::calculate() {
-    auto result = const_1->getZero();
+Numerical* Polynomial::calculate() {
+    auto result = new Numerical(getZero());
     for(int i = length - 1; i > 0; --i) {
         *result += *coefficients[i];
         *result *= *variable;

@@ -120,7 +120,7 @@ Matrix* Matrix::operator*(Matrix& m) {
 
     auto new_vectors = new Vector*[m.col];
     for(int i = 0; i < m.col; ++i) {
-        auto arr = new RealNumber*[row];
+        auto arr = new AbstractNum*[row];
         for(int j = 0; j < row; ++j)
             arr[j] = *vectors[j] * *m.vectors[i];
         new_vectors[i] = new Vector(arr, row);
@@ -142,7 +142,7 @@ Matrix* Matrix::operator/(Matrix& m) {
     return result;
 }
 
-Matrix* Matrix::operator*(RealNumber& n) {
+Matrix* Matrix::operator*(AbstractNum& n) {
     int length = getLength();
     auto arr = new Vector*[length];
     for(int i = 0; i < length; ++i)
@@ -173,11 +173,11 @@ void Matrix::operator/=(Matrix& m) {
         *this << *divide;
 }
 
-void Matrix::operator*=(RealNumber& n) {
+void Matrix::operator*=(AbstractNum& n) {
     *this << *(*this * n);
 }
 
-RealNumber* Matrix::get(int c, int r) {
+AbstractNum* Matrix::get(int c, int r) {
     if(type)
         return (*vectors[c])[r];
     else
@@ -189,7 +189,7 @@ void Matrix::toColMatrix() {
         return;
     auto new_vectors = new Vector*[col];
     for(int i = 0; i < col; ++i) {
-        auto arr = new RealNumber*[row];
+        auto arr = new AbstractNum*[row];
         for(int j = 0; j < row; ++j) {
             arr[j] = vectors[j]->numbers[i];
             vectors[j]->numbers[i] = nullptr;
@@ -205,7 +205,7 @@ void Matrix::toRowMatrix() {
     if(type) {
         auto new_vectors = new Vector*[row];
         for(int i = 0; i < row; ++i) {
-            auto arr = new RealNumber*[col];
+            auto arr = new AbstractNum*[col];
             for(int j = 0; j < col; ++j) {
                 arr[j] = vectors[j]->numbers[i];
                 vectors[j]->numbers[i] = nullptr;

@@ -1,7 +1,8 @@
 #ifndef PHYSICA_MATRIX_H
 #define PHYSICA_MATRIX_H
 
-class RealNumber;
+#include "AbstractNum.h"
+
 class Vector;
 
 class Matrix {
@@ -28,18 +29,18 @@ public:
     Matrix* operator-(Matrix& m);
     Matrix* operator*(Matrix& m);
     Matrix* operator/(Matrix& m);
-    Matrix* operator*(RealNumber& n);
+    Matrix* operator*(AbstractNum& n);
     void operator+=(Matrix& m);
     void operator-=(Matrix& m);
     void operator*=(Matrix& m);
     void operator/=(Matrix& m);
-    void operator*=(RealNumber& n);
+    void operator*=(AbstractNum& n);
 
     int getRow() { return row; };
     int getCol() { return col; };
     int getLength() { if(type) return row; else return col; };
     bool isEmpty() { return row == 0; };
-    RealNumber* get(int c, int r);
+    AbstractNum* get(int c, int r);
     void toColMatrix();
     void toRowMatrix();
     void changeType();

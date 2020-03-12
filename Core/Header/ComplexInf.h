@@ -4,14 +4,22 @@
 #ifndef PHYSICA_COMPLEXINF_H
 #define PHYSICA_COMPLEXINF_H
 
-#include "Number.h"
+#include "DirectedInf.h"
 
-class ComplexInf : public Number {
-private:
-    bool real_sign;
-    bool imagine_sign;
+class ComplexInf : public DirectedInf {
 public:
-    ComplexInf(bool real_sign, bool imagine_sign);
+    static ComplexInf* getInstance();
+
+    virtual AbstractNum* operator+(const AbstractNum& n) const;
+    virtual AbstractNum* operator-(const AbstractNum& n) const;
+    virtual AbstractNum* operator*(const AbstractNum& n) const;
+    virtual AbstractNum* operator/(const AbstractNum& n) const;
+    virtual AbstractNum* operator^(const AbstractNum& n) const;
+    virtual AbstractNum* operator-() const;
+    virtual bool operator== (const AbstractNum& n) const;
+private:
+    static ComplexInf* instance;
+    ComplexInf();
 };
 
 #endif

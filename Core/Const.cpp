@@ -5,8 +5,6 @@
 #include "Header/Solve.h"
 #include "Header/ElementaryFunction.h"
 #include <malloc.h>
-
-extern const Const_1* const_1;
 /*
  * Basic consts that initialize directly.
  */
@@ -15,7 +13,8 @@ Const_1::Const_1() {
 
     auto byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
-    StepSize = new RealNumber(byte, 1, 1 - GlobalPrecision);
+    //StepSize is also is the smallest relative error that is acceptable.
+    StepSize = new Numerical(byte, 1, 1 - GlobalPrecision);
 
     byte = (unsigned char*)malloc(10 * sizeof(char));
     byte[0] = 2;
@@ -28,41 +27,41 @@ Const_1::Const_1() {
     byte[7] = 6;
     byte[8] = 4;
     byte[9] = 7;
-    R_MAX = new RealNumber(byte, 10, 9);
+    R_MAX = new Numerical(byte, 10, 9);
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 0;
-    _0 = new RealNumber(byte, 1, 0);
+    _0 = new Numerical(byte, 1, 0);
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
-    _1 = new RealNumber(byte, 1, 0);
+    _1 = new Numerical(byte, 1, 0);
 
-    auto temp = new RealNumber(_1);
+    auto temp = new Numerical(_1);
     temp->sign = false;
     Minus_1 = temp;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 2;
-    _2 = new RealNumber(byte, 1, 0);
+    _2 = new Numerical(byte, 1, 0);
 
-    temp = new RealNumber(_2);
+    temp = new Numerical(_2);
     temp->sign = false;
     Minus_2 = temp;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 3;
-    _3 = new RealNumber(byte, 1, 0);
+    _3 = new Numerical(byte, 1, 0);
 
-    temp = new RealNumber(_3);
+    temp = new Numerical(_3);
     temp->sign = false;
     Minus_3 = temp;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 4;
-    _4 = new RealNumber(byte, 1, 0);
+    _4 = new Numerical(byte, 1, 0);
 
-    temp = new RealNumber(_4);
+    temp = new Numerical(_4);
     temp->sign = false;
     Minus_4 = temp;
 }
@@ -85,17 +84,21 @@ Const_1::~Const_1() {
  * Should call new to Const_1 so as to make calculates available.
  */
 Const_2::Const_2() {
+    _0 = new RealNum(getZero());
+    _1 = new RealNum(getOne());
     //TODO Slow and not accurate
-    PI = bisectionMethod(sin, *const_1->_0, *const_1->_3, *const_1->_4);
-    E = bisectionMethod(ln_noCheck, *const_1->_1, *const_1->_2, *const_1->_3);
+    PI = new Numerical(bisectionMethod(sin, *const_1->_0, *const_1->_3, *const_1->_4));
+    E = exp(*const_1->_1);
 
     PI_2 = *PI / *const_1->_2;
-    auto temp = new RealNumber(PI_2);
+    auto temp = new Numerical(PI_2);
     temp->sign = false;
     Minus_PI_2 = temp;
 }
 
 Const_2::~Const_2() {
+    delete _0;
+    delete _1;
     delete PI;
     delete E;
     delete PI_2;
