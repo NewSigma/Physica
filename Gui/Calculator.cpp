@@ -16,7 +16,7 @@ Calculator::Calculator() {
     //Layout
     default_layout = new QVBoxLayout(this);
     //Editor
-    editor_top = new QLineEdit();
+    editor_top = new QLineEdit(this);
     editor_top->setFixedSize(760, 46);
     editor_top->setStyleSheet("border:0px; color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
     editor_top->setAlignment(Qt::AlignRight);
@@ -24,7 +24,7 @@ Calculator::Calculator() {
     editor_top->setFocusPolicy(Qt::NoFocus);
     default_layout->addWidget(editor_top);
 
-    editor_bottom = new QLineEdit();
+    editor_bottom = new QLineEdit(this);
     editor_bottom->setFixedSize(760, 93);
     editor_bottom->setFont(font);
     editor_bottom->setStyleSheet("border:0px; color:rgb(255, 255, 255); background-color:rgb(50, 50, 50);");
@@ -33,35 +33,35 @@ Calculator::Calculator() {
     editor_bottom->setAlignment(Qt::AlignRight);
     default_layout->addWidget(editor_bottom);
     /* Buttons */ {
-        layout = new QGridLayout();
+        layout = new QGridLayout(this);
         layout->setContentsMargins(2,3,2,3);
         default_layout->addLayout(layout);
 
-        num0 = new QPushButton("0");
-        num1 = new QPushButton("1");
-        num2 = new QPushButton("2");
-        num3 = new QPushButton("3");
-        num4 = new QPushButton("4");
-        num5 = new QPushButton("5");
-        num6 = new QPushButton("6");
-        num7 = new QPushButton("7");
-        num8 = new QPushButton("8");
-        num9 = new QPushButton("9");
-        dot = new QPushButton(".");
-        imagine = new QPushButton("i");
-        add = new QPushButton("+");
-        subtract = new QPushButton("-");
-        multiply = new QPushButton("×");
-        divide = new QPushButton("/");
-        equal = new QPushButton("=");
-        del = new QPushButton("Del");
-        clear = new QPushButton("C");
-        clear_entry = new QPushButton("CE");
-        left_bracket = new QPushButton("(");
-        right_bracket = new QPushButton(")");
-        sqroot = new QPushButton("x²");
-        square = new QPushButton("√x");
-        percent = new QPushButton("%");
+        num0 = new QPushButton("0", this);
+        num1 = new QPushButton("1", this);
+        num2 = new QPushButton("2", this);
+        num3 = new QPushButton("3", this);
+        num4 = new QPushButton("4", this);
+        num5 = new QPushButton("5", this);
+        num6 = new QPushButton("6", this);
+        num7 = new QPushButton("7", this);
+        num8 = new QPushButton("8", this);
+        num9 = new QPushButton("9", this);
+        dot = new QPushButton(".", this);
+        imagine = new QPushButton("i", this);
+        add = new QPushButton("+", this);
+        subtract = new QPushButton("-", this);
+        multiply = new QPushButton("×", this);
+        divide = new QPushButton("/", this);
+        equal = new QPushButton("=", this);
+        del = new QPushButton("Del", this);
+        clear = new QPushButton("C", this);
+        clear_entry = new QPushButton("CE", this);
+        left_bracket = new QPushButton("(", this);
+        right_bracket = new QPushButton(")", this);
+        sqroot = new QPushButton("x²", this);
+        square = new QPushButton("√x", this);
+        percent = new QPushButton("%", this);
 
         num0->setFixedSize(150, 93);
         num1->setFixedSize(150, 93);

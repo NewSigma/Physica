@@ -4,24 +4,31 @@
 #include "QMenuBar"
 #include "QScreen"
 #include "QKeyEvent"
+#include "Header/Settings.h"
+#include "InT/Header/LongtonAnt.h"
 
-PhysicaMain::PhysicaMain() : calculator(nullptr) {
+/*
+ * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ */
+PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {
     /* Resize */ {
         QRect primaryScreenRec = QGuiApplication::primaryScreen()->geometry();
         resize(primaryScreenRec.width(), primaryScreenRec.height());
     }
     //Basic settings
-    setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
-    icon = new QIcon(":/icon.png");
-    setWindowIcon(*icon);
+    setWindowTitle(QApplication::applicationName() + "[*]");
+    QIcon icon = QIcon(":/icon.png");
+    setAttribute(Qt::WA_DeleteOnClose);
+    setWindowIcon(icon);
     /* Menu */ {
-        menuBar = new QMenuBar();
+        menuBar = new QMenuBar(this);
         setMenuBar(menuBar);
         file = menuBar->addMenu("File");
         file_new = file->addAction("New");
         file_open = file->addAction("Open");
         file->addSeparator();
         file_settings = file->addAction("Settings");
+        connect(file_settings, SIGNAL(triggered()), SLOT(on_click_settings()));
 
         view = menuBar->addMenu("View");
         view_fullscreen = view->addAction("Full Screen");
@@ -30,26 +37,30 @@ PhysicaMain::PhysicaMain() : calculator(nullptr) {
         evaluate = menuBar->addMenu("Evaluate");
         evaluate_calculator = evaluate->addAction("Calculator");
         connect(evaluate_calculator, SIGNAL(triggered()), SLOT(on_click_calculator()));
+        //InT stands by Interesting Things.
+        InT = menuBar->addMenu("InT");
+        lontonAnt = InT->addAction("Lonton Ant");
+        connect(lontonAnt, SIGNAL(triggered()), SLOT(on_click_lontonAnt()));
     }
-    textEdit = new QTextEdit();
+    //Central
+    textEdit = new QTextEdit(this);
     textEdit->installEventFilter(this);
+    connect(textEdit->document(), SIGNAL(contentsChanged()), SLOT(on_modified()));
     setCentralWidget(textEdit);
+    //StatusBar
+    statusBar()->showMessage("Calculate Time: 0 ms");
 
     show();
 }
-
-PhysicaMain::~PhysicaMain() {
-    delete icon;
-    delete menuBar;
-    delete textEdit;
-}
-
+////////////////////////////////////////////Events////////////////////////////////////////////
 bool PhysicaMain::eventFilter(QObject* obj, QEvent* event) {
     if (obj == textEdit) {
         if (event->type() == QEvent::KeyPress) {
             auto keyEvent = (QKeyEvent*)event;
             if(keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Return) {
-                textEdit->insertPlainText(tr("Done"));
+                lastCalcTime = clock();
+                //TODO Calculate
+                statusBar()->showMessage(QString::fromStdString("Calculate Time: " + std::to_string(clock() - lastCalcTime) + " ms"));
                 return true;
             }
         }
@@ -73,6 +84,15 @@ void PhysicaMain::keyPressEvent(QKeyEvent* event) {
         }
     }
 }
+////////////////////////////////////////////SLOTS////////////////////////////////////////////
+void PhysicaMain::on_modified() {
+    setWindowModified(true);
+    disconnect(textEdit->document(), SIGNAL(contentsChanged()), this, SLOT(on_modified()));
+}
+
+void PhysicaMain::on_click_settings() {
+    new Settings(this);
+}
 
 void PhysicaMain::on_click_fullscreen() {
     if(windowState() == Qt::WindowFullScreen)
@@ -90,4 +110,8 @@ void PhysicaMain::on_click_calculator() {
 
 void PhysicaMain::on_calculator_closed() {
     calculator = nullptr;
+}
+////////////////////////////////////////////InT////////////////////////////////////////////
+void PhysicaMain::on_click_lontonAnt() {
+    new LongtonAnt();
 }

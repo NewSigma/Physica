@@ -155,11 +155,10 @@ std::string Numerical::toString() const {
         if(isNegative())
             result.push_back('-');
         if(abs(power) > const_1->GlobalPrecision) {
-            //48 is the ascii code of 0.
-            result.push_back(byte[0] + 48);
+            result.push_back(byte[0] + '0');
             result.push_back('.');
             for(int i = 1; i < length; ++i)
-                result.push_back(byte[i] + 48);
+                result.push_back(byte[i] + '0');
             result += "×10^";
             result += std::to_string(power);
         }
@@ -168,19 +167,19 @@ std::string Numerical::toString() const {
             for(int i = -power - 1; i > 0; --i)
                 result.push_back('0');
             for(int i = 0; i < length; ++i)
-                result.push_back(byte[i] + 48);
+                result.push_back(byte[i] + '0');
         }
         else {
             if(length > power) {
                 for (int i = 0; i < power + 1; ++i)
-                    result.push_back(byte[i] + 48);
+                    result.push_back(byte[i] + '0');
                 result.push_back('.');
                 for(int i = power + 1; i < length; ++i)
-                    result.push_back(byte[i] + 48);
+                    result.push_back(byte[i] + '0');
             }
             else {
                 for(int i = 0; i < length; ++i)
-                    result.push_back(byte[i] + 48);
+                    result.push_back(byte[i] + '0');
                 for(int i = power - length + 1; i > 0; --i)
                     result.push_back('0');
             }
