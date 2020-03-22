@@ -2,7 +2,7 @@
 #define PHYSICA_PHYSICAMAIN_H
 
 #include <QtWidgets/QMainWindow>
-#include <QtWidgets/QTextEdit>
+#include "EditorMain.h"
 #include "Calculator.h"
 
 class PhysicaMain : public QMainWindow {

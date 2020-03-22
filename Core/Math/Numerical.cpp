@@ -420,7 +420,7 @@ Numerical* Numerical::operator/ (const Numerical& n) const {
  */
 Numerical* Numerical::operator^ (const Numerical& n) const {
     Numerical* result = nullptr;
-    if(isZero()) {
+    if(__glibc_unlikely(isZero())) {
         if(!n.isZero())
             result = getZero();
     }
@@ -698,7 +698,7 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         ///////////////////////////////////////Get byte, length and power//////////////////////////
         unsigned char* byte;
         int power = big->power;
-        if (temp[0] > 9) {
+        if (__glibc_unlikely(temp[0] > 9)) {
             ++length;
             ++power;
             byte = (unsigned char*)malloc(length * sizeof(char));
@@ -754,7 +754,7 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
                 }
             }
             //If n1 - n2 < 0, we have to change our method.
-            if(byte[0] < 0) {
+            if(__glibc_unlikely(byte[0] < 0)) {
                 free(byte);
                 result = n2 - n1;
                 result->sign = false;
@@ -844,9 +844,9 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         return nullptr;
 
     Numerical* result;
-    if(n1.isZero() || n2.isZero())
+    if(__glibc_unlikely(n1.isZero() || n2.isZero()))
         result = getZero();
-    else if(n2 == *const_1->_1)
+    else if(__glibc_unlikely(n2 == *const_1->_1))
         result = new Numerical(n1);
     else {
         result = new Numerical();
@@ -866,7 +866,7 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
             char unit = 0;
             while(true) {
                 n1_copy = subtract(*n1_copy, *n2_copy);
-                if(n1_copy->isNegative()) {
+                if(__glibc_unlikely(n1_copy->isNegative())) {
                     delete n1_copy;
                     n1_copy = n1_copy_old;
                     break;
@@ -946,7 +946,7 @@ void cutZero(Numerical* n) {
         free(n->byte);
         n->byte = new_array;
 
-        if(n->byte[0] == 0)
+        if(__glibc_unlikely(n->byte[0] == 0))
             n->power = 0;
         else
             n->power -= firstCutIndex;
@@ -1140,7 +1140,7 @@ Numerical* exp(const Numerical& n) {
     auto rank = getOne();
     while(true) {
         *temp /= *rank;
-        if(*temp < *const_1->StepSize)
+        if(*temp < *const_1->stepSize)
             break;
         *result += *temp;
         *temp *= n;

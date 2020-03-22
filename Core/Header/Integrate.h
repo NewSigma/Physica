@@ -1,15 +1,10 @@
 #ifndef PHYSICA_INTEGRATE_H
 #define PHYSICA_INTEGRATE_H
 
-#include "AbstractNum.h"
+#include "Numerical.h"
 
-enum IntegrateMethod {
-    Rectangular,
-    Ladder
-};
-
-AbstractNum* Integrate(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1, IntegrateMethod method);
-AbstractNum* rectangular(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1);
-AbstractNum* ladder(AbstractNum* func(AbstractNum*), AbstractNum* x0, AbstractNum* x1);
+Numerical* rectangular(Numerical* func(Numerical*), Numerical* x0, Numerical* x1);
+Numerical* ladder(Numerical* func(Numerical*), Numerical* x0, Numerical* x1);
+Numerical* Simpson(Numerical* func(Numerical*), Numerical* x0, Numerical* x1);
 
 #endif

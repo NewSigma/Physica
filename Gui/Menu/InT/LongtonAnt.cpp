@@ -1,4 +1,4 @@
-#include "Header/LongtonAnt.h"
+#include "../../Header/LongtonAnt.h"
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  * Inspired by interview question 16.22 on leetcode.
@@ -41,7 +41,7 @@ void LongtonAnt::handle() {
 
 LongtonAnt::LongtonAnt() : QChartView(new QChart()), r(0), c(0), type(1), X(1), Y(1) {
     setAttribute(Qt::WA_DeleteOnClose);
-    resize(600, 600);
+    resize(650,650);
 
     series0 = new QScatterSeries(this);
     series0->setMarkerShape(QScatterSeries::MarkerShapeRectangle);

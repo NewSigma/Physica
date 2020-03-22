@@ -9,7 +9,7 @@ class Const_1 {
 public:
     //_1 stands by integer 1.
     int GlobalPrecision;
-    const Numerical* StepSize;
+    const Numerical* stepSize;
     const Numerical* R_MAX;
     const Numerical* _0;
     const Numerical* _1;
@@ -27,8 +27,10 @@ public:
 
 class Const_2 {
 public:
+    const RealNum* stepSize;
     const RealNum* _0;
     const RealNum* _1;
+    const RealNum* _2;
     const Numerical* PI;
     const Numerical* E;
     //Here PI_2 stands by PI / 2.

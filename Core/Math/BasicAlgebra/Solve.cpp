@@ -4,7 +4,6 @@
  * Find the numerical root of algebra equation.
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-extern const Const_1* const_1;
 /*
  * y1 = func(x1), y2 = func(x2)
  * Solve the x when n = func(x)

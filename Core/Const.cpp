@@ -14,7 +14,7 @@ Const_1::Const_1() {
     auto byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
     //StepSize is also is the smallest relative error that is acceptable.
-    StepSize = new Numerical(byte, 1, 1 - GlobalPrecision);
+    stepSize = new Numerical(byte, 1, 1 - GlobalPrecision);
 
     byte = (unsigned char*)malloc(10 * sizeof(char));
     byte[0] = 2;
@@ -67,7 +67,7 @@ Const_1::Const_1() {
 }
 
 Const_1::~Const_1() {
-    delete StepSize;
+    delete stepSize;
     delete R_MAX;
     delete _0;
     delete _1;
@@ -84,8 +84,10 @@ Const_1::~Const_1() {
  * Should call new to Const_1 so as to make calculates available.
  */
 Const_2::Const_2() {
+    stepSize = new RealNum(new Numerical(const_1->stepSize));
     _0 = new RealNum(getZero());
     _1 = new RealNum(getOne());
+    _2 = new RealNum(getTwo());
     //TODO Slow and not accurate
     PI = new Numerical(bisectionMethod(sin, *const_1->_0, *const_1->_3, *const_1->_4));
     E = exp(*const_1->_1);
@@ -97,8 +99,10 @@ Const_2::Const_2() {
 }
 
 Const_2::~Const_2() {
+    delete stepSize;
     delete _0;
     delete _1;
+    delete _2;
     delete PI;
     delete E;
     delete PI_2;

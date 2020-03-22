@@ -4,7 +4,7 @@
 
 #include <QtGui/QGuiApplication>
 #include "QScreen"
-#include "Header/Settings.h"
+#include "../Header/Settings.h"
 
 Settings::Settings(PhysicaMain* parent) : parent(parent) {
     //Basic settings
@@ -16,16 +16,13 @@ Settings::Settings(PhysicaMain* parent) : parent(parent) {
     setWindowTitle("Settings");
     //Main
     default_layout = new QHBoxLayout(this);
-    setLayout(default_layout);
 
     list = new QListWidget(this);
+    list->setFixedSize(width() / 5, height());
     default_layout->addWidget(list);
 
-    themeLabel = new QLabel("Theme", this);
-    default_layout->addWidget(themeLabel);
-
-    themeBox = new QComboBox(this);
-    default_layout->addWidget(themeBox);
+    page = new SettingsPage(this);
+    default_layout->addWidget(page);
 
     show();
 }

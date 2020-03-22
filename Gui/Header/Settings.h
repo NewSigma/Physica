@@ -7,9 +7,8 @@
 #include "PhysicaMain.h"
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QComboBox>
 #include "QDialog"
+#include "SettingsPage.h"
 
 class Settings : public QDialog {
     Q_OBJECT
@@ -17,8 +16,7 @@ class Settings : public QDialog {
     PhysicaMain* parent;
     QHBoxLayout* default_layout;
     QListWidget* list;
-    QLabel* themeLabel;
-    QComboBox* themeBox;
+    SettingsPage* page;
 public:
     explicit Settings(PhysicaMain* parent);
 };

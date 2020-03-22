@@ -1,11 +1,11 @@
 #include <QApplication>
-#include <iostream>
 #include "Header/PhysicaMain.h"
 #include "QMenuBar"
 #include "QScreen"
 #include "QKeyEvent"
 #include "Header/Settings.h"
-#include "InT/Header/LongtonAnt.h"
+#include "Header/LongtonAnt.h"
+#include "Header/GlobalStyle.h"
 
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
@@ -43,7 +43,7 @@ PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {
         connect(lontonAnt, SIGNAL(triggered()), SLOT(on_click_lontonAnt()));
     }
     //Central
-    textEdit = new QTextEdit(this);
+    textEdit = new EditorMain(this);
     textEdit->installEventFilter(this);
     connect(textEdit->document(), SIGNAL(contentsChanged()), SLOT(on_modified()));
     setCentralWidget(textEdit);
@@ -59,7 +59,7 @@ bool PhysicaMain::eventFilter(QObject* obj, QEvent* event) {
             auto keyEvent = (QKeyEvent*)event;
             if(keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Return) {
                 lastCalcTime = clock();
-                //TODO Calculate
+                //TODO
                 statusBar()->showMessage(QString::fromStdString("Calculate Time: " + std::to_string(clock() - lastCalcTime) + " ms"));
                 return true;
             }
