@@ -3,7 +3,6 @@
  */
 #include "Header/Const.h"
 #include "Header/Solve.h"
-#include "Header/ElementaryFunction.h"
 #include <malloc.h>
 /*
  * Basic consts that initialize directly.
@@ -13,8 +12,12 @@ Const_1::Const_1() {
 
     auto byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
-    //StepSize is also is the smallest relative error that is acceptable.
-    stepSize = new Numerical(byte, 1, 1 - GlobalPrecision);
+
+    expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision );
+
+    byte = (unsigned char*)malloc(sizeof(char));
+    byte[0] = 1;
+    stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
 
     byte = (unsigned char*)malloc(10 * sizeof(char));
     byte[0] = 2;
@@ -67,6 +70,7 @@ Const_1::Const_1() {
 }
 
 Const_1::~Const_1() {
+    delete expectedRelativeError;
     delete stepSize;
     delete R_MAX;
     delete _0;

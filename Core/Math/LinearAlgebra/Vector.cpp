@@ -1,7 +1,6 @@
 #include "../../Header/Vector.h"
 #include "../../Header/Const.h"
 #include "../../Header/Indeterminate.h"
-#include "../../Header/ElementaryFunction.h"
 #include "../../Header/Numerical.h"
 
 Vector::Vector() : Vector(nullptr, 0) {}
@@ -241,4 +240,221 @@ bool Vector::operator==(Vector& v) {
         if(*numbers[i] != *v.numbers[i])
             return false;
     return true;
+}
+////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+Vector* reciprocal(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = reciprocal(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* sqrt(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sqrt(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* factorial(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = factorial(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* ln(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = ln(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* log(const Vector& n, const AbstractNum& a) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = log(*n[i], a);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* exp(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = exp(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* pow(const Vector& n, const AbstractNum& a) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = pow(*n[i], a);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* cos(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cos(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* sin(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sin(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* tan(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = tan(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* sec(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sec(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* csc(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = csc(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* cot(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cot(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccos(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccos(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arcsin(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsin(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+;
+Vector* arctan(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arctan(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arcsec(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsec(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccsc(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccsc(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccot(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccot(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* cosh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cosh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* sinh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sinh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* tanh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = tanh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* sech(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sech(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* csch(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = csch(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* coth(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cosh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccosh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccosh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arcsinh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsinh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arctanh(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arctanh(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arcsech(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsech(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccsch(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccsch(*n[i]);
+    return new Vector(arr, n.getLength());
+}
+
+Vector* arccoth(const Vector& n) {
+    auto arr = new AbstractNum*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccoth(*n[i]);
+    return new Vector(arr, n.getLength());
 }

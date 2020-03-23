@@ -33,5 +33,37 @@ public:
 protected:
     NumberType type;
 };
+////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+AbstractNum* reciprocal(const AbstractNum& n);
+AbstractNum* sqrt(const AbstractNum& n);
+AbstractNum* factorial(const AbstractNum& n);
+AbstractNum* ln(const AbstractNum& n);
+AbstractNum* log(const AbstractNum& n, const AbstractNum& a);
+AbstractNum* exp(const AbstractNum& n);
+AbstractNum* pow(const AbstractNum& n, const AbstractNum& a);
+AbstractNum* cos(const AbstractNum& n);
+AbstractNum* sin(const AbstractNum& n);
+AbstractNum* tan(const AbstractNum& n);
+AbstractNum* sec(const AbstractNum& n);
+AbstractNum* csc(const AbstractNum& n);
+AbstractNum* cot(const AbstractNum& n);
+AbstractNum* arccos(const AbstractNum& n);
+AbstractNum* arcsin(const AbstractNum& n);
+AbstractNum* arctan(const AbstractNum& n);
+AbstractNum* arcsec(const AbstractNum& n);
+AbstractNum* arccsc(const AbstractNum& n);
+AbstractNum* arccot(const AbstractNum& n);
+AbstractNum* cosh(const AbstractNum& n);
+AbstractNum* sinh(const AbstractNum& n);
+AbstractNum* tanh(const AbstractNum& n);
+AbstractNum* sech(const AbstractNum& n);
+AbstractNum* csch(const AbstractNum& n);
+AbstractNum* coth(const AbstractNum& n);
+AbstractNum* arccosh(const AbstractNum& n);
+AbstractNum* arcsinh(const AbstractNum& n);
+AbstractNum* arctanh(const AbstractNum& n);
+AbstractNum* arcsech(const AbstractNum& n);
+AbstractNum* arccsch(const AbstractNum& n);
+AbstractNum* arccoth(const AbstractNum& n);
 
 #endif

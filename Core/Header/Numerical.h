@@ -75,7 +75,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2);
 Numerical* divide (const Numerical& n1, const Numerical& n2);
 bool cutLength(Numerical* n);
 void cutZero(Numerical* n);
-//////////////////////////////Basic Operations////////////////////////////////////////
+////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 Numerical* randomNumerical();
 Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound);
 Numerical* reciprocal(const Numerical& n);

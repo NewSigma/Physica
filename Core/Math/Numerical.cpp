@@ -972,7 +972,7 @@ Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound) {
 
     return result;
 }
-
+////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 Numerical* reciprocal(const Numerical& n) {
     return *const_1->_1 / n;
 }
@@ -1140,7 +1140,7 @@ Numerical* exp(const Numerical& n) {
     auto rank = getOne();
     while(true) {
         *temp /= *rank;
-        if(*temp < *const_1->stepSize)
+        if(*temp < *const_1->expectedRelativeError)
             break;
         *result += *temp;
         *temp *= n;

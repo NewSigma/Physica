@@ -9,6 +9,7 @@ class Const_1 {
 public:
     //_1 stands by integer 1.
     int GlobalPrecision;
+    const Numerical* expectedRelativeError;
     const Numerical* stepSize;
     const Numerical* R_MAX;
     const Numerical* _0;

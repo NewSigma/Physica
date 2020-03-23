@@ -37,7 +37,7 @@ Matrix::~Matrix() {
     delete[] vectors;
 }
 
-Vector* Matrix::operator[](int i) {
+Vector* Matrix::operator[](int i) const {
     if(i >= getLength())
         return nullptr;
     return vectors[i];
@@ -239,4 +239,221 @@ void Matrix::transpose() {
     int temp = row;
     row = col;
     col = temp;
+}
+////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+Matrix* reciprocal(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = reciprocal(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* sqrt(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sqrt(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* factorial(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = factorial(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* ln(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = ln(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* log(const Matrix& n, const AbstractNum& a) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = log(*n[i], a);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* exp(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = exp(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* pow(const Matrix& n, const AbstractNum& a) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = pow(*n[i], a);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* cos(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cos(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* sin(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sin(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* tan(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = tan(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* sec(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sec(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* csc(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = csc(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* cot(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cot(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccos(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccos(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arcsin(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsin(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arctan(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arctan(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arcsec(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsec(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccsc(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccsc(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccot(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccot(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* cosh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = cosh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* sinh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sinh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* tanh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = tanh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* sech(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = sech(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* csch(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = csch(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* coth(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = coth(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccosh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccosh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arcsinh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsinh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arctanh(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arctanh(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arcsech(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arcsech(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccsch(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccsch(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
+}
+
+Matrix* arccoth(const Matrix& n) {
+    auto arr = new Vector*[n.getLength()];
+    for(int i = 0; i < n.getLength(); ++i)
+        arr[i] = arccoth(*n[i]);
+    return new Matrix(arr, n.getLength(), n.getType());
 }

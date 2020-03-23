@@ -1,11 +1,11 @@
 #include "../../Header/Integrate.h"
 
-Numerical* rectangular(Numerical* func(Numerical*), Numerical* x0, Numerical* x1) {
+Numerical* rectangular(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
     auto result = getZero();
 
     auto point = new Numerical(x0);
-    while(*point < *x1) {
-        auto temp = func(point);
+    while(*point < x1) {
+        auto temp = func(*point);
         *result += *temp;
         *point += *const_1->stepSize;
         delete temp;
@@ -16,15 +16,15 @@ Numerical* rectangular(Numerical* func(Numerical*), Numerical* x0, Numerical* x1
     return result;
 }
 
-Numerical* ladder(Numerical* func(Numerical*), Numerical* x0, Numerical* x1) {
+Numerical* ladder(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
     auto result = getZero();
-    *result += *x0;
-    *result += *x1;
+    *result += x0;
+    *result += x1;
     *result /= *const_1->_2;
 
-    auto point = *x0 + *const_1->stepSize;
-    while(*point < *x1) {
-        auto temp = func(point);
+    auto point = x0 + *const_1->stepSize;
+    while(*point < x1) {
+        auto temp = func(*point);
         *result += *temp;
         *point += *const_1->stepSize;
         delete temp;
@@ -35,15 +35,15 @@ Numerical* ladder(Numerical* func(Numerical*), Numerical* x0, Numerical* x1) {
     return result;
 }
 
-Numerical* Simpson(Numerical* func(Numerical*), Numerical* x0, Numerical* x1) {
+Numerical* simpson(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
     auto result = getZero(), temp1 = getZero(), temp2 = getZero();
-    *result += *x0;
-    *result += *x1;
+    *result += x0;
+    *result += x1;
 
     bool odd = true;
-    auto point = *x0 + *const_1->stepSize;
-    while(*point < *x1) {
-        auto temp = func(point);
+    auto point = x0 + *const_1->stepSize;
+    while(*point < x1) {
+        auto temp = func(*point);
         if(odd)
             *temp1 += *temp;
         else

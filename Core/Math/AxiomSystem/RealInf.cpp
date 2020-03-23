@@ -4,7 +4,6 @@
 #include "../../Header/RealInf.h"
 #include "../../Header/ComplexInf.h"
 #include "../../Header/Indeterminate.h"
-#include "../../Header/ElementaryFunction.h"
 
 RealInf* RealInf::positive = nullptr;
 RealInf* RealInf::negative = nullptr;

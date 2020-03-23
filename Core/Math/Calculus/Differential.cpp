@@ -1,5 +1,4 @@
 #include "../../Header/Differential.h"
-#include "../../Header/RealNum.h"
 #include "../../Header/Numerical.h"
 
 Numerical* D_double_point(Numerical* func(const Numerical&), const Numerical& x0) {
