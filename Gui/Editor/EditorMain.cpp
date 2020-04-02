@@ -11,9 +11,12 @@ EditorMain::EditorMain(QWidget* parent) : QTextEdit(parent) {
     updateLineNumberAreaWidth();
     doHighLight();
 
+    document()->rootFrame()->begin().currentBlock().setVisible(false);
+    setReadOnly(true);
+
     connect(document(), &QTextDocument::blockCountChanged, this, &EditorMain::updateLineNumberAreaWidth);
     //connect(this, SIGNAL(updateRequest()), SLOT(updateLineNumberArea()));
-    connect(this, &EditorMain::cursorPositionChanged, this, &EditorMain::doHighLight);
+    connect(this, &EditorMain::cursorPositionChanged, this, &EditorMain::onCursorPositionChanged);
 }
 
 int EditorMain::lineNumberAreaWidth() {
@@ -42,6 +45,11 @@ void EditorMain::doHighLight() {
         extraSelections.append(selection);
     }
     setExtraSelections(extraSelections);
+}
+
+void EditorMain::onCursorPositionChanged() {
+    setReadOnly(textCursor().currentFrame() == document()->rootFrame());
+    doHighLight();
 }
 /*
 void EditorMain::paintLineNumber(QPaintEvent *event) {

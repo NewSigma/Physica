@@ -9,10 +9,11 @@ public:
 private:
     int highLight;
     int lineNumberAreaWidth();
-    void paintLineNumber(QPaintEvent *event);
+    void doHighLight();
+    //void paintLineNumber(QPaintEvent *event);
 private slots:
     void updateLineNumberAreaWidth();
-    void doHighLight();
+    void onCursorPositionChanged();
 };
 
 

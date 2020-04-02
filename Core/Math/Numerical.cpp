@@ -51,7 +51,7 @@ Numerical::Numerical(std::wstring s, unsigned char acc) {
                 point_id = index;
                 break;
             default:
-                byte[id_byte] = s[index] - 48;
+                byte[id_byte] = s[index] - '0';
                 ++id_byte;
         }
     }

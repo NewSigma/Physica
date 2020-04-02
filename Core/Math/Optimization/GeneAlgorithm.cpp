@@ -6,52 +6,43 @@
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.
  */
 //TODO Debug
-GeneAlgorithm::GeneAlgorithm(int pop, Numerical* crossover, Numerical* mutation) {
-	population = pop;
-	crossoverRate = crossover;
-	mutationRate = mutation;
+GeneAlgorithm::GeneAlgorithm(Numerical* func(const Numerical&), const Numerical* lower, const Numerical* upper, int pop, ChooseMode mode) {
+    population = pop;
 	points = new Numerical*[population];
-    generations = 0;
-    maxGenerations = 100;
-    maxTime = 600000;
+
+    fitnessFunction = func;
+    lowerBound = lower;
+    upperBound = upper;
+    regionLength = *upperBound - *lowerBound;
+    //Get abs(regionLength).
+    regionLength->sign = true;
+
+    Numerical* element;
+    if (mode == LinearChoose) {
+        auto stepLength = *regionLength / Numerical(population);
+        Numerical* number_i;
+        for (int i = 0; i < population; i++) {
+            number_i = new Numerical(i);
+            element = *stepLength * *number_i;
+            *element += *lowerBound;
+            points[i] = element;
+            delete number_i;
+        }
+        delete stepLength;
+    }
+    else if (mode == RandomChoose) {
+        for (int i = 0; i < population; i++) {
+            element = new Numerical(randomNumerical());
+            *element *= *regionLength;
+            *element += *lowerBound;
+            points[i] = element;
+        }
+    }
 }
 
 GeneAlgorithm::~GeneAlgorithm() {
     delete[] points;
     delete regionLength;
-}
-
-void GeneAlgorithm::initFunction(Numerical* func(Numerical*), Numerical* lower, Numerical* upper, ChooseMode mode) {
-	fitnessFunction = func;
-	lowerBound = lower;
-	upperBound = upper;
-    regionLength = (Numerical*)(*upperBound - *lowerBound);
-	//In case upperBound < lowerBound.
-	regionLength->sign = true;
-
-	Numerical* element;
-	if (mode == LinearChoose) {
-        auto number_pop = new Numerical(new Numerical(population));
-        auto stepLength = *regionLength / *number_pop;
-        Numerical* number_i;
-		for (int i = 0; i < population; i++) {
-		    number_i = new Numerical(i);
-		    element = (Numerical*)(*stepLength * *number_i);
-		    *element += *lowerBound;
-            points[i] = element;
-            delete number_i;
-		}
-		delete number_pop;
-		delete stepLength;
-	}
-	else if (mode == RandomChoose) {
-		for (int i = 0; i < population; i++) {
-			element = new Numerical(randomNumerical());
-			*element *= *regionLength;
-			*element += *lowerBound;
-			points[i] = element;
-		}
-	}
 }
 //Get the maximum point. Multiply the function by a -1 to get the minimum.
 Numerical** GeneAlgorithm::getExtremalPoint() {
@@ -61,17 +52,17 @@ Numerical** GeneAlgorithm::getExtremalPoint() {
 	}
 	startTime = clock();
 	while (!shouldStop()) {
-        overCross();
+        crossover();
 		mutation();
 		generations += 1;
 	}
 	return points;
 }
 
-void GeneAlgorithm::overCross() {
+void GeneAlgorithm::crossover() {
 	for (int i = 0; i < population; i++) {
         auto r = randomNumerical();
-		if (*crossoverRate > *r) {
+		if (Numerical(crossoverRate) > *r) {
 			long randomIndex1 = random() % population;
 			long randomIndex2 = random() % population;
             auto random1 = points[randomIndex1];
@@ -83,9 +74,9 @@ void GeneAlgorithm::overCross() {
             auto child = *random2 - *random1;
             *child *= *r;
             *child += *random1;
-            auto child_y = fitnessFunction(child);
-            auto y_random1 = fitnessFunction(random1);
-            auto y_random2 = fitnessFunction(random2);
+            auto child_y = fitnessFunction(*child);
+            auto y_random1 = fitnessFunction(*random1);
+            auto y_random2 = fitnessFunction(*random2);
 			if (*child_y > *y_random1)
                 *random1 = *child;
 			else if (*child_y > *y_random2)
@@ -102,7 +93,7 @@ void GeneAlgorithm::overCross() {
 
 void GeneAlgorithm::mutation() {
     Numerical* r = randomNumerical();
-	if (*mutationRate > *r) {
+	if (Numerical(mutationRate) > *r) {
 		long randomIndex = random() % population;
 		*points[randomIndex] = *randomNumerical();
         *points[randomIndex] *= *regionLength;
@@ -133,10 +124,9 @@ void GeneAlgorithm::setMaxTime(int time) {
 
 void GeneAlgorithm::print() {
 	if(fitnessFunction != nullptr) {
-        for (int i = 0; i < population; i++) {
-            Numerical* point = points[i];
-            Numerical* value = fitnessFunction(point);
-            std::cout << *point << " " << *value << std::endl;
+        for (int i = 0; i < population; ++i) {
+            Numerical* value = fitnessFunction(*points[i]);
+            std::cout << *points[i] << " " << *value << '\n';
             delete value;
         }
         delete[] points;

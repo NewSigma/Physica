@@ -17,6 +17,7 @@ Const_1::Const_1() {
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
+    //Value (- GlobalPrecision / 2) still need a proof.
     stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
 
     byte = (unsigned char*)malloc(10 * sizeof(char));

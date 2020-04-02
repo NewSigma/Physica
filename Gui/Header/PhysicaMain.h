@@ -15,6 +15,8 @@ private:
             QAction* file_new;
             QAction* file_open;
             QAction* file_settings;
+        QMenu* insert;
+            QAction* insert_cell;
         QMenu* view;
             QAction* view_fullscreen;
         QMenu* evaluate;
@@ -33,11 +35,10 @@ private slots:
     ////////////////////////////////////////////SLOTS////////////////////////////////////////////
     void on_modified();
     void on_click_settings();
+    void on_click_insertCell();
     void on_click_fullscreen();
     void on_click_calculator();
     void on_calculator_closed();
-    ////////////////////////////////////////////InT////////////////////////////////////////////
-    static void on_click_lontonAnt();
 };
 
 #endif

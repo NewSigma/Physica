@@ -10,35 +10,34 @@ public:
         LinearChoose,
         RandomChoose
     };
-	GeneAlgorithm(int population, Numerical* crossoverRate, Numerical* mutationRate);
+    double crossoverRate = 0.6;
+    double mutationRate = 0.1;
+
+	GeneAlgorithm(Numerical* func(const Numerical&), const Numerical* lower, const Numerical* upper, int pop = 100, ChooseMode mode = RandomChoose);
     ~GeneAlgorithm();
 
-	void initFunction(Numerical* func(Numerical*), Numerical* lower, Numerical* upper, ChooseMode mode);
 	Numerical** getExtremalPoint();
 	void setMaxGenerations(int maxGenerations);
 	void setMaxTime(int maxTime);
 	void print();
-
 private:
 	//Algorithm basic args.
 	//The size of initial points we should choose.
 	int population;
-    Numerical* crossoverRate;
-    Numerical* mutationRate;
 	//Function args.
-    Numerical* (*fitnessFunction)(Numerical*);
-    Numerical* lowerBound;
-    Numerical* upperBound;
+    Numerical* (*fitnessFunction)(const Numerical&);
+    const Numerical* lowerBound;
+    const Numerical* upperBound;
     Numerical* regionLength;
 	//Save
     Numerical** points;
 	//Stopping args
-	int generations;
+	int generations = 0;
 	clock_t startTime{};
-	int maxGenerations;
-	int maxTime;
+	int maxGenerations = 100;
+	int maxTime = 600000;
 
-	void overCross();
+	void crossover();
 	void mutation();
 	bool shouldStop();
 };

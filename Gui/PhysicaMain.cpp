@@ -30,6 +30,10 @@ PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {
         file_settings = file->addAction("Settings");
         connect(file_settings, SIGNAL(triggered()), SLOT(on_click_settings()));
 
+        insert = menuBar->addMenu("Insert");
+        insert_cell = insert->addAction("Insert Cell");
+        connect(insert_cell, SIGNAL(triggered()), SLOT(on_click_insertCell()));
+
         view = menuBar->addMenu("View");
         view_fullscreen = view->addAction("Full Screen");
         connect(view_fullscreen, SIGNAL(triggered()), SLOT(on_click_fullscreen()));
@@ -40,7 +44,7 @@ PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {
         //InT stands by Interesting Things.
         InT = menuBar->addMenu("InT");
         lontonAnt = InT->addAction("Lonton Ant");
-        connect(lontonAnt, SIGNAL(triggered()), SLOT(on_click_lontonAnt()));
+        connect(lontonAnt, &QAction::triggered, []() { new LongtonAnt(); });
     }
     //Central
     textEdit = new EditorMain(this);
@@ -87,11 +91,15 @@ void PhysicaMain::keyPressEvent(QKeyEvent* event) {
 ////////////////////////////////////////////SLOTS////////////////////////////////////////////
 void PhysicaMain::on_modified() {
     setWindowModified(true);
-    disconnect(textEdit->document(), SIGNAL(contentsChanged()), this, SLOT(on_modified()));
+    disconnect(textEdit->document(), &QTextDocument::contentsChanged, this, &PhysicaMain::on_modified);
 }
 
 void PhysicaMain::on_click_settings() {
     new Settings(this);
+}
+
+void PhysicaMain::on_click_insertCell() {
+    textEdit->textCursor().insertFrame(QTextFrameFormat());
 }
 
 void PhysicaMain::on_click_fullscreen() {
@@ -110,8 +118,4 @@ void PhysicaMain::on_click_calculator() {
 
 void PhysicaMain::on_calculator_closed() {
     calculator = nullptr;
-}
-////////////////////////////////////////////InT////////////////////////////////////////////
-void PhysicaMain::on_click_lontonAnt() {
-    new LongtonAnt();
 }
