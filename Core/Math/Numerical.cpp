@@ -25,6 +25,52 @@ Numerical::Numerical() {
     sign = true;
 }
 
+Numerical::Numerical(const char* s, unsigned char acc) {
+    sign = true;
+    a = acc;
+    int index = 0, startOfEff = -1, dotId = -1;
+    while(s[index] != '\0') {
+        switch(s[index]) {
+            case '1' ... '9':
+                if(startOfEff == -1)
+                    startOfEff = index;
+            case '0':
+                break;
+            case '-':
+                if(index != 0)
+                    goto error;
+                sign = false;
+                break;
+            case '.':
+                if(dotId != -1)
+                    goto error;
+                dotId = index;
+                break;
+            default:
+                goto error;
+        }
+        ++index;
+    }
+
+    power = dotId - startOfEff - 1;
+    length = index - startOfEff - (startOfEff < dotId);
+    byte = new unsigned char[length];
+    if(dotId > startOfEff) {
+        memcpy(byte, s + startOfEff, dotId - startOfEff);
+        memcpy(byte + dotId - startOfEff, s + dotId + 1, index - dotId - 1);
+    }
+    else
+        memcpy(byte, s + startOfEff, index - startOfEff);
+    for(int i = 0; i < length; ++i)
+        byte[i] -= '0';
+    return;
+error:
+    std::cout << "[Numerical] Failed to initialize Numerical.\n";
+    byte = nullptr;
+    length = power = a = 0;
+    sign = true;
+}
+
 Numerical::Numerical(std::wstring s, unsigned char acc) {
     byte = new unsigned char[s.size()];
     sign = true;

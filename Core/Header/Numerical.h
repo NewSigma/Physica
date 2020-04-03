@@ -24,8 +24,9 @@ public:
     unsigned char a = 0;
 
     Numerical();
-    explicit Numerical(double d, unsigned char acc = 0);
+    explicit Numerical(const char* s, unsigned char acc = 0);
     explicit Numerical(std::wstring s, unsigned char acc = 0);
+    explicit Numerical(double d, unsigned char acc = 0);
     Numerical(const Numerical& n);
     Numerical(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit Numerical(const Numerical* n);
