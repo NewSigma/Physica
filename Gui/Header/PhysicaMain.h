@@ -34,11 +34,8 @@ private:
 private slots:
     ////////////////////////////////////////////SLOTS////////////////////////////////////////////
     void on_modified();
-    void on_click_settings();
-    void on_click_insertCell();
     void on_click_fullscreen();
     void on_click_calculator();
-    void on_calculator_closed();
 };
 
 #endif

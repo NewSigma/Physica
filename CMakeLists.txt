@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #############################################Project##############################################
 add_subdirectory(Core)
 add_subdirectory(Gui)
-add_executable(Physica Physica.cpp)
+add_executable(Physica Physica.cpp Physica.h)
 #############################################Options##############################################
 target_compile_options(Physica PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
         -O${OPTIMIZE_LEVEL}

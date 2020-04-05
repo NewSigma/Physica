@@ -28,11 +28,11 @@ PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {
         file_open = file->addAction("Open");
         file->addSeparator();
         file_settings = file->addAction("Settings");
-        connect(file_settings, SIGNAL(triggered()), SLOT(on_click_settings()));
+        connect(file_settings, &QAction::triggered, [&]() { new Settings(this); });
 
         insert = menuBar->addMenu("Insert");
         insert_cell = insert->addAction("Insert Cell");
-        connect(insert_cell, SIGNAL(triggered()), SLOT(on_click_insertCell()));
+        connect(insert_cell, &QAction::triggered, [&]() { textEdit->textCursor().insertFrame(QTextFrameFormat()); });
 
         view = menuBar->addMenu("View");
         view_fullscreen = view->addAction("Full Screen");
@@ -94,14 +94,6 @@ void PhysicaMain::on_modified() {
     disconnect(textEdit->document(), &QTextDocument::contentsChanged, this, &PhysicaMain::on_modified);
 }
 
-void PhysicaMain::on_click_settings() {
-    new Settings(this);
-}
-
-void PhysicaMain::on_click_insertCell() {
-    textEdit->textCursor().insertFrame(QTextFrameFormat());
-}
-
 void PhysicaMain::on_click_fullscreen() {
     if(windowState() == Qt::WindowFullScreen)
         setWindowState(Qt::WindowMaximized);
@@ -112,10 +104,6 @@ void PhysicaMain::on_click_fullscreen() {
 void PhysicaMain::on_click_calculator() {
     if(calculator == nullptr) {
         calculator = new Calculator();
-        connect(calculator, SIGNAL(destroyed()), SLOT(on_calculator_closed()));
+        connect(calculator, &Calculator::destroyed, [&]() { calculator = nullptr; });
     }
-}
-
-void PhysicaMain::on_calculator_closed() {
-    calculator = nullptr;
 }

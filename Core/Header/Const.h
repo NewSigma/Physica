@@ -42,4 +42,6 @@ public:
     ~Const_2();
 };
 
+Numerical* getPI(int precision);
+
 #endif

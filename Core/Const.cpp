@@ -93,8 +93,7 @@ Const_2::Const_2() {
     _0 = new RealNum(getZero());
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
-    //TODO Slow and not accurate
-    PI = new Numerical(bisectionMethod(sin, *const_1->_0, *const_1->_3, *const_1->_4));
+    PI = getPI(const_1->GlobalPrecision);
     E = exp(*const_1->_1);
 
     PI_2 = *PI / *const_1->_2;
@@ -112,4 +111,36 @@ Const_2::~Const_2() {
     delete E;
     delete PI_2;
     delete Minus_PI_2;
+}
+//Reference:
+//http://www.pi314.net/eng/salamin.php
+//https://blog.csdn.net/liangbch/article/details/78724041
+Numerical* getPI(int precision) {
+    auto a = getOne();
+    auto x = getOne();
+    auto b = sqrt(*const_1->_2);
+    *b << *(*const_1->_1 / *b);
+    auto c = *const_1->_1 / *const_1->_4;
+
+    int goal = 1;
+    while(goal < precision) {
+        Numerical y(a);
+        *a += *b;
+        *a /= *const_1->_2;
+        *b *= y;
+        *b << *sqrt(*b);
+        y -= *a;
+        y *= y;
+        y *= *x;
+        *c -= y;
+        *x *= *const_1->_2;
+        goal *= 2;
+    }
+    *a *= *a;
+    *a /= *c;
+
+    delete x;
+    delete b;
+    delete c;
+    return a;
 }

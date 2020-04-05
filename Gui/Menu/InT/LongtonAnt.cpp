@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  * Inspired by interview question 16.22 on leetcode.
+ * This is a kind of cellular automata.
  */
 void LongtonAnt::handle() {
     int index;

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
+#include "Physica.h"
 #include <QtWidgets/QApplication>
 #include "Core/Header/Const.h"
 #include "Gui/Header/PhysicaMain.h"
@@ -8,9 +9,13 @@
 const Const_1* const_1;
 const Const_2* const_2;
 
-int main(int argc, char** argv) {
+void init() {
     const_1 = new Const_1();
     const_2 = new Const_2();
+}
+
+int main(int argc, char** argv) {
+    init();
 
     QApplication::setApplicationName("Physica");
     QApplication::setApplicationVersion("0.0.1");
@@ -25,8 +30,11 @@ int main(int argc, char** argv) {
 
     int exit_code = QApplication::exec();
 
+    deInit();
+    return exit_code;
+}
+
+void deInit() {
     delete const_1;
     delete const_2;
-
-    return exit_code;
 }
