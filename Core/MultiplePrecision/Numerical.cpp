@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../Header/Numerical.h"
-#include "../Header/Solve.h"
+#include "Numerical.h"
+#include "Solve.h"
 #include <cstring>
 #include <cmath>
 
@@ -19,37 +19,16 @@ extern const Const_2* const_2;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical() {
-    byte = nullptr;
-    length = power = a = 0;
-    sign = true;
-}
+Numerical::Numerical() : Numerical(nullptr, 0, 0, true) {}
 
-Numerical::Numerical(const Numerical& n) {
-    length = n.length;
-    power = n.power;
-    sign = n.sign;
+Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), sign(n.sign), a(n.a) {
     byte = (unsigned char*)malloc(length * sizeof(char));
     memcpy(byte, n.byte, length * sizeof(char));
-    a = n.a;
 }
 
-Numerical::Numerical(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
-    byte = b;
-    length = len;
-    power = pow;
-    sign = s;
-    a = acc;
-}
+Numerical::Numerical(unsigned char* b, signed char len, int pow, bool s, unsigned char acc) : byte(b), power(pow), length(len), sign(s), a(acc) {}
 
-Numerical::Numerical(const Numerical* n) {
-    length = n->length;
-    power = n->power;
-    sign = n->sign;
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    memcpy(byte, n->byte, length * sizeof(char));
-    a = n->a;
-}
+Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 /*
  * May not be very accurate.
  */
@@ -58,7 +37,7 @@ Numerical::Numerical(double d, unsigned char acc) {
     d = sign ? d : -d;
     auto copy_d = d;
 
-    length = power = 0;
+    power = length = 0;
     if(d < 1) {
         do {
             d *= 10;
@@ -91,7 +70,7 @@ Numerical::Numerical(double d, unsigned char acc) {
 Numerical::Numerical(const char* s, unsigned char acc) {
     sign = true;
     a = acc;
-    int index = 0, startOfEff = -1, dotId = -1;
+    signed char index = 0, startOfEff = -1, dotId = -1;
     while(s[index] != '\0') {
         switch(s[index]) {
             case '1' ... '9':
@@ -116,7 +95,7 @@ Numerical::Numerical(const char* s, unsigned char acc) {
     }
 
     power = dotId - startOfEff - 1;
-    length = index - startOfEff - (startOfEff < dotId);
+    length = (signed char)(index - startOfEff - (startOfEff < dotId));
     byte = new unsigned char[length];
     if(dotId > startOfEff) {
         memcpy(byte, s + startOfEff, dotId - startOfEff);
@@ -131,16 +110,16 @@ Numerical::Numerical(const char* s, unsigned char acc) {
     error:
     std::cout << "[Numerical] Failed to initialize Numerical.\n";
     byte = nullptr;
-    length = power = a = 0;
+    power = a = length = 0;
     sign = true;
 }
 
 Numerical::Numerical(const wchar_t* s, unsigned char acc) {
-    int size = wcslen(s);
+    signed char size = wcslen(s);
     byte = new unsigned char[size];
     sign = true;
     a = acc;
-    int index = 0, id_byte = 0, start_eff_num = 0, point_id = size;
+    signed char index = 0, id_byte = 0, start_eff_num = 0, point_id = size;
     for(; index < size; ++index) {
         switch(s[index]) {
             case '-':
@@ -715,7 +694,7 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         }
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, will calculate it accurately later.
-        int length = big->power + std::max(big->length - big->power,small->length - small->power);
+        signed char length = (signed char)(big->power + std::max(big->length - big->power, small->length - small->power));
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memcpy(temp, big->byte, big->length * sizeof(char));
         memset(temp + big->length, 0, (length - big->length) * sizeof(char));
@@ -775,7 +754,7 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
             //memcpy starts from the start index.
             int start = unitIndex - n1.power;
             //Estimate the ed of result first, will calculate it accurately later.
-            int length = unitIndex + std::max(n1.length - n1.power, n2.length - n2.power);
+            signed char length = (signed char)(unitIndex + std::max(n1.length - n1.power, n2.length - n2.power));
             auto byte = (char*)malloc(length * sizeof(char));
             memset(byte, 0, start * sizeof(char));
             memcpy(byte + start, n1.byte, n1.length * sizeof(char));
@@ -843,7 +822,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         }
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first. we will calculate it accurately later.
-        int length = n1.length + n2.length - 1;
+        auto length = (signed char)(n1.length + n2.length - 1);
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memset(temp, 0, length * sizeof(char));
         for (int i = small->length - 1; i >= 0; --i) {
@@ -895,7 +874,7 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         n1_copy->sign = n2_copy->sign = true;
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, we will calculate it accurately later.
-        int length = const_1->GlobalPrecision;
+        signed char length = const_1->GlobalPrecision;
         int power = n1_copy->power - n2_copy->power - 1;
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memset(temp, 0, length * sizeof(char));
@@ -956,7 +935,7 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
  */
 bool cutLength(Numerical* n) {
     bool result = false;
-    int lastCutIndex = n->length;
+    signed char lastCutIndex = n->length;
 
     if(n->length > const_1->GlobalPrecision) {
         lastCutIndex = const_1->GlobalPrecision;
@@ -973,13 +952,13 @@ bool cutLength(Numerical* n) {
  * Cut zeros from the beginning.
  */
 void cutZero(Numerical* n) {
-    int firstCutIndex = 0;
+    signed char firstCutIndex = 0;
     //Ignore zeros from the first index.
     while(n->byte[firstCutIndex] == 0 && firstCutIndex < n->length - 1)
         ++firstCutIndex;
 
     if(firstCutIndex != 0) {
-        n->length -= firstCutIndex;
+        n->length = (signed char)(n->length - firstCutIndex);
 
         auto new_array = (unsigned char*)malloc(n->length * sizeof(char));
         memcpy(new_array, n->byte + firstCutIndex, n->length * sizeof(char));

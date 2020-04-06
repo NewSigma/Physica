@@ -14,18 +14,18 @@ class Numerical {
 public:
     //Store effective digits.
     unsigned char* byte;
-    //Length of byte.
-    int length;
     //Number = (x0 +- a * 10^(1-length)) * 10^power
     int power;
     //True if Numerical > 0 and false if Numerical < 0. (Numerical != 0)
     bool sign;
+    //Length of byte.
+    signed char length;
     //Accuracy
     unsigned char a = 0;
 
     Numerical();
     Numerical(const Numerical& n);
-    Numerical(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
+    Numerical(unsigned char* byte, signed char length, int power, bool sign = true, unsigned char acc = 0);
     explicit Numerical(const Numerical* n);
     explicit Numerical(double d, unsigned char acc = 0);
     explicit Numerical(const char* s, unsigned char acc = 0);
