@@ -16,16 +16,17 @@ public:
     unsigned char* byte;
     //Number = (x0 +- a * 10^(1-length)) * 10^power
     int power;
-    //True if Numerical > 0 and false if Numerical < 0. (Numerical != 0)
-    bool sign;
-    //Length of byte.
+    /*
+     * Length of byte = abs(length).
+     * sign of length and sign of Numerical are same. (when Numerical != 0)
+     */
     signed char length;
     //Accuracy
     unsigned char a = 0;
 
     Numerical();
     Numerical(const Numerical& n);
-    Numerical(unsigned char* byte, signed char length, int power, bool sign = true, unsigned char acc = 0);
+    Numerical(unsigned char* byte, signed char length, int power, unsigned char acc = 0);
     explicit Numerical(const Numerical* n);
     explicit Numerical(double d, unsigned char acc = 0);
     explicit Numerical(const char* s, unsigned char acc = 0);
@@ -62,9 +63,10 @@ public:
     Numerical* getMaximum() const;
     Numerical* getMinimum() const;
     bool applyError(const Numerical* copy_error);
+    inline int getSize() const { return abs(length); }
     inline bool isZero() const { return byte[0] == 0; }
-    inline bool isPositive() const { return !isZero() && sign; }
-    inline bool isNegative() const { return !isZero() && !sign; }
+    inline bool isPositive() const { return !isZero() && length > 0; }
+    inline bool isNegative() const { return !isZero() && length < 0; }
     inline bool isInteger() const { return length == power + 1; }
 };
 ////////////////////////////////Helper functions/////////////////////////////////////

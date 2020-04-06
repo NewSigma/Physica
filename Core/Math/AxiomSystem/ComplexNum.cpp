@@ -89,11 +89,8 @@ AbstractNum* ComplexNum::operator- (const AbstractNum& n) const {
     switch(n.getType()) {
         case ComplexNumber:
             return new ComplexNum(*real - *((ComplexNum&)n).real, *imagine - *((ComplexNum&)n).imagine);
-        case RealNumber: {
-            auto temp = new Numerical(imagine);
-            temp->sign = !temp->sign;
-            return new ComplexNum(*real - *((RealNum&)n).real, temp);
-        }
+        case RealNumber:
+            return new ComplexNum(*real - *((RealNum&)n).real, -*imagine);
         case DirectedInfinity:
             return -(DirectedInf&)n;
         case ComplexInfinity:

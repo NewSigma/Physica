@@ -40,34 +40,22 @@ Const_1::Const_1() {
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 1;
     _1 = new Numerical(byte, 1, 0);
-
-    auto temp = new Numerical(_1);
-    temp->sign = false;
-    Minus_1 = temp;
+    Minus_1 = -*_1;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 2;
     _2 = new Numerical(byte, 1, 0);
-
-    temp = new Numerical(_2);
-    temp->sign = false;
-    Minus_2 = temp;
+    Minus_2 = -*_2;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 3;
     _3 = new Numerical(byte, 1, 0);
-
-    temp = new Numerical(_3);
-    temp->sign = false;
-    Minus_3 = temp;
+    Minus_3 = -*_3;
 
     byte = (unsigned char*)malloc(sizeof(char));
     byte[0] = 4;
     _4 = new Numerical(byte, 1, 0);
-
-    temp = new Numerical(_4);
-    temp->sign = false;
-    Minus_4 = temp;
+    Minus_4 = -*_4;
 }
 
 Const_1::~Const_1() {
@@ -97,9 +85,7 @@ Const_2::Const_2() {
     E = exp(*const_1->_1);
 
     PI_2 = *PI / *const_1->_2;
-    auto temp = new Numerical(PI_2);
-    temp->sign = false;
-    Minus_PI_2 = temp;
+    Minus_PI_2 = -*PI_2;
 }
 
 Const_2::~Const_2() {

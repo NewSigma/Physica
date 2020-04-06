@@ -5,6 +5,7 @@
 #include "Solve.h"
 #include <cstring>
 #include <cmath>
+#include <QtCore/qlogging.h>
 
 extern const Const_2* const_2;
 /*
@@ -19,22 +20,23 @@ extern const Const_2* const_2;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical() : Numerical(nullptr, 0, 0, true) {}
+Numerical::Numerical() : Numerical(nullptr, 0, 0) {}
 
-Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), sign(n.sign), a(n.a) {
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    memcpy(byte, n.byte, length * sizeof(char));
+Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), a(n.a) {
+    auto size = getSize();
+    byte = (unsigned char*)malloc(size * sizeof(char));
+    memcpy(byte, n.byte, size * sizeof(char));
 }
 
-Numerical::Numerical(unsigned char* b, signed char len, int pow, bool s, unsigned char acc) : byte(b), power(pow), length(len), sign(s), a(acc) {}
+Numerical::Numerical(unsigned char* byte, signed char length, int power, unsigned char a) : byte(byte), power(power), length(length), a(a) {}
 
 Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 /*
  * May not be very accurate.
  */
 Numerical::Numerical(double d, unsigned char acc) {
-    sign = d >= 0;
-    d = sign ? d : -d;
+    bool negative = d < 0;
+    d = negative ? -d : d;
     auto copy_d = d;
 
     power = length = 0;
@@ -63,75 +65,34 @@ Numerical::Numerical(double d, unsigned char acc) {
         d -= double(int(d));
         d *= 10;
     }
-
+    if(negative)
+        length = (signed char)-length;
     a = acc;
 }
 
 Numerical::Numerical(const char* s, unsigned char acc) {
-    sign = true;
-    a = acc;
-    signed char index = 0, startOfEff = -1, dotId = -1;
-    while(s[index] != '\0') {
-        switch(s[index]) {
-            case '1' ... '9':
-                if(startOfEff == -1)
-                    startOfEff = index;
-            case '0':
-                break;
-            case '-':
-                if(index != 0)
-                    goto error;
-                sign = false;
-                break;
-            case '.':
-                if(dotId != -1)
-                    goto error;
-                dotId = index;
-                break;
-            default:
-                goto error;
-        }
-        ++index;
-    }
-
-    power = dotId - startOfEff - 1;
-    length = (signed char)(index - startOfEff - (startOfEff < dotId));
-    byte = new unsigned char[length];
-    if(dotId > startOfEff) {
-        memcpy(byte, s + startOfEff, dotId - startOfEff);
-        memcpy(byte + dotId - startOfEff, s + dotId + 1, index - dotId - 1);
-    }
-    else
-        memcpy(byte, s + startOfEff, index - startOfEff);
-    for(int i = 0; i < length; ++i)
-        byte[i] -= '0';
-    return;
-
-    error:
-    std::cout << "[Numerical] Failed to initialize Numerical.\n";
-    byte = nullptr;
-    power = a = length = 0;
-    sign = true;
-}
-
-Numerical::Numerical(const wchar_t* s, unsigned char acc) {
-    signed char size = wcslen(s);
+    signed char size = strlen(s);
     byte = new unsigned char[size];
-    sign = true;
+    bool negative = false;
     a = acc;
     signed char index = 0, id_byte = 0, start_eff_num = 0, point_id = size;
     for(; index < size; ++index) {
         switch(s[index]) {
             case '-':
-                sign = false;
+                negative = true;
                 break;
             case '.':
                 point_id = index;
             case '0':
                 break;
-            default:
+            case '1' ... '9':
                 start_eff_num = index;
                 goto double_break;
+            default:
+                qCritical("Failed to initialize Numerical.");
+                byte = nullptr;
+                power = a = length = 0;
+                return;
         }
     }
     double_break:
@@ -148,6 +109,22 @@ Numerical::Numerical(const wchar_t* s, unsigned char acc) {
     length = id_byte > const_1->GlobalPrecision ? const_1->GlobalPrecision : id_byte;
     power = point_id - start_eff_num + (point_id > start_eff_num ? -1 : 0);
     byte = (unsigned char*)realloc(byte, length);
+    if(negative)
+        length = (signed char)-length;
+}
+
+Numerical::Numerical(const wchar_t* s, unsigned char acc) {
+    signed char size = wcslen(s);
+    char str[size + 1];
+    str[size] = '\0';
+    for(int i = 0; i < size; ++i)
+        str[i] = (char)s[i];
+    Numerical temp(str);
+    byte = temp.byte;
+    temp.byte = nullptr;
+    length = temp.length;
+    power = temp.power;
+    a = acc;
 }
 
 Numerical::Numerical(const std::string& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
@@ -160,13 +137,14 @@ Numerical::~Numerical() {
 
 std::string Numerical::toString() const {
     std::string result;
+    int size = getSize();
     if(byte != nullptr) {
         if(isNegative())
             result.push_back('-');
         if(abs(power) > const_1->GlobalPrecision) {
             result.push_back(byte[0] + '0');
             result.push_back('.');
-            for(int i = 1; i < length; ++i)
+            for(int i = 1; i < size; ++i)
                 result.push_back(byte[i] + '0');
             result += "×10^";
             result += std::to_string(power);
@@ -175,21 +153,21 @@ std::string Numerical::toString() const {
             result += "0.";
             for(int i = -power - 1; i > 0; --i)
                 result.push_back('0');
-            for(int i = 0; i < length; ++i)
+            for(int i = 0; i < size; ++i)
                 result.push_back(byte[i] + '0');
         }
         else {
-            if(length > power) {
+            if(size > power) {
                 for (int i = 0; i < power + 1; ++i)
                     result.push_back(byte[i] + '0');
                 result.push_back('.');
-                for(int i = power + 1; i < length; ++i)
+                for(int i = power + 1; i < size; ++i)
                     result.push_back(byte[i] + '0');
             }
             else {
-                for(int i = 0; i < length; ++i)
+                for(int i = 0; i < size; ++i)
                     result.push_back(byte[i] + '0');
-                for(int i = power - length + 1; i > 0; --i)
+                for(int i = power - size + 1; i > 0; --i)
                     result.push_back('0');
             }
         }
@@ -202,6 +180,7 @@ std::string Numerical::toString() const {
 Numerical::operator double() const {
     double result_integer = 0;
     double result_float = 0;
+    int size = getSize();
 
     int temp_index = power + 1;
     for(int i = 0; i < temp_index; ++i) {
@@ -209,20 +188,21 @@ Numerical::operator double() const {
         result_integer += byte[i];
     }
 
-    while(temp_index < length) {
+    while(temp_index < size) {
         result_float += byte[temp_index];
         result_float *= 10;
         ++temp_index;
     }
-    result_float /= pow(10,length - power);
+    result_float /= pow(10,size - power);
 
     return result_integer + result_float;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
-    os << n.toString() << "\tLength = " << n.length << "\tPower = " << n.power << "\tAccuracy = ";
+    int size = n.getSize();
+    os << n.toString() << "\tLength = " << size << "\tPower = " << n.power << "\tAccuracy = ";
 
-    int temp = n.power - n.length +1;
+    int temp = n.power - size +1;
     if(n.a == 0)
         os << "0.";
     else {
@@ -247,7 +227,6 @@ void Numerical::operator<<(Numerical& n) {
     byte = n.byte;
     length = n.length;
     power = n.power;
-    sign = n.sign;
     a = n.a;
     n.byte = nullptr;
     delete &n;
@@ -256,11 +235,11 @@ void Numerical::operator<<(Numerical& n) {
 Numerical& Numerical::operator= (const Numerical& n) {
     if(this == &n)
         return *this;
-    byte = (unsigned char*)realloc(byte, n.length * sizeof(char));
-    memcpy(byte, n.byte, n.length * sizeof(char));
     length = n.length;
+    int size = getSize();
+    byte = (unsigned char*)realloc(byte, size * sizeof(char));
+    memcpy(byte, n.byte, size * sizeof(char));
     power = n.power;
-    sign = n.sign;
     a = n.a;
     return *this;
 }
@@ -269,7 +248,7 @@ Numerical& Numerical::operator= (const Numerical& n) {
 Numerical* Numerical::getAccuracy() const {
     auto b = (unsigned char*)malloc(sizeof(char));
     b[0] = a;
-    return new Numerical(b, 1, power - length + 1);
+    return new Numerical(b, 1, power - getSize() + 1);
 }
 //Return this + accuracy
 Numerical* Numerical::getMaximum() const {
@@ -287,14 +266,15 @@ Numerical* Numerical::getMinimum() const {
 }
 //Add error to this and adjust this->length as well as this-> byte.
 bool Numerical::applyError(const Numerical* error) {
-    int temp = power - length + 1 - error->power;
+    int size = getSize();
+    int temp = power - size + 1 - error->power;
     if(temp <= 0) {
         if(temp < 0) {
             auto b = (unsigned char*)malloc(sizeof(char));
             b[0] = a;
-            auto error_1 = new Numerical(b, 1, power - length + 1);
+            auto error_1 = new Numerical(b, 1, power - size + 1);
             *error_1 << *add(*error_1, *error);
-            length += temp;
+            size += temp;
             a += error_1->byte[0];
             delete error_1;
         }
@@ -304,17 +284,23 @@ bool Numerical::applyError(const Numerical* error) {
 
     if(a > 9) {
         a = 1;
-        --length;
+        --size;
     }
 
-    if(length < 1) {
-        std::cout << "[Numerical] Warn: Accumulated too many errors.\n";
-        power += 1 - length;
-        length = 1;
+    if(size < 1) {
+        qWarning("Accumulated too many errors.");
+        power += 1 - size;
+        size = 1;
+        if(length < 0)
+            size = -size;
+        length = (signed char)size;
         return true;
     }
 
-    byte = (unsigned char*)realloc(byte, length * sizeof(char));
+    byte = (unsigned char*)realloc(byte, size * sizeof(char));
+    if(length < 0)
+        size = -size;
+    length = (signed char)size;
     return false;
 }
 
@@ -484,7 +470,7 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
             bool go_on;
             do {
                 result = ln(*temp_result);
-                result->sign = !result->sign;
+                result->length = (signed char)-result->length;
                 *result += *temp_1;
                 *result *= *temp_result;
                 go_on = *result == *temp_result;
@@ -498,7 +484,7 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
     return result;
 }
 /*
- * Warning: n1 can not be temp object.
+ * Warning: *this can not be temp object.
  */
 void Numerical::operator+= (const Numerical& n) {
     Numerical* p_result = *this + n;
@@ -506,7 +492,6 @@ void Numerical::operator+= (const Numerical& n) {
     byte = p_result->byte;
     length = p_result->length;
     power = p_result->power;
-    sign = p_result->sign;
     a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
@@ -518,7 +503,6 @@ void Numerical::operator-= (const Numerical& n) {
     byte = p_result->byte;
     length = p_result->length;
     power = p_result->power;
-    sign = p_result->sign;
     a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
@@ -530,7 +514,6 @@ void Numerical::operator*= (const Numerical& n) {
     byte = p_result->byte;
     length = p_result->length;
     power = p_result->power;
-    sign = p_result->sign;
     a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
@@ -544,7 +527,6 @@ void Numerical::operator/= (const Numerical& n) {
     byte = p_result->byte;
     length = p_result->length;
     power = p_result->power;
-    sign = p_result->sign;
     a = p_result->a;
     p_result->byte = nullptr;
     delete p_result;
@@ -577,7 +559,7 @@ bool Numerical::operator> (const Numerical& n) const {
     else {
         //The only method left.
         Numerical* p_result = *this - n;
-        result = p_result->sign;
+        result = p_result->isPositive();
         delete p_result;
     }
     return result;
@@ -621,7 +603,7 @@ bool Numerical::operator<= (const Numerical& n) const {
 bool Numerical::operator== (const Numerical& n) const {
     if(power != n.power)
         return false;
-    if(sign != n.sign)
+    if((length ^ n.length) < 0) // NOLINT(hicpp-signed-bitwise)
         return false;
     if(a != n.a)
         return false;
@@ -653,7 +635,7 @@ bool Numerical::operator!= (const Numerical& n) const {
 
 Numerical* Numerical::operator- () const {
     auto result = new Numerical(this);
-    result->sign = !result->sign;
+    result->length = (signed char)-result->length;
     return result;
 }
 //////////////////////////////Process functions////////////////////////////////////////
@@ -667,15 +649,15 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         result = new Numerical(n2);
     else if(n2.isZero())
         result = new Numerical(n1);
-    else if (n1.sign != n2.sign) {
+    else if ((n1.length ^ n2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
         Numerical* shallow_copy;
-        if (n1.sign) {
-            shallow_copy = new Numerical(n2.byte, n2.length, n2.power, true);
+        if (n1.length > 0) {
+            shallow_copy = new Numerical(n2.byte, n2.length, n2.power);
             result = n1 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
         else {
-            shallow_copy = new Numerical(n1.byte, n1.length, n1.power, true);
+            shallow_copy = new Numerical(n1.byte, n1.length, n1.power);
             result = n2 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
@@ -693,12 +675,14 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
             small = &n1;
         }
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
+        int bigSize = big->getSize();
+        int smallSize = small->getSize();
         //Estimate the ed of result first, will calculate it accurately later.
-        signed char length = (signed char)(big->power + std::max(big->length - big->power, small->length - small->power));
+        signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
         auto temp = (unsigned char*)malloc(length * sizeof(char));
-        memcpy(temp, big->byte, big->length * sizeof(char));
-        memset(temp + big->length, 0, (length - big->length) * sizeof(char));
-        for (int i = small->length - 1; i >= 0; --i) {
+        memcpy(temp, big->byte, bigSize * sizeof(char));
+        memset(temp + bigSize, 0, (length - bigSize) * sizeof(char));
+        for (int i = smallSize - 1; i >= 0; --i) {
             int index = big->power - small->power + i;
             temp[index] += small->byte[i];
             //Carry bit.
@@ -729,7 +713,9 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         else
             byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
-        result = new Numerical(byte, length, power, big->sign);
+        if(big->length < 0)
+            length = (signed char)-length;
+        result = new Numerical(byte, length, power);
     }
     return result;
 }
@@ -742,25 +728,27 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
         result = -n2;
     else if(n2.isZero())
         result = new Numerical(n1);
-    else if (n1.sign) {
-        if (!n2.sign) {
-            shallow_copy = new Numerical(n2.byte, n2.length, n2.power, true);
+    else if (n1.length > 0) {
+        if (n2.length < 0) {
+            shallow_copy = new Numerical(n2.byte, n2.length, n2.power);
             result = n1 + *shallow_copy;
             shallow_copy->byte = nullptr;
         }
         else {
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
+            int size1 = n1.getSize();
+            int size2 = n2.getSize();
             int unitIndex = std::max(n1.power, n2.power);
             //memcpy starts from the start index.
             int start = unitIndex - n1.power;
             //Estimate the ed of result first, will calculate it accurately later.
-            signed char length = (signed char)(unitIndex + std::max(n1.length - n1.power, n2.length - n2.power));
+            signed char length = (signed char)(unitIndex + std::max(size1 - n1.power, size2 - n2.power));
             auto byte = (char*)malloc(length * sizeof(char));
             memset(byte, 0, start * sizeof(char));
-            memcpy(byte + start, n1.byte, n1.length * sizeof(char));
-            memset(byte + start + n1.length, 0, (length - start - n1.length) * sizeof(char));
+            memcpy(byte + start, n1.byte, size1 * sizeof(char));
+            memset(byte + start + size1, 0, (length - start - size1) * sizeof(char));
 
-            for (int i = n2.length - 1; i >= 0; --i) {
+            for (int i = size2 - 1; i >= 0; --i) {
                 int index = unitIndex - n2.power + i;
                 byte[index] = char(byte[index] - n2.byte[i]);
             }
@@ -776,21 +764,21 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
             if(__glibc_unlikely(byte[0] < 0)) {
                 free(byte);
                 result = n2 - n1;
-                result->sign = false;
+                result->length = (signed char)-result->length;
             }
             else
-                result = new Numerical((unsigned char*)byte, length, unitIndex, true);
+                result = new Numerical((unsigned char*)byte, length, unitIndex);
             cutZero(result);
         }
     }
     else {
-        shallow_copy = new Numerical(n1.byte, n1.length, n1.power, true);
-        if (n2.sign) {
+        shallow_copy = new Numerical(n1.byte, n1.length, n1.power);
+        if (n2.length > 0) {
             result = *shallow_copy + n2;
-            result->sign = false;
+            result->length = (signed char)-result->length;
         }
         else {
-            auto shallow_copy_1 = new Numerical(n2.byte, n2.length, n2.power, true);
+            auto shallow_copy_1 = new Numerical(n2.byte, n2.length, n2.power);
             result = *shallow_copy_1 - *shallow_copy;
             shallow_copy_1->byte = nullptr;
             delete shallow_copy_1;
@@ -812,7 +800,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         //In this case, big has more digits after the dot.
         const Numerical* big;
         const Numerical* small;
-        if (n1.length - n1.power > n2.length - n2.power) {
+        if (n1.getSize() - n1.power > n2.getSize() - n2.power) {
             big = &n1;
             small = &n2;
         }
@@ -821,12 +809,14 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
             small = &n1;
         }
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
+        int bigSize = big->getSize();
+        int smallSize = small->getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
-        auto length = (signed char)(n1.length + n2.length - 1);
+        auto length = (signed char)(bigSize + smallSize - 1);
         auto temp = (unsigned char*)malloc(length * sizeof(char));
         memset(temp, 0, length * sizeof(char));
-        for (int i = small->length - 1; i >= 0; --i) {
-            for(int j=big->length - 1; j >= 0; --j) {
+        for (int i = smallSize - 1; i >= 0; --i) {
+            for(int j = bigSize - 1; j >= 0; --j) {
                 int index = i + j;
                 temp[index] += small->byte[i] * big->byte[j];
                 //Carry bit.
@@ -853,7 +843,9 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         else
             byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
-        result = new Numerical(byte, length, power, n1.sign == n2.sign);
+        if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
+            length = (signed char)-length;
+        result = new Numerical(byte, length, power);
     }
     return result;
 }
@@ -868,10 +860,10 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
     else if(__glibc_unlikely(n2 == *const_1->_1))
         result = new Numerical(n1);
     else {
-        result = new Numerical();
         auto n1_copy = new Numerical(n1);
         auto n2_copy = new Numerical(n2);
-        n1_copy->sign = n2_copy->sign = true;
+        n1_copy->length = (signed char)n1_copy->getSize();
+        n2_copy->length = (signed char)n2_copy->getSize();
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the ed of result first, we will calculate it accurately later.
         signed char length = const_1->GlobalPrecision;
@@ -905,7 +897,6 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
             temp[i] = unit;
         }
         //1 comes from algorithm of divide()
-        result->a = 1;
         double_break:
         delete n1_copy;
         delete n2_copy;
@@ -921,11 +912,9 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         }
         else
             byte = temp;
-        result->byte = byte;
-        result->length = length;
-        result->power = power;
-        result->sign = n1.sign == n2.sign;
-        cutZero(result);
+        if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
+            length = (signed char)-length;
+        result = new Numerical(byte, length, power, 1);
     }
     return result;
 }
@@ -935,15 +924,18 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
  */
 bool cutLength(Numerical* n) {
     bool result = false;
-    signed char lastCutIndex = n->length;
+    int size = n->getSize();
+    int lastCutIndex = size;
 
-    if(n->length > const_1->GlobalPrecision) {
+    if(size > const_1->GlobalPrecision) {
         lastCutIndex = const_1->GlobalPrecision;
         result = true;
     }
 
-    if(lastCutIndex != n->length) {
-        n->length = lastCutIndex;
+    if(lastCutIndex != size) {
+        if(n->length < 0)
+            lastCutIndex = -lastCutIndex;
+        n->length = (signed char)lastCutIndex;
         n->byte = (unsigned char*)realloc(n->byte, lastCutIndex * sizeof(char));
     }
     return result;
@@ -952,16 +944,21 @@ bool cutLength(Numerical* n) {
  * Cut zeros from the beginning.
  */
 void cutZero(Numerical* n) {
+    int size = n->getSize();
     signed char firstCutIndex = 0;
     //Ignore zeros from the first index.
-    while(n->byte[firstCutIndex] == 0 && firstCutIndex < n->length - 1)
+    while(n->byte[firstCutIndex] == 0 && firstCutIndex < size - 1)
         ++firstCutIndex;
 
     if(firstCutIndex != 0) {
-        n->length = (signed char)(n->length - firstCutIndex);
+        size -= firstCutIndex;
+        if(n->length < 0)
+            size = -size;
+        n->length = (signed char)size;
 
-        auto new_array = (unsigned char*)malloc(n->length * sizeof(char));
-        memcpy(new_array, n->byte + firstCutIndex, n->length * sizeof(char));
+        size = abs(size);
+        auto new_array = (unsigned char*)malloc(size * sizeof(char));
+        memcpy(new_array, n->byte + firstCutIndex, size * sizeof(char));
         free(n->byte);
         n->byte = new_array;
 
@@ -1000,7 +997,7 @@ Numerical* reciprocal(const Numerical& n) {
  * (sqrt(n + a) - sqrt(n)) for error.
  */
 Numerical* sqrt_light(const Numerical& n) {
-    if(!n.sign)
+    if(n.length < 0)
         return nullptr;
     auto MachinePrecision = const_1->GlobalPrecision;
     auto copy_n = new Numerical(n);
@@ -1044,7 +1041,7 @@ Numerical* sqrt(const Numerical& n) {
             error = sqrt_light(*n_error);
         }
         *error -= *result;
-        error->sign = true;
+        error->length = (signed char)error->getSize();
 
         result->applyError(error);
 
@@ -1055,7 +1052,7 @@ Numerical* sqrt(const Numerical& n) {
 }
 //TODO not completed: Use gamma function.
 Numerical* factorial(const Numerical& n) {
-    if(!n.sign) {
+    if(n.length < 0) {
         std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
         return nullptr;
     }
@@ -1125,7 +1122,7 @@ Numerical* ln(const Numerical& n) {
             error = ln_light(*n_error);
         }
         *error -= *result;
-        error->sign = true;
+        error->length = (signed char)error->getSize();
 
         result->applyError(error);
 
@@ -1188,12 +1185,11 @@ Numerical* cos(const Numerical& n) {
         auto temp_1 = new Numerical(square_n);
         auto temp_2 = getTwo();
         auto rank = getTwo();
-        bool sign = false;
 
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->sign = sign;
+            temp->length = (signed char)-temp->length;
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
@@ -1205,7 +1201,6 @@ Numerical* cos(const Numerical& n) {
             if(result->power - temp_power >= MachinePrecision)
                 break;
             //Prepare for next calculate.
-            sign = !sign;
             *temp_1 *= *square_n;
             *temp_2 *= *rank;
             *rank += *ONE;
@@ -1229,12 +1224,11 @@ Numerical* sin(const Numerical& n) {
         auto temp_1 = new Numerical(n);
         auto temp_2 = getOne();
         auto rank = getOne();
-        bool sign = true;
 
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->sign = sign;
+            temp->length = (signed char)-temp->length;
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
@@ -1246,7 +1240,6 @@ Numerical* sin(const Numerical& n) {
             if(result->power - temp_power >= MachinePrecision)
                 break;
             //Prepare for next calculate.
-            sign = !sign;
             *temp_1 *= *square_n;
             *temp_2 *= *rank;
             *rank += *ONE;
@@ -1312,7 +1305,9 @@ Numerical* arctan(const Numerical& n) {
     delete sqrt_temp;
 
     auto result = arcsin(*temp);
-    result->sign = n.sign;
+    if((result->length ^ n.length) < 0) // NOLINT(hicpp-signed-bitwise)
+        result->length = (signed char)-result->length;
+
     delete temp;
     return result;
 }

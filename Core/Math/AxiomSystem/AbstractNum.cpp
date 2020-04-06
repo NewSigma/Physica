@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& os, const AbstractNum& n) {
     switch(n.getType()) {
         case AbstractNum::ComplexNumber:
             os << ((ComplexNum&)n).real;
-            if(((ComplexNum&)n).imagine->sign)
+            if(((ComplexNum&)n).imagine->length > 0)
                 os << '+';
             os << *((ComplexNum&)n).imagine;
             break;

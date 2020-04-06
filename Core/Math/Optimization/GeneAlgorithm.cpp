@@ -1,5 +1,4 @@
-#include "../../Header/GeneAlgorithm.h"
-#include "../../Header/Numerical.h"
+#include "GeneAlgorithm.h"
 #include <iostream>
 /*
  * Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
@@ -15,7 +14,7 @@ GeneAlgorithm::GeneAlgorithm(Numerical* func(const Numerical&), const Numerical*
     upperBound = upper;
     regionLength = *upperBound - *lowerBound;
     //Get abs(regionLength).
-    regionLength->sign = true;
+    regionLength->length = (signed char)regionLength->getSize();
 
     Numerical* element;
     if (mode == LinearChoose) {

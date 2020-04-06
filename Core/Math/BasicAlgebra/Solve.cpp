@@ -1,5 +1,4 @@
 #include "../../Header/Solve.h"
-#include "../../Header/Const.h"
 /*
  * Find the numerical root of algebra equation.
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
@@ -26,7 +25,7 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
 
     auto delta_left = subtract(n, y1);
     auto delta_right = subtract(n, y2);
-    if(delta_left->sign == delta_right->sign)
+    if((delta_left->length ^ delta_right->length) > 0) // NOLINT(hicpp-signed-bitwise)
         return nullptr;
     delete delta_left;
     delete delta_right;
@@ -36,7 +35,7 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
     Numerical* y_result;
 
     auto error = subtract(y1, y2);
-    error->sign = true;
+    error->length = (signed char)error->getSize();
     *error << *divide(*error, *const_1->_2);
 
     auto x_left = new Numerical(x1);
@@ -44,14 +43,14 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
     auto y_left = new Numerical(y1);
 
     delta_left = subtract(n, *y_left);
-    bool delta_left_sign = delta_left->sign;
+    bool delta_left_sign = delta_left->length > 0;
     bool delta_right_sign;
     delete delta_left;
 
     do {
         y_result = func(*result);
         delta_right = subtract(n, *y_result);
-        delta_right_sign = delta_right->sign;
+        delta_right_sign = delta_right->length > 0;
         delete delta_right;
 
         if(delta_left_sign == delta_right_sign) {
@@ -61,7 +60,7 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
             y_left = y_result;
 
             delta_left = subtract(n, *y_left);
-            delta_left_sign = delta_left->sign;
+            delta_left_sign = delta_left->length > 0;
             delete delta_left;
         }
         else {

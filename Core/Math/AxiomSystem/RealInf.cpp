@@ -79,7 +79,7 @@ AbstractNum* RealInf::operator*(const AbstractNum& n) const {
         case DirectedInfinity:
             return new DirectedInf((DirectedInf&)n);
         case RealNumber:
-            return getInstance(getSign() && ((RealNum&)n).real->sign);
+            return getInstance(getSign() && ((RealNum&)n).real->length > 0);
         case RealInfinity:
             return getInstance(getSign() && ((RealInf&)n).getSign());
         case ComplexInfinity:
@@ -98,7 +98,7 @@ AbstractNum* RealInf::operator/(const AbstractNum& n) const {
             return result;
         }
         case RealNumber:
-            return getInstance(getSign() && ((RealNum&)n).real->sign);
+            return getInstance(getSign() && ((RealNum&)n).real->length > 0);
         case DirectedInfinity:
         case ComplexInfinity:
         case RealInfinity:
@@ -110,8 +110,8 @@ AbstractNum* RealInf::operator/(const AbstractNum& n) const {
 AbstractNum* RealInf::operator^(const AbstractNum& n) const {
     switch(n.getType()) {
         case RealNumber:
-            if(((RealNum&)n).real->sign)
-                return getInstance(getSign() && ((RealNum&)n).real->sign);
+            if(((RealNum&)n).real->length > 0)
+                return getInstance(getSign() && ((RealNum&)n).real->length > 0);
             else
                 return new RealNum(getZero());
         case ComplexNumber:
