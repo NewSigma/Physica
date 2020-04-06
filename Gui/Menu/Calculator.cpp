@@ -33,7 +33,7 @@ Calculator::Calculator() {
     editor_bottom->setAlignment(Qt::AlignRight);
     default_layout->addWidget(editor_bottom);
     /* Buttons */ {
-        layout = new QGridLayout(this);
+        layout = new QGridLayout();
         layout->setContentsMargins(2,3,2,3);
         default_layout->addLayout(layout);
 

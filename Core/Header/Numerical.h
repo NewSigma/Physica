@@ -24,12 +24,14 @@ public:
     unsigned char a = 0;
 
     Numerical();
-    explicit Numerical(const char* s, unsigned char acc = 0);
-    explicit Numerical(std::wstring s, unsigned char acc = 0);
-    explicit Numerical(double d, unsigned char acc = 0);
     Numerical(const Numerical& n);
     Numerical(unsigned char* byte, int length, int power, bool sign = true, unsigned char acc = 0);
     explicit Numerical(const Numerical* n);
+    explicit Numerical(double d, unsigned char acc = 0);
+    explicit Numerical(const char* s, unsigned char acc = 0);
+    explicit Numerical(const wchar_t* s, unsigned char acc = 0);
+    explicit Numerical(const std::string& s, unsigned char acc = 0);
+    explicit Numerical(const std::wstring& s, unsigned char acc = 0);
     ~Numerical();
 
     std::string toString() const;
@@ -60,15 +62,15 @@ public:
     Numerical* getMaximum() const;
     Numerical* getMinimum() const;
     bool applyError(const Numerical* copy_error);
-    bool isZero() const { return byte[0] == 0; }
-    bool isPositive() const { return !isZero() && sign; }
-    bool isNegative() const { return !isZero() && !sign; }
-    bool isInteger() const { return length == power + 1; }
+    inline bool isZero() const { return byte[0] == 0; }
+    inline bool isPositive() const { return !isZero() && sign; }
+    inline bool isNegative() const { return !isZero() && !sign; }
+    inline bool isInteger() const { return length == power + 1; }
 };
 ////////////////////////////////Helper functions/////////////////////////////////////
-Numerical* getZero();
-Numerical* getOne();
-Numerical* getTwo();
+inline Numerical* getZero() { return new Numerical(const_1->_0); }
+inline Numerical* getOne() { return new Numerical(const_1->_1); }
+inline Numerical* getTwo() { return new Numerical(const_1->_2); }
 //////////////////////////////Process functions////////////////////////////////////////
 Numerical* add (const Numerical& n1, const Numerical& n2);
 Numerical* subtract (const Numerical& n1, const Numerical& n2);

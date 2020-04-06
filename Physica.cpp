@@ -2,9 +2,10 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Physica.h"
-#include <QtWidgets/QApplication>
-#include "Core/Header/Const.h"
-#include "Gui/Header/PhysicaMain.h"
+#include <QApplication>
+#include <iostream>
+#include "Const.h"
+#include "PhysicaMain.h"
 
 const Const_1* const_1;
 const Const_2* const_2;

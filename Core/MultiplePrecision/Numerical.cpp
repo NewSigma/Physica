@@ -25,6 +25,69 @@ Numerical::Numerical() {
     sign = true;
 }
 
+Numerical::Numerical(const Numerical& n) {
+    length = n.length;
+    power = n.power;
+    sign = n.sign;
+    byte = (unsigned char*)malloc(length * sizeof(char));
+    memcpy(byte, n.byte, length * sizeof(char));
+    a = n.a;
+}
+
+Numerical::Numerical(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
+    byte = b;
+    length = len;
+    power = pow;
+    sign = s;
+    a = acc;
+}
+
+Numerical::Numerical(const Numerical* n) {
+    length = n->length;
+    power = n->power;
+    sign = n->sign;
+    byte = (unsigned char*)malloc(length * sizeof(char));
+    memcpy(byte, n->byte, length * sizeof(char));
+    a = n->a;
+}
+/*
+ * May not be very accurate.
+ */
+Numerical::Numerical(double d, unsigned char acc) {
+    sign = d >= 0;
+    d = sign ? d : -d;
+    auto copy_d = d;
+
+    length = power = 0;
+    if(d < 1) {
+        do {
+            d *= 10;
+            --power;
+        } while(d < 1);
+    }
+    else if(d >= 10) {
+        do {
+            d /= 10;
+            ++power;
+        } while(d >= 10);
+    }
+
+    do {
+        copy_d -= double(int(copy_d));
+        copy_d *= 10;
+        ++length;
+    } while(copy_d != 0 && length <= const_1->GlobalPrecision);
+
+    byte = (unsigned char*)malloc(length * sizeof(char));
+    for(int i = 0; i < length; ++i) {
+        byte[i] = (char)d;
+        d -= double(int(d));
+        d *= 10;
+    }
+
+    a = acc;
+}
+
 Numerical::Numerical(const char* s, unsigned char acc) {
     sign = true;
     a = acc;
@@ -64,19 +127,21 @@ Numerical::Numerical(const char* s, unsigned char acc) {
     for(int i = 0; i < length; ++i)
         byte[i] -= '0';
     return;
-error:
+
+    error:
     std::cout << "[Numerical] Failed to initialize Numerical.\n";
     byte = nullptr;
     length = power = a = 0;
     sign = true;
 }
 
-Numerical::Numerical(std::wstring s, unsigned char acc) {
-    byte = new unsigned char[s.size()];
+Numerical::Numerical(const wchar_t* s, unsigned char acc) {
+    int size = wcslen(s);
+    byte = new unsigned char[size];
     sign = true;
     a = acc;
-    int index = 0, id_byte = 0, start_eff_num = 0, point_id = s.size();
-    for(; index < s.size(); ++index) {
+    int index = 0, id_byte = 0, start_eff_num = 0, point_id = size;
+    for(; index < size; ++index) {
         switch(s[index]) {
             case '-':
                 sign = false;
@@ -91,7 +156,7 @@ Numerical::Numerical(std::wstring s, unsigned char acc) {
         }
     }
     double_break:
-    for(; index < s.size(); ++index) {
+    for(; index < size; ++index) {
         switch(s[index]) {
             case '.':
                 point_id = index;
@@ -105,91 +170,10 @@ Numerical::Numerical(std::wstring s, unsigned char acc) {
     power = point_id - start_eff_num + (point_id > start_eff_num ? -1 : 0);
     byte = (unsigned char*)realloc(byte, length);
 }
-/*
- * May not be very accurate.
- */
-Numerical::Numerical(double d, unsigned char acc) {
-    sign = d >= 0;
-    d = sign ? d : -d;
-    auto copy_d = d;
 
-    length = power = 0;
-    if(d < 1) {
-        do {
-            d *= 10;
-            --power;
-        } while(d < 1);
-    }
-    else if(d >= 10) {
-        do {
-            d /= 10;
-            ++power;
-        } while(d >= 10);
-    }
+Numerical::Numerical(const std::string& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
 
-    do {
-        copy_d -= double(int(copy_d));
-        copy_d *= 10;
-        ++length;
-    } while(copy_d != 0 && length <= const_1->GlobalPrecision);
-
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    for(int i = 0; i < length; ++i) {
-        byte[i] = (char)d;
-        d -= double(int(d));
-        d *= 10;
-    }
-
-    a = acc;
-}
-/*
- * Not very accurate either.
- */
-Numerical::operator double() const {
-    double result_integer = 0;
-    double result_float = 0;
-
-    int temp_index = power + 1;
-    for(int i = 0; i < temp_index; ++i) {
-        result_integer *= 10;
-        result_integer += byte[i];
-    }
-
-    while(temp_index < length) {
-        result_float += byte[temp_index];
-        result_float *= 10;
-        ++temp_index;
-    }
-    result_float /= pow(10,length- power);
-
-    return result_integer + result_float;
-}
-
-Numerical::Numerical(const Numerical& n) {
-    length = n.length;
-    power = n.power;
-    sign = n.sign;
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    memcpy(byte, n.byte, length * sizeof(char));
-    a = n.a;
-}
-
-Numerical::Numerical(unsigned char* b, int len, int pow, bool s, unsigned char acc) {
-    byte = b;
-    length = len;
-    power = pow;
-    sign = s;
-    a = acc;
-}
-
-Numerical::Numerical(const Numerical* n) {
-    length = n->length;
-    power = n->power;
-    sign = n->sign;
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    memcpy(byte, n->byte, length * sizeof(char));
-    a = n->a;
-}
+Numerical::Numerical(const std::wstring& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
 
 Numerical::~Numerical() {
     free(byte);
@@ -232,6 +216,28 @@ std::string Numerical::toString() const {
         }
     }
     return result;
+}
+/*
+ * Not very accurate either.
+ */
+Numerical::operator double() const {
+    double result_integer = 0;
+    double result_float = 0;
+
+    int temp_index = power + 1;
+    for(int i = 0; i < temp_index; ++i) {
+        result_integer *= 10;
+        result_integer += byte[i];
+    }
+
+    while(temp_index < length) {
+        result_float += byte[temp_index];
+        result_float *= 10;
+        ++temp_index;
+    }
+    result_float /= pow(10,length - power);
+
+    return result_integer + result_float;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
@@ -670,18 +676,6 @@ Numerical* Numerical::operator- () const {
     auto result = new Numerical(this);
     result->sign = !result->sign;
     return result;
-}
-////////////////////////////////Helper functions/////////////////////////////////////
-Numerical* getZero() {
-    return new Numerical(const_1->_0);
-}
-
-Numerical* getOne() {
-    return new Numerical(const_1->_1);
-}
-
-Numerical* getTwo() {
-    return new Numerical(const_1->_2);
 }
 //////////////////////////////Process functions////////////////////////////////////////
 /*

@@ -4,7 +4,8 @@ find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 #############################################Project##############################################
-file(GLOB_RECURSE SOURCES_CORE *.*)
+file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
+include_directories(Header)
 add_library(Physica_Core SHARED ${SOURCES_CORE})
 #############################################Options##############################################
 target_link_libraries(Physica_Core Qt5::Core)
