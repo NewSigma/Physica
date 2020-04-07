@@ -1,8 +1,7 @@
 #ifndef _Physica_C_Const_H
 #define _Physica_C_Const_H
 
-#include "RealNum.h"
-
+class RealNum;
 class Numerical;
 
 class Const_1 {

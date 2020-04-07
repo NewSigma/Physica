@@ -64,12 +64,13 @@ public:
     Numerical* getMinimum() const;
     bool applyError(const Numerical* copy_error);
     inline int getSize() const { return abs(length); }
-    inline bool isZero() const { return byte[0] == 0; }
+    inline bool isZero() const { return byte[getSize() - 1] == 0; }
     inline bool isPositive() const { return !isZero() && length > 0; }
     inline bool isNegative() const { return !isZero() && length < 0; }
     inline bool isInteger() const { return length == power + 1; }
 };
 ////////////////////////////////Helper functions/////////////////////////////////////
+void reverse(unsigned char* arr, int length);
 inline Numerical* getZero() { return new Numerical(const_1->_0); }
 inline Numerical* getOne() { return new Numerical(const_1->_1); }
 inline Numerical* getTwo() { return new Numerical(const_1->_2); }

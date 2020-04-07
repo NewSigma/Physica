@@ -60,11 +60,14 @@ Numerical::Numerical(double d, unsigned char acc) {
     } while(copy_d != 0 && length <= const_1->GlobalPrecision);
 
     byte = (unsigned char*)malloc(length * sizeof(char));
-    for(int i = 0; i < length; ++i) {
-        byte[i] = (char)d;
+    int copy = length;
+    while(--copy) {
+        byte[copy] = (char)d;
         d -= double(int(d));
         d *= 10;
     }
+    byte[0] = (char)d;
+
     if(negative)
         length = (signed char)-length;
     a = acc;
@@ -97,18 +100,18 @@ Numerical::Numerical(const char* s, unsigned char acc) {
     }
     double_break:
     for(; index < size; ++index) {
-        switch(s[index]) {
-            case '.':
-                point_id = index;
-                break;
-            default:
-                byte[id_byte] = s[index] - '0';
-                ++id_byte;
+        if(s[index] != '.') {
+            byte[id_byte] = s[index] - '0';
+            ++id_byte;
+        }
+        else {
+            point_id = index;
         }
     }
     length = id_byte > const_1->GlobalPrecision ? const_1->GlobalPrecision : id_byte;
     power = point_id - start_eff_num + (point_id > start_eff_num ? -1 : 0);
     byte = (unsigned char*)realloc(byte, length);
+    reverse(byte, getSize());
     if(negative)
         length = (signed char)-length;
 }
@@ -131,9 +134,7 @@ Numerical::Numerical(const std::string& s, unsigned char acc) : Numerical(s.c_st
 
 Numerical::Numerical(const std::wstring& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
 
-Numerical::~Numerical() {
-    free(byte);
-}
+Numerical::~Numerical() { free(byte); }
 
 std::string Numerical::toString() const {
     std::string result;
@@ -142,10 +143,11 @@ std::string Numerical::toString() const {
         if(isNegative())
             result.push_back('-');
         if(abs(power) > const_1->GlobalPrecision) {
-            result.push_back(byte[0] + '0');
+            result.push_back(byte[size - 1] + '0');
+            --size;
             result.push_back('.');
-            for(int i = 1; i < size; ++i)
-                result.push_back(byte[i] + '0');
+            while(size--)
+                result.push_back(byte[size] + '0');
             result += "×10^";
             result += std::to_string(power);
         }
@@ -153,20 +155,20 @@ std::string Numerical::toString() const {
             result += "0.";
             for(int i = -power - 1; i > 0; --i)
                 result.push_back('0');
-            for(int i = 0; i < size; ++i)
-                result.push_back(byte[i] + '0');
+            while(size--)
+                result.push_back(byte[size] + '0');
         }
         else {
             if(size > power) {
-                for (int i = 0; i < power + 1; ++i)
-                    result.push_back(byte[i] + '0');
+                for (int i = 1; i <= power + 1; ++i)
+                    result.push_back(byte[size - i] + '0');
                 result.push_back('.');
-                for(int i = power + 1; i < size; ++i)
-                    result.push_back(byte[i] + '0');
+                for(int i = power + 2; i <= size; ++i)
+                    result.push_back(byte[size - i] + '0');
             }
             else {
-                for(int i = 0; i < size; ++i)
-                    result.push_back(byte[i] + '0');
+                while(size--)
+                    result.push_back(byte[size] + '0');
                 for(int i = power - size + 1; i > 0; --i)
                     result.push_back('0');
             }
@@ -189,7 +191,7 @@ Numerical::operator double() const {
     }
 
     while(temp_index < size) {
-        result_float += byte[temp_index];
+        result_float += byte[size - temp_index - 1];
         result_float *= 10;
         ++temp_index;
     }
@@ -242,66 +244,6 @@ Numerical& Numerical::operator= (const Numerical& n) {
     power = n.power;
     a = n.a;
     return *this;
-}
-
-//Return accuracy in class Numerical.
-Numerical* Numerical::getAccuracy() const {
-    auto b = (unsigned char*)malloc(sizeof(char));
-    b[0] = a;
-    return new Numerical(b, 1, power - getSize() + 1);
-}
-//Return this + accuracy
-Numerical* Numerical::getMaximum() const {
-    auto acc = getAccuracy();
-    auto result = add(*this, *acc);
-    delete acc;
-    return result;
-}
-//Return this - accuracy
-Numerical* Numerical::getMinimum() const {
-    auto acc = getAccuracy();
-    auto result = subtract(*this, *acc);
-    delete acc;
-    return result;
-}
-//Add error to this and adjust this->length as well as this-> byte.
-bool Numerical::applyError(const Numerical* error) {
-    int size = getSize();
-    int temp = power - size + 1 - error->power;
-    if(temp <= 0) {
-        if(temp < 0) {
-            auto b = (unsigned char*)malloc(sizeof(char));
-            b[0] = a;
-            auto error_1 = new Numerical(b, 1, power - size + 1);
-            *error_1 << *add(*error_1, *error);
-            size += temp;
-            a += error_1->byte[0];
-            delete error_1;
-        }
-        else
-            a += error->byte[0];
-    }
-
-    if(a > 9) {
-        a = 1;
-        --size;
-    }
-
-    if(size < 1) {
-        qWarning("Accumulated too many errors.");
-        power += 1 - size;
-        size = 1;
-        if(length < 0)
-            size = -size;
-        length = (signed char)size;
-        return true;
-    }
-
-    byte = (unsigned char*)realloc(byte, size * sizeof(char));
-    if(length < 0)
-        size = -size;
-    length = (signed char)size;
-    return false;
 }
 
 Numerical* Numerical::operator+ (const Numerical& n) const {
@@ -387,7 +329,6 @@ Numerical* Numerical::operator* (const Numerical& n) const {
 Numerical* Numerical::operator/ (const Numerical& n) const {
     auto result = divide(*this, n);
     if(result != nullptr) {
-        result->a += cutLength(result);
         if(a != 0 || n.a != 0) {
             Numerical* error;
             if(a == 0) {
@@ -607,25 +548,10 @@ bool Numerical::operator== (const Numerical& n) const {
         return false;
     if(a != n.a)
         return false;
-    const Numerical* longer;
-    const Numerical* shorter;
-    if(length > n.length) {
-        longer = this;
-        shorter = &n;
-    }
-    else {
-        longer = &n;
-        shorter = this;
-    }
-    for(int i = 0; i < shorter->length; ++i) {
-        if(shorter->byte[i] != longer->byte[i])
-            return false;
-    }
-    //Extra parts should be zero.
-    for(int i = shorter->length; i < longer->length; ++i) {
-        if(longer->byte[i] != 0)
-            return false;
-    }
+    auto temp = *this - n;
+    if(!temp->isZero())
+        return false;
+    delete temp;
     return true;
 }
 
@@ -637,6 +563,81 @@ Numerical* Numerical::operator- () const {
     auto result = new Numerical(this);
     result->length = (signed char)-result->length;
     return result;
+}
+//Return accuracy in class Numerical.
+Numerical* Numerical::getAccuracy() const {
+    auto b = (unsigned char*)malloc(sizeof(char));
+    b[0] = a;
+    return new Numerical(b, 1, power - getSize() + 1);
+}
+//Return this + accuracy
+Numerical* Numerical::getMaximum() const {
+    auto acc = getAccuracy();
+    auto result = add(*this, *acc);
+    delete acc;
+    return result;
+}
+//Return this - accuracy
+Numerical* Numerical::getMinimum() const {
+    auto acc = getAccuracy();
+    auto result = subtract(*this, *acc);
+    delete acc;
+    return result;
+}
+//Add error to this and adjust this->length as well as this-> byte.
+bool Numerical::applyError(const Numerical* error) {
+    int size = getSize();
+    int copy = size;
+    int temp = power - size + 1 - error->power;
+    if(temp <= 0) {
+        if(temp < 0) {
+            auto b = (unsigned char*)malloc(sizeof(char));
+            b[0] = a;
+            auto error_1 = new Numerical(b, 1, power - size + 1);
+            *error_1 << *add(*error_1, *error);
+            size += temp;
+            a += error_1->byte[error_1->getSize() - 1];
+            delete error_1;
+        }
+        else
+            a += error->byte[error->getSize() - 1];
+    }
+
+    if(a > 9) {
+        a = 1;
+        --size;
+    }
+
+    if(size < 1) {
+        qWarning("Accumulated too many errors.");
+        power += 1 - size;
+        size = 1;
+        if(length < 0)
+            size = -size;
+        length = (signed char)size;
+        return true;
+    }
+
+    if(size < copy) {
+        auto new_byte = (unsigned char*)malloc(size * sizeof(char));
+        memcpy(new_byte, byte + copy - size, size * sizeof(char));
+        free(byte);
+        byte = new_byte;
+    }
+    if(length < 0)
+        size = -size;
+    length = (signed char)size;
+    return false;
+}
+////////////////////////////////Helper functions/////////////////////////////////////
+//reverse the order of elements of arr
+void reverse(unsigned char* arr, int length) {
+    unsigned char temp;
+    for(int i = 0; i < length / 2; ++i) {
+        temp = arr[i];
+        arr[i] = arr[length - i - 1];
+        arr[length - i - 1] = temp;
+    }
 }
 //////////////////////////////Process functions////////////////////////////////////////
 /*
@@ -674,44 +675,41 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
             big = &n2;
             small = &n1;
         }
-        ////////////////////////////////Calculate cursory first//////////////////////////////////////
         int bigSize = big->getSize();
         int smallSize = small->getSize();
         //Estimate the ed of result first, will calculate it accurately later.
         signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
-        auto temp = (unsigned char*)malloc(length * sizeof(char));
-        memcpy(temp, big->byte, bigSize * sizeof(char));
-        memset(temp + bigSize, 0, (length - bigSize) * sizeof(char));
-        for (int i = smallSize - 1; i >= 0; --i) {
-            int index = big->power - small->power + i;
-            temp[index] += small->byte[i];
-            //Carry bit.
-            if (temp[index] > 9 && index > 0) {
-                ++temp[index - 1];
-                temp[index] -= 10;
+        auto byte = (unsigned char*)malloc(length * sizeof(char));
+        memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(char));
+        memset(byte, 0, (length - bigSize) * sizeof(char));
+        //Add small to big
+        int index = length - big->power + small->power - smallSize;
+        int lastIndex = smallSize - 1;
+        for(int i = 0; i < lastIndex; ++i) {
+            byte[index] += small->byte[i];
+            //Carry bit;
+            if(byte[index] > 9) {
+                ++byte[index + 1];
+                byte[index] -= 10;
             }
+            ++index;
         }
-
-        for(int i = big->power - small->power - 1; i > 0; --i) {
-            if(temp[i] > 9) {
-                ++temp[i - 1];
-                temp[i] -= 10;
-            }
+        byte[index] += small->byte[lastIndex];
+        //Carry bit
+        while(byte[index] > 9 && index != length - 1) {
+            byte[index] -= 10;
+            ++index;
+            ++byte[index];
         }
         ///////////////////////////////////////Get byte, length and power//////////////////////////
-        unsigned char* byte;
         int power = big->power;
-        if (__glibc_unlikely(temp[0] > 9)) {
+        if(byte[0] > 9) {
             ++length;
             ++power;
-            byte = (unsigned char*)malloc(length * sizeof(char));
-            byte[0] = 1;
-            byte[1] = temp[0] - 10;
-            memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-            free(temp);
+            byte = (unsigned char*)realloc(byte, length * sizeof(char));
+            byte[length - 1] = 1;
+            byte[length - 2] -= 10;
         }
-        else
-            byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
         if(big->length < 0)
             length = (signed char)-length;
@@ -735,39 +733,57 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
             shallow_copy->byte = nullptr;
         }
         else {
-            ////////////////////////////////Calculate cursory first//////////////////////////////////////
-            int size1 = n1.getSize();
-            int size2 = n2.getSize();
-            int unitIndex = std::max(n1.power, n2.power);
-            //memcpy starts from the start index.
-            int start = unitIndex - n1.power;
+            const Numerical* big;
+            const Numerical* small;
+            bool changeSign = false;
+            if (n1.power > n2.power) {
+                big = &n1;
+                small = &n2;
+            }
+            else {
+                changeSign = true;
+                big = &n2;
+                small = &n1;
+            }
+            int bigSize = big->getSize();
+            int smallSize = small->getSize();
             //Estimate the ed of result first, will calculate it accurately later.
-            signed char length = (signed char)(unitIndex + std::max(size1 - n1.power, size2 - n2.power));
-            auto byte = (char*)malloc(length * sizeof(char));
-            memset(byte, 0, start * sizeof(char));
-            memcpy(byte + start, n1.byte, size1 * sizeof(char));
-            memset(byte + start + size1, 0, (length - start - size1) * sizeof(char));
+            signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
+            auto byte = (signed char*)malloc(length * sizeof(char));
+            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(char));
+            memset(byte, 0, (length - bigSize) * sizeof(char));
 
-            for (int i = size2 - 1; i >= 0; --i) {
-                int index = unitIndex - n2.power + i;
-                byte[index] = char(byte[index] - n2.byte[i]);
-            }
-
-            for(int i = length - 1; i > 0; --i) {
-                //Carry bit.
-                if (byte[i] < 0) {
-                    --byte[i - 1];
-                    byte[i] += 10;
+            int index = length - big->power + small->power - smallSize;
+            int lastIndex = smallSize - 1;
+            //Add small to big
+            for(int i = 0; i < lastIndex; ++i) {
+                byte[index] = (signed char)(byte[index] - small->byte[i]);
+                //Carry bit;
+                if(byte[index] < 0) {
+                    --byte[index + 1];
+                    byte[index] += 10;
                 }
+                ++index;
             }
-            //If n1 - n2 < 0, we have to change our method.
-            if(__glibc_unlikely(byte[0] < 0)) {
+            byte[index] = (signed char)(byte[index] - small->byte[lastIndex]);
+            //Carry bit
+            while(byte[index] < 0 && index != length - 1) {
+                byte[index] += 10;
+                ++index;
+                --byte[index];
+            }
+
+            if(byte[length - 1] >= 0) {
+                if(changeSign)
+                    length = (signed char)-length;
+                result = new Numerical((unsigned char*)byte, length, big->power);
+            }
+            else {
+                //If n1 - n2 < 0, we have to change our method.
                 free(byte);
-                result = n2 - n1;
+                result = subtract(n2, n1);
                 result->length = (signed char)-result->length;
             }
-            else
-                result = new Numerical((unsigned char*)byte, length, unitIndex);
             cutZero(result);
         }
     }
@@ -797,51 +813,50 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
     else if(n2 == *const_1->_1)
         result = new Numerical(n1);
     else {
-        //In this case, big has more digits after the dot.
-        const Numerical* big;
-        const Numerical* small;
-        if (n1.getSize() - n1.power > n2.getSize() - n2.power) {
-            big = &n1;
-            small = &n2;
-        }
-        else {
-            big = &n2;
-            small = &n1;
-        }
-        ////////////////////////////////Calculate cursory first//////////////////////////////////////
-        int bigSize = big->getSize();
-        int smallSize = small->getSize();
+        int size1 = n1.getSize();
+        int size2 = n2.getSize();
+        int last1 = size1 - 1;
+        int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
-        auto length = (signed char)(bigSize + smallSize - 1);
-        auto temp = (unsigned char*)malloc(length * sizeof(char));
-        memset(temp, 0, length * sizeof(char));
-        for (int i = smallSize - 1; i >= 0; --i) {
-            for(int j = bigSize - 1; j >= 0; --j) {
+        auto length = (signed char)(size1 + size2 - 1);
+        auto lastIndex = length - 1;
+        auto byte = (unsigned char*)malloc(length * sizeof(char));
+        memset(byte, 0, length * sizeof(char));
+        //i = 1 ... size - 2
+        for (int i = 0; i < last1; ++i) {
+            for(int j = 0; j < size2; ++j) {
                 int index = i + j;
-                temp[index] += small->byte[i] * big->byte[j];
+                byte[index] += n1.byte[i] * n2.byte[j];
                 //Carry bit.
-                if (temp[index] > 9 && index > 0) {
-                    int tens = temp[index] / 10;
-                    temp[index - 1] += tens;
-                    temp[index] -= tens * 10;
+                if (byte[index] > 9) {
+                    int tens = byte[index] / 10;
+                    byte[index] -= tens * 10;
+                    byte[index + 1] += tens;
                 }
             }
         }
-        ///////////////////////////////////////Get byte, length and power//////////////////////////
-        unsigned char* byte;
+        //i = size - 1
+        for(int j = 0; j < last2; ++j) {
+            int index = size1 - 1 + j;
+            byte[index] += n1.byte[last1] * n2.byte[j];
+            //Carry bit.
+            if (byte[index] > 9) {
+                int tens = byte[index] / 10;
+                byte[index] -= tens * 10;
+                byte[index + 1] += tens;
+            }
+        }
+        byte[last1 + last2] += n1.byte[last1] * n2.byte[last2];
+        ///////////////////////////////////////Get byte, length and power//////////////////////////;
         int power = n1.power + n2.power;
-        if (temp[0] > 9) {
+        if (byte[lastIndex] > 9) {
             ++length;
             ++power;
-            int tens = temp[0] / 10;
-            byte = (unsigned char*)malloc(length * sizeof(char));
-            byte[0] = tens;
-            byte[1] = temp[0] - tens * 10;
-            memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-            free(temp);
+            int tens = byte[lastIndex] / 10;
+            byte[lastIndex] -= tens * 10;
+            byte = (unsigned char*)realloc(byte, length * sizeof(char));
+            byte[length - 1] = tens;
         }
-        else
-            byte = (unsigned char*)realloc(temp, length * sizeof(char));
         ////////////////////////////////////Out put////////////////////////////////////////
         if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
             length = (signed char)-length;
@@ -851,8 +866,10 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
 }
 
 Numerical* divide (const Numerical& n1, const Numerical& n2) {
-    if(n2.byte[0] == 0)
+    if(n2.isZero()) {
+        qCritical("Divide by zero!");
         return nullptr;
+    }
 
     Numerical* result;
     if(__glibc_unlikely(n1.isZero() || n2.isZero()))
@@ -865,16 +882,17 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         n1_copy->length = (signed char)n1_copy->getSize();
         n2_copy->length = (signed char)n2_copy->getSize();
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
-        //Estimate the ed of result first, we will calculate it accurately later.
+        //Estimate the length of result.
         signed char length = const_1->GlobalPrecision;
+        //Change n1_copy's power larger than n2_copy, power of the result will change correspondingly.
         int power = n1_copy->power - n2_copy->power - 1;
-        auto temp = (unsigned char*)malloc(length * sizeof(char));
-        memset(temp, 0, length * sizeof(char));
+        n1_copy->power = n2_copy->power + 1;
+        auto byte = (unsigned char*)malloc(length * sizeof(char));
+        memset(byte, 0, length * sizeof(char));
 
         auto n1_copy_old = n1_copy;
-        n1_copy->power = n2_copy->power + 1;
-        for (int i = 0; i < length; ++i) {
-            char unit = 0;
+        for (int i = length - 1; i >= 0; --i) {
+            unsigned char unit = 0;
             while(true) {
                 n1_copy = subtract(*n1_copy, *n2_copy);
                 if(__glibc_unlikely(n1_copy->isNegative())) {
@@ -887,56 +905,52 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
                     delete n1_copy_old;
                     n1_copy_old = n1_copy;
                     if(n1_copy->isZero()) {
-                        temp[i] = unit;
-                        //Do we have better choice?
+                        byte[i] = unit;
                         goto double_break;
                     }
                 }
             }
             ++n1_copy->power;
-            temp[i] = unit;
+            byte[i] = unit;
         }
-        //1 comes from algorithm of divide()
         double_break:
         delete n1_copy;
         delete n2_copy;
         ////////////////////////////////////Out put////////////////////////////////////////
-        unsigned char* byte;
-        if(temp[0] > 9) {
+        if(byte[length - 1] > 9) {
+            int tens = byte[length - 1] / 10;
+            byte[length - 1] -= tens * 10;
             ++power;
-            byte = (unsigned char*)malloc(length * sizeof(char));
-            byte[0] = temp[0] / 10;
-            byte[1] = temp[0] - byte[0] * 10;
-            memcpy(byte + 2, temp + 1, (length - 2) * sizeof(char));
-            free(temp);
+            ++length;
+            byte = (unsigned char*)realloc(byte, length * sizeof(char));
+            byte[length - 1] = tens;
         }
-        else
-            byte = temp;
         if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
             length = (signed char)-length;
+        //1 comes from the algorithm
         result = new Numerical(byte, length, power, 1);
     }
     return result;
 }
 /*
  * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
- * Return true array is cut.
+ * Return true if array is cut.
  */
 bool cutLength(Numerical* n) {
     bool result = false;
     int size = n->getSize();
-    int lastCutIndex = size;
 
     if(size > const_1->GlobalPrecision) {
-        lastCutIndex = const_1->GlobalPrecision;
         result = true;
-    }
-
-    if(lastCutIndex != size) {
+        int cutFrom = size - const_1->GlobalPrecision;
+        auto new_byte = (unsigned char*)malloc(const_1->GlobalPrecision * sizeof(char));
+        memcpy(new_byte, n->byte + cutFrom, const_1->GlobalPrecision * sizeof(char));
+        free(n->byte);
+        n->byte = new_byte;
+        auto length = const_1->GlobalPrecision;
         if(n->length < 0)
-            lastCutIndex = -lastCutIndex;
-        n->length = (signed char)lastCutIndex;
-        n->byte = (unsigned char*)realloc(n->byte, lastCutIndex * sizeof(char));
+            length = -length;
+        n->length = length;
     }
     return result;
 }
@@ -945,27 +959,23 @@ bool cutLength(Numerical* n) {
  */
 void cutZero(Numerical* n) {
     int size = n->getSize();
-    signed char firstCutIndex = 0;
-    //Ignore zeros from the first index.
-    while(n->byte[firstCutIndex] == 0 && firstCutIndex < size - 1)
-        ++firstCutIndex;
+    int id = size - 1;
+    while(n->byte[id] == 0 && id > 0)
+        --id;
+    ++id;
 
-    if(firstCutIndex != 0) {
-        size -= firstCutIndex;
+    if(id != size) {
+        int shorten = size - id;
+        n->byte = (unsigned char*)realloc(n->byte, id * sizeof(char));
+        size = id;
         if(n->length < 0)
             size = -size;
         n->length = (signed char)size;
 
-        size = abs(size);
-        auto new_array = (unsigned char*)malloc(size * sizeof(char));
-        memcpy(new_array, n->byte + firstCutIndex, size * sizeof(char));
-        free(n->byte);
-        n->byte = new_array;
-
-        if(__glibc_unlikely(n->byte[0] == 0))
-            n->power = 0;
+        if(n->byte[id - 1] != 0)
+            n->power -= shorten;
         else
-            n->power -= firstCutIndex;
+            n->power = 0;
     }
 }
 //////////////////////////////Basic Operations////////////////////////////////////////
@@ -1053,7 +1063,7 @@ Numerical* sqrt(const Numerical& n) {
 //TODO not completed: Use gamma function.
 Numerical* factorial(const Numerical& n) {
     if(n.length < 0) {
-        std::cout << "[BasicCalculates] Error: Cannot solve the factorial of a minus value." << std::endl;
+        qCritical("Cannot solve the factorial of a minus value.");
         return nullptr;
     }
 
