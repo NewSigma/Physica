@@ -7,7 +7,7 @@
 #include <cmath>
 #include <QtCore/qlogging.h>
 
-extern const Const_2* const_2;
+extern const MathConst* mathConst;
 /*
  *
  * Useful formulas:
@@ -57,7 +57,7 @@ Numerical::Numerical(double d, unsigned char acc) {
         copy_d -= double(int(copy_d));
         copy_d *= 10;
         ++length;
-    } while(copy_d != 0 && length <= const_1->GlobalPrecision);
+    } while(copy_d != 0 && length <= basicConst->getGlobalPrecision());
 
     byte = (unsigned char*)malloc(length * sizeof(char));
     int copy = length;
@@ -108,7 +108,7 @@ Numerical::Numerical(const char* s, unsigned char acc) {
             point_id = index;
         }
     }
-    length = id_byte > const_1->GlobalPrecision ? const_1->GlobalPrecision : id_byte;
+    length = id_byte > basicConst->getGlobalPrecision() ? basicConst->getGlobalPrecision() : id_byte;
     power = point_id - start_eff_num + (point_id > start_eff_num ? -1 : 0);
     byte = (unsigned char*)realloc(byte, length);
     reverse(byte, getSize());
@@ -142,7 +142,7 @@ std::string Numerical::toString() const {
     if(byte != nullptr) {
         if(isNegative())
             result.push_back('-');
-        if(abs(power) > const_1->GlobalPrecision) {
+        if(abs(power) > basicConst->getGlobalPrecision()) {
             result.push_back(byte[size - 1] + '0');
             --size;
             result.push_back('.');
@@ -378,7 +378,7 @@ Numerical* Numerical::operator/ (const Numerical& n) const {
  */
 Numerical* Numerical::operator^ (const Numerical& n) const {
     Numerical* result = nullptr;
-    if(__glibc_unlikely(isZero())) {
+    if(Q_UNLIKELY(isZero())) {
         if(!n.isZero())
             result = getZero();
     }
@@ -389,15 +389,15 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
             result = getOne();
             if(n.isNegative()) {
                 auto temp = reciprocal(*this);
-                while(*n2_copy != *const_1->_0) {
-                    *n2_copy -= *const_1->_1;
+                while(*n2_copy != basicConst->get_0()) {
+                    *n2_copy -= basicConst->get_1();
                     *result *= *temp;
                 }
                 delete temp;
             }
             else {
-                while(*n2_copy != *const_1->_0) {
-                    *n2_copy -= *const_1->_1;
+                while(*n2_copy != basicConst->get_0()) {
+                    *n2_copy -= basicConst->get_1();
                     *result *= *this;
                 }
             }
@@ -407,7 +407,7 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
             auto temp_result = getOne();
             auto temp_1 = ln(*this);
             *temp_1 *= n;
-            *temp_1 += *const_1->_1;
+            *temp_1 += basicConst->get_1();
             bool go_on;
             do {
                 result = ln(*temp_result);
@@ -808,9 +808,9 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
 
 Numerical* multiply (const Numerical& n1, const Numerical& n2) {
     Numerical* result;
-    if(n1 == *const_1->_1)
+    if(n1 == basicConst->get_1())
         result = new Numerical(n2);
-    else if(n2 == *const_1->_1)
+    else if(n2 == basicConst->get_1())
         result = new Numerical(n1);
     else {
         int size1 = n1.getSize();
@@ -820,8 +820,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         //Estimate the ed of result first. we will calculate it accurately later.
         auto length = (signed char)(size1 + size2 - 1);
         auto lastIndex = length - 1;
-        auto byte = (unsigned char*)malloc(length * sizeof(char));
-        memset(byte, 0, length * sizeof(char));
+        auto byte = (unsigned char*)calloc(length, sizeof(char));
         //i = 1 ... size - 2
         for (int i = 0; i < last1; ++i) {
             for(int j = 0; j < size2; ++j) {
@@ -866,15 +865,13 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
 }
 
 Numerical* divide (const Numerical& n1, const Numerical& n2) {
-    if(n2.isZero()) {
-        qCritical("Divide by zero!");
-        return nullptr;
-    }
+    if(Q_UNLIKELY(n2.isZero()))
+        qFatal("Divide by zero!");
 
     Numerical* result;
-    if(__glibc_unlikely(n1.isZero() || n2.isZero()))
+    if(Q_UNLIKELY(n1.isZero() || n2.isZero()))
         result = getZero();
-    else if(__glibc_unlikely(n2 == *const_1->_1))
+    else if(Q_UNLIKELY(n2 == basicConst->get_1()))
         result = new Numerical(n1);
     else {
         auto n1_copy = new Numerical(n1);
@@ -883,19 +880,18 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         n2_copy->length = (signed char)n2_copy->getSize();
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the length of result.
-        signed char length = const_1->GlobalPrecision;
+        signed char length = basicConst->getGlobalPrecision();
         //Change n1_copy's power larger than n2_copy, power of the result will change correspondingly.
         int power = n1_copy->power - n2_copy->power - 1;
         n1_copy->power = n2_copy->power + 1;
-        auto byte = (unsigned char*)malloc(length * sizeof(char));
-        memset(byte, 0, length * sizeof(char));
+        auto byte = (unsigned char*)calloc(length, sizeof(char));
 
         auto n1_copy_old = n1_copy;
         for (int i = length - 1; i >= 0; --i) {
             unsigned char unit = 0;
             while(true) {
                 n1_copy = subtract(*n1_copy, *n2_copy);
-                if(__glibc_unlikely(n1_copy->isNegative())) {
+                if(Q_UNLIKELY(n1_copy->isNegative())) {
                     delete n1_copy;
                     n1_copy = n1_copy_old;
                     break;
@@ -940,14 +936,14 @@ bool cutLength(Numerical* n) {
     bool result = false;
     int size = n->getSize();
 
-    if(size > const_1->GlobalPrecision) {
+    if(size > basicConst->getGlobalPrecision()) {
         result = true;
-        int cutFrom = size - const_1->GlobalPrecision;
-        auto new_byte = (unsigned char*)malloc(const_1->GlobalPrecision * sizeof(char));
-        memcpy(new_byte, n->byte + cutFrom, const_1->GlobalPrecision * sizeof(char));
+        int cutFrom = size - basicConst->getGlobalPrecision();
+        auto new_byte = (unsigned char*)malloc(basicConst->getGlobalPrecision() * sizeof(char));
+        memcpy(new_byte, n->byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(char));
         free(n->byte);
         n->byte = new_byte;
-        auto length = const_1->GlobalPrecision;
+        auto length = basicConst->getGlobalPrecision();
         if(n->length < 0)
             length = -length;
         n->length = length;
@@ -984,7 +980,7 @@ Numerical* randomNumerical() {
     srand(clock());
     srand(random());
     auto result = new Numerical((double)random());
-    *result /= *const_1->R_MAX;
+    *result /= basicConst->getR_MAX();
 
     return result;
 }
@@ -1000,7 +996,7 @@ Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound) {
 }
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 Numerical* reciprocal(const Numerical& n) {
-    return *const_1->_1 / n;
+    return basicConst->get_1() / n;
 }
 /*
  * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
@@ -1009,7 +1005,7 @@ Numerical* reciprocal(const Numerical& n) {
 Numerical* sqrt_light(const Numerical& n) {
     if(n.length < 0)
         return nullptr;
-    auto MachinePrecision = const_1->GlobalPrecision;
+    auto MachinePrecision = basicConst->getGlobalPrecision();
     auto copy_n = new Numerical(n);
     //Let n < 1 so as to control error.
     char add_power = 0;
@@ -1030,7 +1026,7 @@ Numerical* sqrt_light(const Numerical& n) {
     for(int i = 0; i < 3.33 * MachinePrecision; ++i) {
         temp = divide(*copy_n, *result);
         *result += *temp;
-        *result /= *const_1->_2;
+        *result /= basicConst->get_2();
         delete temp;
     }
     delete copy_n;
@@ -1072,7 +1068,7 @@ Numerical* factorial(const Numerical& n) {
         result = getOne();
         auto temp = getOne();
         while(*temp < n) {
-            *temp += *const_1->_1;
+            *temp += basicConst->get_1();
             *result *= *temp;
         }
         delete temp;
@@ -1085,9 +1081,9 @@ Numerical* ln_light(const Numerical& n) {
     if(!n.isPositive())
         return nullptr;
     auto result = getZero();
-    if(n != *const_1->_1) {
-        auto temp_0 = add(n, *const_1->_1);
-        auto temp_1 = subtract(n, *const_1->_1);
+    if(n != basicConst->get_1()) {
+        auto temp_0 = add(n, basicConst->get_1());
+        auto temp_1 = subtract(n, basicConst->get_1());
         *temp_1 /= *temp_0;
         auto copy_temp_1 = new Numerical(temp_1);
         auto temp_2 = getOne();
@@ -1101,18 +1097,18 @@ Numerical* ln_light(const Numerical& n) {
             delete temp;
             //Here the temp means the criteria of break.
             *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->_1;
+            *temp_2 += basicConst->get_1();
             temp = *temp_1 / *temp_2;
             int temp_power = temp->power;
             delete temp;
 
-            if(result->power - temp_power >= const_1->GlobalPrecision)
+            if(result->power - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *copy_temp_1;
-            *temp_2 += *const_1->_1;
+            *temp_2 += basicConst->get_1();
         }
-        *result *= *const_1->_2;
+        *result *= basicConst->get_2();
         delete temp_0;
         delete temp_1;
         delete copy_temp_1;
@@ -1143,7 +1139,7 @@ Numerical* ln(const Numerical& n) {
 }
 //Return log_a n
 Numerical* log(const Numerical& n, const Numerical& a) {
-    if(a == *const_1->_1)
+    if(a == basicConst->get_1())
         return nullptr;
 
     auto ln_n = ln(n);
@@ -1166,11 +1162,11 @@ Numerical* exp(const Numerical& n) {
     auto rank = getOne();
     while(true) {
         *temp /= *rank;
-        if(*temp < *const_1->expectedRelativeError)
+        if(*temp < basicConst->getExpectedRelativeError())
             break;
         *result += *temp;
         *temp *= n;
-        *rank += *const_1->_1;
+        *rank += basicConst->get_1();
     }
     return result;
 }
@@ -1187,9 +1183,9 @@ Numerical* pow(const Numerical& n, const Numerical& a) {
  */
 Numerical* cos(const Numerical& n) {
     auto result = getOne();
-    if(n != *const_1->_0) {
-        auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->_1;
+    if(n != basicConst->get_0()) {
+        auto MachinePrecision = basicConst->getGlobalPrecision();
+        auto& ONE = basicConst->get_1();
 
         auto square_n = n * n;
         auto temp_1 = new Numerical(square_n);
@@ -1203,7 +1199,7 @@ Numerical* cos(const Numerical& n) {
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
-            *rank += *ONE;
+            *rank += ONE;
             *temp /= *rank;
             int temp_power = temp->power;
             delete temp;
@@ -1213,7 +1209,7 @@ Numerical* cos(const Numerical& n) {
             //Prepare for next calculate.
             *temp_1 *= *square_n;
             *temp_2 *= *rank;
-            *rank += *ONE;
+            *rank += ONE;
             *temp_2 *= *rank;
         }
         delete square_n;
@@ -1226,9 +1222,9 @@ Numerical* cos(const Numerical& n) {
 
 Numerical* sin(const Numerical& n) {
     auto result = getZero();
-    if(n != *const_1->_0) {
-        auto MachinePrecision = const_1->GlobalPrecision;
-        auto ONE = const_1->_1;
+    if(n != basicConst->get_0()) {
+        auto MachinePrecision = basicConst->getGlobalPrecision();
+        auto& ONE = basicConst->get_1();
 
         auto square_n = n * n;
         auto temp_1 = new Numerical(n);
@@ -1242,7 +1238,7 @@ Numerical* sin(const Numerical& n) {
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
-            *rank += *ONE;
+            *rank += ONE;
             *temp /= *rank;
             int temp_power = temp->power;
             delete temp;
@@ -1252,7 +1248,7 @@ Numerical* sin(const Numerical& n) {
             //Prepare for next calculate.
             *temp_1 *= *square_n;
             *temp_2 *= *rank;
-            *rank += *ONE;
+            *rank += ONE;
             *temp_2 *= *rank;
         }
         delete square_n;
@@ -1298,16 +1294,16 @@ Numerical* cot(const Numerical& n) {
 }
 
 Numerical* arccos(const Numerical& n) {
-    return bisectionMethod(cos, n, *const_1->_0, *const_2->PI, *const_1->_1, *const_1->Minus_1);
+    return bisectionMethod(cos, n, basicConst->get_0(), mathConst->getPI(), basicConst->get_1(), basicConst->getMinus_1());
 }
 
 Numerical* arcsin(const Numerical& n) {
-    return bisectionMethod(sin, n, *const_2->Minus_PI_2, *const_2->PI_2, *const_1->Minus_1, *const_1->_1);
+    return bisectionMethod(sin, n, mathConst->getMinus_PI_2(), mathConst->getPI_2(), basicConst->getMinus_1(), basicConst->get_1());
 }
 
 Numerical* arctan(const Numerical& n) {
     auto temp = n * n;
-    *temp += *const_1->_1;
+    *temp += basicConst->get_1();
     auto sqrt_temp = sqrt(*temp);
     delete temp;
 
@@ -1353,7 +1349,7 @@ Numerical* cosh(const Numerical& n) {
     auto result = exp(n);
     auto temp = reciprocal(*result);
     *result += *temp;
-    *result /= *const_1->_2;
+    *result /= basicConst->get_2();
     delete temp;
     return result;
 }
@@ -1362,7 +1358,7 @@ Numerical* sinh(const Numerical& n) {
     auto result = exp(n);
     auto temp = reciprocal(*result);
     *result -= *temp;
-    *result /= *const_1->_2;
+    *result /= basicConst->get_2();
     delete temp;
     return result;
 }
@@ -1413,7 +1409,7 @@ Numerical* coth(const Numerical& n) {
 
 Numerical* arccosh(const Numerical& n) {
     auto temp = n * n;
-    *temp -= *const_1->_1;
+    *temp -= basicConst->get_1();
     *temp << *sqrt(*temp);
     *temp += n;
     auto result = ln(*temp);
@@ -1423,7 +1419,7 @@ Numerical* arccosh(const Numerical& n) {
 
 Numerical* arcsinh(const Numerical& n) {
     auto temp = n * n;
-    *temp += *const_1->_1;
+    *temp += basicConst->get_1();
     *temp << *sqrt(*temp);
     *temp += n;
     auto result = ln(*temp);
@@ -1432,11 +1428,11 @@ Numerical* arcsinh(const Numerical& n) {
 }
 
 Numerical* arctanh(const Numerical& n) {
-    auto result = *const_1->_1 + n;
-    auto temp = *const_1->_1 - n;
+    auto result = basicConst->get_1() + n;
+    auto temp = basicConst->get_1() - n;
     *result /= *temp;
     *result << *ln(*result);
-    *result /= *const_1->_2;
+    *result /= basicConst->get_2();
     delete temp;
     return result;
 }
@@ -1456,11 +1452,11 @@ Numerical* arccsch(const Numerical& n) {
 }
 
 Numerical* arccoth(const Numerical& n) {
-    auto result = n + *const_1->_1;
-    auto temp = n - *const_1->_1;
+    auto result = n + basicConst->get_1();
+    auto temp = n - basicConst->get_1();
     *result /= *temp;
     *result << *ln(*result);
-    *result /= *const_1->_2;
+    *result /= basicConst->get_2();
     delete temp;
     return result;
 }

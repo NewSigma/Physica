@@ -9,8 +9,8 @@
 #include "PhysicaMain.h"
 #include "Numerical.h"
 
-const Const_1* const_1;
-const Const_2* const_2;
+const BasicConst* basicConst;
+const MathConst* mathConst;
 
 static QtMessageHandler handler;
 
@@ -69,8 +69,8 @@ void init() {
         if(handler)
             handler(type, context, prefix + msg);
     });
-    const_1 = new Const_1();
-    const_2 = new Const_2();
+    basicConst = new BasicConst();
+    mathConst = new MathConst();
 }
 //e.g turn /home/user/Physica/Physica.cpp into Physica
 char* getNameFromFile(const char* file) {
@@ -87,6 +87,6 @@ char* getNameFromFile(const char* file) {
 }
 
 void deInit() {
-    delete const_1;
-    delete const_2;
+    delete basicConst;
+    delete mathConst;
 }

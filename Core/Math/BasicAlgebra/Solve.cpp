@@ -31,12 +31,12 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
     delete delta_right;
 
     auto result = add(x1, x2);
-    *result /= *const_1->_2;
+    *result /= basicConst->get_2();
     Numerical* y_result;
 
     auto error = subtract(y1, y2);
     error->length = (signed char)error->getSize();
-    *error << *divide(*error, *const_1->_2);
+    *error << *divide(*error, basicConst->get_2());
 
     auto x_left = new Numerical(x1);
     auto x_right = new Numerical(x2);
@@ -69,9 +69,9 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
             x_right = result;
         }
         result = add(*x_left, *x_right);
-        *result << *divide(*result, *const_1->_2);
-        *error << *divide(*error, *const_1->_2);
-    } while(result->power - error->power < const_1->GlobalPrecision);
+        *result << *divide(*result, basicConst->get_2());
+        *error << *divide(*error, basicConst->get_2());
+    } while(result->power - error->power < basicConst->getGlobalPrecision());
     result->a = 1;
 
     delete x_left;

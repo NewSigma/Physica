@@ -9,11 +9,11 @@
 #include "Numerical.h"
 #include "Const.h"
 
-extern const Const_1* const_1;
+extern const BasicConst* basicConst;
 
 class RealInf : public DirectedInf {
 public:
-    bool getSign() const { return *((RealNum*)(*direction)[0])->real == *const_1->_1; }
+    bool getSign() const { return *((RealNum*)(*direction)[0])->real == basicConst->get_1(); }
     static RealInf* getInstance(bool b);
 
     virtual AbstractNum* operator+(const AbstractNum& n) const;

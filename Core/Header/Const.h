@@ -4,8 +4,7 @@
 class RealNum;
 class Numerical;
 
-class Const_1 {
-public:
+class BasicConst {
     //_1 stands by integer 1.
     signed char GlobalPrecision;
     const Numerical* expectedRelativeError;
@@ -20,13 +19,26 @@ public:
     const Numerical* Minus_3;
     const Numerical* _4;
     const Numerical* Minus_4;
+public:
+    BasicConst();
+    ~BasicConst();
 
-    Const_1();
-    ~Const_1();
+    inline signed char getGlobalPrecision() const { return GlobalPrecision; }
+    inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
+    inline const Numerical& getStepSize() const { return *stepSize; }
+    inline const Numerical& getR_MAX() const { return *R_MAX; }
+    inline const Numerical& get_0() const { return *_0; }
+    inline const Numerical& get_1() const { return *_1; }
+    inline const Numerical& getMinus_1() const { return *Minus_1; }
+    inline const Numerical& get_2() const { return *_2; }
+    inline const Numerical& getMinus_2() const { return *Minus_2; }
+    inline const Numerical& get_3() const { return *_3; }
+    inline const Numerical& getMinus_3() const { return *Minus_3; }
+    inline const Numerical& get_4() const { return *_4; }
+    inline const Numerical& getMinus_4() const { return *Minus_4; }
 };
 
-class Const_2 {
-public:
+class MathConst {
     const RealNum* stepSize;
     const RealNum* _0;
     const RealNum* _1;
@@ -36,11 +48,20 @@ public:
     //Here PI_2 stands by PI / 2.
     const Numerical* PI_2;
     const Numerical* Minus_PI_2;
+public:
+    MathConst();
+    ~MathConst();
 
-    Const_2();
-    ~Const_2();
+    inline const RealNum& getStepSize() const { return *stepSize; }
+    inline const RealNum& get_0() const { return *_0; }
+    inline const RealNum& get_1() const { return *_1; }
+    inline const RealNum& get_2() const { return *_2; }
+    inline const Numerical& getPI() const { return *PI; }
+    inline const Numerical& getE() const { return *E; }
+    inline const Numerical& getPI_2() const { return *PI_2; }
+    inline const Numerical& getMinus_PI_2() const { return *Minus_PI_2; }
+private:
+    static Numerical* calcPI(int precision);
 };
-
-Numerical* getPI(int precision);
 
 #endif

@@ -5,7 +5,7 @@
 #include "../../Header/RealInf.h"
 #include "../../Header/Indeterminate.h"
 
-RealNum::RealNum(Numerical* n) : ComplexNum(n, (Numerical*)const_1->_0) {
+RealNum::RealNum(Numerical* n) : ComplexNum(n, const_cast<Numerical*>(&basicConst->get_0())) {
     type = RealNumber;
 }
 

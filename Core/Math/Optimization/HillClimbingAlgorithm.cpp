@@ -12,13 +12,12 @@
  *
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.
  */
-extern const Const_1* const_1;
 //TODO Optional: Auto step-size
 HillClimbingAlgorithm::HillClimbingAlgorithm(Numerical* f(Numerical*), Numerical* init, Numerical* size) {
 	func = f;
 	x_initial = init;
 	stepSize = size;
-	minStep = new Numerical(const_1->stepSize);
+	minStep = new Numerical(basicConst->getStepSize());
 }
 
 HillClimbingAlgorithm::~HillClimbingAlgorithm() {

@@ -8,7 +8,7 @@
 #include "Const.h"
 #include "RealNum.h"
 
-extern const Const_1* const_1;
+extern const BasicConst* basicConst;
 
 class Numerical {
 public:
@@ -67,13 +67,13 @@ public:
     inline bool isZero() const { return byte[getSize() - 1] == 0; }
     inline bool isPositive() const { return !isZero() && length > 0; }
     inline bool isNegative() const { return !isZero() && length < 0; }
-    inline bool isInteger() const { return length == power + 1; }
+    inline bool isInteger() const { return getSize() == power + 1; }
 };
 ////////////////////////////////Helper functions/////////////////////////////////////
 void reverse(unsigned char* arr, int length);
-inline Numerical* getZero() { return new Numerical(const_1->_0); }
-inline Numerical* getOne() { return new Numerical(const_1->_1); }
-inline Numerical* getTwo() { return new Numerical(const_1->_2); }
+inline Numerical* getZero() { return new Numerical(basicConst->get_0()); }
+inline Numerical* getOne() { return new Numerical(basicConst->get_1()); }
+inline Numerical* getTwo() { return new Numerical(basicConst->get_2()); }
 //////////////////////////////Process functions////////////////////////////////////////
 Numerical* add (const Numerical& n1, const Numerical& n2);
 Numerical* subtract (const Numerical& n1, const Numerical& n2);

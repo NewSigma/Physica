@@ -10,7 +10,7 @@
 #include "../../Header/Indeterminate.h"
 #include "../../Header/Numerical.h"
 
-extern const Const_2* const_2;
+extern const MathConst* mathConst;
 
 AbstractNum* AbstractNum::concretize() {
     switch(type) {
@@ -64,7 +64,7 @@ bool AbstractNum::operator!= (const AbstractNum& n) const {
 }
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 AbstractNum* reciprocal(const AbstractNum& n) {
-    return *const_2->_1 / n;
+    return mathConst->get_1() / n;
 }
 
 AbstractNum* sqrt(const AbstractNum& n) {
@@ -75,7 +75,7 @@ AbstractNum* sqrt(const AbstractNum& n) {
             *((RealNum*)norm)->real << *sqrt(*((RealNum*)norm)->real);
 
             auto arg = vec->toArg(0);
-            *((RealNum*)arg)->real /= *const_1->_2;
+            *((RealNum*)arg)->real /= basicConst->get_2();
             auto new_real = cos(*((RealNum*)arg)->real);
             *new_real *= *((RealNum*)norm)->real;
             auto new_imagine = sin(*((RealNum*)arg)->real);
@@ -94,7 +94,7 @@ AbstractNum* sqrt(const AbstractNum& n) {
         case AbstractNum::DirectedInfinity:
             if(((DirectedInf&)n).direction->getLength() == 2) {
                 auto arg = ((DirectedInf&)n).direction->toArg(0);
-                *((RealNum*)arg)->real /= *const_1->_2;
+                *((RealNum*)arg)->real /= basicConst->get_2();
                 auto unit_vec_x = new RealNum(cos(*((RealNum*)arg)->real));
                 auto unit_vec_y = new RealNum(sin(*((RealNum*)arg)->real));
                 auto result = new DirectedInf(new Vector(unit_vec_x, unit_vec_y));

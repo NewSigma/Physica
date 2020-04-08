@@ -12,9 +12,9 @@ RealInf::RealInf(bool b) {
     type = AbstractNum::RealInfinity;
     auto arr = new AbstractNum*[1];
     if(b)
-        arr[0] = (AbstractNum*)const_1->_1;
+        arr[0] = new RealNum(new Numerical(basicConst->get_1()));
     else
-        arr[0] = (AbstractNum*)const_1->Minus_1;
+        arr[0] = new RealNum(new Numerical(basicConst->getMinus_1()));
     direction = new Vector(arr, 1);
 }
 

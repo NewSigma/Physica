@@ -1,7 +1,7 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "Numerical.h"
+class Numerical;
 
 Numerical* D_double_point(Numerical* func(const Numerical&), const Numerical& x0);
 Numerical* D_right(Numerical* func(const Numerical&), const Numerical& x0);

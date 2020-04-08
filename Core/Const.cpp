@@ -7,7 +7,7 @@
 /*
  * Basic consts that initialize directly.
  */
-Const_1::Const_1() {
+BasicConst::BasicConst() {
     GlobalPrecision = 16;
 
     auto byte = (unsigned char*)malloc(sizeof(char));
@@ -58,7 +58,7 @@ Const_1::Const_1() {
     Minus_4 = -*_4;
 }
 
-Const_1::~Const_1() {
+BasicConst::~BasicConst() {
     delete expectedRelativeError;
     delete stepSize;
     delete R_MAX;
@@ -76,19 +76,19 @@ Const_1::~Const_1() {
  * Consts that need some calculates.
  * Should call new to Const_1 so as to make calculates available.
  */
-Const_2::Const_2() {
-    stepSize = new RealNum(new Numerical(const_1->stepSize));
+MathConst::MathConst() {
+    stepSize = new RealNum(new Numerical(basicConst->getStepSize()));
     _0 = new RealNum(getZero());
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
-    PI = getPI(const_1->GlobalPrecision);
-    E = exp(*const_1->_1);
+    PI = calcPI(basicConst->getGlobalPrecision());
+    E = exp(basicConst->get_1());
 
-    PI_2 = *PI / *const_1->_2;
+    PI_2 = *PI / basicConst->get_2();
     Minus_PI_2 = -*PI_2;
 }
 
-Const_2::~Const_2() {
+MathConst::~MathConst() {
     delete stepSize;
     delete _0;
     delete _1;
@@ -101,25 +101,25 @@ Const_2::~Const_2() {
 //Reference:
 //http://www.pi314.net/eng/salamin.php
 //https://blog.csdn.net/liangbch/article/details/78724041
-Numerical* getPI(int precision) {
+Numerical* MathConst::calcPI(int precision) {
     auto a = getOne();
     auto x = getOne();
-    auto b = sqrt(*const_1->_2);
-    *b << *(*const_1->_1 / *b);
-    auto c = *const_1->_1 / *const_1->_4;
+    auto b = sqrt(basicConst->get_2());
+    *b << *(basicConst->get_1() / *b);
+    auto c = basicConst->get_1() / basicConst->get_4();
 
     int goal = 1;
     while(goal < precision) {
         Numerical y(a);
         *a += *b;
-        *a /= *const_1->_2;
+        *a /= basicConst->get_2();
         *b *= y;
         *b << *sqrt(*b);
         y -= *a;
         y *= y;
         y *= *x;
         *c -= y;
-        *x *= *const_1->_2;
+        *x *= basicConst->get_2();
         goal *= 2;
     }
     *a *= *a;

@@ -7,7 +7,7 @@
 #include "../../Header/Const.h"
 #include "../../Header/RealNum.h"
 
-extern const Const_1* const_1;
+extern const BasicConst* basicConst;
 
 DirectedInf::DirectedInf(Vector* vec) {
     type = DirectedInfinity;
