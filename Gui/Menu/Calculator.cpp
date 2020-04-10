@@ -1,8 +1,8 @@
-#include "../Header/Calculator.h"
-#include "../../Core/Header/ExprReader.h"
+#include "Calculator.h"
+#include "ExprReader.h"
+#include "ElementaryFunction.h"
 #include <QKeyEvent>
-#include "../../Core/Header/Numerical.h"
-
+//FIXME Calculate result is not accurate.
 Calculator::Calculator() {
     //Const
     QFont font;
@@ -338,7 +338,8 @@ void Calculator::on_click_equal() {
     ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
     editor_top->setText(editor_bottom->text());
-    editor_bottom->setText(QString::fromStdString(result->toString()));
+    editor_bottom->setText(QString::number((double)*result));
+    delete result;
 }
 
 void Calculator::on_click_del() {
@@ -371,7 +372,7 @@ void Calculator::on_click_sqrt() {
     editor_top->setText(editor_bottom->text());
     if(temp != nullptr) {
         *result << *temp;
-        editor_bottom->setText(QString::fromStdString(result->toString()));
+        editor_bottom->setText(QString::number((double)*result));
     }
     delete result;
 }
@@ -383,7 +384,7 @@ void Calculator::on_click_square() {
     editor_top->setText(editor_bottom->text());
     if(temp != nullptr) {
         *result << *temp;
-        editor_bottom->setText(QString::fromStdString(result->toString()));
+        editor_bottom->setText(QString::number((double)*result));
     }
     delete result;
 }

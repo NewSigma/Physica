@@ -1,14 +1,13 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../../Header/ComplexNum.h"
-#include "../../Header/RealNum.h"
-#include "../../Header/DirectedInf.h"
-#include "../../Header/ComplexInf.h"
-#include "../../Header/RealInf.h"
-#include "../../Header/Indeterminate.h"
-#include "../../Header/Vector.h"
-#include "../../Header/Numerical.h"
+#include "ComplexNum.h"
+#include "RealNum.h"
+#include "DirectedInf.h"
+#include "ComplexInf.h"
+#include "RealInf.h"
+#include "Indeterminate.h"
+#include "ElementaryFunction.h"
 
 ComplexNum::ComplexNum(Numerical* n1, Numerical* n2, bool polar) {
     type = AbstractNum::ComplexNumber;

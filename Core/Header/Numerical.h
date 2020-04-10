@@ -5,6 +5,7 @@
 #define PHYSICA_NUMERICAL_H
 
 #include <iostream>
+#include <climits>
 #include "Const.h"
 #include "RealNum.h"
 
@@ -22,7 +23,7 @@ public:
      */
     signed char length;
     //Accuracy
-    unsigned char a = 0;
+    unsigned char a;
 
     Numerical();
     Numerical(const Numerical& n);
@@ -35,9 +36,7 @@ public:
     explicit Numerical(const std::wstring& s, unsigned char acc = 0);
     ~Numerical();
 
-    std::string toString() const;
     explicit operator double() const;
-
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
     void operator<<(Numerical& n);
     Numerical& operator= (const Numerical& n);
@@ -70,52 +69,8 @@ public:
     inline bool isInteger() const { return getSize() == power + 1; }
 };
 ////////////////////////////////Helper functions/////////////////////////////////////
-void reverse(unsigned char* arr, int length);
 inline Numerical* getZero() { return new Numerical(basicConst->get_0()); }
 inline Numerical* getOne() { return new Numerical(basicConst->get_1()); }
 inline Numerical* getTwo() { return new Numerical(basicConst->get_2()); }
-//////////////////////////////Process functions////////////////////////////////////////
-Numerical* add (const Numerical& n1, const Numerical& n2);
-Numerical* subtract (const Numerical& n1, const Numerical& n2);
-Numerical* multiply (const Numerical& n1, const Numerical& n2);
-Numerical* divide (const Numerical& n1, const Numerical& n2);
-bool cutLength(Numerical* n);
-void cutZero(Numerical* n);
-////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-Numerical* randomNumerical();
-Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound);
-Numerical* reciprocal(const Numerical& n);
-Numerical* sqrt_light(const Numerical& n);
-Numerical* sqrt(const Numerical& n);
-Numerical* factorial(const Numerical& n);
-Numerical* ln_light(const Numerical& n);
-Numerical* ln(const Numerical& n);
-Numerical* log(const Numerical& n, const Numerical& a);
-Numerical* exp(const Numerical& n);
-Numerical* pow(const Numerical& n, const Numerical& a);
-Numerical* cos(const Numerical& n);
-Numerical* sin(const Numerical& n);
-Numerical* tan(const Numerical& n);
-Numerical* sec(const Numerical& n);
-Numerical* csc(const Numerical& n);
-Numerical* cot(const Numerical& n);
-Numerical* arccos(const Numerical& n);
-Numerical* arcsin(const Numerical& n);
-Numerical* arctan(const Numerical& n);
-Numerical* arcsec(const Numerical& n);
-Numerical* arccsc(const Numerical& n);
-Numerical* arccot(const Numerical& n);
-Numerical* cosh(const Numerical& n);
-Numerical* sinh(const Numerical& n);
-Numerical* tanh(const Numerical& n);
-Numerical* sech(const Numerical& n);
-Numerical* csch(const Numerical& n);
-Numerical* coth(const Numerical& n);
-Numerical* arccosh(const Numerical& n);
-Numerical* arcsinh(const Numerical& n);
-Numerical* arctanh(const Numerical& n);
-Numerical* arcsech(const Numerical& n);
-Numerical* arccsch(const Numerical& n);
-Numerical* arccoth(const Numerical& n);
 
 #endif

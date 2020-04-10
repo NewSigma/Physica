@@ -2,7 +2,8 @@
 #define _Physica_C_GeneAlgorithm_H
 
 #include <ctime>
-#include "Numerical.h"
+
+class Numerical;
 
 class GeneAlgorithm {
 public:

@@ -1,4 +1,5 @@
-#include "../../Header/Solve.h"
+#include "Solve.h"
+#include "CalcBasic.h"
 /*
  * Find the numerical root of algebra equation.
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.

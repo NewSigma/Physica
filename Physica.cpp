@@ -4,9 +4,9 @@
 #include "Physica.h"
 #include <QApplication>
 #include "QTime"
-#include <iostream>
 #include "Const.h"
 #include "PhysicaMain.h"
+#include "ConstTest.h"
 #include "Numerical.h"
 
 const BasicConst* basicConst;
@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
     return exit_code;
 }
 
-
+#include <iostream>
+#include <Core/Header/CalcBasic.h>
+#include "Numerical.h"
 void init() {
     handler = qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {
         QString prefix{};

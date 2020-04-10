@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ */
+#ifndef PHYSICA_NUMERICALTEST_H
+#define PHYSICA_NUMERICALTEST_H
+
+#include "Numerical.h"
+
+void numerical_test() {
+    std::cout << "Please input two double numbers. Let the second number be zero to stop the test." << '\n';
+    double d1, d2 = 1;
+    std::cin >> d1 >> d2;
+    while(d2 != 0) {
+        Numerical n1(d1);
+        Numerical n2(d2);
+        auto c1 = n1 + n2;
+        auto c2 = n1 - n2;
+        auto c3 = n1 * n2;
+        auto c4 = n1 / n2;
+        std::cout << "d1 + d2 = " << '\n' << *c1 << '\n';
+        std::cout << "d1 - d2 = " << '\n' << *c2 << '\n';
+        std::cout << "d1 * d2 = " << '\n' << *c3 << '\n';
+        std::cout << "d1 / d2 = " << '\n' << *c4 << '\n' << "Waiting for next inputs." << std::endl;
+        delete c1;
+        delete c2;
+        delete c3;
+        delete c4;
+        std::cin >> d1 >> d2;
+    }
+}
+
+#endif //PHYSICA_NUMERICALTEST_H

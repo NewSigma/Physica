@@ -16,13 +16,13 @@ public:
     bool getSign() const { return *((RealNum*)(*direction)[0])->real == basicConst->get_1(); }
     static RealInf* getInstance(bool b);
 
-    virtual AbstractNum* operator+(const AbstractNum& n) const;
-    virtual AbstractNum* operator-(const AbstractNum& n) const;
-    virtual AbstractNum* operator*(const AbstractNum& n) const;
-    virtual AbstractNum* operator/(const AbstractNum& n) const;
-    virtual AbstractNum* operator^(const AbstractNum& n) const;
-    virtual AbstractNum* operator-() const;
-    virtual bool operator== (const AbstractNum& n) const;
+    AbstractNum* operator+(const AbstractNum& n) const override;
+    AbstractNum* operator-(const AbstractNum& n) const override;
+    AbstractNum* operator*(const AbstractNum& n) const override;
+    AbstractNum* operator/(const AbstractNum& n) const override;
+    AbstractNum* operator^(const AbstractNum& n) const override;
+    AbstractNum* operator-() const override;
+    bool operator== (const AbstractNum& n) const override;
 private:
     static RealInf* positive;
     static RealInf* negative;

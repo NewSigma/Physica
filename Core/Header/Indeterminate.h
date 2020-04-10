@@ -9,17 +9,17 @@
 class Indeterminate : public AbstractNum {
 public:
     static Indeterminate* getInstance();
-    virtual AbstractNum* operator+(const AbstractNum& n) const;
-    virtual AbstractNum* operator-(const AbstractNum& n) const;
-    virtual AbstractNum* operator*(const AbstractNum& n) const;
-    virtual AbstractNum* operator/(const AbstractNum& n) const;
-    virtual AbstractNum* operator^(const AbstractNum& n) const;
-    virtual AbstractNum* operator-() const;
-    virtual bool operator== (const AbstractNum& n) const;
+    AbstractNum* operator+(const AbstractNum& n) const override;
+    AbstractNum* operator-(const AbstractNum& n) const override;
+    AbstractNum* operator*(const AbstractNum& n) const override;
+    AbstractNum* operator/(const AbstractNum& n) const override;
+    AbstractNum* operator^(const AbstractNum& n) const override;
+    AbstractNum* operator-() const override;
+    bool operator== (const AbstractNum& n) const override;
 private:
     static Indeterminate* instance;
     Indeterminate();
-    virtual ~Indeterminate();
+    ~Indeterminate();
 };
 
 #endif

@@ -17,13 +17,13 @@ public:
     DirectedInf(const DirectedInf* instance);
     ~DirectedInf();
 
-    virtual AbstractNum* operator+ (const AbstractNum& n) const;
-    virtual AbstractNum* operator- (const AbstractNum& n) const;
-    virtual AbstractNum* operator* (const AbstractNum& n) const;
-    virtual AbstractNum* operator/ (const AbstractNum& n) const;
-    virtual AbstractNum* operator^ (const AbstractNum& n) const;
-    virtual AbstractNum* operator- () const;
-    virtual bool operator== (const AbstractNum& n) const;
+    AbstractNum* operator+ (const AbstractNum& n) const override;
+    AbstractNum* operator- (const AbstractNum& n) const override;
+    AbstractNum* operator* (const AbstractNum& n) const override;
+    AbstractNum* operator/ (const AbstractNum& n) const override;
+    AbstractNum* operator^ (const AbstractNum& n) const override;
+    AbstractNum* operator- () const override;
+    bool operator== (const AbstractNum& n) const override;
 protected:
     DirectedInf() = default;
 };

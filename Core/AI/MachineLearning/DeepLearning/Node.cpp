@@ -1,6 +1,5 @@
-#include "../../../Header/Node.h"
-#include "../../../Header/Const.h"
-#include "../../../Header/Numerical.h"
+#include "Node.h"
+#include "ElementaryFunction.h"
 
 Node::Node(int size) {
     auto arr = new AbstractNum*[size];

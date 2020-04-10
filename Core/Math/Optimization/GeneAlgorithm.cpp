@@ -1,5 +1,7 @@
 #include "GeneAlgorithm.h"
 #include <iostream>
+#include "ElementaryFunction.h"
+#include "Numerical.h"
 /*
  * Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
  * Copyright (c) 2019 NewSigma@163.com.All rights reserved.

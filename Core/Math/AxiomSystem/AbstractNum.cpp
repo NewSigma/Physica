@@ -1,14 +1,15 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../../Header/AbstractNum.h"
-#include "../../Header/ComplexNum.h"
-#include "../../Header/RealNum.h"
-#include "../../Header/DirectedInf.h"
-#include "../../Header/ComplexInf.h"
-#include "../../Header/RealInf.h"
-#include "../../Header/Indeterminate.h"
-#include "../../Header/Numerical.h"
+#include "AbstractNum.h"
+#include "ComplexNum.h"
+#include "RealNum.h"
+#include "DirectedInf.h"
+#include "ComplexInf.h"
+#include "RealInf.h"
+#include "Indeterminate.h"
+#include "Numerical.h"
+#include "ElementaryFunction.h"
 
 extern const MathConst* mathConst;
 

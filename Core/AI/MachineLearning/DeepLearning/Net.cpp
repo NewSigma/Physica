@@ -1,6 +1,5 @@
-#include "../../../Header/Net.h"
-#include "../../../Header/Numerical.h"
-
+#include "Net.h"
+#include "ElementaryFunction.h"
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */

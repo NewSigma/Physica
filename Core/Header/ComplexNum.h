@@ -23,13 +23,13 @@ public:
 
     void operator<<(ComplexNum& n);
     ComplexNum& operator= (const ComplexNum& n);
-    virtual AbstractNum* operator+ (const AbstractNum& n) const;
-    virtual AbstractNum* operator- (const AbstractNum& n) const;
-    virtual AbstractNum* operator* (const AbstractNum& n) const;
-    virtual AbstractNum* operator/ (const AbstractNum& n) const;
-    virtual AbstractNum* operator^ (const AbstractNum& n) const;
-    virtual AbstractNum* operator- () const;
-    virtual bool operator== (const AbstractNum& n) const;
+    AbstractNum* operator+ (const AbstractNum& n) const override;
+    AbstractNum* operator- (const AbstractNum& n) const override;
+    AbstractNum* operator* (const AbstractNum& n) const override;
+    AbstractNum* operator/ (const AbstractNum& n) const override;
+    AbstractNum* operator^ (const AbstractNum& n) const override;
+    AbstractNum* operator- () const override;
+    bool operator== (const AbstractNum& n) const override;
 };
 
 #endif
