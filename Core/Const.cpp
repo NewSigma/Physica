@@ -70,7 +70,8 @@ MathConst::MathConst() {
     _0 = new RealNum(getZero());
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
-    PI = calcPI(basicConst->getGlobalPrecision());
+    //0.31 is the big approximation of ln(2) / ln(10)
+    PI = calcPI((int)(8 * basicConst->getGlobalPrecision() * 0.31) + 1);
     E = exp(basicConst->get_1());
 
     PI_2 = *PI / basicConst->get_2();
@@ -87,9 +88,12 @@ MathConst::~MathConst() {
     delete PI_2;
     delete Minus_PI_2;
 }
-//Reference:
-//http://www.pi314.net/eng/salamin.php
-//https://blog.csdn.net/liangbch/article/details/78724041
+/*
+ * precision is the number of effective digits in decimal.
+ * Reference:
+ * http://www.pi314.net/eng/salamin.php
+ * https://blog.csdn.net/liangbch/article/details/78724041
+ */
 Numerical* MathConst::calcPI(int precision) {
     auto a = getOne();
     auto x = getOne();

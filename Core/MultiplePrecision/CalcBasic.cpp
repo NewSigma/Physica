@@ -349,6 +349,7 @@ bool cutLength(Numerical* n) {
         if(n->length < 0)
             length = -length;
         n->length = length;
+        n->a = n->a != 0;
     }
     return result;
 }

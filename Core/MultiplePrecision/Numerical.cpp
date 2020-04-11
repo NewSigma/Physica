@@ -7,6 +7,7 @@
 #include <cmath>
 #include <QtCore/qlogging.h>
 #include <vector>
+#include <iomanip>
 #include "CalcBasic.h"
 
 extern const MathConst* mathConst;
@@ -35,6 +36,8 @@ Numerical::Numerical(unsigned char* byte, signed char length, int power, unsigne
 
 Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 Numerical::Numerical(double d, unsigned char acc) : a(acc) {
     if(d == 0) {
         byte = (unsigned char*)malloc(sizeof(char));
@@ -47,20 +50,29 @@ Numerical::Numerical(double d, unsigned char acc) : a(acc) {
     if(negative)
         d = -d;
 
-    power = length = 0;
     auto integer = (unsigned long long)d;
     d -= integer;
     std::vector<unsigned char> vec{};
-    for(int i = 0; i < sizeof(unsigned int); ++i) {
-        unsigned char aByte = (integer << (i * CHAR_BIT)) >> ((sizeof(unsigned int) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
-        if(aByte != 0)
+    if(integer != 0) {
+        int index = 0;
+        //Ignore zeros.
+        unsigned char aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
+        while(aByte == 0) {
+            ++index;
+            integer <<= CHAR_BIT;
+            aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
+        }
+        //Here the last byte of integer is not zero.
+        power = (int)sizeof(unsigned long long) - index - 1;
+        for(; index < sizeof(unsigned long long) - 1; ++index) {
             vec.push_back(aByte);
+            integer <<= CHAR_BIT;
+            aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
+        }
+        vec.push_back(aByte);
     }
-
-    if(!vec.empty())
-        power = (int)vec.size() - 1;
     else {
-        integer = 0;
+        integer = power = 0;
         while(integer == 0) {
             d *= (CHAR_MAX + 1) * 2;
             integer = (unsigned int)d;
@@ -85,12 +97,13 @@ Numerical::Numerical(double d, unsigned char acc) : a(acc) {
     if(negative)
         length = (signed char)-length;
 }
+#pragma clang diagnostic pop
 /*
  * May not be very accurate.
  */
 Numerical::Numerical(const char* s, unsigned char acc) : Numerical(strtod(s, nullptr), acc) {}
 
-Numerical::Numerical(const wchar_t* s, unsigned char acc) {
+Numerical::Numerical(const wchar_t* s, unsigned char acc) : a(acc) {
     signed char size = wcslen(s);
     char str[size + 1];
     str[size] = '\0';
@@ -101,7 +114,6 @@ Numerical::Numerical(const wchar_t* s, unsigned char acc) {
     temp.byte = nullptr;
     length = temp.length;
     power = temp.power;
-    a = acc;
 }
 
 Numerical::Numerical(const std::string& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
@@ -126,8 +138,8 @@ Numerical::operator double() const {
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
-    os << std::to_string(double(n)) << "\tLength = " << (int)n.length << "\tPower = " << n.power <<
-    "\tAccuracy = " << (int)n.a << " × " << ((CHAR_MAX + 1) * 2) << 'E' << - n.getSize() + n.power + 1;
+    os << std::setprecision(53) << std::to_string(double(n)) << "\tLength = " << (int)n.length << "\tPower = " << n.power
+        << "\tAccuracy = " << (int)n.a << " × " << ((CHAR_MAX + 1) * 2) << 'E' << - n.getSize() + n.power + 1 << std::setprecision(6);
     return os;
 }
 //Move operator, which moves this to n.
@@ -155,7 +167,7 @@ Numerical& Numerical::operator= (const Numerical& n) {
 
 Numerical* Numerical::operator+ (const Numerical& n) const {
     auto result = add(*this, n);
-    result->a = cutLength(result);
+    cutLength(result);
     if(a != 0 || n.a != 0) {
         Numerical* error;
         if(a == 0)
@@ -177,7 +189,7 @@ Numerical* Numerical::operator+ (const Numerical& n) const {
 
 Numerical* Numerical::operator- (const Numerical& n) const {
     auto result = subtract(*this, n);
-    result->a = cutLength(result);
+    cutLength(result);
     if(a != 0 || n.a != 0) {
         Numerical* error;
         if(a == 0)
@@ -199,7 +211,7 @@ Numerical* Numerical::operator- (const Numerical& n) const {
 
 Numerical* Numerical::operator* (const Numerical& n) const {
     auto result = multiply(*this, n);
-    result->a = cutLength(result);
+    cutLength(result);
     if(a != 0 || n.a != 0) {
         Numerical* error;
         if(a == 0) {

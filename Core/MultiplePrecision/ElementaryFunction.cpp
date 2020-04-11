@@ -219,7 +219,6 @@ Numerical* pow(const Numerical& n, const Numerical& a) {
 Numerical* cos(const Numerical& n) {
     auto result = getOne();
     if(n != basicConst->get_0()) {
-        auto MachinePrecision = basicConst->getGlobalPrecision();
         auto& ONE = basicConst->get_1();
 
         auto square_n = n * n;
@@ -239,7 +238,7 @@ Numerical* cos(const Numerical& n) {
             int temp_power = temp->power;
             delete temp;
 
-            if(result->power - temp_power >= MachinePrecision)
+            if(result->power - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *square_n;
@@ -258,7 +257,6 @@ Numerical* cos(const Numerical& n) {
 Numerical* sin(const Numerical& n) {
     auto result = getZero();
     if(n != basicConst->get_0()) {
-        auto MachinePrecision = basicConst->getGlobalPrecision();
         auto& ONE = basicConst->get_1();
 
         auto square_n = n * n;
@@ -278,7 +276,7 @@ Numerical* sin(const Numerical& n) {
             int temp_power = temp->power;
             delete temp;
 
-            if(result->power - temp_power >= MachinePrecision)
+            if(result->power - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *square_n;

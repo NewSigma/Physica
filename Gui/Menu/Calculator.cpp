@@ -59,8 +59,8 @@ Calculator::Calculator() {
         clear_entry = new QPushButton("CE", this);
         left_bracket = new QPushButton("(", this);
         right_bracket = new QPushButton(")", this);
-        sqroot = new QPushButton("x²", this);
-        square = new QPushButton("√x", this);
+        sqroot = new QPushButton("√x", this);
+        square = new QPushButton("x²", this);
         percent = new QPushButton("%", this);
 
         num0->setFixedSize(150, 93);
@@ -338,7 +338,7 @@ void Calculator::on_click_equal() {
     ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
     editor_top->setText(editor_bottom->text());
-    editor_bottom->setText(QString::number((double)*result));
+    editor_bottom->setText(QString::number((double)*result, 'f'));
     delete result;
 }
 
@@ -368,11 +368,11 @@ void Calculator::on_click_right_bracket() {
 void Calculator::on_click_sqrt() {
     ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
-    auto temp = *result * *result;
+    auto temp = sqrt(*result);
     editor_top->setText(editor_bottom->text());
     if(temp != nullptr) {
         *result << *temp;
-        editor_bottom->setText(QString::number((double)*result));
+        editor_bottom->setText(QString::number((double)*result, 'f'));
     }
     delete result;
 }
@@ -380,11 +380,11 @@ void Calculator::on_click_sqrt() {
 void Calculator::on_click_square() {
     ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
-    auto temp = sqrt(*result);
+    auto temp = *result * *result;
     editor_top->setText(editor_bottom->text());
     if(temp != nullptr) {
         *result << *temp;
-        editor_bottom->setText(QString::number((double)*result));
+        editor_bottom->setText(QString::number((double)*result, 'f'));
     }
     delete result;
 }
