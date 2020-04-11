@@ -2,13 +2,13 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCore/qlogging.h>
+#include <climits>
 #include "Solve.h"
 #include "ElementaryFunction.h"
 #include "CalcBasic.h"
 #include "Numerical.h"
 
 extern const MathConst* mathConst;
-extern const unsigned char UnitByte;
 
 //Return a real number between 0 and 1.
 Numerical* randomNumerical() {
@@ -40,7 +40,6 @@ Numerical* reciprocal(const Numerical& n) {
 Numerical* sqrt_light(const Numerical& n) {
     if(n.length < 0)
         return nullptr;
-    auto GlobalPrecision = basicConst->getGlobalPrecision();
     auto copy_n = new Numerical(n);
     //Let n < 1 so as to control error.
     char add_power = 0;
@@ -58,7 +57,7 @@ Numerical* sqrt_light(const Numerical& n) {
     Numerical* result = getOne();
     Numerical* temp;
     //3.33 is the big approximate value of ln(10)/ln(2)
-    for(int i = 0; i < CHAR_BIT * UnitByte * GlobalPrecision; ++i) {
+    for(int i = 0; i < LONG_WIDTH * basicConst->getGlobalPrecision(); ++i) {
         temp = divide(*copy_n, *result);
         *result += *temp;
         *result /= basicConst->get_2();

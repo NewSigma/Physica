@@ -9,9 +9,9 @@
 #include <vector>
 #include <iomanip>
 #include "CalcBasic.h"
+#include "SystemBits.h"
 
 extern const MathConst* mathConst;
-extern const unsigned char ByteMask;
 /*
  *
  * Useful formulas:
@@ -24,15 +24,13 @@ extern const unsigned char ByteMask;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical() : Numerical(nullptr, 0, 0) {}
+Numerical::Numerical(unsigned long* byte, signed char length, int power, unsigned char a) : byte(byte), power(power), length(length), a(a) {}
 
 Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), a(n.a) {
     auto size = getSize();
-    byte = (unsigned char*)malloc(size * sizeof(char));
-    memcpy(byte, n.byte, size * sizeof(char));
+    byte = (unsigned long*)malloc(size * sizeof(long));
+    memcpy(byte, n.byte, size * sizeof(long));
 }
-
-Numerical::Numerical(unsigned char* byte, signed char length, int power, unsigned char a) : byte(byte), power(power), length(length), a(a) {}
 
 Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 
@@ -40,60 +38,46 @@ Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 Numerical::Numerical(double d, unsigned char acc) : a(acc) {
     if(d == 0) {
-        byte = (unsigned char*)malloc(sizeof(char));
+        byte = (unsigned long*)malloc(sizeof(long));
         length = 1;
-        power = byte[0] = 0;
+        byte[0] = power = 0;
         return;
     }
-
     bool negative = d < 0;
     if(negative)
         d = -d;
 
-    auto integer = (unsigned long long)d;
+    power = 0;
+    while(d > ULONG_MAX) {
+        d /= ULONG_MAX;
+        ++power;
+    }
+
+    while(d < 1) {
+        d *= ULONG_MAX;
+        --power;
+    }
+#ifdef PHYSICA_64BIT
+    length = 2;
+    byte = (unsigned long*)malloc(length * sizeof(long));
+    auto integer = (unsigned long)d;
+    byte[1] = integer;
     d -= integer;
-    std::vector<unsigned char> vec{};
-    if(integer != 0) {
-        int index = 0;
-        //Ignore zeros.
-        unsigned char aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
-        while(aByte == 0) {
-            ++index;
-            integer <<= CHAR_BIT;
-            aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
-        }
-        //Here the last byte of integer is not zero.
-        power = (int)sizeof(unsigned long long) - index - 1;
-        for(; index < sizeof(unsigned long long) - 1; ++index) {
-            vec.push_back(aByte);
-            integer <<= CHAR_BIT;
-            aByte = integer >> ((sizeof(unsigned long long) - 1) * CHAR_BIT); // NOLINT(hicpp-signed-bitwise)
-        }
-        vec.push_back(aByte);
-    }
-    else {
-        integer = power = 0;
-        while(integer == 0) {
-            d *= (CHAR_MAX + 1) * 2;
-            integer = (unsigned int)d;
-            --power;
-        }
-        vec.push_back((unsigned char)integer);
-        d -= integer;
-    }
+    byte[0] = (unsigned long)(d * ULONG_MAX);
+#endif
 
-    while(d != 0) {
-        d *= (CHAR_MAX + 1) * 2;
-        integer = (unsigned int)d;
-        if(integer != 0)
-            vec.push_back((unsigned char)integer);
-        d -= integer;
-    }
-    length = vec.size();
-    byte = (unsigned char*)malloc(length * sizeof(char));
-    for(int i = 0; i < length; ++i)
-        byte[i] = vec[length - i - 1];
-
+#ifdef PHYSICA_32BIT
+    length = 3;
+    byte = (unsigned long*)malloc(length * sizeof(long));
+    auto integer = (unsigned long)d;
+    d -= integer;
+    byte[2] = integer;
+    d *= ULONG_MAX;
+    integer = (unsigned long)d;
+    d -= integer;
+    byte[1] = integer;
+    byte[0] = (unsigned long)(d * ULONG_MAX);
+#endif
     if(negative)
         length = (signed char)-length;
 }
@@ -101,9 +85,9 @@ Numerical::Numerical(double d, unsigned char acc) : a(acc) {
 /*
  * May not be very accurate.
  */
-Numerical::Numerical(const char* s, unsigned char acc) : Numerical(strtod(s, nullptr), acc) {}
+Numerical::Numerical(const char* s, unsigned char a) : Numerical(strtod(s, nullptr), a) {}
 
-Numerical::Numerical(const wchar_t* s, unsigned char acc) : a(acc) {
+Numerical::Numerical(const wchar_t* s, unsigned char a) : a(a) {
     signed char size = wcslen(s);
     char str[size + 1];
     str[size] = '\0';
@@ -116,9 +100,9 @@ Numerical::Numerical(const wchar_t* s, unsigned char acc) : a(acc) {
     power = temp.power;
 }
 
-Numerical::Numerical(const std::string& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
+Numerical::Numerical(const std::string& s, unsigned char a) : Numerical(s.c_str(), a) {}
 
-Numerical::Numerical(const std::wstring& s, unsigned char acc) : Numerical(s.c_str(), acc) {}
+Numerical::Numerical(const std::wstring& s, unsigned char a) : Numerical(s.c_str(), a) {}
 
 Numerical::~Numerical() { free(byte); }
 /*
@@ -127,20 +111,19 @@ Numerical::~Numerical() { free(byte); }
 Numerical::operator double() const {
     int lastIndex = getSize() - 1;
     double d = 0;
-    double base = pow((CHAR_MAX + 1) * 2, power - lastIndex);
+    double base = pow(ULONG_MAX, power - lastIndex);
     for(int i = 0; i < lastIndex; ++i) {
-        d += base * byte[i];
-        base *= (CHAR_MAX + 1) * 2;
+        d += base * (double)byte[i];
+        base *= ULONG_MAX;
     }
-    d += base * byte[lastIndex];
+    d += base * (double)byte[lastIndex];
 
     return d;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
-    os << std::setprecision(53) << std::to_string(double(n)) << "\tLength = " << (int)n.length << "\tPower = " << n.power
-        << "\tAccuracy = " << (int)n.a << " × " << ((CHAR_MAX + 1) * 2) << 'E' << - n.getSize() + n.power + 1 << std::setprecision(6);
-    return os;
+    return os << std::setprecision(53) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
+    << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6);
 }
 //Move operator, which moves this to n.
 void Numerical::operator<<(Numerical& n) {
@@ -158,8 +141,8 @@ Numerical& Numerical::operator= (const Numerical& n) {
         return *this;
     length = n.length;
     int size = getSize();
-    byte = (unsigned char*)realloc(byte, size * sizeof(char));
-    memcpy(byte, n.byte, size * sizeof(char));
+    byte = (unsigned long*)realloc(byte, size * sizeof(long));
+    memcpy(byte, n.byte, size * sizeof(long));
     power = n.power;
     a = n.a;
     return *this;
@@ -283,10 +266,8 @@ Numerical* Numerical::operator/ (const Numerical& n) const {
                 delete temp_4;
                 delete temp_5;
             }
-            auto boolean = result->applyError(error);
+            result->applyError(error);
             delete error;
-            if(boolean)
-                return nullptr;
         }
     }
     return result;
@@ -491,7 +472,7 @@ Numerical* Numerical::operator- () const {
 }
 //Return accuracy in class Numerical.
 Numerical* Numerical::getAccuracy() const {
-    auto b = (unsigned char*)malloc(sizeof(char));
+    auto b = (unsigned long*)malloc(sizeof(long));
     b[0] = a;
     return new Numerical(b, 1, power - getSize() + 1);
 }
@@ -510,7 +491,7 @@ Numerical* Numerical::getMinimum() const {
     return result;
 }
 //Add error to this and adjust this->length as well as this-> byte.
-bool Numerical::applyError(const Numerical* error) {
+void Numerical::applyError(const Numerical* error) {
     if(!error->isZero()) {
         int size = getSize();
         int copy = size;
@@ -518,13 +499,12 @@ bool Numerical::applyError(const Numerical* error) {
         unsigned char copy_a = a;
         if(temp <= 0) {
             if(temp < 0) {
-                auto b = (unsigned char*)malloc(sizeof(char));
+                auto b = (unsigned long*)malloc(sizeof(long));
                 b[0] = a;
-                auto error_1 = new Numerical(b, 1, power - size + 1);
-                *error_1 << *add(*error_1, *error);
+                auto error_1 = Numerical(b, 1, power - size + 1);
+                error_1 << *add(error_1, *error);
                 size += temp;
-                a += error_1->byte[error_1->getSize() - 1];
-                delete error_1;
+                a += error_1.byte[error_1.getSize() - 1];
             }
             else
                 a += error->byte[error->getSize() - 1];
@@ -542,12 +522,12 @@ bool Numerical::applyError(const Numerical* error) {
             if(length < 0)
                 size = -size;
             length = (signed char)size;
-            return true;
+            return;
         }
 
         if(size < copy) {
-            auto new_byte = (unsigned char*)malloc(size * sizeof(char));
-            memcpy(new_byte, byte + copy - size, size * sizeof(char));
+            auto new_byte = (unsigned long*)malloc(size * sizeof(long));
+            memcpy(new_byte, byte + copy - size, size * sizeof(long));
             free(byte);
             byte = new_byte;
         }
@@ -555,5 +535,9 @@ bool Numerical::applyError(const Numerical* error) {
             size = -size;
         length = (signed char)size;
     }
-    return false;
+}
+
+void Numerical::printElements() const {
+    for(int i = 0; i < getSize(); ++i)
+        std::cout << byte[i] << ' ';
 }

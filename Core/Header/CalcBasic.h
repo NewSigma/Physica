@@ -4,9 +4,9 @@
 #ifndef PHYSICA_CALCBASIC_H
 #define PHYSICA_CALCBASIC_H
 
-#include "Numerical.h"
+class Numerical;
 
-unsigned char basicMultiply(unsigned char& carry, unsigned char n1, unsigned char n2);
+unsigned long basicMultiply(unsigned long& carry, unsigned long n1, unsigned long n2);
 
 Numerical* add (const Numerical& n1, const Numerical& n2);
 Numerical* subtract (const Numerical& n1, const Numerical& n2);

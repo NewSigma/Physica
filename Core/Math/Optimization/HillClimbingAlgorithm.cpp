@@ -26,24 +26,19 @@ HillClimbingAlgorithm::~HillClimbingAlgorithm() {
 
 void HillClimbingAlgorithm::getExtremal() {
 	Numerical* y_initial = func(x_initial);
-    auto x = new Numerical();
-    auto y = new Numerical();
-    auto x_last = new Numerical();
-    auto y_last = new Numerical();
-    auto x_result = new Numerical();
-    auto y_result = new Numerical();
+    auto x_last = new Numerical(x_initial);
+    *x_last += *stepSize;
+    auto y_last = func(x_last);
+    auto x = new Numerical(x_last);
+    auto y = new Numerical(stepSize);
+    Numerical* x_result = nullptr;
+    Numerical* y_result = nullptr;
 	bool positiveUsable = false;
 	bool negativeUsable = false;
 
-    *x_last = *x_initial;
-    *x_last += *stepSize;
-    *y_last = *func(x_last);
     if (*y_last > *y_initial) {
         positiveUsable = true;
         while (true) {
-            *x = *x_last;
-            *x += *stepSize;
-            *y = *func(x);
             if (*y > *y_last) {
                 *x_last = *x;
                 *y_last = *y;
@@ -51,11 +46,14 @@ void HillClimbingAlgorithm::getExtremal() {
             else {
                 --stepSize->power;
                 if (*stepSize < *minStep) {
-                    *x_result = *x_last;
-                    *y_result = *y_last;
+                    x_result = x_last;
+                    y_result = y_last;
                     break;
                 }
             }
+            *x = *x_last;
+            *x += *stepSize;
+            *y = *func(x);
         }
     }
 

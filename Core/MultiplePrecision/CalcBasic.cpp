@@ -2,35 +2,34 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  * This file contains some low levels which will be used by Numerical.
  */
-#include <climits>
 #include <cstring>
 #include <QtCore/qlogging.h>
+#include <climits>
 #include "CalcBasic.h"
+#include "Numerical.h"
+
+const unsigned long LongLowMask = ULONG_MAX >> (LONG_WIDTH / 2); // NOLINT(hicpp-signed-bitwise)
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-extern const unsigned char ByteMask = -1; //1111 1111 in binary form.
-extern const unsigned char ByteLowMask = ByteMask >> (CHAR_BIT / 2); //0000 1111 in binary form.
-extern const unsigned char UnitByte = sizeof(char);
-
 //n1 * n2 = product(16 bits) = carry(high 8 bits) + ReturnValue(low 8bits)
-unsigned char basicMultiply(unsigned char& carry, unsigned char n1, unsigned char n2) {
-    unsigned char n1_low = n1 & ByteLowMask;
-    unsigned char n1_high = n1 >> (CHAR_BIT / 2);
-    unsigned char n2_low = n2 & ByteLowMask;
-    unsigned char n2_high = n2 >> (CHAR_BIT / 2);
-    
+unsigned long basicMultiply(unsigned long& carry, unsigned long n1, unsigned long n2) {
+    unsigned long n1_low = n1 & LongLowMask;
+    unsigned long n1_high = n1 >> (LONG_WIDTH / 2);
+    unsigned long n2_low = n2 & LongLowMask;
+    unsigned long n2_high = n2 >> (LONG_WIDTH / 2);
+
     auto ll = n1_low * n2_low;
     auto lh = n1_low * n2_high;
     auto hl = n1_high * n2_low;
     auto hh = n1_high * n2_high;
-    
-    lh += ll >> (CHAR_BIT / 2);
+
+    lh += ll >> (LONG_WIDTH / 2);
     lh += hl;
     if(lh < hl)
-        hh += (unsigned char)1 << (CHAR_BIT / 2);
-    carry = hh + (lh >> (CHAR_BIT / 2));
-    return (lh << (CHAR_BIT / 2)) + (ll & ByteLowMask);
+        hh += (unsigned long)1 << (LONG_WIDTH / 2);
+    carry = hh + (lh >> (LONG_WIDTH / 2));
+    return (lh << (LONG_WIDTH / 2)) + (ll & LongLowMask);
 }
 #pragma clang diagnostic pop
 /*
@@ -73,14 +72,14 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         int lastIndex = smallSize - 1;
         //Estimate the ed of result first, will calculate it accurately later.
         signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
-        auto byte = (unsigned char*)malloc(length * sizeof(char));
-        memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(char));
-        memset(byte, 0, (length - bigSize) * sizeof(char));
+        auto byte = (unsigned long*)malloc(length * sizeof(long));
+        memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
+        memset(byte, 0, (length - bigSize) * sizeof(long));
 
         int index = length - big->power + small->power - smallSize;
-        unsigned char aByte;
-        unsigned char carry = 0;
-        unsigned char carry_temp;
+        unsigned long aByte;
+        unsigned long carry = 0;
+        unsigned long carry_temp;
         //Add small to big
         for(int i = 0; i < lastIndex; ++i) {
             aByte = byte[index];
@@ -109,7 +108,7 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         if(carry != 0) {
             ++length;
             ++power;
-            byte = (unsigned char*)realloc(byte, length * sizeof(char));
+            byte = (unsigned long*)realloc(byte, length * sizeof(long));
             byte[length - 1] = 1;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -153,14 +152,14 @@ redo:
             const int lastIndex = smallSize - 1;
             //Estimate the ed of result first, will calculate it accurately later.
             signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
-            auto byte = (unsigned char*)malloc(length * sizeof(char));
-            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(char));
-            memset(byte, 0, (length - bigSize) * sizeof(char));
+            auto byte = (unsigned long*)malloc(length * sizeof(long));
+            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
+            memset(byte, 0, (length - bigSize) * sizeof(long));
 
             int index = length - big->power + small->power - smallSize;
-            unsigned char aByte;
-            unsigned char carry = 0;
-            unsigned char carry_temp;
+            unsigned long aByte;
+            unsigned long carry = 0;
+            unsigned long carry_temp;
             //Subtract small from big
             for(int i = 0; i < lastIndex; ++i) {
                 aByte = byte[index];
@@ -230,12 +229,12 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         const int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
         auto length = (signed char)(size1 + size2 - 1);
-        auto byte = (unsigned char*)calloc(length, sizeof(char));
-        unsigned char aByte;
-        unsigned char carry = 0;
+        auto byte = (unsigned long*)calloc(length, sizeof(long));
+        unsigned long aByte;
+        unsigned long carry = 0;
         //Every time the outer loop finished once, the position of carry will be reset. So we have to save the data.
-        unsigned char carry_last = 0;
-        unsigned char carry_temp;
+        unsigned long carry_last = 0;
+        unsigned long carry_temp;
         for (int i = 0; i < size1; ++i) {
             int index = i;
             for(int j = 0; j < last2; ++j) {
@@ -262,7 +261,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         if (carry_last != 0) {
             ++length;
             ++power;
-            byte = (unsigned char*)realloc(byte, length * sizeof(char));
+            byte = (unsigned long*)realloc(byte, length * sizeof(long));
             byte[length - 1] = carry_last;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -278,56 +277,70 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         qFatal("Divide by zero!");
 
     Numerical* result;
-    if(Q_UNLIKELY(n1.isZero() || n2.isZero()))
-        result = getZero();
-    else if(Q_UNLIKELY(n2 == basicConst->get_1()))
-        result = new Numerical(n1);
-    else {
-        auto n1_copy = new Numerical(n1);
-        auto n2_copy = new Numerical(n2);
-        n1_copy->length = (signed char)n1_copy->getSize();
-        n2_copy->length = (signed char)n2_copy->getSize();
-        ////////////////////////////////Calculate cursory first//////////////////////////////////////
-        //Estimate the length of result.
-        signed char length = basicConst->getGlobalPrecision();
-        //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
-        int power = n1_copy->power - n2_copy->power;
-        n1_copy->power = n2_copy->power;
-        auto byte = (unsigned char*)calloc(length, sizeof(char));
+    if(!n1.isZero()) {
+        if(n2 != basicConst->get_1()) {
+            Numerical n1_copy(n1);
+            Numerical n2_copy(n2);
+            n1_copy.length = (signed char)n1_copy.getSize();
+            n1_copy.a = n2_copy.a = 0;
+            ////////////////////////////////Calculate cursory first//////////////////////////////////////
+            //Estimate the length of result.
+            signed char length = basicConst->getGlobalPrecision();
+            //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
+            int power = n1.power - n2.power;
+            n1_copy.power = n2.power;
+            auto byte = (unsigned long*)calloc(length, sizeof(long));
 
-        auto n1_copy_old = n1_copy;
-        for (int i = length - 1; i >= 0; --i) {
-            unsigned char unit = 0;
-            while(true) {
-                n1_copy = subtract(*n1_copy, *n2_copy);
-                if(Q_UNLIKELY(n1_copy->isNegative())) {
-                    delete n1_copy;
-                    n1_copy = n1_copy_old;
-                    break;
-                }
-                else {
-                    ++unit;
-                    delete n1_copy_old;
-                    n1_copy_old = n1_copy;
-                    if(n1_copy->isZero()) {
-                        byte[i] = unit;
-                        goto double_break;
+            auto temp_arr = (unsigned long*)malloc(sizeof(long));
+            Numerical temp(temp_arr, 1, 0);
+            for (int i = length - 1; i >= 0; --i) {
+                unsigned long large = ULONG_MAX;
+                temp_arr[0] = ULONG_MAX / 2;
+                unsigned long small = 0;
+                while(true) {
+                    auto mul = temp * n2_copy;
+                    if(*mul < n1_copy)
+                        small = temp_arr[0];
+                    else if (*mul > n1_copy)
+                        large = temp_arr[0];
+                    else {
+                        byte[i] = temp_arr[0];
+                        delete mul;
+                        goto stop;
+                    }
+                    delete mul;
+
+                    temp_arr[0] = small + large;
+                    if(temp_arr[0] < small) {
+                        temp_arr[0] /= 2;
+                        temp_arr[0] += (ULONG_MAX / 2 + 1);
+                    }
+                    else
+                        temp_arr[0] /= 2;
+
+                    if(small + 1 == large) {
+                        mul = temp * n2_copy;
+                        n1_copy -= *mul;
+                        delete mul;
+                        break;
                     }
                 }
+                ++n1_copy.power;
+                byte[i] = temp_arr[0];
             }
-            ++n1_copy->power;
-            byte[i] = unit;
+            ////////////////////////////////////Out put////////////////////////////////////////
+            stop:
+            if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
+                length = (signed char)-length;
+            //1 comes from the algorithm
+            result = new Numerical(byte, length, power, 1);
+            cutZero(result);
         }
-        double_break:
-        delete n1_copy;
-        delete n2_copy;
-        ////////////////////////////////////Out put////////////////////////////////////////
-        if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
-            length = (signed char)-length;
-        //1 comes from the algorithm
-        result = new Numerical(byte, length, power, 1);
-        cutZero(result);
+        else
+            result = new Numerical(n1);
     }
+    else
+        result = getZero();
     return result;
 }
 /*
@@ -341,8 +354,8 @@ bool cutLength(Numerical* n) {
     if(size > basicConst->getGlobalPrecision()) {
         result = true;
         int cutFrom = size - basicConst->getGlobalPrecision();
-        auto new_byte = (unsigned char*)malloc(basicConst->getGlobalPrecision() * sizeof(char));
-        memcpy(new_byte, n->byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(char));
+        auto new_byte = (unsigned long*)malloc(basicConst->getGlobalPrecision() * sizeof(long));
+        memcpy(new_byte, n->byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(long));
         free(n->byte);
         n->byte = new_byte;
         auto length = basicConst->getGlobalPrecision();
@@ -365,7 +378,7 @@ void cutZero(Numerical* n) {
 
     if(id != size) {
         int shorten = size - id;
-        n->byte = (unsigned char*)realloc(n->byte, id * sizeof(char));
+        n->byte = (unsigned long*)realloc(n->byte, id * sizeof(long));
         size = id;
         if(n->length < 0)
             size = -size;

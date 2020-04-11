@@ -5,7 +5,6 @@
 #define PHYSICA_NUMERICAL_H
 
 #include <iostream>
-#include <climits>
 #include "Const.h"
 #include "RealNum.h"
 
@@ -14,7 +13,8 @@ extern const BasicConst* basicConst;
 class Numerical {
 public:
     //Store effective digits.
-    unsigned char* byte;
+    //TODO Depending on the platform, unsigned long may not be the best choice but the type whose length equals to the word length is.
+    unsigned long* byte;
     //Number = (x0 +- a * 10^(1-length)) * 10^power
     int power;
     /*
@@ -25,15 +25,14 @@ public:
     //Accuracy
     unsigned char a;
 
-    Numerical();
+    Numerical(unsigned long* byte, signed char length, int power, unsigned char a = 0);
     Numerical(const Numerical& n);
-    Numerical(unsigned char* byte, signed char length, int power, unsigned char acc = 0);
     explicit Numerical(const Numerical* n);
-    explicit Numerical(double d, unsigned char acc = 0);
-    explicit Numerical(const char* s, unsigned char acc = 0);
-    explicit Numerical(const wchar_t* s, unsigned char acc = 0);
-    explicit Numerical(const std::string& s, unsigned char acc = 0);
-    explicit Numerical(const std::wstring& s, unsigned char acc = 0);
+    explicit Numerical(double d, unsigned char a = 0);
+    explicit Numerical(const char* s, unsigned char a = 0);
+    explicit Numerical(const wchar_t* s, unsigned char a = 0);
+    explicit Numerical(const std::string& s, unsigned char a = 0);
+    explicit Numerical(const std::wstring& s, unsigned char a = 0);
     ~Numerical();
 
     explicit operator double() const;
@@ -61,7 +60,8 @@ public:
     Numerical* getAccuracy() const;
     Numerical* getMaximum() const;
     Numerical* getMinimum() const;
-    bool applyError(const Numerical* copy_error);
+    void applyError(const Numerical* error);
+    void printElements() const;
     inline int getSize() const { return abs(length); }
     inline bool isZero() const { return byte[getSize() - 1] == 0; }
     inline bool isPositive() const { return !isZero() && length > 0; }

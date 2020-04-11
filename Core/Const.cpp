@@ -4,44 +4,44 @@
 #include "Const.h"
 #include "Solve.h"
 #include "ElementaryFunction.h"
+#include "climits"
 /*
  * Basic consts that initialize directly.
  */
 BasicConst::BasicConst() {
-    GlobalPrecision = 8;
+    GlobalPrecision = 4;
 
-    auto byte = (unsigned char*)malloc(sizeof(char));
+    auto byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 1;
+    expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision);
 
-    expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision );
-
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 1;
     //Value (- GlobalPrecision / 2) still need a proof.
     stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
 
     R_MAX = new Numerical(2147483647);
 
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 0;
     _0 = new Numerical(byte, 1, 0);
 
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 1;
     _1 = new Numerical(byte, 1, 0);
     Minus_1 = -*_1;
 
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 2;
     _2 = new Numerical(byte, 1, 0);
     Minus_2 = -*_2;
 
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 3;
     _3 = new Numerical(byte, 1, 0);
     Minus_3 = -*_3;
 
-    byte = (unsigned char*)malloc(sizeof(char));
+    byte = (unsigned long*)malloc(sizeof(long));
     byte[0] = 4;
     _4 = new Numerical(byte, 1, 0);
     Minus_4 = -*_4;
@@ -71,7 +71,7 @@ MathConst::MathConst() {
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
     //0.31 is the big approximation of ln(2) / ln(10)
-    PI = calcPI((int)(8 * basicConst->getGlobalPrecision() * 0.31) + 1);
+    PI = calcPI((int)(LONG_WIDTH * basicConst->getGlobalPrecision() * 0.31) + 1);
     E = exp(basicConst->get_1());
 
     PI_2 = *PI / basicConst->get_2();
