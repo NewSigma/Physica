@@ -16,7 +16,7 @@ GeneAlgorithm::GeneAlgorithm(Numerical* func(const Numerical&), const Numerical*
     upperBound = upper;
     regionLength = *upperBound - *lowerBound;
     //Get abs(regionLength).
-    regionLength->length = (signed char)regionLength->getSize();
+    regionLength->toAbs();
 
     Numerical* element;
     if (mode == LinearChoose) {

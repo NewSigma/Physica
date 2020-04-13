@@ -44,7 +44,7 @@ void HillClimbingAlgorithm::getExtremal() {
                 *y_last = *y;
             }
             else {
-                --stepSize->power;
+                *stepSize >> 1;
                 if (*stepSize < *minStep) {
                     x_result = x_last;
                     y_result = y_last;
@@ -71,7 +71,7 @@ void HillClimbingAlgorithm::getExtremal() {
                 *y_last = *y;
             }
             else {
-                stepSize->power -= 1;
+                *stepSize >> 1;
                 if (*stepSize < *minStep) {
                     if (positiveUsable && *y_last > *y_result) {
                         *x_result = *x_last;

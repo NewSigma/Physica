@@ -4,8 +4,6 @@
 #include <QtCore/qlogging.h>
 #include <climits>
 #include "Solve.h"
-#include "ElementaryFunction.h"
-#include "CalcBasic.h"
 #include "Numerical.h"
 
 extern const MathConst* mathConst;
@@ -38,18 +36,18 @@ Numerical* reciprocal(const Numerical& n) {
  * (sqrt(n + a) - sqrt(n)) for error.
  */
 Numerical* sqrt_light(const Numerical& n) {
-    if(n.length < 0)
+    if(n.getLength() < 0)
         return nullptr;
     auto copy_n = new Numerical(n);
     //Let n < 1 so as to control error.
     int add_power = 0;
-    if(copy_n->power > 0) {
-        if(copy_n->power % 2 == 0) {
-            add_power = copy_n->power / 2 + 1;
+    if(copy_n->getPower() > 0) {
+        if(copy_n->getPower() % 2 == 0) {
+            add_power = copy_n->getPower() / 2 + 1;
             copy_n->power = -2;
         }
         else {
-            add_power = (copy_n->power + 1) / 2;
+            add_power = (copy_n->getPower() + 1) / 2;
             copy_n->power = -1;
         }
     }
@@ -65,14 +63,14 @@ Numerical* sqrt_light(const Numerical& n) {
     }
     delete copy_n;
     result->power += add_power;
-    result->a = 1;
+    result->toUnitA();
 
     return result;
 }
 
 Numerical* sqrt(const Numerical& n) {
     auto result  = sqrt_light(n);
-    if(n.a != 0) {
+    if(n.getA() != 0) {
         auto n_error = n.getMinimum();
         auto error = sqrt_light(*n_error);
         if(error == nullptr) {
@@ -81,7 +79,7 @@ Numerical* sqrt(const Numerical& n) {
             error = sqrt_light(*n_error);
         }
         *error -= *result;
-        error->length = error->getSize();
+        error->toAbs();
 
         result->applyError(error);
 
@@ -92,7 +90,7 @@ Numerical* sqrt(const Numerical& n) {
 }
 //TODO not completed: Use gamma function.
 Numerical* factorial(const Numerical& n) {
-    if(n.length < 0) {
+    if(n.getLength() < 0) {
         qCritical("Cannot solve the factorial of a minus value.");
         return nullptr;
     }
@@ -122,21 +120,22 @@ Numerical* ln_light(const Numerical& n) {
         auto copy_temp_1 = new Numerical(temp_1);
         auto temp_2 = getOne();
 
-        copy_temp_1->a = temp_1->a = 0;
+        temp_1->toUnitA();
+        copy_temp_1->toUnitA();
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->a = 0;
+            temp->clearA();
             *result += *temp;
             delete temp;
             //Here the temp means the criteria of break.
             *temp_1 *= *copy_temp_1;
             *temp_2 += basicConst->get_1();
             temp = *temp_1 / *temp_2;
-            int temp_power = temp->power;
+            int temp_power = temp->getPower();
             delete temp;
 
-            if(result->power - temp_power >= basicConst->getGlobalPrecision())
+            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *copy_temp_1;
@@ -153,7 +152,7 @@ Numerical* ln_light(const Numerical& n) {
 
 Numerical* ln(const Numerical& n) {
     auto result = ln_light(n);
-    if(n.a != 0) {
+    if(n.getA() != 0) {
         auto n_error = n.getMinimum();
         auto error = ln_light(*n_error);
         if(error == nullptr) {
@@ -162,7 +161,7 @@ Numerical* ln(const Numerical& n) {
             error = ln_light(*n_error);
         }
         *error -= *result;
-        error->length = error->getSize();
+        error->toAbs();
 
         result->applyError(error);
 
@@ -192,23 +191,25 @@ Numerical* log(const Numerical& n, const Numerical& a) {
 
 Numerical* exp(const Numerical& n) {
     auto result = getOne();
-    auto temp = new Numerical(n);
+    Numerical temp(n);
     auto rank = getOne();
     while(true) {
-        *temp /= *rank;
-        if(*temp < basicConst->getExpectedRelativeError())
+        temp /= *rank;
+        if(temp < basicConst->getExpectedRelativeError())
             break;
-        *result += *temp;
-        *temp *= n;
+        *result += temp;
+        temp *= n;
         *rank += basicConst->get_1();
     }
+    delete rank;
     return result;
 }
 
 Numerical* pow(const Numerical& n, const Numerical& a) {
-    auto result = ln(n);
-    *result *= a;
-    *result << *exp(*result);
+    auto temp = ln(n);
+    *temp *= a;
+    auto result = exp(*temp);
+    delete temp;
     return result;
 }
 /*
@@ -228,16 +229,16 @@ Numerical* cos(const Numerical& n) {
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->length = -temp->length;
+            temp->toOpposite();
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
             *rank += ONE;
             *temp /= *rank;
-            int temp_power = temp->power;
+            int temp_power = temp->getPower();
             delete temp;
 
-            if(result->power - temp_power >= basicConst->getGlobalPrecision())
+            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *square_n;
@@ -266,16 +267,16 @@ Numerical* sin(const Numerical& n) {
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->length = -temp->length;
+            temp->toOpposite();
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
             *rank += ONE;
             *temp /= *rank;
-            int temp_power = temp->power;
+            int temp_power = temp->getPower();
             delete temp;
 
-            if(result->power - temp_power >= basicConst->getGlobalPrecision())
+            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
                 break;
             //Prepare for next calculate.
             *temp_1 *= *square_n;
@@ -343,8 +344,8 @@ Numerical* arctan(const Numerical& n) {
     delete sqrt_temp;
 
     auto result = arcsin(*temp);
-    if((result->length ^ n.length) < 0) // NOLINT(hicpp-signed-bitwise)
-        result->length = -result->length;
+    if((result->getLength() ^ n.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
+        result->toAbs();
 
     delete temp;
     return result;
@@ -442,30 +443,33 @@ Numerical* coth(const Numerical& n) {
 Numerical* arccosh(const Numerical& n) {
     auto temp = n * n;
     *temp -= basicConst->get_1();
-    *temp << *sqrt(*temp);
-    *temp += n;
-    auto result = ln(*temp);
+    auto temp1 = sqrt(*temp);
+    *temp1 += n;
+    auto result = ln(*temp1);
     delete temp;
+    delete temp1;
     return result;
 }
 
 Numerical* arcsinh(const Numerical& n) {
     auto temp = n * n;
     *temp += basicConst->get_1();
-    *temp << *sqrt(*temp);
-    *temp += n;
-    auto result = ln(*temp);
+    auto temp1 = sqrt(*temp);
+    *temp1 += n;
+    auto result = ln(*temp1);
     delete temp;
+    delete temp1;
     return result;
 }
 
 Numerical* arctanh(const Numerical& n) {
-    auto result = basicConst->get_1() + n;
-    auto temp = basicConst->get_1() - n;
-    *result /= *temp;
-    *result << *ln(*result);
+    auto temp = basicConst->get_1() + n;
+    auto temp1 = basicConst->get_1() - n;
+    *temp /= *temp1;
+    auto result = ln(*temp);
     *result /= basicConst->get_2();
     delete temp;
+    delete temp1;
     return result;
 }
 
@@ -484,11 +488,12 @@ Numerical* arccsch(const Numerical& n) {
 }
 
 Numerical* arccoth(const Numerical& n) {
-    auto result = n + basicConst->get_1();
-    auto temp = n - basicConst->get_1();
-    *result /= *temp;
-    *result << *ln(*result);
+    auto temp = n + basicConst->get_1();
+    auto temp1 = n - basicConst->get_1();
+    *temp /= *temp1;
+    auto result = ln(*temp);
     *result /= basicConst->get_2();
     delete temp;
+    delete temp1;
     return result;
 }

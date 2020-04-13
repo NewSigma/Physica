@@ -1,18 +1,19 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Physica.h"
 #include <QApplication>
 #include "QTime"
 #include "Const.h"
 #include "PhysicaMain.h"
-#include "Numerical.h"
 #include "Util.h"
 
 const BasicConst* basicConst;
 const MathConst* mathConst;
 
 static QtMessageHandler handler;
+
+void init();
+void deInit();
 
 int main(int argc, char** argv) {
     init();

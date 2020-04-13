@@ -370,11 +370,10 @@ void Calculator::on_click_sqrt() {
     auto result = reader.calc();
     auto temp = sqrt(*result);
     editor_top->setText(editor_bottom->text());
-    if(temp != nullptr) {
-        *result << *temp;
-        editor_bottom->setText(QString::number((double)*result, 'f'));
-    }
+    if(temp != nullptr)
+        editor_bottom->setText(QString::number((double)*temp, 'f'));
     delete result;
+    delete temp;
 }
 
 void Calculator::on_click_square() {
@@ -382,11 +381,10 @@ void Calculator::on_click_square() {
     auto result = reader.calc();
     auto temp = *result * *result;
     editor_top->setText(editor_bottom->text());
-    if(temp != nullptr) {
-        *result << *temp;
-        editor_bottom->setText(QString::number((double)*result, 'f'));
-    }
+    if(temp != nullptr)
+        editor_bottom->setText(QString::number((double)*temp, 'f'));
     delete result;
+    delete temp;
 }
 
 void Calculator::on_click_percent() {

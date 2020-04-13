@@ -1,7 +1,7 @@
-#include "../../Header/Vector.h"
-#include "../../Header/Const.h"
-#include "../../Header/Indeterminate.h"
-#include "../../Header/Numerical.h"
+#include "Vector.h"
+#include "Indeterminate.h"
+#include "Numerical.h"
+#include "RealNum.h"
 
 Vector::Vector() : Vector(nullptr, 0) {}
 //Convenience function to create a 2D Vector.
@@ -346,7 +346,7 @@ Vector* arcsin(const Vector& n) {
         arr[i] = arcsin(*n[i]);
     return new Vector(arr, n.getLength());
 }
-;
+
 Vector* arctan(const Vector& n) {
     auto arr = new AbstractNum*[n.getLength()];
     for(int i = 0; i < n.getLength(); ++i)

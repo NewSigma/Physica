@@ -1,5 +1,5 @@
 #include "Solve.h"
-#include "CalcBasic.h"
+#include "Numerical.h"
 /*
  * Find the numerical root of algebra equation.
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
@@ -26,7 +26,7 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
 
     auto delta_left = subtract(n, y1);
     auto delta_right = subtract(n, y2);
-    if((delta_left->length ^ delta_right->length) > 0) // NOLINT(hicpp-signed-bitwise)
+    if((delta_left->getLength() ^ delta_right->getLength()) > 0) // NOLINT(hicpp-signed-bitwise)
         return nullptr;
     delete delta_left;
     delete delta_right;
@@ -36,22 +36,22 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
     Numerical* y_result;
 
     auto error = subtract(y1, y2);
-    error->length = (signed char)error->getSize();
-    *error << *divide(*error, basicConst->get_2());
+    error->toAbs();
+    move(error, divide(*error, basicConst->get_2()));
 
     auto x_left = new Numerical(x1);
     auto x_right = new Numerical(x2);
     auto y_left = new Numerical(y1);
 
     delta_left = subtract(n, *y_left);
-    bool delta_left_sign = delta_left->length > 0;
+    bool delta_left_sign = delta_left->getLength() > 0;
     bool delta_right_sign;
     delete delta_left;
 
     do {
         y_result = func(*result);
         delta_right = subtract(n, *y_result);
-        delta_right_sign = delta_right->length > 0;
+        delta_right_sign = delta_right->getLength() > 0;
         delete delta_right;
 
         if(delta_left_sign == delta_right_sign) {
@@ -61,7 +61,7 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
             y_left = y_result;
 
             delta_left = subtract(n, *y_left);
-            delta_left_sign = delta_left->length > 0;
+            delta_left_sign = delta_left->getLength() > 0;
             delete delta_left;
         }
         else {
@@ -70,10 +70,10 @@ Numerical* bisectionMethod(Numerical* func(const Numerical&), const Numerical& n
             x_right = result;
         }
         result = add(*x_left, *x_right);
-        *result << *divide(*result, basicConst->get_2());
-        *error << *divide(*error, basicConst->get_2());
-    } while(result->power - error->power < basicConst->getGlobalPrecision());
-    result->a = 1;
+        move(result, divide(*result, basicConst->get_2()));
+        move(error, divide(*error, basicConst->get_2()));
+    } while(result->getPower() - error->getPower() < basicConst->getGlobalPrecision());
+    result->toUnitA();
 
     delete x_left;
     delete x_right;

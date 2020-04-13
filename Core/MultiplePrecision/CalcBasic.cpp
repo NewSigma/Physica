@@ -5,7 +5,6 @@
 #include <cstring>
 #include <QtCore/qlogging.h>
 #include <climits>
-#include "CalcBasic.h"
 #include "Numerical.h"
 
 const unsigned long LongLowMask = ULONG_MAX >> (LONG_WIDTH / 2); // NOLINT(hicpp-signed-bitwise)

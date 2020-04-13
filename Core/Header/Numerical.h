@@ -6,12 +6,12 @@
 
 #include <iostream>
 #include "Const.h"
-#include "RealNum.h"
+#include "CalcBasic.h"
+#include "ElementaryFunction.h"
 
 extern const BasicConst* basicConst;
 
 class Numerical {
-public:
     //Store effective digits.
     //TODO Depending on the platform, unsigned long may not be the best choice but the type whose length equals to the word length is.
     unsigned long* byte;
@@ -24,7 +24,7 @@ public:
     int length;
     //Accuracy
     unsigned long a;
-
+public:
     Numerical(unsigned long* byte, int length, int power, unsigned long a = 0);
     Numerical(const Numerical& n);
     explicit Numerical(const Numerical* n);
@@ -37,7 +37,8 @@ public:
 
     explicit operator double() const;
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
-    void operator<<(Numerical& n);
+    void operator<<(int bits);
+    void operator>>(int bits);
     unsigned long operator[](unsigned int index);
     Numerical& operator= (const Numerical& n);
     Numerical* operator+ (const Numerical& n) const;
@@ -62,14 +63,31 @@ public:
     Numerical* getMaximum() const;
     Numerical* getMinimum() const;
     void applyError(const Numerical* error);
-    void printElements() const;
-    inline int getSize() const { return abs(length); }
-    inline bool isZero() const { return byte[getSize() - 1] == 0; }
-    inline bool isPositive() const { return !isZero() && length > 0; }
-    inline bool isNegative() const { return !isZero() && length < 0; }
-    inline bool isInteger() const { return getSize() == power + 1; }
+
+    const int& getLength() const { return length; }
+    const int& getPower() const { return power; }
+    const unsigned long& getA() const { return a; }
+    int getSize() const { return abs(length); }
+    void toAbs() { length = getSize(); }
+    void toOpposite() { length = -length; }
+    void toUnitA() { a = 1; }
+    void clearA() { a = 0; }
+
+    bool isZero() const { return byte[getSize() - 1] == 0; }
+    bool isPositive() const { return !isZero() && length > 0; }
+    bool isNegative() const { return !isZero() && length < 0; }
+    bool isInteger() const { return getSize() == power + 1; }
+
+    friend Numerical* add (const Numerical& n1, const Numerical& n2);
+    friend Numerical* subtract (const Numerical& n1, const Numerical& n2);
+    friend Numerical* multiply (const Numerical& n1, const Numerical& n2);
+    friend Numerical* divide (const Numerical& n1, const Numerical& n2);
+    friend bool cutLength(Numerical* n);
+    friend void cutZero(Numerical* n);
+    friend Numerical* sqrt_light(const Numerical& n);
 };
 ////////////////////////////////Helper functions/////////////////////////////////////
+inline void move(Numerical*& dest, Numerical*&& src) { delete dest; dest = src; }
 inline Numerical* getZero() { return new Numerical(basicConst->get_0()); }
 inline Numerical* getOne() { return new Numerical(basicConst->get_1()); }
 inline Numerical* getTwo() { return new Numerical(basicConst->get_2()); }

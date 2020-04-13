@@ -2,9 +2,9 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Const.h"
-#include "Solve.h"
-#include "ElementaryFunction.h"
+#include "Numerical.h"
 #include "climits"
+#include "RealNum.h"
 /*
  * Basic consts that initialize directly.
  */
@@ -97,9 +97,10 @@ MathConst::~MathConst() {
 Numerical* MathConst::calcPI(int precision) {
     auto a = getOne();
     auto x = getOne();
-    auto b = sqrt(basicConst->get_2());
-    *b << *reciprocal(*b);
+    auto temp = sqrt(basicConst->get_2());
+    auto b = reciprocal(*temp);
     auto c = reciprocal(basicConst->get_4());
+    delete temp;
 
     int goal = 1;
     while(goal < precision) {
@@ -107,7 +108,9 @@ Numerical* MathConst::calcPI(int precision) {
         *a += *b;
         *a /= basicConst->get_2();
         *b *= y;
-        *b << *sqrt(*b);
+        temp = sqrt(*b);
+        delete b;
+        b = temp;
         y -= *a;
         y *= y;
         y *= *x;

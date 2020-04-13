@@ -6,9 +6,7 @@
 #include <cstring>
 #include <cmath>
 #include <QtCore/qlogging.h>
-#include <vector>
 #include <iomanip>
-#include "CalcBasic.h"
 #include "SystemBits.h"
 
 extern const MathConst* mathConst;
@@ -125,15 +123,13 @@ std::ostream& operator<<(std::ostream& os, const Numerical& n) {
     return os << std::setprecision(53) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
     << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6);
 }
-//Move operator, which moves n to *this.
-void Numerical::operator<<(Numerical& n) {
-    free(byte);
-    byte = n.byte;
-    length = n.length;
-    power = n.power;
-    a = n.a;
-    n.byte = nullptr;
-    delete &n;
+
+void Numerical::operator<<(int bits) {
+    power += bits;
+}
+
+void Numerical::operator>>(int bits) {
+    power -= bits;
 }
 
 unsigned long Numerical::operator[](unsigned int index) {
@@ -470,7 +466,7 @@ bool Numerical::operator!= (const Numerical& n) const {
 
 Numerical* Numerical::operator- () const {
     auto result = new Numerical(this);
-    result->length = -result->length;
+    result->toOpposite();
     return result;
 }
 //Return accuracy in class Numerical.
@@ -504,10 +500,11 @@ void Numerical::applyError(const Numerical* error) {
             if(temp < 0) {
                 auto b = (unsigned long*)malloc(sizeof(long));
                 b[0] = a;
-                auto error_1 = Numerical(b, 1, power - size + 1);
-                error_1 << *add(error_1, *error);
+                auto error_1 = new Numerical(b, 1, power - size + 1);
+                move(error_1, add(*error_1, *error));
                 size += temp;
-                a += error_1.byte[error_1.getSize() - 1];
+                a += error_1->byte[error_1->getSize() - 1];
+                delete error_1;
             }
             else
                 a += error->byte[error->getSize() - 1];
@@ -538,9 +535,4 @@ void Numerical::applyError(const Numerical* error) {
             size = -size;
         length = size;
     }
-}
-
-void Numerical::printElements() const {
-    for(int i = 0; i < getSize(); ++i)
-        std::cout << byte[i] << ' ';
 }

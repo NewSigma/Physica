@@ -21,7 +21,7 @@ if(ENABLE_TEST)
     add_subdirectory(Test)
     include_directories(Test)
 endif()
-add_executable(Physica Physica.cpp Physica.h)
+add_executable(Physica Physica.cpp)
 #############################################Options##############################################
 target_compile_options(Physica PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
         -O${OPTIMIZE_LEVEL}

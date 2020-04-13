@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const AbstractNum& n) {
     switch(n.getType()) {
         case AbstractNum::ComplexNumber:
             os << ((ComplexNum&)n).real;
-            if(((ComplexNum&)n).imagine->length > 0)
+            if(((ComplexNum&)n).imagine->getLength() > 0)
                 os << '+';
             os << *((ComplexNum&)n).imagine;
             break;
@@ -73,7 +73,7 @@ AbstractNum* sqrt(const AbstractNum& n) {
         case AbstractNum::ComplexNumber: {
             auto vec = ((ComplexNum&)n).toVector();
             auto norm = vec->toNorm();
-            *((RealNum*)norm)->real << *sqrt(*((RealNum*)norm)->real);
+            move(((RealNum*)norm)->real, sqrt(*((RealNum*)norm)->real));
 
             auto arg = vec->toArg(0);
             *((RealNum*)arg)->real /= basicConst->get_2();
