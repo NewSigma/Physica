@@ -6,7 +6,7 @@ class Numerical;
 
 class BasicConst {
     //_1 stands by integer 1.
-    signed char GlobalPrecision;
+    int GlobalPrecision;
     const Numerical* expectedRelativeError;
     const Numerical* stepSize;
     const Numerical* R_MAX;

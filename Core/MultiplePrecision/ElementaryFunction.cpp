@@ -42,14 +42,14 @@ Numerical* sqrt_light(const Numerical& n) {
         return nullptr;
     auto copy_n = new Numerical(n);
     //Let n < 1 so as to control error.
-    char add_power = 0;
+    int add_power = 0;
     if(copy_n->power > 0) {
         if(copy_n->power % 2 == 0) {
-            add_power = char(copy_n->power / 2 + 1);
+            add_power = copy_n->power / 2 + 1;
             copy_n->power = -2;
         }
         else {
-            add_power = char((copy_n->power + 1) / 2);
+            add_power = (copy_n->power + 1) / 2;
             copy_n->power = -1;
         }
     }
@@ -81,7 +81,7 @@ Numerical* sqrt(const Numerical& n) {
             error = sqrt_light(*n_error);
         }
         *error -= *result;
-        error->length = (signed char)error->getSize();
+        error->length = error->getSize();
 
         result->applyError(error);
 
@@ -162,7 +162,7 @@ Numerical* ln(const Numerical& n) {
             error = ln_light(*n_error);
         }
         *error -= *result;
-        error->length = (signed char)error->getSize();
+        error->length = error->getSize();
 
         result->applyError(error);
 
@@ -228,7 +228,7 @@ Numerical* cos(const Numerical& n) {
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->length = (signed char)-temp->length;
+            temp->length = -temp->length;
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
@@ -266,7 +266,7 @@ Numerical* sin(const Numerical& n) {
         while(true) {
             //Calculate one term of the taylor series.
             auto temp = *temp_1 / *temp_2;
-            temp->length = (signed char)-temp->length;
+            temp->length = -temp->length;
             *result += *temp;
             //Here the temp means the criteria of break.
             *temp *= n;
@@ -344,7 +344,7 @@ Numerical* arctan(const Numerical& n) {
 
     auto result = arcsin(*temp);
     if((result->length ^ n.length) < 0) // NOLINT(hicpp-signed-bitwise)
-        result->length = (signed char)-result->length;
+        result->length = -result->length;
 
     delete temp;
     return result;

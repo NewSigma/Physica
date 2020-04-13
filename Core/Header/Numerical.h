@@ -21,23 +21,24 @@ public:
      * Length of byte = abs(length).
      * sign of length and sign of Numerical are same. (when Numerical != 0)
      */
-    signed char length;
+    int length;
     //Accuracy
-    unsigned char a;
+    unsigned long a;
 
-    Numerical(unsigned long* byte, signed char length, int power, unsigned char a = 0);
+    Numerical(unsigned long* byte, int length, int power, unsigned long a = 0);
     Numerical(const Numerical& n);
     explicit Numerical(const Numerical* n);
-    explicit Numerical(double d, unsigned char a = 0);
-    explicit Numerical(const char* s, unsigned char a = 0);
-    explicit Numerical(const wchar_t* s, unsigned char a = 0);
-    explicit Numerical(const std::string& s, unsigned char a = 0);
-    explicit Numerical(const std::wstring& s, unsigned char a = 0);
+    explicit Numerical(double d, unsigned long a = 0);
+    explicit Numerical(const char* s, unsigned long a = 0);
+    explicit Numerical(const wchar_t* s, unsigned long a = 0);
+    explicit Numerical(const std::string& s, unsigned long a = 0);
+    explicit Numerical(const std::wstring& s, unsigned long a = 0);
     ~Numerical();
 
     explicit operator double() const;
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
     void operator<<(Numerical& n);
+    unsigned long operator[](unsigned int index);
     Numerical& operator= (const Numerical& n);
     Numerical* operator+ (const Numerical& n) const;
     Numerical* operator- (const Numerical& n) const;

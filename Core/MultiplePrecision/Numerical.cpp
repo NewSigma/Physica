@@ -24,7 +24,7 @@ extern const MathConst* mathConst;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical(unsigned long* byte, signed char length, int power, unsigned char a) : byte(byte), power(power), length(length), a(a) {}
+Numerical::Numerical(unsigned long* byte, int length, int power, unsigned long a) : byte(byte), power(power), length(length), a(a) {}
 
 Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), a(n.a) {
     auto size = getSize();
@@ -36,7 +36,7 @@ Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-Numerical::Numerical(double d, unsigned char acc) : a(acc) {
+Numerical::Numerical(double d, unsigned long a) : a(a) {
     if(d == 0) {
         byte = (unsigned long*)malloc(sizeof(long));
         length = 1;
@@ -79,16 +79,16 @@ Numerical::Numerical(double d, unsigned char acc) : a(acc) {
     byte[0] = (unsigned long)(d * ULONG_MAX);
 #endif
     if(negative)
-        length = (signed char)-length;
+        length = -length;
 }
 #pragma clang diagnostic pop
 /*
  * May not be very accurate.
  */
-Numerical::Numerical(const char* s, unsigned char a) : Numerical(strtod(s, nullptr), a) {}
+Numerical::Numerical(const char* s, unsigned long a) : Numerical(strtod(s, nullptr), a) {}
 
-Numerical::Numerical(const wchar_t* s, unsigned char a) : a(a) {
-    signed char size = wcslen(s);
+Numerical::Numerical(const wchar_t* s, unsigned long a) : a(a) {
+    auto size = wcslen(s);
     char str[size + 1];
     str[size] = '\0';
     for(int i = 0; i < size; ++i)
@@ -100,9 +100,9 @@ Numerical::Numerical(const wchar_t* s, unsigned char a) : a(a) {
     power = temp.power;
 }
 
-Numerical::Numerical(const std::string& s, unsigned char a) : Numerical(s.c_str(), a) {}
+Numerical::Numerical(const std::string& s, unsigned long a) : Numerical(s.c_str(), a) {}
 
-Numerical::Numerical(const std::wstring& s, unsigned char a) : Numerical(s.c_str(), a) {}
+Numerical::Numerical(const std::wstring& s, unsigned long a) : Numerical(s.c_str(), a) {}
 
 Numerical::~Numerical() { free(byte); }
 /*
@@ -134,6 +134,10 @@ void Numerical::operator<<(Numerical& n) {
     a = n.a;
     n.byte = nullptr;
     delete &n;
+}
+
+unsigned long Numerical::operator[](unsigned int index) {
+    return byte[index];
 }
 
 Numerical& Numerical::operator= (const Numerical& n) {
@@ -310,7 +314,7 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
             bool go_on;
             do {
                 result = ln(*temp_result);
-                result->length = (signed char)-result->length;
+                result->length = -result->length;
                 *result += *temp_1;
                 *result *= *temp_result;
                 go_on = *result == *temp_result;
@@ -466,7 +470,7 @@ bool Numerical::operator!= (const Numerical& n) const {
 
 Numerical* Numerical::operator- () const {
     auto result = new Numerical(this);
-    result->length = (signed char)-result->length;
+    result->length = -result->length;
     return result;
 }
 //Return accuracy in class Numerical.
@@ -495,7 +499,7 @@ void Numerical::applyError(const Numerical* error) {
         int size = getSize();
         int copy = size;
         int temp = power - size + 1 - error->power;
-        unsigned char copy_a = a;
+        unsigned long copy_a = a;
         if(temp <= 0) {
             if(temp < 0) {
                 auto b = (unsigned long*)malloc(sizeof(long));
@@ -520,7 +524,7 @@ void Numerical::applyError(const Numerical* error) {
             size = 1;
             if(length < 0)
                 size = -size;
-            length = (signed char)size;
+            length = size;
             return;
         }
 
@@ -532,7 +536,7 @@ void Numerical::applyError(const Numerical* error) {
         }
         if(length < 0)
             size = -size;
-        length = (signed char)size;
+        length = size;
     }
 }
 

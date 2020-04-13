@@ -45,12 +45,12 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
     else if ((n1.length ^ n2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
         Numerical* shallow_copy;
         if (n1.length > 0) {
-            shallow_copy = new Numerical(n2.byte, (signed char)-n2.length, n2.power);
+            shallow_copy = new Numerical(n2.byte, -n2.length, n2.power);
             result = n1 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
         else {
-            shallow_copy = new Numerical(n1.byte, (signed char)-n1.length, n1.power);
+            shallow_copy = new Numerical(n1.byte, -n1.length, n1.power);
             result = n2 - *shallow_copy;
             shallow_copy->byte = nullptr;
         }
@@ -71,7 +71,7 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         const int smallSize = small->getSize();
         int lastIndex = smallSize - 1;
         //Estimate the ed of result first, will calculate it accurately later.
-        signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
+        int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
         auto byte = (unsigned long*)malloc(length * sizeof(long));
         memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
         memset(byte, 0, (length - bigSize) * sizeof(long));
@@ -113,7 +113,7 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         }
         ////////////////////////////////////Out put////////////////////////////////////////
         if(big->length < 0)
-            length = (signed char)-length;
+            length = -length;
         result = new Numerical(byte, length, power);
     }
     return result;
@@ -129,7 +129,7 @@ Numerical* subtract (const Numerical& n1, const Numerical& n2) {
         result = new Numerical(n1);
     else if (n1.length > 0) {
         if (n2.length < 0) {
-            shallow_copy = new Numerical(n2.byte, (signed char)-n2.length, n2.power);
+            shallow_copy = new Numerical(n2.byte, -n2.length, n2.power);
             result = n1 + *shallow_copy;
             shallow_copy->byte = nullptr;
         }
@@ -151,7 +151,7 @@ redo:
             const int smallSize = small->getSize();
             const int lastIndex = smallSize - 1;
             //Estimate the ed of result first, will calculate it accurately later.
-            signed char length = (signed char)(big->power + std::max(bigSize - big->power, smallSize - small->power));
+            int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
             auto byte = (unsigned long*)malloc(length * sizeof(long));
             memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
             memset(byte, 0, (length - bigSize) * sizeof(long));
@@ -193,16 +193,16 @@ redo:
             }
 
             if(changeSign)
-                length = (signed char)-length;
+                length = -length;
             result = new Numerical(byte, length, big->power);
             cutZero(result);
         }
     }
     else {
-        shallow_copy = new Numerical(n1.byte, (signed char)-n1.length, n1.power);
+        shallow_copy = new Numerical(n1.byte, -n1.length, n1.power);
         if (n2.length > 0) {
             result = *shallow_copy + n2;
-            result->length = (signed char)-result->length;
+            result->length = -result->length;
         }
         else {
             auto shallow_copy_1 = new Numerical(n2.byte, n2.length, n2.power);
@@ -228,7 +228,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         const int size2 = n2.getSize();
         const int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
-        auto length = (signed char)(size1 + size2 - 1);
+        auto length = (size1 + size2 - 1);
         auto byte = (unsigned long*)calloc(length, sizeof(long));
         unsigned long aByte;
         unsigned long carry = 0;
@@ -266,7 +266,7 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         }
         ////////////////////////////////////Out put////////////////////////////////////////
         if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
-            length = (signed char)-length;
+            length = -length;
         result = new Numerical(byte, length, power);
     }
     return result;
@@ -281,11 +281,11 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
         if(n2 != basicConst->get_1()) {
             Numerical n1_copy(n1);
             Numerical n2_copy(n2);
-            n1_copy.length = (signed char)n1_copy.getSize();
+            n1_copy.length = n1_copy.getSize();
             n1_copy.a = n2_copy.a = 0;
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
             //Estimate the length of result.
-            signed char length = basicConst->getGlobalPrecision();
+            int length = basicConst->getGlobalPrecision();
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
             int power = n1.power - n2.power;
             n1_copy.power = n2.power;
@@ -331,7 +331,7 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
             ////////////////////////////////////Out put////////////////////////////////////////
             stop:
             if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
-                length = (signed char)-length;
+                length = -length;
             //1 comes from the algorithm
             result = new Numerical(byte, length, power, 1);
             cutZero(result);
@@ -382,7 +382,7 @@ void cutZero(Numerical* n) {
         size = id;
         if(n->length < 0)
             size = -size;
-        n->length = (signed char)size;
+        n->length = size;
 
         if(n->byte[id - 1] != 0)
             n->power -= shorten;
