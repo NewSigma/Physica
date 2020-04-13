@@ -5,7 +5,6 @@
 #define PHYSICA_PHYSICA_H
 
 void init();
-char* getNameFromFile(const char* file);
 void deInit();
 
 #endif

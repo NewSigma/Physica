@@ -125,7 +125,7 @@ std::ostream& operator<<(std::ostream& os, const Numerical& n) {
     return os << std::setprecision(53) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
     << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6);
 }
-//Move operator, which moves this to n.
+//Move operator, which moves n to *this.
 void Numerical::operator<<(Numerical& n) {
     free(byte);
     byte = n.byte;
@@ -284,24 +284,23 @@ Numerical* Numerical::operator^ (const Numerical& n) const {
     }
     else if(isPositive()) {
         if(n.isInteger()) {
-            auto n2_copy = new Numerical(n);
+            Numerical n2_copy(n);
 
             result = getOne();
             if(n.isNegative()) {
                 auto temp = reciprocal(*this);
-                while(*n2_copy != basicConst->get_0()) {
-                    *n2_copy -= basicConst->get_1();
+                while(n2_copy != basicConst->get_0()) {
+                    n2_copy -= basicConst->get_1();
                     *result *= *temp;
                 }
                 delete temp;
             }
             else {
-                while(*n2_copy != basicConst->get_0()) {
-                    *n2_copy -= basicConst->get_1();
+                while(n2_copy != basicConst->get_0()) {
+                    n2_copy -= basicConst->get_1();
                     *result *= *this;
                 }
             }
-            delete n2_copy;
         }
         else {
             auto temp_result = getOne();

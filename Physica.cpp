@@ -7,6 +7,7 @@
 #include "Const.h"
 #include "PhysicaMain.h"
 #include "Numerical.h"
+#include "Util.h"
 
 const BasicConst* basicConst;
 const MathConst* mathConst;
@@ -37,7 +38,7 @@ void init() {
     handler = qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {
         QString prefix{};
         prefix.push_back('[');
-        prefix.push_back(QTime::currentTime().toString("hh:mm:ss"));
+        prefix.push_back(QTime::currentTime().toString("hh:mm:ss.zzz"));
         prefix.push_back("] [");
         switch(type) {
             case QtDebugMsg:
@@ -57,9 +58,7 @@ void init() {
                 break;
         }
         prefix.push_back("] [");
-        auto name = getNameFromFile(context.file);
-        prefix.push_back(name);
-        delete[] name;
+        prefix.push_back(__FILENAME__);
         prefix.push_back(':');
         prefix.push_back(QString::fromStdString(std::to_string(context.line)));
         prefix.push_back("]: ");
@@ -69,19 +68,6 @@ void init() {
     });
     basicConst = new BasicConst();
     mathConst = new MathConst();
-}
-//e.g turn /home/user/Physica/Physica.cpp into Physica
-char* getNameFromFile(const char* file) {
-    int length = strlen(file);
-    int temp = length;
-    while(--temp)
-        if(file[temp] == '/')
-            break;
-    length = length - temp - 5;
-    auto result = new char[length + 1];
-    result[length] = '\0';
-    memcpy(result, file + temp + 1, length);
-    return result;
 }
 
 void deInit() {
