@@ -75,43 +75,40 @@ ExprReader::ExprReader(const std::wstring& str) {
     }
 }
 
-Numerical* ExprReader::calc() {
-    std::stack<Numerical*> stack{};
+Numerical ExprReader::calc() {
+    std::stack<Numerical> stack{};
     for(auto& str : anti_poland) {
-        Numerical* n1 = nullptr, *n2 = nullptr;
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
-                    n1 = stack.top();
+                    Numerical n1 = stack.top();
                     stack.pop();
-                    n2 = stack.top();
+                    Numerical n2 = stack.top();
                     stack.pop();
-                    stack.push(*n1 + *n2);
+                    stack.push(n1 + n2);
                 }
                 break;
             case L'×':
                 if(stack.size() > 1) {
-                    n1 = stack.top();
+                    Numerical n1 = stack.top();
                     stack.pop();
-                    n2 = stack.top();
+                    Numerical n2 = stack.top();
                     stack.pop();
-                    stack.push(*n1 * *n2);
+                    stack.push(n1 * n2);
                 }
                 break;
             case '/':
                 if(stack.size() > 1) {
-                    n1 = stack.top();
+                    Numerical n1 = stack.top();
                     stack.pop();
-                    n2 = stack.top();
+                    Numerical n2 = stack.top();
                     stack.pop();
-                    stack.push(*n2 / *n1);
+                    stack.push(n2 / n1);
                 }
                 break;
             default:
-                stack.push(new Numerical(str));
+                stack.push(Numerical(str));
         }
-        delete n1;
-        delete n2;
     }
     return stack.top();
 }

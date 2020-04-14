@@ -22,12 +22,16 @@ extern const MathConst* mathConst;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical(unsigned long* byte, int length, int power, unsigned long a) : byte(byte), power(power), length(length), a(a) {}
+Numerical::Numerical(unsigned long* byte, int length, int power, unsigned long a) : byte(byte), length(length), power(power), a(a) {}
 
-Numerical::Numerical(const Numerical& n) : power(n.power), length(n.length), a(n.a) {
-    auto size = getSize();
+Numerical::Numerical(const Numerical& n) : length(n.length), power(n.power), a(n.a) {
+    int size = getSize();
     byte = (unsigned long*)malloc(size * sizeof(long));
     memcpy(byte, n.byte, size * sizeof(long));
+}
+
+Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), power(n.power), a(n.a) {
+    n.byte = nullptr;
 }
 
 Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
@@ -67,7 +71,7 @@ Numerical::Numerical(double d, unsigned long a) : a(a) {
 #ifdef PHYSICA_32BIT
     length = 3;
     byte = (unsigned long*)malloc(length * sizeof(long));
-    auto integer = (unsigned long)d;
+    Numerical integer = (unsigned long)d;
     d -= integer;
     byte[2] = integer;
     d *= ULONG_MAX;
@@ -86,7 +90,7 @@ Numerical::Numerical(double d, unsigned long a) : a(a) {
 Numerical::Numerical(const char* s, unsigned long a) : Numerical(strtod(s, nullptr), a) {}
 
 Numerical::Numerical(const wchar_t* s, unsigned long a) : a(a) {
-    auto size = wcslen(s);
+    size_t size = wcslen(s);
     char str[size + 1];
     str[size] = '\0';
     for(int i = 0; i < size; ++i)
@@ -132,7 +136,7 @@ void Numerical::operator>>(int bits) {
     power -= bits;
 }
 
-unsigned long Numerical::operator[](unsigned int index) {
+unsigned long Numerical::operator[](unsigned int index) const {
     return byte[index];
 }
 
@@ -141,133 +145,87 @@ Numerical& Numerical::operator= (const Numerical& n) {
         return *this;
     length = n.length;
     int size = getSize();
-    byte = (unsigned long*)realloc(byte, size * sizeof(long));
+    free(byte);
+    byte = (unsigned long*)malloc(size * sizeof(long));
     memcpy(byte, n.byte, size * sizeof(long));
     power = n.power;
     a = n.a;
     return *this;
 }
 
-Numerical* Numerical::operator+ (const Numerical& n) const {
-    auto result = add(*this, n);
+Numerical& Numerical::operator=(Numerical&& n) noexcept {
+    free(byte);
+    byte = n.byte;
+    n.byte = nullptr;
+    length = n.length;
+    power = n.power;
+    a = n.a;
+    return *this;
+}
+
+Numerical Numerical::operator+ (const Numerical& n) const {
+    Numerical result = add(*this, n);
     cutLength(result);
     if(a != 0 || n.a != 0) {
-        Numerical* error;
         if(a == 0)
-            error = n.getAccuracy();
+            result.applyError(n.getAccuracy());
         else if(n.a == 0)
-            error = getAccuracy();
-        else {
-            auto n1_a = getAccuracy();
-            auto n2_a = n.getAccuracy();
-            error = add(*n1_a, *n2_a);
-            delete n1_a;
-            delete n2_a;
-        }
-        result->applyError(error);
-        delete error;
+            result.applyError(getAccuracy());
+        else
+            result.applyError(add(getAccuracy(), n.getAccuracy()));
     }
     return result;
 }
 
-Numerical* Numerical::operator- (const Numerical& n) const {
-    auto result = subtract(*this, n);
+Numerical Numerical::operator- (const Numerical& n) const {
+    Numerical result = sub(*this, n);
     cutLength(result);
     if(a != 0 || n.a != 0) {
-        Numerical* error;
         if(a == 0)
-            error = n.getAccuracy();
+            result.applyError(n.getAccuracy());
         else if(n.a == 0)
-            error = getAccuracy();
-        else {
-            auto n1_a = getAccuracy();
-            auto n2_a = n.getAccuracy();
-            error = add(*n1_a, *n2_a);
-            delete n1_a;
-            delete n2_a;
-        }
-        result->applyError(error);
-        delete error;
+            result.applyError(getAccuracy());
+        else
+            result.applyError(add(getAccuracy(), n.getAccuracy()));
     }
     return result;
 }
 
-Numerical* Numerical::operator* (const Numerical& n) const {
-    auto result = multiply(*this, n);
+Numerical Numerical::operator* (const Numerical& n) const {
+    Numerical result = mul(*this, n);
     cutLength(result);
     if(a != 0 || n.a != 0) {
-        Numerical* error;
+        if(a == 0)
+            result.applyError(mul(*this, n.getAccuracy()));
+        else if(n.a == 0)
+            result.applyError(mul(n, getAccuracy()));
+        else {
+            Numerical n1_a = getAccuracy();
+            Numerical n2_a = n.getAccuracy();
+            Numerical temp1 = mul(n1_a, n2_a);
+            Numerical temp2 = add(mul(*this, n2_a), mul(n, n1_a));
+            result.applyError(add(temp1, temp2));
+        }
+    }
+    return result;
+}
+
+Numerical Numerical::operator/ (const Numerical& n) const {
+    Numerical result = div(*this, n);
+    if(a != 0 || n.a != 0) {
         if(a == 0) {
-            auto n2_a = n.getAccuracy();
-            error = multiply(*this, *n2_a);
-            delete n2_a;
+            Numerical n2_a = n.getAccuracy();
+            Numerical temp_1 = mul(*this, n2_a);
+            Numerical temp_2 = mul(n, sub(n, n2_a));
+            result.applyError(div(temp_1, temp_2));
         }
-        else if(n.a == 0) {
-            auto n1_a = getAccuracy();
-            error = multiply(n, *n1_a);
-            delete n1_a;
-        }
+        else if(n.a == 0)
+            result.applyError(div(getAccuracy(), n));
         else {
-            auto n1_a = getAccuracy();
-            auto n2_a = n.getAccuracy();
-            auto temp_1 = multiply(*this, *n2_a);
-            auto temp_2 = multiply(n, *n1_a);
-            auto temp_3 = multiply(*n1_a, *n2_a);
-            auto temp_4 = add(*temp_1, *temp_2);
-            error = add(*temp_3, *temp_4);
-            delete n1_a;
-            delete n2_a;
-            delete temp_1;
-            delete temp_2;
-            delete temp_3;
-            delete temp_4;
-        }
-        result->applyError(error);
-        delete error;
-    }
-    return result;
-}
-
-Numerical* Numerical::operator/ (const Numerical& n) const {
-    auto result = divide(*this, n);
-    if(result != nullptr) {
-        if(a != 0 || n.a != 0) {
-            Numerical* error;
-            if(a == 0) {
-                auto n2_a = n.getAccuracy();
-                auto temp_1 = multiply(*this, *n2_a);
-                auto temp_2 = subtract(n, *n2_a);
-                auto temp_3 = multiply(n, *temp_2);
-                error = divide(*temp_1, *temp_3);
-                delete n2_a;
-                delete temp_1;
-                delete temp_2;
-                delete temp_3;
-            }
-            else if(n.a == 0) {
-                auto n1_a = getAccuracy();
-                error = divide(*n1_a, n);
-                delete n1_a;
-            }
-            else {
-                auto n1_a = getAccuracy();
-                auto n2_a = n.getAccuracy();
-                auto temp_1 = multiply(*this, *n2_a);
-                auto temp_2 = multiply(n, *n1_a);
-                auto temp_3 = add(*temp_1, *temp_2);
-                auto temp_4 = subtract(n, *n2_a);
-                auto temp_5 = multiply(n, *temp_4);
-                error = divide(*temp_3, *temp_5);
-                delete n1_a;
-                delete n2_a;
-                delete temp_1;
-                delete temp_2;
-                delete temp_3;
-                delete temp_4;
-                delete temp_5;
-            }
-            result->applyError(error);
-            delete error;
+            Numerical n2_a = n.getAccuracy();
+            Numerical temp_1 = add(mul(*this, n2_a), mul(n, getAccuracy()));
+            Numerical temp_2 = mul(n, sub(n, n2_a));
+            result.applyError(div(temp_1, temp_2));
         }
     }
     return result;
@@ -276,111 +234,49 @@ Numerical* Numerical::operator/ (const Numerical& n) const {
  * Using Newton's method
  * May return nullptr.
  */
-Numerical* Numerical::operator^ (const Numerical& n) const {
-    Numerical* result = nullptr;
+Numerical Numerical::operator^ (const Numerical& n) const {
     if(Q_UNLIKELY(isZero())) {
         if(!n.isZero())
-            result = getZero();
+            return getZero();
     }
     else if(isPositive()) {
         if(n.isInteger()) {
             Numerical n2_copy(n);
 
-            result = getOne();
+            Numerical result = getOne();
             if(n.isNegative()) {
-                auto temp = reciprocal(*this);
+                Numerical temp = reciprocal(*this);
                 while(n2_copy != basicConst->get_0()) {
                     n2_copy -= basicConst->get_1();
-                    *result *= *temp;
+                    result *= temp;
                 }
-                delete temp;
             }
             else {
                 while(n2_copy != basicConst->get_0()) {
                     n2_copy -= basicConst->get_1();
-                    *result *= *this;
+                    result *= *this;
                 }
             }
+            return result;
         }
         else {
-            auto temp_result = getOne();
-            auto temp_1 = ln(*this);
-            *temp_1 *= n;
-            *temp_1 += basicConst->get_1();
+            Numerical result = getOne();
+            Numerical temp_1 = ln(*this);
+            temp_1 *= n;
+            temp_1 += basicConst->get_1();
             bool go_on;
             do {
-                result = ln(*temp_result);
-                result->length = -result->length;
-                *result += *temp_1;
-                *result *= *temp_result;
-                go_on = *result == *temp_result;
-                delete temp_result;
-                temp_result = result;
+                Numerical temp_2 = ln(result);
+                temp_2.toOpposite();
+                temp_2 += temp_1;
+                temp_2 *= result;
+                go_on = temp_2 == result;
+                result = std::move(temp_2);
             } while(go_on);
-            result->a += 1;
-            delete temp_1;
+            result.a += 1;
+            return result;
         }
     }
-    return result;
-}
-/*
- * Warning: *this can not be temp object.
- */
-void Numerical::operator+= (const Numerical& n) {
-    Numerical* p_result = *this + n;
-    free(byte);
-    byte = p_result->byte;
-    length = p_result->length;
-    power = p_result->power;
-    a = p_result->a;
-    p_result->byte = nullptr;
-    delete p_result;
-}
-
-void Numerical::operator-= (const Numerical& n) {
-    Numerical* p_result = *this - n;
-    free(byte);
-    byte = p_result->byte;
-    length = p_result->length;
-    power = p_result->power;
-    a = p_result->a;
-    p_result->byte = nullptr;
-    delete p_result;
-}
-
-void Numerical::operator*= (const Numerical& n) {
-    Numerical* p_result = *this * n;
-    free(byte);
-    byte = p_result->byte;
-    length = p_result->length;
-    power = p_result->power;
-    a = p_result->a;
-    p_result->byte = nullptr;
-    delete p_result;
-}
-/*
- * n2 mustn't be zero.
- */
-void Numerical::operator/= (const Numerical& n) {
-    Numerical* p_result = *this / n;
-    free(byte);
-    byte = p_result->byte;
-    length = p_result->length;
-    power = p_result->power;
-    a = p_result->a;
-    p_result->byte = nullptr;
-    delete p_result;
-}
-
-void Numerical::operator^= (const Numerical& n) {
-    Numerical* p_result = *this ^ n;
-    free(byte);
-    byte = p_result->byte;
-    length = p_result->length;
-    power = p_result->power;
-    a = p_result->a;
-    p_result->byte = nullptr;
-    delete p_result;
 }
 
 bool Numerical::operator> (const Numerical& n) const {
@@ -403,9 +299,8 @@ bool Numerical::operator> (const Numerical& n) const {
         result = false;
     else {
         //The only method left.
-        Numerical* p_result = *this - n;
-        result = p_result->isPositive();
-        delete p_result;
+        Numerical subtract = *this - n;
+        result = subtract.isPositive();
     }
     return result;
 }
@@ -430,9 +325,8 @@ bool Numerical::operator< (const Numerical& n) const {
         result = true;
     else {
         //The only method left.
-        Numerical* p_result = *this - n;
-        result = p_result->isNegative();
-        delete p_result;
+        Numerical subtract = *this - n;
+        result = subtract.isNegative();
     }
     return result;
 }
@@ -453,61 +347,44 @@ bool Numerical::operator== (const Numerical& n) const {
         return false;
     if(a != n.a)
         return false;
-    auto temp = *this - n;
-    if(!temp->isZero())
-        return false;
-    delete temp;
-    return true;
+    Numerical temp = *this - n;
+    return temp.isZero();
 }
 
 bool Numerical::operator!= (const Numerical& n) const {
     return !(*this == n);
 }
 
-Numerical* Numerical::operator- () const {
-    auto result = new Numerical(this);
-    result->toOpposite();
-    return result;
-}
+Numerical Numerical::operator-() const {
+    size_t bytes = getSize() * sizeof(long);
+    auto new_byte = (unsigned long*)malloc(bytes);
+    mempcpy(new_byte, byte, bytes);
+    return Numerical(new_byte, length, power, a);
+};
 //Return accuracy in class Numerical.
-Numerical* Numerical::getAccuracy() const {
+Numerical Numerical::getAccuracy() const {
     auto b = (unsigned long*)malloc(sizeof(long));
     b[0] = a;
-    return new Numerical(b, 1, power - getSize() + 1);
-}
-//Return this + accuracy
-Numerical* Numerical::getMaximum() const {
-    auto acc = getAccuracy();
-    auto result = add(*this, *acc);
-    delete acc;
-    return result;
-}
-//Return this - accuracy
-Numerical* Numerical::getMinimum() const {
-    auto acc = getAccuracy();
-    auto result = subtract(*this, *acc);
-    delete acc;
-    return result;
+    return Numerical(b, 1, power - getSize() + 1);
 }
 //Add error to this and adjust this->length as well as this-> byte.
-void Numerical::applyError(const Numerical* error) {
-    if(!error->isZero()) {
+Numerical& Numerical::applyError(const Numerical& error) {
+    if(!error.isZero()) {
         int size = getSize();
         int copy = size;
-        int temp = power - size + 1 - error->power;
+        int temp = power - size + 1 - error.power;
         unsigned long copy_a = a;
         if(temp <= 0) {
             if(temp < 0) {
                 auto b = (unsigned long*)malloc(sizeof(long));
                 b[0] = a;
-                auto error_1 = new Numerical(b, 1, power - size + 1);
-                move(error_1, add(*error_1, *error));
+                Numerical error_1(b, 1, power - size + 1);
+                error_1 = add(error_1, error);
                 size += temp;
-                a += error_1->byte[error_1->getSize() - 1];
-                delete error_1;
+                a += error_1.byte[error_1.getSize() - 1];
             }
             else
-                a += error->byte[error->getSize() - 1];
+                a += error.byte[error.getSize() - 1];
         }
 
         if(a < copy_a) {
@@ -522,7 +399,7 @@ void Numerical::applyError(const Numerical* error) {
             if(length < 0)
                 size = -size;
             length = size;
-            return;
+            return *this;
         }
 
         if(size < copy) {
@@ -535,4 +412,11 @@ void Numerical::applyError(const Numerical* error) {
             size = -size;
         length = size;
     }
+    return *this;
+}
+
+void printElements(const Numerical& n) {
+    int size = n.getSize();
+    for(int i = 0; i < size; ++i)
+        std::cout << n[i] << ' ';
 }

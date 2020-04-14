@@ -336,10 +336,8 @@ void Calculator::on_click_divide() {
 
 void Calculator::on_click_equal() {
     ExprReader reader(editor_bottom->text().toStdWString());
-    auto result = reader.calc();
     editor_top->setText(editor_bottom->text());
-    editor_bottom->setText(QString::number((double)*result, 'f'));
-    delete result;
+    editor_bottom->setText(QString::number((double)reader.calc(), 'f'));
 }
 
 void Calculator::on_click_del() {
@@ -367,24 +365,19 @@ void Calculator::on_click_right_bracket() {
 
 void Calculator::on_click_sqrt() {
     ExprReader reader(editor_bottom->text().toStdWString());
-    auto result = reader.calc();
-    auto temp = sqrt(*result);
+    Numerical result = reader.calc();
     editor_top->setText(editor_bottom->text());
-    if(temp != nullptr)
-        editor_bottom->setText(QString::number((double)*temp, 'f'));
-    delete result;
-    delete temp;
+    if(result.isPositive())
+        editor_bottom->setText(QString::number((double)sqrt(result), 'f'));
+    else
+        on_click_clear_entry();
 }
 
 void Calculator::on_click_square() {
     ExprReader reader(editor_bottom->text().toStdWString());
     auto result = reader.calc();
-    auto temp = *result * *result;
     editor_top->setText(editor_bottom->text());
-    if(temp != nullptr)
-        editor_bottom->setText(QString::number((double)*temp, 'f'));
-    delete result;
-    delete temp;
+    editor_bottom->setText(QString::number((double)(result * result), 'f'));
 }
 
 void Calculator::on_click_percent() {

@@ -1,15 +1,15 @@
-#include "../../Header/RealNum.h"
-#include "../../Header/Numerical.h"
-#include "../../Header/DirectedInf.h"
-#include "../../Header/ComplexInf.h"
-#include "../../Header/RealInf.h"
-#include "../../Header/Indeterminate.h"
+#include "RealNum.h"
+#include "Numerical.h"
+#include "DirectedInf.h"
+#include "ComplexInf.h"
+#include "RealInf.h"
+#include "Indeterminate.h"
 
-RealNum::RealNum(Numerical* n) : ComplexNum(n, const_cast<Numerical*>(&basicConst->get_0())) {
+RealNum::RealNum(const Numerical& n) : ComplexNum(n, basicConst->get_0()) {
     type = RealNumber;
 }
 
-RealNum::RealNum(const RealNum& n) : RealNum(new Numerical(n.real)) {}
+RealNum::RealNum(const RealNum& n) : RealNum(*n.real) {}
 
 RealNum::RealNum(const RealNum* n) : RealNum(*n) {}
 

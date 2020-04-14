@@ -9,7 +9,7 @@ private:
     std::list<std::wstring> anti_poland;
 public:
     ExprReader(const std::wstring& str);
-    Numerical* calc();
+    Numerical calc();
 private:
     static bool isSign(wchar_t c);
 };

@@ -1,66 +1,38 @@
 #include "../../Header/Integrate.h"
 
-Numerical* rectangular(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-    auto result = getZero();
+Numerical rectangular(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
+    Numerical deltaY = getZero();
 
-    auto point = new Numerical(x0);
-    while(*point < x1) {
-        auto temp = func(*point);
-        *result += *temp;
-        *point += basicConst->getStepSize();
-        delete temp;
+    Numerical point(x0);
+    while(point < x1) {
+        Numerical temp = func(point);
+        deltaY += temp;
+        point += basicConst->getStepSize();
     }
-    delete point;
-
-    *result *= basicConst->getStepSize();
-    return result;
+    return deltaY * basicConst->getStepSize();
 }
 
-Numerical* ladder(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-    auto result = getZero();
-    *result += x0;
-    *result += x1;
-    *result /= basicConst->get_2();
-
-    auto point = x0 + basicConst->getStepSize();
-    while(*point < x1) {
-        auto temp = func(*point);
-        *result += *temp;
-        *point += basicConst->getStepSize();
-        delete temp;
+Numerical ladder(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
+    Numerical deltaY = (x0 + x1) / basicConst->get_2();
+    Numerical point = x0 + basicConst->getStepSize();
+    while(point < x1) {
+        deltaY += func(point);
+        point += basicConst->getStepSize();
     }
-    delete point;
-
-    *result *= basicConst->getStepSize();
-    return result;
+    return deltaY * basicConst->getStepSize();
 }
 
-Numerical* simpson(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-    auto result = getZero(), temp1 = getZero(), temp2 = getZero();
-    *result += x0;
-    *result += x1;
-
+Numerical simpson(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
+    Numerical temp0 = x0 + x1, temp1 = getZero(), temp2 = getZero();
     bool odd = true;
-    auto point = x0 + basicConst->getStepSize();
-    while(*point < x1) {
-        auto temp = func(*point);
+    Numerical point = x0 + basicConst->getStepSize();
+    while(point < x1) {
         if(odd)
-            *temp1 += *temp;
+            temp1 += func(point);
         else
-            *temp2 += *temp;
+            temp2 += func(point);
         odd = !odd;
-        *point += basicConst->getStepSize();
-        delete temp;
+        point += basicConst->getStepSize();
     }
-    delete point;
-
-    *temp1 += basicConst->get_4();
-    *temp2 *= basicConst->get_2();
-    *result += *temp1;
-    *result += *temp2;
-    *result *= basicConst->getStepSize();
-    *result /= basicConst->get_3();
-    delete temp1;
-    delete temp2;
-    return result;
+    return (temp0 + temp1 + basicConst->get_4() + temp2 * basicConst->get_2()) * basicConst->getStepSize() / basicConst->get_3();
 }

@@ -73,14 +73,12 @@ AbstractNum* sqrt(const AbstractNum& n) {
         case AbstractNum::ComplexNumber: {
             auto vec = ((ComplexNum&)n).toVector();
             auto norm = vec->toNorm();
-            move(((RealNum*)norm)->real, sqrt(*((RealNum*)norm)->real));
+            *((RealNum*)norm)->real = sqrt(*((RealNum*)norm)->real);
 
             auto arg = vec->toArg(0);
             *((RealNum*)arg)->real /= basicConst->get_2();
-            auto new_real = cos(*((RealNum*)arg)->real);
-            *new_real *= *((RealNum*)norm)->real;
-            auto new_imagine = sin(*((RealNum*)arg)->real);
-            *new_imagine *= *((RealNum*)norm)->real;
+            Numerical new_real = *((RealNum*)norm)->real * cos(*((RealNum*)arg)->real);
+            Numerical new_imagine = *((RealNum*)norm)->real * sin(*((RealNum*)arg)->real);
             delete vec;
             delete norm;
             delete arg;

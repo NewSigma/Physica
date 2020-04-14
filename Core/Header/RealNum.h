@@ -11,10 +11,10 @@
  */
 class RealNum : public ComplexNum {
 public:
-    RealNum(Numerical* n);
+    explicit RealNum(const Numerical& n);
     RealNum(const RealNum& n);
-    RealNum(const RealNum* n);
-    virtual ~RealNum();
+    explicit RealNum(const RealNum* n);
+    ~RealNum() override;
 
     AbstractNum* operator+(const AbstractNum& n) const override;
     AbstractNum* operator-(const AbstractNum& n) const override;

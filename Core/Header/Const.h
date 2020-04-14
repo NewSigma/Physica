@@ -23,7 +23,7 @@ public:
     BasicConst();
     ~BasicConst();
 
-    inline signed char getGlobalPrecision() const { return GlobalPrecision; }
+    inline int getGlobalPrecision() const { return GlobalPrecision; }
     inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
     inline const Numerical& getStepSize() const { return *stepSize; }
     inline const Numerical& getR_MAX() const { return *R_MAX; }
@@ -61,7 +61,7 @@ public:
     inline const Numerical& getPI_2() const { return *PI_2; }
     inline const Numerical& getMinus_PI_2() const { return *Minus_PI_2; }
 private:
-    static Numerical* calcPI(int precision);
+    static Numerical calcPI(int precision);
 };
 
 #endif

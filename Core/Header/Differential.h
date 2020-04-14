@@ -3,8 +3,8 @@
 
 class Numerical;
 
-Numerical* D_double_point(Numerical* func(const Numerical&), const Numerical& x0);
-Numerical* D_right(Numerical* func(const Numerical&), const Numerical& x0);
-Numerical* D_left(Numerical* func(const Numerical&), const Numerical& x0);
+Numerical D_double_point(Numerical func(const Numerical&), const Numerical& x0);
+Numerical D_right(Numerical func(const Numerical&), const Numerical& x0);
+Numerical D_left(Numerical func(const Numerical&), const Numerical& x0);
 
 #endif

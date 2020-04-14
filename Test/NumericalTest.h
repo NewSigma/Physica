@@ -14,17 +14,13 @@ void numerical_test() {
         Numerical n1(d1);
         Numerical n2(d2);
         auto c1 = n1 + n2;
-        std::cout << "d1 + d2 = " << '\n' << *c1 << std::endl;
+        std::cout << "d1 + d2 = " << '\n' << c1 << std::endl;
         auto c2 = n1 - n2;
-        std::cout << "d1 - d2 = " << '\n' << *c2 << std::endl;
+        std::cout << "d1 - d2 = " << '\n' << c2 << std::endl;
         auto c3 = n1 * n2;
-        std::cout << "d1 * d2 = " << '\n' << *c3 << std::endl;
+        std::cout << "d1 * d2 = " << '\n' << c3 << std::endl;
         auto c4 = n1 / n2;
-        std::cout << "d1 / d2 = " << '\n' << *c4 << '\n' << "Waiting for next inputs." << std::endl;
-        delete c1;
-        delete c2;
-        delete c3;
-        delete c4;
+        std::cout << "d1 / d2 = " << '\n' << c4 << '\n' << "Waiting for next inputs." << std::endl;
         std::cin >> d1 >> d2;
     }
 }

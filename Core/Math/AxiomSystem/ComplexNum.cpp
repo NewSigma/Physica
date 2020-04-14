@@ -9,22 +9,19 @@
 #include "Indeterminate.h"
 #include "ElementaryFunction.h"
 
-ComplexNum::ComplexNum(Numerical* n1, Numerical* n2, bool polar) {
+ComplexNum::ComplexNum(const Numerical& n1, const Numerical& n2, bool polar) {
     type = AbstractNum::ComplexNumber;
     if(polar) {
-        real = cos(*n2);
-        *real *= *n1;
-        imagine = sin(*n2);
-        *imagine *= *n1;
-        delete n2;
+        real = new Numerical(n1 * cos(n2));
+        imagine = new Numerical(n1 * sin(n2));
     }
     else {
-        real = n1;
-        imagine = n2;
+        real = new Numerical(n1);
+        imagine = new Numerical(n2);
     }
 }
 
-ComplexNum::ComplexNum(ComplexNum& instance) : ComplexNum(new Numerical(instance.real), new Numerical(instance.imagine)) {}
+ComplexNum::ComplexNum(ComplexNum& instance) : ComplexNum(*instance.real, *instance.imagine) {}
 
 ComplexNum::ComplexNum(ComplexNum* instance) : ComplexNum(*instance) {}
 
@@ -34,21 +31,17 @@ ComplexNum::~ComplexNum() {
 }
 
 ComplexNum* ComplexNum::toConjugate() const {
-    return new ComplexNum(new Numerical(real), -*imagine);
+    return new ComplexNum(*real, -*imagine);
 }
 
-Numerical* ComplexNum::toNorm() const {
-    auto result = *real * *real;
-    auto temp = *imagine * *imagine;
-    *result += *temp;
-    delete temp;
-    return result;
+Numerical ComplexNum::toNorm() const {
+    return *real * *real + *imagine * *imagine;
 }
 
 Vector* ComplexNum::toVector() const {
     auto arr = new AbstractNum*[2];
-    arr[0] = new RealNum(new Numerical(real));
-    arr[1] = new RealNum(new Numerical(imagine));
+    arr[0] = new RealNum(*real);
+    arr[1] = new RealNum(*imagine);
     return new Vector(arr, 2);
 }
 
@@ -72,7 +65,7 @@ AbstractNum* ComplexNum::operator+ (const AbstractNum& n) const {
         case ComplexNumber:
             return new ComplexNum(*real + *((ComplexNum&)n).real, *imagine + *((ComplexNum&)n).imagine);
         case RealNumber:
-            return new ComplexNum(*real + *((RealNum&)n).real, new Numerical(imagine));
+            return new ComplexNum(*real + *((RealNum&)n).real, *imagine);
         case DirectedInfinity:
             return new DirectedInf((DirectedInf&)n);
         case ComplexInfinity:
@@ -104,17 +97,8 @@ AbstractNum* ComplexNum::operator- (const AbstractNum& n) const {
 AbstractNum* ComplexNum::operator* (const AbstractNum& n) const {
     switch(n.getType()) {
         case ComplexNumber: {
-            auto new_real = *real * *((ComplexNum&)n).real;
-            auto new_imagine = *real * *((ComplexNum&)n).imagine;
-
-            auto temp = *imagine * *((ComplexNum&)n).imagine;
-            *new_real -= *temp;
-            delete temp;
-
-            temp = *imagine * *((ComplexNum&)n).real;
-            *new_imagine += *temp;
-            delete temp;
-            return new ComplexNum(new_real, new_imagine);
+            return new ComplexNum(*real * *((ComplexNum&)n).real - *imagine * *((ComplexNum&)n).imagine
+                    , *real * *((ComplexNum&)n).imagine + *imagine * *((ComplexNum&)n).real);
         }
         case RealNumber:
             return new ComplexNum(*real * *((RealNum&)n).real, *imagine * *((RealNum&)n).real);
@@ -142,26 +126,10 @@ AbstractNum* ComplexNum::operator* (const AbstractNum& n) const {
 AbstractNum* ComplexNum::operator/ (const AbstractNum& n) const {
     switch(n.getType()) {
         case ComplexNumber: {
-            auto new_real = *real * *((ComplexNum&)n).real;
-            auto new_imagine = *((ComplexNum&)n).real * *imagine;
-
-            auto temp = *imagine * *((ComplexNum&)n).imagine;
-            *new_real += *temp;
-            delete temp;
-
-            temp = *real * *((ComplexNum&)n).imagine;
-            *new_imagine -= *temp;
-            delete temp;
-
-            auto temp1 = *((ComplexNum&)n).imagine * *((ComplexNum&)n).imagine;
-            temp = *((ComplexNum&)n).real * *((ComplexNum&)n).real;
-            *temp += *temp1;
-            delete temp1;
-
-            *new_real /= *temp;
-            *new_imagine /= *temp;
-            delete temp;
-            return new ComplexNum(new_real, new_imagine);
+            Numerical new_real = *real * *((ComplexNum&)n).real + *imagine * *((ComplexNum&)n).imagine;
+            Numerical new_imagine = *((ComplexNum&)n).real * *imagine - *real * *((ComplexNum&)n).imagine;
+            Numerical temp = *((ComplexNum&)n).imagine * *((ComplexNum&)n).imagine + *((ComplexNum&)n).real * *((ComplexNum&)n).real;
+            return new ComplexNum(new_real / temp, new_imagine / temp);
         }
         case RealNumber:
             return new ComplexNum(*real / *((RealNum&)n).real, *imagine / *((RealNum&)n).real);

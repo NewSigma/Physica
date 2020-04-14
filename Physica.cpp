@@ -6,6 +6,7 @@
 #include "Const.h"
 #include "PhysicaMain.h"
 #include "Util.h"
+#include "NumericalTest.h"
 
 const BasicConst* basicConst;
 const MathConst* mathConst;

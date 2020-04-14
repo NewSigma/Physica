@@ -9,491 +9,324 @@
 extern const MathConst* mathConst;
 
 //Return a real number between 0 and 1.
-Numerical* randomNumerical() {
-    srand(clock());
-    srand(random());
-    auto result = new Numerical((double)random());
-    *result /= basicConst->getR_MAX();
-
-    return result;
+Numerical randomNumerical() {
+    return Numerical(double(random()) / RAND_MAX);
 }
 //Return a real number lowerBound and upperBound.
-Numerical* randomNumerical(Numerical* lowerBound, Numerical* upperBound) {
-    Numerical* random = randomNumerical();
-    auto result = *lowerBound - *upperBound;
-    *random *= *random;
-    *result += *lowerBound;
-    delete random;
-
-    return result;
+Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBound) {
+    return randomNumerical() * (upperBound - lowerBound) + lowerBound;
 }
 
-Numerical* reciprocal(const Numerical& n) {
+Numerical reciprocal(const Numerical& n) {
     return basicConst->get_1() / n;
 }
 /*
  * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
  * (sqrt(n + a) - sqrt(n)) for error.
  */
-Numerical* sqrt_light(const Numerical& n) {
+Numerical sqrt_light(const Numerical& n) {
     if(n.getLength() < 0)
-        return nullptr;
-    auto copy_n = new Numerical(n);
+        qFatal("Can not resolve the square root of a minus value.");
+    Numerical copy_n(n);
     //Let n < 1 so as to control error.
     int add_power = 0;
-    if(copy_n->getPower() > 0) {
-        if(copy_n->getPower() % 2 == 0) {
-            add_power = copy_n->getPower() / 2 + 1;
-            copy_n->power = -2;
+    if(copy_n.getPower() > 0) {
+        if(copy_n.getPower() % 2 == 0) {
+            add_power = copy_n.getPower() / 2 + 1;
+            copy_n.power = -2;
         }
         else {
-            add_power = (copy_n->getPower() + 1) / 2;
-            copy_n->power = -1;
+            add_power = (copy_n.getPower() + 1) / 2;
+            copy_n.power = -1;
         }
     }
 
-    Numerical* result = getOne();
-    Numerical* temp;
+    Numerical result = getOne();
     //3.33 is the big approximate value of ln(10)/ln(2)
-    for(int i = 0; i < LONG_WIDTH * basicConst->getGlobalPrecision(); ++i) {
-        temp = divide(*copy_n, *result);
-        *result += *temp;
-        *result /= basicConst->get_2();
-        delete temp;
-    }
-    delete copy_n;
-    result->power += add_power;
-    result->toUnitA();
+    for(int i = 0; i < LONG_WIDTH * basicConst->getGlobalPrecision(); ++i)
+        result = (result + div(copy_n, result)) / basicConst->get_2();
+    result.power += add_power;
+    result.toUnitA();
 
     return result;
 }
 
-Numerical* sqrt(const Numerical& n) {
-    auto result  = sqrt_light(n);
+Numerical sqrt(const Numerical& n) {
+    Numerical result  = sqrt_light(n);
     if(n.getA() != 0) {
-        auto n_error = n.getMinimum();
-        auto error = sqrt_light(*n_error);
-        if(error == nullptr) {
-            delete n_error;
+        Numerical n_error = n.getMinimum();
+        if(n_error.isNegative())
             n_error = n.getMaximum();
-            error = sqrt_light(*n_error);
-        }
-        *error -= *result;
-        error->toAbs();
+        Numerical error = sqrt_light(n_error);
+        error -= result;
+        error.toAbs();
 
-        result->applyError(error);
-
-        delete n_error;
-        delete error;
+        result.applyError(error);
     }
     return result;
 }
 //TODO not completed: Use gamma function.
-Numerical* factorial(const Numerical& n) {
-    if(n.getLength() < 0) {
-        qCritical("Cannot solve the factorial of a minus value.");
-        return nullptr;
-    }
+Numerical factorial(const Numerical& n) {
+    if(n.getLength() < 0)
+        qFatal("Can not resolve the factorial of a minus value.");
+    if(!n.isInteger())
+        qFatal("Can not resolve the factorial of a float value.");
 
-    Numerical* result;
-    if(n.isInteger()) {
-        result = getOne();
-        auto temp = getOne();
-        while(*temp < n) {
-            *temp += basicConst->get_1();
-            *result *= *temp;
-        }
-        delete temp;
-        return result;
-    }
-    return nullptr;
-}
-
-Numerical* ln_light(const Numerical& n) {
-    if(!n.isPositive())
-        return nullptr;
-    auto result = getZero();
-    if(n != basicConst->get_1()) {
-        auto temp_0 = add(n, basicConst->get_1());
-        auto temp_1 = subtract(n, basicConst->get_1());
-        *temp_1 /= *temp_0;
-        auto copy_temp_1 = new Numerical(temp_1);
-        auto temp_2 = getOne();
-
-        temp_1->toUnitA();
-        copy_temp_1->toUnitA();
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->clearA();
-            *result += *temp;
-            delete temp;
-            //Here the temp means the criteria of break.
-            *temp_1 *= *copy_temp_1;
-            *temp_2 += basicConst->get_1();
-            temp = *temp_1 / *temp_2;
-            int temp_power = temp->getPower();
-            delete temp;
-
-            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
-                break;
-            //Prepare for next calculate.
-            *temp_1 *= *copy_temp_1;
-            *temp_2 += basicConst->get_1();
-        }
-        *result *= basicConst->get_2();
-        delete temp_0;
-        delete temp_1;
-        delete copy_temp_1;
-        delete temp_2;
+    Numerical result = getOne();
+    Numerical temp = getOne();
+    while(temp < n) {
+        temp += basicConst->get_1();
+        result *= temp;
     }
     return result;
 }
 
-Numerical* ln(const Numerical& n) {
-    auto result = ln_light(n);
+Numerical ln_light(const Numerical& n) {
+    if(!n.isPositive())
+        qFatal("Can not resolve the logarithm of zero or a negative value.");
+    if(n == basicConst->get_1())
+        return getZero();
+    Numerical result = getZero();
+    Numerical temp_1 = sub(n, basicConst->get_1()) / add(n, basicConst->get_1());
+    Numerical copy_temp_1(temp_1);
+    Numerical rank = getOne();
+
+    temp_1.toUnitA();
+    copy_temp_1.toUnitA();
+    while(true) {
+        //Calculate one term of the taylor series.
+        Numerical temp = temp_1 / rank;
+        temp.clearA();
+        result += temp;
+
+        temp_1 *= copy_temp_1;
+        rank += basicConst->get_1();
+        Numerical criteria = temp_1 / rank;
+        //Break if result meets the precision goal.
+        if(result.getPower() - criteria.getPower() >= basicConst->getGlobalPrecision())
+            break;
+        //Prepare for next calculate.
+        temp_1 *= copy_temp_1;
+        rank += basicConst->get_1();
+    }
+    result *= basicConst->get_2();
+    return result;
+}
+
+Numerical ln(const Numerical& n) {
+    Numerical result = ln_light(n);
     if(n.getA() != 0) {
-        auto n_error = n.getMinimum();
-        auto error = ln_light(*n_error);
-        if(error == nullptr) {
-            delete n_error;
+        Numerical n_error = n.getMinimum();
+        if(n_error.isNegative())
             n_error = n.getMaximum();
-            error = ln_light(*n_error);
-        }
-        *error -= *result;
-        error->toAbs();
+        Numerical error = ln_light(n_error);
+        error -= result;
+        error.toAbs();
 
-        result->applyError(error);
-
-        delete n_error;
-        delete error;
+        result.applyError(error);
     }
     return result;
 }
 //Return log_a n
-Numerical* log(const Numerical& n, const Numerical& a) {
-    if(a == basicConst->get_1())
-        return nullptr;
-
-    auto ln_n = ln(n);
-    if(ln_n == nullptr)
-        return nullptr;
-
-    auto ln_a = ln(a);
-    if(ln_a == nullptr) {
-        delete ln_n;
-        return nullptr;
-    }
-    *ln_n /= *ln_a;
-    delete ln_a;
-    return ln_n;
+Numerical log(const Numerical& n, const Numerical& a) {
+    if(!n.isPositive() || !a.isPositive())
+        qFatal("Can not resolve the logarithm of zero or a negative value.");
+    return ln(n) / ln(a);
 }
 
-Numerical* exp(const Numerical& n) {
-    auto result = getOne();
+Numerical exp(const Numerical& n) {
+    Numerical result = getOne();
     Numerical temp(n);
-    auto rank = getOne();
+    Numerical rank = getOne();
     while(true) {
-        temp /= *rank;
+        temp /= rank;
         if(temp < basicConst->getExpectedRelativeError())
             break;
-        *result += temp;
+        result += temp;
         temp *= n;
-        *rank += basicConst->get_1();
+        rank += basicConst->get_1();
     }
-    delete rank;
     return result;
 }
 
-Numerical* pow(const Numerical& n, const Numerical& a) {
-    auto temp = ln(n);
-    *temp *= a;
-    auto result = exp(*temp);
-    delete temp;
-    return result;
+Numerical pow(const Numerical& n, const Numerical& a) {
+    return exp(ln(n) * a);
 }
 /*
  * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
  * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
  */
-Numerical* cos(const Numerical& n) {
-    auto result = getOne();
-    if(n != basicConst->get_0()) {
-        auto& ONE = basicConst->get_1();
+Numerical cos(const Numerical& n) {
+    Numerical result = getOne();
+    if(n == basicConst->get_0())
+        return result;
+    Numerical square_n = n * n;
+    Numerical temp_1(square_n);
+    Numerical temp_2 = getTwo();
+    Numerical rank = getTwo();
 
-        auto square_n = n * n;
-        auto temp_1 = new Numerical(square_n);
-        auto temp_2 = getTwo();
-        auto rank = getTwo();
-
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->toOpposite();
-            *result += *temp;
-            //Here the temp means the criteria of break.
-            *temp *= n;
-            *rank += ONE;
-            *temp /= *rank;
-            int temp_power = temp->getPower();
-            delete temp;
-
-            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
-                break;
-            //Prepare for next calculate.
-            *temp_1 *= *square_n;
-            *temp_2 *= *rank;
-            *rank += ONE;
-            *temp_2 *= *rank;
-        }
-        delete square_n;
-        delete temp_1;
-        delete temp_2;
-        delete rank;
+    while(true) {
+        //Calculate one term of the taylor series.
+        Numerical temp = temp_1 / temp_2;
+        temp.toOpposite();
+        result += temp;
+        //Here the temp means the criteria of break.
+        temp *= n;
+        rank += basicConst->get_1();
+        temp /= rank;
+        //Break if result meets the precision goal.
+        if(result.getPower() - temp.getPower() >= basicConst->getGlobalPrecision())
+            break;
+        //Prepare for next calculate.
+        temp_1 *= square_n;
+        temp_2 *= rank;
+        rank += basicConst->get_1();
+        temp_2 *= rank;
     }
     return result;
 }
 
-Numerical* sin(const Numerical& n) {
-    auto result = getZero();
-    if(n != basicConst->get_0()) {
-        auto& ONE = basicConst->get_1();
+Numerical sin(const Numerical& n) {
+    Numerical result = getZero();
+    if(n == basicConst->get_0())
+        return result;
+    Numerical square_n = n * n;
+    Numerical temp_1(n);
+    Numerical temp_2 = getOne();
+    Numerical rank = getOne();
 
-        auto square_n = n * n;
-        auto temp_1 = new Numerical(n);
-        auto temp_2 = getOne();
-        auto rank = getOne();
-
-        while(true) {
-            //Calculate one term of the taylor series.
-            auto temp = *temp_1 / *temp_2;
-            temp->toOpposite();
-            *result += *temp;
-            //Here the temp means the criteria of break.
-            *temp *= n;
-            *rank += ONE;
-            *temp /= *rank;
-            int temp_power = temp->getPower();
-            delete temp;
-
-            if(result->getPower() - temp_power >= basicConst->getGlobalPrecision())
-                break;
-            //Prepare for next calculate.
-            *temp_1 *= *square_n;
-            *temp_2 *= *rank;
-            *rank += ONE;
-            *temp_2 *= *rank;
-        }
-        delete square_n;
-        delete temp_1;
-        delete temp_2;
-        delete rank;
+    while(true) {
+        //Calculate one term of the taylor series.
+        Numerical temp = temp_1 / temp_2;
+        temp.toOpposite();
+        result += temp;
+        //Here the temp means the criteria of break.
+        temp *= n;
+        rank += basicConst->get_1();
+        temp /= rank;
+        //Break if result meets the precision goal.
+        if(result.getPower() - temp.getPower() >= basicConst->getGlobalPrecision())
+            break;
+        //Prepare for next calculate.
+        temp_1 *= square_n;
+        temp_2 *= rank;
+        rank += basicConst->get_1();
+        temp_2 *= rank;
     }
     return result;
 }
 
-Numerical* tan(const Numerical& n) {
-    auto cos_n = cos(n);
-    if(cos_n == nullptr)
-        return nullptr;
-    auto sin_n = sin(n);
-    *sin_n /= *cos_n;
-    delete cos_n;
-    return sin_n;
+Numerical tan(const Numerical& n) {
+    return sin(n) / cos(n);
 }
 
-Numerical* sec(const Numerical& n) {
-    auto cos_n = cos(n);
-    auto result = reciprocal(*cos_n);
-    delete cos_n;
-    return result;
+Numerical sec(const Numerical& n) {
+    return reciprocal(cos(n));
 }
 
-Numerical* csc(const Numerical& n) {
-    auto sin_n = sin(n);
-    auto result = reciprocal(*sin_n);
-    delete sin_n;
-    return result;
+Numerical csc(const Numerical& n) {
+    return reciprocal(sin(n));
 }
 
-Numerical* cot(const Numerical& n) {
-    auto sin_n = sin(n);
-    if(sin_n == nullptr)
-        return nullptr;
-    auto cos_n = cos(n);
-    *cos_n /= *sin_n;
-    delete sin_n;
-    return cos_n;
+Numerical cot(const Numerical& n) {
+    return cos(n) / sin(n);
 }
 
-Numerical* arccos(const Numerical& n) {
+Numerical arccos(const Numerical& n) {
     return bisectionMethod(cos, n, basicConst->get_0(), mathConst->getPI(), basicConst->get_1(), basicConst->getMinus_1());
 }
 
-Numerical* arcsin(const Numerical& n) {
+Numerical arcsin(const Numerical& n) {
     return bisectionMethod(sin, n, mathConst->getMinus_PI_2(), mathConst->getPI_2(), basicConst->getMinus_1(), basicConst->get_1());
 }
 
-Numerical* arctan(const Numerical& n) {
-    auto temp = n * n;
-    *temp += basicConst->get_1();
-    auto sqrt_temp = sqrt(*temp);
-    delete temp;
-
-    temp = n / *sqrt_temp;
-    delete sqrt_temp;
-
-    auto result = arcsin(*temp);
-    if((result->getLength() ^ n.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
-        result->toAbs();
-
-    delete temp;
+Numerical arctan(const Numerical& n) {
+    Numerical result = arcsin(n / sqrt(n * n + basicConst->get_1()));
+    if((result.getLength() ^ n.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
+        result.toAbs();
     return result;
 }
 
-Numerical* arcsec(const Numerical& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arccos(*temp);
-    delete temp;
+Numerical arcsec(const Numerical& n) {
+    return arccos(reciprocal(n));
+}
+
+Numerical arccsc(const Numerical& n) {
+    return arcsin(reciprocal(n));
+}
+
+Numerical arccot(const Numerical& n) {
+    return arctan(reciprocal(n));
+}
+
+Numerical cosh(const Numerical& n) {
+    Numerical result = exp(n);
+    result = (result + reciprocal(result)) / basicConst->get_2();
     return result;
 }
 
-Numerical* arccsc(const Numerical& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arcsin(*temp);
-    delete temp;
+Numerical sinh(const Numerical& n) {
+    Numerical result = exp(n);
+    Numerical temp = reciprocal(result);
+    result -= temp;
+    result /= basicConst->get_2();
     return result;
 }
 
-Numerical* arccot(const Numerical& n) {
-    auto temp = reciprocal(n);
-    if(temp == nullptr)
-        return temp;
-    auto result = arctan(*temp);
-    delete temp;
+Numerical tanh(const Numerical& n) {
+    Numerical result = exp(n);
+    Numerical temp = reciprocal(result);
+    Numerical temp1 = result + temp;
+    result -= temp;
+    result /= temp1;
     return result;
 }
 
-Numerical* cosh(const Numerical& n) {
-    auto result = exp(n);
-    auto temp = reciprocal(*result);
-    *result += *temp;
-    *result /= basicConst->get_2();
-    delete temp;
+Numerical sech(const Numerical& n) {
+    Numerical result = getTwo();
+    Numerical temp = exp(n);
+    temp += reciprocal(temp);
+    result /= temp;
     return result;
 }
 
-Numerical* sinh(const Numerical& n) {
-    auto result = exp(n);
-    auto temp = reciprocal(*result);
-    *result -= *temp;
-    *result /= basicConst->get_2();
-    delete temp;
+Numerical csch(const Numerical& n) {
+    Numerical result = getTwo();
+    Numerical temp = exp(n);
+    temp -= reciprocal(temp);
+    result /= temp;
     return result;
 }
 
-Numerical* tanh(const Numerical& n) {
-    auto result = exp(n);
-    auto temp = reciprocal(*result);
-    auto temp1 = *result + *temp;
-    *result -= *temp;
-    *result /= *temp1;
-    delete temp;
-    delete temp1;
+Numerical coth(const Numerical& n) {
+    Numerical result = exp(n);
+    Numerical temp = reciprocal(result);
+    Numerical temp1 = result - temp;
+    result += temp;
+    result /= temp1;
     return result;
 }
 
-Numerical* sech(const Numerical& n) {
-    auto result = getTwo();
-    auto temp = exp(n);
-    auto temp1 = reciprocal(*temp);
-    *temp += *temp1;
-    *result /= *temp;
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arccosh(const Numerical& n) {
+    return ln(sqrt(n * n - basicConst->get_1()) + n);
 }
 
-Numerical* csch(const Numerical& n) {
-    auto result = getTwo();
-    auto temp = exp(n);
-    auto temp1 = reciprocal(*temp);
-    *temp -= *temp1;
-    *result /= *temp;
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arcsinh(const Numerical& n) {
+    return ln(sqrt(n * n + basicConst->get_1()) + n);
 }
 
-Numerical* coth(const Numerical& n) {
-    auto result = exp(n);
-    auto temp = reciprocal(*result);
-    auto temp1 = *result - *temp;
-    *result += *temp;
-    *result /= *temp1;
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arctanh(const Numerical& n) {
+    return ln((basicConst->get_1() + n) / (basicConst->get_1() - n)) / basicConst->get_2();
 }
 
-Numerical* arccosh(const Numerical& n) {
-    auto temp = n * n;
-    *temp -= basicConst->get_1();
-    auto temp1 = sqrt(*temp);
-    *temp1 += n;
-    auto result = ln(*temp1);
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arcsech(const Numerical& n) {
+    return arccosh(reciprocal(n));
 }
 
-Numerical* arcsinh(const Numerical& n) {
-    auto temp = n * n;
-    *temp += basicConst->get_1();
-    auto temp1 = sqrt(*temp);
-    *temp1 += n;
-    auto result = ln(*temp1);
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arccsch(const Numerical& n) {
+    return arcsinh(reciprocal(n));
 }
 
-Numerical* arctanh(const Numerical& n) {
-    auto temp = basicConst->get_1() + n;
-    auto temp1 = basicConst->get_1() - n;
-    *temp /= *temp1;
-    auto result = ln(*temp);
-    *result /= basicConst->get_2();
-    delete temp;
-    delete temp1;
-    return result;
-}
-
-Numerical* arcsech(const Numerical& n) {
-    auto temp = reciprocal(n);
-    auto result = arccosh(*temp);
-    delete temp;
-    return result;
-}
-
-Numerical* arccsch(const Numerical& n) {
-    auto temp = reciprocal(n);
-    auto result = arcsinh(*temp);
-    delete temp;
-    return result;
-}
-
-Numerical* arccoth(const Numerical& n) {
-    auto temp = n + basicConst->get_1();
-    auto temp1 = n - basicConst->get_1();
-    *temp /= *temp1;
-    auto result = ln(*temp);
-    *result /= basicConst->get_2();
-    delete temp;
-    delete temp1;
-    return result;
+Numerical arccoth(const Numerical& n) {
+    return ln((n + basicConst->get_1()) / (n - basicConst->get_1())) / basicConst->get_2();
 }

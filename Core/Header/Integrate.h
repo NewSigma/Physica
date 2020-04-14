@@ -3,8 +3,8 @@
 
 #include "Numerical.h"
 
-Numerical* rectangular(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1);
-Numerical* ladder(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1);
-Numerical* simpson(Numerical* func(const Numerical&), const Numerical& x0, const Numerical& x1);
+Numerical rectangular(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1);
+Numerical ladder(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1);
+Numerical simpson(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1);
 
 #endif

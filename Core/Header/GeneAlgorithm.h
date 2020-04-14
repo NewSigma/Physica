@@ -14,7 +14,7 @@ public:
     double crossoverRate = 0.6;
     double mutationRate = 0.1;
 
-	GeneAlgorithm(Numerical* func(const Numerical&), const Numerical* lower, const Numerical* upper, int pop = 100, ChooseMode mode = RandomChoose);
+	GeneAlgorithm(Numerical func(const Numerical&), const Numerical& lower, const Numerical& upper, int pop = 100, ChooseMode mode = RandomChoose);
     ~GeneAlgorithm();
 
 	Numerical** getExtremalPoint();
@@ -26,7 +26,7 @@ private:
 	//The size of initial points we should choose.
 	int population;
 	//Function args.
-    Numerical* (*fitnessFunction)(const Numerical&);
+    Numerical (*fitnessFunction)(const Numerical&);
     const Numerical* lowerBound;
     const Numerical* upperBound;
     Numerical* regionLength;

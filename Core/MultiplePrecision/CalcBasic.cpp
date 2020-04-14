@@ -35,25 +35,26 @@ unsigned long basicMultiply(unsigned long& carry, unsigned long n1, unsigned lon
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
  */
-Numerical* add (const Numerical& n1, const Numerical& n2) {
-    Numerical* result;
+Numerical add(const Numerical& n1, const Numerical& n2) {
     if(n1.isZero())
-        result = new Numerical(n2);
+        return Numerical(n2);
     else if(n2.isZero())
-        result = new Numerical(n1);
+        return Numerical(n1);
     else if ((n1.length ^ n2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
-        Numerical* shallow_copy;
         if (n1.length > 0) {
-            shallow_copy = new Numerical(n2.byte, -n2.length, n2.power);
-            result = n1 - *shallow_copy;
-            shallow_copy->byte = nullptr;
+            Numerical shallow_copy(n2.byte, -n2.length, n2.power);
+            auto result = sub(n1, shallow_copy);
+            shallow_copy.byte = nullptr;
+            Q_UNUSED(shallow_copy)
+            return result;
         }
         else {
-            shallow_copy = new Numerical(n1.byte, -n1.length, n1.power);
-            result = n2 - *shallow_copy;
-            shallow_copy->byte = nullptr;
+            Numerical shallow_copy(n1.byte, -n1.length, n1.power);
+            auto result = sub(n2, shallow_copy);
+            shallow_copy.byte = nullptr;
+            Q_UNUSED(shallow_copy)
+            return result;
         }
-        delete shallow_copy;
     }
     else {
         const Numerical* big;
@@ -113,24 +114,22 @@ Numerical* add (const Numerical& n1, const Numerical& n2) {
         ////////////////////////////////////Out put////////////////////////////////////////
         if(big->length < 0)
             length = -length;
-        result = new Numerical(byte, length, power);
+        return Numerical(byte, length, power);
     }
-    return result;
 }
 
-Numerical* subtract (const Numerical& n1, const Numerical& n2) {
-    Numerical* result;
-    ///////////////////////////////////Deal with Binderies////////////////////////////////
-    Numerical* shallow_copy = nullptr;
+Numerical sub(const Numerical& n1, const Numerical& n2) {
     if(n1.isZero())
-        result = -n2;
+        return -n2;
     else if(n2.isZero())
-        result = new Numerical(n1);
+        return Numerical(n1);
     else if (n1.length > 0) {
         if (n2.length < 0) {
-            shallow_copy = new Numerical(n2.byte, -n2.length, n2.power);
-            result = n1 + *shallow_copy;
-            shallow_copy->byte = nullptr;
+            Numerical shallow_copy(n2.byte, -n2.length, n2.power);
+            Numerical result = add(n1, shallow_copy);
+            shallow_copy.byte = nullptr;
+            Q_UNUSED(shallow_copy)
+            return result;
         }
         else {
             const Numerical* big;
@@ -193,41 +192,42 @@ redo:
 
             if(changeSign)
                 length = -length;
-            result = new Numerical(byte, length, big->power);
+            Numerical result(byte, length, big->power);
             cutZero(result);
+            return result;
         }
     }
     else {
-        shallow_copy = new Numerical(n1.byte, -n1.length, n1.power);
+        Numerical shallow_copy(n1.byte, -n1.length, n1.power);
         if (n2.length > 0) {
-            result = *shallow_copy + n2;
-            result->length = -result->length;
+            Numerical result = add(shallow_copy, n2);
+            result.toOpposite();
+            shallow_copy.byte = nullptr;
+            Q_UNUSED(shallow_copy)
+            return result;
         }
         else {
-            auto shallow_copy_1 = new Numerical(n2.byte, n2.length, n2.power);
-            result = *shallow_copy_1 - *shallow_copy;
-            shallow_copy_1->byte = nullptr;
-            delete shallow_copy_1;
+            Numerical shallow_copy_1(n2.byte, n2.length, n2.power);
+            Numerical result = sub(shallow_copy_1, shallow_copy);
+            shallow_copy.byte = shallow_copy_1.byte = nullptr;
+            Q_UNUSED(shallow_copy)
+            Q_UNUSED(shallow_copy_1)
+            return result;
         }
-        shallow_copy->byte = nullptr;
     }
-    ////////////////////////////////////Out put////////////////////////////////////////
-    delete shallow_copy;
-    return result;
 }
 
-Numerical* multiply (const Numerical& n1, const Numerical& n2) {
-    Numerical* result;
+Numerical mul(const Numerical& n1, const Numerical& n2) {
     if(n1 == basicConst->get_1())
-        result = new Numerical(n2);
+        return Numerical(n2);
     else if(n2 == basicConst->get_1())
-        result = new Numerical(n1);
+        return Numerical(n1);
     else {
         const int size1 = n1.getSize();
         const int size2 = n2.getSize();
         const int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
-        auto length = (size1 + size2 - 1);
+        auto length = size1 + size2 - 1;
         auto byte = (unsigned long*)calloc(length, sizeof(long));
         unsigned long aByte;
         unsigned long carry = 0;
@@ -266,27 +266,26 @@ Numerical* multiply (const Numerical& n1, const Numerical& n2) {
         ////////////////////////////////////Out put////////////////////////////////////////
         if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
             length = -length;
-        result = new Numerical(byte, length, power);
+        return Numerical(byte, length, power);
     }
-    return result;
 }
 
-Numerical* divide (const Numerical& n1, const Numerical& n2) {
+Numerical div(const Numerical& n1, const Numerical& n2) {
     if(Q_UNLIKELY(n2.isZero()))
         qFatal("Divide by zero!");
 
-    Numerical* result;
     if(!n1.isZero()) {
         if(n2 != basicConst->get_1()) {
             Numerical n1_copy(n1);
             Numerical n2_copy(n2);
-            n1_copy.length = n1_copy.getSize();
+            n1_copy.toAbs();
+            n2_copy.toAbs();
             n1_copy.a = n2_copy.a = 0;
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
             //Estimate the length of result.
             int length = basicConst->getGlobalPrecision();
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
-            int power = n1.power - n2.power;
+            int power = n1.getPower() - n2.getPower();
             n1_copy.power = n2.power;
             auto byte = (unsigned long*)calloc(length, sizeof(long));
 
@@ -297,17 +296,15 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
                 temp_arr[0] = ULONG_MAX / 2;
                 unsigned long small = 0;
                 while(true) {
-                    auto mul = temp * n2_copy;
-                    if(*mul < n1_copy)
+                    Numerical mul = temp * n2_copy;
+                    if(mul < n1_copy)
                         small = temp_arr[0];
-                    else if (*mul > n1_copy)
+                    else if (mul > n1_copy)
                         large = temp_arr[0];
                     else {
                         byte[i] = temp_arr[0];
-                        delete mul;
                         goto stop;
                     }
-                    delete mul;
 
                     temp_arr[0] = small + large;
                     if(temp_arr[0] < small) {
@@ -318,9 +315,7 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
                         temp_arr[0] /= 2;
 
                     if(small + 1 == large) {
-                        mul = temp * n2_copy;
-                        n1_copy -= *mul;
-                        delete mul;
+                        n1_copy -= temp * n2_copy;
                         break;
                     }
                 }
@@ -332,60 +327,60 @@ Numerical* divide (const Numerical& n1, const Numerical& n2) {
             if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
                 length = -length;
             //1 comes from the algorithm
-            result = new Numerical(byte, length, power, 1);
+            Numerical result(byte, length, power, 1);
             cutZero(result);
+            return result;
         }
         else
-            result = new Numerical(n1);
+            return Numerical(n1);
     }
     else
-        result = getZero();
-    return result;
+        return getZero();
 }
 /*
  * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
  * Return true if array is cut.
  */
-bool cutLength(Numerical* n) {
+bool cutLength(Numerical& n) {
     bool result = false;
-    int size = n->getSize();
+    int size = n.getSize();
 
     if(size > basicConst->getGlobalPrecision()) {
         result = true;
         int cutFrom = size - basicConst->getGlobalPrecision();
         auto new_byte = (unsigned long*)malloc(basicConst->getGlobalPrecision() * sizeof(long));
-        memcpy(new_byte, n->byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(long));
-        free(n->byte);
-        n->byte = new_byte;
+        memcpy(new_byte, n.byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(long));
+        free(n.byte);
+        n.byte = new_byte;
         auto length = basicConst->getGlobalPrecision();
-        if(n->length < 0)
+        if(n.length < 0)
             length = -length;
-        n->length = length;
-        n->a = n->a != 0;
+        n.length = length;
+        n.a = n.a != 0;
     }
     return result;
 }
 /*
  * Cut zeros from the beginning.
  */
-void cutZero(Numerical* n) {
-    int size = n->getSize();
+void cutZero(Numerical& n) {
+    int size = n.getSize();
     int id = size - 1;
-    while(n->byte[id] == 0 && id > 0)
+    while(n.byte[id] == 0 && id > 0)
         --id;
     ++id;
 
     if(id != size) {
         int shorten = size - id;
-        n->byte = (unsigned long*)realloc(n->byte, id * sizeof(long));
+        n.byte = (unsigned long*)realloc(n.byte, id * sizeof(long));
         size = id;
-        if(n->length < 0)
+        if(n.length < 0)
             size = -size;
-        n->length = size;
+        n.length = size;
 
-        if(n->byte[id - 1] != 0)
-            n->power -= shorten;
+        if(n.byte[id - 1] != 0)
+            n.power -= shorten;
         else
-            n->power = 0;
+            n.power = 0;
     }
 }

@@ -13,12 +13,12 @@ public:
     Numerical* real;
     Numerical* imagine;
 
-    ComplexNum(Numerical* n1, Numerical* n2, bool polar = false);
+    ComplexNum(const Numerical& n1, const Numerical& n2, bool polar = false);
     ComplexNum(ComplexNum& instance);
-    ComplexNum(ComplexNum* instance);
-    virtual ~ComplexNum();
+    explicit ComplexNum(ComplexNum* instance);
+    ~ComplexNum() override;
     ComplexNum* toConjugate() const;
-    Numerical* toNorm() const;
+    Numerical toNorm() const;
     Vector* toVector() const;
 
     void operator<<(ComplexNum& n);
