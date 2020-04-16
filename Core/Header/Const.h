@@ -6,7 +6,8 @@ class Numerical;
 
 class BasicConst {
     //_1 stands by integer 1.
-    int GlobalPrecision;
+    const int GlobalPrecision;
+    const Numerical* plotPoints;
     const Numerical* expectedRelativeError;
     const Numerical* stepSize;
     const Numerical* R_MAX;
@@ -24,6 +25,7 @@ public:
     ~BasicConst();
 
     inline int getGlobalPrecision() const { return GlobalPrecision; }
+    inline const Numerical& getPlotPoints() const { return *plotPoints; }
     inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
     inline const Numerical& getStepSize() const { return *stepSize; }
     inline const Numerical& getR_MAX() const { return *R_MAX; }
@@ -63,5 +65,8 @@ public:
 private:
     static Numerical calcPI(int precision);
 };
+
+extern const BasicConst* basicConst;
+extern const MathConst* mathConst;
 
 #endif

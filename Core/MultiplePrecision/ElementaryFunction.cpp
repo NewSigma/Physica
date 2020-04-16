@@ -5,9 +5,6 @@
 #include <climits>
 #include "Solve.h"
 #include "Numerical.h"
-
-extern const MathConst* mathConst;
-
 //Return a real number between 0 and 1.
 Numerical randomNumerical() {
     return Numerical(double(random()) / RAND_MAX);
@@ -25,8 +22,10 @@ Numerical reciprocal(const Numerical& n) {
  * (sqrt(n + a) - sqrt(n)) for error.
  */
 Numerical sqrt_light(const Numerical& n) {
-    if(n.getLength() < 0)
+    if(n.isNegative())
         qFatal("Can not resolve the square root of a minus value.");
+    if(n.isZero())
+        return Numerical(basicConst->get_0());
     Numerical copy_n(n);
     //Let n < 1 so as to control error.
     int add_power = 0;
@@ -164,11 +163,14 @@ Numerical cos(const Numerical& n) {
     Numerical temp_1(square_n);
     Numerical temp_2 = getTwo();
     Numerical rank = getTwo();
+    bool changeSign = true;
 
     while(true) {
         //Calculate one term of the taylor series.
         Numerical temp = temp_1 / temp_2;
-        temp.toOpposite();
+        if(changeSign)
+            temp.toOpposite();
+        changeSign = !changeSign;
         result += temp;
         //Here the temp means the criteria of break.
         temp *= n;
@@ -194,11 +196,14 @@ Numerical sin(const Numerical& n) {
     Numerical temp_1(n);
     Numerical temp_2 = getOne();
     Numerical rank = getOne();
+    bool changeSign = false;
 
     while(true) {
         //Calculate one term of the taylor series.
         Numerical temp = temp_1 / temp_2;
-        temp.toOpposite();
+        if(changeSign)
+            temp.toOpposite();
+        changeSign = !changeSign;
         result += temp;
         //Here the temp means the criteria of break.
         temp *= n;

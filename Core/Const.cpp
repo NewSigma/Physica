@@ -8,40 +8,42 @@
 /*
  * Basic consts that initialize directly.
  */
-BasicConst::BasicConst() {
-    GlobalPrecision = 4;
+BasicConst::BasicConst() : GlobalPrecision(4) {
+    auto byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
+    byte[0] = 100;
+    plotPoints = new Numerical(byte, 1, 0);
 
-    auto byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 1;
     expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 1;
     //Value (- GlobalPrecision / 2) still need a proof.
     stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
 
     R_MAX = new Numerical(2147483647);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 0;
     _0 = new Numerical(byte, 1, 0);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 1;
     _1 = new Numerical(byte, 1, 0);
     Minus_1 = new Numerical(-*_1);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 2;
     _2 = new Numerical(byte, 1, 0);
     Minus_2 = new Numerical(-*_2);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 3;
     _3 = new Numerical(byte, 1, 0);
     Minus_3 = new Numerical(-*_3);
 
-    byte = (unsigned long*)malloc(sizeof(long));
+    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 4;
     _4 = new Numerical(byte, 1, 0);
     Minus_4 = new Numerical(-*_4);

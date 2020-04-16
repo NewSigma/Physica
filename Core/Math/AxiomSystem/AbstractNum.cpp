@@ -14,7 +14,7 @@
 extern const MathConst* mathConst;
 
 AbstractNum* AbstractNum::concretize() {
-    switch(type) {
+    switch(getType()) {
         case ComplexNumber:
             return new ComplexNum((ComplexNum*)this);
         case RealNumber:

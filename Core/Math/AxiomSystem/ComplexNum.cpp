@@ -10,7 +10,6 @@
 #include "ElementaryFunction.h"
 
 ComplexNum::ComplexNum(const Numerical& n1, const Numerical& n2, bool polar) {
-    type = AbstractNum::ComplexNumber;
     if(polar) {
         real = new Numerical(n1 * cos(n2));
         imagine = new Numerical(n1 * sin(n2));
@@ -43,6 +42,10 @@ Vector* ComplexNum::toVector() const {
     arr[0] = new RealNum(*real);
     arr[1] = new RealNum(*imagine);
     return new Vector(arr, 2);
+}
+
+AbstractNum::NumberType ComplexNum::getType() const noexcept {
+    return AbstractNum::ComplexNumber;
 }
 
 void ComplexNum::operator<<(ComplexNum& n) {

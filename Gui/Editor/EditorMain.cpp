@@ -3,8 +3,10 @@
  */
 #include <QtGui/QPainter>
 #include <QtGui/QTextBlock>
-#include "../Header/EditorMain.h"
+#include <Gui/Header/Plot.h>
+#include "EditorMain.h"
 #include "QPaintEvent"
+#include <Core/Header/Numerical.h>
 
 EditorMain::EditorMain(QWidget* parent) : QTextEdit(parent) {
     highLight = 0xDCDCDC;

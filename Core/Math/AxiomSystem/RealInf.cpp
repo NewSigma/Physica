@@ -1,15 +1,14 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../../Header/RealInf.h"
-#include "../../Header/ComplexInf.h"
-#include "../../Header/Indeterminate.h"
+#include "RealInf.h"
+#include "ComplexInf.h"
+#include "Indeterminate.h"
 
 RealInf* RealInf::positive = nullptr;
 RealInf* RealInf::negative = nullptr;
 
 RealInf::RealInf(bool b) {
-    type = AbstractNum::RealInfinity;
     auto arr = new AbstractNum*[1];
     if(b)
         arr[0] = new RealNum(basicConst->get_1());
@@ -34,6 +33,10 @@ RealInf* RealInf::getInstance(bool b) {
             negative = new RealInf(b);
         return negative;
     }
+}
+
+AbstractNum::NumberType RealInf::getType() const noexcept {
+    return AbstractNum::RealInfinity;
 }
 
 AbstractNum* RealInf::operator+(const AbstractNum& n) const {

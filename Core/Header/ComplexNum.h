@@ -21,6 +21,7 @@ public:
     Numerical toNorm() const;
     Vector* toVector() const;
 
+    NumberType getType() const noexcept override;
     void operator<<(ComplexNum& n);
     ComplexNum& operator= (const ComplexNum& n);
     AbstractNum* operator+ (const AbstractNum& n) const override;

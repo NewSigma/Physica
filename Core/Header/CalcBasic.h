@@ -6,8 +6,6 @@
 
 class Numerical;
 
-unsigned long basicMultiply(unsigned long& carry, unsigned long n1, unsigned long n2);
-
 Numerical add(const Numerical& n1, const Numerical& n2);
 Numerical sub(const Numerical& n1, const Numerical& n2);
 Numerical mul(const Numerical& n1, const Numerical& n2);

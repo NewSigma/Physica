@@ -16,6 +16,7 @@ public:
     bool getSign() const { return *((RealNum*)(*direction)[0])->real == basicConst->get_1(); }
     static RealInf* getInstance(bool b);
 
+    NumberType getType() const noexcept override;
     AbstractNum* operator+(const AbstractNum& n) const override;
     AbstractNum* operator-(const AbstractNum& n) const override;
     AbstractNum* operator*(const AbstractNum& n) const override;

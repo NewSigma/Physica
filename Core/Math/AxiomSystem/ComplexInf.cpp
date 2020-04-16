@@ -1,13 +1,12 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../../Header/ComplexInf.h"
-#include "../../Header/Indeterminate.h"
+#include "ComplexInf.h"
+#include "Indeterminate.h"
 
 ComplexInf* ComplexInf::instance = nullptr;
 
 ComplexInf::ComplexInf() {
-    type = AbstractNum::ComplexInfinity;
     direction = nullptr;
 }
 
@@ -15,6 +14,10 @@ ComplexInf* ComplexInf::getInstance() {
     if(instance == nullptr)
         instance = new ComplexInf();
     return instance;
+}
+
+AbstractNum::NumberType ComplexInf::getType() const noexcept {
+    return AbstractNum::ComplexInfinity;
 }
 
 AbstractNum* ComplexInf::operator+(const AbstractNum& n) const {

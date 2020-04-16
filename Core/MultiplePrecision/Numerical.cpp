@@ -2,13 +2,11 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Numerical.h"
-#include "ElementaryFunction.h"
 #include <cstring>
 #include <cmath>
 #include <QtCore/qlogging.h>
+#include <iostream>
 #include <iomanip>
-
-extern const MathConst* mathConst;
 /*
  *
  * Useful formulas:
@@ -21,11 +19,11 @@ extern const MathConst* mathConst;
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a) : byte(byte), length(length), power(power), a(a) {}
+Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {}
 
-Numerical::Numerical(const Numerical& n) : length(n.length), power(n.power), a(n.a) {
+Numerical::Numerical(const Numerical& n) noexcept : length(n.length), power(n.power), a(n.a) {
     int size = getSize();
-    byte = (NumericalUnit*)malloc(size * sizeof(NumericalUnit));
+    byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
     memcpy(byte, n.byte, size * sizeof(NumericalUnit));
 }
 
@@ -33,13 +31,13 @@ Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), p
     n.byte = nullptr;
 }
 
-Numerical::Numerical(const Numerical* n) : Numerical(*n) {}
+Numerical::Numerical(const Numerical* n) noexcept : Numerical(*n) {}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 Numerical::Numerical(double d, NumericalUnit a) : a(a) {
     if(d == 0) {
-        byte = (NumericalUnit*)malloc(sizeof(NumericalUnit));
+        byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
         length = 1;
         byte[0] = power = 0;
         return;
@@ -49,27 +47,28 @@ Numerical::Numerical(double d, NumericalUnit a) : a(a) {
         d = -d;
 
     power = 0;
-    while(d > (double)NumericalUnitMax) {
-        d /= (double)NumericalUnitMax;
+    auto dNumericalUnitMax = static_cast<double>(NumericalUnitMax);
+    while(d > dNumericalUnitMax) {
+        d /= dNumericalUnitMax;
         ++power;
     }
 
     while(d < 1) {
-        d *= (double)NumericalUnitMax;
+        d *= dNumericalUnitMax;
         --power;
     }
 #ifdef PHYSICA_64BIT
     length = 2;
-    byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
-    auto integer = (NumericalUnit)d;
+    byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+    auto integer = static_cast<NumericalUnit>(d);
     byte[1] = integer;
     d -= integer;
-    byte[0] = (NumericalUnit)(d * (double)NumericalUnitMax);
+    byte[0] = static_cast<NumericalUnit>(d * dNumericalUnitMax);
 #endif
 
 #ifdef PHYSICA_32BIT
     length = 3;
-    byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
+    byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
     Numerical integer = (NumericalUnit)d;
     d -= integer;
     byte[2] = integer;
@@ -112,31 +111,32 @@ Numerical::~Numerical() { free(byte); }
 Numerical::operator double() const {
     int lastIndex = getSize() - 1;
     double d = 0;
-    double base = pow((double)NumericalUnitMax, power - lastIndex);
+    double base = pow(static_cast<double>(NumericalUnitMax), power - lastIndex);
     for(int i = 0; i < lastIndex; ++i) {
-        d += base * (double)byte[i];
-        base *= (double)NumericalUnitMax;
+        d += base * static_cast<double>(byte[i]);
+        base *= static_cast<double>(NumericalUnitMax);
     }
-    d += base * (double)byte[lastIndex];
+    d += base * static_cast<double>(byte[lastIndex]);
 
     return d;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
-    return os << std::setprecision(53) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
-    << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6);
+    //10 is the max precision.
+    return os << std::setprecision(10) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
+    << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6); //6 is the default precision.
 }
 
 Numerical Numerical::operator<<(int bits) {
     size_t bytes = getSize() * sizeof(NumericalUnit);
-    auto new_byte = (NumericalUnit*)malloc(bytes);
+    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
     mempcpy(new_byte, byte, bytes);
     return Numerical(new_byte, length, power + bits, a);
 }
 
 Numerical Numerical::operator>>(int bits) {
     size_t bytes = getSize() * sizeof(NumericalUnit);
-    auto new_byte = (NumericalUnit*)malloc(bytes);
+    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
     mempcpy(new_byte, byte, bytes);
     return Numerical(new_byte, length, power - bits, a);
 }
@@ -151,7 +151,7 @@ Numerical& Numerical::operator= (const Numerical& n) {
     length = n.length;
     int size = getSize();
     free(byte);
-    byte = (NumericalUnit*)malloc(size * sizeof(NumericalUnit));
+    byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
     memcpy(byte, n.byte, size * sizeof(NumericalUnit));
     power = n.power;
     a = n.a;
@@ -217,9 +217,9 @@ Numerical Numerical::operator^ (const Numerical& n) const {
 
 Numerical Numerical::operator-() const {
     size_t bytes = getSize() * sizeof(NumericalUnit);
-    auto new_byte = (NumericalUnit*)malloc(bytes);
+    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
     mempcpy(new_byte, byte, bytes);
-    return Numerical(new_byte, length, power, a);
+    return Numerical(new_byte, -length, power, a);
 }
 
 Numerical operator+ (const Numerical& n1, const Numerical& n2) {
@@ -367,7 +367,7 @@ bool operator!= (const Numerical& n1, const Numerical& n2) {
 }
 //Return accuracy in class Numerical.
 Numerical getAccuracy(const Numerical& n) {
-    auto b = (NumericalUnit*)malloc(sizeof(NumericalUnit));
+    auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
     b[0] = n.getA();
     return Numerical(b, 1, n.getPower() - n.getSize() + 1);
 }
@@ -380,7 +380,7 @@ Numerical& Numerical::applyError(const Numerical& error) {
         NumericalUnit copy_a = a;
         if(temp <= 0) {
             if(temp < 0) {
-                auto b = (NumericalUnit*)malloc(sizeof(NumericalUnit));
+                auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
                 b[0] = a;
                 Numerical error_1(b, 1, power - size + 1);
                 error_1 = add(error_1, error);
@@ -407,7 +407,7 @@ Numerical& Numerical::applyError(const Numerical& error) {
         }
 
         if(size < copy) {
-            auto new_byte = (NumericalUnit*)malloc(size * sizeof(NumericalUnit));
+            auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
             memcpy(new_byte, byte + copy - size, size * sizeof(NumericalUnit));
             free(byte);
             byte = new_byte;

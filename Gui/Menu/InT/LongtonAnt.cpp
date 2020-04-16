@@ -1,4 +1,4 @@
-#include "../../Header/LongtonAnt.h"
+#include "LongtonAnt.h"
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  * Inspired by interview question 16.22 on leetcode.

@@ -20,11 +20,10 @@ Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, 
     if(n == y2)
         return Numerical(x2);
 
-    if((sub(n, y1).getLength() ^ sub(n, y2).getLength()) > 0) // NOLINT(hicpp-signed-bitwise)
+    if((sub(n, y1).getLength() ^ sub(n, y2).getLength()) >= 0) // NOLINT(hicpp-signed-bitwise)
         qFatal("Root is nonexistent.");
 
-    Numerical result = add(x1, x2);
-    result /= basicConst->get_2();
+    Numerical result = div(add(x1, x2), basicConst->get_2());
     Numerical y_result = getZero();
 
     Numerical error = div(sub(y1, y2).toAbs(), basicConst->get_2());

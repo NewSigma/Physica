@@ -26,7 +26,7 @@ NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUni
     lh += ll >> (NumericalUnitWidth / 2);
     lh += hl;
     if(lh < hl)
-        hh += (NumericalUnit)1 << (NumericalUnitWidth / 2);
+        hh += static_cast<NumericalUnit>(1) << (NumericalUnitWidth / 2);
     carry = hh + (lh >> (NumericalUnitWidth / 2));
     return (lh << (NumericalUnitWidth / 2)) + (ll & LongLowMask);
 }
@@ -72,7 +72,7 @@ Numerical add(const Numerical& n1, const Numerical& n2) {
         int lastIndex = smallSize - 1;
         //Estimate the ed of result first, will calculate it accurately later.
         int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-        auto byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
+        auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
         memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
         memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
 
@@ -108,7 +108,7 @@ Numerical add(const Numerical& n1, const Numerical& n2) {
         if(carry != 0) {
             ++length;
             ++power;
-            byte = (NumericalUnit*)realloc(byte, length * sizeof(NumericalUnit));
+            byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
             byte[length - 1] = 1;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -150,7 +150,7 @@ redo:
             const int lastIndex = smallSize - 1;
             //Estimate the ed of result first, will calculate it accurately later.
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-            auto byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
+            auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
             memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
             memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
 
@@ -228,7 +228,7 @@ Numerical mul(const Numerical& n1, const Numerical& n2) {
         const int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
         auto length = size1 + size2 - 1;
-        auto byte = (NumericalUnit*)calloc(length, sizeof(NumericalUnit));
+        auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
         NumericalUnit aByte;
         NumericalUnit carry = 0;
         //Every time the outer loop finished once, the position of carry will be reset. So we have to save the data.
@@ -260,7 +260,7 @@ Numerical mul(const Numerical& n1, const Numerical& n2) {
         if (carry_last != 0) {
             ++length;
             ++power;
-            byte = (NumericalUnit*)realloc(byte, length * sizeof(NumericalUnit));
+            byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
             byte[length - 1] = carry_last;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -287,9 +287,9 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
             int power = n1.getPower() - n2.getPower();
             n1_copy.power = n2.power;
-            auto byte = (NumericalUnit*)calloc(length, sizeof(NumericalUnit));
+            auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
 
-            auto temp_arr = (NumericalUnit*)malloc(sizeof(NumericalUnit));
+            auto temp_arr = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
             Numerical temp(temp_arr, 1, 0);
             for (int i = length - 1; i >= 0; --i) {
                 NumericalUnit large = ULONG_MAX;
@@ -348,7 +348,7 @@ bool cutLength(Numerical& n) {
     if(size > basicConst->getGlobalPrecision()) {
         result = true;
         int cutFrom = size - basicConst->getGlobalPrecision();
-        auto new_byte = (NumericalUnit*)malloc(basicConst->getGlobalPrecision() * sizeof(NumericalUnit));
+        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(basicConst->getGlobalPrecision() * sizeof(NumericalUnit)));
         memcpy(new_byte, n.byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(NumericalUnit));
         free(n.byte);
         n.byte = new_byte;
@@ -372,7 +372,7 @@ void cutZero(Numerical& n) {
 
     if(id != size) {
         int shorten = size - id;
-        n.byte = (NumericalUnit*)realloc(n.byte, id * sizeof(NumericalUnit));
+        n.byte = reinterpret_cast<NumericalUnit*>(realloc(n.byte, id * sizeof(NumericalUnit)));
         size = id;
         if(n.length < 0)
             size = -size;

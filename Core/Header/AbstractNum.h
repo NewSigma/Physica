@@ -18,7 +18,7 @@ public:
         Indeterminate
     };
     virtual ~AbstractNum() = default;
-    NumberType getType() const { return type; }
+    virtual NumberType getType() const noexcept = 0;
     AbstractNum* concretize();
 
     friend std::ostream& operator<<(std::ostream& os, const AbstractNum& n);
@@ -30,8 +30,6 @@ public:
     virtual AbstractNum* operator- () const = 0;
     virtual bool operator== (const AbstractNum& n) const = 0;
     bool operator!= (const AbstractNum& n) const;
-protected:
-    NumberType type;
 };
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 AbstractNum* reciprocal(const AbstractNum& n);

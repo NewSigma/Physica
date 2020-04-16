@@ -6,11 +6,8 @@
 
 #include <iostream>
 #include "Const.h"
-#include "CalcBasic.h"
 #include "ElementaryFunction.h"
 #include "SystemBits.h"
-
-extern const BasicConst* basicConst;
 
 class Numerical {
     //Store effective digits.
@@ -25,10 +22,10 @@ class Numerical {
     //Accuracy
     NumericalUnit a;
 public:
-    Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0);
-    Numerical(const Numerical& n);
+    Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0) noexcept;
+    Numerical(const Numerical& n) noexcept;
     Numerical(Numerical&& n) noexcept;
-    explicit Numerical(const Numerical* n);
+    explicit Numerical(const Numerical* n) noexcept;
     explicit Numerical(double d, NumericalUnit a = 0);
     explicit Numerical(const char* s, NumericalUnit a = 0);
     explicit Numerical(const wchar_t* s, NumericalUnit a = 0);
@@ -40,8 +37,8 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
     Numerical operator<<(int bits);
     Numerical operator>>(int bits);
-    void operator<<=(int bits) { power += bits; }
-    void operator>>=(int bits) { power -= bits; }
+    void operator<<=(int bits) noexcept { power += bits; }
+    void operator>>=(int bits) noexcept { power -= bits; }
     NumericalUnit operator[](unsigned int index) const;
     Numerical& operator=(const Numerical& n);
     Numerical& operator=(Numerical&& n) noexcept;
@@ -50,10 +47,10 @@ public:
 
     Numerical& applyError(const Numerical& error);
 
-    const int& getLength() const { return length; }
-    const int& getPower() const { return power; }
-    const NumericalUnit& getA() const { return a; }
-    int getSize() const { return abs(length); }
+    const int& getLength() const noexcept { return length; }
+    const int& getPower() const noexcept { return power; }
+    const NumericalUnit& getA() const noexcept { return a; }
+    int getSize() const noexcept { return abs(length); }
     Numerical& toAbs() { length = getSize(); return *this; }
     Numerical& toOpposite() { length = -length; return *this; }
     Numerical& toUnitA() { a = 1; return *this; }

@@ -5,9 +5,7 @@
 #include "RealInf.h"
 #include "Indeterminate.h"
 
-RealNum::RealNum(const Numerical& n) : ComplexNum(n, basicConst->get_0()) {
-    type = RealNumber;
-}
+RealNum::RealNum(const Numerical& n) : ComplexNum(n, basicConst->get_0()) {}
 
 RealNum::RealNum(const RealNum& n) : RealNum(*n.real) {}
 
@@ -15,6 +13,10 @@ RealNum::RealNum(const RealNum* n) : RealNum(*n) {}
 
 RealNum::~RealNum() {
     imagine = nullptr;
+}
+
+AbstractNum::NumberType RealNum::getType() const noexcept {
+    return AbstractNum::RealNumber;
 }
 
 AbstractNum* RealNum::operator+ (const AbstractNum& n) const {

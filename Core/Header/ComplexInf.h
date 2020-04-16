@@ -10,6 +10,7 @@ class ComplexInf : public DirectedInf {
 public:
     static ComplexInf* getInstance();
 
+    NumberType getType() const noexcept override;
     AbstractNum* operator+(const AbstractNum& n) const override;
     AbstractNum* operator-(const AbstractNum& n) const override;
     AbstractNum* operator*(const AbstractNum& n) const override;

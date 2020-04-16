@@ -5,7 +5,7 @@
 
 class EditorMain : public QTextEdit {
 public:
-    EditorMain(QWidget* parent);
+    explicit EditorMain(QWidget* parent);
 private:
     int highLight;
     int lineNumberAreaWidth();

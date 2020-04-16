@@ -9,6 +9,7 @@
 class Indeterminate : public AbstractNum {
 public:
     static Indeterminate* getInstance();
+    NumberType getType() const noexcept override;
     AbstractNum* operator+(const AbstractNum& n) const override;
     AbstractNum* operator-(const AbstractNum& n) const override;
     AbstractNum* operator*(const AbstractNum& n) const override;

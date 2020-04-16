@@ -1,16 +1,15 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "../../Header/DirectedInf.h"
-#include "../../Header/Indeterminate.h"
-#include "../../Header/ComplexInf.h"
-#include "../../Header/Const.h"
-#include "../../Header/RealNum.h"
+#include "DirectedInf.h"
+#include "Indeterminate.h"
+#include "ComplexInf.h"
+#include "Const.h"
+#include "RealNum.h"
 
 extern const BasicConst* basicConst;
 
 DirectedInf::DirectedInf(Vector* vec) {
-    type = DirectedInfinity;
     direction = vec;
 }
 
@@ -22,6 +21,10 @@ DirectedInf::DirectedInf(const DirectedInf* instance) : DirectedInf(*instance) {
 
 DirectedInf::~DirectedInf() {
     delete direction;
+}
+
+AbstractNum::NumberType DirectedInf::getType() const noexcept {
+    return AbstractNum::DirectedInfinity;
 }
 
 AbstractNum* DirectedInf::operator+ (const AbstractNum& n) const {

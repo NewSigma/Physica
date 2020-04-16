@@ -17,6 +17,7 @@ public:
     DirectedInf(const DirectedInf* instance);
     ~DirectedInf();
 
+    NumberType getType() const noexcept override;
     AbstractNum* operator+ (const AbstractNum& n) const override;
     AbstractNum* operator- (const AbstractNum& n) const override;
     AbstractNum* operator* (const AbstractNum& n) const override;
