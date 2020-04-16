@@ -8,13 +8,13 @@
 #include "Const.h"
 #include "CalcBasic.h"
 #include "ElementaryFunction.h"
+#include "SystemBits.h"
 
 extern const BasicConst* basicConst;
 
 class Numerical {
     //Store effective digits.
-    //TODO Depending on the platform, unsigned long may not be the best choice but the type whose length equals to the word length is.
-    unsigned long* byte;
+    NumericalUnit* byte;
     /*
      * Length of byte = abs(length).
      * sign of length and sign of Numerical are same. (when Numerical != 0)
@@ -23,24 +23,24 @@ class Numerical {
     //Number = (x0 +- a * 10^(1-length)) * 10^power
     int power;
     //Accuracy
-    unsigned long a;
+    NumericalUnit a;
 public:
-    Numerical(unsigned long* byte, int length, int power, unsigned long a = 0);
+    Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0);
     Numerical(const Numerical& n);
     Numerical(Numerical&& n) noexcept;
     explicit Numerical(const Numerical* n);
-    explicit Numerical(double d, unsigned long a = 0);
-    explicit Numerical(const char* s, unsigned long a = 0);
-    explicit Numerical(const wchar_t* s, unsigned long a = 0);
-    explicit Numerical(const std::string& s, unsigned long a = 0);
-    explicit Numerical(const std::wstring& s, unsigned long a = 0);
+    explicit Numerical(double d, NumericalUnit a = 0);
+    explicit Numerical(const char* s, NumericalUnit a = 0);
+    explicit Numerical(const wchar_t* s, NumericalUnit a = 0);
+    explicit Numerical(const std::string& s, NumericalUnit a = 0);
+    explicit Numerical(const std::wstring& s, NumericalUnit a = 0);
     ~Numerical();
 
     explicit operator double() const;
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
     void operator<<(int bits);
     void operator>>(int bits);
-    unsigned long operator[](unsigned int index) const;
+    NumericalUnit operator[](unsigned int index) const;
     Numerical& operator=(const Numerical& n);
     Numerical& operator=(Numerical&& n) noexcept;
     Numerical operator+(const Numerical& n) const;
@@ -68,7 +68,7 @@ public:
 
     const int& getLength() const { return length; }
     const int& getPower() const { return power; }
-    const unsigned long& getA() const { return a; }
+    const NumericalUnit& getA() const { return a; }
     int getSize() const { return abs(length); }
     Numerical& toAbs() { length = getSize(); return *this; }
     Numerical& toOpposite() { length = -length; return *this; }

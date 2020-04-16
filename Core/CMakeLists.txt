@@ -21,7 +21,7 @@ target_compile_options(Physica_Core PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
 target_compile_options(Physica_Core PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
         --compiler-options -fPIC
         --gpu-architecture ${GPU_ARCHITECTURE}
-        --gpu-code ${GPU_ARCHITECTURE}
-        --optimize ${GPU_CODE}
+        --gpu-code ${GPU_CODE}
+        --optimize ${OPTIMIZE_LEVEL}
         --relocatable-device-code=true
         >)

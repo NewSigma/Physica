@@ -7,28 +7,28 @@
 #include <climits>
 #include "Numerical.h"
 
-const unsigned long LongLowMask = ULONG_MAX >> (LONG_WIDTH / 2); // NOLINT(hicpp-signed-bitwise)
+const NumericalUnit LongLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2); // NOLINT(hicpp-signed-bitwise)
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 //n1 * n2 = product(16 bits) = carry(high 8 bits) + ReturnValue(low 8bits)
-unsigned long basicMultiply(unsigned long& carry, unsigned long n1, unsigned long n2) {
-    unsigned long n1_low = n1 & LongLowMask;
-    unsigned long n1_high = n1 >> (LONG_WIDTH / 2);
-    unsigned long n2_low = n2 & LongLowMask;
-    unsigned long n2_high = n2 >> (LONG_WIDTH / 2);
+NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
+    NumericalUnit n1_low = n1 & LongLowMask;
+    NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2);
+    NumericalUnit n2_low = n2 & LongLowMask;
+    NumericalUnit n2_high = n2 >> (NumericalUnitWidth / 2);
 
     auto ll = n1_low * n2_low;
     auto lh = n1_low * n2_high;
     auto hl = n1_high * n2_low;
     auto hh = n1_high * n2_high;
 
-    lh += ll >> (LONG_WIDTH / 2);
+    lh += ll >> (NumericalUnitWidth / 2);
     lh += hl;
     if(lh < hl)
-        hh += (unsigned long)1 << (LONG_WIDTH / 2);
-    carry = hh + (lh >> (LONG_WIDTH / 2));
-    return (lh << (LONG_WIDTH / 2)) + (ll & LongLowMask);
+        hh += (NumericalUnit)1 << (NumericalUnitWidth / 2);
+    carry = hh + (lh >> (NumericalUnitWidth / 2));
+    return (lh << (NumericalUnitWidth / 2)) + (ll & LongLowMask);
 }
 #pragma clang diagnostic pop
 /*
@@ -72,14 +72,14 @@ Numerical add(const Numerical& n1, const Numerical& n2) {
         int lastIndex = smallSize - 1;
         //Estimate the ed of result first, will calculate it accurately later.
         int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-        auto byte = (unsigned long*)malloc(length * sizeof(long));
-        memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
-        memset(byte, 0, (length - bigSize) * sizeof(long));
+        auto byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
+        memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
+        memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
 
         int index = length - big->power + small->power - smallSize;
-        unsigned long aByte;
-        unsigned long carry = 0;
-        unsigned long carry_temp;
+        NumericalUnit aByte;
+        NumericalUnit carry = 0;
+        NumericalUnit carry_temp;
         //Add small to big
         for(int i = 0; i < lastIndex; ++i) {
             aByte = byte[index];
@@ -108,7 +108,7 @@ Numerical add(const Numerical& n1, const Numerical& n2) {
         if(carry != 0) {
             ++length;
             ++power;
-            byte = (unsigned long*)realloc(byte, length * sizeof(long));
+            byte = (NumericalUnit*)realloc(byte, length * sizeof(NumericalUnit));
             byte[length - 1] = 1;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -150,14 +150,14 @@ redo:
             const int lastIndex = smallSize - 1;
             //Estimate the ed of result first, will calculate it accurately later.
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-            auto byte = (unsigned long*)malloc(length * sizeof(long));
-            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(long));
-            memset(byte, 0, (length - bigSize) * sizeof(long));
+            auto byte = (NumericalUnit*)malloc(length * sizeof(NumericalUnit));
+            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
+            memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
 
             int index = length - big->power + small->power - smallSize;
-            unsigned long aByte;
-            unsigned long carry = 0;
-            unsigned long carry_temp;
+            NumericalUnit aByte;
+            NumericalUnit carry = 0;
+            NumericalUnit carry_temp;
             //Subtract small from big
             for(int i = 0; i < lastIndex; ++i) {
                 aByte = byte[index];
@@ -228,12 +228,12 @@ Numerical mul(const Numerical& n1, const Numerical& n2) {
         const int last2 = size2 - 1;
         //Estimate the ed of result first. we will calculate it accurately later.
         auto length = size1 + size2 - 1;
-        auto byte = (unsigned long*)calloc(length, sizeof(long));
-        unsigned long aByte;
-        unsigned long carry = 0;
+        auto byte = (NumericalUnit*)calloc(length, sizeof(NumericalUnit));
+        NumericalUnit aByte;
+        NumericalUnit carry = 0;
         //Every time the outer loop finished once, the position of carry will be reset. So we have to save the data.
-        unsigned long carry_last = 0;
-        unsigned long carry_temp;
+        NumericalUnit carry_last = 0;
+        NumericalUnit carry_temp;
         for (int i = 0; i < size1; ++i) {
             int index = i;
             for(int j = 0; j < last2; ++j) {
@@ -260,7 +260,7 @@ Numerical mul(const Numerical& n1, const Numerical& n2) {
         if (carry_last != 0) {
             ++length;
             ++power;
-            byte = (unsigned long*)realloc(byte, length * sizeof(long));
+            byte = (NumericalUnit*)realloc(byte, length * sizeof(NumericalUnit));
             byte[length - 1] = carry_last;
         }
         ////////////////////////////////////Out put////////////////////////////////////////
@@ -287,14 +287,14 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
             int power = n1.getPower() - n2.getPower();
             n1_copy.power = n2.power;
-            auto byte = (unsigned long*)calloc(length, sizeof(long));
+            auto byte = (NumericalUnit*)calloc(length, sizeof(NumericalUnit));
 
-            auto temp_arr = (unsigned long*)malloc(sizeof(long));
+            auto temp_arr = (NumericalUnit*)malloc(sizeof(NumericalUnit));
             Numerical temp(temp_arr, 1, 0);
             for (int i = length - 1; i >= 0; --i) {
-                unsigned long large = ULONG_MAX;
+                NumericalUnit large = ULONG_MAX;
                 temp_arr[0] = ULONG_MAX / 2;
-                unsigned long small = 0;
+                NumericalUnit small = 0;
                 while(true) {
                     Numerical mul = temp * n2_copy;
                     if(mul < n1_copy)
@@ -348,8 +348,8 @@ bool cutLength(Numerical& n) {
     if(size > basicConst->getGlobalPrecision()) {
         result = true;
         int cutFrom = size - basicConst->getGlobalPrecision();
-        auto new_byte = (unsigned long*)malloc(basicConst->getGlobalPrecision() * sizeof(long));
-        memcpy(new_byte, n.byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(long));
+        auto new_byte = (NumericalUnit*)malloc(basicConst->getGlobalPrecision() * sizeof(NumericalUnit));
+        memcpy(new_byte, n.byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(NumericalUnit));
         free(n.byte);
         n.byte = new_byte;
         auto length = basicConst->getGlobalPrecision();
@@ -372,7 +372,7 @@ void cutZero(Numerical& n) {
 
     if(id != size) {
         int shorten = size - id;
-        n.byte = (unsigned long*)realloc(n.byte, id * sizeof(long));
+        n.byte = (NumericalUnit*)realloc(n.byte, id * sizeof(NumericalUnit));
         size = id;
         if(n.length < 0)
             size = -size;

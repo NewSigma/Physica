@@ -6,12 +6,32 @@
 
 #include <climits>
 
-#if LONG_WIDTH == 64
-#define PHYSICA_64BIT
-#elif LONG_WIDTH == 32;
-#define PHYSICA_32BIT
+#ifdef __WORDSIZE
+    #if __WORDSIZE == 64
+        #define PHYSICA_64BIT
+    #elif __WORDSIZE == 32;
+        #define PHYSICA_32BIT
+    #else
+        #error Uncompatible operating system bits.
+#endif
 #else
-#error Uncompatible operating system bits.
+    #error __WORDSIZE not defined.
 #endif
 
-#endif //PHYSICA_SYSTEMBITS_H
+#if __WORDSIZE == INT_WIDTH
+typedef unsigned int NumericalUnit;
+const NumericalUnit NumericalUnitMax = UINT_MAX;
+const size_t NumericalUnitWidth = INT_WIDTH;
+#elif __WORDSIZE == LONG_WIDTH
+typedef unsigned long NumericalUnit;
+const NumericalUnit NumericalUnitMax = ULONG_MAX;
+const size_t NumericalUnitWidth = LONG_WIDTH;
+#elif __WORDSIZE == LLONG_WIDTH
+typedef unsigned long long NumericalUnit;
+const NumericalUnit NumericalUnitMax = ULLLONG_MAX;
+const size_t NumericalUnitWidth = LLONG_WIDTH;
+#else
+#error No marching NumericalUnit.
+#endif
+
+#endif
