@@ -1,9 +1,6 @@
 /*
   Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_ELEMENTARYFUNCTIONTEST_H
-#define PHYSICA_ELEMENTARYFUNCTIONTEST_H
-
 #include <iostream>
 #include <Numerical.h>
 #include <ElementaryFunction.h>
@@ -90,5 +87,3 @@ void elementary_function_test() {
         std::cin >> d1 >> d2;
     }
 }
-
-#endif //PHYSICA_ELEMENTARYFUNCTIONTEST_H

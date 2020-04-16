@@ -54,9 +54,9 @@ Numerical sqrt_light(const Numerical& n) {
 Numerical sqrt(const Numerical& n) {
     Numerical result  = sqrt_light(n);
     if(n.getA() != 0) {
-        Numerical n_error = n.getMinimum();
+        Numerical n_error = getMinimum(n);
         if(n_error.isNegative())
-            n_error = n.getMaximum();
+            n_error = getMaximum(n);
         Numerical error = sqrt_light(n_error);
         error -= result;
         error.toAbs();
@@ -116,9 +116,9 @@ Numerical ln_light(const Numerical& n) {
 Numerical ln(const Numerical& n) {
     Numerical result = ln_light(n);
     if(n.getA() != 0) {
-        Numerical n_error = n.getMinimum();
+        Numerical n_error = getMinimum(n);
         if(n_error.isNegative())
-            n_error = n.getMaximum();
+            n_error = getMaximum(n);
         Numerical error = ln_light(n_error);
         error -= result;
         error.toAbs();

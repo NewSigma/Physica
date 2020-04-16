@@ -38,32 +38,16 @@ public:
 
     explicit operator double() const;
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
-    void operator<<(int bits);
-    void operator>>(int bits);
+    Numerical operator<<(int bits);
+    Numerical operator>>(int bits);
+    void operator<<=(int bits) { power += bits; }
+    void operator>>=(int bits) { power -= bits; }
     NumericalUnit operator[](unsigned int index) const;
     Numerical& operator=(const Numerical& n);
     Numerical& operator=(Numerical&& n) noexcept;
-    Numerical operator+(const Numerical& n) const;
-    Numerical operator-(const Numerical& n) const;
-    Numerical operator*(const Numerical& n) const;
-    Numerical operator/(const Numerical& n) const;
     Numerical operator^(const Numerical& n) const;
-    void operator+=(const Numerical& n) { *this = *this + n; };
-    void operator-=(const Numerical& n) { *this = *this - n; };
-    void operator*=(const Numerical& n) { *this = *this * n; };
-    void operator/=(const Numerical& n) { *this = *this / n; };
-    void operator^=(const Numerical& n) { *this = *this ^ n; };
-    bool operator>(const Numerical& n) const;
-    bool operator<(const Numerical& n) const;
-    bool operator>=(const Numerical& n) const;
-    bool operator<=(const Numerical& n) const;
-    bool operator==(const Numerical& n) const;
-    bool operator!=(const Numerical& n) const;
     Numerical operator-() const;
 
-    Numerical getAccuracy() const;
-    Numerical getMaximum() const { return add(*this, getAccuracy()); }
-    Numerical getMinimum() const { return sub(*this, getAccuracy()); }
     Numerical& applyError(const Numerical& error);
 
     const int& getLength() const { return length; }
@@ -88,10 +72,28 @@ public:
     friend void cutZero(Numerical& n);
     friend Numerical sqrt_light(const Numerical& n);
 };
+Numerical operator+(const Numerical& n1, const Numerical& n2);
+Numerical operator-(const Numerical& n1, const Numerical& n2);
+Numerical operator*(const Numerical& n1, const Numerical& n2);
+Numerical operator/(const Numerical& n1, const Numerical& n2);
+inline void operator+=(Numerical& n1, const Numerical& n2) { n1 = n1 + n2; }
+inline void operator-=(Numerical& n1, const Numerical& n2) { n1 = n1 - n2; }
+inline void operator*=(Numerical& n1, const Numerical& n2) { n1 = n1 * n2; }
+inline void operator/=(Numerical& n1, const Numerical& n2) { n1 = n1 / n2; }
+inline void operator^=(Numerical& n1, const Numerical& n2) { n1 = n1 ^ n2; }
+bool operator>(const Numerical& n1, const Numerical& n2);
+bool operator<(const Numerical& n1, const Numerical& n2);
+bool operator>=(const Numerical& n1, const Numerical& n2);
+bool operator<=(const Numerical& n1, const Numerical& n2);
+bool operator==(const Numerical& n1, const Numerical& n2);
+bool operator!=(const Numerical& n1, const Numerical& n2);
 ////////////////////////////////Helper functions/////////////////////////////////////
-void printElements(const Numerical& n);
+Numerical getAccuracy(const Numerical& n);
+inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)); }
+inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n)); }
 inline Numerical getZero() { return Numerical(basicConst->get_0()); }
 inline Numerical getOne() { return Numerical(basicConst->get_1()); }
 inline Numerical getTwo() { return Numerical(basicConst->get_2()); }
+void printElements(const Numerical& n);
 
 #endif

@@ -6,9 +6,9 @@
 
 //e.g turn /home/user/Physica/Physica.cpp into Physica
 #ifdef WIN32
-#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define FILENAME(x) (strrchr(x, '\\') ? strrchr(x, '\\') + 1 : x)
 #else
-#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define FILENAME(x) (strrchr(x, '/') ? strrchr(x, '/') + 1 : x)
 #endif
 
 #define cuDebug(x) do { printf("[] [Debug] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
@@ -24,7 +24,7 @@
 #define checkCudaError(x)                                                                                                       \
     do {                                                                                                                        \
         if(x) {                                                                                                                 \
-            printf("[] [Fatal] [%s:%d]: CUDA error encountered! Error code: %s\n", __FILENAME__, __LINE__, cudaGetErrorName(x));\
+            printf("[] [Fatal] [%s:%d]: CUDA error encountered! Error code: %s\n", FILENAME(__FILE__), __LINE__, cudaGetErrorName(x));\
             cudaDeviceReset();                                                                                                  \
             exit(EXIT_FAILURE);                                                                                                 \
         }                                                                                                                       \

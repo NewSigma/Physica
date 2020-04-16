@@ -1,9 +1,6 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_NUMERICALTEST_H
-#define PHYSICA_NUMERICALTEST_H
-
 #include "Numerical.h"
 
 void numerical_test() {
@@ -24,5 +21,3 @@ void numerical_test() {
         std::cin >> d1 >> d2;
     }
 }
-
-#endif //PHYSICA_NUMERICALTEST_H

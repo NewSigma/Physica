@@ -1,9 +1,6 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_CONSTTEST_H
-#define PHYSICA_CONSTTEST_H
-
 #include <Const.h>
 #include <iostream>
 #include "Numerical.h"
@@ -29,5 +26,3 @@ void const_test() {
     std::cout << "Pi / 2: " << mathConst->getPI_2() << '\n';
     std::cout << "-Pi / 2: " << mathConst->getMinus_PI_2() << '\n';
 }
-
-#endif //PHYSICA_CONSTTEST_H

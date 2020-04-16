@@ -127,12 +127,18 @@ std::ostream& operator<<(std::ostream& os, const Numerical& n) {
     << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6);
 }
 
-void Numerical::operator<<(int bits) {
-    power += bits;
+Numerical Numerical::operator<<(int bits) {
+    size_t bytes = getSize() * sizeof(NumericalUnit);
+    auto new_byte = (NumericalUnit*)malloc(bytes);
+    mempcpy(new_byte, byte, bytes);
+    return Numerical(new_byte, length, power + bits, a);
 }
 
-void Numerical::operator>>(int bits) {
-    power -= bits;
+Numerical Numerical::operator>>(int bits) {
+    size_t bytes = getSize() * sizeof(NumericalUnit);
+    auto new_byte = (NumericalUnit*)malloc(bytes);
+    mempcpy(new_byte, byte, bytes);
+    return Numerical(new_byte, length, power - bits, a);
 }
 
 NumericalUnit Numerical::operator[](unsigned int index) const {
@@ -161,84 +167,11 @@ Numerical& Numerical::operator=(Numerical&& n) noexcept {
     a = n.a;
     return *this;
 }
-
-Numerical Numerical::operator+ (const Numerical& n) const {
-    Numerical result = add(*this, n);
-    cutLength(result);
-    if(a != 0 || n.a != 0) {
-        if(a == 0)
-            result.applyError(n.getAccuracy());
-        else if(n.a == 0)
-            result.applyError(getAccuracy());
-        else
-            result.applyError(add(getAccuracy(), n.getAccuracy()));
-    }
-    return result;
-}
-
-Numerical Numerical::operator- (const Numerical& n) const {
-    Numerical result = sub(*this, n);
-    cutLength(result);
-    if(a != 0 || n.a != 0) {
-        if(a == 0)
-            result.applyError(n.getAccuracy());
-        else if(n.a == 0)
-            result.applyError(getAccuracy());
-        else
-            result.applyError(add(getAccuracy(), n.getAccuracy()));
-    }
-    return result;
-}
-
-Numerical Numerical::operator* (const Numerical& n) const {
-    Numerical result = mul(*this, n);
-    cutLength(result);
-    if(a != 0 || n.a != 0) {
-        if(a == 0)
-            result.applyError(mul(*this, n.getAccuracy()));
-        else if(n.a == 0)
-            result.applyError(mul(n, getAccuracy()));
-        else {
-            Numerical n1_a = getAccuracy();
-            Numerical n2_a = n.getAccuracy();
-            Numerical temp1 = mul(n1_a, n2_a);
-            Numerical temp2 = add(mul(*this, n2_a), mul(n, n1_a));
-            result.applyError(add(temp1, temp2));
-        }
-    }
-    return result;
-}
-
-Numerical Numerical::operator/ (const Numerical& n) const {
-    Numerical result = div(*this, n);
-    if(a != 0 || n.a != 0) {
-        if(a == 0) {
-            Numerical n2_a = n.getAccuracy();
-            Numerical temp_1 = mul(*this, n2_a);
-            Numerical temp_2 = mul(n, sub(n, n2_a));
-            result.applyError(div(temp_1, temp_2));
-        }
-        else if(n.a == 0)
-            result.applyError(div(getAccuracy(), n));
-        else {
-            Numerical n2_a = n.getAccuracy();
-            Numerical temp_1 = add(mul(*this, n2_a), mul(n, getAccuracy()));
-            Numerical temp_2 = mul(n, sub(n, n2_a));
-            result.applyError(div(temp_1, temp_2));
-        }
-    }
-    return result;
-}
 /*
  * Using Newton's method
- * May return nullptr.
  */
 Numerical Numerical::operator^ (const Numerical& n) const {
-    if(Q_UNLIKELY(isZero())) {
-        if(!n.isZero())
-            return getZero();
-    }
-    else if(isPositive()) {
+    if(isPositive()) {
         if(n.isInteger()) {
             Numerical n2_copy(n);
 
@@ -272,86 +205,14 @@ Numerical Numerical::operator^ (const Numerical& n) const {
                 go_on = temp_2 == result;
                 result = std::move(temp_2);
             } while(go_on);
-            result.a += 1;
+            ++result.a;
             return result;
         }
     }
-}
-
-bool Numerical::operator> (const Numerical& n) const {
-    //Judge from sign.
-    if(isPositive()) {
-        if(!n.isPositive())
-            return true;
-    }
-    else if(isZero())
-        return n.isNegative();
-    else {
-        if(!n.isNegative())
-            return false;
-    }
-    //If we cannot get a result, judge from power
-    bool result;
-    if(power > n.power)
-        result = true;
-    else if(power < n.power)
-        result = false;
-    else {
-        //The only method left.
-        Numerical subtract = *this - n;
-        result = subtract.isPositive();
-    }
-    return result;
-}
-
-bool Numerical::operator< (const Numerical& n) const {
-    //Judge from sign.
-    if(isPositive()) {
-        if(!n.isPositive())
-            return false;
-    }
-    else if(isZero())
-        return n.isPositive();
-    else {
-        if(!n.isNegative())
-            return true;
-    }
-    //If we cannot get a result, judge from power
-    bool result;
-    if(power > n.power)
-        result = false;
-    else if(power < n.power)
-        result = true;
-    else {
-        //The only method left.
-        Numerical subtract = *this - n;
-        result = subtract.isNegative();
-    }
-    return result;
-}
-
-bool Numerical::operator>= (const Numerical& n) const {
-    return !(*this < n);
-}
-
-bool Numerical::operator<= (const Numerical& n) const {
-    return !(*this > n);
-}
-
-bool Numerical::operator== (const Numerical& n) const {
-    if(power != n.power)
-        return false;
-    //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
-    if((length ^ n.length) < 0) // NOLINT(hicpp-signed-bitwise)
-        return false;
-    if(a != n.a)
-        return false;
-    Numerical temp = *this - n;
-    return temp.isZero();
-}
-
-bool Numerical::operator!= (const Numerical& n) const {
-    return !(*this == n);
+    else if(isZero() && !n.isZero())
+        return getZero();
+    else
+        qFatal("Can not resolve power of a minus value.");
 }
 
 Numerical Numerical::operator-() const {
@@ -360,11 +221,155 @@ Numerical Numerical::operator-() const {
     mempcpy(new_byte, byte, bytes);
     return Numerical(new_byte, length, power, a);
 }
+
+Numerical operator+ (const Numerical& n1, const Numerical& n2) {
+    Numerical result = add(n1, n2);
+    cutLength(result);
+    if(n1.getA() != 0 || n2.getA() != 0) {
+        if(n1.getA() == 0)
+            result.applyError(getAccuracy(n2));
+        else if(n2.getA() == 0)
+            result.applyError(getAccuracy(n1));
+        else
+            result.applyError(add(getAccuracy(n1), getAccuracy(n2)));
+    }
+    return result;
+}
+
+Numerical operator- (const Numerical& n1, const Numerical& n2) {
+    Numerical result = sub(n1, n2);
+    cutLength(result);
+    if(n1.getA() != 0 || n2.getA() != 0) {
+        if(n1.getA() == 0)
+            result.applyError(getAccuracy(n2));
+        else if(n2.getA() == 0)
+            result.applyError(getAccuracy(n1));
+        else
+            result.applyError(add(getAccuracy(n1), getAccuracy(n2)));
+    }
+    return result;
+}
+
+Numerical operator* (const Numerical& n1, const Numerical& n2) {
+    Numerical result = mul(n1, n2);
+    cutLength(result);
+    if(n1.getA() != 0 || n2.getA() != 0) {
+        if(n1.getA() == 0)
+            result.applyError(mul(n1, getAccuracy(n2)));
+        else if(n2.getA() == 0)
+            result.applyError(mul(n2, getAccuracy(n1)));
+        else {
+            Numerical n1_a = getAccuracy(n1);
+            Numerical n2_a = getAccuracy(n2);
+            Numerical temp1 = mul(n1_a, n2_a);
+            Numerical temp2 = add(mul(n1, n2_a), mul(n2, n1_a));
+            result.applyError(add(temp1, temp2));
+        }
+    }
+    return result;
+}
+
+Numerical operator/ (const Numerical& n1, const Numerical& n2) {
+    Numerical result = div(n1, n2);
+    if(n1.getA() != 0 || n2.getA() != 0) {
+        if(n1.getA() == 0) {
+            Numerical n2_a = getAccuracy(n2);
+            Numerical temp_1 = mul(n1, n2_a);
+            Numerical temp_2 = mul(n2, sub(n2, n2_a));
+            result.applyError(div(temp_1, temp_2));
+        }
+        else if(n2.getA() == 0)
+            result.applyError(div(getAccuracy(n1), n2));
+        else {
+            Numerical n2_a = getAccuracy(n2);
+            Numerical temp_1 = add(mul(n1, n2_a), mul(n2, getAccuracy(n1)));
+            Numerical temp_2 = mul(n2, sub(n2, n2_a));
+            result.applyError(div(temp_1, temp_2));
+        }
+    }
+    return result;
+}
+
+bool operator> (const Numerical& n1, const Numerical& n2) {
+    //Judge from sign.
+    if(n1.isPositive()) {
+        if(!n2.isPositive())
+            return true;
+    }
+    else if(n1.isZero())
+        return n2.isNegative();
+    else {
+        if(!n2.isNegative())
+            return false;
+    }
+    //If we cannot get a result, judge from power
+    bool result;
+    if(n1.getPower() > n2.getPower())
+        result = true;
+    else if(n1.getPower() < n2.getPower())
+        result = false;
+    else {
+        //The only method left.
+        Numerical subtract = n1 - n2;
+        result = subtract.isPositive();
+    }
+    return result;
+}
+
+bool operator< (const Numerical& n1, const Numerical& n2) {
+    //Judge from sign.
+    if(n1.isPositive()) {
+        if(!n2.isPositive())
+            return false;
+    }
+    else if(n1.isZero())
+        return n2.isPositive();
+    else {
+        if(!n2.isNegative())
+            return true;
+    }
+    //If we cannot get a result, judge from power
+    bool result;
+    if(n1.getPower() > n2.getPower())
+        result = false;
+    else if(n1.getPower() < n2.getPower())
+        result = true;
+    else {
+        //The only method left.
+        Numerical subtract = n1 - n2;
+        result = subtract.isNegative();
+    }
+    return result;
+}
+
+bool operator>= (const Numerical& n1, const Numerical& n2) {
+    return !(n1 < n2);
+}
+
+bool operator<= (const Numerical& n1, const Numerical& n2) {
+    return !(n1 > n2);
+}
+
+bool operator== (const Numerical& n1, const Numerical& n2) {
+    if(n1.getPower() != n2.getPower())
+        return false;
+    //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
+    if((n1.getLength() ^ n2.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
+        return false;
+    if(n1.getA() != n2.getA())
+        return false;
+    Numerical temp = n1 - n2;
+    return temp.isZero();
+}
+
+bool operator!= (const Numerical& n1, const Numerical& n2) {
+    return !(n1 == n2);
+}
 //Return accuracy in class Numerical.
-Numerical Numerical::getAccuracy() const {
+Numerical getAccuracy(const Numerical& n) {
     auto b = (NumericalUnit*)malloc(sizeof(NumericalUnit));
-    b[0] = getA();
-    return Numerical(b, 1, power - getSize() + 1);
+    b[0] = n.getA();
+    return Numerical(b, 1, n.getPower() - n.getSize() + 1);
 }
 //Add error to this and adjust this->length as well as this-> byte.
 Numerical& Numerical::applyError(const Numerical& error) {

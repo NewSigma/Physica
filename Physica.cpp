@@ -6,7 +6,6 @@
 #include "Const.h"
 #include "PhysicaMain.h"
 #include "Util.h"
-#include "NumericalTest.h"
 
 const BasicConst* basicConst;
 const MathConst* mathConst;
@@ -60,7 +59,7 @@ void init() {
                 break;
         }
         prefix.push_back("] [");
-        prefix.push_back(__FILENAME__);
+        prefix.push_back(FILENAME(context.file));
         prefix.push_back(':');
         prefix.push_back(QString::fromStdString(std::to_string(context.line)));
         prefix.push_back("]: ");
