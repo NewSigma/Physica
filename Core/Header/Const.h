@@ -5,8 +5,6 @@ class RealNum;
 class Numerical;
 
 class BasicConst {
-    //_1 stands by integer 1.
-    const int GlobalPrecision;
     const Numerical* plotPoints;
     const Numerical* expectedRelativeError;
     const Numerical* stepSize;
@@ -21,10 +19,12 @@ class BasicConst {
     const Numerical* _4;
     const Numerical* Minus_4;
 public:
+    const int GlobalPrecision;
+    const int MaxPower;
+
     BasicConst();
     ~BasicConst();
 
-    inline int getGlobalPrecision() const { return GlobalPrecision; }
     inline const Numerical& getPlotPoints() const { return *plotPoints; }
     inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
     inline const Numerical& getStepSize() const { return *stepSize; }

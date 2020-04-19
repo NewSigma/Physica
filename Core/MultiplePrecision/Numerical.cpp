@@ -33,8 +33,23 @@ Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), p
 
 Numerical::Numerical(const Numerical* n) noexcept : Numerical(*n) {}
 
+Numerical::Numerical(SignedNumericalUnit unit, NumericalUnit a) noexcept
+: byte(reinterpret_cast<unsigned long*>(malloc(sizeof(NumericalUnit)))), power(0), a(a) {
+    if(unit < 0) {
+        byte[0] = -unit;
+        length = -1;
+    }
+    else {
+        byte[0] = unit;
+        length = 1;
+    }
+}
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
+/*
+ * Not accurate.
+ */
 Numerical::Numerical(double d, NumericalUnit a) : a(a) {
     if(d == 0) {
         byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
@@ -83,10 +98,12 @@ Numerical::Numerical(double d, NumericalUnit a) : a(a) {
 }
 #pragma clang diagnostic pop
 /*
- * May not be very accurate.
+ * Not accurate.
  */
 Numerical::Numerical(const char* s, NumericalUnit a) : Numerical(strtod(s, nullptr), a) {}
-
+/*
+ * Not accurate.
+ */
 Numerical::Numerical(const wchar_t* s, NumericalUnit a) : a(a) {
     size_t size = wcslen(s);
     char str[size + 1];
@@ -99,14 +116,18 @@ Numerical::Numerical(const wchar_t* s, NumericalUnit a) : a(a) {
     length = temp.length;
     power = temp.power;
 }
-
+/*
+ * Not accurate.
+ */
 Numerical::Numerical(const std::string& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
-
+/*
+ * Not accurate.
+ */
 Numerical::Numerical(const std::wstring& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
 
 Numerical::~Numerical() { free(byte); }
 /*
- * Not very accurate.
+ * Not accurate.
  */
 Numerical::operator double() const {
     int lastIndex = getSize() - 1;
@@ -117,13 +138,14 @@ Numerical::operator double() const {
         base *= static_cast<double>(NumericalUnitMax);
     }
     d += base * static_cast<double>(byte[lastIndex]);
-
+    if(length < 0)
+        d = -d;
     return d;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
     //10 is the max precision.
-    return os << std::setprecision(10) << (n.length < 0 ? '-' : ' ') << std::to_string(double(n)) << "\tLength = "
+    return os << std::setprecision(10) << std::to_string(double(n)) << "\tLength = "
     << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6); //6 is the default precision.
 }
 

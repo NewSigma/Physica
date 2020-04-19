@@ -20,14 +20,17 @@
 
 #if __WORDSIZE == INT_WIDTH
 typedef unsigned int NumericalUnit;
+typedef int SignedNumericalUnit;
 const NumericalUnit NumericalUnitMax = UINT_MAX;
 const size_t NumericalUnitWidth = INT_WIDTH;
 #elif __WORDSIZE == LONG_WIDTH
 typedef unsigned long NumericalUnit;
+typedef long SignedNumericalUnit;
 const NumericalUnit NumericalUnitMax = ULONG_MAX;
 const size_t NumericalUnitWidth = LONG_WIDTH;
 #elif __WORDSIZE == LLONG_WIDTH
 typedef unsigned long long NumericalUnit;
+typedef long long SignedNumericalUnit;
 const NumericalUnit NumericalUnitMax = ULLLONG_MAX;
 const size_t NumericalUnitWidth = LLONG_WIDTH;
 #else

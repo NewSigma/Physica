@@ -47,7 +47,7 @@ Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, 
             x_right = result;
         result = div(add(x_left, x_right), basicConst->get_2());
         error = div(error, basicConst->get_2());
-    } while(result.getPower() - error.getPower() < basicConst->getGlobalPrecision());
+    } while(result.getPower() - error.getPower() < basicConst->GlobalPrecision);
     result.toUnitA();
 
     return result;

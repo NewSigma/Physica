@@ -187,6 +187,7 @@ redo:
                 big = small;
                 small = temp;
                 changeSign = !changeSign;
+                free(byte);
                 goto redo;
             }
 
@@ -283,7 +284,7 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
             n1_copy.a = n2_copy.a = 0;
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
             //Estimate the length of result.
-            int length = basicConst->getGlobalPrecision();
+            int length = basicConst->GlobalPrecision;
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
             int power = n1.getPower() - n2.getPower();
             n1_copy.power = n2.power;
@@ -345,14 +346,14 @@ bool cutLength(Numerical& n) {
     bool result = false;
     int size = n.getSize();
 
-    if(size > basicConst->getGlobalPrecision()) {
+    if(size > basicConst->GlobalPrecision) {
         result = true;
-        int cutFrom = size - basicConst->getGlobalPrecision();
-        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(basicConst->getGlobalPrecision() * sizeof(NumericalUnit)));
-        memcpy(new_byte, n.byte + cutFrom, basicConst->getGlobalPrecision() * sizeof(NumericalUnit));
+        int cutFrom = size - basicConst->GlobalPrecision;
+        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(basicConst->GlobalPrecision * sizeof(NumericalUnit)));
+        memcpy(new_byte, n.byte + cutFrom, basicConst->GlobalPrecision * sizeof(NumericalUnit));
         free(n.byte);
         n.byte = new_byte;
-        auto length = basicConst->getGlobalPrecision();
+        auto length = basicConst->GlobalPrecision;
         if(n.length < 0)
             length = -length;
         n.length = length;

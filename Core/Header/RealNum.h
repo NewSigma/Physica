@@ -16,7 +16,7 @@ public:
     explicit RealNum(const RealNum* n);
     ~RealNum() override;
 
-    NumberType getType() const noexcept;
+    NumberType getType() const noexcept override;
     AbstractNum* operator+(const AbstractNum& n) const override;
     AbstractNum* operator-(const AbstractNum& n) const override;
     AbstractNum* operator*(const AbstractNum& n) const override;

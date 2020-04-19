@@ -3,53 +3,33 @@
  */
 #include "Const.h"
 #include "Numerical.h"
-#include "climits"
 #include "RealNum.h"
 /*
  * Basic consts that initialize directly.
  */
-BasicConst::BasicConst() : GlobalPrecision(4) {
+BasicConst::BasicConst() : GlobalPrecision(4), MaxPower(16) {
+    plotPoints = new Numerical(static_cast<SignedNumericalUnit>(20));
     auto byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 100;
-    plotPoints = new Numerical(byte, 1, 0);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 1;
     expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision);
-
     byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
     byte[0] = 1;
     //Value (- GlobalPrecision / 2) still need a proof.
     stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
-
-    R_MAX = new Numerical(2147483647);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 0;
-    _0 = new Numerical(byte, 1, 0);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 1;
-    _1 = new Numerical(byte, 1, 0);
-    Minus_1 = new Numerical(-*_1);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 2;
-    _2 = new Numerical(byte, 1, 0);
-    Minus_2 = new Numerical(-*_2);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 3;
-    _3 = new Numerical(byte, 1, 0);
-    Minus_3 = new Numerical(-*_3);
-
-    byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-    byte[0] = 4;
-    _4 = new Numerical(byte, 1, 0);
-    Minus_4 = new Numerical(-*_4);
+    R_MAX = new Numerical(static_cast<SignedNumericalUnit>(2147483647));
+    _0 = new Numerical(static_cast<SignedNumericalUnit>(0));
+    _1 = new Numerical(static_cast<SignedNumericalUnit>(1));
+    Minus_1 = new Numerical(static_cast<SignedNumericalUnit>(-1));
+    _2 = new Numerical(static_cast<SignedNumericalUnit>(2));
+    Minus_2 = new Numerical(static_cast<SignedNumericalUnit>(-2));
+    _3 = new Numerical(static_cast<SignedNumericalUnit>(3));
+    Minus_3 = new Numerical(static_cast<SignedNumericalUnit>(-3));
+    _4 = new Numerical(static_cast<SignedNumericalUnit>(4));
+    Minus_4 = new Numerical(static_cast<SignedNumericalUnit>(-4));
 }
 
 BasicConst::~BasicConst() {
+    delete plotPoints;
     delete expectedRelativeError;
     delete stepSize;
     delete R_MAX;
@@ -73,7 +53,8 @@ MathConst::MathConst() {
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
     //0.31 is the big approximation of ln(2) / ln(10)
-    PI = new Numerical(calcPI((int)(LONG_WIDTH * basicConst->getGlobalPrecision() * 0.31) + 1));
+    PI = new Numerical(calcPI(
+            static_cast<int>(static_cast<double>(NumericalUnitWidth) * basicConst->GlobalPrecision * 0.31) + 1));
     E = new Numerical(exp(basicConst->get_1()));
 
     PI_2 = new Numerical(*PI / basicConst->get_2());

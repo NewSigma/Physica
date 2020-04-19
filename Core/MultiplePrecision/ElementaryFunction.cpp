@@ -42,7 +42,7 @@ Numerical sqrt_light(const Numerical& n) {
 
     Numerical result = getOne();
     //3.33 is the big approximate value of ln(10)/ln(2)
-    for(int i = 0; i < LONG_WIDTH * basicConst->getGlobalPrecision(); ++i)
+    for(int i = 0; i < LONG_WIDTH * basicConst->GlobalPrecision; ++i)
         result = (result + div(copy_n, result)) / basicConst->get_2();
     result.power += add_power;
     result.toUnitA();
@@ -102,7 +102,7 @@ Numerical ln_light(const Numerical& n) {
         rank += basicConst->get_1();
         Numerical criteria = temp_1 / rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - criteria.getPower() >= basicConst->getGlobalPrecision())
+        if(result.getPower() - criteria.getPower() >= basicConst->GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= copy_temp_1;
@@ -177,7 +177,7 @@ Numerical cos(const Numerical& n) {
         rank += basicConst->get_1();
         temp /= rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - temp.getPower() >= basicConst->getGlobalPrecision())
+        if(result.getPower() - temp.getPower() >= basicConst->GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= square_n;
@@ -210,7 +210,7 @@ Numerical sin(const Numerical& n) {
         rank += basicConst->get_1();
         temp /= rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - temp.getPower() >= basicConst->getGlobalPrecision())
+        if(result.getPower() - temp.getPower() >= basicConst->GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= square_n;

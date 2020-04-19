@@ -14,6 +14,8 @@ set(GPU_CODE sm_75)
 ##############################################Libs################################################
 #############################################Project##############################################
 include_directories(./)
+add_subdirectory(AI)
+include_directories(AI/Header)
 add_subdirectory(Core)
 include_directories(Core/Header)
 add_subdirectory(Gui)

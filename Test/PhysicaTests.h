@@ -8,5 +8,6 @@ void checkGPU();
 void const_test();
 void elementary_function_test();
 void numerical_test();
+void simpleNet();
 
 #endif

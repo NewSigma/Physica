@@ -1,5 +1,5 @@
-#include "../../Header/Differential.h"
-#include "../../Header/Numerical.h"
+#include "Differential.h"
+#include "Numerical.h"
 
 Numerical D_double_point(Numerical func(const Numerical&), const Numerical& x0) {
     Numerical x1 = x0 + basicConst->getStepSize();

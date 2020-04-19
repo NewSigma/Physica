@@ -19,7 +19,7 @@ GeneAlgorithm::GeneAlgorithm(Numerical func(const Numerical&), const Numerical& 
     regionLength->toAbs();
 
     if (mode == LinearChoose) {
-        Numerical stepLength = *regionLength / Numerical(population);
+        Numerical stepLength = *regionLength / Numerical(static_cast<SignedNumericalUnit>(population));
         for (int i = 0; i < population; i++) {
             auto byte = (unsigned long*)malloc(sizeof(long));
             byte[0] = i;

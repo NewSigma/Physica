@@ -26,6 +26,7 @@ public:
     Numerical(const Numerical& n) noexcept;
     Numerical(Numerical&& n) noexcept;
     explicit Numerical(const Numerical* n) noexcept;
+    explicit Numerical(SignedNumericalUnit unit, NumericalUnit a = 0) noexcept;
     explicit Numerical(double d, NumericalUnit a = 0);
     explicit Numerical(const char* s, NumericalUnit a = 0);
     explicit Numerical(const wchar_t* s, NumericalUnit a = 0);

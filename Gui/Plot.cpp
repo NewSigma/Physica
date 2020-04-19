@@ -4,16 +4,30 @@
 #include "Plot.h"
 #include "Numerical.h"
 #include <QtCharts>
+#include <Core/Header/Differential.h>
 
 Plot::Plot(Numerical (*func)(const Numerical&), const Numerical& begin, const Numerical& end, QWidget* parent)
     : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
-    Numerical plotStepSize = (end - begin) / basicConst->getPlotPoints();
+    setAttribute(Qt::WA_DeleteOnClose);
+
+    Numerical maxStepSize = (end - begin) / basicConst->getPlotPoints();
     Numerical point = Numerical(begin);
-    for(unsigned long l = basicConst->getPlotPoints()[0]; l > 1; --l) {
+    do {
         Numerical y = func(point);
         *series << QPointF(double(point), double(y));
-        point += plotStepSize;
-    }
+        /*
+        //Changeable step size depending on current derivative.
+        Numerical derivative = D_right(func, point);
+        std::cout << derivative << point << std::endl;
+        if(derivative.getPower() > basicConst->MaxPower) {
+            qWarning("StepSize is too small, suspect encountered a singularity. Ignoring...");
+            derivative = basicConst->get_0();
+        }
+        point += maxStepSize / (basicConst->get_1() + derivative * derivative);
+         */
+        point += maxStepSize;
+        point.clearA();
+    } while(point < end);
     //Handle l = 1.
     Numerical y = func(point);
     *series << QPointF(double(point), double(y));

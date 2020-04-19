@@ -5,10 +5,8 @@
 #include <iostream>
 #include "Numerical.h"
 
-extern const MathConst* mathConst;
-
 void const_test() {
-    std::cout << "GlobalPrecision: " << (int)basicConst->getGlobalPrecision() << '\n';
+    std::cout << "GlobalPrecision: " << (int) basicConst->GlobalPrecision << '\n';
     std::cout << "ExpectedRelativeError: " << basicConst->getExpectedRelativeError() << '\n';
     std::cout << "StepSize: " << basicConst->getStepSize() << '\n';
     std::cout << "RandomMax: " << basicConst->getR_MAX() << '\n';
