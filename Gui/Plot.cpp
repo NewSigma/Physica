@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Plot.h"
-#include "Numerical.h"
+#include "Core/Header/Numerical.h"
 #include <QtCharts>
 #include <Core/Header/Differential.h>
 

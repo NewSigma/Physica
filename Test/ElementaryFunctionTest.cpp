@@ -2,8 +2,8 @@
   Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <iostream>
-#include <Numerical.h>
-#include <ElementaryFunction.h>
+#include <Core/Header/Numerical.h>
+#include <Core/Header/ElementaryFunction.h>
 
 void elementary_function_test() {
     std::cout << "Please input a double. Input 0 to stop the test." << '\n';

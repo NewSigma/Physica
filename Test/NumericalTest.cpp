@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Numerical.h"
+#include "Core/Header/Numerical.h"
 
 void numerical_test() {
     std::cout << "Please input two double numbers. Let the second number be zero to stop the test." << '\n';

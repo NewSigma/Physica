@@ -3,9 +3,9 @@
  */
 #include <QApplication>
 #include "QTime"
-#include "Const.h"
-#include "PhysicaMain.h"
-#include "Util.h"
+#include "Core/Header/Const.h"
+#include "Gui/Header/PhysicaMain.h"
+#include "Core/Header/Util.h"
 
 const BasicConst* basicConst;
 const MathConst* mathConst;

@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include <Const.h>
+#include <Core/Header/Const.h>
 #include <iostream>
-#include "Numerical.h"
+#include "Core/Header/Numerical.h"
 
 void const_test() {
     std::cout << "GlobalPrecision: " << (int) basicConst->GlobalPrecision << '\n';

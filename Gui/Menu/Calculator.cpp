@@ -1,6 +1,6 @@
 #include "Calculator.h"
-#include "ExprReader.h"
-#include "ElementaryFunction.h"
+#include "Interpreter/Header/ExprReader.h"
+#include "Core/Header/ElementaryFunction.h"
 #include <QKeyEvent>
 //FIXME Calculate result is not accurate.
 Calculator::Calculator() {

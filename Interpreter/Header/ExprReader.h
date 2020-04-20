@@ -2,7 +2,7 @@
 #define PHYSICA_EXPRREADER_H
 
 #include <list>
-#include "Numerical.h"
+#include "Core/Header/Numerical.h"
 
 class ExprReader {
 private:

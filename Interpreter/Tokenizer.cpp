@@ -3,7 +3,8 @@
  */
 #include <cstring>
 #include <iostream>
-#include "../Header/Tokenizer.h"
+#include <QtCore/qlogging.h>
+#include "Interpreter/Header/Tokenizer.h"
 
 Tokenizer::Tokenizer(const char* str) : state(Start) {
     int i = 0;
@@ -32,9 +33,7 @@ void Tokenizer::readChar(const char& ch) {
                     state = Int;
                     break;
                 default:
-                    std::cout << "TokenizerError" << std::endl;
-                    return;
-                    //TODO TokenizerError
+                    qFatal("Encountered tokenizer error.");
             }
             break;
         case PreInt:

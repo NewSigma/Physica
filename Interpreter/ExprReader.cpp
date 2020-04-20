@@ -1,5 +1,5 @@
 #include <stack>
-#include "../Header/ExprReader.h"
+#include "Interpreter/Header/ExprReader.h"
 
 ExprReader::ExprReader(const std::wstring& str) {
     int pointer = 0;
