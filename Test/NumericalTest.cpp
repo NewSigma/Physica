@@ -21,3 +21,9 @@ void numerical_test() {
         std::cin >> d1 >> d2;
     }
 }
+
+void printElements(const Numerical& n) {
+    int size = n.getSize();
+    for(int i = 0; i < size; ++i)
+        std::cout << n[i] << ' ';
+}

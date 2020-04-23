@@ -1,18 +1,19 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
- * This file contains some low levels which will be used by Numerical.
  */
+#ifndef PHYSICA_CALCBASIC_H
+#define PHYSICA_CALCBASIC_H
+
 #include <cstring>
 #include <QtCore/qlogging.h>
-#include <climits>
-#include "Numerical.h"
-
-const NumericalUnit LongLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2); // NOLINT(hicpp-signed-bitwise)
+#include "Core/Header/Numerical.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 //n1 * n2 = product(16 bits) = carry(high 8 bits) + ReturnValue(low 8bits)
-NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
+inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
+    const NumericalUnit LongLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2);
+
     NumericalUnit n1_low = n1 & LongLowMask;
     NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2);
     NumericalUnit n2_low = n2 & LongLowMask;
@@ -35,7 +36,7 @@ NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUni
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
  */
-Numerical add(const Numerical& n1, const Numerical& n2) {
+inline Numerical add(const Numerical& n1, const Numerical& n2) {
     if(n1.isZero())
         return Numerical(n2);
     else if(n2.isZero())
@@ -118,7 +119,7 @@ Numerical add(const Numerical& n1, const Numerical& n2) {
     }
 }
 
-Numerical sub(const Numerical& n1, const Numerical& n2) {
+inline Numerical sub(const Numerical& n1, const Numerical& n2) {
     if(n1.isZero())
         return -n2;
     else if(n2.isZero())
@@ -144,7 +145,7 @@ Numerical sub(const Numerical& n1, const Numerical& n2) {
                 big = &n2;
                 small = &n1;
             }
-redo:
+            redo:
             const int bigSize = big->getSize();
             const int smallSize = small->getSize();
             const int lastIndex = smallSize - 1;
@@ -218,7 +219,7 @@ redo:
     }
 }
 
-Numerical mul(const Numerical& n1, const Numerical& n2) {
+inline Numerical mul(const Numerical& n1, const Numerical& n2) {
     if(n1 == basicConst->get_1())
         return Numerical(n2);
     else if(n2 == basicConst->get_1())
@@ -271,7 +272,7 @@ Numerical mul(const Numerical& n1, const Numerical& n2) {
     }
 }
 
-Numerical div(const Numerical& n1, const Numerical& n2) {
+inline Numerical div(const Numerical& n1, const Numerical& n2) {
     if(Q_UNLIKELY(n2.isZero()))
         qFatal("Divide by zero!");
 
@@ -293,8 +294,8 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
             auto temp_arr = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
             Numerical temp(temp_arr, 1, 0);
             for (int i = length - 1; i >= 0; --i) {
-                NumericalUnit large = ULONG_MAX;
-                temp_arr[0] = ULONG_MAX / 2;
+                NumericalUnit large = NumericalUnitMax;
+                temp_arr[0] = NumericalUnitMax / 2;
                 NumericalUnit small = 0;
                 while(true) {
                     Numerical mul = temp * n2_copy;
@@ -310,12 +311,12 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
                     temp_arr[0] = small + large;
                     if(temp_arr[0] < small) {
                         temp_arr[0] /= 2;
-                        temp_arr[0] += (ULONG_MAX / 2 + 1);
+                        temp_arr[0] += (NumericalUnitMax / 2 + 1);
                     }
                     else
                         temp_arr[0] /= 2;
 
-                    if(small + 1 == large) {
+                    if(small + 1 >= large) {
                         n1_copy -= temp * n2_copy;
                         break;
                     }
@@ -342,7 +343,7 @@ Numerical div(const Numerical& n1, const Numerical& n2) {
  * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
  * Return true if array is cut.
  */
-bool cutLength(Numerical& n) {
+inline bool cutLength(Numerical& n) {
     bool result = false;
     int size = n.getSize();
 
@@ -364,7 +365,7 @@ bool cutLength(Numerical& n) {
 /*
  * Cut zeros from the beginning.
  */
-void cutZero(Numerical& n) {
+inline void cutZero(Numerical& n) {
     int size = n.getSize();
     int id = size - 1;
     while(n.byte[id] == 0 && id > 0)
@@ -385,3 +386,5 @@ void cutZero(Numerical& n) {
             n.power = 0;
     }
 }
+
+#endif

@@ -92,6 +92,5 @@ inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n));
 inline Numerical getZero() { return Numerical(basicConst->get_0()); }
 inline Numerical getOne() { return Numerical(basicConst->get_1()); }
 inline Numerical getTwo() { return Numerical(basicConst->get_2()); }
-void printElements(const Numerical& n);
 
 #endif

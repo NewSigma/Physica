@@ -1,10 +1,8 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Numerical.h"
-#include <cstring>
+#include "CalcBasic.h"
 #include <cmath>
-#include <QtCore/qlogging.h>
 #include <iostream>
 #include <iomanip>
 /*
@@ -439,10 +437,4 @@ Numerical& Numerical::applyError(const Numerical& error) {
         length = size;
     }
     return *this;
-}
-
-void printElements(const Numerical& n) {
-    int size = n.getSize();
-    for(int i = 0; i < size; ++i)
-        std::cout << n[i] << ' ';
 }

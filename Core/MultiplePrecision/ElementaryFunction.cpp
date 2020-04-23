@@ -1,10 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include <QtCore/qlogging.h>
+#include "CalcBasic.h"
 #include <climits>
 #include "Solve.h"
-#include "Numerical.h"
 //Return a real number between 0 and 1.
 Numerical randomNumerical() {
     return Numerical(double(random()) / RAND_MAX);
