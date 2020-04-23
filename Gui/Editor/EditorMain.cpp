@@ -6,22 +6,29 @@
 #include <Gui/Header/Plot.h>
 #include "EditorMain.h"
 #include "QPaintEvent"
-#include <Core/Header/Numerical.h>
+#include "Gui/Header/LineNumberArea.h"
+#include "QScrollBar"
 
-EditorMain::EditorMain(QWidget* parent) : QTextEdit(parent) {
-    highLight = 0xDCDCDC;
+EditorMain::EditorMain(QWidget* parent) : QTextEdit(parent), defaultFont(QFont("DejaVu Sans Mono", 14)) {
+    lineNumberArea = new LineNumberArea(this);
+
+    document()->setDefaultFont(defaultFont);
+
     updateLineNumberAreaWidth();
     doHighLight();
 
-    document()->rootFrame()->begin().currentBlock().setVisible(false);
-    setReadOnly(true);
-
     connect(document(), &QTextDocument::blockCountChanged, this, &EditorMain::updateLineNumberAreaWidth);
-    //connect(this, SIGNAL(updateRequest()), SLOT(updateLineNumberArea()));
     connect(this, &EditorMain::cursorPositionChanged, this, &EditorMain::onCursorPositionChanged);
+    connect(this, SIGNAL(cursorPositionChanged()), lineNumberArea, SLOT(update()));
+    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), lineNumberArea, SLOT(update()));
 }
 
-int EditorMain::lineNumberAreaWidth() {
+void EditorMain::resizeEvent(QResizeEvent* event) {
+    lineNumberArea->setFixedHeight(height());
+    QTextEdit::resizeEvent(event);
+}
+
+int EditorMain::lineNumberAreaWidth() const {
     int digits = 1;
     int max = qMax(1, document()->blockCount());
     while (max >= 10) {
@@ -31,16 +38,12 @@ int EditorMain::lineNumberAreaWidth() {
     return 80 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 }
 
-void EditorMain::updateLineNumberAreaWidth() {
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
-}
-
 void EditorMain::doHighLight() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection{};
 
-        selection.format.setBackground(QColor(highLight));
+        selection.format.setBackground(QColor(0xDCDCDC));
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
@@ -49,30 +52,12 @@ void EditorMain::doHighLight() {
     setExtraSelections(extraSelections);
 }
 
+void EditorMain::updateLineNumberAreaWidth() {
+    int w = lineNumberAreaWidth();
+    setViewportMargins(w, 0, 0, 0);
+    lineNumberArea->setFixedWidth(w);
+}
+
 void EditorMain::onCursorPositionChanged() {
-    setReadOnly(textCursor().currentFrame() == document()->rootFrame());
     doHighLight();
 }
-/*
-void EditorMain::paintLineNumber(QPaintEvent *event) {
-    QPainter painter(this);
-    painter.fillRect(event->rect(), Qt::lightGray);
-
-    QTextBlock block = document()->firstBlock();
-    int blockNumber = block.blockNumber();
-    int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int)blockBoundingRect(block).height();
-
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            painter.setPen(Qt::black);
-            painter.drawText(0, top, lineNumberAreaWidth(), fontMetrics().height(), Qt::AlignLeft, QString::number(blockNumber + 1));
-        }
-
-        block = block.next();
-        top = bottom;
-        bottom = top + (int)blockBoundingRect(block).height();
-        ++blockNumber;
-    }
-}
-*/

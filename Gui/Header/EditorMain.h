@@ -3,17 +3,24 @@
 
 #include "QTextEdit"
 
+class LineNumberArea;
+
 class EditorMain : public QTextEdit {
+    LineNumberArea* lineNumberArea;
+    //Should be put into settings.
+    QFont defaultFont;
 public:
     explicit EditorMain(QWidget* parent);
+protected:
+    void resizeEvent(QResizeEvent* event) override;
 private:
-    int highLight;
-    int lineNumberAreaWidth();
+    int lineNumberAreaWidth() const;
     void doHighLight();
-    //void paintLineNumber(QPaintEvent *event);
 private slots:
     void updateLineNumberAreaWidth();
     void onCursorPositionChanged();
+
+    friend class LineNumberArea;
 };
 
 

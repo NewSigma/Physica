@@ -4,17 +4,41 @@
 #ifndef PHYSICA_TOKEN_H
 #define PHYSICA_TOKEN_H
 
+#include <string>
+
 class Token {
-    const char* data;
+    char* data;
 public:
     enum TokenType {
         Null,
-        Number,
+        Integer,
+        IntegerExp,
+        Float,
+        FloatExp,
         Identifier,
-        Keyword
+        //Operators
+        OperatorAddSub,     // +, -
+        OperatorMulDiv,     // *, /
+        OperatorOpeAssign,  // +=, -=, *=, /= and so on.
+        OperatorLess,       // <
+        OperatorLessEq,     // <
+        OperatorLarger,     // >
+        OperatorLargerEq,   // >
+        OperatorAssign,     // =
+        OperatorEq,
+        OperatorNot,
+        OperatorNotEq,
+        //Keywords
+        KeyWordIf,
+        KeyWordElse,
+        KeyWordSwitch,
+        KeyWordFor,
+        KeyWordDo,
+        KeyWordWhile
+        //Boundarys
     } const type;
 
-    Token(const char* data, TokenType type);
+    Token(const std::string& data, TokenType type);
     ~Token();
 };
 

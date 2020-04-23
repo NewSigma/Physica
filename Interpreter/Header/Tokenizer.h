@@ -10,23 +10,15 @@
 #include "Token.h"
 
 class Tokenizer {
-    enum BufferState {
-        Start,
-        PreInt,
-        Int,
-        Float
-    } state;
     std::list<Token> tokens;
-    std::string buffer;
+    const char* str;
+    //Defined to make debug easier.
+    int line;
 public:
     Tokenizer(const char* str);
-    ~Tokenizer() = default;
-
-    inline bool isNonZeroNum(const char& ch) { return '1' <= ch && ch <= '9'; }
 private:
-    void readChar(const char& ch);
-    void resetBuffer(Token::TokenType type);
-    Token::TokenType getCurrentType();
+    void readWord();
+    void handleOperator(Token::TokenType single, Token::TokenType pair);
 };
 
 #endif

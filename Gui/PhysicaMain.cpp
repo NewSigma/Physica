@@ -64,7 +64,8 @@ bool PhysicaMain::eventFilter(QObject* obj, QEvent* event) {
             if(keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Return) {
                 lastCalcTime = clock();
                 //TODO
-                statusBar()->showMessage(QString::fromStdString("Calculate Time: " + std::to_string(clock() - lastCalcTime) + " ms"));
+                clock_t end = clock();
+                statusBar()->showMessage(QString::fromStdString("Calculate Time: " + std::to_string(end - lastCalcTime) + " ms"));
                 return true;
             }
         }
