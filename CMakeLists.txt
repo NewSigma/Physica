@@ -11,6 +11,8 @@ set(ENABLE_TEST True)
 #Platform related
 set(GPU_ARCHITECTURE compute_75)
 set(GPU_CODE sm_75)
+
+include(PhysicaConfig.cmake)
 ##############################################Libs################################################
 #############################################Project##############################################
 include_directories(./)

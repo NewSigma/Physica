@@ -1,4 +1,8 @@
 This package contains all about Multiple Precision Arbitrary supports.
+
+Note:
+This package contains several platform dependent methods, may fix them in the future.
+
 Reference:
 [1] GNU Multiple Precision arithmetic library (GMP) 6.2.0  https://gmplib.org/
 [2] https://www.emath.ac.cn/

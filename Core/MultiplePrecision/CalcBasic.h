@@ -8,8 +8,6 @@
 #include <QtCore/qlogging.h>
 #include "Core/Header/Numerical.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 //n1 * n2 = product(16 bits) = carry(high 8 bits) + ReturnValue(low 8bits)
 inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
     const NumericalUnit LongLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2);
@@ -31,7 +29,6 @@ inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, Numer
     carry = hh + (lh >> (NumericalUnitWidth / 2));
     return (lh << (NumericalUnitWidth / 2)) + (ll & LongLowMask);
 }
-#pragma clang diagnostic pop
 /*
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
@@ -385,6 +382,17 @@ inline void cutZero(Numerical& n) {
         else
             n.power = 0;
     }
+}
+//Maybe faster if use asm.
+inline unsigned int countLeadingZeros(NumericalUnit n) {
+    if(n == 0)
+        return NumericalUnitWidth;
+    int count = 0;
+    while((n & highestBitMask) == 0) {
+        ++count;
+        n <<= 1U;
+    }
+    return count;
 }
 
 #endif

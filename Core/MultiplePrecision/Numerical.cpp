@@ -5,17 +5,17 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
-/*
- *
- * Useful formulas:
- * (1) n.ed - n.power
- *     Number of digits between the unit and the last digit. (Both included)
- *
- * Operators that do not need to free memory : = += -= *= /= > <
- * Operators that need memory free : new + - * / toNumericalber() randomNumericalber()
- *
- * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
- */
+
+//Platform dependent
+union double_extract {
+    double value;
+    struct {
+        unsigned int low : 32;
+        unsigned int high : 20;
+        unsigned int exp : 11;
+        unsigned int sign : 1;
+    } structure;
+};
 ////////////////////////////////Numerical////////////////////////////////
 Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {}
 
@@ -43,11 +43,6 @@ Numerical::Numerical(SignedNumericalUnit unit, NumericalUnit a) noexcept
     }
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
-/*
- * Not accurate.
- */
 Numerical::Numerical(double d, NumericalUnit a) : a(a) {
     if(d == 0) {
         byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
@@ -55,46 +50,69 @@ Numerical::Numerical(double d, NumericalUnit a) : a(a) {
         byte[0] = power = 0;
         return;
     }
-    bool negative = d < 0;
-    if(negative)
-        d = -d;
-
-    power = 0;
-    auto dNumericalUnitMax = static_cast<double>(NumericalUnitMax);
-    while(d > dNumericalUnitMax) {
-        d /= dNumericalUnitMax;
-        ++power;
-    }
-
-    while(d < 1) {
-        d *= dNumericalUnitMax;
+    double_extract extract{d};
+    auto quotient = static_cast<int>(extract.structure.exp) - 1023;
+    power = quotient / __WORDSIZE;
+    //Have power * __WORDSIZE < extract.structure.exp, so that remainder > 0.
+    if(quotient < 0)
         --power;
-    }
+    unsigned int remainder = quotient - power * __WORDSIZE;
 #ifdef PHYSICA_64BIT
-    length = 2;
-    byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
-    auto integer = static_cast<NumericalUnit>(d);
-    byte[1] = integer;
-    d -= integer;
-    byte[0] = static_cast<NumericalUnit>(d * dNumericalUnitMax);
+    if(remainder < 52) {
+        length = 2;
+        byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        //Hidden bit
+        byte[1] = 1;
+        byte[1] <<= remainder;
+        if(remainder <= 20) {
+            byte[1] += static_cast<NumericalUnit>(extract.structure.high) >> (20 - remainder);
+            byte[0] = static_cast<NumericalUnit>(extract.structure.high) << (44 + remainder);
+            byte[0] += static_cast<NumericalUnit>(extract.structure.low) << (32 - (20 - remainder));
+        }
+        else {
+            byte[1] += static_cast<NumericalUnit>(extract.structure.high) << (remainder - 20);
+            byte[1] += static_cast<NumericalUnit>(extract.structure.low) >> (32 - (remainder - 20));
+            byte[0] = static_cast<NumericalUnit>(extract.structure.low) << (32 + (remainder - 20));
+        }
+    }
+    else {
+        length = 1;
+        byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
+        //Hidden bit
+        byte[0] = 1;
+        byte[0] <<= 20U;
+        byte[0] += static_cast<NumericalUnit>(extract.structure.high);
+        byte[0] <<= 32U;
+        byte[0] += static_cast<NumericalUnit>(extract.structure.low);
+        byte[0] <<= remainder - 52;
+    }
 #endif
-
 #ifdef PHYSICA_32BIT
-    length = 3;
-    byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
-    Numerical integer = (NumericalUnit)d;
-    d -= integer;
-    byte[2] = integer;
-    d *= NumericalUnitMax;
-    integer = (NumericalUnit)d;
-    d -= integer;
-    byte[1] = integer;
-    byte[0] = (NumericalUnit)(d * NumericalUnitMax);
+    if(remainder < 20) {
+        length = 3;
+        byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        //Hidden bit
+        byte[2] = 1;
+        byte[2] <<= remainder;
+        byte[2] += static_cast<NumericalUnit>(extract.structure.high) >> (20 - remainder);
+        byte[1] = static_cast<NumericalUnit>(extract.structure.high) << (32 - (20 - remainder));
+        byte[1] +=  static_cast<NumericalUnit>(extract.structure.low) >> (20 - remainder);
+        byte[0] = static_cast<NumericalUnit>(extract.structure.low) << remainder;
+    }
+    else {
+        length = 2;
+        byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        //Hidden bit
+        byte[1] = 1;
+        byte[1] <<= remainder;
+        byte[1] += static_cast<NumericalUnit>(extract.structure.high) << (remainder - 20);
+        byte[1] += static_cast<NumericalUnit>(extract.structure.low) >> (32 - (remainder - 20));
+        byte[0] = static_cast<NumericalUnit>(extract.structure.low) << (remainder - 20);
+    }
 #endif
-    if(negative)
+    if(extract.structure.sign)
         length = -length;
 }
-#pragma clang diagnostic pop
 /*
  * Not accurate.
  */
@@ -124,21 +142,63 @@ Numerical::Numerical(const std::string& s, NumericalUnit a) : Numerical(s.c_str(
 Numerical::Numerical(const std::wstring& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
 
 Numerical::~Numerical() { free(byte); }
-/*
- * Not accurate.
- */
+
 Numerical::operator double() const {
-    int lastIndex = getSize() - 1;
-    double d = 0;
-    double base = pow(static_cast<double>(NumericalUnitMax), power - lastIndex);
-    for(int i = 0; i < lastIndex; ++i) {
-        d += base * static_cast<double>(byte[i]);
-        base *= static_cast<double>(NumericalUnitMax);
+    if(isZero())
+        return 0.0;
+    double_extract extract{0};
+    extract.structure.sign = length < 0;
+
+    const auto zeroCount = countLeadingZeros(byte[getSize() - 1]);
+    auto exp = power * __WORDSIZE + NumericalUnitWidth - zeroCount - 1 + 1023;
+    if(exp >= 2047) {
+        extract.structure.high = extract.structure.low = 0;
+        extract.structure.exp = 2047;
+        return extract.value;
     }
-    d += base * static_cast<double>(byte[lastIndex]);
-    if(length < 0)
-        d = -d;
-    return d;
+    if(exp <= 0) {
+        return 0.0;
+    }
+    extract.structure.exp = exp;
+
+    auto size = getSize();
+    auto temp = byte[size - 1] << (zeroCount + 1);
+#ifdef PHYSICA_64BIT
+    extract.structure.high = temp >> 44U;
+    if(zeroCount <= 11) {
+        extract.structure.low = temp << 20U >> 32U;
+    }
+    else {
+        if(zeroCount <= 44 - 1) {
+            extract.structure.low = temp << 20U >> 32U;
+            if(size > 1)
+                extract.structure.low += byte[size - 2] >> (64 - (32 - (64 - 20 - zeroCount - 1)));
+        }
+        else {
+            if(size > 1) {
+                extract.structure.high += byte[size - 2] >> (64 - (20 - (64 - zeroCount - 1)));
+                extract.structure.low = byte[size - 2] << (20 - (64 - zeroCount - 1)) >> 32U;
+            }
+        }
+    }
+#endif
+#ifdef PHYSICA_32BIT
+    extract.structure.high = temp >> 12U;
+    if(zeroCount <= 11) {
+        extract.structure.low = temp << 20U;
+        if(size > 1)
+            extract.structure.low = byte[size - 1] >> (32 - 20 - zeroCount - 1);
+    }
+    else {
+        if(size > 1) {
+            extract.structure.high += byte[size - 1] >> (32 - (zeroCount + 1 - 12));
+            extract.structure.low = byte[size - 1] << (zeroCount + 1 - 12);
+        }
+        if(size > 2)
+            extract.structure.low += byte[size - 2] >> (32 - (zeroCount + 1 - 12));
+    }
+#endif
+    return extract.value;
 }
 
 std::ostream& operator<<(std::ostream& os, const Numerical& n) {
