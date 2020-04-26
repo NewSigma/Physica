@@ -11,9 +11,9 @@ RealInf* RealInf::negative = nullptr;
 RealInf::RealInf(bool b) {
     auto arr = new AbstractNum*[1];
     if(b)
-        arr[0] = new RealNum(basicConst->get_1());
+        arr[0] = new RealNum(BasicConst::getInstance().get_1());
     else
-        arr[0] = new RealNum(basicConst->getMinus_1());
+        arr[0] = new RealNum(BasicConst::getInstance().getMinus_1());
     direction = new Vector(arr, 1);
 }
 

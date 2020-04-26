@@ -5,6 +5,8 @@ class RealNum;
 class Numerical;
 
 class BasicConst {
+    static BasicConst* instance;
+
     const Numerical* plotPoints;
     const Numerical* expectedRelativeError;
     const Numerical* stepSize;
@@ -24,6 +26,9 @@ public:
 
     BasicConst();
     ~BasicConst();
+    static void init();
+    static const BasicConst& getInstance() { return *instance; }
+    static void deInit();
 
     inline const Numerical& getPlotPoints() const { return *plotPoints; }
     inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
@@ -41,6 +46,8 @@ public:
 };
 
 class MathConst {
+    static MathConst* instance;
+
     const RealNum* stepSize;
     const RealNum* _0;
     const RealNum* _1;
@@ -53,6 +60,9 @@ class MathConst {
 public:
     MathConst();
     ~MathConst();
+    static void init();
+    static const MathConst& getInstance() { return *instance; }
+    static void deInit();
 
     inline const RealNum& getStepSize() const { return *stepSize; }
     inline const RealNum& get_0() const { return *_0; }
@@ -65,8 +75,5 @@ public:
 private:
     static Numerical calcPI(int precision);
 };
-
-extern const BasicConst* basicConst;
-extern const MathConst* mathConst;
 
 #endif

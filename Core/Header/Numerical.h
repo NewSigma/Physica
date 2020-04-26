@@ -89,8 +89,8 @@ bool operator!=(const Numerical& n1, const Numerical& n2);
 Numerical getAccuracy(const Numerical& n);
 inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)); }
 inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n)); }
-inline Numerical getZero() { return Numerical(basicConst->get_0()); }
-inline Numerical getOne() { return Numerical(basicConst->get_1()); }
-inline Numerical getTwo() { return Numerical(basicConst->get_2()); }
+inline Numerical getZero() { return Numerical(BasicConst::getInstance().get_0()); }
+inline Numerical getOne() { return Numerical(BasicConst::getInstance().get_1()); }
+inline Numerical getTwo() { return Numerical(BasicConst::getInstance().get_2()); }
 
 #endif

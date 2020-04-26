@@ -7,8 +7,6 @@
 #include "Const.h"
 #include "RealNum.h"
 
-extern const BasicConst* basicConst;
-
 DirectedInf::DirectedInf(Vector* vec) {
     direction = vec;
 }

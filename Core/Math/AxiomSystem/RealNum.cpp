@@ -5,7 +5,7 @@
 #include "RealInf.h"
 #include "Indeterminate.h"
 
-RealNum::RealNum(const Numerical& n) : ComplexNum(n, basicConst->get_0()) {}
+RealNum::RealNum(const Numerical& n) : ComplexNum(n, BasicConst::getInstance().get_0()) {}
 
 RealNum::RealNum(const RealNum& n) : RealNum(*n.real) {}
 

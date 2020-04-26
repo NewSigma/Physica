@@ -33,7 +33,7 @@ void Layer::handleLoss() {
     if(id != 0) {
         Layer& lastLayer = (*parentNet)[id - 1];
         for(int i = 0; i < lastLayer.getSize(); ++i)
-            lastLayer[i].acceptedLoss = basicConst->get_0();
+            lastLayer[i].acceptedLoss = BasicConst::getInstance().get_0();
     }
     for(int j = 0; j < getSize(); ++j)
         nodes[j]->handleLoss();

@@ -55,7 +55,7 @@ void Node::handleLoss() {
             target.acceptedLoss += averageLoss;
             continue;
         }
-        vector[i] += basicConst->get_2() * net.learnRate * acceptedLoss * net.getInputs()[i];
+        vector[i] += BasicConst::getInstance().get_2() * net.learnRate * acceptedLoss * net.getInputs()[i];
     }
 }
 

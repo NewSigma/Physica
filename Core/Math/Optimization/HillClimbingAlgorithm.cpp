@@ -17,7 +17,7 @@ HillClimbingAlgorithm::HillClimbingAlgorithm(Numerical* f(Numerical*), Numerical
 	func = f;
 	x_initial = init;
 	stepSize = size;
-	minStep = new Numerical(basicConst->getStepSize());
+	minStep = new Numerical(BasicConst::getInstance().getStepSize());
 }
 
 HillClimbingAlgorithm::~HillClimbingAlgorithm() {

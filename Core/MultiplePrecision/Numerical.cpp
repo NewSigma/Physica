@@ -258,14 +258,14 @@ Numerical Numerical::operator^ (const Numerical& n) const {
             Numerical result = getOne();
             if(n.isNegative()) {
                 Numerical temp = reciprocal(*this);
-                while(n2_copy != basicConst->get_0()) {
-                    n2_copy -= basicConst->get_1();
+                while(n2_copy != BasicConst::getInstance().get_0()) {
+                    n2_copy -= BasicConst::getInstance().get_1();
                     result *= temp;
                 }
             }
             else {
-                while(n2_copy != basicConst->get_0()) {
-                    n2_copy -= basicConst->get_1();
+                while(n2_copy != BasicConst::getInstance().get_0()) {
+                    n2_copy -= BasicConst::getInstance().get_1();
                     result *= *this;
                 }
             }
@@ -275,7 +275,7 @@ Numerical Numerical::operator^ (const Numerical& n) const {
             Numerical result = getOne();
             Numerical temp_1 = ln(*this);
             temp_1 *= n;
-            temp_1 += basicConst->get_1();
+            temp_1 += BasicConst::getInstance().get_1();
             bool go_on;
             do {
                 Numerical temp_2 = ln(result);

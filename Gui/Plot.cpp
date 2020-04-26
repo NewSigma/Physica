@@ -10,7 +10,7 @@ Plot::Plot(Numerical (*func)(const Numerical&), const Numerical& begin, const Nu
     : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    Numerical maxStepSize = (end - begin) / basicConst->getPlotPoints();
+    Numerical maxStepSize = (end - begin) / BasicConst::getInstance().getPlotPoints();
     Numerical point = Numerical(begin);
     do {
         Numerical y = func(point);

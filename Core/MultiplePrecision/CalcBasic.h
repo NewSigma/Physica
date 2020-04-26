@@ -8,13 +8,18 @@
 #include <QtCore/qlogging.h>
 #include "Core/Header/Numerical.h"
 
-//n1 * n2 = product(16 bits) = carry(high 8 bits) + ReturnValue(low 8bits)
+extern const NumericalUnit numericalUnitHighestBitMask;
+extern const NumericalUnit numericalUnitLowMask;
+/*
+ * On 64 bits machine(similar to 32 bit machine):
+ * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
+ */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
-    const NumericalUnit LongLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2);
-
-    NumericalUnit n1_low = n1 & LongLowMask;
+    NumericalUnit n1_low = n1 & numericalUnitLowMask;
     NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2);
-    NumericalUnit n2_low = n2 & LongLowMask;
+    NumericalUnit n2_low = n2 & numericalUnitLowMask;
     NumericalUnit n2_high = n2 >> (NumericalUnitWidth / 2);
 
     auto ll = n1_low * n2_low;
@@ -27,8 +32,9 @@ inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, Numer
     if(lh < hl)
         hh += static_cast<NumericalUnit>(1) << (NumericalUnitWidth / 2);
     carry = hh + (lh >> (NumericalUnitWidth / 2));
-    return (lh << (NumericalUnitWidth / 2)) + (ll & LongLowMask);
+    return (lh << (NumericalUnitWidth / 2)) + (ll & numericalUnitLowMask);
 }
+#pragma clang diagnostic pop
 /*
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
@@ -217,9 +223,9 @@ inline Numerical sub(const Numerical& n1, const Numerical& n2) {
 }
 
 inline Numerical mul(const Numerical& n1, const Numerical& n2) {
-    if(n1 == basicConst->get_1())
+    if(n1 == BasicConst::getInstance().get_1())
         return Numerical(n2);
-    else if(n2 == basicConst->get_1())
+    else if(n2 == BasicConst::getInstance().get_1())
         return Numerical(n1);
     else {
         const int size1 = n1.getSize();
@@ -274,7 +280,7 @@ inline Numerical div(const Numerical& n1, const Numerical& n2) {
         qFatal("Divide by zero!");
 
     if(!n1.isZero()) {
-        if(n2 != basicConst->get_1()) {
+        if(n2 != BasicConst::getInstance().get_1()) {
             Numerical n1_copy(n1);
             Numerical n2_copy(n2);
             n1_copy.toAbs();
@@ -282,7 +288,7 @@ inline Numerical div(const Numerical& n1, const Numerical& n2) {
             n1_copy.a = n2_copy.a = 0;
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
             //Estimate the length of result.
-            int length = basicConst->GlobalPrecision;
+            int length = BasicConst::getInstance().GlobalPrecision;
             //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
             int power = n1.getPower() - n2.getPower();
             n1_copy.power = n2.power;
@@ -344,14 +350,14 @@ inline bool cutLength(Numerical& n) {
     bool result = false;
     int size = n.getSize();
 
-    if(size > basicConst->GlobalPrecision) {
+    if(size > BasicConst::getInstance().GlobalPrecision) {
         result = true;
-        int cutFrom = size - basicConst->GlobalPrecision;
-        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(basicConst->GlobalPrecision * sizeof(NumericalUnit)));
-        memcpy(new_byte, n.byte + cutFrom, basicConst->GlobalPrecision * sizeof(NumericalUnit));
+        int cutFrom = size - BasicConst::getInstance().GlobalPrecision;
+        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(BasicConst::getInstance().GlobalPrecision * sizeof(NumericalUnit)));
+        memcpy(new_byte, n.byte + cutFrom, BasicConst::getInstance().GlobalPrecision * sizeof(NumericalUnit));
         free(n.byte);
         n.byte = new_byte;
-        auto length = basicConst->GlobalPrecision;
+        auto length = BasicConst::getInstance().GlobalPrecision;
         if(n.length < 0)
             length = -length;
         n.length = length;
@@ -388,7 +394,7 @@ inline unsigned int countLeadingZeros(NumericalUnit n) {
     if(n == 0)
         return NumericalUnitWidth;
     int count = 0;
-    while((n & highestBitMask) == 0) {
+    while((n & numericalUnitHighestBitMask) == 0) {
         ++count;
         n <<= 1U;
     }

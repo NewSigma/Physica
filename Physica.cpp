@@ -7,9 +7,6 @@
 #include "Gui/Header/PhysicaMain.h"
 #include "Core/Header/Util.h"
 
-const BasicConst* basicConst;
-const MathConst* mathConst;
-
 static QtMessageHandler handler;
 
 void init();
@@ -67,11 +64,11 @@ void init() {
         if(handler)
             handler(type, context, prefix + msg);
     });
-    basicConst = new BasicConst();
-    mathConst = new MathConst();
+    BasicConst::init();
+    MathConst::init();
 }
 
 void deInit() {
-    delete basicConst;
-    delete mathConst;
+    BasicConst::deInit();
+    MathConst::deInit();
 }

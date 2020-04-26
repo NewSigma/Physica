@@ -149,8 +149,8 @@ NumericalVector NumericalVector::operator/(const NumericalVector& v) const {
     if(length == v.length) {
         if(length == 2) {
             auto arr = new Numerical*[3];
-            arr[0] = new Numerical(basicConst->get_0());
-            arr[1] = new Numerical(basicConst->get_0());
+            arr[0] = new Numerical(BasicConst::getInstance().get_0());
+            arr[1] = new Numerical(BasicConst::getInstance().get_0());
             arr[2] = new Numerical(*numbers[0] * *v.numbers[1] - *numbers[1] * *v.numbers[0]);
             return NumericalVector(arr, 3);
         }

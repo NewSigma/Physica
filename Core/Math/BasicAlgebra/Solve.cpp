@@ -23,10 +23,10 @@ Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, 
     if((sub(n, y1).getLength() ^ sub(n, y2).getLength()) >= 0) // NOLINT(hicpp-signed-bitwise)
         qFatal("Root is nonexistent.");
 
-    Numerical result = div(add(x1, x2), basicConst->get_2());
+    Numerical result = div(add(x1, x2), BasicConst::getInstance().get_2());
     Numerical y_result = getZero();
 
-    Numerical error = div(sub(y1, y2).toAbs(), basicConst->get_2());
+    Numerical error = div(sub(y1, y2).toAbs(), BasicConst::getInstance().get_2());
 
     Numerical x_left(x1);
     Numerical x_right(x2);
@@ -45,9 +45,9 @@ Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, 
         }
         else
             x_right = result;
-        result = div(add(x_left, x_right), basicConst->get_2());
-        error = div(error, basicConst->get_2());
-    } while(result.getPower() - error.getPower() < basicConst->GlobalPrecision);
+        result = div(add(x_left, x_right), BasicConst::getInstance().get_2());
+        error = div(error, BasicConst::getInstance().get_2());
+    } while(result.getPower() - error.getPower() < BasicConst::getInstance().GlobalPrecision);
     result.toUnitA();
 
     return result;

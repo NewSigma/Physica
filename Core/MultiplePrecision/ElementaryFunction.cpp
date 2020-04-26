@@ -14,7 +14,7 @@ Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBou
 }
 
 Numerical reciprocal(const Numerical& n) {
-    return basicConst->get_1() / n;
+    return BasicConst::getInstance().get_1() / n;
 }
 /*
  * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
@@ -24,7 +24,7 @@ Numerical sqrt_light(const Numerical& n) {
     if(n.isNegative())
         qFatal("Can not resolve the square root of a minus value.");
     if(n.isZero())
-        return Numerical(basicConst->get_0());
+        return Numerical(BasicConst::getInstance().get_0());
     Numerical copy_n(n);
     //Let n < 1 so as to control error.
     int add_power = 0;
@@ -41,8 +41,8 @@ Numerical sqrt_light(const Numerical& n) {
 
     Numerical result = getOne();
     //3.33 is the big approximate value of ln(10)/ln(2)
-    for(int i = 0; i < LONG_WIDTH * basicConst->GlobalPrecision; ++i)
-        result = (result + div(copy_n, result)) / basicConst->get_2();
+    for(int i = 0; i < LONG_WIDTH * BasicConst::getInstance().GlobalPrecision; ++i)
+        result = (result + div(copy_n, result)) / BasicConst::getInstance().get_2();
     result.power += add_power;
     result.toUnitA();
 
@@ -73,7 +73,7 @@ Numerical factorial(const Numerical& n) {
     Numerical result = getOne();
     Numerical temp = getOne();
     while(temp < n) {
-        temp += basicConst->get_1();
+        temp += BasicConst::getInstance().get_1();
         result *= temp;
     }
     return result;
@@ -82,10 +82,10 @@ Numerical factorial(const Numerical& n) {
 Numerical ln_light(const Numerical& n) {
     if(!n.isPositive())
         qFatal("Can not resolve the logarithm of zero or a negative value.");
-    if(n == basicConst->get_1())
+    if(n == BasicConst::getInstance().get_1())
         return getZero();
     Numerical result = getZero();
-    Numerical temp_1 = sub(n, basicConst->get_1()) / add(n, basicConst->get_1());
+    Numerical temp_1 = sub(n, BasicConst::getInstance().get_1()) / add(n, BasicConst::getInstance().get_1());
     Numerical copy_temp_1(temp_1);
     Numerical rank = getOne();
 
@@ -98,16 +98,16 @@ Numerical ln_light(const Numerical& n) {
         result += temp;
 
         temp_1 *= copy_temp_1;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
         Numerical criteria = temp_1 / rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - criteria.getPower() >= basicConst->GlobalPrecision)
+        if(result.getPower() - criteria.getPower() >= BasicConst::getInstance().GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= copy_temp_1;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
     }
-    result *= basicConst->get_2();
+    result *= BasicConst::getInstance().get_2();
     return result;
 }
 
@@ -138,11 +138,11 @@ Numerical exp(const Numerical& n) {
     Numerical rank = getOne();
     while(true) {
         temp /= rank;
-        if(temp < basicConst->getExpectedRelativeError())
+        if(temp < BasicConst::getInstance().getExpectedRelativeError())
             break;
         result += temp;
         temp *= n;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
     }
     return result;
 }
@@ -156,7 +156,7 @@ Numerical pow(const Numerical& n, const Numerical& a) {
  */
 Numerical cos(const Numerical& n) {
     Numerical result = getOne();
-    if(n == basicConst->get_0())
+    if(n == BasicConst::getInstance().get_0())
         return result;
     Numerical square_n = n * n;
     Numerical temp_1(square_n);
@@ -173,15 +173,15 @@ Numerical cos(const Numerical& n) {
         result += temp;
         //Here the temp means the criteria of break.
         temp *= n;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
         temp /= rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - temp.getPower() >= basicConst->GlobalPrecision)
+        if(result.getPower() - temp.getPower() >= BasicConst::getInstance().GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= square_n;
         temp_2 *= rank;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
         temp_2 *= rank;
     }
     return result;
@@ -189,7 +189,7 @@ Numerical cos(const Numerical& n) {
 
 Numerical sin(const Numerical& n) {
     Numerical result = getZero();
-    if(n == basicConst->get_0())
+    if(n == BasicConst::getInstance().get_0())
         return result;
     Numerical square_n = n * n;
     Numerical temp_1(n);
@@ -206,15 +206,15 @@ Numerical sin(const Numerical& n) {
         result += temp;
         //Here the temp means the criteria of break.
         temp *= n;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
         temp /= rank;
         //Break if result meets the precision goal.
-        if(result.getPower() - temp.getPower() >= basicConst->GlobalPrecision)
+        if(result.getPower() - temp.getPower() >= BasicConst::getInstance().GlobalPrecision)
             break;
         //Prepare for next calculate.
         temp_1 *= square_n;
         temp_2 *= rank;
-        rank += basicConst->get_1();
+        rank += BasicConst::getInstance().get_1();
         temp_2 *= rank;
     }
     return result;
@@ -237,15 +237,15 @@ Numerical cot(const Numerical& n) {
 }
 
 Numerical arccos(const Numerical& n) {
-    return bisectionMethod(cos, n, basicConst->get_0(), mathConst->getPI(), basicConst->get_1(), basicConst->getMinus_1());
+    return bisectionMethod(cos, n, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI(), BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
 }
 
 Numerical arcsin(const Numerical& n) {
-    return bisectionMethod(sin, n, mathConst->getMinus_PI_2(), mathConst->getPI_2(), basicConst->getMinus_1(), basicConst->get_1());
+    return bisectionMethod(sin, n, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2(), BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
 }
 
 Numerical arctan(const Numerical& n) {
-    Numerical result = arcsin(n / sqrt(n * n + basicConst->get_1()));
+    Numerical result = arcsin(n / sqrt(n * n + BasicConst::getInstance().get_1()));
     if((result.getLength() ^ n.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
         result.toAbs();
     return result;
@@ -265,7 +265,7 @@ Numerical arccot(const Numerical& n) {
 
 Numerical cosh(const Numerical& n) {
     Numerical result = exp(n);
-    result = (result + reciprocal(result)) / basicConst->get_2();
+    result = (result + reciprocal(result)) / BasicConst::getInstance().get_2();
     return result;
 }
 
@@ -273,7 +273,7 @@ Numerical sinh(const Numerical& n) {
     Numerical result = exp(n);
     Numerical temp = reciprocal(result);
     result -= temp;
-    result /= basicConst->get_2();
+    result /= BasicConst::getInstance().get_2();
     return result;
 }
 
@@ -312,15 +312,15 @@ Numerical coth(const Numerical& n) {
 }
 
 Numerical arccosh(const Numerical& n) {
-    return ln(sqrt(n * n - basicConst->get_1()) + n);
+    return ln(sqrt(n * n - BasicConst::getInstance().get_1()) + n);
 }
 
 Numerical arcsinh(const Numerical& n) {
-    return ln(sqrt(n * n + basicConst->get_1()) + n);
+    return ln(sqrt(n * n + BasicConst::getInstance().get_1()) + n);
 }
 
 Numerical arctanh(const Numerical& n) {
-    return ln((basicConst->get_1() + n) / (basicConst->get_1() - n)) / basicConst->get_2();
+    return ln((BasicConst::getInstance().get_1() + n) / (BasicConst::getInstance().get_1() - n)) / BasicConst::getInstance().get_2();
 }
 
 Numerical arcsech(const Numerical& n) {
@@ -332,5 +332,5 @@ Numerical arccsch(const Numerical& n) {
 }
 
 Numerical arccoth(const Numerical& n) {
-    return ln((n + basicConst->get_1()) / (n - basicConst->get_1())) / basicConst->get_2();
+    return ln((n + BasicConst::getInstance().get_1()) / (n - BasicConst::getInstance().get_1())) / BasicConst::getInstance().get_2();
 }

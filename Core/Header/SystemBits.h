@@ -21,20 +21,19 @@
 #if __WORDSIZE == INT_WIDTH
 typedef unsigned int NumericalUnit;
 typedef int SignedNumericalUnit;
-const NumericalUnit NumericalUnitMax = UINT_MAX;
+#define NumericalUnitMax UINT_MAX
 #elif __WORDSIZE == LONG_WIDTH
 typedef unsigned long NumericalUnit;
 typedef long SignedNumericalUnit;
-const NumericalUnit NumericalUnitMax = ULONG_MAX;
+#define NumericalUnitMax ULONG_MAX
 #elif __WORDSIZE == LLONG_WIDTH
 typedef unsigned long long NumericalUnit;
 typedef long long SignedNumericalUnit;
-const NumericalUnit NumericalUnitMax = ULLLONG_MAX;
+#define NumericalUnitMax ULLLONG_MAX
 #else
 #error No marching NumericalUnit.
 #endif
 
-const size_t NumericalUnitWidth = __WORDSIZE;
-const NumericalUnit highestBitMask = (NumericalUnit)1 << (NumericalUnitWidth - 1);
+#define NumericalUnitWidth __WORDSIZE
 
 #endif

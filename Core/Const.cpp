@@ -4,6 +4,11 @@
 #include "Const.h"
 #include "Numerical.h"
 #include "RealNum.h"
+
+extern const NumericalUnit numericalUnitHighestBitMask = (NumericalUnit)1 << (NumericalUnitWidth - 1); // NOLINT(hicpp-signed-bitwise)
+extern const NumericalUnit numericalUnitLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2); // NOLINT(hicpp-signed-bitwise)
+BasicConst* BasicConst::instance = nullptr;
+MathConst* MathConst::instance = nullptr;
 /*
  * Basic consts that initialize directly.
  */
@@ -43,21 +48,31 @@ BasicConst::~BasicConst() {
     delete _4;
     delete Minus_4;
 }
+
+void BasicConst::init() {
+    if(instance == nullptr)
+        instance = new BasicConst();
+}
+
+void BasicConst::deInit() {
+    delete instance;
+    instance = nullptr;
+}
 /*
  * Consts that need some calculates.
  * Should call new to Const_1 so as to make calculates available.
  */
 MathConst::MathConst() {
-    stepSize = new RealNum(basicConst->getStepSize());
+    stepSize = new RealNum(BasicConst::getInstance().getStepSize());
     _0 = new RealNum(getZero());
     _1 = new RealNum(getOne());
     _2 = new RealNum(getTwo());
     //0.31 is the big approximation of ln(2) / ln(10)
     PI = new Numerical(calcPI(
-            static_cast<int>(static_cast<double>(NumericalUnitWidth) * basicConst->GlobalPrecision * 0.31) + 1));
-    E = new Numerical(exp(basicConst->get_1()));
+            static_cast<int>(static_cast<double>(NumericalUnitWidth) * BasicConst::getInstance().GlobalPrecision * 0.31) + 1));
+    E = new Numerical(exp(BasicConst::getInstance().get_1()));
 
-    PI_2 = new Numerical(*PI / basicConst->get_2());
+    PI_2 = new Numerical(*PI / BasicConst::getInstance().get_2());
     Minus_PI_2 = new Numerical(-*PI_2);
 }
 
@@ -71,6 +86,16 @@ MathConst::~MathConst() {
     delete PI_2;
     delete Minus_PI_2;
 }
+
+void MathConst::init() {
+    if(instance == nullptr)
+        instance = new MathConst();
+}
+
+void MathConst::deInit() {
+    delete instance;
+    instance = nullptr;
+}
 /*
  * precision is the number of effective digits in decimal.
  * Reference:
@@ -80,19 +105,19 @@ MathConst::~MathConst() {
 Numerical MathConst::calcPI(int precision) {
     Numerical a = getOne();
     Numerical x = getOne();
-    Numerical b = reciprocal(sqrt(basicConst->get_2()));
-    Numerical c = reciprocal(basicConst->get_4());
+    Numerical b = reciprocal(sqrt(BasicConst::getInstance().get_2()));
+    Numerical c = reciprocal(BasicConst::getInstance().get_4());
 
     int goal = 1;
     while(goal < precision) {
         Numerical y(a);
-        a = (a + b) / basicConst->get_2();
+        a = (a + b) / BasicConst::getInstance().get_2();
         b = sqrt(b * y);
         y -= a;
         c -= y * y * x;
-        x *= basicConst->get_2();
+        x *= BasicConst::getInstance().get_2();
         goal *= 2;
     }
-    a = (a + b) / basicConst->get_2();
+    a = (a + b) / BasicConst::getInstance().get_2();
     return a * a / c;
 }
