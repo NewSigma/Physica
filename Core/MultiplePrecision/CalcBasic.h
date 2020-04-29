@@ -7,34 +7,10 @@
 #include <cstring>
 #include <QtCore/qlogging.h>
 #include "Core/Header/Numerical.h"
+#include "MulBasic.h"
 
 extern const NumericalUnit numericalUnitHighestBitMask;
-extern const NumericalUnit numericalUnitLowMask;
-/*
- * On 64 bits machine(similar to 32 bit machine):
- * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
- */
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
-inline NumericalUnit basicMultiply(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
-    NumericalUnit n1_low = n1 & numericalUnitLowMask;
-    NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2);
-    NumericalUnit n2_low = n2 & numericalUnitLowMask;
-    NumericalUnit n2_high = n2 >> (NumericalUnitWidth / 2);
 
-    auto ll = n1_low * n2_low;
-    auto lh = n1_low * n2_high;
-    auto hl = n1_high * n2_low;
-    auto hh = n1_high * n2_high;
-
-    lh += ll >> (NumericalUnitWidth / 2);
-    lh += hl;
-    if(lh < hl)
-        hh += static_cast<NumericalUnit>(1) << (NumericalUnitWidth / 2);
-    carry = hh + (lh >> (NumericalUnitWidth / 2));
-    return (lh << (NumericalUnitWidth / 2)) + (ll & numericalUnitLowMask);
-}
-#pragma clang diagnostic pop
 /*
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
@@ -243,7 +219,7 @@ inline Numerical mul(const Numerical& n1, const Numerical& n2) {
             int index = i;
             for(int j = 0; j < last2; ++j) {
                 aByte = byte[index];
-                byte[index] += basicMultiply(carry_temp, n1.byte[i], n2.byte[j]);
+                byte[index] += mulWordByWord(carry_temp, n1.byte[i], n2.byte[j]);
                 carry_temp += aByte > byte[index];
                 aByte = byte[index];
                 byte[index] += carry;
@@ -251,7 +227,7 @@ inline Numerical mul(const Numerical& n1, const Numerical& n2) {
                 ++index;
             }
             aByte = byte[index];
-            byte[index] += basicMultiply(carry_temp, n1.byte[i], n2.byte[last2]);
+            byte[index] += mulWordByWord(carry_temp, n1.byte[i], n2.byte[last2]);
             carry_temp += aByte > byte[index];
             aByte = byte[index];
             byte[index] += carry;
@@ -389,7 +365,7 @@ inline void cutZero(Numerical& n) {
             n.power = 0;
     }
 }
-//Maybe faster if use asm.
+//Possibly use asm to speed up.
 inline unsigned int countLeadingZeros(NumericalUnit n) {
     if(n == 0)
         return NumericalUnitWidth;
