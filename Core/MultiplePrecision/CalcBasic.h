@@ -8,9 +8,8 @@
 #include <QtCore/qlogging.h>
 #include "Core/Header/Numerical.h"
 #include "MulBasic.h"
-
-extern const NumericalUnit numericalUnitHighestBitMask;
-
+#include "DivBasic.h"
+#include "Bitwise.h"
 /*
  * The following four functions simply calculate the result while operator functions will
  * consider the accuracy.
@@ -219,7 +218,9 @@ inline Numerical mul(const Numerical& n1, const Numerical& n2) {
             int index = i;
             for(int j = 0; j < last2; ++j) {
                 aByte = byte[index];
-                byte[index] += mulWordByWord(carry_temp, n1.byte[i], n2.byte[j]);
+                NumericalUnit temp;
+                mulWordByWord(carry_temp, temp, n1.byte[i], n2.byte[j]);
+                byte[index] += temp;
                 carry_temp += aByte > byte[index];
                 aByte = byte[index];
                 byte[index] += carry;
@@ -227,7 +228,9 @@ inline Numerical mul(const Numerical& n1, const Numerical& n2) {
                 ++index;
             }
             aByte = byte[index];
-            byte[index] += mulWordByWord(carry_temp, n1.byte[i], n2.byte[last2]);
+            NumericalUnit temp;
+            mulWordByWord(carry_temp, temp, n1.byte[i], n2.byte[last2]);
+            byte[index] += temp;
             carry_temp += aByte > byte[index];
             aByte = byte[index];
             byte[index] += carry;
@@ -364,17 +367,6 @@ inline void cutZero(Numerical& n) {
         else
             n.power = 0;
     }
-}
-//Possibly use asm to speed up.
-inline unsigned int countLeadingZeros(NumericalUnit n) {
-    if(n == 0)
-        return NumericalUnitWidth;
-    int count = 0;
-    while((n & numericalUnitHighestBitMask) == 0) {
-        ++count;
-        n <<= 1U;
-    }
-    return count;
 }
 
 #endif

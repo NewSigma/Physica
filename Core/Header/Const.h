@@ -27,8 +27,8 @@ public:
     BasicConst();
     ~BasicConst();
     static void init();
-    static const BasicConst& getInstance() { return *instance; }
     static void deInit();
+    inline static const BasicConst& getInstance() { return *instance; }
 
     inline const Numerical& getPlotPoints() const { return *plotPoints; }
     inline const Numerical& getExpectedRelativeError() const { return *expectedRelativeError; }
@@ -61,8 +61,8 @@ public:
     MathConst();
     ~MathConst();
     static void init();
-    static const MathConst& getInstance() { return *instance; }
     static void deInit();
+    inline static const MathConst& getInstance() { return *instance; }
 
     inline const RealNum& getStepSize() const { return *stepSize; }
     inline const RealNum& get_0() const { return *_0; }

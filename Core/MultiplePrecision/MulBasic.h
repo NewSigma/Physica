@@ -39,7 +39,7 @@ inline NumericalUnit mulWordByWordHigh(NumericalUnit n1, NumericalUnit n2) {
  *
  * Possibly use asm to speed up. Depending on the platform.
  */
-inline NumericalUnit mulWordByWord(NumericalUnit& carry, NumericalUnit n1, NumericalUnit n2) {
+inline void mulWordByWord(NumericalUnit& high, NumericalUnit& low, NumericalUnit n1, NumericalUnit n2) {
     NumericalUnit n1_low = n1 & numericalUnitLowMask;
     NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2);
     NumericalUnit n2_low = n2 & numericalUnitLowMask;
@@ -53,8 +53,8 @@ inline NumericalUnit mulWordByWord(NumericalUnit& carry, NumericalUnit n1, Numer
     lh += ll >> (NumericalUnitWidth / 2);
     lh += hl;
     hh += static_cast<NumericalUnit>(lh < hl) << (NumericalUnitWidth / 2);
-    carry = hh + (lh >> (NumericalUnitWidth / 2));
-    return (lh << (NumericalUnitWidth / 2)) + (ll & numericalUnitLowMask);
+    high = hh + (lh >> (NumericalUnitWidth / 2));
+    low = (lh << (NumericalUnitWidth / 2)) + (ll & numericalUnitLowMask);
 }
 #pragma clang diagnostic pop
 
