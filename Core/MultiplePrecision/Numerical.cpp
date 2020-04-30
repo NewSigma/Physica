@@ -208,17 +208,46 @@ std::ostream& operator<<(std::ostream& os, const Numerical& n) {
 }
 
 Numerical Numerical::operator<<(int bits) {
-    size_t bytes = getSize() * sizeof(NumericalUnit);
-    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
-    mempcpy(new_byte, byte, bytes);
-    return Numerical(new_byte, length, power + bits, a);
+    if(bits < 0)
+        return *this >> -bits;
+    const int size = getSize();
+    const int quotient = bits / NumericalUnitWidth;
+    const unsigned int remainder = bits - quotient * NumericalUnitWidth;
+    const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
+    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
+
+    new_byte[0] = 0;
+    for(int i = 0; i < size - 1; ++i) {
+        new_byte[i] += byte[i] << remainder;
+        new_byte[i + 1] = byte[i] >> (NumericalUnitWidth - remainder);
+    }
+    new_byte[size - 1] += byte[size - 1] << remainder;
+    if(carry)
+        new_byte[size] = byte[size] >> (NumericalUnitWidth - remainder);
+    //(length >= 0) * 2 - 1) is constructed to get the sign of length.
+    return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
+            , power + quotient + carry, a);
 }
 
 Numerical Numerical::operator>>(int bits) {
-    size_t bytes = getSize() * sizeof(NumericalUnit);
-    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
-    mempcpy(new_byte, byte, bytes);
-    return Numerical(new_byte, length, power - bits, a);
+    if(bits < 0)
+        return *this << -bits;
+    const int size = getSize();
+    const int quotient = bits / NumericalUnitWidth;
+    const unsigned int remainder = bits - quotient * NumericalUnitWidth;
+    const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < NumericalUnitWidth;
+    auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
+
+    if(carry)
+        new_byte[size] = byte[size - 1] >> remainder;
+
+    for(int i = size - 1; i >= 0; --i) {
+        new_byte[i + 1] += byte[i] >> remainder;
+        new_byte[i] = byte[i] << (NumericalUnitWidth - remainder);
+    }
+    //(length >= 0) * 2 - 1) is constructed to get the sign of length.
+    return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
+            , power - quotient + carry - 1, a);
 }
 
 NumericalUnit Numerical::operator[](unsigned int index) const {

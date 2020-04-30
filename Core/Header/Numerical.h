@@ -52,10 +52,10 @@ public:
     const int& getPower() const noexcept { return power; }
     const NumericalUnit& getA() const noexcept { return a; }
     int getSize() const noexcept { return abs(length); }
-    Numerical& toAbs() { length = getSize(); return *this; }
-    Numerical& toOpposite() { length = -length; return *this; }
-    Numerical& toUnitA() { a = 1; return *this; }
-    Numerical& clearA() { a = 0; return *this; }
+    Numerical& toAbs() noexcept { length = getSize(); return *this; }
+    Numerical& toOpposite() noexcept { length = -length; return *this; }
+    Numerical& toUnitA() noexcept { a = 1; return *this; }
+    Numerical& clearA() noexcept { a = 0; return *this; }
 
     bool isZero() const { return byte[getSize() - 1] == 0; }
     bool isPositive() const { return !isZero() && length > 0; }
