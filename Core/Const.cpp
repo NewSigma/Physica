@@ -31,6 +31,7 @@ BasicConst::BasicConst() : GlobalPrecision(4), MaxPower(16) {
     Minus_3 = new Numerical(static_cast<SignedNumericalUnit>(-3));
     _4 = new Numerical(static_cast<SignedNumericalUnit>(4));
     Minus_4 = new Numerical(static_cast<SignedNumericalUnit>(-4));
+    _10 = new Numerical(static_cast<SignedNumericalUnit>(10));
 }
 
 BasicConst::~BasicConst() {
@@ -47,6 +48,7 @@ BasicConst::~BasicConst() {
     delete Minus_3;
     delete _4;
     delete Minus_4;
+    delete _10;
 }
 
 void BasicConst::init() {

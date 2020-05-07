@@ -2,18 +2,33 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCore/qlogging.h>
-#include <Interpreter/Header/TokenizerNum.h>
-#include <Interpreter/Header/TokenizerWord.h>
+#include <Core/Header/Numerical.h>
+#include "Interpreter/Header/TokenWord.h"
+#include "Interpreter/Header/TokenNum.h"
 #include "Interpreter/Header/Tokenizer.h"
+#include "Core/Header/Const.h"
 
 Tokenizer::Tokenizer(const char* str) : str(str), line(1) {
+    Token::init();
     while(*str != '\0') {
         Q_UNUSED(str)
-        readWord();
+        readToken();
     }
 }
 
-void Tokenizer::readWord() {
+Tokenizer::~Tokenizer() {
+    for(auto p : tokens) {
+        switch(p->type) {
+            case Token::Numeric:
+            case Token::Identifier:
+                delete p;
+            default:;
+        }
+    }
+    Token::deInit();
+}
+
+void Tokenizer::readToken() {
     const char ch = *str;
 
     switch(ch) {
@@ -25,8 +40,16 @@ void Tokenizer::readWord() {
             return;
         //Handle operators and boundary symbols
         case '+':
+            if(readChar('='))
+                tokens.push_back(Token::operatorAddEq);
+            else
+                tokens.push_back(Token::operatorAdd);
+            return;
         case '-':
-            handleOperator(Token::OperatorAddSub, Token::OperatorOpeAssign);
+            if(readChar('='))
+                tokens.push_back(Token::operatorSubEq);
+            else
+                tokens.push_back(Token::operatorSub);
             return;
         case '/': {
             //Handle notes
@@ -46,46 +69,233 @@ void Tokenizer::readWord() {
             }
         }
         case '*':
-            handleOperator(Token::OperatorMulDiv, Token::OperatorOpeAssign);
+            if(readChar('='))
+                tokens.push_back(Token::operatorMulEq);
+            else
+                tokens.push_back(Token::operatorMul);
             return;
         case '<':
-            handleOperator(Token::OperatorLess, Token::OperatorLessEq);
+            if(readChar('='))
+                tokens.push_back(Token::operatorLessEq);
+            else
+                tokens.push_back(Token::operatorLess);
             return;
         case '>':
-            handleOperator(Token::OperatorLarger, Token::OperatorLargerEq);
+            if(readChar('='))
+                tokens.push_back(Token::operatorLargerEq);
+            else
+                tokens.push_back(Token::operatorLarger);
             return;
         case '=':
-            handleOperator(Token::OperatorAssign, Token::OperatorEq);
+            if(readChar('='))
+                tokens.push_back(Token::operatorEq);
+            else
+                tokens.push_back(Token::operatorAssign);
             return;
         case '!':
-            handleOperator(Token::OperatorNot, Token::OperatorNotEq);
+            if(readChar('='))
+                tokens.push_back(Token::operatorNotEq);
+            else
+                tokens.push_back(Token::operatorNot);
             return;
         default:;
     }
 
     if(isdigit(ch)) {
-        TokenizerNum tokenizerNum(str);
-        tokens.emplace_back(tokenizerNum.getBuffer(), tokenizerNum.getType());
+        readNum();
         return;
     }
 
     if(isalpha(ch) || ch == '_') {
-        TokenizerWord tokenizerId(str);
-        tokens.emplace_back(tokenizerId.getBuffer(), tokenizerId.getType());
+        readWord();
         return;
     }
-
     qFatal("Unrecognized token.");
 }
-//If the operator is accompanied with '=', use pair. Or use single.
-void Tokenizer::handleOperator(Token::TokenType single, Token::TokenType pair) {
-    std::string buffer{*str};
-    ++str;
-    if(*str == '=') {
-        buffer.push_back('=');
+//Return if the next char equals to ch.
+bool Tokenizer::readChar(char ch) {
+    bool result = *(str + 1) == ch;
+    if(result)
         ++str;
-        tokens.emplace_back(buffer, pair);
-        return;
+    return result;
+}
+
+void Tokenizer::readNum() {
+    bool stoppable = true, go_on = true;
+    NumBufferState state = NumStart;
+    Numerical num(BasicConst::getInstance().get_0());
+    Numerical exp(BasicConst::getInstance().get_0());
+    SignedNumericalUnit power = 0;
+    bool isExpPositive = true;
+    while(go_on) {
+        switch(state) {
+            case NumStart:
+                switch(*str) {
+                    case '0':
+                        state = Zero;
+                        ++str;
+                        break;
+                    case '1' ... '9':
+                        num[0] = *str - '0';
+                        state = Int;
+                        ++str;
+                        break;
+                    default:
+                        go_on = stoppable = false;
+                }
+                break;
+            case Zero:
+                switch(*str) {
+                    case '0':
+                        break;
+                    case '1' ... '9':
+                        num[0] = *str - '0';
+                        state = Int;
+                        ++str;
+                        break;
+                    case '.':
+                        state = Float;
+                        break;
+                    case 'E':
+                    case 'e':
+                        state = PreExp;
+                        break;
+                    default:
+                        go_on = false;
+                }
+                break;
+            case Int:
+                switch(*str) {
+                    case '0' ... '9':
+                        num *= BasicConst::getInstance().get_10();
+                        num += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        ++str;
+                        break;
+                    case '.':
+                        state = Float;
+                        break;
+                    case 'E':
+                    case 'e':
+                        state = PreExp;
+                        break;
+                    default:
+                        go_on = false;
+                }
+                break;
+            case Float:
+                switch(*str) {
+                    case '0' ... '9':
+                        num *= BasicConst::getInstance().get_10();
+                        num += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        --power;
+                        ++str;
+                        break;
+                    case 'E':
+                    case 'e':
+                        state = PreExp;
+                        break;
+                    default:
+                        go_on = false;
+                }
+                break;
+            case PreExp:
+                stoppable = false;
+                switch(*str) {
+                    case '+':
+                    case '0':
+                        state = SignedPreExp;
+                        ++str;
+                        break;
+                    case '1' ... '9':
+                        exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        state = Exp;
+                        ++str;
+                        break;
+                    case '-':
+                        isExpPositive = false;
+                        state = SignedPreExp;
+                        ++str;
+                        break;
+                    default:
+                        go_on = false;
+                }
+                break;
+            case SignedPreExp:
+                stoppable = false;
+                switch(*str) {
+                    case '0':
+                        break;
+                    case '1' ... '9':
+                        exp *= BasicConst::getInstance().get_10();
+                        exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        state = Exp;
+                        ++str;
+                        break;
+                    default:
+                        go_on = false;
+                }
+                break;
+            case Exp:
+                stoppable = true;
+                if(isdigit(*str)) {
+                    exp *= BasicConst::getInstance().get_10();
+                    exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                    ++str;
+                }
+                else
+                    go_on = false;
+                break;
+        }
     }
-    tokens.emplace_back(buffer, single);
+    if(!stoppable)
+        qFatal("Encountered tokenizer error.");
+    if(!isExpPositive)
+        exp.toOpposite();
+    num *= (BasicConst::getInstance().get_10() ^ (exp + Numerical(power)));
+    tokens.push_back(new TokenNum(num));
+}
+
+void Tokenizer::readWord() {
+    bool stoppable = true, go_on = true;
+    WordBufferState state = WordBufferState::WordStart;
+    std::string buffer{};
+    while(go_on) {
+        switch(state) {
+            case WordStart:
+                if(isalpha(*str) || *str == '_') {
+                    buffer.push_back(*str);
+                    state = Identifier;
+                    ++str;
+                }
+                else
+                    go_on = stoppable = false;
+                break;
+            case Identifier:
+                if(isalpha(*str) || isdigit(*str) || *str == '_') {
+                    buffer.push_back(*str);
+                    state = Identifier;
+                    ++str;
+                }
+                else
+                    go_on = false;
+                break;
+        }
+    }
+    if(!stoppable)
+        qFatal("Encountered tokenizer error.");
+    //Recognize keywords
+    if(buffer == "if")
+        tokens.push_back(Token::keyWordIf);
+    else if(buffer == "else")
+        tokens.push_back(Token::keyWordElse);
+    else if(buffer == "switch")
+        tokens.push_back(Token::keyWordSwitch);
+    else if(buffer == "for")
+        tokens.push_back(Token::keyWordFor);
+    else if(buffer == "do")
+        tokens.push_back(Token::keyWordDo);
+    else if(buffer == "while")
+        tokens.push_back(Token::keyWordWhile);
+    else
+        tokens.push_back(new TokenWord(buffer.c_str(), static_cast<int>(buffer.length()) + 1));
 }

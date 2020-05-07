@@ -1,5 +1,5 @@
-#include "../../Header/Matrix.h"
-#include "../../Header/Vector.h"
+#include "Core/Header/Matrix.h"
+#include "Core/Header/Vector.h"
 
 Matrix::Matrix() {
     vectors = nullptr;

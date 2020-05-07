@@ -20,6 +20,7 @@ class BasicConst {
     const Numerical* Minus_3;
     const Numerical* _4;
     const Numerical* Minus_4;
+    const Numerical* _10;
 public:
     const int GlobalPrecision;
     const int MaxPower;
@@ -43,6 +44,7 @@ public:
     inline const Numerical& getMinus_3() const { return *Minus_3; }
     inline const Numerical& get_4() const { return *_4; }
     inline const Numerical& getMinus_4() const { return *Minus_4; }
+    inline const Numerical& get_10() const { return *_10; }
 };
 
 class MathConst {

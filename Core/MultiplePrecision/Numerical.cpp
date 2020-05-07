@@ -32,7 +32,7 @@ Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), p
 Numerical::Numerical(const Numerical* n) noexcept : Numerical(*n) {}
 
 Numerical::Numerical(SignedNumericalUnit unit, NumericalUnit a) noexcept
-: byte(reinterpret_cast<unsigned long*>(malloc(sizeof(NumericalUnit)))), power(0), a(a) {
+: byte(reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)))), power(0), a(a) {
     if(unit < 0) {
         byte[0] = -unit;
         length = -1;
@@ -250,7 +250,7 @@ Numerical Numerical::operator>>(int bits) {
             , power - quotient + carry - 1, a);
 }
 
-NumericalUnit Numerical::operator[](unsigned int index) const {
+NumericalUnit& Numerical::operator[](unsigned int index) const {
     return byte[index];
 }
 
@@ -280,48 +280,7 @@ Numerical& Numerical::operator=(Numerical&& n) noexcept {
  * Using Newton's method
  */
 Numerical Numerical::operator^ (const Numerical& n) const {
-    if(isPositive()) {
-        if(n.isInteger()) {
-            Numerical n2_copy(n);
-
-            Numerical result = getOne();
-            if(n.isNegative()) {
-                Numerical temp = reciprocal(*this);
-                while(n2_copy != BasicConst::getInstance().get_0()) {
-                    n2_copy -= BasicConst::getInstance().get_1();
-                    result *= temp;
-                }
-            }
-            else {
-                while(n2_copy != BasicConst::getInstance().get_0()) {
-                    n2_copy -= BasicConst::getInstance().get_1();
-                    result *= *this;
-                }
-            }
-            return result;
-        }
-        else {
-            Numerical result = getOne();
-            Numerical temp_1 = ln(*this);
-            temp_1 *= n;
-            temp_1 += BasicConst::getInstance().get_1();
-            bool go_on;
-            do {
-                Numerical temp_2 = ln(result);
-                temp_2.toOpposite();
-                temp_2 += temp_1;
-                temp_2 *= result;
-                go_on = temp_2 == result;
-                result = std::move(temp_2);
-            } while(go_on);
-            ++result.a;
-            return result;
-        }
-    }
-    else if(isZero() && !n.isZero())
-        return getZero();
-    else
-        qFatal("Can not resolve power of a minus value.");
+    return exp(ln(*this) * n);
 }
 
 Numerical Numerical::operator-() const {

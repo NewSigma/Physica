@@ -17,7 +17,10 @@ class Numerical {
      * sign of length and sign of Numerical are same. (when Numerical != 0)
     */
     int length;
-    //Number = (x0 +- a * 10^(1-length)) * 10^power
+    /*
+     * Number = (x0 +- a * (2 ^ __WORDSIZE) ^ (1-length)) * (2 ^ __WORDSIZE) ^power
+     * We have not considered overflow of power in our codes elsewhere.
+     */
     int power;
     //Accuracy
     NumericalUnit a;
@@ -40,7 +43,7 @@ public:
     Numerical operator>>(int bits);
     void operator<<=(int bits) noexcept { power += bits; }
     void operator>>=(int bits) noexcept { power -= bits; }
-    NumericalUnit operator[](unsigned int index) const;
+    NumericalUnit& operator[](unsigned int index) const;
     Numerical& operator=(const Numerical& n);
     Numerical& operator=(Numerical&& n) noexcept;
     Numerical operator^(const Numerical& n) const;
@@ -85,10 +88,16 @@ bool operator>=(const Numerical& n1, const Numerical& n2);
 bool operator<=(const Numerical& n1, const Numerical& n2);
 bool operator==(const Numerical& n1, const Numerical& n2);
 bool operator!=(const Numerical& n1, const Numerical& n2);
+Numerical& operator++(Numerical& n) { n += BasicConst::getInstance().get_1(); return n; }
+Numerical& operator--(Numerical& n) { n -= BasicConst::getInstance().get_1(); return n; }
+Numerical operator++(Numerical& n, int) { Numerical temp(n); n += BasicConst::getInstance().get_1(); return temp; } //NOLINT
+Numerical operator--(Numerical& n, int) { Numerical temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
 ////////////////////////////////Helper functions/////////////////////////////////////
 Numerical getAccuracy(const Numerical& n);
 inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)); }
 inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n)); }
+//Let i have the same sign of j.
+inline int applySign(int i, int j) { return ((j < 0) << (CHAR_BIT - 1)) | i; }  //NOLINT
 inline Numerical getZero() { return Numerical(BasicConst::getInstance().get_0()); }
 inline Numerical getOne() { return Numerical(BasicConst::getInstance().get_1()); }
 inline Numerical getTwo() { return Numerical(BasicConst::getInstance().get_2()); }

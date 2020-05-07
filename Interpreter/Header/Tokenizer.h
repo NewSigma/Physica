@@ -10,15 +10,32 @@
 #include "Token.h"
 
 class Tokenizer {
-    std::list<Token> tokens;
+    enum NumBufferState {
+        NumStart,
+        Zero,
+        Int,
+        Float,
+        PreExp,
+        SignedPreExp,
+        Exp
+    };
+
+    enum WordBufferState {
+        WordStart,
+        Identifier
+    };
+    std::list<Token*> tokens;
     const char* str;
     //Defined to make debug easier.
     int line;
 public:
-    Tokenizer(const char* str);
+    explicit Tokenizer(const char* str);
+    ~Tokenizer();
 private:
+    void readToken();
+    bool readChar(char ch);
+    void readNum();
     void readWord();
-    void handleOperator(Token::TokenType single, Token::TokenType pair);
 };
 
 #endif

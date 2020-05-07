@@ -13,6 +13,22 @@ Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBou
     return randomNumerical() * (upperBound - lowerBound) + lowerBound;
 }
 
+Numerical floor(const Numerical& n) {
+    if(n.isInteger())
+        return Numerical(n);
+    int length = n.getSize() > (n.getPower() + 1) ? (n.getPower() + 1) : n.getSize();
+    auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+    for(int i = 0; i < length; ++i)
+        byte[i] = n[i];
+    length = applySign(length, n.getLength());
+    return Numerical(byte, length, n.getPower());
+}
+
+Numerical ceil(const Numerical& n) {
+    auto f = floor(n);
+    return ++f;
+}
+
 Numerical reciprocal(const Numerical& n) {
     return BasicConst::getInstance().get_1() / n;
 }
@@ -145,10 +161,6 @@ Numerical exp(const Numerical& n) {
         rank += BasicConst::getInstance().get_1();
     }
     return result;
-}
-
-Numerical pow(const Numerical& n, const Numerical& a) {
-    return exp(ln(n) * a);
 }
 /*
  * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)

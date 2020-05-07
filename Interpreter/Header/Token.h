@@ -7,39 +7,32 @@
 #include <string>
 
 class Token {
-    char* data;
 public:
     enum TokenType {
-        Null,
-        Integer,
-        IntegerExp,
-        Float,
-        FloatExp,
+        Numeric,
         Identifier,
         //Operators
-        OperatorAddSub,     // +, -
-        OperatorMulDiv,     // *, /
-        OperatorOpeAssign,  // +=, -=, *=, /= and so on.
-        OperatorLess,       // <
-        OperatorLessEq,     // <
-        OperatorLarger,     // >
-        OperatorLargerEq,   // >
-        OperatorAssign,     // =
-        OperatorEq,
-        OperatorNot,
-        OperatorNotEq,
+        OperatorAdd, OperatorSub, OperatorMul, OperatorDiv,
+        OperatorAddEq, OperatorSubEq, OperatorMulEq, OperatorDivEq,
+        OperatorLess, OperatorLessEq, OperatorLarger, OperatorLargerEq,   // <, <=, >, >=
+        OperatorAssign, OperatorEq, OperatorNot, OperatorNotEq, // =, ==, !, !=
         //Keywords
-        KeyWordIf,
-        KeyWordElse,
-        KeyWordSwitch,
-        KeyWordFor,
-        KeyWordDo,
-        KeyWordWhile
+        KeyWordIf, KeyWordElse, KeyWordSwitch,
+        KeyWordFor, KeyWordDo, KeyWordWhile
         //Boundarys
     } const type;
 
-    Token(const std::string& data, TokenType type);
-    ~Token();
+    explicit Token(TokenType type);
+
+    static void init();
+    static void deInit();
+
+    static Token* operatorAdd, *operatorSub, *operatorMul, *operatorDiv
+                , *operatorAddEq, *operatorSubEq, *operatorMulEq, *operatorDivEq
+                , *operatorLess, *operatorLessEq, *operatorLarger, *operatorLargerEq
+                , *operatorAssign, *operatorEq, *operatorNot, *operatorNotEq
+                , *keyWordIf, *keyWordElse, *keyWordSwitch
+                , *keyWordFor, *keyWordDo, *keyWordWhile;
 };
 
 #endif

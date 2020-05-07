@@ -8,6 +8,8 @@ class Numerical;
 
 Numerical randomNumerical();
 Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBound);
+Numerical floor(const Numerical& n);
+Numerical ceil(const Numerical& n);
 Numerical reciprocal(const Numerical& n);
 Numerical sqrt_light(const Numerical& n);
 Numerical sqrt(const Numerical& n);
@@ -16,7 +18,6 @@ Numerical ln_light(const Numerical& n);
 Numerical ln(const Numerical& n);
 Numerical log(const Numerical& n, const Numerical& a);
 Numerical exp(const Numerical& n);
-Numerical pow(const Numerical& n, const Numerical& a);
 Numerical cos(const Numerical& n);
 Numerical sin(const Numerical& n);
 Numerical tan(const Numerical& n);
