@@ -4,6 +4,13 @@
 #include <cstring>
 #include "Interpreter/Header/Token.h"
 
+Token* Token::operatorAdd = nullptr; Token* Token::operatorSub = nullptr; Token* Token::operatorMul = nullptr; Token* Token::operatorDiv = nullptr;
+Token* Token::operatorAddEq = nullptr; Token* Token::operatorSubEq = nullptr; Token* Token::operatorMulEq = nullptr; Token* Token::operatorDivEq = nullptr;
+Token* Token::operatorLess = nullptr; Token* Token::operatorLessEq = nullptr; Token* Token::operatorLarger = nullptr; Token* Token::operatorLargerEq = nullptr;
+Token* Token::operatorAssign = nullptr; Token* Token::operatorEq = nullptr; Token* Token::operatorNot = nullptr; Token* Token::operatorNotEq = nullptr;
+Token* Token::keyWordIf = nullptr; Token* Token::keyWordElse = nullptr; Token* Token::keyWordSwitch = nullptr;
+Token* Token::keyWordFor = nullptr; Token* Token::keyWordDo = nullptr; Token* Token::keyWordWhile = nullptr;
+
 Token::Token(TokenType t) : type(t) {}
 
 void Token::init() {

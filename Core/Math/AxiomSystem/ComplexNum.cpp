@@ -37,11 +37,11 @@ Numerical ComplexNum::toNorm() const {
     return *real * *real + *imagine * *imagine;
 }
 
-Vector* ComplexNum::toVector() const {
-    auto arr = new AbstractNum*[2];
-    arr[0] = new RealNum(*real);
-    arr[1] = new RealNum(*imagine);
-    return new Vector(arr, 2);
+Vector ComplexNum::toVector() const {
+    auto arr = new Numerical*[2];
+    arr[0] = new Numerical(real);
+    arr[1] = new Numerical(imagine);
+    return Vector(arr, 2);
 }
 
 AbstractNum::NumberType ComplexNum::getType() const noexcept {
@@ -106,16 +106,11 @@ AbstractNum* ComplexNum::operator* (const AbstractNum& n) const {
         case RealNumber:
             return new ComplexNum(*real * *((RealNum&)n).real, *imagine * *((RealNum&)n).real);
         case DirectedInfinity: {
-            auto unit = toVector();
-            auto arg1 = unit->toArg(0);
-            auto arg2 = ((DirectedInf&)n).direction->toArg(0);
-            auto result_arg = *arg1 + *arg2;
-            auto result = new DirectedInf(result_arg);
-            delete unit;
-            delete arg1;
-            delete arg2;
-            delete result_arg;
-            return result;
+            Vector unit = toVector();
+            auto arg1 = unit.toArg(0);
+            auto arg2 = ((DirectedInf&)n).direction.toArg(0);
+            auto result_arg = arg1 + arg2;
+            return new DirectedInf(result_arg);
         }
         case ComplexInfinity:
             return ComplexInf::getInstance();

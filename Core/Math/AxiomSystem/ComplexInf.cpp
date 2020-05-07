@@ -6,9 +6,7 @@
 
 ComplexInf* ComplexInf::instance = nullptr;
 
-ComplexInf::ComplexInf() {
-    direction = nullptr;
-}
+ComplexInf::ComplexInf() : DirectedInf(Vector()) {}
 
 ComplexInf* ComplexInf::getInstance() {
     if(instance == nullptr)

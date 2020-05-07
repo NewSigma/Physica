@@ -9,13 +9,11 @@
 
 class DirectedInf : public AbstractNum {
 public:
-    Vector* direction;
+    Vector direction;
 
-    DirectedInf(Vector* direction);
-    DirectedInf(AbstractNum* arg);
+    explicit DirectedInf(const Numerical& arg);
+    explicit DirectedInf(const Vector& direction);
     DirectedInf(const DirectedInf& instance);
-    DirectedInf(const DirectedInf* instance);
-    ~DirectedInf();
 
     NumberType getType() const noexcept override;
     AbstractNum* operator+ (const AbstractNum& n) const override;
@@ -25,8 +23,6 @@ public:
     AbstractNum* operator^ (const AbstractNum& n) const override;
     AbstractNum* operator- () const override;
     bool operator== (const AbstractNum& n) const override;
-protected:
-    DirectedInf() = default;
 };
 
 #endif

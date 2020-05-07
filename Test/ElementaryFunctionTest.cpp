@@ -21,7 +21,6 @@ void elementary_function_test() {
         std::cout << "ln: " << ln(n1) << '\n';
         std::cout << "log: " << log(n1, n2) << '\n';
         std::cout << "exp: " << exp(n1) << '\n';
-        std::cout << "pow: " << pow(n1, n2) << '\n';
         std::cout << "#######################Trigonometric Functions#######################\n";
         std::cout << "cos: " << cos(n1) << '\n';
         std::cout << "sin: " << sin(n1) << '\n';

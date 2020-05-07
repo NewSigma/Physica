@@ -8,18 +8,13 @@
 RealInf* RealInf::positive = nullptr;
 RealInf* RealInf::negative = nullptr;
 
-RealInf::RealInf(bool b) {
-    auto arr = new AbstractNum*[1];
+RealInf::RealInf(bool b) : DirectedInf(Vector()) {
+    auto arr = new Numerical*[1];
     if(b)
-        arr[0] = new RealNum(BasicConst::getInstance().get_1());
+        arr[0] = new Numerical(BasicConst::getInstance().get_1());
     else
-        arr[0] = new RealNum(BasicConst::getInstance().getMinus_1());
-    direction = new Vector(arr, 1);
-}
-
-RealInf::~RealInf() {
-    direction->numbers[0] = nullptr;
-    delete direction;
+        arr[0] = new Numerical(BasicConst::getInstance().getMinus_1());
+    direction = Vector(arr, 1);
 }
 
 RealInf* RealInf::getInstance(bool b) {
@@ -45,7 +40,7 @@ AbstractNum* RealInf::operator+(const AbstractNum& n) const {
         case AbstractNum::RealNumber:
             return (AbstractNum*)this;
         case AbstractNum::DirectedInfinity:
-            if((*((DirectedInf&)n).direction) == *direction)
+            if((((DirectedInf&)n).direction) == direction)
                 return (AbstractNum*)this;
             return ComplexInf::getInstance();
         case AbstractNum::RealInfinity:
@@ -63,7 +58,7 @@ AbstractNum* RealInf::operator-(const AbstractNum& n) const {
         case AbstractNum::RealNumber:
             return (AbstractNum*)this;
         case AbstractNum::DirectedInfinity:
-            if((*((DirectedInf&)n).direction) == *direction)
+            if((((DirectedInf&)n).direction) == direction)
                 return (AbstractNum*)this;
             return ComplexInf::getInstance();
         case AbstractNum::RealInfinity:

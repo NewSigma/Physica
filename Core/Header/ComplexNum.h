@@ -19,7 +19,7 @@ public:
     ~ComplexNum() override;
     ComplexNum* toConjugate() const;
     Numerical toNorm() const;
-    Vector* toVector() const;
+    Vector toVector() const;
 
     NumberType getType() const noexcept override;
     void operator<<(ComplexNum& n);

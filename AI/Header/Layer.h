@@ -6,7 +6,6 @@
 
 #include <vector>
 #include "PhysicaAI.h"
-#include "Node.h"
 
 PhysicaAI_Namespace_Begin
 

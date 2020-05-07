@@ -18,7 +18,7 @@ AbstractNum* AbstractNum::concretize() {
         case RealNumber:
             return new RealNum((RealNum*)this);
         case DirectedInfinity:
-            return new DirectedInf((DirectedInf*)this);
+            return new DirectedInf(*(DirectedInf*)this);
         case ComplexInfinity:
             return ComplexInf::getInstance();
         case RealInfinity:
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& os, const AbstractNum& n) {
             os << *((RealNum&)n).real;
             break;
         case AbstractNum::DirectedInfinity:
-            os << "DirectedInfinity" << *((DirectedInf&)n).direction;
+            os << "DirectedInfinity" << ((DirectedInf&)n).direction;
             break;
         case AbstractNum::ComplexInfinity:
             os << "ComplexInfinity";
@@ -69,18 +69,10 @@ AbstractNum* reciprocal(const AbstractNum& n) {
 AbstractNum* sqrt(const AbstractNum& n) {
     switch(n.getType()) {
         case AbstractNum::ComplexNumber: {
-            auto vec = ((ComplexNum&)n).toVector();
-            auto norm = vec->toNorm();
-            *((RealNum*)norm)->real = sqrt(*((RealNum*)norm)->real);
-
-            auto arg = vec->toArg(0);
-            *((RealNum*)arg)->real /= BasicConst::getInstance().get_2();
-            Numerical new_real = *((RealNum*)norm)->real * cos(*((RealNum*)arg)->real);
-            Numerical new_imagine = *((RealNum*)norm)->real * sin(*((RealNum*)arg)->real);
-            delete vec;
-            delete norm;
-            delete arg;
-            return new ComplexNum(new_real, new_imagine);
+            Vector vec = ((ComplexNum&)n).toVector();
+            Numerical norm = sqrt(vec.toNorm());
+            Numerical arg = vec.toArg(0);
+            return new ComplexNum(norm * cos(arg), norm * sin(arg));
         }
         case AbstractNum::RealNumber:
             return new RealNum(sqrt(*((RealNum&)n).real));
@@ -89,13 +81,10 @@ AbstractNum* sqrt(const AbstractNum& n) {
         case AbstractNum::RealInfinity:
             return RealInf::getInstance(((RealInf&)n).getSign());
         case AbstractNum::DirectedInfinity:
-            if(((DirectedInf&)n).direction->getLength() == 2) {
-                auto arg = ((DirectedInf&)n).direction->toArg(0);
-                *((RealNum*)arg)->real /= BasicConst::getInstance().get_2();
-                auto unit_vec_x = new RealNum(cos(*((RealNum*)arg)->real));
-                auto unit_vec_y = new RealNum(sin(*((RealNum*)arg)->real));
-                auto result = new DirectedInf(new Vector(unit_vec_x, unit_vec_y));
-                delete arg;
+            if(((DirectedInf&)n).direction.getLength() == 2) {
+                Numerical arg = ((DirectedInf&)n).direction.toArg(0);
+                arg /= BasicConst::getInstance().get_2();
+                auto result = new DirectedInf(Vector(cos(arg), sin(arg)));
                 return result;
             }
         case AbstractNum::Indeterminate:

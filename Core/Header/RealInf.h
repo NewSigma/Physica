@@ -11,7 +11,7 @@
 
 class RealInf : public DirectedInf {
 public:
-    bool getSign() const { return *((RealNum*)(*direction)[0])->real == BasicConst::getInstance().get_1(); }
+    bool getSign() const { return direction[0].isPositive(); }
     static RealInf* getInstance(bool b);
 
     NumberType getType() const noexcept override;
@@ -26,7 +26,6 @@ private:
     static RealInf* positive;
     static RealInf* negative;
     explicit RealInf(bool b);
-    ~RealInf() override;
 };
 
 #endif

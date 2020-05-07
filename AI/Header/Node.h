@@ -5,7 +5,7 @@
 #ifndef PHYSICA_NODE_H
 #define PHYSICA_NODE_H
 
-#include <Core/Header/NumericalVector.h>
+#include <Core/Header/Vector.h>
 #include <Core/Header/Numerical.h>
 #include <map>
 #include <set>
@@ -20,7 +20,7 @@ class Node {
     std::map<int, int> forwardConnections;
     //Contains connection between this node to the node at previous layer. <index of Numerical, index of node>
     std::map<int, int> backwardConnections;
-    NumericalVector vector;
+    Vector vector;
     Numerical bias;
     Numerical acceptedLoss;
     Numerical (*activeFunc)(const Numerical&);

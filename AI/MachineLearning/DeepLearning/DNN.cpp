@@ -4,6 +4,7 @@
 #include <QtCore/qlogging.h>
 #include "DNN.h"
 #include "Layer.h"
+#include "Node.h"
 
 PhysicaAI_Namespace_Begin
 /*
@@ -21,7 +22,7 @@ DNN::~DNN() {
         delete layer;
 }
 
-void DNN::loadData(const NumericalVector& loadInputs, const Numerical& loadExpect) {
+void DNN::loadData(const Vector& loadInputs, const Numerical& loadExpect) {
     if(loadInputs.getLength() != inputSize) {
         qWarning("Insufficient data!");
         return;

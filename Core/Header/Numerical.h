@@ -88,10 +88,10 @@ bool operator>=(const Numerical& n1, const Numerical& n2);
 bool operator<=(const Numerical& n1, const Numerical& n2);
 bool operator==(const Numerical& n1, const Numerical& n2);
 bool operator!=(const Numerical& n1, const Numerical& n2);
-Numerical& operator++(Numerical& n) { n += BasicConst::getInstance().get_1(); return n; }
-Numerical& operator--(Numerical& n) { n -= BasicConst::getInstance().get_1(); return n; }
-Numerical operator++(Numerical& n, int) { Numerical temp(n); n += BasicConst::getInstance().get_1(); return temp; } //NOLINT
-Numerical operator--(Numerical& n, int) { Numerical temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
+inline Numerical& operator++(Numerical& n) { n += BasicConst::getInstance().get_1(); return n; }
+inline Numerical& operator--(Numerical& n) { n -= BasicConst::getInstance().get_1(); return n; }
+inline Numerical operator++(Numerical& n, int) { Numerical temp(n); n += BasicConst::getInstance().get_1(); return temp; } //NOLINT
+inline Numerical operator--(Numerical& n, int) { Numerical temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
 ////////////////////////////////Helper functions/////////////////////////////////////
 Numerical getAccuracy(const Numerical& n);
 inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)); }
