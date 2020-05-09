@@ -1,9 +1,20 @@
+#include <Core/Header/Const.h>
+#include <Core/Header/Numerical.h>
 #include "Core/Header/Matrix.h"
 #include "Core/Header/Vector.h"
 
 Matrix::Matrix() : vectors(nullptr), length(0) {}
 
-Matrix::Matrix(Vector* arr, int length) : vectors(arr), length(length) {}
+Matrix::Matrix(int c, int r) : Matrix(new Vector[c], c) {
+    for(int i = 0; i < c; ++i)
+        vectors[i] = Vector(r);
+}
+
+Matrix::Matrix(Vector*& arr, int length) : vectors(arr), length(length) {
+    arr = nullptr;
+}
+
+Matrix::Matrix(Vector*&& arr, int length) : vectors(arr), length(length) {}
 
 Matrix::Matrix(Matrix& matrix) : vectors(new Vector[matrix.length]), length(matrix.length)  {
     for(int i = 0; i < length; ++i)
@@ -16,10 +27,6 @@ Matrix::Matrix(Matrix&& matrix) noexcept : vectors(matrix.vectors), length(matri
 
 Matrix::~Matrix() {
     delete[] vectors;
-}
-
-Vector& Matrix::operator[](int i) const {
-    return vectors[i];
 }
 
 Matrix& Matrix::operator=(const Matrix& m) noexcept {
@@ -56,8 +63,17 @@ Matrix operator-(const Matrix& m1, const Matrix& m2) {
 }
 
 Matrix operator*(const Matrix& m1, const Matrix& m2) {
-    auto new_vectors = new Vector[m1.getLength()];
-    //TODO
+    auto new_vectors = new Vector[m2.getLength()];
+    for(int i = 0; i < m1.getLength(); ++i)
+        new_vectors[i] = Vector(m1.row());
+    for(int i = 0; i < m2.getLength(); ++i) {
+        for(int j = 0; j < m1.row(); ++j) {
+            auto& element = new_vectors[i][j];
+            element = BasicConst::getInstance().get_0();
+            for(int k = 0; k < m1.getLength(); ++k)
+                element += m1(j, k) * m2(k, i);
+        }
+    }
     return Matrix(new_vectors, m1.getLength());
 }
 
@@ -68,13 +84,17 @@ Matrix operator*(const Matrix& m, const Numerical& n) {
     return Matrix(arr, m.getLength());
 }
 
-Matrix Matrix::inverse() const {
-    //TODO
-    return Matrix();
-}
-
 void Matrix::transpose() {
-    //TODO
+    auto arr = new Vector[row()];
+    for(int i = 0; i < row(); ++i)
+        arr[i] = Vector(getLength());
+    for(int i = 0; i < row(); ++i) {
+        for(int j = 0; j < getLength(); ++j)
+            arr[i][j] = vectors[j][i];
+    }
+    this->~Matrix();
+    length = row();
+    vectors = arr;
 }
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
 Matrix reciprocal(const Matrix& m) {

@@ -25,7 +25,9 @@ class Numerical {
     //Accuracy
     NumericalUnit a;
 public:
-    Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0) noexcept;
+    Numerical() noexcept;
+    Numerical(NumericalUnit*& byte, int length, int power, NumericalUnit a = 0) noexcept;
+    Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a = 0) noexcept;
     Numerical(const Numerical& n) noexcept;
     Numerical(Numerical&& n) noexcept;
     explicit Numerical(const Numerical* n) noexcept;
@@ -41,9 +43,10 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
     Numerical operator<<(int bits);
     Numerical operator>>(int bits);
-    void operator<<=(int bits) noexcept { power += bits; }
-    void operator>>=(int bits) noexcept { power -= bits; }
-    NumericalUnit& operator[](unsigned int index) const;
+    inline void operator<<=(int bits) noexcept { power += bits; }
+    inline void operator>>=(int bits) noexcept { power -= bits; }
+    inline NumericalUnit& operator[](unsigned int index) { return byte[index]; }
+    inline const NumericalUnit& operator[](unsigned int index) const { return byte[index]; }
     Numerical& operator=(const Numerical& n);
     Numerical& operator=(Numerical&& n) noexcept;
     Numerical operator^(const Numerical& n) const;
@@ -51,11 +54,11 @@ public:
 
     Numerical& applyError(const Numerical& error);
 
-    const int& getLength() const noexcept { return length; }
-    const int& getPower() const noexcept { return power; }
-    const NumericalUnit& getA() const noexcept { return a; }
+    int getLength() const noexcept { return length; }
+    int getPower() const noexcept { return power; }
+    NumericalUnit getA() const noexcept { return a; }
     int getSize() const noexcept { return abs(length); }
-    Numerical& toAbs() noexcept { length = getSize(); return *this; }
+    Numerical& toAbs() noexcept { length = getSize(); return *this; } //NOLINT
     Numerical& toOpposite() noexcept { length = -length; return *this; }
     Numerical& toUnitA() noexcept { a = 1; return *this; }
     Numerical& clearA() noexcept { a = 0; return *this; }
@@ -73,6 +76,7 @@ public:
     friend void cutZero(Numerical& n);
     friend Numerical sqrt_light(const Numerical& n);
 };
+////////////////////////////////Operators/////////////////////////////////////
 Numerical operator+(const Numerical& n1, const Numerical& n2);
 Numerical operator-(const Numerical& n1, const Numerical& n2);
 Numerical operator*(const Numerical& n1, const Numerical& n2);
@@ -94,10 +98,8 @@ inline Numerical operator++(Numerical& n, int) { Numerical temp(n); n += BasicCo
 inline Numerical operator--(Numerical& n, int) { Numerical temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
 ////////////////////////////////Helper functions/////////////////////////////////////
 Numerical getAccuracy(const Numerical& n);
-inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)); }
-inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n)); }
-//Let i have the same sign of j.
-inline int applySign(int i, int j) { return ((j < 0) << (CHAR_BIT - 1)) | i; }  //NOLINT
+inline Numerical getMaximum(const Numerical& n) { return add(n, getAccuracy(n)).clearA(); }
+inline Numerical getMinimum(const Numerical& n) { return sub(n, getAccuracy(n)).clearA(); }
 inline Numerical getZero() { return Numerical(BasicConst::getInstance().get_0()); }
 inline Numerical getOne() { return Numerical(BasicConst::getInstance().get_1()); }
 inline Numerical getTwo() { return Numerical(BasicConst::getInstance().get_2()); }

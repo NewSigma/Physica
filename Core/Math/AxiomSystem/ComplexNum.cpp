@@ -38,10 +38,7 @@ Numerical ComplexNum::toNorm() const {
 }
 
 Vector ComplexNum::toVector() const {
-    auto arr = new Numerical*[2];
-    arr[0] = new Numerical(real);
-    arr[1] = new Numerical(imagine);
-    return Vector(arr, 2);
+    return Vector(new Numerical[2]{*real, *imagine}, 2);
 }
 
 AbstractNum::NumberType ComplexNum::getType() const noexcept {

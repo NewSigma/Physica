@@ -21,14 +21,14 @@ inline Numerical add(const Numerical& n1, const Numerical& n2) {
         return Numerical(n1);
     else if ((n1.length ^ n2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
         if (n1.length > 0) {
-            Numerical shallow_copy(n2.byte, -n2.length, n2.power);
+            Numerical shallow_copy(const_cast<NumericalUnit*>(n2.byte), -n2.length, n2.power);
             auto result = sub(n1, shallow_copy);
             shallow_copy.byte = nullptr;
             Q_UNUSED(shallow_copy)
             return result;
         }
         else {
-            Numerical shallow_copy(n1.byte, -n1.length, n1.power);
+            Numerical shallow_copy(const_cast<NumericalUnit*>(n1.byte), -n1.length, n1.power);
             auto result = sub(n2, shallow_copy);
             shallow_copy.byte = nullptr;
             Q_UNUSED(shallow_copy)
@@ -104,7 +104,7 @@ inline Numerical sub(const Numerical& n1, const Numerical& n2) {
         return Numerical(n1);
     else if (n1.length > 0) {
         if (n2.length < 0) {
-            Numerical shallow_copy(n2.byte, -n2.length, n2.power);
+            Numerical shallow_copy(const_cast<NumericalUnit*>(n2.byte), -n2.length, n2.power);
             Numerical result = add(n1, shallow_copy);
             shallow_copy.byte = nullptr;
             Q_UNUSED(shallow_copy)
@@ -178,7 +178,7 @@ inline Numerical sub(const Numerical& n1, const Numerical& n2) {
         }
     }
     else {
-        Numerical shallow_copy(n1.byte, -n1.length, n1.power);
+        Numerical shallow_copy(const_cast<NumericalUnit*>(n1.byte), -n1.length, n1.power);
         if (n2.length > 0) {
             Numerical result = add(shallow_copy, n2);
             result.toOpposite();
@@ -187,7 +187,7 @@ inline Numerical sub(const Numerical& n1, const Numerical& n2) {
             return result;
         }
         else {
-            Numerical shallow_copy_1(n2.byte, n2.length, n2.power);
+            Numerical shallow_copy_1(const_cast<NumericalUnit*>(n2.byte), n2.length, n2.power);
             Numerical result = sub(shallow_copy_1, shallow_copy);
             shallow_copy.byte = shallow_copy_1.byte = nullptr;
             Q_UNUSED(shallow_copy)
@@ -273,30 +273,29 @@ inline Numerical div(const Numerical& n1, const Numerical& n2) {
             n1_copy.power = n2.power;
             auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
 
-            auto temp_arr = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
-            Numerical temp(temp_arr, 1, 0);
+            Numerical temp(reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit))), 1, 0);
             for (int i = length - 1; i >= 0; --i) {
                 NumericalUnit large = NumericalUnitMax;
-                temp_arr[0] = NumericalUnitMax / 2;
+                temp[0] = NumericalUnitMax / 2;
                 NumericalUnit small = 0;
                 while(true) {
                     Numerical mul = temp * n2_copy;
                     if(mul < n1_copy)
-                        small = temp_arr[0];
+                        small = temp[0];
                     else if (mul > n1_copy)
-                        large = temp_arr[0];
+                        large = temp[0];
                     else {
-                        byte[i] = temp_arr[0];
+                        byte[i] = temp[0];
                         goto stop;
                     }
 
-                    temp_arr[0] = small + large;
-                    if(temp_arr[0] < small) {
-                        temp_arr[0] /= 2;
-                        temp_arr[0] += (NumericalUnitMax / 2 + 1);
+                    temp[0] = small + large;
+                    if(temp[0] < small) {
+                        temp[0] /= 2;
+                        temp[0] += (NumericalUnitMax / 2 + 1);
                     }
                     else
-                        temp_arr[0] /= 2;
+                        temp[0] /= 2;
 
                     if(small + 1 >= large) {
                         n1_copy -= temp * n2_copy;
@@ -304,7 +303,7 @@ inline Numerical div(const Numerical& n1, const Numerical& n2) {
                     }
                 }
                 ++n1_copy.power;
-                byte[i] = temp_arr[0];
+                byte[i] = temp[0];
             }
             ////////////////////////////////////Out put////////////////////////////////////////
             stop:

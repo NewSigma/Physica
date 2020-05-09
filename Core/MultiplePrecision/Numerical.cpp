@@ -17,15 +17,20 @@ union double_extract {
     } structure;
 };
 ////////////////////////////////Numerical////////////////////////////////
-Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {}
+Numerical::Numerical() noexcept : Numerical(nullptr, 0, 0) {}
 
-Numerical::Numerical(const Numerical& n) noexcept : length(n.length), power(n.power), a(n.a) {
-    int size = getSize();
-    byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
-    memcpy(byte, n.byte, size * sizeof(NumericalUnit));
+Numerical::Numerical(NumericalUnit*& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {
+    byte = nullptr;
 }
 
-Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), power(n.power), a(n.a) {
+Numerical::Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {}
+
+Numerical::Numerical(const Numerical& n) noexcept
+: Numerical(reinterpret_cast<NumericalUnit*>(malloc(abs(n.length) * sizeof(NumericalUnit))), n.length, n.power, n.a) {
+    memcpy(byte, n.byte, getSize() * sizeof(NumericalUnit));
+}
+
+Numerical::Numerical(Numerical&& n) noexcept : Numerical(n.byte, n.length, n.power, n.a) {
     n.byte = nullptr;
 }
 
@@ -250,16 +255,12 @@ Numerical Numerical::operator>>(int bits) {
             , power - quotient + carry - 1, a);
 }
 
-NumericalUnit& Numerical::operator[](unsigned int index) const {
-    return byte[index];
-}
-
 Numerical& Numerical::operator= (const Numerical& n) {
     if(this == &n)
         return *this;
     length = n.length;
     int size = getSize();
-    free(byte);
+    this->~Numerical();
     byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
     memcpy(byte, n.byte, size * sizeof(NumericalUnit));
     power = n.power;
@@ -268,7 +269,7 @@ Numerical& Numerical::operator= (const Numerical& n) {
 }
 
 Numerical& Numerical::operator=(Numerical&& n) noexcept {
-    free(byte);
+    this->~Numerical();
     byte = n.byte;
     n.byte = nullptr;
     length = n.length;
@@ -477,7 +478,7 @@ Numerical& Numerical::applyError(const Numerical& error) {
         if(size < copy) {
             auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
             memcpy(new_byte, byte + copy - size, size * sizeof(NumericalUnit));
-            free(byte);
+            this->~Numerical();
             byte = new_byte;
         }
         if(length < 0)

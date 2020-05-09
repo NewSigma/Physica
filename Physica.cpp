@@ -6,7 +6,7 @@
 #include "Core/Header/Const.h"
 #include "Gui/Header/PhysicaMain.h"
 #include "Core/Header/Util.h"
-
+#include "Core/Header/Numerical.h"
 static QtMessageHandler handler;
 
 void init();

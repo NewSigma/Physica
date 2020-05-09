@@ -20,7 +20,6 @@ Numerical floor(const Numerical& n) {
     auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
     for(int i = 0; i < length; ++i)
         byte[i] = n[i];
-    length = applySign(length, n.getLength());
     return Numerical(byte, length, n.getPower());
 }
 

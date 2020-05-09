@@ -8,22 +8,25 @@ class Matrix {
     int length;
 public:
     Matrix();
-    Matrix(Vector* vectors, int length);
+    Matrix(int c, int r);
+    Matrix(Vector*& vectors, int length);
+    Matrix(Vector*&& vectors, int length);
     Matrix(Matrix& matrix);
     Matrix(Matrix&& matrix) noexcept;
     ~Matrix();
 
-    Vector& operator[](int index) const;
-    Numerical& operator()(int c, int r) const { return vectors[c][r]; }
+    Vector& operator[](int index) { return vectors[index]; }
+    const Vector& operator[](int index) const { return vectors[index]; }
+    const Numerical& operator()(int c, int r) const { return vectors[c][r]; }
     Matrix& operator=(const Matrix& m) noexcept;
     Matrix& operator=(Matrix&& m) noexcept;
+
+    void transpose();
 
     inline int row() const { return vectors[0].getLength(); }
     inline int col() const { return length; }
     inline int getLength() const { return length; }
     inline bool isEmpty() const { return length == 0; };
-    Matrix inverse() const;
-    void transpose();
 };
 Matrix operator+(const Matrix& m1, const Matrix& m2);
 Matrix operator-(const Matrix& m1, const Matrix& m2);

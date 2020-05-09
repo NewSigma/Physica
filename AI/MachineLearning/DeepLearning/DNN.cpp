@@ -12,7 +12,7 @@ PhysicaAI_Namespace_Begin
  * nodeCounts: number of nodes of each layers.
  */
 DNN::DNN(int inputSize, int size, int* nodeCounts)
-: layers(std::vector<Layer*>(size)), inputs(inputSize), expect(getZero()), learnRate(getOne()), inputSize(inputSize) {
+: layers(std::vector<Layer*>(size)), inputs(randomVector(inputSize)), expect(getZero()), learnRate(getOne()), inputSize(inputSize) {
     for(int i = 0; i < size; ++i)
         layers[i] = new Layer(i, nodeCounts[i], this);
 }

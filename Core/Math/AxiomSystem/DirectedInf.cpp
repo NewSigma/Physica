@@ -9,7 +9,7 @@
 #include "Core/Header/RealNum.h"
 #include "Core/Header/Vector.h"
 
-DirectedInf::DirectedInf(const Numerical& arg) : direction(2) {
+DirectedInf::DirectedInf(const Numerical& arg) : direction(randomVector(2)) {
     direction[0] = cos(arg);
     direction[1] = sin(arg);
 }

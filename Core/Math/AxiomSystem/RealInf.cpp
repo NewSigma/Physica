@@ -9,11 +9,11 @@ RealInf* RealInf::positive = nullptr;
 RealInf* RealInf::negative = nullptr;
 
 RealInf::RealInf(bool b) : DirectedInf(Vector()) {
-    auto arr = new Numerical*[1];
+    auto arr = new Numerical[1];
     if(b)
-        arr[0] = new Numerical(BasicConst::getInstance().get_1());
+        arr[0] = Numerical(BasicConst::getInstance().get_1());
     else
-        arr[0] = new Numerical(BasicConst::getInstance().getMinus_1());
+        arr[0] = Numerical(BasicConst::getInstance().getMinus_1());
     direction = Vector(arr, 1);
 }
 

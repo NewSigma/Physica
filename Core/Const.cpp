@@ -57,8 +57,10 @@ void BasicConst::init() {
 }
 
 void BasicConst::deInit() {
-    delete instance;
-    instance = nullptr;
+    if(instance != nullptr) {
+        delete instance;
+        instance = nullptr;
+    }
 }
 /*
  * Consts that need some calculates.
@@ -95,8 +97,10 @@ void MathConst::init() {
 }
 
 void MathConst::deInit() {
-    delete instance;
-    instance = nullptr;
+    if(instance != nullptr) {
+        delete instance;
+        instance = nullptr;
+    }
 }
 /*
  * precision is the number of effective digits in decimal.

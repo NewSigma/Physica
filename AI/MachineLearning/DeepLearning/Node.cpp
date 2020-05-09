@@ -9,7 +9,7 @@
 PhysicaAI_Namespace_Begin
 
 Node::Node(int id, Layer* parent)
-: vector(parent->getNet()->getInputSize()), bias(randomNumerical())
+: vector(randomVector(parent->getNet()->getInputSize())), bias(randomNumerical())
 , acceptedLoss(getZero()), activeFunc(nullptr), parentLayer(parent), id(id) {
 }
 
