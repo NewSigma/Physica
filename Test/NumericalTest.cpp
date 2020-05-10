@@ -3,7 +3,7 @@
  */
 #include "Core/Header/Numerical.h"
 
-void numerical_test() {
+void numericalTest() {
     std::cout << "Please input two double numbers. Let the second number be zero to stop the test." << '\n';
     double d1, d2 = 1;
     std::cin >> d1 >> d2;

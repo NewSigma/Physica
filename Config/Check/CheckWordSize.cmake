@@ -1,0 +1,16 @@
+message(STATUS "Performing CheckWordSize")
+try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR ${CMAKE_BINARY_DIR} ${CMAKE_HOME_DIRECTORY}/Config/Check/CheckWordSize.cpp)
+if(NOT ${COMPILE_RESULT_VAR})
+    message(FATAL_ERROR Failed to compile CheckWordSize.cpp)
+endif()
+
+if(${RUN_RESULT_VAR} MATCHES FAILED_TO_RUN)
+    message(FATAL_ERROR Failed to run CheckWordSize)
+endif()
+
+if(NOT ${RUN_RESULT_VAR} MATCHES 64 AND NOT ${RUN_RESULT_VAR} MATCHES 32)
+    message(STATUS "Performing CheckWordSize --Failed")
+    message(FATAL_ERROR "Unsupported word length.")
+endif()
+message(STATUS "Performing CheckWordSize --${RUN_RESULT_VAR}")
+set(PhysicaWordSize ${RUN_RESULT_VAR})

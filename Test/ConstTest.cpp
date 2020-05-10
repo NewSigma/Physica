@@ -5,7 +5,7 @@
 #include <iostream>
 #include "Core/Header/Numerical.h"
 
-void const_test() {
+void constTest() {
     std::cout << "GlobalPrecision: " << (int) BasicConst::getInstance().GlobalPrecision << '\n';
     std::cout << "ExpectedRelativeError: " << BasicConst::getInstance().getExpectedRelativeError() << '\n';
     std::cout << "StepSize: " << BasicConst::getInstance().getStepSize() << '\n';

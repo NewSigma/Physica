@@ -5,8 +5,8 @@
 #include "Numerical.h"
 #include "RealNum.h"
 
-extern const NumericalUnit numericalUnitHighestBitMask = (NumericalUnit)1 << (NumericalUnitWidth - 1); // NOLINT(hicpp-signed-bitwise)
-extern const NumericalUnit numericalUnitLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2); // NOLINT(hicpp-signed-bitwise)
+extern const NumericalUnit numericalUnitHighestBitMask = (NumericalUnit)1 << (NumericalUnitWidth - 1);
+extern const NumericalUnit numericalUnitLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2);
 BasicConst* BasicConst::instance = nullptr;
 MathConst* MathConst::instance = nullptr;
 /*

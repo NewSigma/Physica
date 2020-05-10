@@ -5,25 +5,18 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
-
-//Platform dependent
-union double_extract {
-    double value;
-    struct {
-        unsigned int low : 32;
-        unsigned int high : 20;
-        unsigned int exp : 11;
-        unsigned int sign : 1;
-    } structure;
-};
 ////////////////////////////////Numerical////////////////////////////////
 Numerical::Numerical() noexcept : Numerical(nullptr, 0, 0) {}
 
 Numerical::Numerical(NumericalUnit*& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {
+    //The ownership of byte is given to Numerical and make byte null in case the user delete it later.
     byte = nullptr;
 }
 
-Numerical::Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {}
+Numerical::Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {
+    //There is no need to use this because byte is a rvalue
+    //byte = nullptr;
+}
 
 Numerical::Numerical(const Numerical& n) noexcept
 : Numerical(reinterpret_cast<NumericalUnit*>(malloc(abs(n.length) * sizeof(NumericalUnit))), n.length, n.power, n.a) {

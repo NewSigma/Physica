@@ -1,0 +1,15 @@
+message(STATUS "Performing CheckIntegerCast")
+try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR ${CMAKE_BINARY_DIR} ${CMAKE_HOME_DIRECTORY}/Config/Check/CheckIntegerCast.cpp)
+if(NOT ${COMPILE_RESULT_VAR})
+    message(FATAL_ERROR Failed to compile CheckIntegerCast.cpp)
+endif()
+
+if(${RUN_RESULT_VAR} MATCHES FAILED_TO_RUN)
+    message(FATAL_ERROR Failed to run CheckIntegerCast)
+endif()
+
+if(${RUN_RESULT_VAR} MATCHES 1)
+    message(STATUS "Performing CheckIntegerCast --Failed")
+    message(FATAL_ERROR "Performing CheckIntegerCast --BigEndian")
+endif()
+message(STATUS "Performing CheckIntegerCast --Passed")

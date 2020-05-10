@@ -7,9 +7,9 @@
 class Numerical;
 
 void checkGPU();
-void const_test();
+void constTest();
 void elementary_function_test();
-void numerical_test();
+void numericalTest();
 void printElements(const Numerical& n);
 void simpleNet();
 

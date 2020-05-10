@@ -1,0 +1,15 @@
+message(STATUS "Performing CheckRightShift")
+try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR ${CMAKE_BINARY_DIR} ${CMAKE_HOME_DIRECTORY}/Config/Check/CheckRightShift.cpp)
+if(NOT ${COMPILE_RESULT_VAR})
+    message(FATAL_ERROR Failed to compile CheckRightShift.cpp)
+endif()
+
+if(${RUN_RESULT_VAR} MATCHES FAILED_TO_RUN)
+    message(FATAL_ERROR Failed to run CheckRightShift)
+endif()
+
+if(${RUN_RESULT_VAR} MATCHES 1)
+    message(STATUS "Performing CheckRightShift --Failed")
+    message(FATAL_ERROR "Logical right shift is unsupported.")
+endif()
+message(STATUS "Performing CheckRightShift --Passed")
