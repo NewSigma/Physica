@@ -3,6 +3,8 @@
  */
 #include "Core/Header/Numerical.h"
 
+using namespace Physica::Core;
+
 void numericalTest() {
     std::cout << "Please input two double numbers. Let the second number be zero to stop the test." << '\n';
     double d1, d2 = 1;

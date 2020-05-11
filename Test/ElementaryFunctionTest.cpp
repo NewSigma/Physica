@@ -5,6 +5,8 @@
 #include <Core/Header/Numerical.h>
 #include <Core/Header/ElementaryFunction.h>
 
+using namespace Physica::Core;
+
 void elementary_function_test() {
     std::cout << "Please input a double. Input 0 to stop the test." << '\n';
     double d1 = 1, d2;

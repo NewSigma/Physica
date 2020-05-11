@@ -6,13 +6,19 @@
 
 #include "Token.h"
 
-class Numerical;
+namespace Physica::Core {
+    class Numerical;
+}
 
-class TokenNum : public Token {
-    Numerical* data;
-public:
-    explicit TokenNum(const Numerical& num);
-    ~TokenNum();
-};
+using Physica::Core::Numerical;
+
+namespace Physica::Interpreter {
+    class TokenNum : public Token {
+        Core::Numerical* data;
+    public:
+        explicit TokenNum(const Numerical& num);
+        ~TokenNum();
+    };
+}
 
 #endif

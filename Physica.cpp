@@ -7,8 +7,9 @@
 #include "Gui/Header/PhysicaMain.h"
 #include "Core/Header/Util.h"
 #include "Core/Header/Numerical.h"
-static QtMessageHandler handler;
 
+using namespace Physica::Core;
+static QtMessageHandler handler;
 void init();
 void deInit();
 

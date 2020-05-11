@@ -4,7 +4,9 @@
 #include "Interpreter/Header/TokenNum.h"
 #include "Core/Header/Numerical.h"
 
-TokenNum::TokenNum(const Numerical& num) : Token(TokenType::Numeric), data(new Numerical(num)) {}
+using namespace Physica::Interpreter;
+
+TokenNum::TokenNum(const Core::Numerical& num) : Token(TokenType::Numeric), data(new Core::Numerical(num)) {}
 
 TokenNum::~TokenNum() {
     delete data;

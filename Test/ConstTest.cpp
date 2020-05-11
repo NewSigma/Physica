@@ -5,6 +5,8 @@
 #include <iostream>
 #include "Core/Header/Numerical.h"
 
+using namespace Physica::Core;
+
 void constTest() {
     std::cout << "GlobalPrecision: " << (int) BasicConst::getInstance().GlobalPrecision << '\n';
     std::cout << "ExpectedRelativeError: " << BasicConst::getInstance().getExpectedRelativeError() << '\n';

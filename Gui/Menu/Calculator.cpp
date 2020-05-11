@@ -2,6 +2,8 @@
 #include "Interpreter/Header/ExprReader.h"
 #include "Core/Header/ElementaryFunction.h"
 #include <QKeyEvent>
+#include "Core/Header/Numerical.h"
+using Physica::Interpreter::ExprReader;
 //FIXME Calculate result is not accurate.
 Calculator::Calculator() {
     //Const

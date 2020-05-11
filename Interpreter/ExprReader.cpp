@@ -1,5 +1,8 @@
 #include <stack>
 #include "Interpreter/Header/ExprReader.h"
+#include "Core/Header/Numerical.h"
+
+using namespace Physica::Interpreter;
 
 ExprReader::ExprReader(const std::wstring& str) {
     int pointer = 0;

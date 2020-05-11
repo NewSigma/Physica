@@ -6,41 +6,40 @@
 #define PHYSICA_DNN_H
 
 #include <vector>
-#include <Core/Header/Vector.h>
-#include <Core/Header/Numerical.h>
-#include "PhysicaAI.h"
+#include "Core/Header/Vector.h"
 
-PhysicaAI_Namespace_Begin
+using Physica::Core::Numerical;
+using Physica::Core::Vector;
 
-class Node;
-class Layer;
+namespace Physica::AI {
+    class Node;
+    class Layer;
 
-class DNN {
-    std::vector<Layer*> layers;
-    Vector inputs;
-    Numerical expect;
+    class DNN {
+        std::vector<Layer*> layers;
+        Vector inputs;
+        Numerical expect;
 
-    Numerical learnRate;
-    int inputSize;
-public:
-    DNN(int inputSize, int size, int* nodeCounts);
-    ~DNN();
-    DNN(const DNN&) = delete;
-    DNN& operator=(const DNN&) = delete;
+        Numerical learnRate;
+        int inputSize;
+    public:
+        DNN(int inputSize, int size, int* nodeCounts);
+        ~DNN();
+        DNN(const DNN&) = delete;
+        DNN& operator=(const DNN&) = delete;
 
-    Layer& operator[](int i) const { return *layers[i]; }
-    const Vector& getInputs() const { return inputs; }
-    int getInputSize() const { return inputSize; }
-    int getSize() const { return layers.size(); }
+        Layer& operator[](int i) const { return *layers[i]; }
+        [[nodiscard]] const Vector& getInputs() const { return inputs; }
+        [[nodiscard]] int getInputSize() const { return inputSize; }
+        [[nodiscard]] int getSize() const { return layers.size(); }
 
-    void loadData(const Vector& loadInputs, const Numerical& loadExpect);
-    void setLearnRate(const Numerical& n) { learnRate = n; }
-    void train() const;
-    Numerical predict() const;
+        void loadData(const Vector& loadInputs, const Numerical& loadExpect);
+        void setLearnRate(const Numerical& n) { learnRate = n; }
+        void train() const;
+        [[nodiscard]] Numerical predict() const;
 
-    friend class Node;
-};
-
-PhysicaAI_Namespace_End
+        friend class Node;
+    };
+}
 
 #endif

@@ -6,21 +6,23 @@
 
 #include "DirectedInf.h"
 
-class ComplexInf : public DirectedInf {
-public:
-    static ComplexInf* getInstance();
+namespace Physica::Core {
+    class ComplexInf : public DirectedInf {
+    public:
+        static ComplexInf* getInstance();
 
-    NumberType getType() const noexcept override;
-    AbstractNum* operator+(const AbstractNum& n) const override;
-    AbstractNum* operator-(const AbstractNum& n) const override;
-    AbstractNum* operator*(const AbstractNum& n) const override;
-    AbstractNum* operator/(const AbstractNum& n) const override;
-    AbstractNum* operator^(const AbstractNum& n) const override;
-    AbstractNum* operator-() const override;
-    bool operator== (const AbstractNum& n) const override;
-private:
-    static ComplexInf* instance;
-    ComplexInf();
-};
+        NumberType getType() const noexcept override;
+        AbstractNum* operator+(const AbstractNum& n) const override;
+        AbstractNum* operator-(const AbstractNum& n) const override;
+        AbstractNum* operator*(const AbstractNum& n) const override;
+        AbstractNum* operator/(const AbstractNum& n) const override;
+        AbstractNum* operator^(const AbstractNum& n) const override;
+        AbstractNum* operator-() const override;
+        bool operator== (const AbstractNum& n) const override;
+    private:
+        static ComplexInf* instance;
+        ComplexInf();
+    };
+}
 
 #endif

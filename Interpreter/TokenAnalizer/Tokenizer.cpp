@@ -8,6 +8,9 @@
 #include "Interpreter/Header/Tokenizer.h"
 #include "Core/Header/Const.h"
 
+using namespace Physica::Interpreter;
+using namespace Physica::Core;
+
 Tokenizer::Tokenizer(const char* str) : str(str), line(1) {
     Token::init();
     while(*str != '\0') {

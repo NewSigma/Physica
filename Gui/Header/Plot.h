@@ -7,7 +7,10 @@
 #include <QChartView>
 #include <QtCharts/QSplineSeries>
 
-class Numerical;
+namespace Physica::Core {
+    class Numerical;
+}
+using Physica::Core::Numerical;
 
 class Plot : public QtCharts::QChartView {
     QtCharts::QSplineSeries* series;

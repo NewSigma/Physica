@@ -6,21 +6,23 @@
 
 #include "AbstractNum.h"
 
-class Indeterminate : public AbstractNum {
-public:
-    static Indeterminate* getInstance();
-    NumberType getType() const noexcept override;
-    AbstractNum* operator+(const AbstractNum& n) const override;
-    AbstractNum* operator-(const AbstractNum& n) const override;
-    AbstractNum* operator*(const AbstractNum& n) const override;
-    AbstractNum* operator/(const AbstractNum& n) const override;
-    AbstractNum* operator^(const AbstractNum& n) const override;
-    AbstractNum* operator-() const override;
-    bool operator== (const AbstractNum& n) const override;
-private:
-    static Indeterminate* instance;
-    Indeterminate();
-    ~Indeterminate();
-};
+namespace Physica::Core {
+    class Indeterminate : public AbstractNum {
+    public:
+        static Indeterminate* getInstance();
+        NumberType getType() const noexcept override;
+        AbstractNum* operator+(const AbstractNum& n) const override;
+        AbstractNum* operator-(const AbstractNum& n) const override;
+        AbstractNum* operator*(const AbstractNum& n) const override;
+        AbstractNum* operator/(const AbstractNum& n) const override;
+        AbstractNum* operator^(const AbstractNum& n) const override;
+        AbstractNum* operator-() const override;
+        bool operator== (const AbstractNum& n) const override;
+    private:
+        static Indeterminate* instance;
+        Indeterminate();
+        ~Indeterminate();
+    };
+}
 
 #endif

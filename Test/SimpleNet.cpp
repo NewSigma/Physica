@@ -8,7 +8,7 @@
 
 void simpleNet() {
     int* arr = new int[3]{2, 2, 2};
-    auto& net = *new PhysicaAI::DNN(2, 3, arr);
+    auto& net = *new Physica::AI::DNN(2, 3, arr);
     net.setLearnRate(Numerical(0.1));
     net[0][0].connect(0, 0);
     net[0][0].connect(0, 1);

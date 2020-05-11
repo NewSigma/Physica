@@ -6,6 +6,8 @@
 #include <QtCharts>
 #include <Core/Header/Differential.h>
 
+using namespace Physica::Core;
+
 Plot::Plot(Numerical (*func)(const Numerical&), const Numerical& begin, const Numerical& end, QWidget* parent)
     : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
     setAttribute(Qt::WA_DeleteOnClose);

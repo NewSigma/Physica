@@ -6,12 +6,14 @@
 
 #include "Token.h"
 
-class TokenWord : public Token {
-    char* data;
-public:
-    explicit TokenWord(const char* str);
-    TokenWord(const char* str, int len);
-    ~TokenWord();
-};
+namespace Physica::Interpreter {
+    class TokenWord : public Token {
+        char* data;
+    public:
+        explicit TokenWord(const char* str);
+        TokenWord(const char* str, int len);
+        ~TokenWord();
+    };
+}
 
 #endif

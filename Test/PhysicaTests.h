@@ -4,13 +4,21 @@
 #ifndef PHYSICA_PHYSICATESTS_H
 #define PHYSICA_PHYSICATESTS_H
 
-class Numerical;
+namespace Physica::Core {
+    class Numerical;
+}
 
-void checkGPU();
-void constTest();
-void elementary_function_test();
-void numericalTest();
-void printElements(const Numerical& n);
-void simpleNet();
+using Physica::Core::Numerical;
+
+namespace Physica {
+    namespace Test {
+        void checkGPU();
+        void constTest();
+        void elementary_function_test();
+        void numericalTest();
+        void printElements(const Numerical& n);
+        void simpleNet();
+    }
+}
 
 #endif

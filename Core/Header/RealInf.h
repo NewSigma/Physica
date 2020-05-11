@@ -9,23 +9,25 @@
 #include "Numerical.h"
 #include "Const.h"
 
-class RealInf : public DirectedInf {
-public:
-    bool getSign() const { return direction[0].isPositive(); }
-    static RealInf* getInstance(bool b);
+namespace Physica::Core {
+    class RealInf : public DirectedInf {
+    public:
+        bool getSign() const { return direction[0].isPositive(); }
+        static RealInf* getInstance(bool b);
 
-    NumberType getType() const noexcept override;
-    AbstractNum* operator+(const AbstractNum& n) const override;
-    AbstractNum* operator-(const AbstractNum& n) const override;
-    AbstractNum* operator*(const AbstractNum& n) const override;
-    AbstractNum* operator/(const AbstractNum& n) const override;
-    AbstractNum* operator^(const AbstractNum& n) const override;
-    AbstractNum* operator-() const override;
-    bool operator== (const AbstractNum& n) const override;
-private:
-    static RealInf* positive;
-    static RealInf* negative;
-    explicit RealInf(bool b);
-};
+        NumberType getType() const noexcept override;
+        AbstractNum* operator+(const AbstractNum& n) const override;
+        AbstractNum* operator-(const AbstractNum& n) const override;
+        AbstractNum* operator*(const AbstractNum& n) const override;
+        AbstractNum* operator/(const AbstractNum& n) const override;
+        AbstractNum* operator^(const AbstractNum& n) const override;
+        AbstractNum* operator-() const override;
+        bool operator== (const AbstractNum& n) const override;
+    private:
+        static RealInf* positive;
+        static RealInf* negative;
+        explicit RealInf(bool b);
+    };
+}
 
 #endif

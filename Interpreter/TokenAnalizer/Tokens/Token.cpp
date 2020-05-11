@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include <cstring>
 #include "Interpreter/Header/Token.h"
+
+using namespace Physica::Interpreter;
 
 Token* Token::operatorAdd = nullptr; Token* Token::operatorSub = nullptr; Token* Token::operatorMul = nullptr; Token* Token::operatorDiv = nullptr;
 Token* Token::operatorAddEq = nullptr; Token* Token::operatorSubEq = nullptr; Token* Token::operatorMulEq = nullptr; Token* Token::operatorDivEq = nullptr;

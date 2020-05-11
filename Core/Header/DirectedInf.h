@@ -7,22 +7,26 @@
 #include "AbstractNum.h"
 #include "Vector.h"
 
-class DirectedInf : public AbstractNum {
-public:
-    Vector direction;
+namespace Physica::Core {
+    class DirectedInf : public AbstractNum {
+    public:
+        Vector direction;
 
-    explicit DirectedInf(const Numerical& arg);
-    explicit DirectedInf(const Vector& direction);
-    DirectedInf(const DirectedInf& instance);
+        explicit DirectedInf(const Numerical& arg);
+        explicit DirectedInf(const Vector& direction);
+        DirectedInf(const DirectedInf& instance);
 
-    NumberType getType() const noexcept override;
-    AbstractNum* operator+ (const AbstractNum& n) const override;
-    AbstractNum* operator- (const AbstractNum& n) const override;
-    AbstractNum* operator* (const AbstractNum& n) const override;
-    AbstractNum* operator/ (const AbstractNum& n) const override;
-    AbstractNum* operator^ (const AbstractNum& n) const override;
-    AbstractNum* operator- () const override;
-    bool operator== (const AbstractNum& n) const override;
-};
+        NumberType getType() const noexcept override;
+        AbstractNum* operator+ (const AbstractNum& n) const override;
+        AbstractNum* operator- (const AbstractNum& n) const override;
+        AbstractNum* operator* (const AbstractNum& n) const override;
+        AbstractNum* operator/ (const AbstractNum& n) const override;
+        AbstractNum* operator^ (const AbstractNum& n) const override;
+        AbstractNum* operator- () const override;
+        bool operator== (const AbstractNum& n) const override;
+    };
+}
+
+
 
 #endif
