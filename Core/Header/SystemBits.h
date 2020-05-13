@@ -31,6 +31,9 @@ typedef long long SignedNumericalUnit;
 #error No marching NumericalUnit.
 #endif
 
+#define numericalUnitHighestBitMask ((NumericalUnit)1 << (NumericalUnitWidth - 1))
+#define numericalUnitLowMask (NumericalUnitMax >> (NumericalUnitWidth / 2))
+
 #if PhysicaEndian == PhysicaBigEndian
 union double_extract {
             double value;

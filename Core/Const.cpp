@@ -6,8 +6,6 @@
 #include "RealNum.h"
 
 namespace Physica::Core {
-    extern const NumericalUnit numericalUnitHighestBitMask = (NumericalUnit)1 << (NumericalUnitWidth - 1);
-    extern const NumericalUnit numericalUnitLowMask = NumericalUnitMax >> (NumericalUnitWidth / 2);
     BasicConst* BasicConst::instance = nullptr;
     MathConst* MathConst::instance = nullptr;
     /*

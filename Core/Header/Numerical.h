@@ -73,6 +73,7 @@ namespace Physica::Core {
         friend Numerical sub (const Numerical& n1, const Numerical& n2);
         friend Numerical mul (const Numerical& n1, const Numerical& n2);
         friend Numerical div (const Numerical& n1, const Numerical& n2);
+        friend Numerical square(const Numerical& n);
         friend bool cutLength(Numerical& n);
         friend void cutZero(Numerical& n);
         friend Numerical sqrt_light(const Numerical& n);

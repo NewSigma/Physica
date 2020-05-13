@@ -142,7 +142,7 @@ namespace Physica::Core {
         }
         return result;
     }
-//Return log_a n
+    //Return log_a n
     Numerical log(const Numerical& n, const Numerical& a) {
         if(!n.isPositive() || !a.isPositive())
             qFatal("Can not resolve the logarithm of zero or a negative value.");
@@ -163,15 +163,15 @@ namespace Physica::Core {
         }
         return result;
     }
-/*
- * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
- * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
- */
+    /*
+     * Taylor's formula n.th term: (-1)^n * x^(2n) / (2n!)
+     * Here temp_1 = x^(2n), temp_2 = 2n!, rank = 2n
+     */
     Numerical cos(const Numerical& n) {
         Numerical result = getOne();
         if(n == BasicConst::getInstance().get_0())
             return result;
-        Numerical square_n = n * n;
+        Numerical square_n = square(n);
         Numerical temp_1(square_n);
         Numerical temp_2 = getTwo();
         Numerical rank = getTwo();
@@ -204,7 +204,7 @@ namespace Physica::Core {
         Numerical result = getZero();
         if(n == BasicConst::getInstance().get_0())
             return result;
-        Numerical square_n = n * n;
+        Numerical square_n = square(n);
         Numerical temp_1(n);
         Numerical temp_2 = getOne();
         Numerical rank = getOne();
@@ -258,7 +258,7 @@ namespace Physica::Core {
     }
 
     Numerical arctan(const Numerical& n) {
-        Numerical result = arcsin(n / sqrt(n * n + BasicConst::getInstance().get_1()));
+        Numerical result = arcsin(n / sqrt(square(n) + BasicConst::getInstance().get_1()));
         if((result.getLength() ^ n.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
@@ -325,11 +325,11 @@ namespace Physica::Core {
     }
 
     Numerical arccosh(const Numerical& n) {
-        return ln(sqrt(n * n - BasicConst::getInstance().get_1()) + n);
+        return ln(sqrt(square(n) - BasicConst::getInstance().get_1()) + n);
     }
 
     Numerical arcsinh(const Numerical& n) {
-        return ln(sqrt(n * n + BasicConst::getInstance().get_1()) + n);
+        return ln(sqrt(square(n) + BasicConst::getInstance().get_1()) + n);
     }
 
     Numerical arctanh(const Numerical& n) {

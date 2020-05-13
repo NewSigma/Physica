@@ -207,47 +207,17 @@ namespace Physica::Core {
         else {
             const int size1 = n1.getSize();
             const int size2 = n2.getSize();
-            const int last2 = size2 - 1;
             //Estimate the ed of result first. we will calculate it accurately later.
-            auto length = size1 + size2 - 1;
+            auto length = size1 + size2;
             auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
-            NumericalUnit aByte;
-            NumericalUnit carry = 0;
-            //Every time the outer loop finished once, the position of carry will be reset. So we have to save the data.
-            NumericalUnit carry_last = 0;
-            NumericalUnit carry_temp;
-            for (int i = 0; i < size1; ++i) {
-                int index = i;
-                for(int j = 0; j < last2; ++j) {
-                    aByte = byte[index];
-                    NumericalUnit temp;
-                    mulWordByWord(carry_temp, temp, n1.byte[i], n2.byte[j]);
-                    byte[index] += temp;
-                    carry_temp += aByte > byte[index];
-                    aByte = byte[index];
-                    byte[index] += carry;
-                    carry = carry_temp + (aByte > byte[index]);
-                    ++index;
-                }
-                aByte = byte[index];
-                NumericalUnit temp;
-                mulWordByWord(carry_temp, temp, n1.byte[i], n2.byte[last2]);
-                byte[index] += temp;
-                carry_temp += aByte > byte[index];
-                aByte = byte[index];
-                byte[index] += carry;
-                carry_temp += aByte > byte[index];
-                aByte = byte[index];
-                byte[index] += carry_last;
-                carry_last = carry_temp + (aByte > byte[index]);
-            }
+            for (int i = 0; i < size1; ++i)
+                byte[i + size2] = mulAddArrByWord(byte + i, n2.byte, size2, n1.byte[i]);
             ///////////////////////////////////////Get byte, length and power//////////////////////////;
-            int power = n1.power + n2.power;
-            if (carry_last != 0) {
-                ++length;
-                ++power;
+            int power = n1.power + n2.power + 1;
+            if (byte[length - 1] == 0) {
+                --length;
+                --power;
                 byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
-                byte[length - 1] = carry_last;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
             if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
@@ -322,6 +292,8 @@ namespace Physica::Core {
         else
             return getZero();
     }
+
+    Numerical square(const Numerical& n);
     /*
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
      * Return true if array is cut.

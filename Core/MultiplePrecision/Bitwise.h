@@ -5,7 +5,6 @@
 #define PHYSICA_BITWISE_H
 
 namespace Physica::Core {
-    extern const NumericalUnit numericalUnitHighestBitMask;
     //Possibly use asm to speed up.
     inline unsigned int countLeadingZeros(NumericalUnit n) {
         if(n == 0)

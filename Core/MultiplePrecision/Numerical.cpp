@@ -211,7 +211,7 @@ namespace Physica::Core {
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
-        const int quotient = bits / NumericalUnitWidth;
+        const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * NumericalUnitWidth;
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
         auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
@@ -233,7 +233,7 @@ namespace Physica::Core {
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
-        const int quotient = bits / NumericalUnitWidth;
+        const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * NumericalUnitWidth;
         const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < NumericalUnitWidth;
         auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
@@ -415,15 +415,11 @@ namespace Physica::Core {
     }
 
     bool operator== (const Numerical& n1, const Numerical& n2) {
-        if(n1.getPower() != n2.getPower())
-            return false;
+        return n1.getPower() == n2.getPower()
         //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
-        if((n1.getLength() ^ n2.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
-            return false;
-        if(n1.getA() != n2.getA())
-            return false;
-        Numerical temp = n1 - n2;
-        return temp.isZero();
+        && ((n1.getLength() ^ n2.getLength()) >= 0) //NOLINT
+        && n1.getA() == n2.getA()
+        && (n1 - n2).isZero();
     }
 
     bool operator!= (const Numerical& n1, const Numerical& n2) {

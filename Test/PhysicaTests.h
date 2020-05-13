@@ -10,15 +10,13 @@ namespace Physica::Core {
 
 using Physica::Core::Numerical;
 
-namespace Physica {
-    namespace Test {
-        void checkGPU();
-        void constTest();
-        void elementary_function_test();
-        void numericalTest();
-        void printElements(const Numerical& n);
-        void simpleNet();
-    }
+namespace Physica::Test {
+    void checkGPU();
+    void constTest();
+    void elementary_function_test();
+    void numericalTest();
+    void printElements(const Numerical& n);
+    void simpleNet();
 }
 
 #endif

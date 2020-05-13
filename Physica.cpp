@@ -2,11 +2,10 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QApplication>
-#include "QTime"
+#include <QTime>
 #include "Core/Header/Const.h"
 #include "Gui/Header/PhysicaMain.h"
 #include "Core/Header/Util.h"
-#include "Core/Header/Numerical.h"
 
 using namespace Physica::Core;
 static QtMessageHandler handler;
