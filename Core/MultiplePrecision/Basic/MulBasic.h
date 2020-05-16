@@ -53,8 +53,8 @@ namespace Physica::Core {
         high = hh + (lh >> (NumericalUnitWidth / 2U));
         low = (lh << (NumericalUnitWidth / 2U)) + (ll & numericalUnitLowMask);
     }
-
-    inline NumericalUnit mulArrByWord(NumericalUnit* result, NumericalUnit* arr, size_t length, NumericalUnit n) {
+    //Length of result should at least as long as arr.
+    inline NumericalUnit mulArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
         NumericalUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
@@ -64,8 +64,8 @@ namespace Physica::Core {
         }
         return carry;
     }
-
-    inline NumericalUnit mulAddArrByWord(NumericalUnit* result, NumericalUnit* arr, size_t length, NumericalUnit n) {
+    //Length of result should at least as long as arr.
+    inline NumericalUnit mulAddArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
         NumericalUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
@@ -73,6 +73,20 @@ namespace Physica::Core {
             carry = (low < carry) + high;
             result[i] += low;
             carry += result[i] < low;
+        }
+        return carry;
+    }
+    //Length of result should at least as long as arr.
+    inline NumericalUnit mulSubArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
+        NumericalUnit carry = 0, high, low;
+        for(size_t i = 0; i < length; ++i) {
+            mulWordByWord(high, low, arr[i], n);
+            low = result[i] - low;
+            high += result[i] < low;
+            result[i] = low;
+            low -= carry;
+            carry = high + (result[i] < low);
+            result[i] = low;
         }
         return carry;
     }

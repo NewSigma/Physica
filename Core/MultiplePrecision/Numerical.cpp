@@ -206,8 +206,10 @@ namespace Physica::Core {
         return os << std::setprecision(10) << std::to_string(double(n)) << "\tLength = "
                   << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6); //6 is the default precision.
     }
-
-    Numerical Numerical::operator<<(int bits) {
+    //FIXME a is not accurate
+    Numerical Numerical::operator<<(int bits) const {
+        if(bits == 0)
+            return Numerical(this);
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
@@ -218,18 +220,20 @@ namespace Physica::Core {
 
         new_byte[0] = 0;
         for(int i = 0; i < size - 1; ++i) {
-            new_byte[i] += byte[i] << remainder;
+            new_byte[i] |= byte[i] << remainder;
             new_byte[i + 1] = byte[i] >> (NumericalUnitWidth - remainder);
         }
-        new_byte[size - 1] += byte[size - 1] << remainder;
+        new_byte[size - 1] |= byte[size - 1] << remainder;
         if(carry)
-            new_byte[size] = byte[size] >> (NumericalUnitWidth - remainder);
+            new_byte[size] = byte[size - 1] >> (NumericalUnitWidth - remainder);
         //(length >= 0) * 2 - 1) is constructed to get the sign of length.
         return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
                 , power + quotient + carry, a);
     }
-
-    Numerical Numerical::operator>>(int bits) {
+    //FIXME a is not accurate
+    Numerical Numerical::operator>>(int bits) const {
+        if(bits == 0)
+            return Numerical(this);
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
@@ -241,10 +245,11 @@ namespace Physica::Core {
         if(carry)
             new_byte[size] = byte[size - 1] >> remainder;
 
-        for(int i = size - 1; i >= 0; --i) {
-            new_byte[i + 1] += byte[i] >> remainder;
+        for(int i = size - 1; i > 0; --i) {
             new_byte[i] = byte[i] << (NumericalUnitWidth - remainder);
+            new_byte[i] |= byte[i - 1] >> remainder;
         }
+        new_byte[0] = byte[0] << (NumericalUnitWidth - remainder);
         //(length >= 0) * 2 - 1) is constructed to get the sign of length.
         return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
                 , power - quotient + carry - 1, a);
@@ -272,9 +277,9 @@ namespace Physica::Core {
         a = n.a;
         return *this;
     }
-/*
- * Using Newton's method
- */
+    /*
+     * Using Newton's method
+     */
     Numerical Numerical::operator^ (const Numerical& n) const {
         return exp(ln(*this) * n);
     }

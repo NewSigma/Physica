@@ -7,15 +7,18 @@
 #include <cstring>
 #include <QtCore/qlogging.h>
 #include "Core/Header/Numerical.h"
-#include "MulBasic.h"
-#include "DivBasic.h"
-#include "Bitwise.h"
+#include "Core/MultiplePrecision/Basic/AddBasic.h"
+#include "Core/MultiplePrecision/Basic/MulBasic.h"
+#include "Core/MultiplePrecision/Basic/DivBasic.h"
+#include "Core/MultiplePrecision/Util/ArraySupport.h"
+#include "Core/MultiplePrecision/Util/Bitwise.h"
 
 namespace Physica::Core {
     /*
      * The following four functions simply calculate the result while operator functions will
      * consider the accuracy.
      */
+    //Refactor: move the key algorithm into a separated method. We may not use every words.
     inline Numerical add(const Numerical& n1, const Numerical& n2) {
         if(n1.isZero())
             return Numerical(n2);
@@ -98,7 +101,7 @@ namespace Physica::Core {
             return Numerical(byte, length, power);
         }
     }
-
+    //Refactor: move the key algorithm into a separated method. We may not use every words.
     inline Numerical sub(const Numerical& n1, const Numerical& n2) {
         if(n1.isZero())
             return -n2;
@@ -232,59 +235,45 @@ namespace Physica::Core {
 
         if(!n1.isZero()) {
             if(n2 != BasicConst::getInstance().get_1()) {
-                Numerical n1_copy(n1);
-                Numerical n2_copy(n2);
-                n1_copy.toAbs();
-                n2_copy.toAbs();
-                n1_copy.a = n2_copy.a = 0;
+                auto n1_size = n1.getSize(), n2_size = n2.getSize();
+                //Add one to avoid precision loss during right shift.
+                auto arr1_len = std::max(n1_size, n2_size) + 1;
+                auto n1_blank = arr1_len - n1_size;
+                auto arr1 = new NumericalUnit[arr1_len];
+                memcpy(arr1 + n1_blank, n1.byte, n1_size * sizeof(NumericalUnit));
+                memset(arr1, 0, n1_blank * sizeof(NumericalUnit));
+                //Size of arr2 is arranged 1 less than arr1.
+                auto arr2_len = arr1_len - 1;
+                auto n2_blank = arr2_len - n2_size;
+                auto arr2 = new NumericalUnit[arr2_len];
+                memcpy(arr2 + n2_blank, n2.byte, n2_size * sizeof(NumericalUnit));
+                memset(arr2, 0, n2_blank * sizeof(NumericalUnit));
+
+                int n1_shift = static_cast<int>(countLeadingZeros(n1.byte[n1.getSize() - 1])) - 1;
+                if(n1_shift > 0)
+                    byteLeftShiftEq(arr1, arr1_len, n1_shift);
+                else
+                    byteRightShiftEq(arr1, arr1_len, -n1_shift);
+                int n2_shift = static_cast<int>(countLeadingZeros(n2.byte[n2.getSize() - 1]));
+                byteLeftShiftEq(arr2, arr2_len, n2_shift);
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
                 int length = BasicConst::getInstance().GlobalPrecision;
                 //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
-                int power = n1.getPower() - n2.getPower();
-                n1_copy.power = n2.power;
-                auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
+                auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
 
-                Numerical temp(reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit))), 1, 0);
-                for (int i = length - 1; i >= 0; --i) {
-                    NumericalUnit large = NumericalUnitMax;
-                    temp[0] = NumericalUnitMax / 2;
-                    NumericalUnit small = 0;
-                    while(true) {
-                        Numerical mul = temp * n2_copy;
-                        if(mul < n1_copy)
-                            small = temp[0];
-                        else if (mul > n1_copy)
-                            large = temp[0];
-                        else {
-                            byte[i] = temp[0];
-                            goto stop;
-                        }
-
-                        temp[0] = small + large;
-                        if(temp[0] < small) {
-                            temp[0] /= 2;
-                            temp[0] += (NumericalUnitMax / 2 + 1);
-                        }
-                        else
-                            temp[0] /= 2;
-
-                        if(small + 1 >= large) {
-                            n1_copy -= temp * n2_copy;
-                            break;
-                        }
-                    }
-                    ++n1_copy.power;
-                    byte[i] = temp[0];
+                for(int i = length - 1; i >= 0; --i) {
+                    byte[i] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
+                    arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[i]);
+                    byteLeftShiftEq(arr1, arr1_len, NumericalUnitWidth);
                 }
+                delete[] arr1;
+                delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                stop:
                 if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
                     length = -length;
                 //1 comes from the algorithm
-                Numerical result(byte, length, power, 1);
-                cutZero(result);
-                return result;
+                return Numerical(byte, length, n1.getPower() - n2.getPower() - 1, 1) >> (n1_shift - n2_shift);
             }
             else
                 return Numerical(n1);

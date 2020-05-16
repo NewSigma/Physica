@@ -59,7 +59,7 @@ namespace Physica::Core {
         Numerical result = getOne();
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * BasicConst::getInstance().GlobalPrecision; ++i)
-            result = (result + div(copy_n, result)) / BasicConst::getInstance().get_2();
+            result = (result + div(copy_n, result)) >> 1U;
         result.power += add_power;
         result.toUnitA();
 
@@ -159,7 +159,7 @@ namespace Physica::Core {
                 break;
             result += temp;
             temp *= n;
-            rank += BasicConst::getInstance().get_1();
+            ++rank;
         }
         return result;
     }

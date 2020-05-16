@@ -9,10 +9,10 @@
 
 #if PhysicaWordSize == 64
 #define PHYSICA_64BIT
-#define NumericalUnitWidth 64U
+#define NumericalUnitWidth (64U)
 #elif PhysicaWordSize == 32;
 #define PHYSICA_32BIT
-#define NumericalUnitWidth 32U
+#define NumericalUnitWidth (32U)
 #endif
 
 #if PhysicaWordSize == INT_WIDTH

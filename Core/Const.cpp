@@ -116,14 +116,14 @@ namespace Physica::Core {
         int goal = 1;
         while(goal < precision) {
             Numerical y(a);
-            a = (a + b) / BasicConst::getInstance().get_2();
+            a = (a + b) >> 1U;
             b = sqrt(b * y);
             y -= a;
             c -= y * y * x;
             x *= BasicConst::getInstance().get_2();
             goal *= 2;
         }
-        a = (a + b) / BasicConst::getInstance().get_2();
+        a = (a + b) >> 1U;
         return a * a / c;
     }
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
 #include "CalcBasic.h"
-#include "ArraySupport.h"
+#include "Core/MultiplePrecision/Util/ArraySupport.h"
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
@@ -19,7 +19,7 @@ namespace Physica::Core {
             for(int i = 0; i < n_size - 1; ++i)
                 byte[i + n_size] = mulAddArrByWord(byte + i + i + 1, n.byte + i + 1, n_size - i - 1, n.byte[i]);
             //Shift count is known, possible to optimize the performance.
-            byteLeftShift(byte, length, 1);
+            byteLeftShiftEq(byte, length, 1);
 
             NumericalUnit high, low;
             for(int i = 0; i < n_size; ++i) {

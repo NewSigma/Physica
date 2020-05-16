@@ -5,6 +5,7 @@
 #define PHYSICA_DIVBASIC_H
 
 #include "Core/Header/SystemBits.h"
+#include "SubBasic.h"
 #include "MulBasic.h"
 #include "qcompilerdetection.h"
 
@@ -15,7 +16,7 @@ namespace Physica::Core {
      */
     inline NumericalUnit getInverse(NumericalUnit unit) {
         unsigned long unit0 = unit & 1U;
-#ifdef PHYSICA_64BIT
+    #ifdef PHYSICA_64BIT
         unsigned long unit9 = unit >> 55U;
         unsigned long unit40 = (unit >> 24U) + 1;
         unsigned long unit63 = (unit >> 1U) + unit0;
@@ -29,29 +30,31 @@ namespace Physica::Core {
         mulWordByWord(high, low, v3, unit);
         unsigned long v4 = v3 - unit - high - (low + unit < low);
         return v4;
-#endif
-#ifdef PHYSICA_32BIT
+    #endif
+    #ifdef PHYSICA_32BIT
         unsigned long unit10 = unit >> 22U;
-    unsigned long unit21 = (unit >> 11U) + 1;
-    unsigned long unit31 = (unit >> 1U) + unit10;
-    unsigned long v0 = ((static_cast<unsigned long>(1) << 24U) - (static_cast<unsigned long>(1) << 14U)
-            + (static_cast<unsigned long>(1) << 9U)) / unit10;
-    unsigned long v1 = (static_cast<unsigned long>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
-    unsigned long e = (v1 >> 1U) * unit0 - v1 * unit31;
-    unsigned long v2 = (static_cast<unsigned long>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
-    unsigned long high, low;
-    mulWordByWord(high, low, v2, unit);
-    unsigned long v3 = v2 - unit - high - (low + unit < low);
-    return v3;
-#endif
+        unsigned long unit21 = (unit >> 11U) + 1;
+        unsigned long unit31 = (unit >> 1U) + unit10;
+        unsigned long v0 = ((static_cast<unsigned long>(1) << 24U) - (static_cast<unsigned long>(1) << 14U)
+                + (static_cast<unsigned long>(1) << 9U)) / unit10;
+        unsigned long v1 = (static_cast<unsigned long>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
+        unsigned long e = (v1 >> 1U) * unit0 - v1 * unit31;
+        unsigned long v2 = (static_cast<unsigned long>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
+        unsigned long high, low;
+        mulWordByWord(high, low, v2, unit);
+        unsigned long v3 = v2 - unit - high - (low + unit < low);
+        return v3;
+    #endif
     }
     /*
      * Calculate (high, low) / divisor.
      * Assume high < divisor and divisor >= 2^(__WORDSIZE - 1).
      *
+     * A full word here indicates that the highest bit of divisor is set.
+     *
      * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
-    inline void div2WordByWord(NumericalUnit& quotient, NumericalUnit& remainder
+    inline void div2WordByFullWord(NumericalUnit& quotient, NumericalUnit& remainder
             , NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
         NumericalUnit quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
@@ -70,13 +73,15 @@ namespace Physica::Core {
         }
     }
     /*
-     * This is a simplified version of div2WordByWord(), which returns the quotient only.
+     * This is a simplified version of div2WordByFullWord(), which returns the quotient only.
      */
-    inline NumericalUnit div2WordByWordQ(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+    inline NumericalUnit div2WordByFullWordQ(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
         NumericalUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
-        quotient += high + 1;
+
+        auto temp = quotient2;
         quotient2 += low;
+        quotient += high + (temp > quotient2) + 1;
         NumericalUnit remainder = low - quotient * divisor;
         if(remainder > quotient2) {
             --quotient;
@@ -87,9 +92,9 @@ namespace Physica::Core {
         return quotient;
     }
     /*
-     * This is a simplified version of div2WordByWord(), which returns the remainder only.
+     * This is a simplified version of div2WordByFullWord(), which returns the remainder only.
      */
-    inline NumericalUnit div2WordByWordR(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+    inline NumericalUnit div2WordByFullWordR(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
         NumericalUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -102,6 +107,34 @@ namespace Physica::Core {
         if(Q_UNLIKELY(remainder >= divisor))
             remainder -= divisor;
         return remainder;
+    }
+    /*
+     * Acquirement:
+     * The quotient must be one word.
+     * len is the length of divisor, length of dividend should equals to len + 1.
+     * FullArr here indicates that the highest bit of divisor is set.
+     * dividend[len] < divisor[len - 1].
+     * len >= 2 to avoid invalid read.
+     *
+     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.4-8
+     */
+    inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* dividend, const NumericalUnit* divisor, size_t len) {
+        auto q = div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
+        if(len == 1)
+            return q;
+        auto t = dividend[len - 1] - q * divisor[len - 1];
+        NumericalUnit temp[2];
+        mulWordByWord(temp[1], temp[0], q, divisor[len - 2]);
+        auto copy = temp[1];
+        temp[1] -= subArrByArrEq(temp, dividend + len - 2, 1);
+        if((t < temp[1] || (t == temp[1] && temp[0] != 0)) && copy > temp[1])
+            --q;
+        auto n = new NumericalUnit[len + 1];
+        n[len] = mulArrByWord(n, divisor, len, q);
+        if(subArrByArr(n, dividend, n, len + 1))
+            --q;
+        delete[] n;
+        return q;
     }
 }
 

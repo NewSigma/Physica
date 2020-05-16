@@ -42,8 +42,8 @@ namespace Physica::Core {
 
         explicit operator double() const;
         friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
-        Numerical operator<<(int bits);
-        Numerical operator>>(int bits);
+        Numerical operator<<(int bits) const;
+        Numerical operator>>(int bits) const;
         inline void operator<<=(int bits) noexcept { power += bits; }
         inline void operator>>=(int bits) noexcept { power -= bits; }
         inline NumericalUnit& operator[](unsigned int index) { return byte[index]; }
