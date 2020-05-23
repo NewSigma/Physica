@@ -12,7 +12,7 @@
 namespace Physica::Core {
     class Numerical {
         //Store effective digits.
-        NumericalUnit* byte;
+        NumericalUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Numerical are same. (when Numerical != 0)
@@ -54,6 +54,7 @@ namespace Physica::Core {
         Numerical operator-() const;
 
         Numerical& applyError(const Numerical& error);
+        void swap(Numerical& n) noexcept;
 
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getPower() const noexcept { return power; }
@@ -69,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
 
+        friend void swap(Numerical& n1, Numerical& n2) noexcept;
         friend Numerical add (const Numerical& n1, const Numerical& n2);
         friend Numerical sub (const Numerical& n1, const Numerical& n2);
         friend Numerical mul (const Numerical& n1, const Numerical& n2);
@@ -105,6 +107,7 @@ namespace Physica::Core {
     inline Numerical getZero() { return Numerical(BasicConst::getInstance().get_0()); }
     inline Numerical getOne() { return Numerical(BasicConst::getInstance().get_1()); }
     inline Numerical getTwo() { return Numerical(BasicConst::getInstance().get_2()); }
+    inline void swap(Numerical& n1, Numerical& n2) noexcept { n1.swap(n2); }
 }
 
 #endif

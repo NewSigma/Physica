@@ -5,6 +5,12 @@
 #ifndef PHYSICA_CONFIG_H
 #define PHYSICA_CONFIG_H
 
+#cmakedefine UseASM @UseASM@
+#if UseASM
+    //Avoid "unused parameter" warnings and note that the parameter is used in asm.
+    #define USE_IN_ASM(x) (void)x
+#endif
+
 #cmakedefine PhysicaWordSize @PhysicaWordSize@
 
 #define PhysicaLittleEndian 0

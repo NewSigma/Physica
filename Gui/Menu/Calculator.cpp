@@ -4,7 +4,7 @@
 #include <QKeyEvent>
 #include "Core/Header/Numerical.h"
 using Physica::Interpreter::ExprReader;
-//FIXME Calculate result is not accurate.
+
 Calculator::Calculator() {
     //Const
     QFont font;

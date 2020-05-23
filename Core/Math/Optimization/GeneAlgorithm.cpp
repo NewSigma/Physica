@@ -8,7 +8,6 @@
 
 namespace Physica::Core {
     //Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
-//TODO Debug
     GeneAlgorithm::GeneAlgorithm(Numerical func(const Numerical&), const Numerical& lower, const Numerical& upper, int pop, ChooseMode mode) {
         population = pop;
         points = new Numerical*[population];

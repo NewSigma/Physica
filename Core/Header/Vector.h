@@ -7,26 +7,23 @@
 namespace Physica::Core {
     class Vector {
         Numerical* numbers;
-        int length;
+        size_t length;
     public:
         Vector();
-        explicit Vector(int length);
+        explicit Vector(size_t length);
         Vector(const Numerical& n1, const Numerical& n2);
         Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3);
-        Vector(Numerical*& numbers, int length);
-        Vector(Numerical*&& numbers, int length);
+        Vector(Numerical*& numbers, size_t length);
+        Vector(Numerical*&& numbers, size_t length);
         explicit Vector(const Numerical& arg);
         Vector(const Vector& vec);
         Vector(Vector&& vec) noexcept;
         explicit Vector(const Vector* vector);
         ~Vector();
-
-        Numerical toNorm() const;
-        void toUnit();
-
+        //operators
         friend std::ostream& operator<<(std::ostream& os, const Vector& n);
-        Numerical& operator[](int i) { return numbers[i]; }
-        const Numerical& operator[](int i) const { return numbers[i]; }
+        Numerical& operator[](size_t i) { return numbers[i]; }
+        const Numerical& operator[](size_t i) const { return numbers[i]; }
         Vector& operator=(const Vector& v) noexcept;
         Vector& operator=(Vector&& v) noexcept;
         Vector operator+(const Vector& v) const;
@@ -39,13 +36,18 @@ namespace Physica::Core {
         void operator*=(Numerical& n) { *this = *this * n; };
         Vector operator-() const;
         bool operator==(const Vector& v) const;
-
-        bool isEmpty() const { return length == 0; }
-        int getLength() const { return length; };
-        bool isZeroVector() const;
-        Numerical toArg(int axe) const;
+        //Vector Operations
+        //initVector(int) should be called if and only if numbers equals to nullptr.
+        inline void initVector(size_t l) { numbers = new Numerical[l]; length = l; }
+        [[nodiscard]] Numerical toNorm() const;
+        void toUnit();
+        //Public functions
+        [[nodiscard]] bool isEmpty() const { return length == 0; }
+        [[nodiscard]] size_t getLength() const { return length; };
+        [[nodiscard]] bool isZeroVector() const;
+        [[nodiscard]] Numerical toArg(size_t axe) const;
     };
-    Vector randomVector(int length);
+    Vector randomVector(size_t length);
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     Vector reciprocal(const Vector& n);
     Vector sqrt(const Vector& n);

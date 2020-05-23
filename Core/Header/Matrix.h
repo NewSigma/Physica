@@ -6,28 +6,32 @@
 namespace Physica::Core {
     class Matrix {
         Vector* vectors;
-        int length;
+        size_t length;
     public:
         Matrix();
-        Matrix(int c, int r);
-        Matrix(Vector*& vectors, int length);
-        Matrix(Vector*&& vectors, int length);
+        Matrix(size_t c, size_t r);
+        Matrix(Vector*& vectors, size_t length);
+        Matrix(Vector*&& vectors, size_t length);
         Matrix(Matrix& matrix);
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix();
-
-        Vector& operator[](int index) { return vectors[index]; }
-        const Vector& operator[](int index) const { return vectors[index]; }
-        const Numerical& operator()(int c, int r) const { return vectors[c][r]; }
+        //Operators
+        Vector& operator[](size_t column) { return vectors[column]; }
+        const Vector& operator[](size_t column) const { return vectors[column]; }
+        const Numerical& operator()(size_t row, size_t column) const { return vectors[column][row]; }
         Matrix& operator=(const Matrix& m) noexcept;
         Matrix& operator=(Matrix&& m) noexcept;
-
+        //Matrix operations
+        void rowSwap(size_t r1, size_t r2) noexcept;
+        void columnSwap(size_t c1, size_t c2) noexcept;
+        void rowEliminate(size_t r1, size_t r2, size_t element);
+        void columnEliminate(size_t c1, size_t c2, size_t element);
         void transpose();
-
-        inline int row() const { return vectors[0].getLength(); }
-        inline int col() const { return length; }
-        inline int getLength() const { return length; }
-        inline bool isEmpty() const { return length == 0; };
+        //Public functions
+        [[nodiscard]] inline size_t row() const { return vectors[0].getLength(); }
+        [[nodiscard]] inline size_t column() const { return length; }
+        [[nodiscard]] inline size_t getLength() const { return length; }
+        [[nodiscard]] inline bool isEmpty() const { return length == 0; };
     };
     Matrix operator+(const Matrix& m1, const Matrix& m2);
     Matrix operator-(const Matrix& m1, const Matrix& m2);

@@ -64,11 +64,7 @@ namespace Physica::Core {
         const unsigned int quotient = shift / NumericalUnitWidth;
         if(quotient < length) {
             if(quotient != 0) {
-                auto bufferSize = length - quotient;
-                auto buffer = new NumericalUnit[bufferSize];
-                memcpy(buffer, byte, bufferSize * sizeof(NumericalUnit));
-                memcpy(byte + quotient, buffer, bufferSize * sizeof(NumericalUnit));
-                delete[] buffer;
+                memmove(byte + quotient, byte, (length - quotient) * sizeof(NumericalUnit));
                 memset(byte, 0, quotient * sizeof(NumericalUnit));
                 shift -= quotient * NumericalUnitWidth;
             }
@@ -91,10 +87,7 @@ namespace Physica::Core {
         if(quotient < length) {
             auto bufferSize = length - quotient;
             if(quotient != 0) {
-                auto buffer = new NumericalUnit[bufferSize];
-                memcpy(buffer, byte + quotient, bufferSize * sizeof(NumericalUnit));
-                memcpy(byte, buffer, bufferSize * sizeof(NumericalUnit));
-                delete[] buffer;
+                memmove(byte, byte + quotient, bufferSize * sizeof(NumericalUnit));
                 memset(byte + bufferSize, 0, quotient * sizeof(NumericalUnit));
                 shift -= quotient * NumericalUnitWidth;
             }

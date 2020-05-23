@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include "Operation/Pow.h"
 
 namespace Physica::Core {
     ////////////////////////////////Numerical////////////////////////////////
@@ -25,7 +26,7 @@ namespace Physica::Core {
         memcpy(byte, n.byte, getSize() * sizeof(NumericalUnit));
     }
 
-    Numerical::Numerical(Numerical&& n) noexcept : Numerical(n.byte, n.length, n.power, n.a) {
+    Numerical::Numerical(Numerical&& n) noexcept : Numerical(reinterpret_cast<NumericalUnit*>(n.byte), n.length, n.power, n.a) {
         n.byte = nullptr;
     }
 
@@ -226,8 +227,8 @@ namespace Physica::Core {
         new_byte[size - 1] |= byte[size - 1] << remainder;
         if(carry)
             new_byte[size] = byte[size - 1] >> (NumericalUnitWidth - remainder);
-        //(length >= 0) * 2 - 1) is constructed to get the sign of length.
-        return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
+
+        return Numerical(new_byte, length >= 0 ? (size + carry) : -(size + carry)
                 , power + quotient + carry, a);
     }
     //FIXME a is not accurate
@@ -250,8 +251,8 @@ namespace Physica::Core {
             new_byte[i] |= byte[i - 1] >> remainder;
         }
         new_byte[0] = byte[0] << (NumericalUnitWidth - remainder);
-        //(length >= 0) * 2 - 1) is constructed to get the sign of length.
-        return Numerical(new_byte, ((length >= 0) * 2 - 1) * (size + carry)
+
+        return Numerical(new_byte, length >= 0 ? (size + carry) : -(size + carry)
                 , power - quotient + carry - 1, a);
     }
 
@@ -277,10 +278,10 @@ namespace Physica::Core {
         a = n.a;
         return *this;
     }
-    /*
-     * Using Newton's method
-     */
+    //Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
     Numerical Numerical::operator^ (const Numerical& n) const {
+        if(isInteger())
+            return powNumerical(*this, n);
         return exp(ln(*this) * n);
     }
 
@@ -430,13 +431,13 @@ namespace Physica::Core {
     bool operator!= (const Numerical& n1, const Numerical& n2) {
         return !(n1 == n2);
     }
-//Return accuracy in class Numerical.
+    //Return accuracy in class Numerical.
     Numerical getAccuracy(const Numerical& n) {
         auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
         b[0] = n.getA();
         return Numerical(b, 1, n.getPower() - n.getSize() + 1);
     }
-//Add error to this and adjust this->length as well as this-> byte.
+    //Add error to this and adjust this->length as well as this-> byte.
     Numerical& Numerical::applyError(const Numerical& error) {
         if(!error.isZero()) {
             int size = getSize();
@@ -482,5 +483,20 @@ namespace Physica::Core {
             length = size;
         }
         return *this;
+    }
+
+    void Numerical::swap(Numerical &n) noexcept {
+        auto temp_byte = byte;
+        byte = n.byte;
+        n.byte = temp_byte;
+        auto temp_length = length;
+        length = n.length;
+        n.length = temp_length;
+        temp_length = power;
+        power = n.power;
+        n.power = temp_length;
+        NumericalUnit temp_a = a;
+        a = n.a;
+        n.a = temp_a;
     }
 }

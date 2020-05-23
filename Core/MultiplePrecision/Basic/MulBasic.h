@@ -10,10 +10,18 @@ namespace Physica::Core {
     /*
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
-     *
-     * Possibly use asm to speed up. Depending on the platform.
      */
     inline NumericalUnit mulWordByWordHigh(NumericalUnit n1, NumericalUnit n2) {
+    #if UseASM
+        USE_IN_ASM(n1);
+        USE_IN_ASM(n2);
+        asm (
+                "movq %%rsi, %%rax\n\t"
+                "mulq %%rdi\n\t"
+                "movq %%rdx, %%rax\n\t"
+                ::: "%rax", "rdx"
+        );
+    #else
         unsigned long n1_low = n1 & numericalUnitLowMask;
         unsigned long n1_high = n1 >> (64U / 2U);
         unsigned long n2_low = n2 & numericalUnitLowMask;
@@ -29,14 +37,24 @@ namespace Physica::Core {
         hh += static_cast<unsigned long>(lh < hl) << (64U / 2U);
 
         return hh + (lh >> (64U / 2U));
+    #endif
     }
     /*
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
-     *
-     * Possibly use asm to speed up. Depending on the platform.
      */
     inline void mulWordByWord(NumericalUnit& high, NumericalUnit& low, NumericalUnit n1, NumericalUnit n2) {
+    #if UseASM
+        USE_IN_ASM(n1);
+        USE_IN_ASM(n2);
+        asm (
+                "movq %%rcx, %%rax\n\t"
+                "mulq %%rdx\n\t"
+                "movq %%rax, %%rsi\n\t"
+                "movq %%rdx, %%rdi\n\t"
+                : "=d"(high), "=a"(low)
+        );
+    #else
         NumericalUnit n1_low = n1 & numericalUnitLowMask;
         NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2U);
         NumericalUnit n2_low = n2 & numericalUnitLowMask;
@@ -52,6 +70,7 @@ namespace Physica::Core {
         hh += static_cast<NumericalUnit>(lh < hl) << (NumericalUnitWidth / 2U);
         high = hh + (lh >> (NumericalUnitWidth / 2U));
         low = (lh << (NumericalUnitWidth / 2U)) + (ll & numericalUnitLowMask);
+    #endif
     }
     //Length of result should at least as long as arr.
     inline NumericalUnit mulArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
