@@ -56,6 +56,8 @@ namespace Physica::Core {
      */
     inline void div2WordByFullWord(NumericalUnit& quotient, NumericalUnit& remainder
             , NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+        Q_ASSERT(high < divisor);
+        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
         NumericalUnit quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -76,6 +78,8 @@ namespace Physica::Core {
      * This is a simplified version of div2WordByFullWord(), which returns the quotient only.
      */
     inline NumericalUnit div2WordByFullWordQ(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+        Q_ASSERT(high < divisor);
+        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
         NumericalUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -95,6 +99,8 @@ namespace Physica::Core {
      * This is a simplified version of div2WordByFullWord(), which returns the remainder only.
      */
     inline NumericalUnit div2WordByFullWordR(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+        Q_ASSERT(high < divisor);
+        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
         NumericalUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -114,11 +120,12 @@ namespace Physica::Core {
      * len is the length of divisor, length of dividend should equals to len + 1.
      * FullArr here indicates that the highest bit of divisor is set.
      * dividend[len] < divisor[len - 1].
-     * len >= 2 to avoid invalid read.
+     * len >= 1 to avoid invalid read.
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.4-8
      */
     inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* dividend, const NumericalUnit* divisor, size_t len) {
+        Q_ASSERT(len >= 1);
         auto q = div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
         if(len == 1)
             return q;

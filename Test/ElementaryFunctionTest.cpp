@@ -10,7 +10,7 @@ using namespace Physica::Core;
 namespace Physica::Test {
     void elementary_function_test() {
         std::cout << "Please input a double. Input 0 to stop the test." << '\n';
-        double d1 = 1, d2;
+        double d1, d2;
         std::cin >> d1 >> d2;
         while(d1 != 0) {
             Numerical n1(d1);

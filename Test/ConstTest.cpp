@@ -24,12 +24,12 @@ namespace Physica::Test {
 
         /* Test Pi */ {
             auto Pi = MathConst::getInstance().getPI();
-            std::cout << "Testing E" << '\n';
+            std::cout << "Testing Pi" << '\n';
             if(Pi.getSize() == 5 && Pi[0] == 11171822399862759264UL && Pi[1] == 11820040416388919747UL
                 && Pi[2] == 1376283091369227076 && Pi[3] == 2611923443488327891 && Pi[4] == 3)
-                std::cout << "Testing E --Passed" << '\n';
+                std::cout << "Testing Pi --Passed" << '\n';
             else
-                std::cout << "Testing E --Failed" << '\n';
+                std::cout << "Testing Pi --Failed" << '\n';
         }
         /* Test E */ {
             auto E = MathConst::getInstance().getE();

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "CalcBasic.h"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
@@ -58,7 +57,7 @@ namespace Physica::Core {
         if(quotient < 0)
             --power;
         unsigned int remainder = quotient - power * __WORDSIZE;
-#ifdef PHYSICA_64BIT
+    #ifdef PHYSICA_64BIT
         if(remainder < 52) {
             length = 2;
             byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
@@ -87,8 +86,8 @@ namespace Physica::Core {
             byte[0] += static_cast<NumericalUnit>(extract.structure.low);
             byte[0] <<= remainder - 52;
         }
-#endif
-#ifdef PHYSICA_32BIT
+    #endif
+    #ifdef PHYSICA_32BIT
         if(remainder < 20) {
         length = 3;
         byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
@@ -110,17 +109,17 @@ namespace Physica::Core {
         byte[1] += static_cast<NumericalUnit>(extract.structure.low) >> (32 - (remainder - 20));
         byte[0] = static_cast<NumericalUnit>(extract.structure.low) << (remainder - 20);
     }
-#endif
+    #endif
         if(extract.structure.sign)
             length = -length;
     }
-/*
- * Not accurate.
- */
+    /*
+     * Not accurate.
+     */
     Numerical::Numerical(const char* s, NumericalUnit a) : Numerical(strtod(s, nullptr), a) {}
-/*
- * Not accurate.
- */
+    /*
+     * Not accurate.
+     */
     Numerical::Numerical(const wchar_t* s, NumericalUnit a) : a(a) {
         size_t size = wcslen(s);
         char str[size + 1];
@@ -133,13 +132,13 @@ namespace Physica::Core {
         length = temp.length;
         power = temp.power;
     }
-/*
- * Not accurate.
- */
+    /*
+     * Not accurate.
+     */
     Numerical::Numerical(const std::string& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
-/*
- * Not accurate.
- */
+    /*
+     * Not accurate.
+     */
     Numerical::Numerical(const std::wstring& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
 
     Numerical::~Numerical() { free(byte); }
@@ -164,7 +163,7 @@ namespace Physica::Core {
 
         auto size = getSize();
         auto temp = byte[size - 1] << (zeroCount + 1);
-#ifdef PHYSICA_64BIT
+    #ifdef PHYSICA_64BIT
         extract.structure.high = temp >> 44U;
         if(zeroCount <= 11) {
             extract.structure.low = temp << 20U >> 32U;
@@ -182,8 +181,8 @@ namespace Physica::Core {
                 }
             }
         }
-#endif
-#ifdef PHYSICA_32BIT
+    #endif
+    #ifdef PHYSICA_32BIT
         extract.structure.high = temp >> 12U;
     if(zeroCount <= 11) {
         extract.structure.low = temp << 20U;
@@ -198,14 +197,82 @@ namespace Physica::Core {
         if(size > 2)
             extract.structure.low += byte[size - 2] >> (32 - (zeroCount + 1 - 12));
     }
-#endif
+    #endif
         return extract.value;
     }
 
     std::ostream& operator<<(std::ostream& os, const Numerical& n) {
-        //10 is the max precision.
+        //10 is the max precision of double.
         return os << std::setprecision(10) << std::to_string(double(n)) << "\tLength = "
                   << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6); //6 is the default precision.
+    }
+
+    Numerical Numerical::operator+(const Numerical& n) const {
+        Numerical result = add(*this, n);
+        cutLength(result);
+        if(getA() != 0 || n.getA() != 0) {
+            if(getA() == 0)
+                result.applyError(n.getAccuracy());
+            else if(n.getA() == 0)
+                result.applyError(getAccuracy());
+            else
+                result.applyError(add(getAccuracy(), n.getAccuracy()));
+        }
+        return result;
+    }
+
+    Numerical Numerical::operator-(const Numerical& n) const {
+        Numerical result = sub(*this, n);
+        cutLength(result);
+        if(getA() != 0 || n.getA() != 0) {
+            if(getA() == 0)
+                result.applyError(n.getAccuracy());
+            else if(n.getA() == 0)
+                result.applyError(getAccuracy());
+            else
+                result.applyError(add(getAccuracy(), n.getAccuracy()));
+        }
+        return result;
+    }
+
+    Numerical Numerical::operator*(const Numerical& n) const {
+        Numerical result = mul(*this, n);
+        cutLength(result);
+        if(getA() != 0 || n.getA() != 0) {
+            if(getA() == 0)
+                result.applyError(mul(*this, n.getAccuracy()));
+            else if(n.getA() == 0)
+                result.applyError(mul(n, getAccuracy()));
+            else {
+                Numerical n1_a = getAccuracy();
+                Numerical n_a = n.getAccuracy();
+                Numerical temp1 = mul(n1_a, n_a);
+                Numerical temp2 = add(mul(*this, n_a), mul(n, n1_a));
+                result.applyError(add(temp1, temp2));
+            }
+        }
+        return result;
+    }
+
+    Numerical Numerical::operator/(const Numerical& n) const {
+        Numerical result = div(*this, n);
+        if(getA() != 0 || n.getA() != 0) {
+            if(getA() == 0) {
+                Numerical n_a = n.getAccuracy();
+                Numerical temp_1 = mul(*this, n_a);
+                Numerical temp_2 = mul(n, sub(n, n_a));
+                result.applyError(div(temp_1, temp_2));
+            }
+            else if(n.getA() == 0)
+                result.applyError(div(getAccuracy(), n));
+            else {
+                Numerical n_a = n.getAccuracy();
+                Numerical temp_1 = add(mul(*this, n_a), mul(n, getAccuracy()));
+                Numerical temp_2 = mul(n, sub(n, n_a));
+                result.applyError(div(temp_1, temp_2));
+            }
+        }
+        return result;
     }
     //FIXME a is not accurate
     Numerical Numerical::operator<<(int bits) const {
@@ -292,74 +359,6 @@ namespace Physica::Core {
         return Numerical(new_byte, -length, power, a);
     }
 
-    Numerical operator+ (const Numerical& n1, const Numerical& n2) {
-        Numerical result = add(n1, n2);
-        cutLength(result);
-        if(n1.getA() != 0 || n2.getA() != 0) {
-            if(n1.getA() == 0)
-                result.applyError(getAccuracy(n2));
-            else if(n2.getA() == 0)
-                result.applyError(getAccuracy(n1));
-            else
-                result.applyError(add(getAccuracy(n1), getAccuracy(n2)));
-        }
-        return result;
-    }
-
-    Numerical operator- (const Numerical& n1, const Numerical& n2) {
-        Numerical result = sub(n1, n2);
-        cutLength(result);
-        if(n1.getA() != 0 || n2.getA() != 0) {
-            if(n1.getA() == 0)
-                result.applyError(getAccuracy(n2));
-            else if(n2.getA() == 0)
-                result.applyError(getAccuracy(n1));
-            else
-                result.applyError(add(getAccuracy(n1), getAccuracy(n2)));
-        }
-        return result;
-    }
-
-    Numerical operator* (const Numerical& n1, const Numerical& n2) {
-        Numerical result = mul(n1, n2);
-        cutLength(result);
-        if(n1.getA() != 0 || n2.getA() != 0) {
-            if(n1.getA() == 0)
-                result.applyError(mul(n1, getAccuracy(n2)));
-            else if(n2.getA() == 0)
-                result.applyError(mul(n2, getAccuracy(n1)));
-            else {
-                Numerical n1_a = getAccuracy(n1);
-                Numerical n2_a = getAccuracy(n2);
-                Numerical temp1 = mul(n1_a, n2_a);
-                Numerical temp2 = add(mul(n1, n2_a), mul(n2, n1_a));
-                result.applyError(add(temp1, temp2));
-            }
-        }
-        return result;
-    }
-
-    Numerical operator/ (const Numerical& n1, const Numerical& n2) {
-        Numerical result = div(n1, n2);
-        if(n1.getA() != 0 || n2.getA() != 0) {
-            if(n1.getA() == 0) {
-                Numerical n2_a = getAccuracy(n2);
-                Numerical temp_1 = mul(n1, n2_a);
-                Numerical temp_2 = mul(n2, sub(n2, n2_a));
-                result.applyError(div(temp_1, temp_2));
-            }
-            else if(n2.getA() == 0)
-                result.applyError(div(getAccuracy(n1), n2));
-            else {
-                Numerical n2_a = getAccuracy(n2);
-                Numerical temp_1 = add(mul(n1, n2_a), mul(n2, getAccuracy(n1)));
-                Numerical temp_2 = mul(n2, sub(n2, n2_a));
-                result.applyError(div(temp_1, temp_2));
-            }
-        }
-        return result;
-    }
-
     bool operator> (const Numerical& n1, const Numerical& n2) {
         //Judge from sign.
         if(n1.isPositive()) {
@@ -432,12 +431,17 @@ namespace Physica::Core {
         return !(n1 == n2);
     }
     //Return accuracy in class Numerical.
-    Numerical getAccuracy(const Numerical& n) {
+    Numerical Numerical::getAccuracy() const {
         auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
-        b[0] = n.getA();
-        return Numerical(b, 1, n.getPower() - n.getSize() + 1);
+        b[0] = a;
+        return Numerical(b, 1, power - getSize() + 1);
     }
-    //Add error to this and adjust this->length as well as this-> byte.
+    /*
+     * Add error to this and adjust this->length as well as this-> byte.
+     *
+     * Optimize:
+     * error is always non-zero, if(!error.isZero()) is unnecessary.
+     */
     Numerical& Numerical::applyError(const Numerical& error) {
         if(!error.isZero()) {
             int size = getSize();
@@ -451,13 +455,16 @@ namespace Physica::Core {
                     Numerical error_1(b, 1, power - size + 1);
                     error_1 = add(error_1, error);
                     size += temp;
+                    //Use (a += error_1.byte[error_1.getSize() - 1] + 1) for more conservative error estimate.
                     a += error_1.byte[error_1.getSize() - 1];
                 }
                 else
+                    //Use (a += error.byte[error.getSize() - 1] + 1) for more conservative error estimate.
                     a += error.byte[error.getSize() - 1];
             }
 
             if(a < copy_a) {
+                //Use (a = 2) for more conservative error estimate.
                 a = 1;
                 --size;
             }
@@ -465,10 +472,7 @@ namespace Physica::Core {
             if(size < 1) {
                 qWarning("Accumulated too many errors.");
                 power += 1 - size;
-                size = 1;
-                if(length < 0)
-                    size = -size;
-                length = size;
+                length = length < 0 ? -1 : 1;
                 return *this;
             }
 
@@ -478,9 +482,7 @@ namespace Physica::Core {
                 this->~Numerical();
                 byte = new_byte;
             }
-            if(length < 0)
-                size = -size;
-            length = size;
+            length = length < 0 ? -size : size;
         }
         return *this;
     }

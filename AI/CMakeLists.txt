@@ -6,7 +6,9 @@ include_directories(Header)
 add_library(Physica_AI SHARED ${SOURCES_AI})
 #############################################Options##############################################
 target_link_libraries(Physica_AI Qt5::Core)
-
-target_compile_options(Physica_AI PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
-        -O${OPTIMIZE_LEVEL}
-        >)
+#Qt::Core will pass wrong option -fPIC to nvcc, so we have to remove it.
+if(TARGET Qt5::Core)
+    get_property(core_options TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS)
+    string(REPLACE "-fPIC" "" new_core_options "${core_options}")
+    set_property(TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS ${new_core_options})
+endif()

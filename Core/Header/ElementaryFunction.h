@@ -9,6 +9,7 @@ namespace Physica::Core {
 
     Numerical randomNumerical();
     Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBound);
+    Numerical square(const Numerical& n);
     Numerical floor(const Numerical& n);
     Numerical ceil(const Numerical& n);
     Numerical reciprocal(const Numerical& n);

@@ -10,6 +10,3 @@ include_directories(Header)
 add_library(Physica_Gui SHARED ${SOURCES_GUI})
 #############################################Options##############################################
 target_link_libraries(Physica_Gui Physica_Interpreter Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Charts)
-target_compile_options(Physica_Gui PUBLIC $<$<COMPILE_LANGUAGE:CXX>:
-        -O${OPTIMIZE_LEVEL}
-        >)

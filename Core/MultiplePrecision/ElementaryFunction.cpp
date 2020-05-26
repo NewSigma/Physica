@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "CalcBasic.h"
+#include "Core/Header/Numerical.h"
 #include <climits>
 #include "Solve.h"
 
@@ -10,9 +10,38 @@ namespace Physica::Core {
     Numerical randomNumerical() {
         return Numerical(double(random()) / RAND_MAX);
     }
-//Return a real number lowerBound and upperBound.
+    //Return a real number lowerBound and upperBound.
     Numerical randomNumerical(const Numerical& lowerBound, const Numerical& upperBound) {
         return randomNumerical() * (upperBound - lowerBound) + lowerBound;
+    }
+    //Reference: GMP Doc BaseCase Multiplication
+    Numerical square(const Numerical& n) {
+        if(n == BasicConst::getInstance().get_1())
+            return Numerical(n);
+        else {
+            auto n_size = n.getSize();
+            //Estimate the ed of result first. we will calculate it accurately later.
+            auto length = 2 * n_size;
+            auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
+
+            for(int i = 0; i < n_size - 1; ++i)
+                byte[i + n_size] = mulAddArrByWord(byte + i + i + 1, n.byte + i + 1, n_size - i - 1, n.byte[i]);
+            //Shift count is known, possible to optimize the performance.
+            byteLeftShiftEq(byte, length, 1);
+
+            NumericalUnit high, low;
+            for(int i = 0; i < n_size; ++i) {
+                mulWordByWord(high, low, n.byte[i], n.byte[i]);
+                byte[2 * i] += low;
+                byte[2 * i + 1] += high;
+            }
+            auto power = n.power * 2 + 1;
+            if(high == 0) {
+                --power;
+                byte = reinterpret_cast<NumericalUnit*>(realloc(byte, (length - 1) * sizeof(NumericalUnit)));
+            }
+            return Numerical(byte, length, power);
+        }
     }
 
     Numerical floor(const Numerical& n) {
@@ -33,10 +62,10 @@ namespace Physica::Core {
     Numerical reciprocal(const Numerical& n) {
         return BasicConst::getInstance().get_1() / n;
     }
-/*
- * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
- * (sqrt(n + a) - sqrt(n)) for error.
- */
+    /*
+     * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
+     * (sqrt(n + a) - sqrt(n)) for error.
+     */
     Numerical sqrt_light(const Numerical& n) {
         if(n.isNegative())
             qFatal("Can not resolve the square root of a minus value.");
@@ -59,7 +88,7 @@ namespace Physica::Core {
         Numerical result = getOne();
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * BasicConst::getInstance().GlobalPrecision; ++i)
-            result = (result + div(copy_n, result)) >> 1U;
+            result = (result + Numerical::div(copy_n, result)) >> 1U;
         result.power += add_power;
         result.toUnitA();
 
@@ -69,9 +98,9 @@ namespace Physica::Core {
     Numerical sqrt(const Numerical& n) {
         Numerical result  = sqrt_light(n);
         if(n.getA() != 0) {
-            Numerical n_error = getMinimum(n);
+            Numerical n_error = n.getMinimum();
             if(n_error.isNegative())
-                n_error = getMaximum(n);
+                n_error = n.getMaximum();
             Numerical error = sqrt_light(n_error);
             error -= result;
             error.toAbs();
@@ -102,7 +131,8 @@ namespace Physica::Core {
         if(n == BasicConst::getInstance().get_1())
             return getZero();
         Numerical result = getZero();
-        Numerical temp_1 = sub(n, BasicConst::getInstance().get_1()) / add(n, BasicConst::getInstance().get_1());
+        Numerical temp_1 = Numerical::sub(n, BasicConst::getInstance().get_1())
+                           / Numerical::add(n, BasicConst::getInstance().get_1());
         Numerical copy_temp_1(temp_1);
         Numerical rank = getOne();
 
@@ -131,9 +161,9 @@ namespace Physica::Core {
     Numerical ln(const Numerical& n) {
         Numerical result = ln_light(n);
         if(n.getA() != 0) {
-            Numerical n_error = getMinimum(n);
+            Numerical n_error = n.getMinimum();
             if(n_error.isNegative())
-                n_error = getMaximum(n);
+                n_error = n.getMaximum();
             Numerical error = ln_light(n_error);
             error -= result;
             error.toAbs();
@@ -250,11 +280,11 @@ namespace Physica::Core {
     }
 
     Numerical arccos(const Numerical& n) {
-        return bisectionMethod(cos, n, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI(), BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
+        return Solve::bisectionMethod(cos, n, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI(), BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
     }
 
     Numerical arcsin(const Numerical& n) {
-        return bisectionMethod(sin, n, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2(), BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
+        return Solve::bisectionMethod(sin, n, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2(), BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
     }
 
     Numerical arctan(const Numerical& n) {

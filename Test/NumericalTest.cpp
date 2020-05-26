@@ -21,11 +21,15 @@ namespace Physica::Test {
             double d_b = d * engine();
             Numerical b(d_b);
 
-            double result = double(a + b);
-            if((d_a + d_b) == result) {
+            double_extract expect{d_a + d_b};
+            double_extract result{double(a + b)};
+            if(expect.value != result.value) {
                 std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\t"
-                << (d_a + d_b) << " != " << result << '\n' << std::setprecision(6);
+                std::cout << "Performing add test " << "--Failed\n"
+                        << "low:\t" << expect.structure.low << '\t' << result.structure.low
+                        << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
+                        << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
+                        << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
                 return;
             }
         }
@@ -45,11 +49,15 @@ namespace Physica::Test {
             double d_b = d * engine();
             Numerical b(d_b);
 
-            double result = double(a - b);
-            if((d_a - d_b) == result) {
+            double_extract expect{d_a - d_b};
+            double_extract result{double(a - b)};
+            if(expect.value != result.value) {
                 std::cout << "Performing add test " << d_a << " - " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\t"
-                          << (d_a - d_b) << " != " << result << '\n' << std::setprecision(6);
+                std::cout << "Performing add test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
+                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
+                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
+                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
                 return;
             }
         }
@@ -69,11 +77,15 @@ namespace Physica::Test {
             double d_b = d * engine();
             Numerical b(d_b);
 
-            double result = double(a * b);
-            if((d_a * d_b) == result) {
+            double_extract expect{d_a * d_b};
+            double_extract result{double(a * b)};
+            if(expect.value != result.value) {
                 std::cout << "Performing add test " << d_a << " * " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\t"
-                          << (d_a * d_b) << " != " << result << '\n' << std::setprecision(6);
+                std::cout << "Performing add test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
+                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
+                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
+                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
                 return;
             }
         }
@@ -97,11 +109,15 @@ namespace Physica::Test {
             }
             Numerical b(d_b);
 
-            double result = double(a / b);
-            if((d_a / d_b) == result) {
+            double_extract expect{d_a / d_b};
+            double_extract result{double(a / b)};
+            if(expect.value != result.value) {
                 std::cout << "Performing add test " << d_a << " / " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\t"
-                          << (d_a / d_b) << " != " << result << '\n' << std::setprecision(6);
+                std::cout << "Performing add test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
+                          << "high:\t" << expect.structure.high << '\t' << result.structure.high
+                          << "exp:\t" << expect.structure.exp << '\t' << result.structure.exp
+                          << "sign:\t" << expect.structure.sign << '\t' << result.structure.sign;
                 return;
             }
         }

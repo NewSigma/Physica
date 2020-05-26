@@ -1,17 +1,29 @@
-#ifndef _Physica_C_LinearEquations_H
-#define _Physica_C_LinearEquations_H
+/*
+ * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
+ */
+#ifndef PHYSICA_LINEAREQUATIONS_H
+#define PHYSICA_LINEAREQUATIONS_H
+
+#include "Matrix.h"
 
 namespace Physica::Core {
-    class LinearEquations
-    {
-    private:
-        int rank;
-        double* coefficient;
-        double* constant;
-
+    class LinearEquations {
     public:
-        LinearEquations(int rank, double* coefficient, double* constant);
-        double* SolveCrammer();
+        enum LinearEquationsMethod {
+            GaussJordanPartial,
+            GaussJordanComplete,
+            GaussEliminationPartial,
+            GaussEliminationComplete,
+            LUDecomposition
+        };
+    private:
+        Matrix& matrix;
+    public:
+        explicit LinearEquations(Matrix*& m) noexcept;
+        explicit LinearEquations(Matrix*&& m) noexcept;
+        ~LinearEquations();
+
+        const Vector& solve(LinearEquationsMethod method);
     };
 }
 

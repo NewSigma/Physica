@@ -2,36 +2,35 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCore/qlogging.h>
+#include <cstring>
 #include "Vector.h"
 #include "Numerical.h"
 
 namespace Physica::Core {
-    Vector::Vector() : numbers(nullptr), length(0) {}
+    Vector::Vector() : numbers(nullptr), length(0), capacity(0) {}
 
-    Vector::Vector(size_t length) : numbers(new Numerical[length]), length(length) {}
+    Vector::Vector(size_t length) : numbers(new Numerical[length]), length(0), capacity(length) {}
     //Convenience function to create a 2D Vector.
-    Vector::Vector(const Numerical& n1, const Numerical& n2) : numbers(new Numerical[2]{n1, n2}), length(2) {}
+    Vector::Vector(const Numerical& n1, const Numerical& n2)
+            : numbers(new Numerical[2]{n1, n2}), length(2), capacity(2) {}
     //Convenience function to create a 3D Vector.
-    Vector::Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3) : numbers(new Numerical[3]{n1, n2, n3}), length(3) {}
+    Vector::Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3)
+            : numbers(new Numerical[3]{n1, n2, n3}), length(3), capacity(3) {}
 
-    Vector::Vector(Numerical*& n, size_t length) : numbers(n), length(length) {
+    Vector::Vector(Numerical*& n, size_t length) : numbers(n), length(length), capacity(length) {
         n = nullptr;
     }
 
-    Vector::Vector(Numerical*&& n, size_t length) : numbers(n), length(length) {}
-    //Create a Vector whose angular between x-axis and itself is arg.
-    Vector::Vector(const Numerical& arg) : Vector(cos(arg), sin(arg)) {}
+    Vector::Vector(Numerical*&& n, size_t length) : numbers(n), length(length), capacity(length) {}
 
     Vector::Vector(const Vector& vec) : Vector(vec.length)  {
         for(size_t i = 0; i < vec.length; ++i)
             numbers[i] = vec[i];
     }
 
-    Vector::Vector(Vector&& vec) noexcept : numbers(vec.numbers), length(vec.length)  {
+    Vector::Vector(Vector&& vec) noexcept : numbers(vec.numbers), length(vec.length), capacity(vec.capacity)  {
         vec.numbers = nullptr;
     }
-
-    Vector::Vector(const Vector* vector) : Vector(*vector) {}
 
     Vector::~Vector() {
         delete[] numbers;
@@ -40,7 +39,7 @@ namespace Physica::Core {
     Numerical Vector::toNorm() const {
         Numerical norm = getZero();
         for(size_t i = 0; i < length; ++i)
-            norm += numbers[i] * numbers[i];
+            norm += square(numbers[i]);
         return sqrt(norm);
     }
 
@@ -52,12 +51,96 @@ namespace Physica::Core {
             numbers[i] /= norm;
     }
 
+    void Vector::resize(size_t size) {
+        auto arr = new Numerical[size];
+        length = size > length ? length : size;
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = std::move(numbers[i]);
+        delete[] numbers;
+        numbers = arr;
+    }
+
+    void Vector::squeeze() {
+        if(length < capacity) {
+            auto arr = new Numerical[length];
+            for(size_t i = 0; i < length; ++i)
+                arr[i] = std::move(numbers[i]);
+            delete[] numbers;
+            numbers = arr;
+            capacity = length;
+        }
+    }
+
+    void Vector::append(Numerical n) noexcept {
+        const bool doAlloc = length == capacity;
+        auto arr = doAlloc ? new Numerical[length + 1] : numbers;
+        if(doAlloc) {
+            for(size_t i = 0; i < length; ++i)
+                arr[i] = std::move(numbers[i]);
+            delete[] numbers;
+            ++capacity;
+        }
+        arr[length] = std::move(n);
+        numbers = arr;
+        ++length;
+    }
+
+    void Vector::append(Vector v) noexcept {
+        const auto new_length = length + v.length;
+        const bool doAlloc = new_length > capacity;
+        auto new_arr = doAlloc ? new Numerical[new_length] : numbers;
+        if(doAlloc) {
+            for(size_t i = 0; i < length; ++i)
+                new_arr[i] = std::move(numbers[i]);
+            delete[] numbers;
+        }
+        for(size_t i = length; i < new_length; ++i)
+            new_arr[i] = std::move(v.numbers[i - length]);
+        numbers = new_arr;
+        length = new_length;
+    }
+
+    Vector Vector::cut(size_t from) {
+        auto new_length = length - from;
+        length = from;
+        auto arr = new Numerical[new_length];
+        for(size_t i = 0; from < length; ++from, ++i)
+            arr[i] = std::move(numbers[from]);
+        return Vector(arr, new_length);
+    }
+
+    Numerical Vector::cutLast() {
+        --length;
+        return Numerical(std::move(numbers[length - 1]));
+    }
+    /*
+     * Return the sub vector of current vector. From is included and to is excluded.
+     */
+    Vector Vector::subVector(size_t from, size_t to) {
+        //Discard __restrict
+        Vector temp((Numerical*)numbers + from, to - from);
+        Vector result(temp);
+        temp.numbers = nullptr;
+        return result;
+    }
+
+    void Vector::swap(Vector& v) noexcept {
+        auto temp = numbers;
+        numbers = v.numbers;
+        v.numbers = temp;
+        auto temp_size = length;
+        length = v.length;
+        v.length = temp_size;
+        temp_size = capacity;
+        capacity = v.capacity;
+        v.capacity = temp_size;
+    }
+
     std::ostream& operator<<(std::ostream& os, const Vector& n) {
         os << '(';
-        for(size_t i = 0; i < n.length - 1; ++i) {
-            os << n[i] << ", ";
-        }
-        os << n[n.length - 1] << ')';
+        for(size_t i = 0; i < n.length - 1; ++i)
+            os << double(n[i]) << ", ";
+        os << double(n[n.length - 1]) << ')';
         return os;
     }
 
@@ -66,7 +149,8 @@ namespace Physica::Core {
             return *this;
         this->~Vector();
         length = v.length;
-        numbers = new Numerical[length];
+        capacity = v.capacity;
+        numbers = new Numerical[capacity];
         for(size_t i = 0; i < length; ++i)
             numbers[i] = v[i];
         return *this;
@@ -76,36 +160,9 @@ namespace Physica::Core {
         this->~Vector();
         numbers = v.numbers;
         length = v.length;
+        capacity = v.capacity;
         v.numbers = nullptr;
         return *this;
-    }
-
-    Vector Vector::operator+(const Vector& v) const {
-        auto arr = new Numerical[length];
-        for(size_t i = 0; i < length; ++i)
-            arr[i] = numbers[i] + v.numbers[i];
-        return Vector(arr, length);
-    }
-
-    Vector Vector::operator-(const Vector& v) const {
-        auto arr = new Numerical[length];
-        for(size_t i = 0; i < length; ++i)
-            arr[i] = numbers[i] - v.numbers[i];
-        return Vector(arr, length);
-    }
-
-    Vector Vector::operator*(const Numerical& n) const {
-        auto arr = new Numerical[length];
-        for(size_t i = 0; i < length; ++i)
-            arr[i] = numbers[i] * n;
-        return Vector(arr, length);
-    }
-
-    Numerical Vector::operator*(const Vector& v) const {
-        Numerical result = getZero();
-        for(size_t i = 0; i < length; ++i)
-            result += numbers[i] * v.numbers[i];
-        return result;
     }
     //Here the operator/ means cross product.
     Vector Vector::operator/(const Vector& v) const {
@@ -129,22 +186,6 @@ namespace Physica::Core {
         qFatal("Can not resolve the cross product of high dimensional Vector.");
     }
 
-    Vector Vector::operator-() const {
-        auto arr = new Numerical[length];
-        for(size_t i = 0; i < length; ++i)
-            arr[i] = -numbers[i];
-        return Vector(arr, length);
-    }
-
-    bool Vector::operator==(const Vector& v) const {
-        if(length != v.getLength())
-            return false;
-        for(size_t i = 0; i < length; ++i)
-            if(numbers[i] != v.numbers[i])
-                return false;
-        return true;
-    }
-
     bool Vector::isZeroVector() const {
         if(length == 0)
             return false;
@@ -163,6 +204,88 @@ namespace Physica::Core {
         auto arr = new Numerical[length];
         for(size_t i = 0; i < length; ++i)
             arr[i] = randomNumerical();
+        return Vector(arr, length);
+    }
+
+    Vector simplyMultiply(const Vector& v1, const Vector& v2) {
+        const auto length = v1.getLength();
+        Vector result(length);
+        for(size_t i = 0; i < length; ++i)
+            result[i] = v1[i] * v2[i];
+        return result;
+    }
+
+    Vector operator-(const Vector& v) {
+        const auto length = v.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = -v[i];
+        return Vector(arr, length);
+    }
+
+    bool operator==(const Vector& v1, const Vector& v2) {
+        const auto length = v1.getLength();
+        if(length != v2.getLength())
+            return false;
+        for(size_t i = 0; i < length; ++i)
+            if(v1[i] != v2[i])
+                return false;
+        return true;
+    }
+
+    Vector operator+(const Vector& v1, const Vector& v2) {
+        const auto length = v1.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v1[i] + v2[i];
+        return Vector(arr, length);
+    }
+
+    Vector operator-(const Vector& v1, const Vector& v2) {
+        const auto length = v1.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v1[i] - v2[i];
+        return Vector(arr, length);
+    }
+
+    Numerical operator*(const Vector& v1, const Vector& v2) {
+        const auto length = v1.getLength();
+        Numerical result = getZero();
+        for(size_t i = 0; i < length; ++i)
+            result += v1[i] * v2[i];
+        return result;
+    }
+
+    Vector operator+(const Vector& v, const Numerical& n) {
+        const auto length = v.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v[i] + n;
+        return Vector(arr, length);
+    }
+
+    Vector operator-(const Vector& v, const Numerical& n) {
+        const auto length = v.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v[i] - n;
+        return Vector(arr, length);
+    }
+
+    Vector operator*(const Vector& v, const Numerical& n) {
+        const auto length = v.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v[i] * n;
+        return Vector(arr, length);
+    }
+
+    Vector operator/(const Vector& v, const Numerical& n) {
+        const auto length = v.getLength();
+        auto arr = new Numerical[length];
+        for(size_t i = 0; i < length; ++i)
+            arr[i] = v[i] / n;
         return Vector(arr, length);
     }
 ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

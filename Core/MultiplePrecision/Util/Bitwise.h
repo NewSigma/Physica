@@ -9,11 +9,21 @@ namespace Physica::Core {
     inline unsigned int countLeadingZeros(NumericalUnit n) {
         if(n == 0)
             return NumericalUnitWidth;
-        int count = 0;
+    #if UseASM
+        NumericalUnit count;
+        asm volatile (
+                "bsrq %1, %0\n\t"
+                : "=r" (count)
+                : "rm" (n)
+        );
+        (count) ^= 63U;
+    #else
+        NumericalUnit count = 0U;
         while((n & numericalUnitHighestBitMask) == 0) {
             ++count;
             n <<= 1U;
         }
+    #endif
         return count;
     }
 }

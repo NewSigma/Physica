@@ -15,11 +15,11 @@ namespace Physica::Core {
     #if UseASM
         USE_IN_ASM(n1);
         USE_IN_ASM(n2);
-        asm (
+        asm volatile (
                 "movq %%rsi, %%rax\n\t"
                 "mulq %%rdi\n\t"
                 "movq %%rdx, %%rax\n\t"
-                ::: "%rax", "rdx"
+                ::: "%rax", "%rdx"
         );
     #else
         unsigned long n1_low = n1 & numericalUnitLowMask;
@@ -47,12 +47,13 @@ namespace Physica::Core {
     #if UseASM
         USE_IN_ASM(n1);
         USE_IN_ASM(n2);
-        asm (
+        asm volatile (
                 "movq %%rcx, %%rax\n\t"
                 "mulq %%rdx\n\t"
                 "movq %%rax, %%rsi\n\t"
                 "movq %%rdx, %%rdi\n\t"
                 : "=d"(high), "=a"(low)
+                :: "%rdi", "%rsi"
         );
     #else
         NumericalUnit n1_low = n1 & numericalUnitLowMask;
