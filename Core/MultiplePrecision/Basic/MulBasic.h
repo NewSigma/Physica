@@ -13,14 +13,25 @@ namespace Physica::Core {
      */
     inline NumericalUnit mulWordByWordHigh(NumericalUnit n1, NumericalUnit n2) {
     #if UseASM
-        USE_IN_ASM(n1);
-        USE_IN_ASM(n2);
-        asm volatile (
-                "movq %%rsi, %%rax\n\t"
-                "mulq %%rdi\n\t"
-                "movq %%rdx, %%rax\n\t"
-                ::: "%rax", "%rdx"
-        );
+        NumericalUnit result;
+        #ifdef PHYSICA_64BIT
+            asm (
+                    "movq %1, %%rax\n\t"
+                    "mulq %2"
+                    : "=d"(result)
+                    : "rm"(n1), "rm"(n2)
+                    : "%rax"
+            );
+        #else
+            asm (
+                    "movl %1, %%rax\n\t"
+                    "mull %2"
+                    : "=d"(result)
+                    : "rm"(n1), "rm"(n2)
+                    : "%rax"
+            );
+        #endif
+        return result;
     #else
         unsigned long n1_low = n1 & numericalUnitLowMask;
         unsigned long n1_high = n1 >> (64U / 2U);
@@ -45,16 +56,21 @@ namespace Physica::Core {
      */
     inline void mulWordByWord(NumericalUnit& high, NumericalUnit& low, NumericalUnit n1, NumericalUnit n2) {
     #if UseASM
-        USE_IN_ASM(n1);
-        USE_IN_ASM(n2);
-        asm volatile (
-                "movq %%rcx, %%rax\n\t"
-                "mulq %%rdx\n\t"
-                "movq %%rax, %%rsi\n\t"
-                "movq %%rdx, %%rdi\n\t"
-                : "=d"(high), "=a"(low)
-                :: "%rdi", "%rsi"
-        );
+        #ifdef PHYSICA_64BIT
+            asm (
+                    "movq %2, %%rax\n\t"
+                    "mulq %3"
+                    : "=d"(high), "=a"(low)
+                    : "rm"(n1), "rm"(n2)
+            );
+        #else
+            asm (
+                    "movl %2, %%rax\n\t"
+                    "mull %3"
+                    : "=d"(high), "=a"(low)
+                    : "rm"(n1), "rm"(n2)
+            );
+        #endif
     #else
         NumericalUnit n1_low = n1 & numericalUnitLowMask;
         NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2U);

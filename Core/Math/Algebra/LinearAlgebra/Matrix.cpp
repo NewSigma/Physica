@@ -103,6 +103,8 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Matrix> operator+(const Matrix& m1, const Matrix& m2) {
+        Q_ASSERT(m1.row() == m2.row());
+        Q_ASSERT(m1.column() == m2.column());
         const auto length = m1.getLength();
         auto new_vectors = new Vector[length];
         for(size_t i = 0; i < length; ++i)
@@ -114,6 +116,8 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Matrix> operator-(const Matrix& m1, const Matrix& m2) {
+        Q_ASSERT(m1.row() == m2.row());
+        Q_ASSERT(m1.column() == m2.column());
         const auto length = m1.getLength();
         auto new_vectors = new Vector[length];
         for(size_t i = 0; i < length; ++i)
@@ -136,6 +140,7 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Matrix> operator*(const Matrix& m1, const Matrix& m2) {
+        Q_ASSERT(m1.column() == m2.row());
         const auto result_row = m1.row();
         const auto result_column = m2.column();
         const auto m1_column = m1.column();

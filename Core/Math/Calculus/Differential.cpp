@@ -1,18 +1,23 @@
+#include <Core/Header/Differential.h>
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
-    Numerical D_double_point(Numerical func(const Numerical&), const Numerical& x0) {
-        Numerical x1 = x0 + BasicConst::getInstance().getStepSize();
-        Numerical x2 = x0 - BasicConst::getInstance().getStepSize();
-        Numerical temp = func(x2) - func(x1);
-        return temp / (x2 - x1);
-    }
+    Differential::Differential(FunctionTree func, Numerical at, Numerical stepSize)
+            : func(std::move(func)), at(std::move(at)), stepSize(std::move(stepSize)) {}
 
-    Numerical D_right(Numerical func(const Numerical&), const Numerical& x0) {
-        return (func(x0 + BasicConst::getInstance().getStepSize()) - func(x0)) / BasicConst::getInstance().getStepSize();
-    }
-
-    Numerical D_left(Numerical func(const Numerical&), const Numerical& x0) {
-        return (func(x0) - func(x0 - BasicConst::getInstance().getStepSize())) / BasicConst::getInstance().getStepSize();
+    Numerical Differential::solve(DifferentialMethod method) const {
+        Numerical result;
+        switch(method) {
+            case DoublePoint:
+                result = (func(at + stepSize) - func(at - stepSize)) / (stepSize << 1);
+                break;
+            case Forward:
+                result = (func(at + stepSize) - func(at)) / stepSize;
+                break;
+            case Backward:
+                result = (func(at) - func(at - stepSize)) / stepSize;
+                break;
+        }
+        return result;
     }
 }

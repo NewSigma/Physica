@@ -29,8 +29,6 @@ namespace Physica::Core {
         n.byte = nullptr;
     }
 
-    Numerical::Numerical(const Numerical* n) noexcept : Numerical(*n) {}
-
     Numerical::Numerical(SignedNumericalUnit unit, NumericalUnit a) noexcept
             : byte(reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)))), power(0), a(a) {
         if(unit < 0) {

@@ -1,40 +1,56 @@
+#include <Core/Header/Integrate.h>
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
-    Numerical rectangular(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-        Numerical deltaY = getZero();
+    Integrate::Integrate(FunctionTree func, Numerical from, Numerical to, Numerical stepSize)
+            : func(std::move(func)), from(std::move(from)), to(std::move(to)), stepSize(std::move(stepSize)) {}
 
-        Numerical point(x0);
-        while(point < x1) {
-            Numerical temp = func(point);
-            deltaY += temp;
-            point += BasicConst::getInstance().getStepSize();
+    Numerical Integrate::solve(IntegrateMethod method) const {
+        Numerical result(BasicConst::getInstance().get_0());
+        switch(method) {
+            case Rectangular: {
+                Numerical start(from);
+                while(start < to) {
+                    result += func(start);
+                    start += stepSize;
+                }
+                result *= stepSize;
+            }
+                break;
+            case Ladder: {
+                result += ((func(from) + func(to)) >> 1);
+                Numerical start(from + stepSize);
+                while(start < to) {
+                    result += func(start);
+                    start += stepSize;
+                }
+                result *= stepSize;
+            }
+                break;
+            case Simpson: {
+                result += func(from) + func(to);
+                Numerical odd(BasicConst::getInstance().get_0());
+                Numerical even(BasicConst::getInstance().get_0());
+                bool b = true;
+                Numerical start = from + stepSize;
+                while(start < to) {
+                    Numerical& toChange = b ? odd : even;
+                    b = !b;
+                    toChange += func(start);
+                    start += stepSize;
+                }
+                odd <<= 2;
+                even <<= 1;
+                result += odd + even;
+                result *= stepSize;
+                result /= BasicConst::getInstance().get_3();
+            }
+                break;
+            case Simpson_3_8:
+                break;
+            case Bode:
+                break;
         }
-        return deltaY * BasicConst::getInstance().getStepSize();
-    }
-
-    Numerical ladder(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-        Numerical deltaY = (x0 + x1) / BasicConst::getInstance().get_2();
-        Numerical point = x0 + BasicConst::getInstance().getStepSize();
-        while(point < x1) {
-            deltaY += func(point);
-            point += BasicConst::getInstance().getStepSize();
-        }
-        return deltaY * BasicConst::getInstance().getStepSize();
-    }
-
-    Numerical simpson(Numerical func(const Numerical&), const Numerical& x0, const Numerical& x1) {
-        Numerical temp0 = x0 + x1, temp1 = getZero(), temp2 = getZero();
-        bool odd = true;
-        Numerical point = x0 + BasicConst::getInstance().getStepSize();
-        while(point < x1) {
-            if(odd)
-                temp1 += func(point);
-            else
-                temp2 += func(point);
-            odd = !odd;
-            point += BasicConst::getInstance().getStepSize();
-        }
-        return (temp0 + temp1 + BasicConst::getInstance().get_4() + temp2 * BasicConst::getInstance().get_2()) * BasicConst::getInstance().getStepSize() / BasicConst::getInstance().get_3();
+        return result;
     }
 }

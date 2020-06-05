@@ -4,20 +4,19 @@
 #ifndef PHYSICA_FUNCTION_H
 #define PHYSICA_FUNCTION_H
 
-#include "Numerical.h"
+#include "Vector.h"
+#include "FunctionTree.h"
 
 namespace Physica::Core {
     class Function {
-        //A function is a tree.
-        Function* left;
-        Function* right;
-        void* func;
-        Numerical* c;
+        FunctionTree tree;
+        FunctionTree* constantNodes;
+        size_t length;
     public:
-        Function(Numerical (*func)(const Numerical&, const Numerical&), Function* left, Function* right);
-        explicit Function(const Numerical& n);
+        Function(FunctionTree tree, size_t variableCount);
         ~Function();
-        Numerical operator()(const Numerical& n);
+
+        [[nodiscard]] const FunctionTree& getConstNode(Numerical n, size_t index) const;
     };
 }
 
