@@ -5,10 +5,12 @@ namespace Physica::Core {
     class Numerical;
 
     class Solve {
-        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, const Numerical& x1, const Numerical& x2);
-
     public:
-        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n, const Numerical& x_left, const Numerical& x_right, const Numerical& y_left, const Numerical& y2);
+        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n
+                , const Numerical& x1, const Numerical& x2);
+        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n
+                , const Numerical& x_left, const Numerical& x_right
+                , const Numerical& y_left, const Numerical& y2);
     };
 }
 

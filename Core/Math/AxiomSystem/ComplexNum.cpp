@@ -39,7 +39,10 @@ namespace Physica::Core {
     }
 
     Vector ComplexNum::toVector() const {
-        return Vector(new Numerical[2]{*real, *imagine}, 2);
+        Vector result(2);
+        result.grow(*real);
+        result.grow(*imagine);
+        return result;
     }
 
     AbstractNum::NumberType ComplexNum::getType() const noexcept {
@@ -56,8 +59,8 @@ namespace Physica::Core {
         if(this == &n)
             return *this;
         this->~ComplexNum();
-        real = new Numerical(n.real);
-        imagine = new Numerical(n.imagine);
+        real = new Numerical(*n.real);
+        imagine = new Numerical(*n.imagine);
         return *this;
     }
 

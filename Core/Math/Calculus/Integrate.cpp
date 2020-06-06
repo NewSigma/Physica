@@ -2,10 +2,10 @@
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
-    Integrate::Integrate(FunctionTree func, Numerical from, Numerical to, Numerical stepSize)
+    Integrate::Integrate(Function func, Numerical from, Numerical to, Numerical stepSize)
             : func(std::move(func)), from(std::move(from)), to(std::move(to)), stepSize(std::move(stepSize)) {}
 
-    Numerical Integrate::solve(IntegrateMethod method) const {
+    Numerical Integrate::solve(IntegrateMethod method) {
         Numerical result(BasicConst::getInstance().get_0());
         switch(method) {
             case Rectangular: {

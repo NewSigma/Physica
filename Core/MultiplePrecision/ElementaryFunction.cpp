@@ -21,37 +21,43 @@ namespace Physica::Core {
         else {
             auto n_size = n.getSize();
             //Estimate the ed of result first. we will calculate it accurately later.
-            auto length = 2 * n_size;
-            auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
+            const auto length = 2 * n_size;
+            Numerical result(length, n.power * 2 + 1);
 
             for(int i = 0; i < n_size - 1; ++i)
-                byte[i + n_size] = mulAddArrByWord(byte + i + i + 1, n.byte + i + 1, n_size - i - 1, n.byte[i]);
+                result[i + n_size] = mulAddArrByWord(result.byte + i + i + 1
+                        , n.byte + i + 1, n_size - i - 1, n.byte[i]);
             //Shift count is known, possible to optimize the performance.
-            byteLeftShiftEq(byte, length, 1);
+            byteLeftShiftEq(result.byte, length, 1);
 
             NumericalUnit high, low;
             for(int i = 0; i < n_size; ++i) {
                 mulWordByWord(high, low, n.byte[i], n.byte[i]);
-                byte[2 * i] += low;
-                byte[2 * i + 1] += high;
+                result[2 * i] += low;
+                result[2 * i + 1] += high;
             }
-            auto power = n.power * 2 + 1;
+
             if(high == 0) {
-                --power;
-                byte = reinterpret_cast<NumericalUnit*>(realloc(byte, (length - 1) * sizeof(NumericalUnit)));
+                --result.power;
+                result.byte =
+                        reinterpret_cast<NumericalUnit*>(realloc(result.byte, (length - 1) * sizeof(NumericalUnit)));
             }
-            return Numerical(byte, length, power);
+            return result;
         }
     }
 
     Numerical floor(const Numerical& n) {
         if(n.isInteger())
             return Numerical(n);
-        int length = n.getSize() > (n.getPower() + 1) ? (n.getPower() + 1) : n.getSize();
-        auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        const auto size = n.getSize();
+        const auto power = n.getPower();
+        const auto power_1 = power + 1;
+        auto length = size > power_1 ? power_1 : size;
+        length = n.isNegative() ? -length : length;
+        Numerical result(length, power);
         for(int i = 0; i < length; ++i)
-            byte[i] = n[i];
-        return Numerical(byte, length, n.getPower());
+            result[i] = n[i];
+        return result;
     }
 
     Numerical ceil(const Numerical& n) {

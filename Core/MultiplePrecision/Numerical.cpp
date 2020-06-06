@@ -8,24 +8,25 @@
 
 namespace Physica::Core {
     ////////////////////////////////Numerical////////////////////////////////
-    Numerical::Numerical() noexcept : Numerical(nullptr, 0, 0) {}
+    Numerical::Numerical() noexcept : byte(nullptr), length(0), power(0), a(0) {}
 
-    Numerical::Numerical(NumericalUnit*& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {
-        //The ownership of byte is given to Numerical and make byte null in case the user delete it later.
-        byte = nullptr;
-    }
-
-    Numerical::Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a) noexcept : byte(byte), length(length), power(power), a(a) {
-        //There is no need to use this because byte is a rvalue
-        //byte = nullptr;
-    }
+    Numerical::Numerical(int length, int power, NumericalUnit a) noexcept
+            : byte(reinterpret_cast<NumericalUnit*>(malloc(abs(length) * sizeof(NumericalUnit))))
+            , length(length), power(power), a(a) {}
+    /*
+     * byte must be allocated by malloc().
+     * It is declared to be protected to avoid incorrect use.
+     */
+    Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a)
+            : byte(byte), length(length), power(power), a(a) {}
 
     Numerical::Numerical(const Numerical& n) noexcept
-            : Numerical(reinterpret_cast<NumericalUnit*>(malloc(abs(n.length) * sizeof(NumericalUnit))), n.length, n.power, n.a) {
+            : byte(reinterpret_cast<NumericalUnit*>(malloc(n.getSize() * sizeof(NumericalUnit))))
+            , length(n.length), power(n.power), a(n.a) {
         memcpy(byte, n.byte, getSize() * sizeof(NumericalUnit));
     }
 
-    Numerical::Numerical(Numerical&& n) noexcept : Numerical(reinterpret_cast<NumericalUnit*>(n.byte), n.length, n.power, n.a) {
+    Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), power(n.power), a(n.a) {
         n.byte = nullptr;
     }
 
@@ -275,50 +276,48 @@ namespace Physica::Core {
     //FIXME a is not accurate
     Numerical Numerical::operator<<(int bits) const {
         if(bits == 0)
-            return Numerical(this);
+            return Numerical(*this);
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
         const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * NumericalUnitWidth;
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
-        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
 
-        new_byte[0] = 0;
+        Numerical result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry, a);
+        result[0] = 0;
         for(int i = 0; i < size - 1; ++i) {
-            new_byte[i] |= byte[i] << remainder;
-            new_byte[i + 1] = byte[i] >> (NumericalUnitWidth - remainder);
+            result[i] |= byte[i] << remainder;
+            result[i + 1] = byte[i] >> (NumericalUnitWidth - remainder);
         }
-        new_byte[size - 1] |= byte[size - 1] << remainder;
+        result[size - 1] |= byte[size - 1] << remainder;
         if(carry)
-            new_byte[size] = byte[size - 1] >> (NumericalUnitWidth - remainder);
+            result[size] = byte[size - 1] >> (NumericalUnitWidth - remainder);
 
-        return Numerical(new_byte, length >= 0 ? (size + carry) : -(size + carry)
-                , power + quotient + carry, a);
+        return result;
     }
     //FIXME a is not accurate
     Numerical Numerical::operator>>(int bits) const {
         if(bits == 0)
-            return Numerical(this);
+            return Numerical(*this);
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
         const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * NumericalUnitWidth;
         const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < NumericalUnitWidth;
-        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc((size + carry) * sizeof(NumericalUnit)));
 
+        Numerical result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1, a);
         if(carry)
-            new_byte[size] = byte[size - 1] >> remainder;
+            result[size] = byte[size - 1] >> remainder;
 
         for(int i = size - 1; i > 0; --i) {
-            new_byte[i] = byte[i] << (NumericalUnitWidth - remainder);
-            new_byte[i] |= byte[i - 1] >> remainder;
+            result[i] = byte[i] << (NumericalUnitWidth - remainder);
+            result[i] |= byte[i - 1] >> remainder;
         }
-        new_byte[0] = byte[0] << (NumericalUnitWidth - remainder);
+        result[0] = byte[0] << (NumericalUnitWidth - remainder);
 
-        return Numerical(new_byte, length >= 0 ? (size + carry) : -(size + carry)
-                , power - quotient + carry - 1, a);
+        return result;
     }
 
     Numerical& Numerical::operator= (const Numerical& n) {
@@ -351,10 +350,9 @@ namespace Physica::Core {
     }
 
     Numerical Numerical::operator-() const {
-        size_t bytes = getSize() * sizeof(NumericalUnit);
-        auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(bytes));
-        mempcpy(new_byte, byte, bytes);
-        return Numerical(new_byte, -length, power, a);
+        Numerical result(-length, power, a);
+        memcpy(result.byte, byte, getSize() * sizeof(NumericalUnit));
+        return result;
     }
 
     bool operator> (const Numerical& n1, const Numerical& n2) {
@@ -430,9 +428,9 @@ namespace Physica::Core {
     }
     //Return accuracy in class Numerical.
     Numerical Numerical::getAccuracy() const {
-        auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
-        b[0] = a;
-        return Numerical(b, 1, power - getSize() + 1);
+        Numerical result(1, power - getSize() + 1);
+        result[0] = a;
+        return result;
     }
     /*
      * Add error to this and adjust this->length as well as this-> byte.
@@ -448,10 +446,7 @@ namespace Physica::Core {
             NumericalUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
-                    auto b = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
-                    b[0] = a;
-                    Numerical error_1(b, 1, power - size + 1);
-                    error_1 = add(error_1, error);
+                    auto error_1 = add(getAccuracy(), error);
                     size += temp;
                     //Use (a += error_1.byte[error_1.getSize() - 1] + 1) for more conservative error estimate.
                     a += error_1.byte[error_1.getSize() - 1];

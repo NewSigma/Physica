@@ -13,13 +13,13 @@ namespace Physica::Core {
      */
     BasicConst::BasicConst() : GlobalPrecision(4), MaxPower(16) {
         plotPoints = new Numerical(static_cast<SignedNumericalUnit>(20));
-        auto byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-        byte[0] = 1;
-        expectedRelativeError = new Numerical(byte, 1, 1 - GlobalPrecision);
-        byte = reinterpret_cast<unsigned long*>(malloc(sizeof(long)));
-        byte[0] = 1;
+        auto temp = new Numerical(1, 1 - GlobalPrecision);
+        (*temp)[0] = 1;
+        expectedRelativeError = temp;
+        temp = new Numerical(1, - GlobalPrecision / 2);
+        (*temp)[0] = 1;
         //Value (- GlobalPrecision / 2) still need a proof.
-        stepSize = new Numerical(byte, 1, - GlobalPrecision / 2);
+        stepSize = temp;
         R_MAX = new Numerical(static_cast<SignedNumericalUnit>(2147483647));
         _0 = new Numerical(static_cast<SignedNumericalUnit>(0));
         _1 = new Numerical(static_cast<SignedNumericalUnit>(1));
@@ -116,14 +116,14 @@ namespace Physica::Core {
         int goal = 1;
         while(goal < precision) {
             Numerical y(a);
-            a = (a + b) >> 1U;
+            a = (a + b) >> 1;
             b = sqrt(b * y);
             y -= a;
             c -= y * y * x;
             x *= BasicConst::getInstance().get_2();
             goal *= 2;
         }
-        a = (a + b) >> 1U;
+        a = (a + b) >> 1;
         return a * a / c;
     }
 }

@@ -31,8 +31,7 @@ namespace Physica::Core {
         NumericalUnit a;
     public:
         Numerical() noexcept;
-        Numerical(NumericalUnit*& byte, int length, int power, NumericalUnit a = 0) noexcept;
-        Numerical(NumericalUnit*&& byte, int length, int power, NumericalUnit a = 0) noexcept;
+        Numerical(int length, int power, NumericalUnit a = 0) noexcept;
         Numerical(const Numerical& n) noexcept;
         Numerical(Numerical&& n) noexcept;
         explicit Numerical(SignedNumericalUnit unit, NumericalUnit a = 0) noexcept;
@@ -79,6 +78,7 @@ namespace Physica::Core {
         [[nodiscard]] Numerical getMaximum() const { return Numerical::add(*this, getAccuracy()).clearA(); }
         [[nodiscard]] Numerical getMinimum() const { return Numerical::sub(*this, getAccuracy()).clearA(); }
     protected:
+        Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0);
         inline static Numerical add (const Numerical& n1, const Numerical& n2);
         inline static Numerical sub (const Numerical& n1, const Numerical& n2);
         inline static Numerical mul (const Numerical& n1, const Numerical& n2);
@@ -194,9 +194,7 @@ namespace Physica::Core {
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            if(big->length < 0)
-                length = -length;
-            return Numerical(byte, length, power);
+            return Numerical(byte, big->length < 0 ? -length : length, power);
         }
     }
     //Refactor: move the key algorithm into a separated method. We may not use every words.
@@ -272,10 +270,7 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-
-                if(changeSign)
-                    length = -length;
-                Numerical result(byte, length, big->power);
+                Numerical result(byte, changeSign ? -length : length, big->power);
                 cutZero(result);
                 return result;
             }
@@ -321,9 +316,7 @@ namespace Physica::Core {
                 byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
-                length = -length;
-            return Numerical(byte, length, power);
+            return Numerical(byte, (n1.length ^ n2.length) < 0 ? -length : length, power); //NOLINT
         }
     }
 
@@ -368,10 +361,9 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                if((n1.length ^ n2.length) < 0) // NOLINT(hicpp-signed-bitwise)
-                    length = -length;
                 //1 comes from the algorithm
-                return Numerical(byte, length, n1.getPower() - n2.getPower() - 1, 1) >> (n1_shift - n2_shift);
+                return Numerical(byte, (n1.length ^ n2.length) < 0 ? -length : length //NOLINT
+                        , n1.getPower() - n2.getPower() - 1, 1) >> (n1_shift - n2_shift);
             }
             else
                 return Numerical(n1);

@@ -5,15 +5,13 @@
 
 namespace Physica::Core {
     /////////////////////////////////////SquareMatrix//////////////////////////////////////////
-    /*
+    /*!
      * SquareMatrix is the matrix whose row() equals to column().
      * If the column of a SquareMatrix less than its row, out of bounder visiting will happen during
      * the latter calculation. If the column of a SquareMatrix more than its row,
      * the values of unnecessary columns will may also be changed.
      */
-    /*
-     * Note: This function will broke the origin matrix.
-     */
+    // Note: This function will broke the origin matrix.
     Numerical SquareMatrix::determinate(SquareMatrixMethod method) {
         const auto rank = row();
         Numerical result(BasicConst::getInstance().get_1());

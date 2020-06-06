@@ -10,12 +10,9 @@ namespace Physica::Core {
     RealInf* RealInf::negative = nullptr;
 
     RealInf::RealInf(bool b) : DirectedInf(Vector()) {
-        auto arr = new Numerical[1];
-        if(b)
-            arr[0] = Numerical(BasicConst::getInstance().get_1());
-        else
-            arr[0] = Numerical(BasicConst::getInstance().getMinus_1());
-        direction = Vector(arr, 1);
+        direction = Vector(1);
+        Numerical temp = b ? BasicConst::getInstance().get_1() : BasicConst::getInstance().getMinus_1();
+        direction.grow(temp);
     }
 
     RealInf* RealInf::getInstance(bool b) {

@@ -21,10 +21,10 @@ namespace Physica::Core {
 
         if (mode == LinearChoose) {
             Numerical stepLength = *regionLength / Numerical(static_cast<SignedNumericalUnit>(population));
+            Numerical temp(1, 0);
             for (int i = 0; i < population; i++) {
-                auto byte = (unsigned long*)malloc(sizeof(long));
-                byte[0] = i;
-                points[i] = new Numerical(stepLength * Numerical(byte, 1, 0) + lower);
+                temp[0] = i;
+                points[i] = new Numerical(stepLength * temp + lower);
             }
         }
         else if (mode == RandomChoose) {

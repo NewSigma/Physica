@@ -15,7 +15,7 @@ namespace Physica::Core {
                 FunctionTree* right;
             };
             struct {
-                const Numerical* constant{};
+                Numerical* constant{};
                 void* placeHolder{};
             };
         };
@@ -29,10 +29,9 @@ namespace Physica::Core {
 
         FunctionTree& operator=(const FunctionTree& func) = delete;
         FunctionTree& operator=(FunctionTree&& f) noexcept;
-
-        [[nodiscard]] Numerical solve() const;
     private:
-        explicit FunctionTree(const Numerical* constant);
+        explicit FunctionTree(Numerical* constant);
+        [[nodiscard]] Numerical solve() const;
         friend class Function;
     };
 }

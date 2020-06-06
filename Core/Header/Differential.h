@@ -1,13 +1,12 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "FunctionTree.h"
+#include "Numerical.h"
+#include "Function.h"
 
 namespace Physica::Core {
-    class Numerical;
-
     class Differential {
-        FunctionTree func;
+        Function func;
         Numerical at;
         Numerical stepSize;
     public:
@@ -17,8 +16,8 @@ namespace Physica::Core {
             Forward,
             Backward
         };
-        Differential(FunctionTree func, Numerical at, Numerical stepSize = BasicConst::getInstance().getStepSize());
-        [[nodiscard]] Numerical solve(DifferentialMethod method) const;
+        Differential(Function func, Numerical at, Numerical stepSize = BasicConst::getInstance().getStepSize());
+        [[nodiscard]] Numerical solve(DifferentialMethod method);
     };
 }
 

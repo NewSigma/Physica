@@ -30,11 +30,11 @@ namespace Physica::Core {
 
     void HillClimbingAlgorithm::getExtremal() {
         Numerical* y_initial = func(x_initial);
-        auto x_last = new Numerical(x_initial);
+        auto x_last = new Numerical(*x_initial);
         *x_last += *stepSize;
         auto y_last = func(x_last);
-        auto x = new Numerical(x_last);
-        auto y = new Numerical(stepSize);
+        auto x = new Numerical(*x_last);
+        auto y = new Numerical(*stepSize);
         Numerical* x_result = nullptr;
         Numerical* y_result = nullptr;
         bool positiveUsable = false;

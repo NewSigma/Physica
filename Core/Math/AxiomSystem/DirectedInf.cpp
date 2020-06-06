@@ -10,9 +10,9 @@
 #include "Core/Header/Vector.h"
 
 namespace Physica::Core {
-    DirectedInf::DirectedInf(const Numerical& arg) : direction(randomVector(2)) {
-        direction[0] = cos(arg);
-        direction[1] = sin(arg);
+    DirectedInf::DirectedInf(const Numerical& arg) : direction(2) {
+        direction.grow(cos(arg));
+        direction.grow(sin(arg));
     }
 
     DirectedInf::DirectedInf(const Vector& vec) : direction(Vector(vec)) {

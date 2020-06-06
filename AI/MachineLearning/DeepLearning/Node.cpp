@@ -10,7 +10,7 @@ using namespace Physica::Core;
 
 namespace Physica::AI {
     Node::Node(int id, Layer* parent)
-            : vector(randomVector(parent->getNet()->getInputSize())), bias(randomNumerical())
+            : vector(Vector::randomVector(parent->getNet()->getInputSize())), bias(randomNumerical())
             , acceptedLoss(getZero()), activeFunc(nullptr), parentLayer(parent), id(id) {
     }
 

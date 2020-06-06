@@ -2,10 +2,10 @@
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
-    Differential::Differential(FunctionTree func, Numerical at, Numerical stepSize)
+    Differential::Differential(Function func, Numerical at, Numerical stepSize)
             : func(std::move(func)), at(std::move(at)), stepSize(std::move(stepSize)) {}
 
-    Numerical Differential::solve(DifferentialMethod method) const {
+    Numerical Differential::solve(DifferentialMethod method) {
         Numerical result;
         switch(method) {
             case DoublePoint:

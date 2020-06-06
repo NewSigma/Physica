@@ -5,7 +5,7 @@
 #include "Core/Header/LinearEquations.h"
 
 namespace Physica::Core {
-    /*
+    /*!
      * After LinearEquations is constructed, a method should be selected and called.
      * Finally, call getResult() to acquire the solution.
      *
