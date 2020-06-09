@@ -18,7 +18,7 @@ namespace Physica::Core {
         MatrixType type;
     public:
         explicit Matrix(MatrixType type);
-        Matrix(Vector* vectors, size_t length, MatrixType type);
+        Matrix(size_t length, MatrixType type);
         Matrix(const Matrix& matrix);
         Matrix(Matrix&& matrix) noexcept;
         virtual ~Matrix();
@@ -56,6 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] virtual size_t row() const = 0;
         [[nodiscard]] virtual size_t column() const = 0;
     protected:
+        Matrix(Vector* vectors, size_t length, MatrixType type);
         void directSwap(size_t i, size_t j);
         void indirectSwap(size_t i, size_t j);
         inline void directReduce(size_t i, size_t j, size_t element);
@@ -177,16 +178,11 @@ namespace Physica::Core {
     }
 
     inline void Matrix::directVectorAppend(Vector&& v) {
-        const bool doAlloc = length == capacity;
-        auto new_arr = doAlloc ? new Vector[length + 1] : vectors;
-        if(doAlloc) {
-            for(size_t i = 0; i < length; ++i)
-                new_arr[i] = std::move(vectors[i]);
-            delete[] vectors;
+        if(length == capacity) {
             ++capacity;
+            vectors = reinterpret_cast<Vector*>(realloc(vectors, capacity * sizeof(Vector)));
         }
-        new_arr[length] = std::move(v);
-        vectors = new_arr;
+        new (vectors + length) Vector(std::move(v));
         ++length;
     }
 
@@ -197,17 +193,12 @@ namespace Physica::Core {
 
     inline void Matrix::directMatrixAppend(Matrix&& m) {
         const auto new_length = length + m.getLength();
-        const bool doAlloc = new_length > capacity;
-        auto new_arr = doAlloc ? new Vector[new_length] : vectors;
-        if(doAlloc) {
-            for(size_t i = 0; i < length; ++i)
-                new_arr[i] = std::move(vectors[i]);
-            delete[] vectors;
+        if(new_length > capacity) {
             capacity = new_length;
+            vectors = reinterpret_cast<Vector*>(realloc(vectors, capacity * sizeof(Vector)));
         }
         for(size_t i = length; i < new_length; ++i)
-            new_arr[i] = std::move(m.vectors[i - length]);
-        vectors = new_arr;
+            new (vectors + i) Vector(std::move(m.vectors[i - length]));
         length = new_length;
     }
 
@@ -226,17 +217,17 @@ namespace Physica::Core {
         Q_ASSERT(vectors[0].getLength() > 0);
         Vector result(length);
         for(size_t i = 0; i < length; ++i)
-            result[i] = vectors[i].cutLast();
+            result.grow(vectors[i].cutLast());
         return result;
     }
     //!\from is included
     inline Matrix* Matrix::directMatrixCut(size_t from) {
         Q_ASSERT(from <= length);
         const auto new_length = length - from + 1;
-        auto new_vectors = new Vector[new_length];
+        auto new_vectors = reinterpret_cast<Vector*>(malloc(new_length * sizeof(Vector)));
         length = from;
         for(size_t i = 0; i < new_length; ++i)
-            new_vectors[i] = std::move(vectors[from + i]);
+            new (new_vectors + i) Vector(std::move(vectors[from + i]));
         return getType() == Column ?
                static_cast<Matrix*>(new ColumnMatrix(new_vectors, new_length))
                : static_cast<Matrix*>(new RowMatrix(new_vectors, new_length));
@@ -244,9 +235,9 @@ namespace Physica::Core {
     //!\from is included
     inline Matrix* Matrix::indirectMatrixCut(size_t from) {
         Q_ASSERT(from <= vectors[0].getLength());
-        auto new_vectors = new Vector[length];
+        auto new_vectors = reinterpret_cast<Vector*>(malloc(length * sizeof(Vector)));
         for(size_t i = 0; i < length; ++i)
-            new_vectors[i] = vectors[i].cut(from);
+            new (new_vectors + i) Vector(vectors[i].cut(from));
         return getType() == Column ?
                static_cast<Matrix*>(new ColumnMatrix(new_vectors, length))
                : static_cast<Matrix*>(new RowMatrix(new_vectors, length));

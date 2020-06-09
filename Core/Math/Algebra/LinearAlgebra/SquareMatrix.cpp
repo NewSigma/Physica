@@ -11,7 +11,11 @@ namespace Physica::Core {
      * the latter calculation. If the column of a SquareMatrix more than its row,
      * the values of unnecessary columns will may also be changed.
      */
-    // Note: This function will broke the origin matrix.
+    /*!
+     * Note: This function will broke the origin matrix.
+     *
+     * Reference: Numerical Recipes in C++
+     */
     Numerical SquareMatrix::determinate(SquareMatrixMethod method) {
         const auto rank = row();
         Numerical result(BasicConst::getInstance().get_1());

@@ -40,6 +40,7 @@ namespace Physica::Core {
 
     Vector::Vector(Vector&& vec) noexcept : numbers(vec.numbers), length(vec.length), capacity(vec.capacity)  {
         vec.numbers = nullptr;
+        vec.length = 0;
     }
 
     Vector::~Vector() {
@@ -74,6 +75,7 @@ namespace Physica::Core {
         length = v.length;
         capacity = v.capacity;
         v.numbers = nullptr;
+        v.length = 0;
         return *this;
     }
     //Here the operator/ means cross product.
@@ -132,6 +134,7 @@ namespace Physica::Core {
     }
 
     void Vector::initVector(size_t initLength) {
+        Q_ASSERT(initLength <= capacity);
         for(size_t i = 0; i < initLength; ++i)
             new (numbers + i) Numerical{};
         length = initLength;

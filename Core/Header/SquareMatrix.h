@@ -42,6 +42,7 @@ namespace Physica::Core {
         static RowSquareMatrix unitMatrix(size_t n) { return RowSquareMatrix(unitMatrixVector(n), n); }
     };
     /* Inline Implementations */
+    //Reference: Numerical Recipes in C++
     inline void SquareMatrix::LUDecompositionColumn(size_t column) {
         const auto startAlphaIndex = column + 1;
         const auto rank = row();
