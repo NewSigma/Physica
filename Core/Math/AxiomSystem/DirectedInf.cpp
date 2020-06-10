@@ -5,8 +5,6 @@
 #include "Core/Header/DirectedInf.h"
 #include "Core/Header/Indeterminate.h"
 #include "Core/Header/ComplexInf.h"
-#include "Core/Header/Const.h"
-#include "Core/Header/RealNum.h"
 #include "Core/Header/Vector.h"
 
 namespace Physica::Core {

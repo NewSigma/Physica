@@ -23,13 +23,16 @@ namespace Physica::Test {
 
             double_extract expect{d_a + d_b};
             double_extract result{double(a + b)};
-            if(expect.value != result.value) {
+            if((expect.structure.sign != result.structure.sign) //NOLINT
+               || (expect.structure.exp != result.structure.exp) //NOLINT
+               || (expect.structure.high != result.structure.high) //NOLINT
+               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
                 std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
                 std::cout << "Performing add test " << "--Failed\n"
-                        << "low:\t" << expect.structure.low << '\t' << result.structure.low
-                        << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
-                        << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
-                        << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
+                        << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
+                        << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
+                        << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
+                        << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
                 return;
             }
         }
@@ -39,7 +42,7 @@ namespace Physica::Test {
     void numericalSubTest(int loop) {
         double d;
         std::default_random_engine engine(clock());
-        std::cout << "Performing add test" << '\n' << std::setprecision(10);
+        std::cout << "Performing sub test" << '\n' << std::setprecision(10);
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
@@ -51,23 +54,26 @@ namespace Physica::Test {
 
             double_extract expect{d_a - d_b};
             double_extract result{double(a - b)};
-            if(expect.value != result.value) {
-                std::cout << "Performing add test " << d_a << " - " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
-                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
-                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
-                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
+            if((expect.structure.sign != result.structure.sign) //NOLINT
+               || (expect.structure.exp != result.structure.exp) //NOLINT
+               || (expect.structure.high != result.structure.high) //NOLINT
+               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+                std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
+                std::cout << "Performing sub test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
+                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
+                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
+                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
                 return;
             }
         }
-        std::cout << "Performing add test: " << " --Passed" << '\n' << std::setprecision(6);
+        std::cout << "Performing sub test: " << " --Passed" << '\n' << std::setprecision(6);
     }
 
     void numericalMulTest(int loop) {
         double d;
         std::default_random_engine engine(clock());
-        std::cout << "Performing add test" << '\n' << std::setprecision(10);
+        std::cout << "Performing mul test" << '\n' << std::setprecision(10);
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
@@ -79,23 +85,26 @@ namespace Physica::Test {
 
             double_extract expect{d_a * d_b};
             double_extract result{double(a * b)};
-            if(expect.value != result.value) {
-                std::cout << "Performing add test " << d_a << " * " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
-                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high
-                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp
-                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign;
+            if((expect.structure.sign != result.structure.sign) //NOLINT
+               || (expect.structure.exp != result.structure.exp) //NOLINT
+               || (expect.structure.high != result.structure.high) //NOLINT
+               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+                std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
+                std::cout << "Performing mul test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
+                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
+                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
+                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
                 return;
             }
         }
-        std::cout << "Performing add test: " << " --Passed" << '\n' << std::setprecision(6);
+        std::cout << "Performing mul test: " << " --Passed" << '\n' << std::setprecision(6);
     }
 
     void numericalDivTest(int loop) {
         double d;
         std::default_random_engine engine(clock());
-        std::cout << "Performing add test" << '\n' << std::setprecision(10);
+        std::cout << "Performing div test" << '\n' << std::setprecision(10);
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
@@ -111,17 +120,20 @@ namespace Physica::Test {
 
             double_extract expect{d_a / d_b};
             double_extract result{double(a / b)};
-            if(expect.value != result.value) {
-                std::cout << "Performing add test " << d_a << " / " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low
-                          << "high:\t" << expect.structure.high << '\t' << result.structure.high
-                          << "exp:\t" << expect.structure.exp << '\t' << result.structure.exp
-                          << "sign:\t" << expect.structure.sign << '\t' << result.structure.sign;
+            if((expect.structure.sign != result.structure.sign) //NOLINT
+               || (expect.structure.exp != result.structure.exp) //NOLINT
+               || (expect.structure.high != result.structure.high) //NOLINT
+               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+                std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
+                std::cout << "Performing div test " << "--Failed\n"
+                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
+                          << "high:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
+                          << "exp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
+                          << "sign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
                 return;
             }
         }
-        std::cout << "Performing add test: " << " --Passed" << '\n' << std::setprecision(6);
+        std::cout << "Performing div test: " << " --Passed" << '\n' << std::setprecision(6);
     }
 
     void printElements(const Numerical& n) {

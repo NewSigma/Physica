@@ -24,7 +24,7 @@ namespace Physica::Core {
     }
     /*
      * Calculate arr1 - arr2. len is the length of arr1 and arr2.
-     * If arr1 > arr2 the function will return 0, if not, the calculation is failed and return true.
+     * If arr1 >= arr2 the function will return 0, if not, the calculation is failed and return true.
      */
     inline bool subArrByArr(NumericalUnit* result, const NumericalUnit* arr1, const NumericalUnit* arr2, size_t len) {
         NumericalUnit carry = 0, temp, pre_carry;

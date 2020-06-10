@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "RealInf.h"
-#include "ComplexInf.h"
-#include "Indeterminate.h"
+#include "Core/Header/RealInf.h"
+#include "Core/Header/ComplexInf.h"
+#include "Core/Header/Indeterminate.h"
 
 namespace Physica::Core {
     RealInf* RealInf::positive = nullptr;

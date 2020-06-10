@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/Numerical.h"
 #include <climits>
-#include "Solve.h"
+#include "Core/Header/Numerical.h"
+#include "Core/Header/Solve.h"
 
 namespace Physica::Core {
     //Return a real number between 0 and 1.
@@ -286,11 +286,13 @@ namespace Physica::Core {
     }
 
     Numerical arccos(const Numerical& n) {
-        return Solve::bisectionMethod(cos, n, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI(), BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
+        return Solve::bisectionMethod(cos, n, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
+                , BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
     }
 
     Numerical arcsin(const Numerical& n) {
-        return Solve::bisectionMethod(sin, n, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2(), BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
+        return Solve::bisectionMethod(sin, n, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
+                , BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
     }
 
     Numerical arctan(const Numerical& n) {

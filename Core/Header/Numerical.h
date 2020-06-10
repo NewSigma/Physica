@@ -326,7 +326,7 @@ namespace Physica::Core {
 
         if(!n1.isZero()) {
             if(n2 != BasicConst::getInstance().get_1()) {
-                auto n1_size = n1.getSize(), n2_size = n2.getSize();
+                const auto n1_size = n1.getSize(), n2_size = n2.getSize();
                 //Add one to avoid precision loss during right shift.
                 auto arr1_len = std::max(n1_size, n2_size) + 1;
                 auto n1_blank = arr1_len - n1_size;
@@ -340,12 +340,12 @@ namespace Physica::Core {
                 memcpy(arr2 + n2_blank, n2.byte, n2_size * sizeof(NumericalUnit));
                 memset(arr2, 0, n2_blank * sizeof(NumericalUnit));
 
-                int n1_shift = static_cast<int>(countLeadingZeros(n1.byte[n1.getSize() - 1])) - 1;
+                const int n1_shift = static_cast<int>(countLeadingZeros(n1.byte[n1_size - 1])) - 1;
                 if(n1_shift > 0)
                     byteLeftShiftEq(arr1, arr1_len, n1_shift);
                 else
                     byteRightShiftEq(arr1, arr1_len, -n1_shift);
-                int n2_shift = static_cast<int>(countLeadingZeros(n2.byte[n2.getSize() - 1]));
+                const int n2_shift = static_cast<int>(countLeadingZeros(n2.byte[n2_size - 1]));
                 byteLeftShiftEq(arr2, arr2_len, n2_shift);
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.

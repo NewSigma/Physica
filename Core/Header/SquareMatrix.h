@@ -15,11 +15,10 @@ namespace Physica::Core {
             LUMethod
         };
     public:
+        void toUnit();
         /* Getters */
         [[nodiscard]] Numerical determinate(SquareMatrixMethod method);
     protected:
-        inline void LUDecompositionColumn(size_t column);
-        inline static Vector* unitMatrixVector(size_t n);
         /* Friends */
         friend class LinearEquations;
     };
@@ -27,56 +26,20 @@ namespace Physica::Core {
     class ColumnSquareMatrix : public ColumnMatrix, public SquareMatrix {
     public:
         ColumnSquareMatrix();
-        ColumnSquareMatrix(size_t column, size_t row);
-        ColumnSquareMatrix(Vector* vectors, size_t length);
-
-        static ColumnSquareMatrix unitColumnMatrix(size_t n) { return ColumnSquareMatrix(unitMatrixVector(n), n); }
+        explicit ColumnSquareMatrix(size_t size);
+        ColumnSquareMatrix(const ColumnSquareMatrix& matrix);
+        /* Helpers */
+        [[nodiscard]] size_t row() const override { return length; }
     };
     /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
     class RowSquareMatrix : public RowMatrix, public SquareMatrix {
     public:
         RowSquareMatrix();
-        RowSquareMatrix(size_t column, size_t row);
-        RowSquareMatrix(Vector* vectors, size_t length);
-
-        static RowSquareMatrix unitMatrix(size_t n) { return RowSquareMatrix(unitMatrixVector(n), n); }
+        explicit RowSquareMatrix(size_t size);
+        RowSquareMatrix(const RowSquareMatrix& matrix);
+        /* Helpers */
+        [[nodiscard]] size_t column() const override { return length; }
     };
-    /* Inline Implementations */
-    //Reference: Numerical Recipes in C++
-    inline void SquareMatrix::LUDecompositionColumn(size_t column) {
-        const auto startAlphaIndex = column + 1;
-        const auto rank = row();
-        auto& matrix = *this;
-        for(size_t j = 0; j < startAlphaIndex; ++j) {
-            Numerical temp(matrix(j, column));
-            for(size_t k = 0; k < j - 1; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
-            matrix(j, column) = temp;
-        }
-
-        for(size_t j = startAlphaIndex; j < rank; ++j) {
-            Numerical temp(matrix(j, column));
-            for(size_t k = 0; k < j - 1; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
-            matrix(j, column) = temp / matrix(column, column);
-        }
-    }
-    //Implementation of unitColumnMatrix and unitRowMatrix. Should not be used elsewhere.
-    inline Vector* SquareMatrix::unitMatrixVector(size_t n) {
-        auto vectors = new Vector[n];
-        auto& _0 = BasicConst::getInstance().get_0();
-        auto& _1 = BasicConst::getInstance().get_1();
-        for(size_t i = 0; i < n; ++i) {
-            auto& vector = vectors[i];
-            vector.initVector(n);
-            for(size_t j = 0; j < i; ++j)
-                vector[j] = _0;
-            vector[i] = _1;
-            for(size_t j = i + 1; j < n; ++j)
-                vector[j] = _0;
-        }
-        return vectors;
-    }
 }
 
 #endif

@@ -19,7 +19,7 @@ namespace Physica::Core {
                     "movq %1, %%rax\n\t"
                     "mulq %2"
                     : "=d"(result)
-                    : "rm"(n1), "rm"(n2)
+                    : "rm"(n1), "r"(n2)
                     : "%rax"
             );
         #else
@@ -61,7 +61,7 @@ namespace Physica::Core {
                     "movq %2, %%rax\n\t"
                     "mulq %3"
                     : "=d"(high), "=a"(low)
-                    : "rm"(n1), "rm"(n2)
+                    : "rm"(n1), "r"(n2)
             );
         #else
             asm (

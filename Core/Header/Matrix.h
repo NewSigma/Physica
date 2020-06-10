@@ -48,6 +48,8 @@ namespace Physica::Core {
         void lowerEliminate(size_t index);
         void impactPivoting();
         /* Helpers */
+        void resize(size_t size);
+        void squeeze();
         void swap(Matrix& m) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
@@ -55,6 +57,10 @@ namespace Physica::Core {
         [[nodiscard]] bool isEmpty() const noexcept { return length == 0; }
         [[nodiscard]] virtual size_t row() const = 0;
         [[nodiscard]] virtual size_t column() const = 0;
+        /* Pivoting */
+        inline size_t completePivoting(size_t column);
+        inline size_t partialPivoting(size_t column);
+        inline void impactPivoting(size_t row);
     protected:
         Matrix(Vector* vectors, size_t length, MatrixType type);
         void directSwap(size_t i, size_t j);
@@ -69,15 +75,12 @@ namespace Physica::Core {
         inline Vector indirectVectorCut();
         inline Matrix* directMatrixCut(size_t from);
         inline Matrix* indirectMatrixCut(size_t from);
-        /* Pivoting */
-        inline size_t completePivoting(size_t column);
-        inline void partialPivoting(size_t column);
-        inline void impactPivoting(size_t row);
     private:
         /* Friends */
         friend class ColumnMatrix;
         friend class RowMatrix;
         friend class LinearEquations;
+        friend class LUDecomposition;
     };
     ////////////////////////////////////////Column Matrix////////////////////////////////////////////
     class ColumnMatrix : virtual public Matrix {
@@ -85,6 +88,8 @@ namespace Physica::Core {
         ColumnMatrix();
         ColumnMatrix(size_t column, size_t row);
         ColumnMatrix(Vector* vectors, size_t length);
+        ColumnMatrix(const ColumnMatrix& matrix) = default;
+        ColumnMatrix(ColumnMatrix&& matrix) noexcept;
         /* Operators */
         [[nodiscard]] Numerical& operator()(size_t row, size_t column) override { return vectors[column][row]; }
         [[nodiscard]] const Numerical& operator()(size_t row, size_t column) const override { return vectors[column][row]; }
@@ -111,6 +116,8 @@ namespace Physica::Core {
         RowMatrix();
         RowMatrix(size_t column, size_t row);
         RowMatrix(Vector* vectors, size_t length);
+        RowMatrix(const RowMatrix& matrix) = default;
+        RowMatrix(RowMatrix&& matrix) noexcept;
         /* Operators */
         [[nodiscard]] Numerical& operator()(size_t row, size_t column) override { return vectors[row][column]; }
         [[nodiscard]] const Numerical& operator()(size_t row, size_t column) const override { return vectors[row][column]; }
@@ -142,6 +149,93 @@ namespace Physica::Core {
     inline void operator-=(Matrix& m1, const Matrix& m2) { m1 = *(m1 - m2); }
     inline void operator*=(Matrix& m, const Numerical& n) { m = *(m * n); }
     inline void operator*=(Matrix& m1, const Matrix& m2) { m1 = *(m1 * m2); }
+    /*!
+     * Select the main element of a column of Matrix and execute a row swap as well as a column swap to
+     * make it stands at (column, column), return the origin column index of the main element.
+     * The return values should be stored to recover the correct order of the solution.
+     *
+     * Complexity: O((rank - column) ^ 2)
+     *
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+     */
+    inline size_t Matrix::completePivoting(size_t column) {
+        Q_ASSERT(column < this->column());
+        const auto rank = row();
+        auto& matrix = *this;
+        size_t main_row_index = 0, main_column_index = 0;
+        Numerical main(BasicConst::getInstance().get_0());
+        for(size_t i = column; i < rank; ++i) {
+            for(size_t j = column; j < rank; ++j) {
+                Numerical temp = matrix(i, j);
+                temp.toAbs();
+                bool larger = main < temp;
+                main = larger ? std::move(temp) : main;
+                main_row_index = larger ? j : main_row_index;
+                main_column_index = larger ? i : main_column_index;
+            }
+        }
+        matrix.rowSwap(column, main_row_index);
+        const Numerical reciprocal_main = reciprocal(main);
+        for(size_t row = column; row < rank; ++row)
+            matrix(row, column) *= reciprocal_main;
+        return main_column_index;
+    }
+    /*!
+     * Select the main element of a column of Matrix and execute row swaps to make its row index equals to column index,
+     * return the origin row index of the main element.
+     *
+     * Complexity: O(rank - column)
+     *
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+     */
+    inline size_t Matrix::partialPivoting(size_t column) {
+        Q_ASSERT(column < this->column());
+        const auto rank = row();
+        auto& matrix = *this;
+        size_t main_index = column;
+        Numerical main = matrix(column, column);
+        main.toAbs();
+        for(size_t j = column + 1; j < rank; ++j) {
+            Numerical temp = matrix(j, column);
+            temp.toAbs();
+            bool larger = main < temp;
+            main = larger ? std::move(temp) : main;
+            main_index = larger ? j : main_index;
+        }
+        matrix.rowSwap(column, main_index);
+        const Numerical reciprocal_main = reciprocal(main);
+        for(size_t row = column; row < rank; ++row)
+            matrix(row, column) *= reciprocal_main;
+        return main_index;
+    }
+    /*!
+     * Divide the row by the element with the largest abstract value. \row is a row of a matrix.
+     * \rank is the rank of the equations.
+     *
+     * Complexity: O(rank)
+     *
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+     */
+    inline void Matrix::impactPivoting(size_t row) {
+        Q_ASSERT(row < this->row());
+        const auto col = column();
+        auto& matrix = *this;
+        Numerical main(matrix(row, 0));
+        for(size_t i = 1; i < col; ++i) {
+            Numerical temp(matrix(row, i));
+            temp.toAbs();
+            main = main < temp ? std::move(temp) : main;
+        }
+        main = reciprocal(main);
+        for(size_t i = 0; i < col; ++i)
+            matrix(row, i) *= main;
+    }
 
     inline void Matrix::appendMatrixRow(const Matrix& m) {
         appendMatrixRow(RowMatrix(reinterpret_cast<const RowMatrix&>(m))); //NOLINT assume m is a RowMatrix.
@@ -241,84 +335,6 @@ namespace Physica::Core {
         return getType() == Column ?
                static_cast<Matrix*>(new ColumnMatrix(new_vectors, length))
                : static_cast<Matrix*>(new RowMatrix(new_vectors, length));
-    }
-    /*!
-     * Select the main element of a column of Matrix and execute a row swap as well as a column swap to
-     * make it stands at (column, column), return the origin column index of the main element.
-     * The return values should be stored to recover the correct order of the solution.
-     *
-     * Complexity: O((rank - column) ^ 2)
-     */
-    inline size_t Matrix::completePivoting(size_t column) {
-        Q_ASSERT(column < this->column());
-        const auto rank = row();
-        auto& matrix = *this;
-        size_t main_row_index = 0, main_column_index = 0;
-        Numerical main(BasicConst::getInstance().get_0());
-        for(size_t i = column; i < rank; ++i) {
-            for(size_t j = column; j < rank; ++j) {
-                Numerical temp = matrix(i, j);
-                temp.toAbs();
-                bool larger = main < temp;
-                main = larger ? std::move(temp) : main;
-                main_row_index = larger ? j : main_row_index;
-                main_column_index = larger ? i : main_column_index;
-            }
-        }
-        matrix.rowSwap(column, main_row_index);
-        const Numerical reciprocal_main = reciprocal(main);
-        for(size_t row = column; row < rank; ++row)
-            matrix(row, column) *= reciprocal_main;
-        return main_column_index;
-    }
-    /*!
-     * Select the main element of a column of Matrix and execute row swaps to make its row index equals to column index,
-     * return the origin row index of the main element.
-     *
-     * Complexity: O(rank - column)
-     */
-    inline void Matrix::partialPivoting(size_t column) {
-        Q_ASSERT(column < this->column());
-        const auto rank = row();
-        auto& matrix = *this;
-        size_t main_index = 0;
-        Numerical main = matrix(column, column);
-        main.toAbs();
-        for(size_t j = column + 1; j < rank; ++j) {
-            Numerical temp = matrix(j, column);
-            temp.toAbs();
-            bool larger = main < temp;
-            main = larger ? std::move(temp) : main;
-            main_index = larger ? j : main_index;
-        }
-        matrix.rowSwap(column, main_index);
-        const Numerical reciprocal_main = reciprocal(main);
-        for(size_t row = column; row < rank; ++row)
-            matrix(row, column) *= reciprocal_main;
-    }
-    /*!
-     * Divide the row by the element with the largest abstract value. Row is a row of a matrix.
-     * Rank is the rank of the equations.
-     *
-     * Complexity: O(rank)
-     *
-     * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
-     */
-    inline void Matrix::impactPivoting(size_t row) {
-        Q_ASSERT(row < this->row());
-        const auto col = column();
-        auto& matrix = *this;
-        Numerical main(matrix(row, 0));
-        for(size_t i = 1; i < col; ++i) {
-            Numerical temp(matrix(row, i));
-            temp.toAbs();
-            main = main < temp ? std::move(temp) : main;
-        }
-        main = reciprocal(main);
-        for(size_t i = 0; i < col; ++i)
-            matrix(row, i) *= main;
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     std::unique_ptr<Matrix> reciprocal(const Matrix& n);

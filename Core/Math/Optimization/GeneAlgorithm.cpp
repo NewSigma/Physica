@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "GeneAlgorithm.h"
 #include <iostream>
-#include "ElementaryFunction.h"
-#include "Numerical.h"
+#include "Core/Header/GeneAlgorithm.h"
+#include "Core/Header/ElementaryFunction.h"
+#include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
     //Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()

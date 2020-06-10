@@ -1,6 +1,6 @@
 #include <QtCore/qlogging.h>
-#include "Solve.h"
-#include "Numerical.h"
+#include "Core/Header/Solve.h"
+#include "Core/Header/Numerical.h"
 /*
  * Find the numerical root of algebra equation.
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
@@ -9,13 +9,15 @@ namespace Physica::Core {
     /*
      * Solve the x when n = func(x)
      */
-    Numerical Solve::bisectionMethod(Numerical func(const Numerical&), const Numerical& n, const Numerical& x1, const Numerical& x2)    {
+    Numerical Solve::bisectionMethod(Numerical func(const Numerical&), const Numerical& n
+            , const Numerical& x1, const Numerical& x2) {
         Numerical y1 = func(x1);
         Numerical y2 = func(x2);
         return bisectionMethod(func, n, x1, x2, y1, y2);
     }
 
-    Numerical Solve::bisectionMethod(Numerical func(const Numerical&), const Numerical& n, const Numerical& x1, const Numerical& x2, const Numerical& y1, const Numerical& y2) {
+    Numerical Solve::bisectionMethod(Numerical func(const Numerical&), const Numerical& n
+            , const Numerical& x1, const Numerical& x2, const Numerical& y1, const Numerical& y2) {
         if(n == y1)
             return Numerical(x1);
         if(n == y2)

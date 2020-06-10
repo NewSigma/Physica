@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "ComplexNumeric.h"
 #include <iomanip>
 #include <utility>
+#include "Core/Header/ComplexNumeric.h"
 
 namespace Physica::Core {
     ComplexNumeric::ComplexNumeric(Numerical n1, Numerical n2) noexcept

@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "SquareMatrix.h"
+#include <Core/Header/LUDecomposition.h>
+#include "Core/Header/SquareMatrix.h"
 
 namespace Physica::Core {
     /////////////////////////////////////SquareMatrix//////////////////////////////////////////
@@ -11,6 +12,17 @@ namespace Physica::Core {
      * the latter calculation. If the column of a SquareMatrix more than its row,
      * the values of unnecessary columns will may also be changed.
      */
+    void SquareMatrix::toUnit() {
+        auto& _0 = BasicConst::getInstance().get_0();
+        auto& _1 = BasicConst::getInstance().get_1();
+        for(size_t i = 0; i < length; ++i) {
+            for(size_t j = 0; j < i; ++j)
+                vectors[i][j] = _0;
+            vectors[i][i] = _1;
+            for(size_t j = i + 1; j < length; ++j)
+                vectors[i][j] = _0;
+        }
+    }
     /*!
      * Note: This function will broke the origin matrix.
      *
@@ -27,12 +39,12 @@ namespace Physica::Core {
                     result *= vectors[i][i];
                 }
                 break;
-            case LUMethod:
-                for(size_t i = 0; i < rank; ++i) {
-                    partialPivoting(i);
-                    LUDecompositionColumn(i);
-                    result *= vectors[i][i];
-                }
+            case LUMethod: {
+                LUDecomposition lu(*this);
+                const Matrix& m = lu.getMatrix();
+                for(size_t i = 0; i < rank; ++i)
+                    result *= m(i, i);
+            }
                 break;
             default:;
         }
@@ -41,15 +53,19 @@ namespace Physica::Core {
     /////////////////////////////////////ColumnSquareMatrix//////////////////////////////////////////
     ColumnSquareMatrix::ColumnSquareMatrix() : Matrix(Column) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(size_t column, size_t row)
-            : Matrix(new Vector[column], column, Column), ColumnMatrix(column, row) {}
+    ColumnSquareMatrix::ColumnSquareMatrix(size_t size)
+            : Matrix(reinterpret_cast<Vector*>(malloc(size * sizeof(Vector))), size, Column)
+            , ColumnMatrix(size, size) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Column) {}
+    ColumnSquareMatrix::ColumnSquareMatrix(const ColumnSquareMatrix& matrix) //NOLINT
+            : Matrix(matrix), ColumnMatrix(matrix) {}
     /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
     RowSquareMatrix::RowSquareMatrix() : Matrix(Row) {}
 
-    RowSquareMatrix::RowSquareMatrix(size_t column, size_t row)
-            : Matrix(new Vector[row], row, Row), RowMatrix(column, row) {}
+    RowSquareMatrix::RowSquareMatrix(size_t size)
+            : Matrix(reinterpret_cast<Vector*>(malloc(size * sizeof(Vector))), size, Row)
+            , RowMatrix(size, size) {}
 
-    RowSquareMatrix::RowSquareMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Row) {}
+    RowSquareMatrix::RowSquareMatrix(const RowSquareMatrix& matrix) //NOLINT
+            : Matrix(matrix), RowMatrix(matrix) {}
 }

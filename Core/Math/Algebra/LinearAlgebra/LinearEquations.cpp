@@ -2,6 +2,7 @@
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
 #include <Core/Header/SquareMatrix.h>
+#include <Core/Header/LUDecomposition.h>
 #include "Core/Header/LinearEquations.h"
 
 namespace Physica::Core {
@@ -62,11 +63,8 @@ namespace Physica::Core {
                     for(size_t j = 0; j < i; ++j)
                         matrix(j, rank) -= matrix(j, i) * matrix(i, rank);
                 break;
-            case LUDecomposition:
-                for(size_t i = 0; i < rank; ++i) {
-                    matrix.partialPivoting(i);
-                    reinterpret_cast<SquareMatrix&>(matrix).LUDecompositionColumn(i); //NOLINT DataStructure not changed.
-                }
+            case LUMethod:
+                LUDecomposition lu(reinterpret_cast<SquareMatrix&>(matrix)); //NOLINT
                 for(size_t i = rank - 1; i >= 0; --i)
                     for(size_t j = 0; j < i; ++j)
                         matrix(j, rank) -= matrix(j, i) * matrix(i, rank);

@@ -14,7 +14,7 @@ namespace Physica::Core {
             GaussJordanComplete,
             GaussEliminationPartial,
             GaussEliminationComplete,
-            LUDecomposition
+            LUMethod
         };
     private:
         Matrix& matrix;

@@ -1,9 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "FFT.h"
-
 #include <utility>
+#include "Core/Header/FFT.h"
 
 namespace Physica::Core {
     ///////////////////////////////////FFTBase////////////////////////////////////

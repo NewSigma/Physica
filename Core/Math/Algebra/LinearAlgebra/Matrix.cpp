@@ -82,6 +82,21 @@ namespace Physica::Core {
             impactPivoting(i);
     }
 
+    void Matrix::resize(size_t size) {
+        if(length > size) {
+            for(size_t i = size; size < length; ++i)
+                (vectors + i)->~Vector();
+            length = size;
+        }
+        vectors = reinterpret_cast<Vector*>(realloc(vectors, size * sizeof(Vector)));
+        capacity = size;
+    }
+
+    void Matrix::squeeze() {
+        vectors = reinterpret_cast<Vector*>(realloc(vectors, length * sizeof(Vector)));
+        capacity = length;
+    }
+
     void Matrix::swap(Matrix& m) noexcept {
         auto temp = vectors;
         vectors = m.vectors;
@@ -176,6 +191,8 @@ namespace Physica::Core {
     }
 
     ColumnMatrix::ColumnMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Column) {}
+
+    ColumnMatrix::ColumnMatrix(ColumnMatrix&& matrix) noexcept : Matrix(std::move(matrix)) {}
     //Warning: Length of v must equals to column() or a out of bounder visit will happen.
     void ColumnMatrix::appendRow(Vector v) {
         indirectVectorAppend(std::move(v));
@@ -238,6 +255,8 @@ namespace Physica::Core {
     }
 
     RowMatrix::RowMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Row) {}
+
+    RowMatrix::RowMatrix(RowMatrix&& matrix) noexcept : Matrix(std::move(matrix)) {}
     //Warning: Length of v must equals to column() or a out of bounder visit will happen.
     void RowMatrix::appendRow(Vector v) {
         directVectorAppend(std::move(v));

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Indeterminate.h"
+#include "Core/Header/Indeterminate.h"
 
 namespace Physica::Core {
     Indeterminate* Indeterminate::instance = nullptr;

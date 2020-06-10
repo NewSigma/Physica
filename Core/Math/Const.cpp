@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Const.h"
-#include "Numerical.h"
-#include "RealNum.h"
+#include "Core/Header/Const.h"
+#include "Core/Header/Numerical.h"
+#include "Core/Header/RealNum.h"
 
 namespace Physica::Core {
     BasicConst* BasicConst::instance = nullptr;

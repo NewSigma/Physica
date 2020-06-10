@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "FunctionTree.h"
+#include "Core/Header/FunctionTree.h"
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {

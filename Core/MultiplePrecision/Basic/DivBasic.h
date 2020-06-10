@@ -126,22 +126,19 @@ namespace Physica::Core {
      */
     inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* dividend, const NumericalUnit* divisor, size_t len) {
         Q_ASSERT(len >= 1);
-        auto q = div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
-        if(len == 1)
+        NumericalUnit q, r;
+        div2WordByFullWord(q, r, dividend[len], dividend[len - 1], divisor[len - 1]);
+        if(len == 1) //May be ask len > 1 to avoid branches.
             return q;
-        auto t = dividend[len - 1] - q * divisor[len - 1];
         NumericalUnit temp[2];
         mulWordByWord(temp[1], temp[0], q, divisor[len - 2]);
-        auto copy = temp[1];
-        temp[1] -= subArrByArrEq(temp, dividend + len - 2, 1);
-        if((t < temp[1] || (t == temp[1] && temp[0] != 0)) && copy > temp[1])
+        if(r < temp[1] || (r == temp[1] && dividend[len - 2] < temp[0]))
             --q;
         auto n = new NumericalUnit[len + 1];
         n[len] = mulArrByWord(n, divisor, len, q);
-        if(subArrByArr(n, dividend, n, len + 1))
-            --q;
+        const bool carry = subArrByArr(n, dividend, n, len + 1);
         delete[] n;
-        return q;
+        return carry ? (q - 1) : q;
     }
 }
 

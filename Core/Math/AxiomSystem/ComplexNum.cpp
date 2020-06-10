@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "ComplexNum.h"
-#include "RealNum.h"
-#include "DirectedInf.h"
-#include "ComplexInf.h"
-#include "RealInf.h"
-#include "Indeterminate.h"
-#include "ElementaryFunction.h"
+#include "Core/Header/ComplexNum.h"
+#include "Core/Header/RealNum.h"
+#include "Core/Header/DirectedInf.h"
+#include "Core/Header/ComplexInf.h"
+#include "Core/Header/RealInf.h"
+#include "Core/Header/Indeterminate.h"
+#include "Core/Header/ElementaryFunction.h"
 
 namespace Physica::Core {
     ComplexNum::ComplexNum(const Numerical& n1, const Numerical& n2, bool polar) {

@@ -3,8 +3,8 @@
  */
 #include <QtCore/qlogging.h>
 #include <cstring>
-#include "Vector.h"
-#include "Numerical.h"
+#include "Core/Header/Vector.h"
+#include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
     Vector::Vector() : numbers(nullptr), length(0), capacity(0) {}
@@ -131,13 +131,6 @@ namespace Physica::Core {
 
     Numerical Vector::toArg(size_t axe) const {
         return toNorm() / numbers[axe];
-    }
-
-    void Vector::initVector(size_t initLength) {
-        Q_ASSERT(initLength <= capacity);
-        for(size_t i = 0; i < initLength; ++i)
-            new (numbers + i) Numerical{};
-        length = initLength;
     }
 
     void Vector::resize(size_t size) {

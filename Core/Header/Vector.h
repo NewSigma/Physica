@@ -37,7 +37,6 @@ namespace Physica::Core {
         [[nodiscard]] bool isZeroVector() const;
         [[nodiscard]] Numerical toArg(size_t axe) const;
         /* Helpers */
-        void initVector(size_t initLength);
         void resize(size_t size);
         void squeeze();
         void append(Numerical n) noexcept;
