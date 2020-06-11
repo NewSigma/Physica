@@ -11,7 +11,7 @@ namespace Physica::Core {
     /*
      * Both of the arrays have the same length. Allocated length of result should not less than len + 1.
      */
-    inline void addArrWithArr(NumericalUnit* result, const NumericalUnit* from, const NumericalUnit* to, size_t len) {
+    inline void addArrWithArr(NumericalUnit* __restrict result, const NumericalUnit* __restrict from, const NumericalUnit* __restrict to, size_t len) {
         result[0] = 0;
         for(int i = 0; i < len; ++i) {
             NumericalUnit temp = from[i] + to[i];
@@ -22,7 +22,7 @@ namespace Physica::Core {
     /*
      * Both of the arrays have the same length. Allocated length of to should not less than len + 1.
      */
-    inline NumericalUnit addArrWithArrEq(const NumericalUnit* from, NumericalUnit* to, size_t len) {
+    inline NumericalUnit addArrWithArrEq(const NumericalUnit* __restrict from, NumericalUnit* __restrict to, size_t len) {
         NumericalUnit carry = 0;
         for(int i = 0; i < len; ++i) {
             NumericalUnit temp = from[i] + to[i];

@@ -124,19 +124,33 @@ namespace Physica::Core {
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.4-8
      */
-    inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* dividend, const NumericalUnit* divisor, size_t len) {
+    inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* __restrict dividend
+            , const NumericalUnit* __restrict divisor, size_t len) {
         Q_ASSERT(len >= 1);
-        NumericalUnit q, r;
-        div2WordByFullWord(q, r, dividend[len], dividend[len - 1], divisor[len - 1]);
+        NumericalUnit q = dividend[len] >= divisor[len - 1] ? NumericalUnitMax :
+                div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
         if(len == 1) //May be ask len > 1 to avoid branches.
             return q;
-        NumericalUnit temp[2];
-        mulWordByWord(temp[1], temp[0], q, divisor[len - 2]);
-        if(r < temp[1] || (r == temp[1] && dividend[len - 2] < temp[0]))
+        NumericalUnit temp[2]{dividend[len - 1], dividend[len]};
+        /* Calculate temp - q * divisor[len - 1] */ {
+            NumericalUnit temp_1[2];
+            mulWordByWord(temp_1[1], temp_1[0], q, divisor[len - 1]);
+            subArrByArrEq(temp, temp_1, 2);
+        }
+        NumericalUnit q_divisor_high, q_divisor_low;
+        mulWordByWord(q_divisor_high, q_divisor_low, q, divisor[len - 2]);
+        sub2WordByWord(q_divisor_high, q_divisor_low, dividend[len - 2]);
+        if(temp[1] == 0 && (temp[0] < q_divisor_high || (temp[0] == q_divisor_high && q_divisor_low == 0)))
             --q;
+
         auto n = new NumericalUnit[len + 1];
         n[len] = mulArrByWord(n, divisor, len, q);
-        const bool carry = subArrByArr(n, dividend, n, len + 1);
+        //Judge dividend < n or not. If dividend < n, we have to do carry.
+        bool carry = false, go_on = true;
+        for(size_t i = len; go_on && i >= 0; --i) {
+            go_on = dividend[i] == n[i];
+            carry = dividend[i] < n[i];
+        }
         delete[] n;
         return carry ? (q - 1) : q;
     }

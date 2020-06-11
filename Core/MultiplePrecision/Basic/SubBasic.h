@@ -26,7 +26,8 @@ namespace Physica::Core {
      * Calculate arr1 - arr2. len is the length of arr1 and arr2.
      * If arr1 >= arr2 the function will return 0, if not, the calculation is failed and return true.
      */
-    inline bool subArrByArr(NumericalUnit* result, const NumericalUnit* arr1, const NumericalUnit* arr2, size_t len) {
+    inline bool subArrByArr(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr1
+            , const NumericalUnit* __restrict arr2, size_t len) {
         NumericalUnit carry = 0, temp, pre_carry;
         for(int i = 0; i < len; ++i) {
             result[i] = arr1[i] - arr2[i];
@@ -38,7 +39,7 @@ namespace Physica::Core {
         return carry;
     }
     //Another version of subArrByArr()
-    inline bool subArrByArrEq(NumericalUnit* arr1, const NumericalUnit* arr2, size_t len) {
+    inline bool subArrByArrEq(NumericalUnit* __restrict arr1, const NumericalUnit* __restrict arr2, size_t len) {
         NumericalUnit carry = 0, temp, pre_carry;
         for(int i = 0; i < len; ++i) {
             temp = arr1[i] - arr2[i];

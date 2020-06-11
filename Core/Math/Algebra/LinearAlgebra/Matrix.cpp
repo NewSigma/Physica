@@ -58,7 +58,7 @@ namespace Physica::Core {
         m.length = 0;
         return *this;
     }
-    /*
+    /*!
      * Eliminate elements at column index using row reduce, which are above the row index.
      * Warning: Element at (index, index) must not be zero. Or a divide by zero exception will be thrown.
      */
@@ -66,13 +66,13 @@ namespace Physica::Core {
         for(size_t i = 0; i < index; ++i)
             rowReduce(index, i, index);
     }
-    /*
+    /*!
      * Eliminate elements at column index using row reduce, which are above the row index.
      * Warning: Element at (index, index) must not be zero. Or a divide by zero exception will be thrown.
      */
     void Matrix::lowerEliminate(size_t index) {
-        const auto col = column();
-        for(size_t i = index + 1; i < col; ++i)
+        const auto r = row();
+        for(size_t i = index + 1; i < r; ++i)
             rowReduce(index, i, index);
     }
 
@@ -114,9 +114,9 @@ namespace Physica::Core {
         const auto column = m.column();
         //10 is the max precision of double.
         os << std::setprecision(10);
-        for(size_t i = 0; i < column; ++i) {
-            for(size_t j = 0; j < row; ++j)
-                os << std::to_string(double(m(j, i))) << '\t';
+        for(size_t i = 0; i < row; ++i) {
+            for(size_t j = 0; j < column; ++j)
+                os << std::to_string(double(m(i, j))) << '\t';
             os << '\n';
         }
         //6 is the default precision.
@@ -185,7 +185,7 @@ namespace Physica::Core {
     ColumnMatrix::ColumnMatrix() : Matrix(Column) {}
 
     ColumnMatrix::ColumnMatrix(size_t column, size_t row)
-            : Matrix(reinterpret_cast<Vector*>(column * sizeof(Vector)), column, Column) {
+            : Matrix(reinterpret_cast<Vector*>(malloc(column * sizeof(Vector))), column, Column) {
         for(size_t i = 0; i < column; ++i)
             new (vectors + i) Vector(row);
     }
@@ -235,14 +235,10 @@ namespace Physica::Core {
     }
 
     void ColumnMatrix::rowReduce(size_t r1, size_t r2, size_t element) {
-        const auto r = row();
-        Q_ASSERT(r1 < r && r2 < r && element < r);
         indirectReduce(r1, r2, element);
     }
 
     void ColumnMatrix::columnReduce(size_t c1, size_t c2, size_t element) {
-        const auto c = column();
-        Q_ASSERT(c1 < c && c2 < c && element < c);
         directReduce(c1, c2, element);
     }
     ////////////////////////////////////////Row Matrix////////////////////////////////////////////
@@ -299,14 +295,10 @@ namespace Physica::Core {
     }
 
     void RowMatrix::rowReduce(size_t r1, size_t r2, size_t element) {
-        const auto r = row();
-        Q_ASSERT(r1 < r && r2 < r && element < r);
         directReduce(r1, r2, element);
     }
 
     void RowMatrix::columnReduce(size_t c1, size_t c2, size_t element) {
-        const auto c = column();
-        Q_ASSERT(c1 < c && c2 < c && element < c);
         indirectReduce(c1, c2, element);
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

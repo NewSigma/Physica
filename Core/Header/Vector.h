@@ -5,6 +5,13 @@
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
+    /*
+     * TODO:
+     * 1.new class MatrixPrivate, VectorPrivate (Handle resource, template, malloc, placement new)
+     * 2.Constructor Matrix(MatrixPrivate) Vector(VectorPrivate)
+     * 3.remove grow()
+     * 4.add setLength()
+     */
     class Vector {
         Numerical* __restrict numbers;
         size_t length;
@@ -19,6 +26,7 @@ namespace Physica::Core {
         ~Vector();
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Vector& v);
+        Vector& operator<<(Numerical n);
         Numerical& operator[](size_t i) { Q_ASSERT(i < length); return numbers[i]; }
         const Numerical& operator[](size_t i) const { Q_ASSERT(i < length); return numbers[i]; }
         Vector& operator=(const Vector& v) noexcept;

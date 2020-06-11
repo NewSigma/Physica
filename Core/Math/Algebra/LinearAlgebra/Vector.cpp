@@ -10,7 +10,8 @@ namespace Physica::Core {
     Vector::Vector() : numbers(nullptr), length(0), capacity(0) {}
 
     Vector::Vector(size_t length)
-            : numbers(reinterpret_cast<Numerical*>(malloc(length * sizeof(Numerical)))), length(0), capacity(length) {}
+            : numbers(reinterpret_cast<Numerical*>(malloc(length * sizeof(Numerical))))
+            , length(0), capacity(length) {}
     //Convenience function to create a 2D Vector.
     Vector::Vector(const Numerical& n1, const Numerical& n2)
             : numbers(reinterpret_cast<Numerical*>(malloc(sizeof(Numerical) * 2))), length(2), capacity(2) {
@@ -55,6 +56,13 @@ namespace Physica::Core {
             os << double(v[i]) << ", ";
         os << double(v[v.length - 1]) << ')';
         return os;
+    }
+
+    Vector& Vector::operator<<(Numerical n) {
+        Q_ASSERT(length < capacity);
+        new (numbers + length) Numerical(std::move(n));
+        ++length;
+        return *this;
     }
 
     Vector& Vector::operator=(const Vector& v) noexcept {

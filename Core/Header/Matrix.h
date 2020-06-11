@@ -177,9 +177,6 @@ namespace Physica::Core {
             }
         }
         matrix.rowSwap(column, main_row_index);
-        const Numerical reciprocal_main = reciprocal(main);
-        for(size_t row = column; row < rank; ++row)
-            matrix(row, column) *= reciprocal_main;
         return main_column_index;
     }
     /*!
@@ -207,9 +204,6 @@ namespace Physica::Core {
             main_index = larger ? j : main_index;
         }
         matrix.rowSwap(column, main_index);
-        const Numerical reciprocal_main = reciprocal(main);
-        for(size_t row = column; row < rank; ++row)
-            matrix(row, column) *= reciprocal_main;
         return main_index;
     }
     /*!
@@ -251,24 +245,34 @@ namespace Physica::Core {
      * Direct functions will not call Vector's member functions while indirect functions will.
      */
     inline void Matrix::directSwap(size_t i, size_t j) {
+        Q_ASSERT(i < length && j < length);
         Physica::Core::swap(vectors[i], vectors[j]);
     }
 
     inline void Matrix::indirectSwap(size_t i, size_t j) {
+        const auto vector_length = vectors[0].getLength();
+        Q_ASSERT(i < vector_length && j < vector_length);
         for(size_t k = 0; k < length; ++k)
-            Physica::Core::swap(vectors[i], vectors[j]);
+            Physica::Core::swap(vectors[k][i], vectors[k][j]);
     }
     //!Reduce the element at \j using \i.
     inline void Matrix::directReduce(size_t i, size_t j, size_t element) {
+        const auto vector_length = vectors[0].getLength();
+        Q_ASSERT(i < length && j < length && element < vector_length);
         auto& v1 = vectors[i];
         auto& v2 = vectors[j];
         v2 -= v1 * (v2[element] / v1[element]);
     }
     //!Reduce the element at \j using \i.
     inline void Matrix::indirectReduce(size_t i, size_t j, size_t element) {
-        const auto dividend = vectors[element][i] / vectors[element][j];
-        for(size_t k = 0; k < length; ++k)
-            vectors[k][j] -= vectors[k][i] * dividend;
+        const auto vector_length = vectors[0].getLength();
+        Q_ASSERT(i < vector_length && j < vector_length && element < length);
+        const auto& vector_ele = vectors[element];
+        const auto dividend = vector_ele[j] / vector_ele[i];
+        for(size_t k = 0; k < length; ++k) {
+            auto& vector_k = vectors[k];
+            vector_k[j] -= vector_k[i] * dividend;
+        }
     }
 
     inline void Matrix::directVectorAppend(Vector&& v) {

@@ -11,24 +11,21 @@ namespace Physica::Core {
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
+    //FIXME inline will cause incorrect results in release mode.
     inline NumericalUnit mulWordByWordHigh(NumericalUnit n1, NumericalUnit n2) {
     #if UseASM
         NumericalUnit result;
         #ifdef PHYSICA_64BIT
             asm (
-                    "movq %1, %%rax\n\t"
                     "mulq %2"
                     : "=d"(result)
-                    : "rm"(n1), "r"(n2)
-                    : "%rax"
+                    : "a"(n1), "rm"(n2)
             );
         #else
             asm (
-                    "movl %1, %%rax\n\t"
                     "mull %2"
                     : "=d"(result)
-                    : "rm"(n1), "rm"(n2)
-                    : "%rax"
+                    : "a"(n1), "rm"(n2)
             );
         #endif
         return result;
@@ -58,17 +55,15 @@ namespace Physica::Core {
     #if UseASM
         #ifdef PHYSICA_64BIT
             asm (
-                    "movq %2, %%rax\n\t"
                     "mulq %3"
                     : "=d"(high), "=a"(low)
-                    : "rm"(n1), "r"(n2)
+                    : "a"(n1), "rm"(n2)
             );
         #else
             asm (
-                    "movl %2, %%rax\n\t"
                     "mull %3"
                     : "=d"(high), "=a"(low)
-                    : "rm"(n1), "rm"(n2)
+                    : "a"(n1), "rm"(n2)
             );
         #endif
     #else
@@ -90,7 +85,8 @@ namespace Physica::Core {
     #endif
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
+    inline NumericalUnit mulArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr
+            , size_t length, NumericalUnit n) {
         NumericalUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
@@ -101,7 +97,8 @@ namespace Physica::Core {
         return carry;
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulAddArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
+    inline NumericalUnit mulAddArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr
+            , size_t length, NumericalUnit n) {
         NumericalUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
@@ -113,7 +110,7 @@ namespace Physica::Core {
         return carry;
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulSubArrByWord(NumericalUnit* result, const NumericalUnit* arr, size_t length, NumericalUnit n) {
+    inline NumericalUnit mulSubArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr, size_t length, NumericalUnit n) {
         NumericalUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
