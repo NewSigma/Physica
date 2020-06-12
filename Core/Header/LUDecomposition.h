@@ -22,7 +22,7 @@ namespace Physica::Core {
         [[nodiscard]] const Matrix& getMatrix() { return *matrix; }
         [[nodiscard]] const size_t* getOrder() { return biasOrder; }
     private:
-        static void decompositionColumn(const Matrix& from, Matrix& to, size_t column);
+        static void decompositionColumn(Matrix& m, size_t column);
     };
 }
 

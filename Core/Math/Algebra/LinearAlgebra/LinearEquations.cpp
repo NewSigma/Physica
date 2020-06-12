@@ -74,17 +74,23 @@ namespace Physica::Core {
                 matrix(0, rank) /= matrix(0, 0);
                 break;
             case LUMethod:
-                LUDecomposition lu(reinterpret_cast<SquareMatrix&>(matrix)); //NOLINT
+                SquareMatrix* square = matrix.getType() == Matrix::Column
+                        ? static_cast<SquareMatrix*>(new ColumnSquareMatrix(matrix.vectors, matrix.length))
+                        : static_cast<SquareMatrix*>(new RowSquareMatrix(matrix.vectors, matrix.length));
+                LUDecomposition lu(*square);
+                square->vectors = nullptr;
+                square->length = 0;
+                delete square;
+                for(size_t i = 0; i < rank - 1; ++i) {
+                    for(size_t j = i + 1; j < rank; ++j)
+                        matrix(j, rank) -= matrix(j, i) * matrix(i, rank);
+                }
                 for(size_t i = rank - 1; i > 0; --i) {
                     matrix(i, rank) /= matrix(i, i);
                     for(size_t j = 0; j < i; ++j)
                         matrix(j, rank) -= matrix(j, i) * matrix(i, rank);
                 }
                 matrix(0, rank) /= matrix(0, 0);
-                for(size_t i = 0; i < rank; ++i) {
-                    for(size_t j = 0; j < i; ++j)
-                        matrix(j, rank) -= matrix(j, i) * matrix(i, rank);
-                }
                 break;
         }
         return matrix[matrix.row()];

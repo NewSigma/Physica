@@ -7,13 +7,13 @@
 namespace Physica::Core {
     LUDecomposition::LUDecomposition(SquareMatrix& square)
             : matrix(nullptr)
-            , biasOrder(new size_t[square.getLength()]) {
-        const auto length = square.getLength();
-        for(size_t i = 0; i < length; ++i)
+            , biasOrder(new size_t[square.row()]) {
+        const auto r = square.row();
+        for(size_t i = 0; i < r; ++i)
             biasOrder[i] = i;
-        for(size_t i = 0; i < length; ++i) {
+        for(size_t i = 0; i < r; ++i) {
             std::swap(biasOrder[i], biasOrder[square.partialPivoting(i)]);
-            decompositionColumn(square, square, i);
+            decompositionColumn(square, i);
         }
     }
 
@@ -27,7 +27,7 @@ namespace Physica::Core {
             biasOrder[i] = i;
         for (size_t i = 0; i < length; ++i) {
             std::swap(biasOrder[i], biasOrder[matrix->partialPivoting(i)]);
-            decompositionColumn(*matrix, *matrix, i);
+            decompositionColumn(*matrix, i);
         }
     }
 
@@ -37,21 +37,26 @@ namespace Physica::Core {
     }
     /*!
      * Apply LU Decomposition on a column of Matrix \from, save the result to Matrix \to.
+     *
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
      */
-    void LUDecomposition::decompositionColumn(const Matrix& from, Matrix& to, size_t column) {
+    void LUDecomposition::decompositionColumn(Matrix& m, size_t column) {
         const auto startAlphaIndex = column + 1;
-        for (size_t j = 0; j < startAlphaIndex; ++j) {
-            Numerical temp(from(j, column));
-            for (size_t k = 0; k < j - 1; ++k)
-                temp -= from(j, k) * from(k, column);
-            to(j, column) = temp;
+        for (size_t j = 1; j < startAlphaIndex; ++j) {
+            Numerical temp(m(j, column));
+            for (size_t k = 0; k < j; ++k)
+                temp -= m(j, k) * m(k, column);
+            m(j, column) = std::move(temp);
         }
 
-        for (size_t j = startAlphaIndex; j < from.getLength(); ++j) {
-            Numerical temp(from(j, column));
-            for (size_t k = 0; k < j - 1; ++k)
-                temp -= from(j, k) * from(k, column);
-            to(j, column) = temp / from(column, column);
+        const auto r = m.row();
+        for (size_t j = startAlphaIndex; j < r; ++j) {
+            Numerical temp(m(j, column));
+            for (size_t k = 0; k < column; ++k)
+                temp -= m(j, k) * m(k, column);
+            m(j, column) = temp / m(column, column);
         }
     }
 }

@@ -27,18 +27,16 @@ namespace Physica::Core {
     public:
         ColumnSquareMatrix();
         explicit ColumnSquareMatrix(size_t size);
+        ColumnSquareMatrix(Vector* vectors, size_t length);
         ColumnSquareMatrix(const ColumnSquareMatrix& matrix);
-        /* Helpers */
-        [[nodiscard]] size_t row() const override { return length; }
     };
     /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
     class RowSquareMatrix : public RowMatrix, public SquareMatrix {
     public:
         RowSquareMatrix();
         explicit RowSquareMatrix(size_t size);
+        RowSquareMatrix(Vector* vectors, size_t length);
         RowSquareMatrix(const RowSquareMatrix& matrix);
-        /* Helpers */
-        [[nodiscard]] size_t column() const override { return length; }
     };
 }
 

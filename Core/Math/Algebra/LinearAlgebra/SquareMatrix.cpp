@@ -57,6 +57,8 @@ namespace Physica::Core {
             : Matrix(reinterpret_cast<Vector*>(malloc(size * sizeof(Vector))), size, Column)
             , ColumnMatrix(size, size) {}
 
+    ColumnSquareMatrix::ColumnSquareMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Column) {}
+
     ColumnSquareMatrix::ColumnSquareMatrix(const ColumnSquareMatrix& matrix) //NOLINT
             : Matrix(matrix), ColumnMatrix(matrix) {}
     /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
@@ -65,6 +67,8 @@ namespace Physica::Core {
     RowSquareMatrix::RowSquareMatrix(size_t size)
             : Matrix(reinterpret_cast<Vector*>(malloc(size * sizeof(Vector))), size, Row)
             , RowMatrix(size, size) {}
+
+    RowSquareMatrix::RowSquareMatrix(Vector* vectors, size_t length) : Matrix(vectors, length, Row) {}
 
     RowSquareMatrix::RowSquareMatrix(const RowSquareMatrix& matrix) //NOLINT
             : Matrix(matrix), RowMatrix(matrix) {}
