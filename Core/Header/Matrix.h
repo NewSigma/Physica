@@ -1,40 +1,40 @@
 #ifndef PHYSICA_MATRIX_H
 #define PHYSICA_MATRIX_H
 
-#include "Vector.h"
 #include <memory>
+#include "Vector.h"
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////
-    class Matrix {
+    class Matrix : public CStyleArray<Vector> {
     public:
         enum MatrixType {
             Row, Column
         };
     protected:
-        Vector* __restrict vectors;
-        size_t length;
-        size_t capacity;
         MatrixType type;
     public:
         explicit Matrix(MatrixType type);
-        Matrix(size_t length, MatrixType type);
-        Matrix(const Matrix& matrix);
+        Matrix(size_t capacity, MatrixType type);
+        Matrix(size_t length, size_t capacity, MatrixType type);
+        explicit Matrix(const CStyleArray<Vector>& array, MatrixType type);
+        explicit Matrix(CStyleArray<Vector>&& array, MatrixType type) noexcept;
+        Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
-        virtual ~Matrix();
+        virtual ~Matrix() = default;
         /* Operators */
-        [[nodiscard]] Vector& operator[](size_t index) { return vectors[index]; }
-        [[nodiscard]] const Vector& operator[](size_t index) const { return vectors[index]; }
         [[nodiscard]] virtual Numerical& operator()(size_t row, size_t column) = 0;
         [[nodiscard]] virtual const Numerical& operator()(size_t row, size_t column) const = 0;
-        Matrix& operator=(const Matrix& m) noexcept;
+        Matrix& operator=(const Matrix& m);
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
-        virtual void appendRow(Vector v) = 0;
-        virtual void appendColumn(Vector v) = 0;
-        inline void appendMatrixRow(const Matrix& m);
+        virtual void appendRow(const Vector& v) = 0;
+        virtual void appendRow(Vector&& v) noexcept = 0;
+        virtual void appendColumn(const Vector& v) = 0;
+        virtual void appendColumn(Vector&& v) noexcept = 0;
+        virtual void appendMatrixRow(const Matrix& m) = 0;
         virtual void appendMatrixRow(Matrix&& m) = 0;
-        inline void appendMatrixColumn(const Matrix& m);
+        virtual void appendMatrixColumn(const Matrix& m) = 0;
         virtual void appendMatrixColumn(Matrix&& m) = 0;
         virtual Vector cutRow() = 0;
         virtual Vector cutColumn() = 0;
@@ -48,95 +48,19 @@ namespace Physica::Core {
         void lowerEliminate(size_t index);
         void impactPivoting();
         /* Helpers */
-        void resize(size_t size);
-        void squeeze();
         void swap(Matrix& m) noexcept;
-        [[nodiscard]] size_t getLength() const noexcept { return length; }
-        [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
         [[nodiscard]] MatrixType getType() const noexcept { return type; }
-        [[nodiscard]] bool isEmpty() const noexcept { return length == 0; }
         [[nodiscard]] virtual size_t row() const = 0;
         [[nodiscard]] virtual size_t column() const = 0;
         /* Pivoting */
         inline size_t completePivoting(size_t column);
         inline size_t partialPivoting(size_t column);
         inline void impactPivoting(size_t row);
-    protected:
-        Matrix(Vector* vectors, size_t length, MatrixType type);
-        void directSwap(size_t i, size_t j);
-        void indirectSwap(size_t i, size_t j);
-        inline void directReduce(size_t i, size_t j, size_t element);
-        inline void indirectReduce(size_t i, size_t j, size_t element);
-        inline void directVectorAppend(Vector&& v);
-        inline void indirectVectorAppend(Vector&& v);
-        inline void directMatrixAppend(Matrix&& m);
-        inline void indirectMatrixAppend(Matrix&& m);
-        inline Vector directVectorCut();
-        inline Vector indirectVectorCut();
-        inline Matrix* directMatrixCut(size_t from);
-        inline Matrix* indirectMatrixCut(size_t from);
-    private:
         /* Friends */
         friend class ColumnMatrix;
         friend class RowMatrix;
         friend class LinearEquations;
         friend class LUDecomposition;
-    };
-    ////////////////////////////////////////Column Matrix////////////////////////////////////////////
-    class ColumnMatrix : virtual public Matrix {
-    public:
-        ColumnMatrix();
-        ColumnMatrix(size_t column, size_t row);
-        ColumnMatrix(Vector* vectors, size_t length);
-        ColumnMatrix(const ColumnMatrix& matrix) = default;
-        ColumnMatrix(ColumnMatrix&& matrix) noexcept;
-        /* Operators */
-        [[nodiscard]] Numerical& operator()(size_t row, size_t column) override { return vectors[column][row]; }
-        [[nodiscard]] const Numerical& operator()(size_t row, size_t column) const override { return vectors[column][row]; }
-        /* Matrix Operations*/
-        void appendRow(Vector v) override;
-        void appendColumn(Vector v) override;
-        void appendMatrixRow(Matrix&& m) override;
-        void appendMatrixColumn(Matrix&& m) override;
-        Vector cutRow() override;
-        Vector cutColumn() override;
-        std::unique_ptr<Matrix> cutMatrixRow(size_t from) override;
-        std::unique_ptr<Matrix> cutMatrixColumn(size_t from) override;
-        void rowSwap(size_t r1, size_t r2) noexcept override;
-        void columnSwap(size_t c1, size_t c2) noexcept override;
-        void rowReduce(size_t r1, size_t r2, size_t element) override;
-        void columnReduce(size_t c1, size_t c2, size_t element) override;
-        /* Helpers */
-        [[nodiscard]] size_t row() const override { return vectors[0].getLength(); }
-        [[nodiscard]] size_t column() const override { return length; }
-    };
-    ////////////////////////////////////////Row Matrix////////////////////////////////////////////
-    class RowMatrix : virtual public Matrix {
-    public:
-        RowMatrix();
-        RowMatrix(size_t column, size_t row);
-        RowMatrix(Vector* vectors, size_t length);
-        RowMatrix(const RowMatrix& matrix) = default;
-        RowMatrix(RowMatrix&& matrix) noexcept;
-        /* Operators */
-        [[nodiscard]] Numerical& operator()(size_t row, size_t column) override { return vectors[row][column]; }
-        [[nodiscard]] const Numerical& operator()(size_t row, size_t column) const override { return vectors[row][column]; }
-        /* Matrix Operations */
-        void appendRow(Vector v) override;
-        void appendColumn(Vector v) override;
-        void appendMatrixRow(Matrix&& m) override;
-        void appendMatrixColumn(Matrix&& m) override;
-        Vector cutRow() override;
-        Vector cutColumn() override;
-        std::unique_ptr<Matrix> cutMatrixRow(size_t from) override;
-        std::unique_ptr<Matrix> cutMatrixColumn(size_t from) override;
-        void rowSwap(size_t r1, size_t r2) noexcept override;
-        void columnSwap(size_t c1, size_t c2) noexcept override;
-        void rowReduce(size_t r1, size_t r2, size_t element) override;
-        void columnReduce(size_t c1, size_t c2, size_t element) override;
-        /* Helpers */
-        [[nodiscard]] size_t row() const override { return length; }
-        [[nodiscard]] size_t column() const override { return vectors[0].getLength(); }
     };
     /* Operators */
     std::ostream& operator<<(std::ostream& os, const Matrix& m);
@@ -163,20 +87,18 @@ namespace Physica::Core {
     inline size_t Matrix::completePivoting(size_t column) {
         Q_ASSERT(column < this->column());
         const auto rank = row();
-        auto& matrix = *this;
         size_t main_row_index = 0, main_column_index = 0;
-        Numerical main(BasicConst::getInstance().get_0());
+        const Numerical* main = &BasicConst::getInstance().get_0();
         for(size_t i = column; i < rank; ++i) {
             for(size_t j = column; j < rank; ++j) {
-                Numerical temp = matrix(i, j);
-                temp.toAbs();
-                bool larger = main < temp;
-                main = larger ? std::move(temp) : main;
-                main_row_index = larger ? j : main_row_index;
-                main_column_index = larger ? i : main_column_index;
+                const Numerical* temp = &(*this)(i, j);
+                bool larger = absCompare(*main, *temp);
+                main = larger ? main : temp;
+                main_row_index = larger ? main_row_index : j;
+                main_column_index = larger ? main_column_index : i;
             }
         }
-        matrix.rowSwap(column, main_row_index);
+        this->rowSwap(column, main_row_index);
         return main_column_index;
     }
     /*!
@@ -192,18 +114,15 @@ namespace Physica::Core {
     inline size_t Matrix::partialPivoting(size_t column) {
         Q_ASSERT(column < this->column());
         const auto rank = row();
-        auto& matrix = *this;
         size_t main_index = column;
-        Numerical main = matrix(column, column);
-        main.toAbs();
+        const Numerical* main = &(*this)(column, column);
         for(size_t j = column + 1; j < rank; ++j) {
-            Numerical temp = matrix(j, column);
-            temp.toAbs();
-            bool larger = main < temp;
-            main = larger ? std::move(temp) : main;
-            main_index = larger ? j : main_index;
+            const Numerical* temp = &(*this)(j, column);
+            bool larger = absCompare(*main, *temp);
+            main = larger ? main : temp;
+            main_index = larger ? main_index : j;
         }
-        matrix.rowSwap(column, main_index);
+        this->rowSwap(column, main_index);
         return main_index;
     }
     /*!
@@ -219,127 +138,17 @@ namespace Physica::Core {
     inline void Matrix::impactPivoting(size_t row) {
         Q_ASSERT(row < this->row());
         const auto col = column();
-        auto& matrix = *this;
-        Numerical main(matrix(row, 0));
+        const Numerical* main = &(*this)(row, 0);
         for(size_t i = 1; i < col; ++i) {
-            Numerical temp(matrix(row, i));
-            temp.toAbs();
-            main = main < temp ? std::move(temp) : main;
+            const Numerical* temp = &(*this)(row, i);
+            main = absCompare(*main, *temp) ? main : temp;
         }
-        main = reciprocal(main);
+        const Numerical n = reciprocal(*main);
         for(size_t i = 0; i < col; ++i)
-            matrix(row, i) *= main;
-    }
-
-    inline void Matrix::appendMatrixRow(const Matrix& m) {
-        appendMatrixRow(RowMatrix(reinterpret_cast<const RowMatrix&>(m))); //NOLINT assume m is a RowMatrix.
-    }
-
-    inline void Matrix::appendMatrixColumn(const Matrix& m) {
-        appendMatrixColumn(ColumnMatrix(reinterpret_cast<const ColumnMatrix&>(m))); //NOLINT assume m is a RowMatrix.
+            (*this)(row, i) *= n;
     }
 
     inline void swap(Matrix& m1, Matrix& m2) noexcept { m1.swap(m2); }
-    /*!
-     * The following functions(direct and indirect) is the implementation of virtual function swaps and reduces.
-     * Direct functions will not call Vector's member functions while indirect functions will.
-     */
-    inline void Matrix::directSwap(size_t i, size_t j) {
-        Q_ASSERT(i < length && j < length);
-        Physica::Core::swap(vectors[i], vectors[j]);
-    }
-
-    inline void Matrix::indirectSwap(size_t i, size_t j) {
-        const auto vector_length = vectors[0].getLength();
-        Q_ASSERT(i < vector_length && j < vector_length);
-        for(size_t k = 0; k < length; ++k)
-            Physica::Core::swap(vectors[k][i], vectors[k][j]);
-    }
-    //!Reduce the element at \j using \i.
-    inline void Matrix::directReduce(size_t i, size_t j, size_t element) {
-        const auto vector_length = vectors[0].getLength();
-        Q_ASSERT(i < length && j < length && element < vector_length);
-        auto& v1 = vectors[i];
-        auto& v2 = vectors[j];
-        v2 -= v1 * (v2[element] / v1[element]);
-    }
-    //!Reduce the element at \j using \i.
-    inline void Matrix::indirectReduce(size_t i, size_t j, size_t element) {
-        const auto vector_length = vectors[0].getLength();
-        Q_ASSERT(i < vector_length && j < vector_length && element < length);
-        const auto& vector_ele = vectors[element];
-        const auto dividend = vector_ele[j] / vector_ele[i];
-        for(size_t k = 0; k < length; ++k) {
-            auto& vector_k = vectors[k];
-            vector_k[j] -= vector_k[i] * dividend;
-        }
-    }
-
-    inline void Matrix::directVectorAppend(Vector&& v) {
-        if(length == capacity) {
-            ++capacity;
-            vectors = reinterpret_cast<Vector*>(realloc(vectors, capacity * sizeof(Vector)));
-        }
-        new (vectors + length) Vector(std::move(v));
-        ++length;
-    }
-
-    inline void Matrix::indirectVectorAppend(Vector&& v) {
-        for(size_t i = 0; i < length; ++i)
-            vectors[i].append(std::move(v[i]));
-    }
-
-    inline void Matrix::directMatrixAppend(Matrix&& m) {
-        const auto new_length = length + m.getLength();
-        if(new_length > capacity) {
-            capacity = new_length;
-            vectors = reinterpret_cast<Vector*>(realloc(vectors, capacity * sizeof(Vector)));
-        }
-        for(size_t i = length; i < new_length; ++i)
-            new (vectors + i) Vector(std::move(m.vectors[i - length]));
-        length = new_length;
-    }
-
-    inline void Matrix::indirectMatrixAppend(Matrix&& m) {
-        for(size_t i = 0; i < length; ++i)
-            vectors[i].append(std::move(m[i]));
-    }
-
-    inline Vector Matrix::directVectorCut() {
-        Q_ASSERT(length > 0);
-        --length;
-        return Vector(std::move(vectors[length]));
-    }
-
-    inline Vector Matrix::indirectVectorCut() {
-        Q_ASSERT(vectors[0].getLength() > 0);
-        Vector result(length);
-        for(size_t i = 0; i < length; ++i)
-            result.grow(vectors[i].cutLast());
-        return result;
-    }
-    //!\from is included
-    inline Matrix* Matrix::directMatrixCut(size_t from) {
-        Q_ASSERT(from <= length);
-        const auto new_length = length - from + 1;
-        auto new_vectors = reinterpret_cast<Vector*>(malloc(new_length * sizeof(Vector)));
-        length = from;
-        for(size_t i = 0; i < new_length; ++i)
-            new (new_vectors + i) Vector(std::move(vectors[from + i]));
-        return getType() == Column ?
-               static_cast<Matrix*>(new ColumnMatrix(new_vectors, new_length))
-               : static_cast<Matrix*>(new RowMatrix(new_vectors, new_length));
-    }
-    //!\from is included
-    inline Matrix* Matrix::indirectMatrixCut(size_t from) {
-        Q_ASSERT(from <= vectors[0].getLength());
-        auto new_vectors = reinterpret_cast<Vector*>(malloc(length * sizeof(Vector)));
-        for(size_t i = 0; i < length; ++i)
-            new (new_vectors + i) Vector(vectors[i].cut(from));
-        return getType() == Column ?
-               static_cast<Matrix*>(new ColumnMatrix(new_vectors, length))
-               : static_cast<Matrix*>(new RowMatrix(new_vectors, length));
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     std::unique_ptr<Matrix> reciprocal(const Matrix& n);
     std::unique_ptr<Matrix> sqrt(const Matrix& n);

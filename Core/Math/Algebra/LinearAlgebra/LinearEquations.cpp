@@ -16,16 +16,11 @@ namespace Physica::Core {
      *
      * Optimize:
      * If the equations do not have the unique solution, the program will throw a divide zero exception and stop.
+     *
+     * Unfinished:
+     * Change the bias in LU method to solve a family of equations.
      */
-    LinearEquations::LinearEquations(Matrix*& m) noexcept : matrix(*m) {
-        m = nullptr;
-    }
-
-    LinearEquations::LinearEquations(Matrix*&& m) noexcept : matrix(*m) {}
-
-    LinearEquations::~LinearEquations() {
-        delete &matrix;
-    }
+    LinearEquations::LinearEquations(Matrix& m) noexcept : matrix(m) {}
     //!Reference: Numerical Recipes in C++
     const Vector& LinearEquations::solve(LinearEquationsMethod method) {
         const auto rank = matrix.row();
@@ -75,11 +70,10 @@ namespace Physica::Core {
                 break;
             case LUMethod:
                 SquareMatrix* square = matrix.getType() == Matrix::Column
-                        ? static_cast<SquareMatrix*>(new ColumnSquareMatrix(matrix.vectors, matrix.length))
-                        : static_cast<SquareMatrix*>(new RowSquareMatrix(matrix.vectors, matrix.length));
+                        ? static_cast<SquareMatrix*>(new ColumnSquareMatrix(std::move(matrix)))
+                        : static_cast<SquareMatrix*>(new RowSquareMatrix(std::move(matrix)));
                 LUDecomposition lu(*square);
-                square->vectors = nullptr;
-                square->length = 0;
+                static_cast<CStyleArray<Vector>&>(matrix) = std::move(*square);
                 delete square;
                 for(size_t i = 0; i < rank - 1; ++i) {
                     for(size_t j = i + 1; j < rank; ++j)

@@ -354,7 +354,42 @@ namespace Physica::Core {
         memcpy(result.byte, byte, getSize() * sizeof(NumericalUnit));
         return result;
     }
-
+    /*!
+     * return true if the abstract value of n1 is larger or equal than the abstract value of n2.
+     * return false if the abstract value of n1 is smaller to the abstract value of n2.
+     *
+     * Optimize:
+     * Is subtract faster than comparing the elements?
+     */
+    bool absCompare(const Numerical& n1, const Numerical& n2) {
+        if(n1.getPower() > n2.getPower())
+            return true;
+        if(n1.getPower() < n2.getPower())
+            return false;
+        const Numerical* longer, *shorter;
+        int longer_length, shorter_length;
+        /* Compare length */ {
+            const auto n1_length = n1.getLength(), n2_length = n2.getLength();
+            bool b = n1_length > n2_length;
+            longer = b ? &n1 : &n2;
+            shorter = b ? &n2 : &n1;
+            longer_length = b ? n1_length : n2_length;
+            shorter_length = b ? n2_length : n1_length;
+        }
+        --longer_length;
+        --shorter_length;
+        for(; shorter_length >= 0; --shorter_length, --longer_length) {
+            if((*longer)[longer_length] > (*shorter)[shorter_length])
+                return longer == &n1;
+            if((*longer)[longer_length] < (*shorter)[shorter_length])
+                return shorter == &n1;
+        }
+        return longer_length == shorter_length || longer == &n1;
+    }
+    /*!
+     * Optimize:
+     * Is subtract faster than comparing the elements?
+     */
     bool operator> (const Numerical& n1, const Numerical& n2) {
         //Judge from sign.
         if(n1.isPositive()) {
@@ -380,7 +415,10 @@ namespace Physica::Core {
         }
         return result;
     }
-
+    /*!
+     * Optimize:
+     * Is subtract faster than comparing the elements?
+     */
     bool operator< (const Numerical& n1, const Numerical& n2) {
         //Judge from sign.
         if(n1.isPositive()) {

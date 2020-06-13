@@ -15,7 +15,9 @@ namespace Physica::Core {
      * 1 < Length(x) <= Max(SignedNumericalUnit) is required.
      */
     FFTBase::FFTBase(Vector x, Vector y, NormalizationMethod method)
-    : data(RowMatrix(new Vector[2]{std::move(x), std::move(y)}, 2)) {
+    : data(RowMatrix(2, 2)) {
+        data.allocate(std::move(x), 0);
+        data.allocate(std::move(y), 1);
         //Apply integration.
         switch(method) {
             case LadderMethod:

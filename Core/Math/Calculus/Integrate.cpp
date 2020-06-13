@@ -4,7 +4,10 @@
 namespace Physica::Core {
     Integrate::Integrate(Function func, Numerical from, Numerical to, Numerical stepSize)
             : func(std::move(func)), from(std::move(from)), to(std::move(to)), stepSize(std::move(stepSize)) {}
-
+    /*!
+     * Optimize: if \at is much larger than \stepsize, the result will be 0. May be use talor series
+     * and expend the function to the first order.
+     */
     Numerical Integrate::solve(IntegrateMethod method) {
         Numerical result(BasicConst::getInstance().get_0());
         switch(method) {

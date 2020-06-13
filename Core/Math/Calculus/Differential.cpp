@@ -4,7 +4,10 @@
 namespace Physica::Core {
     Differential::Differential(Function func, Numerical at, Numerical stepSize)
             : func(std::move(func)), at(std::move(at)), stepSize(std::move(stepSize)) {}
-
+    /*!
+     * Optimize: if \at is much larger than \stepsize, the result will be 0. May be use talor series
+     * and expend the function to the first order.
+     */
     Numerical Differential::solve(DifferentialMethod method) {
         Numerical result;
         switch(method) {

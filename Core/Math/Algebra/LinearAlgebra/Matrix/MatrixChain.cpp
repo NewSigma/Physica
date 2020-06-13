@@ -41,7 +41,7 @@ namespace Physica::Core {
         delete[] price;
         delete[] point;
     }
-    //Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
+    //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
     std::unique_ptr<Matrix> MatrixChain::solve() {
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;

@@ -19,9 +19,7 @@ namespace Physica::Core {
     private:
         Matrix& matrix;
     public:
-        explicit LinearEquations(Matrix*& m) noexcept;
-        explicit LinearEquations(Matrix*&& m) noexcept;
-        ~LinearEquations();
+        explicit LinearEquations(Matrix& m) noexcept;
 
         const Vector& solve(LinearEquationsMethod method);
     };

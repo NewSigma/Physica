@@ -1,5 +1,5 @@
-#ifndef PHYSICA_UTIL_H
-#define PHYSICA_UTIL_H
+#ifndef PHYSICA_DEBUGUTIL_H
+#define PHYSICA_DEBUGUTIL_H
 
 #include <cstring>
 #include <cuda_runtime_api.h>

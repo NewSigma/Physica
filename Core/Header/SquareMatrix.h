@@ -4,7 +4,8 @@
 #ifndef PHYSICA_SQUAREMATRIX_H
 #define PHYSICA_SQUAREMATRIX_H
 
-#include "Matrix.h"
+#include "ColumnMatrix.h"
+#include "RowMatrix.h"
 
 namespace Physica::Core {
     /////////////////////////////////////SquareMatrix//////////////////////////////////////////
@@ -15,7 +16,6 @@ namespace Physica::Core {
             LUMethod
         };
     public:
-        void toUnit();
         /* Getters */
         [[nodiscard]] Numerical determinate(SquareMatrixMethod method);
     protected:
@@ -26,17 +26,23 @@ namespace Physica::Core {
     class ColumnSquareMatrix : public ColumnMatrix, public SquareMatrix {
     public:
         ColumnSquareMatrix();
-        explicit ColumnSquareMatrix(size_t size);
-        ColumnSquareMatrix(Vector* vectors, size_t length);
+        explicit ColumnSquareMatrix(size_t capacity);
+        explicit ColumnSquareMatrix(const CStyleArray<Vector>& array);
+        explicit ColumnSquareMatrix(CStyleArray<Vector>&& array) noexcept;
         ColumnSquareMatrix(const ColumnSquareMatrix& matrix);
+
+        static ColumnSquareMatrix getUnitMatrix(size_t size);
     };
     /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
     class RowSquareMatrix : public RowMatrix, public SquareMatrix {
     public:
         RowSquareMatrix();
-        explicit RowSquareMatrix(size_t size);
-        RowSquareMatrix(Vector* vectors, size_t length);
+        explicit RowSquareMatrix(size_t capacity);
+        explicit RowSquareMatrix(const CStyleArray<Vector>& array);
+        explicit RowSquareMatrix(CStyleArray<Vector>&& array) noexcept;
         RowSquareMatrix(const RowSquareMatrix& matrix);
+
+        static RowSquareMatrix getUnitMatrix(size_t size);
     };
 }
 

@@ -91,6 +91,7 @@ namespace Physica::Core {
         friend Numerical sqrt_light(const Numerical& n);
         friend Numerical ln_light(const Numerical& n);
     };
+    bool absCompare(const Numerical& n1, const Numerical& n2);
     /* Operators */
     bool operator>(const Numerical& n1, const Numerical& n2);
     bool operator<(const Numerical& n1, const Numerical& n2);
