@@ -25,7 +25,7 @@ namespace Physica::Test {
         /* Test Pi */ {
             auto Pi = MathConst::getInstance().getPI();
             std::cout << "Testing Pi" << '\n';
-            if(Pi.getSize() == 5 && Pi[0] == 11171822399862759264UL && Pi[1] == 11820040416388919747UL
+            if(Pi.getSize() == 5 && Pi[0] == 11424456171093639400UL && Pi[1] == 11820040416388919749UL
                 && Pi[2] == 1376283091369227076 && Pi[3] == 2611923443488327891 && Pi[4] == 3)
                 std::cout << "Testing Pi --Passed" << '\n';
             else

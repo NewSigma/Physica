@@ -45,6 +45,7 @@ union double_extract {
             } structure;
         };
 #elif PhysicaEndian == PhysicaLittleEndian
+//Use of double_extract may cause several warnings in valgrind.
 union double_extract {
     double value;
     struct {

@@ -28,7 +28,7 @@ namespace Physica::Test {
                || (expect.structure.high != result.structure.high) //NOLINT
                || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
                 std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
-                std::cout << "Performing add test " << "--Failed\n"
+                std::cout << "Performing add test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
                         << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
                         << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
                         << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
@@ -59,7 +59,7 @@ namespace Physica::Test {
                || (expect.structure.high != result.structure.high) //NOLINT
                || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
                 std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
-                std::cout << "Performing sub test " << "--Failed\n"
+                std::cout << "Performing sub test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
                           << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
                           << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
                           << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
@@ -90,7 +90,7 @@ namespace Physica::Test {
                || (expect.structure.high != result.structure.high) //NOLINT
                || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
                 std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
-                std::cout << "Performing mul test " << "--Failed\n"
+                std::cout << "Performing mul test " "--Failed (" << (i + 1) << '/' << loop << ")\n"
                           << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
                           << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
                           << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
@@ -125,7 +125,7 @@ namespace Physica::Test {
                || (expect.structure.high != result.structure.high) //NOLINT
                || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
                 std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
-                std::cout << "Performing div test " << "--Failed\n"
+                std::cout << "Performing div test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
                           << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
                           << "high:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
                           << "exp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'

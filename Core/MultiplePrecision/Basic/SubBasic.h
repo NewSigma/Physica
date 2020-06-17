@@ -28,25 +28,29 @@ namespace Physica::Core {
      */
     inline bool subArrByArr(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr1
             , const NumericalUnit* __restrict arr2, size_t len) {
-        NumericalUnit carry = 0, temp, pre_carry;
+        NumericalUnit carry = 0, temp1, temp2;
+        bool pre_carry;
         for(int i = 0; i < len; ++i) {
-            result[i] = arr1[i] - arr2[i];
-            pre_carry = result[i] > arr1[i];
-            temp = result[i] - carry;
-            carry = pre_carry | (temp > result[i]);
-            result[i] = temp;
+            temp1 = arr1[i];
+            temp2 = temp1 - arr2[i];
+            pre_carry = temp1 < temp2;
+            temp1 = temp2 - carry;
+            result[i] = temp1;
+            carry = pre_carry | (temp1 > temp2);
         }
         return carry;
     }
-    //Another version of subArrByArr()
+    //Another version of subArrByArr(), calculate arr1 -= arr2.
     inline bool subArrByArrEq(NumericalUnit* __restrict arr1, const NumericalUnit* __restrict arr2, size_t len) {
-        NumericalUnit carry = 0, temp, pre_carry;
+        NumericalUnit carry = 0, temp1, temp2;
+        bool pre_carry;
         for(int i = 0; i < len; ++i) {
-            temp = arr1[i] - arr2[i];
-            pre_carry = temp > arr1[i];
-            arr1[i] = temp;
-            arr1[i] -= carry;
-            carry = pre_carry | (arr1[i] > temp);
+            temp1 = arr1[i];
+            temp2 = temp1 - arr2[i];
+            pre_carry = temp1 < temp2;
+            temp1 = temp2 - carry;
+            arr1[i] = temp1;
+            carry = pre_carry | (temp1 > temp2);
         }
         return carry;
     }

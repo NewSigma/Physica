@@ -39,7 +39,7 @@ namespace Physica::Core {
         T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
         const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
         CStyleArray& operator<<(const T& t) { append(t); return *this; }
-        CStyleArray& operator<<(T&& t) { append(t); return *this; }
+        CStyleArray& operator<<(T&& t) { append(std::move(t)); return *this; }
         /* Helpers */
         CStyleArray<T> subArray(size_t from, size_t to);
         CStyleArray<T> subArray(size_t from) { return subArray(from, length); }
@@ -163,7 +163,7 @@ namespace Physica::Core {
     void CStyleArray<T>::append(T&& t) {
         if(length == capacity)
             increase(capacity + 1);
-        grow(t);
+        grow(std::move(t));
     }
 
     template<class T>
@@ -218,7 +218,7 @@ namespace Physica::Core {
     template<class T>
     inline void CStyleArray<T>::allocate(T&& t, size_t index) {
         if(QTypeInfo<T>::isComplex)
-            new (arr + index) T(t);
+            new (arr + index) T(std::move(t));
         else
             *(arr + index) = t;
     }

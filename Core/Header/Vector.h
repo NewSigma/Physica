@@ -20,8 +20,9 @@ namespace Physica::Core {
         ~Vector() = default;
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Vector& v);
-        Vector& operator=(const Vector& v) noexcept { CStyleArray<Numerical>::operator=(v); }
-        Vector& operator=(Vector&& v) noexcept { CStyleArray<Numerical>::operator=(std::move(v)); }
+        Vector& operator<<(double d) { static_cast<CStyleArray<Numerical>>(*this) << Numerical(d); return *this; }
+        Vector& operator=(const Vector& v) noexcept { CStyleArray<Numerical>::operator=(v); return *this; }
+        Vector& operator=(Vector&& v) noexcept { CStyleArray<Numerical>::operator=(std::move(v)); return *this; }
         /* Vector Operations */
         [[nodiscard]] Numerical toNorm() const;
         void toUnit();

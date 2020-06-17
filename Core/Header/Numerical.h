@@ -9,6 +9,7 @@
 #include <QtCore/qlogging.h>
 #include "Core/Header/SystemBits.h"
 #include "Core/Header/Const.h"
+#include "Core/MultiplePrecision/Basic/AddBasic.h"
 #include "Core/MultiplePrecision/Basic/DivBasic.h"
 #include "Core/MultiplePrecision/Util/ArraySupport.h"
 #include "Core/Header/ElementaryFunction.h"
@@ -152,50 +153,45 @@ namespace Physica::Core {
             }
             const int bigSize = big->getSize();
             const int smallSize = small->getSize();
-            int lastIndex = smallSize - 1;
             //Estimate the ed of result first, will calculate it accurately later.
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
+            length = length > BasicConst::getInstance().GlobalPrecision
+                     ? BasicConst::getInstance().GlobalPrecision : length;
             auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
-            memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
-            memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
-
-            int index = length - big->power + small->power - smallSize;
-            NumericalUnit aByte;
-            NumericalUnit carry = 0;
-            NumericalUnit carry_temp;
-            //Add small to big
-            for(int i = 0; i < lastIndex; ++i) {
-                aByte = byte[index];
-                byte[index] += small->byte[i];
-                carry_temp = aByte > byte[index];
-                aByte = byte[index];
-                byte[index] += carry;
-                carry = carry_temp | (aByte > byte[index]);
-                ++index;
+            /* Init byte */ {
+                const auto copySize = bigSize > length ? length : bigSize;
+                const auto clearSize = length - copySize;
+                memset(byte, 0, clearSize * sizeof(NumericalUnit));
+                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(NumericalUnit));
             }
-            aByte = byte[index];
-            byte[index] += small->byte[lastIndex];
-            carry_temp = aByte > byte[index];
-            aByte = byte[index];
-            byte[index] += carry;
-            carry = carry_temp | (aByte > byte[index]);
-
-            while(carry != 0 && index != length - 1) {
-                ++index;
-                aByte = byte[index];
-                byte[index] += carry;
-                carry = aByte > byte[index];
+            bool carry;
+            NumericalUnit a;
+            /* Add and carry */ {
+                //useableSmall is the part whose add result will fall in GlobalPrecision.
+                int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
+                a = useableSmall < 0;
+                useableSmall = useableSmall > smallSize
+                               ? smallSize : (a ? 0 : useableSmall);
+                carry = addArrWithArrEq(small->byte + smallSize - useableSmall
+                        , byte + length + small->power - big->power - useableSmall, useableSmall);
+                //useableSmall is also the index which we should carry to.
+                while(carry != 0 && useableSmall < length) {
+                    NumericalUnit temp = byte[useableSmall] + 1;
+                    byte[useableSmall] = temp;
+                    carry = temp < carry;
+                    ++useableSmall;
+                }
             }
             ///////////////////////////////////////Get byte, length and power//////////////////////////
             int power = big->power;
-            if(carry != 0) {
+            if(carry) {
                 ++length;
                 ++power;
                 byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Numerical(byte, big->length < 0 ? -length : length, power);
+            return Numerical(byte, big->length < 0 ? -length : length, power, a);
         }
     }
     //Refactor: move the key algorithm into a separated method. We may not use every words.
@@ -228,42 +224,39 @@ namespace Physica::Core {
                 redo:
                 const int bigSize = big->getSize();
                 const int smallSize = small->getSize();
-                const int lastIndex = smallSize - 1;
                 //Estimate the ed of result first, will calculate it accurately later.
                 int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
+                length = length > BasicConst::getInstance().GlobalPrecision
+                         ? BasicConst::getInstance().GlobalPrecision : length;
                 auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
-                memcpy(byte + length - bigSize, big->byte, bigSize * sizeof(NumericalUnit));
-                memset(byte, 0, (length - bigSize) * sizeof(NumericalUnit));
-
-                int index = length - big->power + small->power - smallSize;
-                NumericalUnit aByte;
-                NumericalUnit carry = 0;
-                NumericalUnit carry_temp;
-                //Subtract small from big
-                for(int i = 0; i < lastIndex; ++i) {
-                    aByte = byte[index];
-                    byte[index] -= small->byte[i];
-                    carry_temp = aByte < byte[index];
-                    aByte = byte[index];
-                    byte[index] -= carry;
-                    carry = carry_temp | (aByte < byte[index]);
-                    ++index;
+                /* Init byte */ {
+                    const auto copySize = bigSize > length ? length : bigSize;
+                    const auto clearSize = length - copySize;
+                    memset(byte, 0, clearSize * sizeof(NumericalUnit));
+                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(NumericalUnit));
                 }
-                aByte = byte[index];
-                byte[index] -= small->byte[lastIndex];
-                carry_temp = aByte < byte[index];
-                aByte = byte[index];
-                byte[index] -= carry;
-                carry = carry_temp | (aByte < byte[index]);
-
-                while(carry != 0 && index != length - 1) {
-                    ++index;
-                    aByte = byte[index];
-                    byte[index] -= carry;
-                    carry = aByte < byte[index];
+                bool carry;
+                NumericalUnit a;
+                /* Add and carry */ {
+                    //useableSmall is the part whose sub result will fall in GlobalPrecision.
+                    int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
+                    a = useableSmall < 0;
+                    useableSmall = useableSmall > smallSize
+                                   ? smallSize : (a ? 0 : useableSmall);
+                    carry = subArrByArrEq(byte + length + small->power - big->power - useableSmall
+                            , small->byte + smallSize - useableSmall, useableSmall);
+                    //useableSmall is also the index which we should carry to.
+                    NumericalUnit temp1, temp2;
+                    while(carry != 0 && useableSmall < length) {
+                        temp1 = byte[useableSmall];
+                        temp2 = temp1 - 1;
+                        byte[useableSmall] = temp2;
+                        carry = temp1 < temp2;
+                        ++useableSmall;
+                    }
                 }
 
-                if(carry != 0) {
+                if(carry) {
                     auto temp = big;
                     big = small;
                     small = temp;
@@ -271,7 +264,7 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-                Numerical result(byte, changeSign ? -length : length, big->power);
+                Numerical result(byte, changeSign ? -length : length, big->power, a);
                 cutZero(result);
                 return result;
             }

@@ -8,26 +8,30 @@
 #include "Core/Header/SystemBits.h"
 
 namespace Physica::Core {
-    /*
-     * Both of the arrays have the same length. Allocated length of result should not less than len + 1.
+    /*!
+     * \len is the length of \from. Length of \to should not less than \len. length of \result should be \len at least.
      */
-    inline void addArrWithArr(NumericalUnit* __restrict result, const NumericalUnit* __restrict from, const NumericalUnit* __restrict to, size_t len) {
-        result[0] = 0;
+    inline NumericalUnit addArrWithArr(NumericalUnit* __restrict result
+            , const NumericalUnit* __restrict from, const NumericalUnit* __restrict to, size_t len) {
+        NumericalUnit carry = 0, from_i, temp;
         for(int i = 0; i < len; ++i) {
-            NumericalUnit temp = from[i] + to[i];
-            result[i] += temp;
-            result[i + 1] = temp < from[i];
+            from_i = from[i];
+            temp = from_i + to[i];
+            result[i] = temp + carry;
+            carry = temp < from_i;
         }
+        return carry;
     }
-    /*
-     * Both of the arrays have the same length. Allocated length of to should not less than len + 1.
+    /*!
+     * \len is the length of \from. Length of \to should not less than \len.
      */
     inline NumericalUnit addArrWithArrEq(const NumericalUnit* __restrict from, NumericalUnit* __restrict to, size_t len) {
-        NumericalUnit carry = 0;
+        NumericalUnit carry = 0, from_i, temp;
         for(int i = 0; i < len; ++i) {
-            NumericalUnit temp = from[i] + to[i];
-            to[i] += temp + carry;
-            carry = temp < from[i];
+            from_i = from[i];
+            temp = from_i + to[i];
+            to[i] = temp + carry;
+            carry = temp < from_i;
         }
         return carry;
     }
