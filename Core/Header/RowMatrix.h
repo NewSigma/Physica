@@ -10,9 +10,10 @@ namespace Physica::Core {
     class RowMatrix : virtual public Matrix {
     public:
         RowMatrix();
+        explicit RowMatrix(size_t capacity);
         RowMatrix(size_t length, size_t capacity);
-        explicit RowMatrix(const CStyleArray<Vector>& array);
-        explicit RowMatrix(CStyleArray<Vector>&& array) noexcept;
+        explicit RowMatrix(const CStyleArray<Vector, Dynamic>& array);
+        explicit RowMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept;
         RowMatrix(const RowMatrix& matrix) = default;
         RowMatrix(RowMatrix&& matrix) noexcept;
         /* Operators */

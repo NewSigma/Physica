@@ -5,7 +5,7 @@
 #include <QTime>
 #include "Core/Header/Const.h"
 #include "Gui/Header/PhysicaMain.h"
-#include "Core/Header/DebugUtil.h"
+#include "Core/Header/Utils/DebugUtil.h"
 
 using namespace Physica::Core;
 static QtMessageHandler handler;

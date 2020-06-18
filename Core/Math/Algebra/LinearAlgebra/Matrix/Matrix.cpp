@@ -11,34 +11,37 @@
 
 namespace Physica::Core {
     ////////////////////////////////////////Column Matrix////////////////////////////////////////////
-    Matrix::Matrix(MatrixType type) : CStyleArray<Vector>(), type(type) {}
+    Matrix::Matrix(MatrixType type) : CStyleArray<Vector, Dynamic>(), type(type) {}
 
-    Matrix::Matrix(size_t capacity, MatrixType type) : CStyleArray<Vector>(capacity), type(type) {}
+    Matrix::Matrix(size_t capacity, MatrixType type) : CStyleArray<Vector, Dynamic>(capacity), type(type) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
-    Matrix::Matrix(size_t length, size_t capacity, MatrixType type) : CStyleArray<Vector>(length, capacity), type(type) {}
+    Matrix::Matrix(size_t length, size_t capacity, MatrixType type)
+            : CStyleArray<Vector, Dynamic>(length, capacity), type(type) {}
 
-    Matrix::Matrix(const CStyleArray<Vector>& array, MatrixType type) : CStyleArray<Vector>(array), type(type) {}
+    Matrix::Matrix(const CStyleArray<Vector, Dynamic>& array, MatrixType type)
+            : CStyleArray<Vector, Dynamic>(array), type(type) {}
 
-    Matrix::Matrix(CStyleArray&& array, MatrixType type) noexcept : CStyleArray<Vector>(std::move(array)), type(type) {}
+    Matrix::Matrix(CStyleArray<Vector, Dynamic>&& array, MatrixType type) noexcept
+            : CStyleArray<Vector, Dynamic>(std::move(array)), type(type) {}
 
-    Matrix::Matrix(Matrix&& matrix) noexcept : CStyleArray<Vector>(std::move(matrix)), type(matrix.type) {}
+    Matrix::Matrix(Matrix&& matrix) noexcept : CStyleArray<Vector, Dynamic>(std::move(matrix)), type(matrix.type) {}
 
     Matrix& Matrix::operator=(const Matrix& m) {
         if(this == &m)
             return *this;
         this->~Matrix();
         type = m.type;
-        CStyleArray<Vector>::operator=(m);
+        CStyleArray<Vector, Dynamic>::operator=(m);
         return *this;
     }
 
     Matrix& Matrix::operator=(Matrix&& m) noexcept {
         this->~Matrix();
         type = m.type;
-        CStyleArray<Vector>::operator=(std::move(m));
+        CStyleArray<Vector, Dynamic>::operator=(std::move(m));
         return *this;
     }
     /*!
@@ -66,7 +69,7 @@ namespace Physica::Core {
     }
 
     void Matrix::swap(Matrix& m) noexcept {
-        CStyleArray<Vector>::swap(m);
+        CStyleArray<Vector, Dynamic>::swap(m);
         auto temp = type;
         type = m.type;
         m.type = temp;

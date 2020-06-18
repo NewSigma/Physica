@@ -3,7 +3,7 @@
  */
 #include <iostream>
 #include <cmath>
-#include <Core/Header/DebugUtil.h>
+#include <Core/Header/Utils/DebugUtil.h>
 
 namespace Physica {
     namespace Test {

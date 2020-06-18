@@ -3,26 +3,26 @@
 
 #include <iosfwd>
 #include "Core/Header/Numerical.h"
-#include "Core/Header/CStyleArray.h"
+#include "Core/Header/Utils/CStyleArray/CStyleArray.h"
 
 namespace Physica::Core {
-    class Vector : public CStyleArray<Numerical> {
+    class Vector : public CStyleArray<Numerical, Dynamic> {
     public:
         Vector();
         explicit Vector(size_t capacity);
         Vector(size_t length, size_t capacity);
         Vector(const Numerical& n1, const Numerical& n2);
         Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3);
-        explicit Vector(const CStyleArray<Numerical>& array);
-        explicit Vector(CStyleArray<Numerical>&& array) noexcept;
+        explicit Vector(const CStyleArray<Numerical, Dynamic>& array);
+        explicit Vector(CStyleArray<Numerical, Dynamic>&& array) noexcept;
         Vector(const Vector& vec) = default;
         Vector(Vector&& vec) noexcept;
         ~Vector() = default;
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Vector& v);
-        Vector& operator<<(double d) { static_cast<CStyleArray<Numerical>>(*this) << Numerical(d); return *this; }
-        Vector& operator=(const Vector& v) noexcept { CStyleArray<Numerical>::operator=(v); return *this; }
-        Vector& operator=(Vector&& v) noexcept { CStyleArray<Numerical>::operator=(std::move(v)); return *this; }
+        Vector& operator<<(double d) { static_cast<CStyleArray<Numerical, Dynamic>>(*this) << Numerical(d); return *this; }
+        Vector& operator=(const Vector& v) noexcept { CStyleArray<Numerical, Dynamic>::operator=(v); return *this; }
+        Vector& operator=(Vector&& v) noexcept { CStyleArray<Numerical, Dynamic>::operator=(std::move(v)); return *this; }
         /* Vector Operations */
         [[nodiscard]] Numerical toNorm() const;
         void toUnit();

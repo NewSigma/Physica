@@ -10,9 +10,10 @@ namespace Physica::Core {
     class ColumnMatrix : virtual public Matrix {
     public:
         ColumnMatrix();
+        explicit ColumnMatrix(size_t capacity);
         ColumnMatrix(size_t length, size_t capacity);
-        explicit ColumnMatrix(const CStyleArray<Vector>& array);
-        explicit ColumnMatrix(CStyleArray<Vector>&& array) noexcept;
+        explicit ColumnMatrix(const CStyleArray<Vector, Dynamic>& array);
+        explicit ColumnMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept;
         ColumnMatrix(const ColumnMatrix& matrix) = default;
         ColumnMatrix(ColumnMatrix&& matrix) noexcept;
         /* Operators */

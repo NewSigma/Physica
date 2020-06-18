@@ -5,15 +5,17 @@
 
 namespace Physica::Core {
     RowMatrix::RowMatrix() : Matrix(Row) {}
+
+    RowMatrix::RowMatrix(size_t capacity) : Matrix(capacity, Row) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
     RowMatrix::RowMatrix(size_t length, size_t capacity) : Matrix(length, capacity, Row) {}
 
-    RowMatrix::RowMatrix(const CStyleArray<Vector>& array) : Matrix(array, Row) {}
+    RowMatrix::RowMatrix(const CStyleArray<Vector, Dynamic>& array) : Matrix(array, Row) {}
 
-    RowMatrix::RowMatrix(CStyleArray<Vector>&& array) noexcept : Matrix(std::move(array), Row) {}
+    RowMatrix::RowMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept : Matrix(std::move(array), Row) {}
 
     RowMatrix::RowMatrix(RowMatrix&& matrix) noexcept : Matrix(std::move(matrix)) {}
     //!Optimize: may be inline append().

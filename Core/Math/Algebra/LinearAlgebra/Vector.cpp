@@ -7,32 +7,32 @@
 #include "Core/Header/Numerical.h"
 
 namespace Physica::Core {
-    Vector::Vector() : CStyleArray<Numerical>() {}
+    Vector::Vector() : CStyleArray<Numerical, Dynamic>() {}
 
-    Vector::Vector(size_t capacity) : CStyleArray<Numerical>(capacity) {}
+    Vector::Vector(size_t capacity) : CStyleArray<Numerical, Dynamic>(capacity) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
-    Vector::Vector(size_t length, size_t capacity) : CStyleArray<Numerical>(length, capacity) {}
+    Vector::Vector(size_t length, size_t capacity) : CStyleArray<Numerical, Dynamic>(length, capacity) {}
     //!Convenience function to create a 2D Vector.
-    Vector::Vector(const Numerical& n1, const Numerical& n2) : CStyleArray<Numerical>(2, 2) {
+    Vector::Vector(const Numerical& n1, const Numerical& n2) : CStyleArray<Numerical, Dynamic>(2, 2) {
         allocate(n1, 0);
         allocate(n2, 1);
     }
     //!Convenience function to create a 3D Vector.
     Vector::Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3)
-            : CStyleArray<Numerical>(3, 3) {
+            : CStyleArray<Numerical, Dynamic>(3, 3) {
         allocate(n1, 0);
         allocate(n2, 1);
         allocate(n3, 2);
     }
 
-    Vector::Vector(const CStyleArray<Numerical>& array) : CStyleArray<Numerical>(array) {}
+    Vector::Vector(const CStyleArray<Numerical, Dynamic>& array) : CStyleArray<Numerical, Dynamic>(array) {}
 
-    Vector::Vector(CStyleArray<Numerical>&& array) noexcept : CStyleArray<Numerical>(std::move(array)) {}
+    Vector::Vector(CStyleArray<Numerical, Dynamic>&& array) noexcept : CStyleArray<Numerical, Dynamic>(std::move(array)) {}
 
-    Vector::Vector(Vector&& vec) noexcept : CStyleArray<Numerical>(std::move(vec))  {}
+    Vector::Vector(Vector&& vec) noexcept : CStyleArray<Numerical, Dynamic>(std::move(vec))  {}
 
     std::ostream& operator<<(std::ostream& os, const Vector& v) {
         os << '(';

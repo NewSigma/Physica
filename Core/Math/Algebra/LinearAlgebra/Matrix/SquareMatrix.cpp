@@ -43,12 +43,12 @@ namespace Physica::Core {
     ColumnSquareMatrix::ColumnSquareMatrix() : Matrix(Column) {}
 
     ColumnSquareMatrix::ColumnSquareMatrix(size_t capacity)
-            : Matrix(CStyleArray<Vector>(capacity), Column) {}
+            : Matrix(CStyleArray<Vector, Dynamic>(capacity), Column) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(const CStyleArray<Vector>& array)
+    ColumnSquareMatrix::ColumnSquareMatrix(const CStyleArray<Vector, Dynamic>& array)
             : Matrix(array, Column) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(CStyleArray<Vector>&& array) noexcept
+    ColumnSquareMatrix::ColumnSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept
             : Matrix(std::move(array), Column) {}
 
     ColumnSquareMatrix::ColumnSquareMatrix(const ColumnSquareMatrix& matrix) //NOLINT
@@ -57,9 +57,9 @@ namespace Physica::Core {
     ColumnSquareMatrix ColumnSquareMatrix::getUnitMatrix(size_t size) {
         const Numerical& _0 = BasicConst::getInstance().get_0();
         const Numerical& _1 = BasicConst::getInstance().get_1();
-        CStyleArray<Vector> array(size, size);
+        CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Numerical> array1(size, size);
+            CStyleArray<Numerical, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
                 array1.allocate(Numerical(_0), j);
             array1.allocate(Numerical(_1), i);
@@ -73,12 +73,12 @@ namespace Physica::Core {
     RowSquareMatrix::RowSquareMatrix() : Matrix(Row) {}
 
     RowSquareMatrix::RowSquareMatrix(size_t capacity)
-            : Matrix(CStyleArray<Vector>(capacity), Row) {}
+            : Matrix(CStyleArray<Vector, Dynamic>(capacity), Row) {}
 
-    RowSquareMatrix::RowSquareMatrix(const CStyleArray<Vector>& array)
+    RowSquareMatrix::RowSquareMatrix(const CStyleArray<Vector, Dynamic>& array)
             : Matrix(array, Row) {}
 
-    RowSquareMatrix::RowSquareMatrix(CStyleArray<Vector>&& array) noexcept
+    RowSquareMatrix::RowSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept
             : Matrix(std::move(array), Row) {}
 
     RowSquareMatrix::RowSquareMatrix(const RowSquareMatrix& matrix) //NOLINT
@@ -87,9 +87,9 @@ namespace Physica::Core {
     RowSquareMatrix RowSquareMatrix::getUnitMatrix(size_t size) {
         const Numerical& _0 = BasicConst::getInstance().get_0();
         const Numerical& _1 = BasicConst::getInstance().get_1();
-        CStyleArray<Vector> array(size, size);
+        CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Numerical> array1(size, size);
+            CStyleArray<Numerical, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
                 array1.allocate(Numerical(_0), j);
             array1.allocate(Numerical(_1), i);

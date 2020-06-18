@@ -6,7 +6,7 @@
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////
-    class Matrix : public CStyleArray<Vector> {
+    class Matrix : public CStyleArray<Vector, Dynamic> {
     public:
         enum MatrixType {
             Row, Column
@@ -17,8 +17,8 @@ namespace Physica::Core {
         explicit Matrix(MatrixType type);
         Matrix(size_t capacity, MatrixType type);
         Matrix(size_t length, size_t capacity, MatrixType type);
-        explicit Matrix(const CStyleArray<Vector>& array, MatrixType type);
-        explicit Matrix(CStyleArray<Vector>&& array, MatrixType type) noexcept;
+        explicit Matrix(const CStyleArray<Vector, Dynamic>& array, MatrixType type);
+        explicit Matrix(CStyleArray<Vector, Dynamic>&& array, MatrixType type) noexcept;
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         virtual ~Matrix() = default;
