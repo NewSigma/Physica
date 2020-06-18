@@ -11,7 +11,7 @@ ExprReader::ExprReader(const std::wstring& str) {
     while(pointer != str.size()) {
         if(isSign(str[pointer])) {
             bool got_sign = false;
-            while(isSign(str[pointer])) {
+            do {
                 if(!got_sign) {
                     switch(str[pointer]) {
                         case '-':
@@ -30,6 +30,13 @@ ExprReader::ExprReader(const std::wstring& str) {
                         case L'×':
                         case '/':
                             got_sign = true;
+                            if(!stack.empty() && (stack.top() == L'×' || stack.top() == '/')) {
+                                std::wstring temp1{stack.top()};
+                                anti_poland.push_back(temp1);
+                                stack.pop();
+                                stack.push(str[pointer]);
+                                break;
+                            }
                         case '(':
                             stack.push(str[pointer]);
                             break;
@@ -50,7 +57,7 @@ ExprReader::ExprReader(const std::wstring& str) {
                     }
                 }
                 ++pointer;
-            }
+            } while(isSign(str[pointer]));
             //If got_sign is false, we mean we only have ' ' or '(', where we should do multiply.
             if(!got_sign) {
                 if(stack.top() == '(') {
