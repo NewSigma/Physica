@@ -45,7 +45,7 @@ namespace Physica::Core {
     void LUDecomposition::decompositionColumn(Matrix& m, size_t column) {
         const auto startAlphaIndex = column + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
-            Numerical temp(m(j, column));
+            Scalar temp(m(j, column));
             for (size_t k = 0; k < j; ++k)
                 temp -= m(j, k) * m(k, column);
             m(j, column) = std::move(temp);
@@ -53,7 +53,7 @@ namespace Physica::Core {
 
         const auto r = m.row();
         for (size_t j = startAlphaIndex; j < r; ++j) {
-            Numerical temp(m(j, column));
+            Scalar temp(m(j, column));
             for (size_t k = 0; k < column; ++k)
                 temp -= m(j, k) * m(k, column);
             m(j, column) = temp / m(column, column);

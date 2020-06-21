@@ -21,7 +21,7 @@ namespace Physica::Core {
      * Change the bias in LU method to solve a family of equations.
      */
     LinearEquations::LinearEquations(Matrix& m) noexcept : matrix(m) {}
-    //!Reference: Numerical Recipes in C++
+    //!Reference: Scalar Recipes in C++
     const Vector& LinearEquations::solve(LinearEquationsMethod method) {
         const auto rank = matrix.row();
         Q_ASSERT(rank + 1 == matrix.column());

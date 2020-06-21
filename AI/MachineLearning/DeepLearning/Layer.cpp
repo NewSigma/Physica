@@ -22,7 +22,7 @@ namespace Physica::AI {
         if(id < parentNet->getSize() - 1) {
             Layer& nextLayer = (*parentNet)[id + 1];
             for(auto node : nodes) {
-                Numerical result = node->calc();
+                Scalar result = node->calc();
                 auto connections = node->getForwardConnections();
                 for(auto connection : connections)
                     nextLayer[connection.first].vector[connection.second] = result;

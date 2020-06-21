@@ -12,7 +12,7 @@ namespace Physica::Core {
     public:
         Vector direction;
 
-        explicit DirectedInf(const Numerical& arg);
+        explicit DirectedInf(const Scalar& arg);
         explicit DirectedInf(const Vector& direction);
         DirectedInf(const DirectedInf& instance);
 

@@ -7,20 +7,20 @@
 #include "AbstractNum.h"
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
     class Vector;
 
     class ComplexNum : public AbstractNum{
     public:
-        Numerical* real;
-        Numerical* imagine;
+        Scalar* real;
+        Scalar* imagine;
 
-        ComplexNum(const Numerical& n1, const Numerical& n2, bool polar = false);
+        ComplexNum(const Scalar& n1, const Scalar& n2, bool polar = false);
         ComplexNum(ComplexNum& instance);
         explicit ComplexNum(ComplexNum* instance);
         ~ComplexNum() override;
         ComplexNum* toConjugate() const;
-        Numerical toNorm() const;
+        Scalar toNorm() const;
         Vector toVector() const;
 
         NumberType getType() const noexcept override;

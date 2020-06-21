@@ -5,7 +5,7 @@
 #define PHYSICA_LUDECOMPOSITION_H
 
 #include <cstdlib>
-#include "Numerical.h"
+#include "Scalar.h"
 #include "Matrix.h"
 
 namespace Physica::Core {

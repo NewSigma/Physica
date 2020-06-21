@@ -5,10 +5,10 @@
 #include <iosfwd>
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 }
 
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 
 namespace Physica::Interpreter {
     class ExprReader {
@@ -16,7 +16,7 @@ namespace Physica::Interpreter {
         std::list<std::wstring> anti_poland;
     public:
         ExprReader(const std::wstring& str);
-        Numerical calc();
+        Scalar calc();
     private:
         static bool isSign(wchar_t c);
     };

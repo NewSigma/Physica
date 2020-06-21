@@ -5,10 +5,10 @@
 #define PHYSICA_PHYSICATESTS_H
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 }
 
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 
 namespace Physica::Test {
     void checkGPU();

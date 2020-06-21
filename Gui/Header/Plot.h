@@ -8,14 +8,14 @@
 #include <QtCharts/QSplineSeries>
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 }
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 
 class Plot : public QtCharts::QChartView {
     QtCharts::QSplineSeries* series;
 public:
-    Plot(Numerical (*func)(const Numerical&), const Numerical& begin, const Numerical& end, QWidget* parent = nullptr);
+    Plot(Scalar (*func)(const Scalar&), const Scalar& begin, const Scalar& end, QWidget* parent = nullptr);
 };
 
 #endif

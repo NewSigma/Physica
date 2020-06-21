@@ -3,7 +3,7 @@
  */
 #include <Core/Header/Const.h>
 #include <iostream>
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 using namespace Physica::Core;
 

@@ -24,7 +24,7 @@ namespace Physica::AI {
             delete layer;
     }
 
-    void DNN::loadData(const Vector& loadInputs, const Numerical& loadExpect) {
+    void DNN::loadData(const Vector& loadInputs, const Scalar& loadExpect) {
         if(loadInputs.getLength() != inputSize) {
             qWarning("Insufficient data!");
             return;
@@ -37,21 +37,21 @@ namespace Physica::AI {
         int i = 0;
         for(; i < layers.size() - 1; ++i)
             layers[i]->update();
-        Numerical loss(expect);
+        Scalar loss(expect);
         for(int j = 0; j < layers[i]->getSize(); ++j)
             loss -= (*layers[i])[j].calc();
-        loss /= Numerical(static_cast<SignedNumericalUnit>(layers[i]->getSize()));
+        loss /= Scalar(static_cast<SignedScalarUnit>(layers[i]->getSize()));
         for(int k = 0; k < layers[i]->getSize(); ++k)
             (*layers[i])[k].acceptedLoss = loss;
         for(; i > 1; --i)
             layers[i]->handleLoss();
     }
 
-    Numerical DNN::predict() const {
+    Scalar DNN::predict() const {
         int i = 0;
         for(; i < layers.size() - 1; ++i)
             layers[i]->update();
-        Numerical loss(expect);
+        Scalar loss(expect);
         for(int j = 0; j < layers[i]->getSize(); ++j)
             loss -= (*layers[i])[j].calc();
         return loss;

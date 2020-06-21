@@ -10,14 +10,14 @@
 #include "Core/Header/ElementaryFunction.h"
 
 namespace Physica::Core {
-    ComplexNum::ComplexNum(const Numerical& n1, const Numerical& n2, bool polar) {
+    ComplexNum::ComplexNum(const Scalar& n1, const Scalar& n2, bool polar) {
         if(polar) {
-            real = new Numerical(n1 * cos(n2));
-            imagine = new Numerical(n1 * sin(n2));
+            real = new Scalar(n1 * cos(n2));
+            imagine = new Scalar(n1 * sin(n2));
         }
         else {
-            real = new Numerical(n1);
-            imagine = new Numerical(n2);
+            real = new Scalar(n1);
+            imagine = new Scalar(n2);
         }
     }
 
@@ -34,7 +34,7 @@ namespace Physica::Core {
         return new ComplexNum(*real, -*imagine);
     }
 
-    Numerical ComplexNum::toNorm() const {
+    Scalar ComplexNum::toNorm() const {
         return *real * *real + *imagine * *imagine;
     }
 
@@ -59,8 +59,8 @@ namespace Physica::Core {
         if(this == &n)
             return *this;
         this->~ComplexNum();
-        real = new Numerical(*n.real);
-        imagine = new Numerical(*n.imagine);
+        real = new Scalar(*n.real);
+        imagine = new Scalar(*n.imagine);
         return *this;
     }
 
@@ -125,9 +125,9 @@ namespace Physica::Core {
     AbstractNum* ComplexNum::operator/ (const AbstractNum& n) const {
         switch(n.getType()) {
             case ComplexNumber: {
-                Numerical new_real = *real * *((ComplexNum&)n).real + *imagine * *((ComplexNum&)n).imagine;
-                Numerical new_imagine = *((ComplexNum&)n).real * *imagine - *real * *((ComplexNum&)n).imagine;
-                Numerical temp = *((ComplexNum&)n).imagine * *((ComplexNum&)n).imagine + *((ComplexNum&)n).real * *((ComplexNum&)n).real;
+                Scalar new_real = *real * *((ComplexNum&)n).real + *imagine * *((ComplexNum&)n).imagine;
+                Scalar new_imagine = *((ComplexNum&)n).real * *imagine - *real * *((ComplexNum&)n).imagine;
+                Scalar temp = *((ComplexNum&)n).imagine * *((ComplexNum&)n).imagine + *((ComplexNum&)n).real * *((ComplexNum&)n).real;
                 return new ComplexNum(new_real / temp, new_imagine / temp);
             }
             case RealNumber:

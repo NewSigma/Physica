@@ -4,32 +4,32 @@
 #include <iostream>
 #include "Core/Header/GeneAlgorithm.h"
 #include "Core/Header/ElementaryFunction.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 namespace Physica::Core {
     //Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
-    GeneAlgorithm::GeneAlgorithm(Numerical func(const Numerical&), const Numerical& lower, const Numerical& upper, int pop, ChooseMode mode) {
+    GeneAlgorithm::GeneAlgorithm(Scalar func(const Scalar&), const Scalar& lower, const Scalar& upper, int pop, ChooseMode mode) {
         population = pop;
-        points = new Numerical*[population];
+        points = new Scalar*[population];
 
         fitnessFunction = func;
-        lowerBound = new Numerical(lower);
-        upperBound = new Numerical(upper);
-        regionLength = new Numerical(upper - lower);
+        lowerBound = new Scalar(lower);
+        upperBound = new Scalar(upper);
+        regionLength = new Scalar(upper - lower);
         //Get abs(regionLength).
         regionLength->toAbs();
 
         if (mode == LinearChoose) {
-            Numerical stepLength = *regionLength / Numerical(static_cast<SignedNumericalUnit>(population));
-            Numerical temp(1, 0);
+            Scalar stepLength = *regionLength / Scalar(static_cast<SignedScalarUnit>(population));
+            Scalar temp(1, 0);
             for (int i = 0; i < population; i++) {
                 temp[0] = i;
-                points[i] = new Numerical(stepLength * temp + lower);
+                points[i] = new Scalar(stepLength * temp + lower);
             }
         }
         else if (mode == RandomChoose) {
             for (int i = 0; i < population; i++)
-                points[i] = new Numerical(randomNumerical() * *regionLength + lower);
+                points[i] = new Scalar(randomNumerical() * *regionLength + lower);
         }
     }
 
@@ -41,7 +41,7 @@ namespace Physica::Core {
         delete regionLength;
     }
 //Get the maximum point. Multiply the function by a -1 to get the minimum.
-    Numerical** GeneAlgorithm::getExtremalPoint() {
+    Scalar** GeneAlgorithm::getExtremalPoint() {
         if (fitnessFunction == nullptr) {
             std::cout << "Uninitialized function.\n";
             return nullptr;
@@ -58,7 +58,7 @@ namespace Physica::Core {
     void GeneAlgorithm::crossover() {
         for (int i = 0; i < population; i++) {
             auto r = randomNumerical();
-            if (Numerical(crossoverRate) > r) {
+            if (Scalar(crossoverRate) > r) {
                 long randomIndex1 = random() % population;
                 long randomIndex2 = random() % population;
                 auto random1 = points[randomIndex1];
@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     void GeneAlgorithm::mutation() {
-        if (Numerical(mutationRate) > randomNumerical()) {
+        if (Scalar(mutationRate) > randomNumerical()) {
             long randomIndex = random() % population;
             *points[randomIndex] = randomNumerical() * *regionLength + *lowerBound;
         }

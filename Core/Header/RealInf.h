@@ -6,7 +6,7 @@
 
 #include "DirectedInf.h"
 #include "RealNum.h"
-#include "Numerical.h"
+#include "Scalar.h"
 #include "Const.h"
 
 namespace Physica::Core {

@@ -14,7 +14,7 @@ namespace Physica::AI {
             , acceptedLoss(getZero()), activeFunc(nullptr), parentLayer(parent), id(id) {
     }
 
-    Numerical Node::calc() const {
+    Scalar Node::calc() const {
         if(activeFunc == nullptr)
             return parentLayer->getNet()->getInputs() * vector + bias;
         else
@@ -47,7 +47,7 @@ namespace Physica::AI {
     }
 
     void Node::handleLoss() {
-        Numerical averageLoss = acceptedLoss / Numerical(static_cast<SignedNumericalUnit>(vector.getLength()));
+        Scalar averageLoss = acceptedLoss / Scalar(static_cast<SignedScalarUnit>(vector.getLength()));
         for(int i = 0; i < vector.getLength(); ++i) {
             DNN& net = *parentLayer->getNet();
             if(backwardConnections.find(i) != backwardConnections.end()) {

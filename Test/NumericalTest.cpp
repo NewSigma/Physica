@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 #include <random>
 #include <iomanip>
 
@@ -15,11 +15,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Numerical a(d_a);
+            Scalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Numerical b(d_b);
+            Scalar b(d_b);
 
             double_extract expect{d_a + d_b};
             double_extract result{double(a + b)};
@@ -46,11 +46,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Numerical a(d_a);
+            Scalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Numerical b(d_b);
+            Scalar b(d_b);
 
             double_extract expect{d_a - d_b};
             double_extract result{double(a - b)};
@@ -77,11 +77,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Numerical a(d_a);
+            Scalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Numerical b(d_b);
+            Scalar b(d_b);
 
             double_extract expect{d_a * d_b};
             double_extract result{double(a * b)};
@@ -108,7 +108,7 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Numerical a(d_a);
+            Scalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
@@ -116,7 +116,7 @@ namespace Physica::Test {
                 d = 1 - 1.4 * d * d;
                 d_b = d * engine();
             }
-            Numerical b(d_b);
+            Scalar b(d_b);
 
             double_extract expect{d_a / d_b};
             double_extract result{double(a / b)};
@@ -136,7 +136,7 @@ namespace Physica::Test {
         std::cout << "Performing div test: " << " --Passed" << '\n' << std::setprecision(6);
     }
 
-    void printElements(const Numerical& n) {
+    void printElements(const Scalar& n) {
         int size = n.getSize();
         for(int i = 0; i < size; ++i)
             std::cout << n[i] << ' ';

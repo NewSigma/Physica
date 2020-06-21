@@ -2,7 +2,7 @@
   Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <iostream>
-#include <Core/Header/Numerical.h>
+#include <Core/Header/Scalar.h>
 #include <Core/Header/ElementaryFunction.h>
 
 using namespace Physica::Core;
@@ -13,8 +13,8 @@ namespace Physica::Test {
         double d1, d2;
         std::cin >> d1 >> d2;
         while(d1 != 0) {
-            Numerical n1(d1);
-            Numerical n2(d2);
+            Scalar n1(d1);
+            Scalar n2(d2);
             std::cout << "#######################Basic Functions#######################\n";
             std::cout << "Random: " << randomNumerical() << '\n';
             std::cout << "Reciprocal: " << reciprocal(n1) << '\n';

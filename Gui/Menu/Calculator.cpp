@@ -2,7 +2,7 @@
 #include "Interpreter/Header/ExprReader.h"
 #include "Core/Header/ElementaryFunction.h"
 #include <QKeyEvent>
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 using Physica::Interpreter::ExprReader;
 
 Calculator::Calculator() {
@@ -367,7 +367,7 @@ void Calculator::on_click_right_bracket() {
 
 void Calculator::on_click_sqrt() {
     ExprReader reader(editor_bottom->text().toStdWString());
-    Numerical result = reader.calc();
+    Scalar result = reader.calc();
     editor_top->setText(editor_bottom->text());
     if(result.isPositive())
         editor_bottom->setText(QString::number((double)sqrt(result), 'f'));

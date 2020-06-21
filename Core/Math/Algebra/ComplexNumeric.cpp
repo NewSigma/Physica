@@ -6,22 +6,22 @@
 #include "Core/Header/ComplexNumeric.h"
 
 namespace Physica::Core {
-    ComplexNumeric::ComplexNumeric(Numerical n1, Numerical n2) noexcept
-    : Numerical(std::move(n1)), imagine(std::move(n2)) {}
+    ComplexNumeric::ComplexNumeric(Scalar n1, Scalar n2) noexcept
+    : Scalar(std::move(n1)), imagine(std::move(n2)) {}
 
     ComplexNumeric::ComplexNumeric(ComplexNumeric&& c) noexcept
-    : Numerical(std::move(c)), imagine(std::move(c.imagine)) {}
+    : Scalar(std::move(c)), imagine(std::move(c.imagine)) {}
 
     ComplexNumeric& ComplexNumeric::operator=(const ComplexNumeric& c) {
         if(this == &c)
             return *this;
-        Numerical::operator=(c);
+        Scalar::operator=(c);
         imagine = c.imagine;
         return *this;
     }
 
     ComplexNumeric& ComplexNumeric::operator=(ComplexNumeric&& c) noexcept {
-        Numerical::operator=(static_cast<Numerical&&>(c));
+        Scalar::operator=(static_cast<Scalar&&>(c));
         imagine = std::move(c.imagine);
         return *this;
     }
@@ -31,15 +31,15 @@ namespace Physica::Core {
     }
 
     void ComplexNumeric::swap(ComplexNumeric& c) noexcept {
-        Numerical::swap(c);
+        Scalar::swap(c);
         Physica::Core::swap(imagine, c.imagine);
     }
 
-    Numerical norm(const ComplexNumeric& c) {
+    Scalar norm(const ComplexNumeric& c) {
         return sqrt(square(c.getReal()) + square(c.getImagine()));
     }
 
-    Numerical arg(const ComplexNumeric& c) {
+    Scalar arg(const ComplexNumeric& c) {
         return arctan(c.getImagine() / c.getReal());
     }
 
@@ -62,11 +62,11 @@ namespace Physica::Core {
                 / (square(c2.getReal()) + square(c2.getImagine()));
     }
 
-    ComplexNumeric operator*(const ComplexNumeric& c, const Numerical& n) {
+    ComplexNumeric operator*(const ComplexNumeric& c, const Scalar& n) {
         return ComplexNumeric(c.getReal() * n, c.getImagine() * n);
     }
 
-    ComplexNumeric operator/(const ComplexNumeric& c, const Numerical& n) {
+    ComplexNumeric operator/(const ComplexNumeric& c, const Scalar& n) {
         return ComplexNumeric(c.getReal() / n, c.getImagine() / n);
     }
 }

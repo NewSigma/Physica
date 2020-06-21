@@ -1,12 +1,12 @@
 #include "Core/Header/RealNum.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 #include "Core/Header/DirectedInf.h"
 #include "Core/Header/ComplexInf.h"
 #include "Core/Header/RealInf.h"
 #include "Core/Header/Indeterminate.h"
 
 namespace Physica::Core {
-    RealNum::RealNum(const Numerical& n) : ComplexNum(n, BasicConst::getInstance().get_0()) {}
+    RealNum::RealNum(const Scalar& n) : ComplexNum(n, BasicConst::getInstance().get_0()) {}
 
     RealNum::RealNum(const RealNum& n) : RealNum(*n.real) {}
 

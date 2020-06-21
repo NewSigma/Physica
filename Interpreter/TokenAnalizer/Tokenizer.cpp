@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCore/qlogging.h>
-#include <Core/Header/Numerical.h>
+#include <Core/Header/Scalar.h>
 #include "Interpreter/Header/TokenWord.h"
 #include "Interpreter/Header/TokenNum.h"
 #include "Interpreter/Header/Tokenizer.h"
@@ -126,9 +126,9 @@ bool Tokenizer::readChar(char ch) {
 void Tokenizer::readNum() {
     bool stoppable = true, go_on = true;
     NumBufferState state = NumStart;
-    Numerical num(BasicConst::getInstance().get_0());
-    Numerical exp(BasicConst::getInstance().get_0());
-    SignedNumericalUnit power = 0;
+    Scalar num(BasicConst::getInstance().get_0());
+    Scalar exp(BasicConst::getInstance().get_0());
+    SignedScalarUnit power = 0;
     bool isExpPositive = true;
     while(go_on) {
         switch(state) {
@@ -171,7 +171,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance().get_10();
-                        num += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        num += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
                         ++str;
                         break;
                     case '.':
@@ -189,7 +189,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance().get_10();
-                        num += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        num += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
                         --power;
                         ++str;
                         break;
@@ -210,7 +210,7 @@ void Tokenizer::readNum() {
                         ++str;
                         break;
                     case '1' ... '9':
-                        exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -230,7 +230,7 @@ void Tokenizer::readNum() {
                         break;
                     case '1' ... '9':
                         exp *= BasicConst::getInstance().get_10();
-                        exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                        exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -242,7 +242,7 @@ void Tokenizer::readNum() {
                 stoppable = true;
                 if(isdigit(*str)) {
                     exp *= BasicConst::getInstance().get_10();
-                    exp += Numerical(static_cast<SignedNumericalUnit>(*str - '0'));
+                    exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
                     ++str;
                 }
                 else
@@ -254,7 +254,7 @@ void Tokenizer::readNum() {
         qFatal("Encountered tokenizer error.");
     if(!isExpPositive)
         exp.toOpposite();
-    num *= (BasicConst::getInstance().get_10() ^ (exp + Numerical(power)));
+    num *= (BasicConst::getInstance().get_10() ^ (exp + Scalar(power)));
     tokens.push_back(new TokenNum(num));
 }
 

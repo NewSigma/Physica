@@ -8,7 +8,7 @@ namespace Physica::Core {
             : tree(FunctionTree(std::move(tree))), length(variableCount)
             , constantNodes(reinterpret_cast<FunctionTree*>(calloc(variableCount, sizeof(FunctionTree)))) {
         for(size_t i = 0; i < variableCount; ++i)
-            new (constantNodes + i) FunctionTree(new Numerical());
+            new (constantNodes + i) FunctionTree(new Scalar());
     }
 
     Function::Function(Function&& func) noexcept
@@ -32,18 +32,18 @@ namespace Physica::Core {
         return *this;
     }
 
-    Numerical Function::operator()(Numerical n) {
+    Scalar Function::operator()(Scalar n) {
         (*this)[0] = std::move(n);
         return solve();
     }
 
-    Numerical Function::operator()(Numerical n1, Numerical n2) {
+    Scalar Function::operator()(Scalar n1, Scalar n2) {
         (*this)[0] = std::move(n1);
         (*this)[1] = std::move(n2);
         return solve();
     }
 
-    Numerical Function::operator()(Numerical n1, Numerical n2, Numerical n3) {
+    Scalar Function::operator()(Scalar n1, Scalar n2, Scalar n3) {
         (*this)[0] = std::move(n1);
         (*this)[1] = std::move(n2);
         (*this)[2] = std::move(n3);

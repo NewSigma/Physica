@@ -1,23 +1,23 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "Numerical.h"
+#include "Scalar.h"
 #include "Function.h"
 
 namespace Physica::Core {
     class Differential {
         Function func;
-        Numerical at;
-        Numerical stepSize;
+        Scalar at;
+        Scalar stepSize;
     public:
-        //Reference: Numerical Recipes in C++
+        //Reference: Scalar Recipes in C++
         enum DifferentialMethod {
             DoublePoint,
             Forward,
             Backward
         };
-        Differential(Function func, Numerical at, Numerical stepSize = BasicConst::getInstance().getStepSize());
-        [[nodiscard]] Numerical solve(DifferentialMethod method);
+        Differential(Function func, Scalar at, Scalar stepSize = BasicConst::getInstance().getStepSize());
+        [[nodiscard]] Scalar solve(DifferentialMethod method);
     };
 }
 

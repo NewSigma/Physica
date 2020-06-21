@@ -5,18 +5,18 @@
 #define PHYSICA_POLYNOMIAL_H
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 
     class Polynomial {
     private:
         int length;
-        const Numerical* variable;
-        const Numerical** coefficients;
+        const Scalar* variable;
+        const Scalar** coefficients;
     public:
-        Polynomial(int length, const Numerical* variable);
+        Polynomial(int length, const Scalar* variable);
         ~Polynomial();
-        void addCoefficients(int index, const Numerical* n);
-        Numerical* calculate();
+        void addCoefficients(int index, const Scalar* n);
+        Scalar* calculate();
     };
 }
 

@@ -7,16 +7,16 @@
 #include "Token.h"
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 }
 
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 
 namespace Physica::Interpreter {
     class TokenNum : public Token {
-        Core::Numerical* data;
+        Core::Scalar* data;
     public:
-        explicit TokenNum(const Numerical& num);
+        explicit TokenNum(const Scalar& num);
         ~TokenNum();
     };
 }

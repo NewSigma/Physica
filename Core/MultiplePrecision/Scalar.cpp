@@ -7,31 +7,31 @@
 #include "Operation/Pow.h"
 
 namespace Physica::Core {
-    ////////////////////////////////Numerical////////////////////////////////
-    Numerical::Numerical() noexcept : byte(nullptr), length(0), power(0), a(0) {}
+    ////////////////////////////////Scalar////////////////////////////////
+    Scalar::Scalar() noexcept : byte(nullptr), length(0), power(0), a(0) {}
 
-    Numerical::Numerical(int length, int power, NumericalUnit a) noexcept
-            : byte(reinterpret_cast<NumericalUnit*>(malloc(abs(length) * sizeof(NumericalUnit))))
+    Scalar::Scalar(int length, int power, ScalarUnit a) noexcept
+            : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length) * sizeof(ScalarUnit))))
             , length(length), power(power), a(a) {}
     /*
      * byte must be allocated by malloc().
      * It is declared to be protected to avoid incorrect use.
      */
-    Numerical::Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a)
+    Scalar::Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a)
             : byte(byte), length(length), power(power), a(a) {}
 
-    Numerical::Numerical(const Numerical& n) noexcept
-            : byte(reinterpret_cast<NumericalUnit*>(malloc(n.getSize() * sizeof(NumericalUnit))))
+    Scalar::Scalar(const Scalar& n) noexcept
+            : byte(reinterpret_cast<ScalarUnit*>(malloc(n.getSize() * sizeof(ScalarUnit))))
             , length(n.length), power(n.power), a(n.a) {
-        memcpy(byte, n.byte, getSize() * sizeof(NumericalUnit));
+        memcpy(byte, n.byte, getSize() * sizeof(ScalarUnit));
     }
 
-    Numerical::Numerical(Numerical&& n) noexcept : byte(n.byte), length(n.length), power(n.power), a(n.a) {
+    Scalar::Scalar(Scalar&& n) noexcept : byte(n.byte), length(n.length), power(n.power), a(n.a) {
         n.byte = nullptr;
     }
 
-    Numerical::Numerical(SignedNumericalUnit unit, NumericalUnit a) noexcept
-            : byte(reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)))), power(0), a(a) {
+    Scalar::Scalar(SignedScalarUnit unit, ScalarUnit a) noexcept
+            : byte(reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit)))), power(0), a(a) {
         if(unit < 0) {
             byte[0] = -unit;
             length = -1;
@@ -42,9 +42,9 @@ namespace Physica::Core {
         }
     }
 
-    Numerical::Numerical(double d, NumericalUnit a) : a(a) {
+    Scalar::Scalar(double d, ScalarUnit a) : a(a) {
         if(d == 0) {
-            byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
+            byte = reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit)));
             length = 1;
             byte[0] = power = 0;
             return;
@@ -59,54 +59,54 @@ namespace Physica::Core {
     #ifdef PHYSICA_64BIT
         if(remainder < 52) {
             length = 2;
-            byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+            byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
             //Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
             if(remainder <= 20) {
-                byte[1] += static_cast<NumericalUnit>(extract.structure.high) >> (20 - remainder);
-                byte[0] = static_cast<NumericalUnit>(extract.structure.high) << (44 + remainder);
-                byte[0] += static_cast<NumericalUnit>(extract.structure.low) << (32 - (20 - remainder));
+                byte[1] += static_cast<ScalarUnit>(extract.structure.high) >> (20 - remainder);
+                byte[0] = static_cast<ScalarUnit>(extract.structure.high) << (44 + remainder);
+                byte[0] += static_cast<ScalarUnit>(extract.structure.low) << (32 - (20 - remainder));
             }
             else {
-                byte[1] += static_cast<NumericalUnit>(extract.structure.high) << (remainder - 20);
-                byte[1] += static_cast<NumericalUnit>(extract.structure.low) >> (32 - (remainder - 20));
-                byte[0] = static_cast<NumericalUnit>(extract.structure.low) << (32 + (remainder - 20));
+                byte[1] += static_cast<ScalarUnit>(extract.structure.high) << (remainder - 20);
+                byte[1] += static_cast<ScalarUnit>(extract.structure.low) >> (32 - (remainder - 20));
+                byte[0] = static_cast<ScalarUnit>(extract.structure.low) << (32 + (remainder - 20));
             }
         }
         else {
             length = 1;
-            byte = reinterpret_cast<NumericalUnit*>(malloc(sizeof(NumericalUnit)));
+            byte = reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit)));
             //Hidden bit
             byte[0] = 1;
             byte[0] <<= 20U;
-            byte[0] += static_cast<NumericalUnit>(extract.structure.high);
+            byte[0] += static_cast<ScalarUnit>(extract.structure.high);
             byte[0] <<= 32U;
-            byte[0] += static_cast<NumericalUnit>(extract.structure.low);
+            byte[0] += static_cast<ScalarUnit>(extract.structure.low);
             byte[0] <<= remainder - 52;
         }
     #endif
     #ifdef PHYSICA_32BIT
         if(remainder < 20) {
         length = 3;
-        byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
         //Hidden bit
         byte[2] = 1;
         byte[2] <<= remainder;
-        byte[2] += static_cast<NumericalUnit>(extract.structure.high) >> (20 - remainder);
-        byte[1] = static_cast<NumericalUnit>(extract.structure.high) << (32 - (20 - remainder));
-        byte[1] +=  static_cast<NumericalUnit>(extract.structure.low) >> (20 - remainder);
-        byte[0] = static_cast<NumericalUnit>(extract.structure.low) << remainder;
+        byte[2] += static_cast<ScalarUnit>(extract.structure.high) >> (20 - remainder);
+        byte[1] = static_cast<ScalarUnit>(extract.structure.high) << (32 - (20 - remainder));
+        byte[1] +=  static_cast<ScalarUnit>(extract.structure.low) >> (20 - remainder);
+        byte[0] = static_cast<ScalarUnit>(extract.structure.low) << remainder;
     }
     else {
         length = 2;
-        byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+        byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
         //Hidden bit
         byte[1] = 1;
         byte[1] <<= remainder;
-        byte[1] += static_cast<NumericalUnit>(extract.structure.high) << (remainder - 20);
-        byte[1] += static_cast<NumericalUnit>(extract.structure.low) >> (32 - (remainder - 20));
-        byte[0] = static_cast<NumericalUnit>(extract.structure.low) << (remainder - 20);
+        byte[1] += static_cast<ScalarUnit>(extract.structure.high) << (remainder - 20);
+        byte[1] += static_cast<ScalarUnit>(extract.structure.low) >> (32 - (remainder - 20));
+        byte[0] = static_cast<ScalarUnit>(extract.structure.low) << (remainder - 20);
     }
     #endif
         if(extract.structure.sign)
@@ -115,17 +115,17 @@ namespace Physica::Core {
     /*
      * Not accurate.
      */
-    Numerical::Numerical(const char* s, NumericalUnit a) : Numerical(strtod(s, nullptr), a) {}
+    Scalar::Scalar(const char* s, ScalarUnit a) : Scalar(strtod(s, nullptr), a) {}
     /*
      * Not accurate.
      */
-    Numerical::Numerical(const wchar_t* s, NumericalUnit a) : a(a) {
+    Scalar::Scalar(const wchar_t* s, ScalarUnit a) : a(a) {
         size_t size = wcslen(s);
         char str[size + 1];
         str[size] = '\0';
         for(int i = 0; i < size; ++i)
             str[i] = (char)s[i];
-        Numerical temp(str);
+        Scalar temp(str);
         byte = temp.byte;
         temp.byte = nullptr;
         length = temp.length;
@@ -134,22 +134,22 @@ namespace Physica::Core {
     /*
      * Not accurate.
      */
-    Numerical::Numerical(const std::string& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
+    Scalar::Scalar(const std::string& s, ScalarUnit a) : Scalar(s.c_str(), a) {}
     /*
      * Not accurate.
      */
-    Numerical::Numerical(const std::wstring& s, NumericalUnit a) : Numerical(s.c_str(), a) {}
+    Scalar::Scalar(const std::wstring& s, ScalarUnit a) : Scalar(s.c_str(), a) {}
 
-    Numerical::~Numerical() { free(byte); }
+    Scalar::~Scalar() { free(byte); }
 
-    Numerical::operator double() const {
+    Scalar::operator double() const {
         if(isZero())
             return 0.0;
         double_extract extract{0};
         extract.structure.sign = length < 0;
 
         const auto zeroCount = countLeadingZeros(byte[getSize() - 1]);
-        auto exp = power * __WORDSIZE + NumericalUnitWidth - zeroCount - 1 + 1023;
+        auto exp = power * __WORDSIZE + ScalarUnitWidth - zeroCount - 1 + 1023;
         if(exp >= 2047) {
             extract.structure.high = extract.structure.low = 0;
             extract.structure.exp = 2047;
@@ -200,14 +200,14 @@ namespace Physica::Core {
         return extract.value;
     }
 
-    std::ostream& operator<<(std::ostream& os, const Numerical& n) {
+    std::ostream& operator<<(std::ostream& os, const Scalar& n) {
         //10 is the max precision of double.
         return os << std::setprecision(10) << std::to_string(double(n)) << "\tLength = "
                   << n.getSize() << "\tPower = " << n.power << "\tAccuracy = " << (int)n.a << std::setprecision(6); //6 is the default precision.
     }
 
-    Numerical Numerical::operator+(const Numerical& n) const {
-        Numerical result = add(*this, n);
+    Scalar Scalar::operator+(const Scalar& n) const {
+        Scalar result = add(*this, n);
         cutLength(result);
         if(getA() != 0 || n.getA() != 0) {
             if(getA() == 0)
@@ -220,8 +220,8 @@ namespace Physica::Core {
         return result;
     }
 
-    Numerical Numerical::operator-(const Numerical& n) const {
-        Numerical result = sub(*this, n);
+    Scalar Scalar::operator-(const Scalar& n) const {
+        Scalar result = sub(*this, n);
         cutLength(result);
         if(getA() != 0 || n.getA() != 0) {
             if(getA() == 0)
@@ -234,8 +234,8 @@ namespace Physica::Core {
         return result;
     }
 
-    Numerical Numerical::operator*(const Numerical& n) const {
-        Numerical result = mul(*this, n);
+    Scalar Scalar::operator*(const Scalar& n) const {
+        Scalar result = mul(*this, n);
         cutLength(result);
         if(getA() != 0 || n.getA() != 0) {
             if(getA() == 0)
@@ -243,98 +243,98 @@ namespace Physica::Core {
             else if(n.getA() == 0)
                 result.applyError(mul(n, getAccuracy()));
             else {
-                Numerical n1_a = getAccuracy();
-                Numerical n_a = n.getAccuracy();
-                Numerical temp1 = mul(n1_a, n_a);
-                Numerical temp2 = add(mul(*this, n_a), mul(n, n1_a));
+                Scalar n1_a = getAccuracy();
+                Scalar n_a = n.getAccuracy();
+                Scalar temp1 = mul(n1_a, n_a);
+                Scalar temp2 = add(mul(*this, n_a), mul(n, n1_a));
                 result.applyError(add(temp1, temp2));
             }
         }
         return result;
     }
 
-    Numerical Numerical::operator/(const Numerical& n) const {
-        Numerical result = div(*this, n);
+    Scalar Scalar::operator/(const Scalar& n) const {
+        Scalar result = div(*this, n);
         if(getA() != 0 || n.getA() != 0) {
             if(getA() == 0) {
-                Numerical n_a = n.getAccuracy();
-                Numerical temp_1 = mul(*this, n_a);
-                Numerical temp_2 = mul(n, sub(n, n_a));
+                Scalar n_a = n.getAccuracy();
+                Scalar temp_1 = mul(*this, n_a);
+                Scalar temp_2 = mul(n, sub(n, n_a));
                 result.applyError(div(temp_1, temp_2));
             }
             else if(n.getA() == 0)
                 result.applyError(div(getAccuracy(), n));
             else {
-                Numerical n_a = n.getAccuracy();
-                Numerical temp_1 = add(mul(*this, n_a), mul(n, getAccuracy()));
-                Numerical temp_2 = mul(n, sub(n, n_a));
+                Scalar n_a = n.getAccuracy();
+                Scalar temp_1 = add(mul(*this, n_a), mul(n, getAccuracy()));
+                Scalar temp_2 = mul(n, sub(n, n_a));
                 result.applyError(div(temp_1, temp_2));
             }
         }
         return result;
     }
     //FIXME a is not accurate
-    Numerical Numerical::operator<<(int bits) const {
+    Scalar Scalar::operator<<(int bits) const {
         if(bits == 0)
-            return Numerical(*this);
+            return Scalar(*this);
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
-        const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * NumericalUnitWidth;
+        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
 
-        Numerical result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry, a);
+        Scalar result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry, a);
         result[0] = 0;
         for(int i = 0; i < size - 1; ++i) {
             result[i] |= byte[i] << remainder;
-            result[i + 1] = byte[i] >> (NumericalUnitWidth - remainder);
+            result[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
         }
         result[size - 1] |= byte[size - 1] << remainder;
         if(carry)
-            result[size] = byte[size - 1] >> (NumericalUnitWidth - remainder);
+            result[size] = byte[size - 1] >> (ScalarUnitWidth - remainder);
 
         return result;
     }
     //FIXME a is not accurate
-    Numerical Numerical::operator>>(int bits) const {
+    Scalar Scalar::operator>>(int bits) const {
         if(bits == 0)
-            return Numerical(*this);
+            return Scalar(*this);
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
-        const int quotient = bits / NumericalUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * NumericalUnitWidth;
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < NumericalUnitWidth;
+        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
+        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
 
-        Numerical result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1, a);
+        Scalar result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1, a);
         if(carry)
             result[size] = byte[size - 1] >> remainder;
 
         for(int i = size - 1; i > 0; --i) {
-            result[i] = byte[i] << (NumericalUnitWidth - remainder);
+            result[i] = byte[i] << (ScalarUnitWidth - remainder);
             result[i] |= byte[i - 1] >> remainder;
         }
-        result[0] = byte[0] << (NumericalUnitWidth - remainder);
+        result[0] = byte[0] << (ScalarUnitWidth - remainder);
 
         return result;
     }
 
-    Numerical& Numerical::operator= (const Numerical& n) {
+    Scalar& Scalar::operator= (const Scalar& n) {
         if(this == &n)
             return *this;
         length = n.length;
         int size = getSize();
-        this->~Numerical();
-        byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
-        memcpy(byte, n.byte, size * sizeof(NumericalUnit));
+        this->~Scalar();
+        byte = reinterpret_cast<ScalarUnit*>(malloc(size * sizeof(ScalarUnit)));
+        memcpy(byte, n.byte, size * sizeof(ScalarUnit));
         power = n.power;
         a = n.a;
         return *this;
     }
 
-    Numerical& Numerical::operator=(Numerical&& n) noexcept {
-        this->~Numerical();
+    Scalar& Scalar::operator=(Scalar&& n) noexcept {
+        this->~Scalar();
         byte = n.byte;
         n.byte = nullptr;
         length = n.length;
@@ -343,15 +343,15 @@ namespace Physica::Core {
         return *this;
     }
     //Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
-    Numerical Numerical::operator^ (const Numerical& n) const {
+    Scalar Scalar::operator^ (const Scalar& n) const {
         if(isInteger())
             return powNumerical(*this, n);
         return exp(ln(*this) * n);
     }
 
-    Numerical Numerical::operator-() const {
-        Numerical result(-length, power, a);
-        memcpy(result.byte, byte, getSize() * sizeof(NumericalUnit));
+    Scalar Scalar::operator-() const {
+        Scalar result(-length, power, a);
+        memcpy(result.byte, byte, getSize() * sizeof(ScalarUnit));
         return result;
     }
     /*!
@@ -361,12 +361,12 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool absCompare(const Numerical& n1, const Numerical& n2) {
+    bool absCompare(const Scalar& n1, const Scalar& n2) {
         if(n1.getPower() > n2.getPower())
             return true;
         if(n1.getPower() < n2.getPower())
             return false;
-        const Numerical* longer, *shorter;
+        const Scalar* longer, *shorter;
         int longer_length, shorter_length;
         /* Compare length */ {
             const auto n1_length = n1.getLength(), n2_length = n2.getLength();
@@ -390,7 +390,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator> (const Numerical& n1, const Numerical& n2) {
+    bool operator> (const Scalar& n1, const Scalar& n2) {
         //Judge from sign.
         if(n1.isPositive()) {
             if(!n2.isPositive())
@@ -410,7 +410,7 @@ namespace Physica::Core {
             result = false;
         else {
             //The only method left.
-            Numerical subtract = n1 - n2;
+            Scalar subtract = n1 - n2;
             result = subtract.isPositive();
         }
         return result;
@@ -419,7 +419,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator< (const Numerical& n1, const Numerical& n2) {
+    bool operator< (const Scalar& n1, const Scalar& n2) {
         //Judge from sign.
         if(n1.isPositive()) {
             if(!n2.isPositive())
@@ -439,21 +439,21 @@ namespace Physica::Core {
             result = true;
         else {
             //The only method left.
-            Numerical subtract = n1 - n2;
+            Scalar subtract = n1 - n2;
             result = subtract.isNegative();
         }
         return result;
     }
 
-    bool operator>= (const Numerical& n1, const Numerical& n2) {
+    bool operator>= (const Scalar& n1, const Scalar& n2) {
         return !(n1 < n2);
     }
 
-    bool operator<= (const Numerical& n1, const Numerical& n2) {
+    bool operator<= (const Scalar& n1, const Scalar& n2) {
         return !(n1 > n2);
     }
 
-    bool operator== (const Numerical& n1, const Numerical& n2) {
+    bool operator== (const Scalar& n1, const Scalar& n2) {
         return n1.getPower() == n2.getPower()
         //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
         && ((n1.getLength() ^ n2.getLength()) >= 0) //NOLINT
@@ -461,12 +461,12 @@ namespace Physica::Core {
         && (n1 - n2).isZero();
     }
 
-    bool operator!= (const Numerical& n1, const Numerical& n2) {
+    bool operator!= (const Scalar& n1, const Scalar& n2) {
         return !(n1 == n2);
     }
-    //Return accuracy in class Numerical.
-    Numerical Numerical::getAccuracy() const {
-        Numerical result(1, power - getSize() + 1);
+    //Return accuracy in class Scalar.
+    Scalar Scalar::getAccuracy() const {
+        Scalar result(1, power - getSize() + 1);
         result[0] = a;
         return result;
     }
@@ -476,12 +476,12 @@ namespace Physica::Core {
      * Optimize:
      * error is always non-zero, if(!error.isZero()) is unnecessary.
      */
-    Numerical& Numerical::applyError(const Numerical& error) {
+    Scalar& Scalar::applyError(const Scalar& error) {
         if(!error.isZero()) {
             int size = getSize();
             int copy = size;
             int temp = power - size + 1 - error.power;
-            NumericalUnit copy_a = a;
+            ScalarUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
                     auto error_1 = add(getAccuracy(), error);
@@ -508,9 +508,9 @@ namespace Physica::Core {
             }
 
             if(size < copy) {
-                auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(size * sizeof(NumericalUnit)));
-                memcpy(new_byte, byte + copy - size, size * sizeof(NumericalUnit));
-                this->~Numerical();
+                auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(size * sizeof(ScalarUnit)));
+                memcpy(new_byte, byte + copy - size, size * sizeof(ScalarUnit));
+                this->~Scalar();
                 byte = new_byte;
             }
             length = length < 0 ? -size : size;
@@ -518,7 +518,7 @@ namespace Physica::Core {
         return *this;
     }
 
-    void Numerical::swap(Numerical &n) noexcept {
+    void Scalar::swap(Scalar &n) noexcept {
         auto temp_byte = byte;
         byte = n.byte;
         n.byte = temp_byte;
@@ -528,7 +528,7 @@ namespace Physica::Core {
         temp_length = power;
         power = n.power;
         n.power = temp_length;
-        NumericalUnit temp_a = a;
+        ScalarUnit temp_a = a;
         a = n.a;
         n.a = temp_a;
     }

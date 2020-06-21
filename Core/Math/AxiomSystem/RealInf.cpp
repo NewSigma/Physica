@@ -11,7 +11,7 @@ namespace Physica::Core {
 
     RealInf::RealInf(bool b) : DirectedInf(Vector()) {
         direction = Vector(1);
-        Numerical temp = b ? BasicConst::getInstance().get_1() : BasicConst::getInstance().getMinus_1();
+        Scalar temp = b ? BasicConst::getInstance().get_1() : BasicConst::getInstance().getMinus_1();
         direction.grow(temp);
     }
 

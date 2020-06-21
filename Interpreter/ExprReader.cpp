@@ -1,6 +1,6 @@
 #include <stack>
 #include "Interpreter/Header/ExprReader.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 using namespace Physica::Interpreter;
 
@@ -85,39 +85,39 @@ ExprReader::ExprReader(const std::wstring& str) {
     }
 }
 
-Numerical ExprReader::calc() {
-    std::stack<Numerical> stack{};
+Scalar ExprReader::calc() {
+    std::stack<Scalar> stack{};
     for(auto& str : anti_poland) {
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
-                    Numerical n1 = stack.top();
+                    Scalar n1 = stack.top();
                     stack.pop();
-                    Numerical n2 = stack.top();
+                    Scalar n2 = stack.top();
                     stack.pop();
                     stack.push(n1 + n2);
                 }
                 break;
             case L'×':
                 if(stack.size() > 1) {
-                    Numerical n1 = stack.top();
+                    Scalar n1 = stack.top();
                     stack.pop();
-                    Numerical n2 = stack.top();
+                    Scalar n2 = stack.top();
                     stack.pop();
                     stack.push(n1 * n2);
                 }
                 break;
             case '/':
                 if(stack.size() > 1) {
-                    Numerical n1 = stack.top();
+                    Scalar n1 = stack.top();
                     stack.pop();
-                    Numerical n2 = stack.top();
+                    Scalar n2 = stack.top();
                     stack.pop();
                     stack.push(n2 / n1);
                 }
                 break;
             default:
-                stack.push(Numerical(str));
+                stack.push(Scalar(str));
         }
     }
     return stack.top();

@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Core/Header/Const.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 #include "Core/Header/RealNum.h"
 
 namespace Physica::Core {
@@ -12,25 +12,25 @@ namespace Physica::Core {
      * Basic consts that initialize directly.
      */
     BasicConst::BasicConst() : GlobalPrecision(4), MaxPower(16) {
-        plotPoints = new Numerical(static_cast<SignedNumericalUnit>(20));
-        auto temp = new Numerical(1, 1 - GlobalPrecision);
+        plotPoints = new Scalar(static_cast<SignedScalarUnit>(20));
+        auto temp = new Scalar(1, 1 - GlobalPrecision);
         (*temp)[0] = 1;
         expectedRelativeError = temp;
-        temp = new Numerical(1, - GlobalPrecision / 2);
+        temp = new Scalar(1, - GlobalPrecision / 2);
         (*temp)[0] = 1;
         //Value (- GlobalPrecision / 2) still need a proof.
         stepSize = temp;
-        R_MAX = new Numerical(static_cast<SignedNumericalUnit>(2147483647));
-        _0 = new Numerical(static_cast<SignedNumericalUnit>(0));
-        _1 = new Numerical(static_cast<SignedNumericalUnit>(1));
-        Minus_1 = new Numerical(static_cast<SignedNumericalUnit>(-1));
-        _2 = new Numerical(static_cast<SignedNumericalUnit>(2));
-        Minus_2 = new Numerical(static_cast<SignedNumericalUnit>(-2));
-        _3 = new Numerical(static_cast<SignedNumericalUnit>(3));
-        Minus_3 = new Numerical(static_cast<SignedNumericalUnit>(-3));
-        _4 = new Numerical(static_cast<SignedNumericalUnit>(4));
-        Minus_4 = new Numerical(static_cast<SignedNumericalUnit>(-4));
-        _10 = new Numerical(static_cast<SignedNumericalUnit>(10));
+        R_MAX = new Scalar(static_cast<SignedScalarUnit>(2147483647));
+        _0 = new Scalar(static_cast<SignedScalarUnit>(0));
+        _1 = new Scalar(static_cast<SignedScalarUnit>(1));
+        Minus_1 = new Scalar(static_cast<SignedScalarUnit>(-1));
+        _2 = new Scalar(static_cast<SignedScalarUnit>(2));
+        Minus_2 = new Scalar(static_cast<SignedScalarUnit>(-2));
+        _3 = new Scalar(static_cast<SignedScalarUnit>(3));
+        Minus_3 = new Scalar(static_cast<SignedScalarUnit>(-3));
+        _4 = new Scalar(static_cast<SignedScalarUnit>(4));
+        Minus_4 = new Scalar(static_cast<SignedScalarUnit>(-4));
+        _10 = new Scalar(static_cast<SignedScalarUnit>(10));
     }
 
     BasicConst::~BasicConst() {
@@ -71,12 +71,12 @@ namespace Physica::Core {
         _1 = new RealNum(getOne());
         _2 = new RealNum(getTwo());
         //0.31 is the big approximation of ln(2) / ln(10)
-        PI = new Numerical(calcPI(
-                static_cast<int>(static_cast<double>(NumericalUnitWidth) * BasicConst::getInstance().GlobalPrecision * 0.31) + 1));
-        E = new Numerical(exp(BasicConst::getInstance().get_1()));
+        PI = new Scalar(calcPI(
+                static_cast<int>(static_cast<double>(ScalarUnitWidth) * BasicConst::getInstance().GlobalPrecision * 0.31) + 1));
+        E = new Scalar(exp(BasicConst::getInstance().get_1()));
 
-        PI_2 = new Numerical(*PI / BasicConst::getInstance().get_2());
-        Minus_PI_2 = new Numerical(-*PI_2);
+        PI_2 = new Scalar(*PI / BasicConst::getInstance().get_2());
+        Minus_PI_2 = new Scalar(-*PI_2);
     }
 
     MathConst::~MathConst() {
@@ -107,15 +107,15 @@ namespace Physica::Core {
      * http://www.pi314.net/eng/salamin.php
      * https://blog.csdn.net/liangbch/article/details/78724041
      */
-    Numerical MathConst::calcPI(int precision) {
-        Numerical a = getOne();
-        Numerical x = getOne();
-        Numerical b = reciprocal(sqrt(BasicConst::getInstance().get_2()));
-        Numerical c = reciprocal(BasicConst::getInstance().get_4());
+    Scalar MathConst::calcPI(int precision) {
+        Scalar a = getOne();
+        Scalar x = getOne();
+        Scalar b = reciprocal(sqrt(BasicConst::getInstance().get_2()));
+        Scalar c = reciprocal(BasicConst::getInstance().get_4());
 
         int goal = 1;
         while(goal < precision) {
-            Numerical y(a);
+            Scalar y(a);
             a = (a + b) >> 1;
             b = sqrt(b * y);
             y -= a;

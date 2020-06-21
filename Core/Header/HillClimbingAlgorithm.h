@@ -2,20 +2,20 @@
 #define _Physica_C_ClimbMountainAlgorithm_H
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 
     class HillClimbingAlgorithm {
     public:
-        HillClimbingAlgorithm(Numerical* func(Numerical*), Numerical* x_initial, Numerical* stepSize);
+        HillClimbingAlgorithm(Scalar* func(Scalar*), Scalar* x_initial, Scalar* stepSize);
         ~HillClimbingAlgorithm();
         void getExtremal();
-        Numerical* getMinStep();
-        void setMinStep(Numerical* minStep);
+        Scalar* getMinStep();
+        void setMinStep(Scalar* minStep);
     private:
-        Numerical* (*func)(Numerical*);
-        Numerical* x_initial;
-        Numerical* stepSize;
-        Numerical* minStep;
+        Scalar* (*func)(Scalar*);
+        Scalar* x_initial;
+        Scalar* stepSize;
+        Scalar* minStep;
     };
 }
 

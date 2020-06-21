@@ -6,11 +6,11 @@
 namespace Physica::Core {
     class Integrate {
         Function func;
-        Numerical from;
-        Numerical to;
-        Numerical stepSize;
+        Scalar from;
+        Scalar to;
+        Scalar stepSize;
     public:
-        //Reference: Numerical Recipes in C++
+        //Reference: Scalar Recipes in C++
         enum IntegrateMethod {
             Rectangular,
             Ladder,
@@ -18,8 +18,8 @@ namespace Physica::Core {
             Simpson_3_8,
             Bode
         };
-        Integrate(Function func, Numerical from, Numerical to, Numerical stepSize = BasicConst::getInstance().getStepSize());
-        [[nodiscard]] Numerical solve(IntegrateMethod method);
+        Integrate(Function func, Scalar from, Scalar to, Scalar stepSize = BasicConst::getInstance().getStepSize());
+        [[nodiscard]] Scalar solve(IntegrateMethod method);
     };
 }
 

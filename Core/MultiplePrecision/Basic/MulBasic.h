@@ -12,9 +12,9 @@ namespace Physica::Core {
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     //FIXME inline will cause incorrect results in release mode.
-    inline NumericalUnit mulWordByWordHigh(NumericalUnit n1, NumericalUnit n2) {
+    inline ScalarUnit mulWordByWordHigh(ScalarUnit n1, ScalarUnit n2) {
     #if UseASM
-        NumericalUnit result;
+        ScalarUnit result;
         #ifdef PHYSICA_64BIT
             asm (
                     "mulq %2"
@@ -51,7 +51,7 @@ namespace Physica::Core {
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
-    inline void mulWordByWord(NumericalUnit& high, NumericalUnit& low, NumericalUnit n1, NumericalUnit n2) {
+    inline void mulWordByWord(ScalarUnit& high, ScalarUnit& low, ScalarUnit n1, ScalarUnit n2) {
     #if UseASM
         #ifdef PHYSICA_64BIT
             asm (
@@ -67,27 +67,27 @@ namespace Physica::Core {
             );
         #endif
     #else
-        NumericalUnit n1_low = n1 & numericalUnitLowMask;
-        NumericalUnit n1_high = n1 >> (NumericalUnitWidth / 2U);
-        NumericalUnit n2_low = n2 & numericalUnitLowMask;
-        NumericalUnit n2_high = n2 >> (NumericalUnitWidth / 2U);
+        ScalarUnit n1_low = n1 & numericalUnitLowMask;
+        ScalarUnit n1_high = n1 >> (ScalarUnitWidth / 2U);
+        ScalarUnit n2_low = n2 & numericalUnitLowMask;
+        ScalarUnit n2_high = n2 >> (ScalarUnitWidth / 2U);
 
         auto ll = n1_low * n2_low;
         auto lh = n1_low * n2_high;
         auto hl = n1_high * n2_low;
         auto hh = n1_high * n2_high;
 
-        lh += ll >> (NumericalUnitWidth / 2U);
+        lh += ll >> (ScalarUnitWidth / 2U);
         lh += hl;
-        hh += static_cast<NumericalUnit>(lh < hl) << (NumericalUnitWidth / 2U);
-        high = hh + (lh >> (NumericalUnitWidth / 2U));
-        low = (lh << (NumericalUnitWidth / 2U)) + (ll & numericalUnitLowMask);
+        hh += static_cast<ScalarUnit>(lh < hl) << (ScalarUnitWidth / 2U);
+        high = hh + (lh >> (ScalarUnitWidth / 2U));
+        low = (lh << (ScalarUnitWidth / 2U)) + (ll & numericalUnitLowMask);
     #endif
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr
-            , size_t length, NumericalUnit n) {
-        NumericalUnit carry = 0, high, low;
+    inline ScalarUnit mulArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
+            , size_t length, ScalarUnit n) {
+        ScalarUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low += carry;
@@ -97,9 +97,9 @@ namespace Physica::Core {
         return carry;
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulAddArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr
-            , size_t length, NumericalUnit n) {
-        NumericalUnit carry = 0, high, low;
+    inline ScalarUnit mulAddArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
+            , size_t length, ScalarUnit n) {
+        ScalarUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low += carry;
@@ -110,8 +110,8 @@ namespace Physica::Core {
         return carry;
     }
     //Length of result should at least as long as arr.
-    inline NumericalUnit mulSubArrByWord(NumericalUnit* __restrict result, const NumericalUnit* __restrict arr, size_t length, NumericalUnit n) {
-        NumericalUnit carry = 0, high, low;
+    inline ScalarUnit mulSubArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr, size_t length, ScalarUnit n) {
+        ScalarUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low = result[i] - low;

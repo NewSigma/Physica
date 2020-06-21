@@ -6,25 +6,25 @@
 #define PHYSICA_NODE_H
 
 #include <Core/Header/Vector.h>
-#include <Core/Header/Numerical.h>
+#include <Core/Header/Scalar.h>
 #include <map>
 #include <set>
 
 using Physica::Core::Vector;
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 
 namespace Physica::AI {
     class Layer;
 
     class Node {
-        //Contains connection between this node to the node at next layer. <index of node, index of Numerical>
+        //Contains connection between this node to the node at next layer. <index of node, index of Scalar>
         std::map<int, int> forwardConnections;
-        //Contains connection between this node to the node at previous layer. <index of Numerical, index of node>
+        //Contains connection between this node to the node at previous layer. <index of Scalar, index of node>
         std::map<int, int> backwardConnections;
         Vector vector;
-        Numerical bias;
-        Numerical acceptedLoss;
-        Numerical (*activeFunc)(const Numerical&);
+        Scalar bias;
+        Scalar acceptedLoss;
+        Scalar (*activeFunc)(const Scalar&);
 
         Layer* parentLayer;
         int id;
@@ -33,11 +33,11 @@ namespace Physica::AI {
         Node(const Node&) = delete;
         Node& operator=(const Node&) = delete;
 
-        [[nodiscard]] Numerical calc() const;
+        [[nodiscard]] Scalar calc() const;
         [[nodiscard]] Layer* getLayer() const { return parentLayer; }
         const std::map<int, int>& getForwardConnections() { return forwardConnections; }
         const std::map<int, int>& getBackwardConnections() { return backwardConnections; }
-        void setActiveFunc(Numerical (*func)(const Numerical&)) { activeFunc = func; }
+        void setActiveFunc(Scalar (*func)(const Scalar&)) { activeFunc = func; }
         bool connect(int toNode, int toPoint);
         void disconnect(int toNode);
 

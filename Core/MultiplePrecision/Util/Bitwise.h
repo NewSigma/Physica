@@ -6,11 +6,11 @@
 
 namespace Physica::Core {
     //Possibly use asm to speed up.
-    inline unsigned int countLeadingZeros(NumericalUnit n) {
+    inline unsigned int countLeadingZeros(ScalarUnit n) {
         if(n == 0)
-            return NumericalUnitWidth;
+            return ScalarUnitWidth;
     #if UseASM
-        NumericalUnit count;
+        ScalarUnit count;
         asm volatile (
                 "bsrq %1, %0\n\t"
                 : "=r" (count)
@@ -18,7 +18,7 @@ namespace Physica::Core {
         );
         (count) ^= 63U;
     #else
-        NumericalUnit count = 0U;
+        ScalarUnit count = 0U;
         while((n & numericalUnitHighestBitMask) == 0) {
             ++count;
             n <<= 1U;

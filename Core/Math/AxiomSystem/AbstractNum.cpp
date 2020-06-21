@@ -8,7 +8,7 @@
 #include "Core/Header/ComplexInf.h"
 #include "Core/Header/RealInf.h"
 #include "Core/Header/Indeterminate.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 #include "Core/Header/ElementaryFunction.h"
 
 namespace Physica::Core {
@@ -71,8 +71,8 @@ namespace Physica::Core {
         switch(n.getType()) {
             case AbstractNum::ComplexNumber: {
                 Vector vec = ((ComplexNum&)n).toVector();
-                Numerical norm = sqrt(vec.toNorm());
-                Numerical arg = vec.toArg(0);
+                Scalar norm = sqrt(vec.toNorm());
+                Scalar arg = vec.toArg(0);
                 return new ComplexNum(norm * cos(arg), norm * sin(arg));
             }
             case AbstractNum::RealNumber:
@@ -83,7 +83,7 @@ namespace Physica::Core {
                 return RealInf::getInstance(((RealInf&)n).getSign());
             case AbstractNum::DirectedInfinity:
                 if(((DirectedInf&)n).direction.getLength() == 2) {
-                    Numerical arg = ((DirectedInf&)n).direction.toArg(0);
+                    Scalar arg = ((DirectedInf&)n).direction.toArg(0);
                     arg /= BasicConst::getInstance().get_2();
                     auto result = new DirectedInf(Vector(cos(arg), sin(arg)));
                     return result;

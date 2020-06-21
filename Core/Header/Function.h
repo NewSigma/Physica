@@ -22,22 +22,22 @@ namespace Physica::Core {
 
         Function& operator=(const Function& func) = delete;
         Function& operator=(Function&& func) noexcept;
-        [[nodiscard]] inline Numerical& operator[](size_t index);
-        [[nodiscard]] inline const Numerical& operator[](size_t index) const;
-        [[nodiscard]] Numerical operator()(Numerical n);
-        [[nodiscard]] Numerical operator()(Numerical n1, Numerical n2);
-        [[nodiscard]] Numerical operator()(Numerical n1, Numerical n2, Numerical n3);
+        [[nodiscard]] inline Scalar& operator[](size_t index);
+        [[nodiscard]] inline const Scalar& operator[](size_t index) const;
+        [[nodiscard]] Scalar operator()(Scalar n);
+        [[nodiscard]] Scalar operator()(Scalar n1, Scalar n2);
+        [[nodiscard]] Scalar operator()(Scalar n1, Scalar n2, Scalar n3);
 
         [[nodiscard]] const FunctionTree& getConstNode(size_t index) const { return constantNodes[index]; }
-        [[nodiscard]] Numerical solve() const { return tree.solve(); }
+        [[nodiscard]] Scalar solve() const { return tree.solve(); }
     };
     /* Inline implementations */
-    inline Numerical& Function::operator[](size_t index) {
+    inline Scalar& Function::operator[](size_t index) {
         Q_ASSERT(index < length);
         return *constantNodes[index].constant;
     }
 
-    inline const Numerical& Function::operator[](size_t index) const {
+    inline const Scalar& Function::operator[](size_t index) const {
         Q_ASSERT(index < length);
         return *constantNodes[index].constant;
     }

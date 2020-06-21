@@ -3,7 +3,7 @@
  */
 #include <iostream>
 #include "Core/Header/HillClimbingAlgorithm.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 namespace Physica::Core {
     /*
@@ -17,11 +17,11 @@ namespace Physica::Core {
      * Usage: new HillClimbingAlgorithm(args)->getExtremal();
      */
     //TODO Optional: Auto step-size
-    HillClimbingAlgorithm::HillClimbingAlgorithm(Numerical* f(Numerical*), Numerical* init, Numerical* size) {
+    HillClimbingAlgorithm::HillClimbingAlgorithm(Scalar* f(Scalar*), Scalar* init, Scalar* size) {
         func = f;
         x_initial = init;
         stepSize = size;
-        minStep = new Numerical(BasicConst::getInstance().getStepSize());
+        minStep = new Scalar(BasicConst::getInstance().getStepSize());
     }
 
     HillClimbingAlgorithm::~HillClimbingAlgorithm() {
@@ -29,14 +29,14 @@ namespace Physica::Core {
     }
 
     void HillClimbingAlgorithm::getExtremal() {
-        Numerical* y_initial = func(x_initial);
-        auto x_last = new Numerical(*x_initial);
+        Scalar* y_initial = func(x_initial);
+        auto x_last = new Scalar(*x_initial);
         *x_last += *stepSize;
         auto y_last = func(x_last);
-        auto x = new Numerical(*x_last);
-        auto y = new Numerical(*stepSize);
-        Numerical* x_result = nullptr;
-        Numerical* y_result = nullptr;
+        auto x = new Scalar(*x_last);
+        auto y = new Scalar(*stepSize);
+        Scalar* x_result = nullptr;
+        Scalar* y_result = nullptr;
         bool positiveUsable = false;
         bool negativeUsable = false;
 
@@ -102,11 +102,11 @@ namespace Physica::Core {
         delete y_result;
     }
 
-    Numerical* HillClimbingAlgorithm::getMinStep() {
+    Scalar* HillClimbingAlgorithm::getMinStep() {
         return minStep;
     }
 
-    void HillClimbingAlgorithm::setMinStep(Numerical* step) {
+    void HillClimbingAlgorithm::setMinStep(Scalar* step) {
         delete minStep;
         minStep = step;
     }

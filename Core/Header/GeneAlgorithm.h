@@ -4,7 +4,7 @@
 #include <ctime>
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 
     class GeneAlgorithm {
     public:
@@ -15,10 +15,10 @@ namespace Physica::Core {
         double crossoverRate = 0.6;
         double mutationRate = 0.1;
 
-        GeneAlgorithm(Numerical func(const Numerical&), const Numerical& lower, const Numerical& upper, int pop = 100, ChooseMode mode = RandomChoose);
+        GeneAlgorithm(Scalar func(const Scalar&), const Scalar& lower, const Scalar& upper, int pop = 100, ChooseMode mode = RandomChoose);
         ~GeneAlgorithm();
 
-        Numerical** getExtremalPoint();
+        Scalar** getExtremalPoint();
         void setMaxGenerations(int maxGenerations);
         void setMaxTime(int maxTime);
         void print();
@@ -27,12 +27,12 @@ namespace Physica::Core {
         //The size of initial points we should choose.
         int population;
         //Function args.
-        Numerical (*fitnessFunction)(const Numerical&);
-        const Numerical* lowerBound;
-        const Numerical* upperBound;
-        Numerical* regionLength;
+        Scalar (*fitnessFunction)(const Scalar&);
+        const Scalar* lowerBound;
+        const Scalar* upperBound;
+        Scalar* regionLength;
         //Save
-        Numerical** points;
+        Scalar** points;
         //Stopping args
         int generations = 0;
         clock_t startTime{};

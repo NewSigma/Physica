@@ -4,35 +4,35 @@
 #include <QtCore/qlogging.h>
 #include <cstring>
 #include "Core/Header/Vector.h"
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 namespace Physica::Core {
-    Vector::Vector() : CStyleArray<Numerical, Dynamic>() {}
+    Vector::Vector() : CStyleArray<Scalar, Dynamic>() {}
 
-    Vector::Vector(size_t capacity) : CStyleArray<Numerical, Dynamic>(capacity) {}
+    Vector::Vector(size_t capacity) : CStyleArray<Scalar, Dynamic>(capacity) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
-    Vector::Vector(size_t length, size_t capacity) : CStyleArray<Numerical, Dynamic>(length, capacity) {}
+    Vector::Vector(size_t length, size_t capacity) : CStyleArray<Scalar, Dynamic>(length, capacity) {}
     //!Convenience function to create a 2D Vector.
-    Vector::Vector(const Numerical& n1, const Numerical& n2) : CStyleArray<Numerical, Dynamic>(2, 2) {
+    Vector::Vector(const Scalar& n1, const Scalar& n2) : CStyleArray<Scalar, Dynamic>(2, 2) {
         allocate(n1, 0);
         allocate(n2, 1);
     }
     //!Convenience function to create a 3D Vector.
-    Vector::Vector(const Numerical& n1, const Numerical& n2, const Numerical& n3)
-            : CStyleArray<Numerical, Dynamic>(3, 3) {
+    Vector::Vector(const Scalar& n1, const Scalar& n2, const Scalar& n3)
+            : CStyleArray<Scalar, Dynamic>(3, 3) {
         allocate(n1, 0);
         allocate(n2, 1);
         allocate(n3, 2);
     }
 
-    Vector::Vector(const CStyleArray<Numerical, Dynamic>& array) : CStyleArray<Numerical, Dynamic>(array) {}
+    Vector::Vector(const CStyleArray<Scalar, Dynamic>& array) : CStyleArray<Scalar, Dynamic>(array) {}
 
-    Vector::Vector(CStyleArray<Numerical, Dynamic>&& array) noexcept : CStyleArray<Numerical, Dynamic>(std::move(array)) {}
+    Vector::Vector(CStyleArray<Scalar, Dynamic>&& array) noexcept : CStyleArray<Scalar, Dynamic>(std::move(array)) {}
 
-    Vector::Vector(Vector&& vec) noexcept : CStyleArray<Numerical, Dynamic>(std::move(vec))  {}
+    Vector::Vector(Vector&& vec) noexcept : CStyleArray<Scalar, Dynamic>(std::move(vec))  {}
 
     std::ostream& operator<<(std::ostream& os, const Vector& v) {
         os << '(';
@@ -43,8 +43,8 @@ namespace Physica::Core {
         return os;
     }
 
-    Numerical Vector::toNorm() const {
-        Numerical norm = getZero();
+    Scalar Vector::toNorm() const {
+        Scalar norm = getZero();
         for(size_t i = 0; i < getLength(); ++i)
             norm += square((*this)[i]);
         return sqrt(norm);
@@ -53,7 +53,7 @@ namespace Physica::Core {
     void Vector::toUnit() {
         if(isZeroVector())
             return;
-        Numerical norm = toNorm();
+        Scalar norm = toNorm();
         for(size_t i = 0; i < getLength(); ++i)
             (*this)[i] /= norm;
     }
@@ -69,7 +69,7 @@ namespace Physica::Core {
         return true;
     }
 
-    Numerical Vector::toArg(size_t axe) const {
+    Scalar Vector::toArg(size_t axe) const {
         return toNorm() / (*this)[axe];
     }
 
@@ -122,15 +122,15 @@ namespace Physica::Core {
         return result;
     }
 
-    Numerical operator*(const Vector& v1, const Vector& v2) {
+    Scalar operator*(const Vector& v1, const Vector& v2) {
         const auto length = v1.getLength();
-        Numerical result = getZero();
+        Scalar result = getZero();
         for(size_t i = 0; i < length; ++i)
             result += v1[i] * v2[i];
         return result;
     }
 
-    Vector operator+(const Vector& v, const Numerical& n) {
+    Vector operator+(const Vector& v, const Scalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -138,7 +138,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator-(const Vector& v, const Numerical& n) {
+    Vector operator-(const Vector& v, const Scalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -146,7 +146,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator*(const Vector& v, const Numerical& n) {
+    Vector operator*(const Vector& v, const Scalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -154,7 +154,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator/(const Vector& v, const Numerical& n) {
+    Vector operator/(const Vector& v, const Scalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -194,7 +194,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector log(const Vector& v, const Numerical& a) {
+    Vector log(const Vector& v, const Scalar& a) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -210,7 +210,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector pow(const Vector& v, const Numerical& a) {
+    Vector pow(const Vector& v, const Scalar& a) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)

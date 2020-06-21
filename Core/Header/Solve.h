@@ -2,15 +2,15 @@
 #define PHYSICA_SOLVE_H
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 
     class Solve {
     public:
-        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n
-                , const Numerical& x1, const Numerical& x2);
-        static Numerical bisectionMethod(Numerical func(const Numerical&), const Numerical& n
-                , const Numerical& x_left, const Numerical& x_right
-                , const Numerical& y_left, const Numerical& y2);
+        static Scalar bisectionMethod(Scalar func(const Scalar&), const Scalar& n
+                , const Scalar& x1, const Scalar& x2);
+        static Scalar bisectionMethod(Scalar func(const Scalar&), const Scalar& n
+                , const Scalar& x_left, const Scalar& x_right
+                , const Scalar& y_left, const Scalar& y2);
     };
 }
 

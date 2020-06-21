@@ -18,7 +18,7 @@ namespace Physica::Core {
             LadderMethod
         };
         FFTBase(FFTBase&& base) noexcept;
-        Numerical operator()(const Numerical& n);
+        Scalar operator()(const Scalar& n);
     protected:
         FFTBase(Vector x, Vector y, NormalizationMethod method);
     private:

@@ -14,7 +14,7 @@ namespace Physica::Core {
      * Return the precomputed reciprocal.
      * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
-    inline NumericalUnit getInverse(NumericalUnit unit) {
+    inline ScalarUnit getInverse(ScalarUnit unit) {
         unsigned long unit0 = unit & 1U;
     #ifdef PHYSICA_64BIT
         unsigned long unit9 = unit >> 55U;
@@ -54,11 +54,11 @@ namespace Physica::Core {
      *
      * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
-    inline void div2WordByFullWord(NumericalUnit& quotient, NumericalUnit& remainder
-            , NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+    inline void div2WordByFullWord(ScalarUnit& quotient, ScalarUnit& remainder
+            , ScalarUnit high, ScalarUnit low, ScalarUnit divisor) {
         Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
-        NumericalUnit quotient2;
+        Q_ASSERT(divisor & (static_cast<ScalarUnit>(1) << (PhysicaWordSize - 1U)));
+        ScalarUnit quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
         auto temp = quotient2;
@@ -77,16 +77,16 @@ namespace Physica::Core {
     /*
      * This is a simplified version of div2WordByFullWord(), which returns the quotient only.
      */
-    inline NumericalUnit div2WordByFullWordQ(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+    inline ScalarUnit div2WordByFullWordQ(ScalarUnit high, ScalarUnit low, ScalarUnit divisor) {
         Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
-        NumericalUnit quotient, quotient2;
+        Q_ASSERT(divisor & (static_cast<ScalarUnit>(1) << (PhysicaWordSize - 1U)));
+        ScalarUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
         auto temp = quotient2;
         quotient2 += low;
         quotient += high + (temp > quotient2) + 1;
-        NumericalUnit remainder = low - quotient * divisor;
+        ScalarUnit remainder = low - quotient * divisor;
         if(remainder > quotient2) {
             --quotient;
             remainder += divisor;
@@ -98,10 +98,10 @@ namespace Physica::Core {
     /*
      * This is a simplified version of div2WordByFullWord(), which returns the remainder only.
      */
-    inline NumericalUnit div2WordByFullWordR(NumericalUnit high, NumericalUnit low, NumericalUnit divisor) {
+    inline ScalarUnit div2WordByFullWordR(ScalarUnit high, ScalarUnit low, ScalarUnit divisor) {
         Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<NumericalUnit>(1) << (PhysicaWordSize - 1U)));
-        NumericalUnit quotient, quotient2;
+        Q_ASSERT(divisor & (static_cast<ScalarUnit>(1) << (PhysicaWordSize - 1U)));
+        ScalarUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
         auto temp = quotient2;
@@ -124,26 +124,26 @@ namespace Physica::Core {
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.4-8
      */
-    inline NumericalUnit divArrByFullArrWith1Word(const NumericalUnit* __restrict dividend
-            , const NumericalUnit* __restrict divisor, size_t len) {
+    inline ScalarUnit divArrByFullArrWith1Word(const ScalarUnit* __restrict dividend
+            , const ScalarUnit* __restrict divisor, size_t len) {
         Q_ASSERT(len >= 1);
-        NumericalUnit q = dividend[len] >= divisor[len - 1] ? NumericalUnitMax :
-                div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
+        ScalarUnit q = dividend[len] >= divisor[len - 1] ? ScalarUnitMax :
+                       div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
         if(len == 1) //May be ask len > 1 to avoid branches.
             return q;
-        NumericalUnit temp[2]{dividend[len - 1], dividend[len]};
+        ScalarUnit temp[2]{dividend[len - 1], dividend[len]};
         /* Calculate temp - q * divisor[len - 1] */ {
-            NumericalUnit temp_1[2];
+            ScalarUnit temp_1[2];
             mulWordByWord(temp_1[1], temp_1[0], q, divisor[len - 1]);
             subArrByArrEq(temp, temp_1, 2);
         }
-        NumericalUnit q_divisor_high, q_divisor_low;
+        ScalarUnit q_divisor_high, q_divisor_low;
         mulWordByWord(q_divisor_high, q_divisor_low, q, divisor[len - 2]);
         sub2WordByWord(q_divisor_high, q_divisor_low, dividend[len - 2]);
         if(temp[1] == 0 && (temp[0] < q_divisor_high || (temp[0] == q_divisor_high && q_divisor_low == 0)))
             --q;
 
-        auto n = new NumericalUnit[len + 1];
+        auto n = new ScalarUnit[len + 1];
         n[len] = mulArrByWord(n, divisor, len, q);
         //Judge dividend < n or not. If dividend < n, we have to do carry.
         bool carry = false, go_on = true;

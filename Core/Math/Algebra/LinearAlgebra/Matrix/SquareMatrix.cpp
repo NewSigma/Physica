@@ -15,11 +15,11 @@ namespace Physica::Core {
     /*!
      * Note: This function will broke the origin matrix.
      *
-     * Reference: Numerical Recipes in C++
+     * Reference: Scalar Recipes in C++
      */
-    Numerical SquareMatrix::determinate(SquareMatrixMethod method) {
+    Scalar SquareMatrix::determinate(SquareMatrixMethod method) {
         const auto rank = row();
-        Numerical result(BasicConst::getInstance().get_1());
+        Scalar result(BasicConst::getInstance().get_1());
         switch(method) {
             case GaussMethod:
                 for(size_t i = 0; i < rank; ++i) {
@@ -55,16 +55,16 @@ namespace Physica::Core {
             : Matrix(matrix), ColumnMatrix(matrix) {}
 
     ColumnSquareMatrix ColumnSquareMatrix::getUnitMatrix(size_t size) {
-        const Numerical& _0 = BasicConst::getInstance().get_0();
-        const Numerical& _1 = BasicConst::getInstance().get_1();
+        const Scalar& _0 = BasicConst::getInstance().get_0();
+        const Scalar& _1 = BasicConst::getInstance().get_1();
         CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Numerical, Dynamic, Dynamic> array1(size, size);
+            CStyleArray<Scalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
-                array1.allocate(Numerical(_0), j);
-            array1.allocate(Numerical(_1), i);
+                array1.allocate(Scalar(_0), j);
+            array1.allocate(Scalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
-                array1.allocate(Numerical(_0), j);
+                array1.allocate(Scalar(_0), j);
             array.allocate(Vector(std::move(array1)), i);
         }
         return ColumnSquareMatrix(std::move(array));
@@ -85,16 +85,16 @@ namespace Physica::Core {
             : Matrix(matrix), RowMatrix(matrix) {}
 
     RowSquareMatrix RowSquareMatrix::getUnitMatrix(size_t size) {
-        const Numerical& _0 = BasicConst::getInstance().get_0();
-        const Numerical& _1 = BasicConst::getInstance().get_1();
+        const Scalar& _0 = BasicConst::getInstance().get_0();
+        const Scalar& _1 = BasicConst::getInstance().get_1();
         CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Numerical, Dynamic, Dynamic> array1(size, size);
+            CStyleArray<Scalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
-                array1.allocate(Numerical(_0), j);
-            array1.allocate(Numerical(_1), i);
+                array1.allocate(Scalar(_0), j);
+            array1.allocate(Scalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
-                array1.allocate(Numerical(_0), j);
+                array1.allocate(Scalar(_0), j);
             array.allocate(Vector(std::move(array1)), i);
         }
         return RowSquareMatrix(std::move(array));

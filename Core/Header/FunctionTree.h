@@ -5,7 +5,7 @@
 #define PHYSICA_FUNCTIONTREE_H
 
 namespace Physica::Core {
-    class Numerical;
+    class Scalar;
 
     class FunctionTree {
         //A function is a tree.
@@ -15,14 +15,14 @@ namespace Physica::Core {
                 FunctionTree* right;
             };
             struct {
-                Numerical* constant{};
+                Scalar* constant{};
                 void* placeHolder{};
             };
         };
         void* func;
     public:
-        FunctionTree(Numerical (*func)(const Numerical&, const Numerical&), FunctionTree left, FunctionTree right);
-        FunctionTree(Numerical (*func)(const Numerical&), FunctionTree f);
+        FunctionTree(Scalar (*func)(const Scalar&, const Scalar&), FunctionTree left, FunctionTree right);
+        FunctionTree(Scalar (*func)(const Scalar&), FunctionTree f);
         FunctionTree(const FunctionTree& func) = delete;
         FunctionTree(FunctionTree&& func) noexcept;
         ~FunctionTree();
@@ -30,8 +30,8 @@ namespace Physica::Core {
         FunctionTree& operator=(const FunctionTree& func) = delete;
         FunctionTree& operator=(FunctionTree&& f) noexcept;
     private:
-        explicit FunctionTree(Numerical* constant);
-        [[nodiscard]] Numerical solve() const;
+        explicit FunctionTree(Scalar* constant);
+        [[nodiscard]] Scalar solve() const;
         friend class Function;
     };
 }

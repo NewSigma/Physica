@@ -105,7 +105,7 @@ namespace Physica::Core {
     //!Reduce the element at \r2 using \r1.
     void ColumnMatrix::rowReduce(size_t r1, size_t r2, size_t element) {
         const auto& element_column = (*this)[element];
-        Numerical dividend = element_column[r2] / element_column[r1];
+        Scalar dividend = element_column[r2] / element_column[r1];
         const auto length = getLength();
         for(size_t i = 0; i < length; ++i) {
             auto& column = (*this)[i];
@@ -114,7 +114,7 @@ namespace Physica::Core {
     }
     //!Reduce the element at \c2 using \c1.
     void ColumnMatrix::columnReduce(size_t c1, size_t c2, size_t element) {
-        Numerical dividend = (*this)(element, c2) / (*this)(element, c1);
+        Scalar dividend = (*this)(element, c2) / (*this)(element, c1);
         (*this)[c2] -= (*this)[c1] * dividend;
     }
 }

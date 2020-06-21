@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_NUMERICAL_H
-#define PHYSICA_NUMERICAL_H
+#ifndef PHYSICA_SCALAR_H
+#define PHYSICA_SCALAR_H
 
 #include <iostream>
 #include <cstring>
@@ -15,12 +15,18 @@
 #include "Core/Header/ElementaryFunction.h"
 
 namespace Physica::Core {
-    class Numerical {
+    enum ScalarType {
+        MultiPrecition,
+        Float,
+        Double
+    };
+
+    class Scalar {
         //Store effective digits.
-        NumericalUnit* __restrict byte;
+        ScalarUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
-         * sign of length and sign of Numerical are same. (when Numerical != 0)
+         * sign of length and sign of Scalar are same. (when Scalar != 0)
         */
         int length;
         /*
@@ -29,111 +35,112 @@ namespace Physica::Core {
          */
         int power;
         //Accuracy
-        NumericalUnit a;
+        ScalarUnit a;
     public:
-        Numerical() noexcept;
-        Numerical(int length, int power, NumericalUnit a = 0) noexcept;
-        Numerical(const Numerical& n) noexcept;
-        Numerical(Numerical&& n) noexcept;
-        explicit Numerical(SignedNumericalUnit unit, NumericalUnit a = 0) noexcept;
-        explicit Numerical(double d, NumericalUnit a = 0);
-        explicit Numerical(const char* s, NumericalUnit a = 0);
-        explicit Numerical(const wchar_t* s, NumericalUnit a = 0);
-        explicit Numerical(const std::string& s, NumericalUnit a = 0);
-        explicit Numerical(const std::wstring& s, NumericalUnit a = 0);
-        ~Numerical();
+        Scalar() noexcept;
+        Scalar(int length, int power, ScalarUnit a = 0) noexcept;
+        Scalar(const Scalar& n) noexcept;
+        Scalar(Scalar&& n) noexcept;
+        explicit Scalar(SignedScalarUnit unit, ScalarUnit a = 0) noexcept;
+        explicit Scalar(double d, ScalarUnit a = 0);
+        explicit Scalar(const char* s, ScalarUnit a = 0);
+        explicit Scalar(const wchar_t* s, ScalarUnit a = 0);
+        explicit Scalar(const std::string& s, ScalarUnit a = 0);
+        explicit Scalar(const std::wstring& s, ScalarUnit a = 0);
+        ~Scalar();
         /* Operators */
         explicit operator double() const;
-        friend std::ostream& operator<<(std::ostream& os, const Numerical& n);
-        Numerical operator+(const Numerical& n) const;
-        Numerical operator-(const Numerical& n) const;
-        Numerical operator*(const Numerical& n) const;
-        Numerical operator/(const Numerical& n) const;
-        Numerical operator<<(int bits) const;
-        Numerical operator>>(int bits) const;
+        friend std::ostream& operator<<(std::ostream& os, const Scalar& n);
+        Scalar operator+(const Scalar& n) const;
+        Scalar operator-(const Scalar& n) const;
+        Scalar operator*(const Scalar& n) const;
+        Scalar operator/(const Scalar& n) const;
+        Scalar operator<<(int bits) const;
+        Scalar operator>>(int bits) const;
         void operator<<=(int bits) noexcept { *this = *this << bits; }
         void operator>>=(int bits) noexcept { *this = *this >> bits; }
-        NumericalUnit& operator[](unsigned int index) { return byte[index]; }
-        const NumericalUnit& operator[](unsigned int index) const { return byte[index]; }
-        Numerical& operator=(const Numerical& n);
-        Numerical& operator=(Numerical&& n) noexcept;
-        Numerical operator^(const Numerical& n) const;
-        Numerical operator-() const;
+        ScalarUnit& operator[](unsigned int index) { return byte[index]; }
+        const ScalarUnit& operator[](unsigned int index) const { return byte[index]; }
+        Scalar& operator=(const Scalar& n);
+        Scalar& operator=(Scalar&& n) noexcept;
+        Scalar operator^(const Scalar& n) const;
+        Scalar operator-() const;
         /* Helpers */
-        Numerical& applyError(const Numerical& error);
-        void swap(Numerical& n) noexcept;
-        Numerical& toAbs() noexcept { length = getSize(); return *this; }
-        Numerical& toOpposite() noexcept { length = -length; return *this; }
-        Numerical& toUnitA() noexcept { a = 1; return *this; }
-        Numerical& clearA() noexcept { a = 0; return *this; }
+        Scalar& applyError(const Scalar& error);
+        void swap(Scalar& n) noexcept;
+        Scalar& toAbs() noexcept { length = getSize(); return *this; }
+        Scalar& toOpposite() noexcept { length = -length; return *this; }
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
         /* Getters */
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getPower() const noexcept { return power; }
-        [[nodiscard]] NumericalUnit getA() const noexcept { return a; }
+        [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
         [[nodiscard]] int getSize() const noexcept { return abs(length); }
         [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
-        [[nodiscard]] Numerical getAccuracy() const;
-        [[nodiscard]] Numerical getMaximum() const { return Numerical::add(*this, getAccuracy()).clearA(); }
-        [[nodiscard]] Numerical getMinimum() const { return Numerical::sub(*this, getAccuracy()).clearA(); }
+        [[nodiscard]] Scalar getAccuracy() const;
+        [[nodiscard]] Scalar getMaximum() const { return Scalar::add(*this, getAccuracy()).clearA(); }
+        [[nodiscard]] Scalar getMinimum() const { return Scalar::sub(*this, getAccuracy()).clearA(); }
     protected:
-        Numerical(NumericalUnit* byte, int length, int power, NumericalUnit a = 0);
-        inline static Numerical add (const Numerical& n1, const Numerical& n2);
-        inline static Numerical sub (const Numerical& n1, const Numerical& n2);
-        inline static Numerical mul (const Numerical& n1, const Numerical& n2);
-        inline static Numerical div (const Numerical& n1, const Numerical& n2);
-        inline static bool cutLength(Numerical& n);
-        inline static void cutZero(Numerical& n);
+        Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0);
+        inline static Scalar add (const Scalar& n1, const Scalar& n2);
+        inline static Scalar sub (const Scalar& n1, const Scalar& n2);
+        inline static Scalar mul (const Scalar& n1, const Scalar& n2);
+        inline static Scalar div (const Scalar& n1, const Scalar& n2);
+        inline static bool cutLength(Scalar& n);
+        inline static void cutZero(Scalar& n);
         /* Friends */
         friend class Solve;
-        friend Numerical square(const Numerical& n);
-        friend Numerical sqrt_light(const Numerical& n);
-        friend Numerical ln_light(const Numerical& n);
+        friend Scalar square(const Scalar& n);
+        friend Scalar sqrt_light(const Scalar& n);
+        friend Scalar ln_light(const Scalar& n);
     };
-    bool absCompare(const Numerical& n1, const Numerical& n2);
+    bool absCompare(const Scalar& n1, const Scalar& n2);
     /* Operators */
-    bool operator>(const Numerical& n1, const Numerical& n2);
-    bool operator<(const Numerical& n1, const Numerical& n2);
-    bool operator>=(const Numerical& n1, const Numerical& n2);
-    bool operator<=(const Numerical& n1, const Numerical& n2);
-    bool operator==(const Numerical& n1, const Numerical& n2);
-    bool operator!=(const Numerical& n1, const Numerical& n2);
+    bool operator>(const Scalar& n1, const Scalar& n2);
+    bool operator<(const Scalar& n1, const Scalar& n2);
+    bool operator>=(const Scalar& n1, const Scalar& n2);
+    bool operator<=(const Scalar& n1, const Scalar& n2);
+    bool operator==(const Scalar& n1, const Scalar& n2);
+    bool operator!=(const Scalar& n1, const Scalar& n2);
     /* Inline Implementations */
-    inline void operator+=(Numerical& n1, const Numerical& n2) { n1 = n1 + n2; }
-    inline void operator-=(Numerical& n1, const Numerical& n2) { n1 = n1 - n2; }
-    inline void operator*=(Numerical& n1, const Numerical& n2) { n1 = n1 * n2; }
-    inline void operator/=(Numerical& n1, const Numerical& n2) { n1 = n1 / n2; }
-    inline void operator^=(Numerical& n1, const Numerical& n2) { n1 = n1 ^ n2; }
-    inline Numerical& operator++(Numerical& n) { n += BasicConst::getInstance().get_1(); return n; }
-    inline Numerical& operator--(Numerical& n) { n -= BasicConst::getInstance().get_1(); return n; }
-    inline Numerical operator++(Numerical& n, int) { Numerical temp(n); n += BasicConst::getInstance().get_1(); return temp; } //NOLINT
-    inline Numerical operator--(Numerical& n, int) { Numerical temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
-    inline Numerical getZero() { return Numerical(BasicConst::getInstance().get_0()); }
-    inline Numerical getOne() { return Numerical(BasicConst::getInstance().get_1()); }
-    inline Numerical getTwo() { return Numerical(BasicConst::getInstance().get_2()); }
-    inline void swap(Numerical& n1, Numerical& n2) noexcept { n1.swap(n2); }
+    inline Scalar operator+(const Scalar& n) { return Scalar(n); }
+    inline void operator+=(Scalar& n1, const Scalar& n2) { n1 = n1 + n2; }
+    inline void operator-=(Scalar& n1, const Scalar& n2) { n1 = n1 - n2; }
+    inline void operator*=(Scalar& n1, const Scalar& n2) { n1 = n1 * n2; }
+    inline void operator/=(Scalar& n1, const Scalar& n2) { n1 = n1 / n2; }
+    inline void operator^=(Scalar& n1, const Scalar& n2) { n1 = n1 ^ n2; }
+    inline Scalar& operator++(Scalar& n) { n += BasicConst::getInstance().get_1(); return n; }
+    inline Scalar& operator--(Scalar& n) { n -= BasicConst::getInstance().get_1(); return n; }
+    inline Scalar operator++(Scalar& n, int) { Scalar temp(n); n += BasicConst::getInstance().get_1(); return temp; } //NOLINT
+    inline Scalar operator--(Scalar& n, int) { Scalar temp(n); n -= BasicConst::getInstance().get_1(); return temp; } //NOLINT
+    inline Scalar getZero() { return Scalar(BasicConst::getInstance().get_0()); }
+    inline Scalar getOne() { return Scalar(BasicConst::getInstance().get_1()); }
+    inline Scalar getTwo() { return Scalar(BasicConst::getInstance().get_2()); }
+    inline void swap(Scalar& n1, Scalar& n2) noexcept { n1.swap(n2); }
     /*
      * The following four functions simply calculate the result while operator functions will
      * consider the accuracy.
      */
     //Refactor: move the key algorithm into a separated method. We may not use every words.
-    inline Numerical Numerical::add(const Numerical& n1, const Numerical& n2) {
+    inline Scalar Scalar::add(const Scalar& n1, const Scalar& n2) {
         if(n1.isZero())
-            return Numerical(n2);
+            return Scalar(n2);
         else if(n2.isZero())
-            return Numerical(n1);
+            return Scalar(n1);
         else if ((n1.length ^ n2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
             if (n1.length > 0) {
-                Numerical shallow_copy(const_cast<NumericalUnit*>(n2.byte), -n2.length, n2.power);
+                Scalar shallow_copy(const_cast<ScalarUnit*>(n2.byte), -n2.length, n2.power);
                 auto result = sub(n1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Numerical shallow_copy(const_cast<NumericalUnit*>(n1.byte), -n1.length, n1.power);
+                Scalar shallow_copy(const_cast<ScalarUnit*>(n1.byte), -n1.length, n1.power);
                 auto result = sub(n2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -141,8 +148,8 @@ namespace Physica::Core {
             }
         }
         else {
-            const Numerical* big;
-            const Numerical* small;
+            const Scalar* big;
+            const Scalar* small;
             if (n1.power > n2.power) {
                 big = &n1;
                 small = &n2;
@@ -157,15 +164,15 @@ namespace Physica::Core {
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
             length = length > BasicConst::getInstance().GlobalPrecision
                      ? BasicConst::getInstance().GlobalPrecision : length;
-            auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+            auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
             /* Init byte */ {
                 const auto copySize = bigSize > length ? length : bigSize;
                 const auto clearSize = length - copySize;
-                memset(byte, 0, clearSize * sizeof(NumericalUnit));
-                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(NumericalUnit));
+                memset(byte, 0, clearSize * sizeof(ScalarUnit));
+                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
             }
             bool carry;
-            NumericalUnit a;
+            ScalarUnit a;
             /* Add and carry */ {
                 //useableSmall is the part whose add result will fall in GlobalPrecision.
                 int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
@@ -176,7 +183,7 @@ namespace Physica::Core {
                         , byte + length + small->power - big->power - useableSmall, useableSmall);
                 //useableSmall is also the index which we should carry to.
                 while(carry != 0 && useableSmall < length) {
-                    NumericalUnit temp = byte[useableSmall] + 1;
+                    ScalarUnit temp = byte[useableSmall] + 1;
                     byte[useableSmall] = temp;
                     carry = temp < carry;
                     ++useableSmall;
@@ -187,30 +194,30 @@ namespace Physica::Core {
             if(carry) {
                 ++length;
                 ++power;
-                byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
+                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Numerical(byte, big->length < 0 ? -length : length, power, a);
+            return Scalar(byte, big->length < 0 ? -length : length, power, a);
         }
     }
     //Refactor: move the key algorithm into a separated method. We may not use every words.
-    inline Numerical Numerical::sub(const Numerical& n1, const Numerical& n2) {
+    inline Scalar Scalar::sub(const Scalar& n1, const Scalar& n2) {
         if(n1.isZero())
             return -n2;
         else if(n2.isZero())
-            return Numerical(n1);
+            return Scalar(n1);
         else if (n1.length > 0) {
             if (n2.length < 0) {
-                Numerical shallow_copy(const_cast<NumericalUnit*>(n2.byte), -n2.length, n2.power);
-                Numerical result = add(n1, shallow_copy);
+                Scalar shallow_copy(const_cast<ScalarUnit*>(n2.byte), -n2.length, n2.power);
+                Scalar result = add(n1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                const Numerical* big;
-                const Numerical* small;
+                const Scalar* big;
+                const Scalar* small;
                 bool changeSign = false;
                 if (n1.power > n2.power) {
                     big = &n1;
@@ -228,15 +235,15 @@ namespace Physica::Core {
                 int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
                 length = length > BasicConst::getInstance().GlobalPrecision
                          ? BasicConst::getInstance().GlobalPrecision : length;
-                auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
                 /* Init byte */ {
                     const auto copySize = bigSize > length ? length : bigSize;
                     const auto clearSize = length - copySize;
-                    memset(byte, 0, clearSize * sizeof(NumericalUnit));
-                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(NumericalUnit));
+                    memset(byte, 0, clearSize * sizeof(ScalarUnit));
+                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
                 }
                 bool carry;
-                NumericalUnit a;
+                ScalarUnit a;
                 /* Add and carry */ {
                     //useableSmall is the part whose sub result will fall in GlobalPrecision.
                     int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
@@ -246,7 +253,7 @@ namespace Physica::Core {
                     carry = subArrByArrEq(byte + length + small->power - big->power - useableSmall
                             , small->byte + smallSize - useableSmall, useableSmall);
                     //useableSmall is also the index which we should carry to.
-                    NumericalUnit temp1, temp2;
+                    ScalarUnit temp1, temp2;
                     while(carry != 0 && useableSmall < length) {
                         temp1 = byte[useableSmall];
                         temp2 = temp1 - 1;
@@ -264,23 +271,23 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-                Numerical result(byte, changeSign ? -length : length, big->power, a);
+                Scalar result(byte, changeSign ? -length : length, big->power, a);
                 cutZero(result);
                 return result;
             }
         }
         else {
-            Numerical shallow_copy(const_cast<NumericalUnit*>(n1.byte), -n1.length, n1.power);
+            Scalar shallow_copy(const_cast<ScalarUnit*>(n1.byte), -n1.length, n1.power);
             if (n2.length > 0) {
-                Numerical result = add(shallow_copy, n2);
+                Scalar result = add(shallow_copy, n2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Numerical shallow_copy_1(const_cast<NumericalUnit*>(n2.byte), n2.length, n2.power);
-                Numerical result = sub(shallow_copy_1, shallow_copy);
+                Scalar shallow_copy_1(const_cast<ScalarUnit*>(n2.byte), n2.length, n2.power);
+                Scalar result = sub(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 Q_UNUSED(shallow_copy_1)
@@ -289,17 +296,17 @@ namespace Physica::Core {
         }
     }
 
-    inline Numerical Numerical::mul(const Numerical& n1, const Numerical& n2) {
+    inline Scalar Scalar::mul(const Scalar& n1, const Scalar& n2) {
         if(n1 == BasicConst::getInstance().get_1())
-            return Numerical(n2);
+            return Scalar(n2);
         else if(n2 == BasicConst::getInstance().get_1())
-            return Numerical(n1);
+            return Scalar(n1);
         else {
             const int size1 = n1.getSize();
             const int size2 = n2.getSize();
             //Estimate the ed of result first. we will calculate it accurately later.
             auto length = size1 + size2;
-            auto byte = reinterpret_cast<NumericalUnit*>(calloc(length, sizeof(NumericalUnit)));
+            auto byte = reinterpret_cast<ScalarUnit*>(calloc(length, sizeof(ScalarUnit)));
             for (int i = 0; i < size1; ++i)
                 byte[i + size2] = mulAddArrByWord(byte + i, n2.byte, size2, n1.byte[i]);
             ///////////////////////////////////////Get byte, length and power//////////////////////////;
@@ -307,14 +314,14 @@ namespace Physica::Core {
             if (byte[length - 1] == 0) {
                 --length;
                 --power;
-                byte = reinterpret_cast<NumericalUnit*>(realloc(byte, length * sizeof(NumericalUnit)));
+                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Numerical(byte, (n1.length ^ n2.length) < 0 ? -length : length, power); //NOLINT
+            return Scalar(byte, (n1.length ^ n2.length) < 0 ? -length : length, power); //NOLINT
         }
     }
 
-    inline Numerical Numerical::div(const Numerical& n1, const Numerical& n2) {
+    inline Scalar Scalar::div(const Scalar& n1, const Scalar& n2) {
         if(Q_UNLIKELY(n2.isZero()))
             qFatal("Encountered dividing by zero exception.");
 
@@ -324,15 +331,15 @@ namespace Physica::Core {
                 //Add one to avoid precision loss during right shift.
                 auto arr1_len = std::max(n1_size, n2_size) + 1;
                 auto n1_blank = arr1_len - n1_size;
-                auto arr1 = new NumericalUnit[arr1_len];
-                memcpy(arr1 + n1_blank, n1.byte, n1_size * sizeof(NumericalUnit));
-                memset(arr1, 0, n1_blank * sizeof(NumericalUnit));
+                auto arr1 = new ScalarUnit[arr1_len];
+                memcpy(arr1 + n1_blank, n1.byte, n1_size * sizeof(ScalarUnit));
+                memset(arr1, 0, n1_blank * sizeof(ScalarUnit));
                 //Size of arr2 is arranged 1 less than arr1.
                 auto arr2_len = arr1_len - 1;
                 auto n2_blank = arr2_len - n2_size;
-                auto arr2 = new NumericalUnit[arr2_len];
-                memcpy(arr2 + n2_blank, n2.byte, n2_size * sizeof(NumericalUnit));
-                memset(arr2, 0, n2_blank * sizeof(NumericalUnit));
+                auto arr2 = new ScalarUnit[arr2_len];
+                memcpy(arr2 + n2_blank, n2.byte, n2_size * sizeof(ScalarUnit));
+                memset(arr2, 0, n2_blank * sizeof(ScalarUnit));
 
                 const int n1_shift = static_cast<int>(countLeadingZeros(n1.byte[n1_size - 1])) - 1;
                 if(n1_shift > 0)
@@ -345,22 +352,22 @@ namespace Physica::Core {
                 //Estimate the length of result.
                 int length = BasicConst::getInstance().GlobalPrecision;
                 //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
-                auto byte = reinterpret_cast<NumericalUnit*>(malloc(length * sizeof(NumericalUnit)));
+                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
 
                 for(int i = length - 1; i >= 0; --i) {
                     byte[i] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
                     arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[i]);
-                    byteLeftShiftEq(arr1, arr1_len, NumericalUnitWidth);
+                    byteLeftShiftEq(arr1, arr1_len, ScalarUnitWidth);
                 }
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
                 //1 comes from the algorithm
-                return Numerical(byte, (n1.length ^ n2.length) < 0 ? -length : length //NOLINT
+                return Scalar(byte, (n1.length ^ n2.length) < 0 ? -length : length //NOLINT
                         , n1.getPower() - n2.getPower() - 1, 1) >> (n1_shift - n2_shift);
             }
             else
-                return Numerical(n1);
+                return Scalar(n1);
         }
         else
             return getZero();
@@ -369,15 +376,15 @@ namespace Physica::Core {
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
      * Return true if array is cut.
      */
-    inline bool Numerical::cutLength(Numerical& n) {
+    inline bool Scalar::cutLength(Scalar& n) {
         bool result = false;
         int size = n.getSize();
 
         if(size > BasicConst::getInstance().GlobalPrecision) {
             result = true;
             int cutFrom = size - BasicConst::getInstance().GlobalPrecision;
-            auto new_byte = reinterpret_cast<NumericalUnit*>(malloc(BasicConst::getInstance().GlobalPrecision * sizeof(NumericalUnit)));
-            memcpy(new_byte, n.byte + cutFrom, BasicConst::getInstance().GlobalPrecision * sizeof(NumericalUnit));
+            auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(BasicConst::getInstance().GlobalPrecision * sizeof(ScalarUnit)));
+            memcpy(new_byte, n.byte + cutFrom, BasicConst::getInstance().GlobalPrecision * sizeof(ScalarUnit));
             free(n.byte);
             n.byte = new_byte;
             auto length = BasicConst::getInstance().GlobalPrecision;
@@ -391,7 +398,7 @@ namespace Physica::Core {
     /*
      * Cut zeros from the beginning.
      */
-    inline void Numerical::cutZero(Numerical& n) {
+    inline void Scalar::cutZero(Scalar& n) {
         int size = n.getSize();
         int id = size - 1;
         while(n.byte[id] == 0 && id > 0)
@@ -400,7 +407,7 @@ namespace Physica::Core {
 
         if(id != size) {
             int shorten = size - id;
-            n.byte = reinterpret_cast<NumericalUnit*>(realloc(n.byte, id * sizeof(NumericalUnit)));
+            n.byte = reinterpret_cast<ScalarUnit*>(realloc(n.byte, id * sizeof(ScalarUnit)));
             size = id;
             if(n.length < 0)
                 size = -size;

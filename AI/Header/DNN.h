@@ -8,7 +8,7 @@
 #include <vector>
 #include "Core/Header/Vector.h"
 
-using Physica::Core::Numerical;
+using Physica::Core::Scalar;
 using Physica::Core::Vector;
 
 namespace Physica::AI {
@@ -18,9 +18,9 @@ namespace Physica::AI {
     class DNN {
         std::vector<Layer*> layers;
         Vector inputs;
-        Numerical expect;
+        Scalar expect;
 
-        Numerical learnRate;
+        Scalar learnRate;
         int inputSize;
     public:
         DNN(int inputSize, int size, int* nodeCounts);
@@ -33,10 +33,10 @@ namespace Physica::AI {
         [[nodiscard]] int getInputSize() const { return inputSize; }
         [[nodiscard]] int getSize() const { return layers.size(); }
 
-        void loadData(const Vector& loadInputs, const Numerical& loadExpect);
-        void setLearnRate(const Numerical& n) { learnRate = n; }
+        void loadData(const Vector& loadInputs, const Scalar& loadExpect);
+        void setLearnRate(const Scalar& n) { learnRate = n; }
         void train() const;
-        [[nodiscard]] Numerical predict() const;
+        [[nodiscard]] Scalar predict() const;
 
         friend class Node;
     };

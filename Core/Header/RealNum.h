@@ -6,7 +6,7 @@
 namespace Physica::Core {
     class RealNum : public ComplexNum {
     public:
-        explicit RealNum(const Numerical& n);
+        explicit RealNum(const Scalar& n);
         RealNum(const RealNum& n);
         explicit RealNum(const RealNum* n);
         ~RealNum() override;

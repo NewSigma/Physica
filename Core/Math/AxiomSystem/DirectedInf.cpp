@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include <Core/Header/Numerical.h>
+#include <Core/Header/Scalar.h>
 #include "Core/Header/DirectedInf.h"
 #include "Core/Header/Indeterminate.h"
 #include "Core/Header/ComplexInf.h"
 #include "Core/Header/Vector.h"
 
 namespace Physica::Core {
-    DirectedInf::DirectedInf(const Numerical& arg) : direction(2) {
+    DirectedInf::DirectedInf(const Scalar& arg) : direction(2) {
         direction.grow(cos(arg));
         direction.grow(sin(arg));
     }
@@ -66,9 +66,9 @@ namespace Physica::Core {
             case RealInfinity:
                 return new DirectedInf(direction);
             case DirectedInfinity: {
-                Numerical arg1 = direction.toArg(0);
-                Numerical arg2 = ((DirectedInf&)n).direction.toArg(0);
-                Numerical result_arg = arg1 + arg2;
+                Scalar arg1 = direction.toArg(0);
+                Scalar arg2 = ((DirectedInf&)n).direction.toArg(0);
+                Scalar result_arg = arg1 + arg2;
                 auto result = new DirectedInf(result_arg);
                 return result;
             }

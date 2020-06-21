@@ -1,18 +1,18 @@
 #include <Core/Header/Integrate.h>
-#include "Core/Header/Numerical.h"
+#include "Core/Header/Scalar.h"
 
 namespace Physica::Core {
-    Integrate::Integrate(Function func, Numerical from, Numerical to, Numerical stepSize)
+    Integrate::Integrate(Function func, Scalar from, Scalar to, Scalar stepSize)
             : func(std::move(func)), from(std::move(from)), to(std::move(to)), stepSize(std::move(stepSize)) {}
     /*!
      * Optimize: if \at is much larger than \stepsize, the result will be 0. May be use talor series
      * and expend the function to the first order.
      */
-    Numerical Integrate::solve(IntegrateMethod method) {
-        Numerical result(BasicConst::getInstance().get_0());
+    Scalar Integrate::solve(IntegrateMethod method) {
+        Scalar result(BasicConst::getInstance().get_0());
         switch(method) {
             case Rectangular: {
-                Numerical start(from);
+                Scalar start(from);
                 while(start < to) {
                     result += func(start);
                     start += stepSize;
@@ -22,7 +22,7 @@ namespace Physica::Core {
                 break;
             case Ladder: {
                 result += ((func(from) + func(to)) >> 1);
-                Numerical start(from + stepSize);
+                Scalar start(from + stepSize);
                 while(start < to) {
                     result += func(start);
                     start += stepSize;
@@ -32,12 +32,12 @@ namespace Physica::Core {
                 break;
             case Simpson: {
                 result += func(from) + func(to);
-                Numerical odd(BasicConst::getInstance().get_0());
-                Numerical even(BasicConst::getInstance().get_0());
+                Scalar odd(BasicConst::getInstance().get_0());
+                Scalar even(BasicConst::getInstance().get_0());
                 bool b = true;
-                Numerical start = from + stepSize;
+                Scalar start = from + stepSize;
                 while(start < to) {
-                    Numerical& toChange = b ? odd : even;
+                    Scalar& toChange = b ? odd : even;
                     b = !b;
                     toChange += func(start);
                     start += stepSize;
