@@ -50,7 +50,7 @@ namespace Physica::Core {
                 x_right = result;
             result = Scalar::div(Scalar::add(x_left, x_right), BasicConst::getInstance().get_2());
             error = Scalar::div(error, BasicConst::getInstance().get_2());
-        } while(result.getPower() - error.getPower() < BasicConst::getInstance().GlobalPrecision);
+        } while(result.getPower() - error.getPower() < GlobalPrecision);
         result.toUnitA();
 
         return result;

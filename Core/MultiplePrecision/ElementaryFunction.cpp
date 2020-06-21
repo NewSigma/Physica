@@ -93,7 +93,7 @@ namespace Physica::Core {
 
         Scalar result = getOne();
         //3.33 is the big approximate value of ln(10)/ln(2)
-        for(int i = 0; i < LONG_WIDTH * BasicConst::getInstance().GlobalPrecision; ++i)
+        for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
             result = (result + Scalar::div(copy_n, result)) >> 1U;
         result.power += add_power;
         result.toUnitA();
@@ -154,7 +154,7 @@ namespace Physica::Core {
             rank += BasicConst::getInstance().get_1();
             Scalar criteria = temp_1 / rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - criteria.getPower() >= BasicConst::getInstance().GlobalPrecision)
+            if(result.getPower() - criteria.getPower() >= GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= copy_temp_1;
@@ -225,7 +225,7 @@ namespace Physica::Core {
             rank += BasicConst::getInstance().get_1();
             temp /= rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - temp.getPower() >= BasicConst::getInstance().GlobalPrecision)
+            if(result.getPower() - temp.getPower() >= GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= square_n;
@@ -258,7 +258,7 @@ namespace Physica::Core {
             rank += BasicConst::getInstance().get_1();
             temp /= rank;
             //Break if result meets the precision goal.
-            if(result.getPower() - temp.getPower() >= BasicConst::getInstance().GlobalPrecision)
+            if(result.getPower() - temp.getPower() >= GlobalPrecision)
                 break;
             //Prepare for next calculate.
             temp_1 *= square_n;

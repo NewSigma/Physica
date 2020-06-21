@@ -16,14 +16,14 @@
 
 namespace Physica::Core {
     enum ScalarType {
-        MultiPrecition,
+        MultiPrecision,
         Float,
         Double
     };
 
     class Scalar {
         //Store effective digits.
-        ScalarUnit* __restrict byte;
+        ScalarUnit* __restrict byte; // Optimize: May use CStyleArray instead.
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Scalar are same. (when Scalar != 0)
@@ -162,8 +162,8 @@ namespace Physica::Core {
             const int smallSize = small->getSize();
             //Estimate the ed of result first, will calculate it accurately later.
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-            length = length > BasicConst::getInstance().GlobalPrecision
-                     ? BasicConst::getInstance().GlobalPrecision : length;
+            length = length > GlobalPrecision
+                     ? GlobalPrecision : length;
             auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
             /* Init byte */ {
                 const auto copySize = bigSize > length ? length : bigSize;
@@ -175,7 +175,7 @@ namespace Physica::Core {
             ScalarUnit a;
             /* Add and carry */ {
                 //useableSmall is the part whose add result will fall in GlobalPrecision.
-                int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
+                int useableSmall = small->power - (big->power - GlobalPrecision);
                 a = useableSmall < 0;
                 useableSmall = useableSmall > smallSize
                                ? smallSize : (a ? 0 : useableSmall);
@@ -233,8 +233,8 @@ namespace Physica::Core {
                 const int smallSize = small->getSize();
                 //Estimate the ed of result first, will calculate it accurately later.
                 int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-                length = length > BasicConst::getInstance().GlobalPrecision
-                         ? BasicConst::getInstance().GlobalPrecision : length;
+                length = length > GlobalPrecision
+                         ? GlobalPrecision : length;
                 auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
                 /* Init byte */ {
                     const auto copySize = bigSize > length ? length : bigSize;
@@ -246,7 +246,7 @@ namespace Physica::Core {
                 ScalarUnit a;
                 /* Add and carry */ {
                     //useableSmall is the part whose sub result will fall in GlobalPrecision.
-                    int useableSmall = small->power - (big->power - BasicConst::getInstance().GlobalPrecision);
+                    int useableSmall = small->power - (big->power - GlobalPrecision);
                     a = useableSmall < 0;
                     useableSmall = useableSmall > smallSize
                                    ? smallSize : (a ? 0 : useableSmall);
@@ -350,7 +350,7 @@ namespace Physica::Core {
                 byteLeftShiftEq(arr2, arr2_len, n2_shift);
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
-                int length = BasicConst::getInstance().GlobalPrecision;
+                int length = GlobalPrecision;
                 //let n1_copy's power equal to n2_copy, power of the result will change correspondingly.
                 auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
 
@@ -380,14 +380,14 @@ namespace Physica::Core {
         bool result = false;
         int size = n.getSize();
 
-        if(size > BasicConst::getInstance().GlobalPrecision) {
+        if(size > GlobalPrecision) {
             result = true;
-            int cutFrom = size - BasicConst::getInstance().GlobalPrecision;
-            auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(BasicConst::getInstance().GlobalPrecision * sizeof(ScalarUnit)));
-            memcpy(new_byte, n.byte + cutFrom, BasicConst::getInstance().GlobalPrecision * sizeof(ScalarUnit));
+            int cutFrom = size - GlobalPrecision;
+            auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(GlobalPrecision * sizeof(ScalarUnit)));
+            memcpy(new_byte, n.byte + cutFrom, GlobalPrecision * sizeof(ScalarUnit));
             free(n.byte);
             n.byte = new_byte;
-            auto length = BasicConst::getInstance().GlobalPrecision;
+            auto length = GlobalPrecision;
             if(n.length < 0)
                 length = -length;
             n.length = length;

@@ -11,7 +11,7 @@ namespace Physica::Core {
     /*
      * Basic consts that initialize directly.
      */
-    BasicConst::BasicConst() : GlobalPrecision(4), MaxPower(16) {
+    BasicConst::BasicConst() : MaxPower(16) {
         plotPoints = new Scalar(static_cast<SignedScalarUnit>(20));
         auto temp = new Scalar(1, 1 - GlobalPrecision);
         (*temp)[0] = 1;
@@ -72,7 +72,7 @@ namespace Physica::Core {
         _2 = new RealNum(getTwo());
         //0.31 is the big approximation of ln(2) / ln(10)
         PI = new Scalar(calcPI(
-                static_cast<int>(static_cast<double>(ScalarUnitWidth) * BasicConst::getInstance().GlobalPrecision * 0.31) + 1));
+                static_cast<int>(static_cast<double>(ScalarUnitWidth) * GlobalPrecision * 0.31) + 1));
         E = new Scalar(exp(BasicConst::getInstance().get_1()));
 
         PI_2 = new Scalar(*PI / BasicConst::getInstance().get_2());

@@ -9,7 +9,7 @@ using namespace Physica::Core;
 
 namespace Physica::Test {
     void constTest() {
-        std::cout << "GlobalPrecision: " << (int) BasicConst::getInstance().GlobalPrecision << '\n';
+        std::cout << "GlobalPrecision: " << (int) GlobalPrecision << '\n';
         std::cout << "ExpectedRelativeError: " << BasicConst::getInstance().getExpectedRelativeError() << '\n';
         std::cout << "StepSize: " << BasicConst::getInstance().getStepSize() << '\n';
         std::cout << "RandomMax: " << BasicConst::getInstance().getR_MAX() << '\n';

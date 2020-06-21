@@ -1,9 +1,13 @@
 #ifndef _Physica_C_Const_H
 #define _Physica_C_Const_H
 
+#include <iosfwd>
+
 namespace Physica::Core {
     class RealNum;
     class Scalar;
+
+    constexpr int GlobalPrecision = 4;
 
     class BasicConst {
         static BasicConst* instance;
@@ -23,7 +27,6 @@ namespace Physica::Core {
         const Scalar* Minus_4;
         const Scalar* _10;
     public:
-        const int GlobalPrecision;
         const int MaxPower;
 
         BasicConst();
