@@ -5,8 +5,6 @@
 #define PHYSICA_ELEMENTARYFUNCTION_H
 
 namespace Physica::Core {
-    class Scalar;
-
     Scalar randomNumerical();
     Scalar randomNumerical(const Scalar& lowerBound, const Scalar& upperBound);
     Scalar square(const Scalar& n);

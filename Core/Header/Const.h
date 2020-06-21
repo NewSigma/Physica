@@ -5,7 +5,6 @@
 
 namespace Physica::Core {
     class RealNum;
-    class Scalar;
 
     constexpr int GlobalPrecision = 4;
 
