@@ -1,8 +1,0 @@
-##############################################Libs################################################
-find_package(Qt5 COMPONENTS Core REQUIRED)
-#############################################Project##############################################
-file(GLOB_RECURSE SOURCES_INTERPRETER *.cpp *.h)
-include_directories(Header)
-add_library(Physica_Interpreter SHARED ${SOURCES_INTERPRETER})
-#############################################Options##############################################
-target_link_libraries(Physica_Interpreter Qt5::Core)

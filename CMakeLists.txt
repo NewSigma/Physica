@@ -27,21 +27,17 @@ set(CMAKE_CUDA_FLAGS "\
 --relocatable-device-code=true")
 
 if(${RUN_CHECKS})
-    add_subdirectory(Config)
+    add_subdirectory(config)
 endif()
-##############################################Libs################################################
-include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 #############################################Project##############################################
-include_directories(./)
-add_subdirectory(AI)
-add_subdirectory(Core)
-add_subdirectory(Gui)
-add_subdirectory(Interpreter)
 if(${PHYSICA_COMPILE_TESTS})
-    add_subdirectory(Test)
+    add_subdirectory(test)
 endif()
 
-add_executable(Physica Physica.cpp)
+include_directories(./include)
+file(GLOB_RECURSE HEADERS include/*.h)
+add_subdirectory(src)
+add_executable(Physica Physica.cpp ${HEADERS})
 #############################################Options##############################################
 target_link_libraries(Physica Physica_Core Physica_Gui)
 if(${PHYSICA_COMPILE_TESTS})
