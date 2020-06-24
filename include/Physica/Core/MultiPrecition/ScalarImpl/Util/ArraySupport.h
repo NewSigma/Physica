@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <memory>
+#include "Physica/Core/SystemBits.h"
 #include "Bitwise.h"
 
 namespace Physica::Core {

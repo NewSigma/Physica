@@ -4,13 +4,15 @@
 #ifndef PHYSICA_ELEMENTARYFUNCTION_H
 #define PHYSICA_ELEMENTARYFUNCTION_H
 
+#include "Scalar.h"
+
 namespace Physica::Core {
-    Scalar randomNumerical();
-    Scalar randomNumerical(const Scalar& lowerBound, const Scalar& upperBound);
-    Scalar square(const Scalar& n);
-    Scalar floor(const Scalar& n);
-    Scalar ceil(const Scalar& n);
-    Scalar reciprocal(const Scalar& n);
+    template<size_t maxPrecision, bool errorTrack>
+    Scalar<maxPrecision, errorTrack> square(const Scalar<maxPrecision, errorTrack>& n);
+
+    template<size_t maxPrecision, bool errorTrack>
+    inline Scalar<maxPrecision, errorTrack> reciprocal(const Scalar<maxPrecision, errorTrack>& n);
+
     Scalar sqrt_light(const Scalar& n);
     Scalar sqrt(const Scalar& n);
     Scalar factorial(const Scalar& n);
@@ -43,5 +45,7 @@ namespace Physica::Core {
     Scalar arccsch(const Scalar& n);
     Scalar arccoth(const Scalar& n);
 }
+
+#include "FunctionsImpl/ElementaryFunctionImpl.h"
 
 #endif

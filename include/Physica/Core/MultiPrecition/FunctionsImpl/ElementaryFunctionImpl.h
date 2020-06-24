@@ -1,28 +1,24 @@
 /*
- * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include <climits>
-#include "Physica/Core/Scalar.h"
-#include "Physica/Core/Solve.h"
+#ifndef PHYSICA_ELEMENTARYFUNCTIONIMPL_H
+#define PHYSICA_ELEMENTARYFUNCTIONIMPL_H
+
+#ifndef PHYSICA_ELEMENTARYFUNCTION_H
+    #include "../ElementaryFunction.h"
+#endif
 
 namespace Physica::Core {
-    //Return a real number between 0 and 1.
-    Scalar randomNumerical() {
-        return Scalar(double(random()) / RAND_MAX);
-    }
-    //Return a real number lowerBound and upperBound.
-    Scalar randomNumerical(const Scalar& lowerBound, const Scalar& upperBound) {
-        return randomNumerical() * (upperBound - lowerBound) + lowerBound;
-    }
-    //Reference: GMP Doc BaseCase Multiplication
-    Scalar square(const Scalar& n) {
+    //!Reference: GMP Doc BaseCase Multiplication
+    template<size_t maxPrecision, bool errorTrack>
+    Scalar<maxPrecision, errorTrack> square(const Scalar<maxPrecision, errorTrack>& n) {
         if(n == BasicConst::getInstance().get_1())
             return Scalar(n);
         else {
             auto n_size = n.getSize();
             //Estimate the ed of result first. we will calculate it accurately later.
             const auto length = 2 * n_size;
-            Scalar result(length, n.power * 2 + 1);
+            Scalar<maxPrecision, errorTrack> result(length, n.power * 2 + 1);
 
             for(int i = 0; i < n_size - 1; ++i)
                 result[i + n_size] = mulAddArrByWord(result.byte + i + i + 1
@@ -46,29 +42,33 @@ namespace Physica::Core {
         }
     }
 
-    Scalar floor(const Scalar& n) {
-        if(n.isInteger())
-            return Scalar(n);
-        const auto size = n.getSize();
-        const auto power = n.getPower();
-        const auto power_1 = power + 1;
-        auto length = size > power_1 ? power_1 : size;
-        length = n.isNegative() ? -length : length;
-        Scalar result(length, power);
-        for(int i = 0; i < length; ++i)
-            result[i] = n[i];
-        return result;
+    template<bool errorTrack>
+    Scalar<0, errorTrack> square(const Scalar<0, errorTrack>& n) {
+        float f = n.f;
+        return Scalar<0, errorTrack>(f * f);
     }
 
-    Scalar ceil(const Scalar& n) {
-        auto f = floor(n);
-        return ++f;
+    template<bool errorTrack>
+    Scalar<1, errorTrack> square(const Scalar<1, errorTrack>& n) {
+        double d = n.d;
+        return Scalar<0, errorTrack>(d * d);
     }
 
-    Scalar reciprocal(const Scalar& n) {
+    template<size_t maxPrecision, bool errorTrack>
+    inline Scalar<maxPrecision, errorTrack> reciprocal(const Scalar<maxPrecision, errorTrack>& n) {
         return BasicConst::getInstance().get_1() / n;
     }
-    /*
+
+    template<bool errorTrack>
+    inline Scalar<0, errorTrack> reciprocal(const Scalar<0, errorTrack>& n) {
+        return Scalar<0, errorTrack>(1.0) / n;
+    }
+
+    template<bool errorTrack>
+    inline Scalar<1, errorTrack> reciprocal(const Scalar<1, errorTrack>& n) {
+        return Scalar<1, errorTrack>(1.0) / n;
+    }
+    /*!
      * *_light functions do not consider the error caused by a. For example, sqrt_light does not calculate
      * (sqrt(n + a) - sqrt(n)) for error.
      */
@@ -386,3 +386,5 @@ namespace Physica::Core {
         return ln((n + BasicConst::getInstance().get_1()) / (n - BasicConst::getInstance().get_1())) / BasicConst::getInstance().get_2();
     }
 }
+
+#endif

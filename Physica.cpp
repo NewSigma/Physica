@@ -3,9 +3,9 @@
  */
 #include <QApplication>
 #include <QTime>
-#include "Core/Header/Const.h"
-#include "Gui/Header/PhysicaMain.h"
-#include "Core/Header/Utils/DebugUtil.h"
+#include "Physica/Core/Const.h"
+#include "Physica/Gui/PhysicaMain.h"
+#include "Physica/Core/Utils/DebugUtil.h"
 
 using namespace Physica::Core;
 static QtMessageHandler handler;

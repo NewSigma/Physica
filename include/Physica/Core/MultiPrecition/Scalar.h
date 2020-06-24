@@ -8,21 +8,25 @@
 #include <cstring>
 #include <cmath>
 #include <QtCore/qlogging.h>
+#include <type_traits>
 #include "Physica/Core/SystemBits.h"
-#include "Physica/Core/Utils/MetaSupport.h"
 #include "Physica/Core/Const.h"
-#include "ElementaryFunction.h"
 
 namespace Physica::Core {
     /*!
      * \Scalar is a advanced float type that supports multiple precision and error track,
      * which is also compatible with float and double.
      */
-    template<size_t maxPrecision = GlobalPrecision, bool errorTrack = true> class Scalar;
-    //TODO operator+-*/ for different Scalars.
-    template<size_t maxPrecision>
-    class Scalar<maxPrecision, false> {
-    protected:
+    enum ScalarType {
+        Float,
+        Double,
+        MultiPrecision
+    };
+    
+    template<ScalarType type, bool errorTrack = true> class Scalar;
+
+    template<>
+    class Scalar<MultiPrecision, false> {
         //Store effective digits.
         ScalarUnit* __restrict byte;
         /*
@@ -51,14 +55,14 @@ namespace Physica::Core {
         explicit operator double() const;
         ScalarUnit& operator[](unsigned int index) { return byte[index]; }
         const ScalarUnit& operator[](unsigned int index) const { return byte[index]; }
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> operator+(const Scalar<maxPrecision2, false>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> operator-(const Scalar<maxPrecision2, false>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> operator*(const Scalar<maxPrecision2, false>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> operator/(const Scalar<maxPrecision2, false>& s) const;
+        Scalar operator+(const Scalar& s) const;
+        Scalar operator-(const Scalar& s) const;
+        Scalar operator*(const Scalar& s) const;
+        Scalar operator/(const Scalar& s) const;
+        Scalar<MultiPrecision> operator+(const Scalar<MultiPrecision>& s) const;
+        Scalar<MultiPrecision> operator-(const Scalar<MultiPrecision>& s) const;
+        Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
+        Scalar<MultiPrecision> operator/(const Scalar<MultiPrecision>& s) const;
         Scalar operator<<(int bits) const;
         Scalar operator>>(int bits) const;
         Scalar operator-() const;
@@ -75,34 +79,34 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
     protected:
-        template<size_t maxPrecision2>
-        inline static Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> add (
-                const Scalar& s1, const Scalar<maxPrecision2, false>& s2);
-        template<size_t maxPrecision2>
-        inline static Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> sub (
-                const Scalar& s1, const Scalar<maxPrecision2, false>& s2);
-        template<size_t maxPrecision2>
-        inline static Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> mul (
-                const Scalar& s1, const Scalar<maxPrecision2, false>& s2);
-        template<size_t maxPrecision2>
-        inline static Scalar<META_MAX<maxPrecision, maxPrecision2>::value, false> div (
-                const Scalar& s1, const Scalar<maxPrecision2, false>& s2);
-        inline static bool cutLength(Scalar& s);
+        //Should only be used in add(), sub(), mul() and div().
+        Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
+        template<bool errorTrack>
+        inline static Scalar<MultiPrecision, errorTrack> add (const Scalar& s1, const Scalar& s2);
+        template<bool errorTrack>
+        inline static Scalar<MultiPrecision, errorTrack> sub (const Scalar& s1, const Scalar& s2);
+        template<bool errorTrack>
+        inline static Scalar<MultiPrecision, errorTrack> mul (const Scalar& s1, const Scalar& s2);
+        template<bool errorTrack>
+        inline static Scalar<MultiPrecision, errorTrack> div (const Scalar& s1, const Scalar& s2);
+        template<bool errorTrack>
+        inline static bool cutLength(Scalar<MultiPrecision, errorTrack>& s);
         inline static void cutZero(Scalar& s);
+        /* Friends */
+        friend class Scalar<MultiPrecision, true>;
     };
 
-    template<size_t maxPrecision>
-    class Scalar<maxPrecision, true> : public Scalar<maxPrecision, false> {
-        using Scalar<maxPrecision, false>::byte;
-        using Scalar<maxPrecision, false>::length;
-        using Scalar<maxPrecision, false>::power;
+    template<>
+    class Scalar<MultiPrecision, true> : public Scalar<MultiPrecision, false> {
         //Accuracy
         ScalarUnit a;
     public:
         Scalar() noexcept;
         Scalar(int length, int power, ScalarUnit a = 0) noexcept;
-        Scalar(const Scalar& s);
+        Scalar(const Scalar& s) = default;
         Scalar(Scalar&& s) noexcept;
+        explicit Scalar(const Scalar<MultiPrecision, false>& s);
+        explicit Scalar(Scalar<MultiPrecision, false>&& s) noexcept;
         explicit Scalar(SignedScalarUnit unit, ScalarUnit a = 0);
         explicit Scalar(double d, ScalarUnit a = 0);
         explicit Scalar(const char* s, ScalarUnit a = 0);
@@ -110,31 +114,45 @@ namespace Physica::Core {
         /* Operators */
         Scalar& operator=(const Scalar& s);
         Scalar& operator=(Scalar&& s) noexcept;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, true> operator+(const Scalar<maxPrecision2, true>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, true> operator-(const Scalar<maxPrecision2, true>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, true> operator*(const Scalar<maxPrecision2, true>& s) const;
-        template<size_t maxPrecision2>
-        Scalar<META_MAX<maxPrecision, maxPrecision2>::value, true> operator/(const Scalar<maxPrecision2, true>& s) const;
+        Scalar& operator=(const Scalar<MultiPrecision, false>& s);
+        Scalar& operator=(Scalar<MultiPrecision, false>&& s) noexcept;
+        Scalar<MultiPrecision, true> operator+(const Scalar<MultiPrecision, false>& s) const;
+        Scalar<MultiPrecision, true> operator-(const Scalar<MultiPrecision, false>& s) const;
+        Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, false>& s) const;
+        Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, false>& s) const;
+        Scalar<MultiPrecision, true> operator+(const Scalar<MultiPrecision, true>& s) const;
+        Scalar<MultiPrecision, true> operator-(const Scalar<MultiPrecision, true>& s) const;
+        Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, true>& s) const;
+        Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, true>& s) const;
         Scalar operator<<(int bits) const;
         Scalar operator>>(int bits) const;
         Scalar operator-() const;
         /* Helpers */
-        Scalar& applyError(const Scalar& error);
+        Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
-        inline void swap(Scalar& s) noexcept;
+        void swap(Scalar& s) noexcept;
         /* Getters */
         [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
-        [[nodiscard]] Scalar<maxPrecision, false> getAccuracy() const;
+        [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
         [[nodiscard]] inline Scalar getMaximum() const;
         [[nodiscard]] inline Scalar getMinimum() const;
+    private:
+        //Should only be used in add(), sub(), mul() and div().
+        Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0)
+                : Scalar<MultiPrecision, false>(byte, length, power), a(a) {}
+        /* Friends */
+        friend class Scalar<MultiPrecision, false>;
     };
+    /* Compare */
+    bool absCompare(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
+    bool operator> (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
+    bool operator< (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
+    bool operator== (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
+    //IDEA: Comparisons between Scalar<MultiPrecision, true> may consider their accuracy.
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
-    class Scalar<0, false> {
+    class Scalar<Float, false> {
     protected:
         float f;
     public:
@@ -146,30 +164,43 @@ namespace Physica::Core {
         Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
+        inline Scalar<Float, true> operator+(const Scalar<Float, true>& s) const;
+        inline Scalar<Float, true> operator-(const Scalar<Float, true>& s) const;
+        inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
+        inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         /* Helpers */
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
+        /* Friends */
+        friend class Scalar<Float, true>;
     };
 
     template<>
-    class Scalar<0, true> : public Scalar<0, false> {
-        using Scalar<0, false>::f;
+    class Scalar<Float, true> : public Scalar<Float, false> {
+    protected:
+        using Scalar<Float, false>::f;
         float a;
     public:
         inline Scalar();
         inline explicit Scalar(float f, float a = 0);
         /* Operators */
-        /* Helpers */
-        void swap(Scalar& s) noexcept;
+        Scalar operator+(const Scalar<Float, false>& s) const { return Scalar(f + s.f, getA()); }
+        Scalar operator-(const Scalar<Float, false>& s) const { return Scalar(f - s.f, getA()); }
+        Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
+        Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
         Scalar operator+(const Scalar& s) const { return Scalar(f + s.f, a + s.a); }
         Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, fabsf((f * a + s.f * s.a) / (s.f * (s.f - s.a)))); }
+        /* Helpers */
+        void swap(Scalar& s) noexcept;
         /* Getters */
         [[nodiscard]] float getA() const noexcept { return a; }
+        /* Friends */
+        friend class Scalar<Float, false>;
     };
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
-    class Scalar<1, false> {
+    class Scalar<Double, false> {
     protected:
         double d;
     public:
@@ -181,34 +212,47 @@ namespace Physica::Core {
         Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
+        inline Scalar<Double, true> operator+(const Scalar<Double, true>& s) const;
+        inline Scalar<Double, true> operator-(const Scalar<Double, true>& s) const;
+        inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
+        inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         /* Helpers */
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
+        /* Friends */
+        friend class Scalar<Double, true>;
     };
 
     template<>
-    class Scalar<1, true> : public Scalar<1, false> {
-        using Scalar<1, false>::d;
+    class Scalar<Double, true> : public Scalar<Double, false> {
+    protected:
+        using Scalar<Double, false>::d;
         double a;
     public:
         inline Scalar();
         inline explicit Scalar(double d, double a = 0);
         /* Operators */
-        /* Helpers */
-        void swap(Scalar& s) noexcept;
+        Scalar operator+(const Scalar<Double, false>& s) const { return Scalar(d + s.d, getA()); }
+        Scalar operator-(const Scalar<Double, false>& s) const { return Scalar(d - s.d, getA()); }
+        Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
+        Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
         Scalar operator+(const Scalar& s) const { return Scalar(d + s.d, a + s.a); }
         Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, fabs((d * a + s.d * s.a) / (s.d * (s.d - s.a)))); }
+        /* Helpers */
+        void swap(Scalar& s) noexcept;
         /* Getters */
         [[nodiscard]] double getA() const noexcept { return a; }
+        /* Friends */
+        friend class Scalar<Double, false>;
     };
     /* typedefs for convenience */
-    [[maybe_unused]] typedef Scalar<0> FloatScalar;
-    [[maybe_unused]] typedef Scalar<1> DoubleScalar;
-    [[maybe_unused]] typedef Scalar<> MultiScalar;
+    [[maybe_unused]] typedef Scalar<Float> FloatScalar;
+    [[maybe_unused]] typedef Scalar<Double> DoubleScalar;
+    [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
-#include "Physica/Core/MultiPrecition/ScalarImpl/MultiScalar.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ScalarImpl.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/BasicCalc.h"
 
 #endif
