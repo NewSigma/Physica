@@ -7,43 +7,98 @@
 #include "Scalar.h"
 
 namespace Physica::Core {
-    template<size_t maxPrecision, bool errorTrack>
-    Scalar<maxPrecision, errorTrack> square(const Scalar<maxPrecision, errorTrack>& n);
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
 
-    template<size_t maxPrecision, bool errorTrack>
-    inline Scalar<maxPrecision, errorTrack> reciprocal(const Scalar<maxPrecision, errorTrack>& n);
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> reciprocal(const Scalar<type, errorTrack>& s);
 
-    Scalar sqrt_light(const Scalar& n);
-    Scalar sqrt(const Scalar& n);
-    Scalar factorial(const Scalar& n);
-    Scalar ln_light(const Scalar& n);
-    Scalar ln(const Scalar& n);
-    Scalar log(const Scalar& n, const Scalar& a);
-    Scalar exp(const Scalar& n);
-    Scalar cos(const Scalar& n);
-    Scalar sin(const Scalar& n);
-    Scalar tan(const Scalar& n);
-    Scalar sec(const Scalar& n);
-    Scalar csc(const Scalar& n);
-    Scalar cot(const Scalar& n);
-    Scalar arccos(const Scalar& n);
-    Scalar arcsin(const Scalar& n);
-    Scalar arctan(const Scalar& n);
-    Scalar arcsec(const Scalar& n);
-    Scalar arccsc(const Scalar& n);
-    Scalar arccot(const Scalar& n);
-    Scalar cosh(const Scalar& n);
-    Scalar sinh(const Scalar& n);
-    Scalar tanh(const Scalar& n);
-    Scalar sech(const Scalar& n);
-    Scalar csch(const Scalar& n);
-    Scalar coth(const Scalar& n);
-    Scalar arccosh(const Scalar& n);
-    Scalar arcsinh(const Scalar& n);
-    Scalar arctanh(const Scalar& n);
-    Scalar arcsech(const Scalar& n);
-    Scalar arccsch(const Scalar& n);
-    Scalar arccoth(const Scalar& n);
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sqrt(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> factorial(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> ln(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    Scalar<type, errorTrack1 | errorTrack2> log(const Scalar<type, errorTrack1>& s, const Scalar<type, errorTrack2>& a);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> exp(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> cos(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sin(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> tan(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sec(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> csc(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> cot(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccos(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arcsin(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arctan(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arcsec(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccsc(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccot(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> cosh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sinh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> tanh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sech(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> csch(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> coth(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccosh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arcsinh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arctanh(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arcsech(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccsch(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arccoth(const Scalar<type, errorTrack>& s);
 }
 
 #include "FunctionsImpl/ElementaryFunctionImpl.h"

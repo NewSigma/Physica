@@ -30,9 +30,9 @@ namespace Physica::Core {
         #endif
         return result;
     #else
-        unsigned long n1_low = n1 & numericalUnitLowMask;
+        unsigned long n1_low = n1 & ScalarUnitLowerMask;
         unsigned long n1_high = n1 >> (64U / 2U);
-        unsigned long n2_low = n2 & numericalUnitLowMask;
+        unsigned long n2_low = n2 & ScalarUnitLowerMask;
         unsigned long n2_high = n2 >> (64U / 2U);
 
         auto ll = n1_low * n2_low;
@@ -67,9 +67,9 @@ namespace Physica::Core {
             );
         #endif
     #else
-        ScalarUnit n1_low = n1 & numericalUnitLowMask;
+        ScalarUnit n1_low = n1 & ScalarUnitLowerMask;
         ScalarUnit n1_high = n1 >> (ScalarUnitWidth / 2U);
-        ScalarUnit n2_low = n2 & numericalUnitLowMask;
+        ScalarUnit n2_low = n2 & ScalarUnitLowerMask;
         ScalarUnit n2_high = n2 >> (ScalarUnitWidth / 2U);
 
         auto ll = n1_low * n2_low;
@@ -81,7 +81,7 @@ namespace Physica::Core {
         lh += hl;
         hh += static_cast<ScalarUnit>(lh < hl) << (ScalarUnitWidth / 2U);
         high = hh + (lh >> (ScalarUnitWidth / 2U));
-        low = (lh << (ScalarUnitWidth / 2U)) + (ll & numericalUnitLowMask);
+        low = (lh << (ScalarUnitWidth / 2U)) + (ll & ScalarUnitLowerMask);
     #endif
     }
     //Length of result should at least as long as arr.

@@ -13,16 +13,15 @@
 #include "Physica/Core/Const.h"
 
 namespace Physica::Core {
-    /*!
-     * \Scalar is a advanced float type that supports multiple precision and error track,
-     * which is also compatible with float and double.
-     */
     enum ScalarType {
         Float,
         Double,
         MultiPrecision
     };
-    
+    /*!
+     * \Scalar is a advanced float type that supports multiple precision and error track,
+     * which is also compatible with float and double.
+     */
     template<ScalarType type, bool errorTrack = true> class Scalar;
 
     template<>
@@ -79,7 +78,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
     protected:
-        //Should only be used in add(), sub(), mul() and div().
+        //Should only be used in add(), sub(), mul() and div(). \byte must be allocated by malloc().
         Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
         template<bool errorTrack>
         inline static Scalar<MultiPrecision, errorTrack> add (const Scalar& s1, const Scalar& s2);
@@ -94,6 +93,12 @@ namespace Physica::Core {
         inline static void cutZero(Scalar& s);
         /* Friends */
         friend class Scalar<MultiPrecision, true>;
+        template<ScalarType type, bool errorTrack>
+        friend Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
+        template<ScalarType type, bool errorTrack>
+        friend Scalar<type, errorTrack> sqrt(const Scalar<type, errorTrack>& s);
+        template<ScalarType type, bool errorTrack>
+        friend Scalar<type, errorTrack> ln(const Scalar<type, errorTrack>& s);
     };
 
     template<>
@@ -135,8 +140,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
         [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
-        [[nodiscard]] inline Scalar getMaximum() const;
-        [[nodiscard]] inline Scalar getMinimum() const;
+        [[nodiscard]] inline Scalar<MultiPrecision, false> getMaximum() const;
+        [[nodiscard]] inline Scalar<MultiPrecision, false> getMinimum() const;
     private:
         //Should only be used in add(), sub(), mul() and div().
         Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0)
@@ -170,14 +175,14 @@ namespace Physica::Core {
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         /* Helpers */
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
+        /* Getters */
+        [[nodiscard]] float getTrivial() const { return f; }
         /* Friends */
         friend class Scalar<Float, true>;
     };
 
     template<>
     class Scalar<Float, true> : public Scalar<Float, false> {
-    protected:
-        using Scalar<Float, false>::f;
         float a;
     public:
         inline Scalar();
@@ -190,7 +195,7 @@ namespace Physica::Core {
         Scalar operator+(const Scalar& s) const { return Scalar(f + s.f, a + s.a); }
         Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
-        Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, fabsf((f * a + s.f * s.a) / (s.f * (s.f - s.a)))); }
+        Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
         void swap(Scalar& s) noexcept;
         /* Getters */
@@ -218,14 +223,14 @@ namespace Physica::Core {
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         /* Helpers */
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
+        /* Getters */
+        [[nodiscard]] double getTrivial() const { return d; }
         /* Friends */
         friend class Scalar<Double, true>;
     };
 
     template<>
     class Scalar<Double, true> : public Scalar<Double, false> {
-    protected:
-        using Scalar<Double, false>::d;
         double a;
     public:
         inline Scalar();
@@ -238,7 +243,7 @@ namespace Physica::Core {
         Scalar operator+(const Scalar& s) const { return Scalar(d + s.d, a + s.a); }
         Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
-        Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, fabs((d * a + s.d * s.a) / (s.d * (s.d - s.a)))); }
+        Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
         void swap(Scalar& s) noexcept;
         /* Getters */

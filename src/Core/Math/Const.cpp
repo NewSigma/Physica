@@ -2,8 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Physica/Core/Const.h"
-#include "Physica/Core/Scalar.h"
-#include "Physica/Core/RealNum.h"
+#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 
 namespace Physica::Core {
     BasicConst* BasicConst::instance = nullptr;
@@ -12,25 +11,25 @@ namespace Physica::Core {
      * Basic consts that initialize directly.
      */
     BasicConst::BasicConst() : MaxPower(16) {
-        plotPoints = new Scalar(static_cast<SignedScalarUnit>(20));
-        auto temp = new Scalar(1, 1 - GlobalPrecision);
+        plotPoints = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(20));
+        auto temp = new Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
         (*temp)[0] = 1;
         expectedRelativeError = temp;
-        temp = new Scalar(1, - GlobalPrecision / 2);
+        temp = new Scalar<MultiPrecision, false>(1, - GlobalPrecision / 2);
         (*temp)[0] = 1;
         //Value (- GlobalPrecision / 2) still need a proof.
         stepSize = temp;
-        R_MAX = new Scalar(static_cast<SignedScalarUnit>(2147483647));
-        _0 = new Scalar(static_cast<SignedScalarUnit>(0));
-        _1 = new Scalar(static_cast<SignedScalarUnit>(1));
-        Minus_1 = new Scalar(static_cast<SignedScalarUnit>(-1));
-        _2 = new Scalar(static_cast<SignedScalarUnit>(2));
-        Minus_2 = new Scalar(static_cast<SignedScalarUnit>(-2));
-        _3 = new Scalar(static_cast<SignedScalarUnit>(3));
-        Minus_3 = new Scalar(static_cast<SignedScalarUnit>(-3));
-        _4 = new Scalar(static_cast<SignedScalarUnit>(4));
-        Minus_4 = new Scalar(static_cast<SignedScalarUnit>(-4));
-        _10 = new Scalar(static_cast<SignedScalarUnit>(10));
+        R_MAX = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(2147483647));
+        _0 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(0));
+        _1 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(1));
+        Minus_1 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-1));
+        _2 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(2));
+        Minus_2 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-2));
+        _3 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(3));
+        Minus_3 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-3));
+        _4 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(4));
+        Minus_4 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-4));
+        _10 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(10));
     }
 
     BasicConst::~BasicConst() {
@@ -66,24 +65,16 @@ namespace Physica::Core {
      * Should call new to Const_1 so as to make calculates available.
      */
     MathConst::MathConst() {
-        stepSize = new RealNum(BasicConst::getInstance().getStepSize());
-        _0 = new RealNum(getZero());
-        _1 = new RealNum(getOne());
-        _2 = new RealNum(getTwo());
         //0.31 is the big approximation of ln(2) / ln(10)
-        PI = new Scalar(calcPI(
+        PI = new MultiScalar(calcPI(
                 static_cast<int>(static_cast<double>(ScalarUnitWidth) * GlobalPrecision * 0.31) + 1));
-        E = new Scalar(exp(BasicConst::getInstance().get_1()));
+        E = new MultiScalar(exp(BasicConst::getInstance().get_1()));
 
-        PI_2 = new Scalar(*PI / BasicConst::getInstance().get_2());
-        Minus_PI_2 = new Scalar(-*PI_2);
+        PI_2 = new MultiScalar(*PI >> 1);
+        Minus_PI_2 = new MultiScalar(-*PI_2);
     }
 
     MathConst::~MathConst() {
-        delete stepSize;
-        delete _0;
-        delete _1;
-        delete _2;
         delete PI;
         delete E;
         delete PI_2;
@@ -107,11 +98,11 @@ namespace Physica::Core {
      * http://www.pi314.net/eng/salamin.php
      * https://blog.csdn.net/liangbch/article/details/78724041
      */
-    Scalar MathConst::calcPI(int precision) {
-        Scalar a = getOne();
-        Scalar x = getOne();
-        Scalar b = reciprocal(sqrt(BasicConst::getInstance().get_2()));
-        Scalar c = reciprocal(BasicConst::getInstance().get_4());
+    MultiScalar MathConst::calcPI(int precision) {
+        MultiScalar a(static_cast<SignedScalarUnit>(1));
+        MultiScalar x(static_cast<SignedScalarUnit>(1));
+        MultiScalar b(reciprocal(sqrt(BasicConst::getInstance().get_2())));
+        MultiScalar c(reciprocal(BasicConst::getInstance().get_4()));
 
         int goal = 1;
         while(goal < precision) {

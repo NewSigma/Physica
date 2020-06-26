@@ -57,12 +57,12 @@ namespace Physica::Core {
         return !(s1 == s2);
     }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::getMaximum() const {
-        return *this + getAccuracy();
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getMaximum() const {
+        return static_cast<const Scalar<MultiPrecision, false>&>(*this) + getAccuracy();
     }
 
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::getMinimum() const {
-        return *this - getAccuracy();
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getMinimum() const {
+        return static_cast<const Scalar<MultiPrecision, false>&>(*this) - getAccuracy();
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
     /////////////////////////////////////////////Float////////////////////////////////////////////////
@@ -117,8 +117,10 @@ namespace Physica::Core {
     }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
     inline Scalar<Float, true>::Scalar() : Scalar<Float, false>(), a(0) {}
-
-    inline Scalar<Float, true>::Scalar(float f, float a) : Scalar<Float, false>(f), a(a) {}
+    /*!
+     * The abstract value of a equals to the accuracy.
+     */
+    inline Scalar<Float, true>::Scalar(float f, float a) : Scalar<Float, false>(f), a(fabsf(a)) {}
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
     inline Scalar<Double, errorTrack>& operator++(Scalar<Double, errorTrack>& s) {
@@ -167,8 +169,10 @@ namespace Physica::Core {
     }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////
     inline Scalar<Double, true>::Scalar() : Scalar<Double, false>(), a(0) {}
-
-    inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(a) {}
+    /*!
+     * The abstract value of a equals to the accuracy.
+     */
+    inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(fabs(a)) {}
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<ScalarType type, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& n) {
@@ -182,21 +186,21 @@ namespace Physica::Core {
         return Scalar<type, errorTrack>(s);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator+=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 + s2; }
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator+=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 + s2; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator-=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 - s2; }
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator-=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 - s2; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator*=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 * s2; }
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator*=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 * s2; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator/=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 / s2; }
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator/=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 / s2; }
 
     template<ScalarType type, bool errorTrack>
     inline void operator^=(Scalar<type, errorTrack>& s1

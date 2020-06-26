@@ -10,7 +10,7 @@
 #else
 #define FILENAME(x) (strrchr(x, '/') ? strrchr(x, '/') + 1 : x)
 #endif
-
+//IDEA: A better logger for both C++ and CUDA is required.
 #define cuDebug(x) do { printf("[] [Debug] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
 #define cuWarning(x) do { printf("[] [Warning] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
 #define cuCritical(x) do { printf("[] [Critical] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)

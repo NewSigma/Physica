@@ -31,8 +31,8 @@ typedef long long SignedScalarUnit;
 #error No marching ScalarUnit.
 #endif
 
-#define numericalUnitHighestBitMask ((ScalarUnit)1 << (ScalarUnitWidth - 1))
-#define numericalUnitLowMask (ScalarUnitMax >> (ScalarUnitWidth / 2))
+#define ScalarUnitHighestBitMask ((ScalarUnit)1 << (ScalarUnitWidth - 1))
+#define ScalarUnitLowerMask (ScalarUnitMax >> (ScalarUnitWidth / 2))
 
 //Use of double_extract may cause several warnings in valgrind.
 #if PhysicaEndian == PhysicaBigEndian

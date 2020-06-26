@@ -4,6 +4,8 @@
 #ifndef PHYSICA_BITWISE_H
 #define PHYSICA_BITWISE_H
 
+#include "Physica/Core/SystemBits.h"
+
 namespace Physica::Core {
     //Possibly use asm to speed up.
     inline unsigned int countLeadingZeros(ScalarUnit n) {
@@ -19,7 +21,7 @@ namespace Physica::Core {
         (count) ^= 63U;
     #else
         ScalarUnit count = 0U;
-        while((n & numericalUnitHighestBitMask) == 0) {
+        while((n & ScalarUnitHighestBitMask) == 0) {
             ++count;
             n <<= 1U;
         }

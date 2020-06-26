@@ -7,19 +7,19 @@
 #include "Scalar.h"
 
 namespace Physica::Core {
-    template<size_t maxPrecision, bool errorTrack>
-    inline Scalar<maxPrecision, errorTrack> randomScalar();
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> randomScalar();
     
-    template<size_t maxPrecision, bool errorTrack>
-    inline Scalar<maxPrecision, errorTrack> randomScalar(
-            const Scalar<maxPrecision, errorTrack>& lowerBound,
-            const Scalar<maxPrecision, errorTrack>& upperBound);
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> randomScalar(
+            const Scalar<type, errorTrack>& lowerBound,
+            const Scalar<type, errorTrack>& upperBound);
 
-    template<size_t maxPrecision, bool errorTrack>
-    inline Scalar<maxPrecision, errorTrack> floor(const Scalar<maxPrecision, errorTrack>& n);
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> floor(const Scalar<type, errorTrack>& n);
     
-    template<size_t maxPrecision, bool errorTrack>
-    inline Scalar<maxPrecision, errorTrack> ceil(const Scalar<maxPrecision, errorTrack>& n);
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& n);
 }
 
 #include "FunctionsImpl/ProbabilityFunctionImpl.h"
