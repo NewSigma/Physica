@@ -4,8 +4,6 @@
 #ifndef PHYSICA_SUBBASIC_H
 #define PHYSICA_SUBBASIC_H
 
-#include "Physica/Core/SystemBits.h"
-
 namespace Physica::Core {
     /*
      * Calculate n1 - n2, the result must be one word.

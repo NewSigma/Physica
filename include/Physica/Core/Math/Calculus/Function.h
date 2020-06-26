@@ -5,7 +5,7 @@
 #define PHYSICA_FUNCTION_H
 
 #include <utility>
-#include "Vector.h"
+#include "Physica/Core/Math/LinearAlgebra/Vector.h"
 #include "FunctionTree.h"
 
 namespace Physica::Core {

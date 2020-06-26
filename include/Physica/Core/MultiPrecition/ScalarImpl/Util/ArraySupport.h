@@ -5,9 +5,6 @@
 #define PHYSICA_ARRAYSUPPORT_H
 
 #include <cstring>
-#include <memory>
-#include "Physica/Core/SystemBits.h"
-#include "Bitwise.h"
 
 namespace Physica::Core {
     // operator<<

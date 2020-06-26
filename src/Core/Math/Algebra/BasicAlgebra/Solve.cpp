@@ -1,5 +1,5 @@
 #include <QtCore/qlogging.h>
-#include "Physica/Core/Solve.h"
+#include "Physica/Core/Math/BasicAlgebra/Solve.h"
 #include "Physica/Core/Scalar.h"
 /*
  * Find the numerical root of algebra equation.

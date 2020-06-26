@@ -4,13 +4,8 @@
 #ifndef PHYSICA_SCALAR_H
 #define PHYSICA_SCALAR_H
 
-#include <iostream>
-#include <cstring>
 #include <cmath>
-#include <QtCore/qlogging.h>
-#include <type_traits>
-#include "Physica/Core/SystemBits.h"
-#include "Physica/Core/Const.h"
+#include "ScalarType.h"
 
 namespace Physica::Core {
     enum ScalarType {

@@ -1,4 +1,4 @@
-#include <Physica/Core/Integrate.h>
+#include <Physica/Core/Math/Calculus/Integrate.h>
 #include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {

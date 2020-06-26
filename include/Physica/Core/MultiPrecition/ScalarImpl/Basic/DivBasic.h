@@ -4,8 +4,7 @@
 #ifndef PHYSICA_DIVBASIC_H
 #define PHYSICA_DIVBASIC_H
 
-#include "qcompilerdetection.h"
-#include "Physica/Core/SystemBits.h"
+#include "qglobal.h"
 #include "SubBasic.h"
 #include "MulBasic.h"
 

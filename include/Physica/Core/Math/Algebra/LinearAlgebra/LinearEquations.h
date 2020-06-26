@@ -4,7 +4,7 @@
 #ifndef PHYSICA_LINEAREQUATIONS_H
 #define PHYSICA_LINEAREQUATIONS_H
 
-#include "Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     class LinearEquations {

@@ -4,7 +4,7 @@
 #ifndef PHYSICA_FFT_H
 #define PHYSICA_FFT_H
 
-#include "RowMatrix.h"
+#include "Physica/Core/Math/LinearAlgebra/Matrix/RowMatrix.h"
 
 namespace Physica::Core {
     ///////////////////////////////////FFTBase////////////////////////////////////

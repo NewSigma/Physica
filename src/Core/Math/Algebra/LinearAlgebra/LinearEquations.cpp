@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include <Physica/Core/SquareMatrix.h>
-#include <Physica/Core/LUDecomposition.h>
-#include "Physica/Core/LinearEquations.h"
+#include <Physica/Core/Math/LinearAlgebra/Matrix/SquareMatrix.h>
+#include <Physica/Core/Math/LinearAlgebra/LUDecomposition.h>
+#include "Physica/Core/Math/LinearAlgebra/LinearEquations.h"
 
 namespace Physica::Core {
     /*!

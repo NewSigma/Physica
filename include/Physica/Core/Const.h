@@ -1,11 +1,11 @@
-#ifndef _Physica_C_Const_H
-#define _Physica_C_Const_H
-
-#ifndef PHYSICA_SCALAR_H
-    #include "Physica/Core/MultiPrecition/Scalar.h"
-#endif
+/*
+ * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
+ */
+#ifndef PHYSICA_CONST_H
+#define PHYSICA_CONST_H
 
 #include <iosfwd>
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
     constexpr int GlobalPrecision = 4;
@@ -67,10 +67,10 @@ namespace Physica::Core {
         static void deInit();
         inline static const MathConst& getInstance() { return *instance; }
 
-        [[nodiscard]] inline const Scalar& getPI() const { return *PI; }
-        [[nodiscard]] inline const Scalar& getE() const { return *E; }
-        [[nodiscard]] inline const Scalar& getPI_2() const { return *PI_2; }
-        [[nodiscard]] inline const Scalar& getMinus_PI_2() const { return *Minus_PI_2; }
+        [[nodiscard]] inline const MultiScalar& getPI() const { return *PI; }
+        [[nodiscard]] inline const MultiScalar& getE() const { return *E; }
+        [[nodiscard]] inline const MultiScalar& getPI_2() const { return *PI_2; }
+        [[nodiscard]] inline const MultiScalar& getMinus_PI_2() const { return *Minus_PI_2; }
     private:
         static MultiScalar calcPI(int precision);
     };

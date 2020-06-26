@@ -3,7 +3,7 @@
  */
 #include <QtCore/qlogging.h>
 #include <cstring>
-#include "Physica/Core/Vector.h"
+#include "Physica/Core/Math/LinearAlgebra/Vector.h"
 #include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {

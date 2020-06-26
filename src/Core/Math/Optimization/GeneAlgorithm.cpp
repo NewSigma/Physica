@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <iostream>
-#include "Physica/Core/GeneAlgorithm.h"
+#include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
 #include "Physica/Core/ElementaryFunction.h"
 #include "Physica/Core/Scalar.h"
 

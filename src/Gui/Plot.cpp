@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCharts>
-#include <Physica/Core/Differential.h>
+#include <Physica/Core/Math/Calculus/Differential.h>
 #include <Physica/Core/Scalar.h>
 #include "Physica/Gui/Plot.h"
 

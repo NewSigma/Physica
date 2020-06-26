@@ -2,7 +2,7 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <iostream>
-#include "Physica/Core/Polynomial.h"
+#include "Physica/Core/Math/BasicAlgebra/Polynomial.h"
 #include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {

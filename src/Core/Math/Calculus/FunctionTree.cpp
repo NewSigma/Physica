@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Physica/Core/FunctionTree.h"
+#include "Physica/Core/Math/Calculus/FunctionTree.h"
 #include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {

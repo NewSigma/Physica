@@ -4,7 +4,7 @@
 #ifndef PHYSICA_BITWISE_H
 #define PHYSICA_BITWISE_H
 
-#include "Physica/Core/SystemBits.h"
+#include "Physica/SystemBits.h"
 
 namespace Physica::Core {
     //Possibly use asm to speed up.

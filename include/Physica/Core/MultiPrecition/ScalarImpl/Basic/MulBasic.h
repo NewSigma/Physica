@@ -4,7 +4,7 @@
 #ifndef PHYSICA_MULBASIC_H
 #define PHYSICA_MULBASIC_H
 
-#include "Physica/Core/SystemBits.h"
+#include "Physica/SystemBits.h"
 
 namespace Physica::Core {
     /*

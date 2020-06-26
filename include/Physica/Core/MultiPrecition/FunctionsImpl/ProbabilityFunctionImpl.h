@@ -5,7 +5,7 @@
 #define PHYSICA_PROBABILITYFUNCTIONIMPL_H
 
 #ifndef PHYSICA_PROBABILITYFUNCTION_H
-    #include "../ProbabilityFunction.h"
+    #include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
 #endif
 
 namespace Physica::Core {

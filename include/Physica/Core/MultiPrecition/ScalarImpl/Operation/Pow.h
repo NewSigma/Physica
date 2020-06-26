@@ -4,14 +4,14 @@
 #ifndef PHYSICA_POW_H
 #define PHYSICA_POW_H
 
-#include "Physica/Core/Scalar.h"
-#include "Physica/Core/SystemBits.h"
-#include "Physica/Core/MultiplePrecision/Util/Bitwise.h"
+#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/Util/Bitwise.h"
+#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 //TODO Not tested
 namespace Physica::Core {
-    //Compute a ^ unit.
-    inline Scalar powWord(const Scalar& a, ScalarUnit unit) {
-        Scalar result(a);
+    //!Compute a ^ unit.
+    inline Scalar<MultiPrecision, false> powWord(const Scalar<MultiPrecision, false>& a, ScalarUnit unit) {
+        Scalar<MultiPrecision, false> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
         for(int j = 0; j < ScalarUnitWidth - lastUnitBits; ++j) {
             result = square(result);
@@ -22,8 +22,8 @@ namespace Physica::Core {
         return result;
     }
     //Compute a ^ unit, the highest bit of unit must be set.
-    inline Scalar powFullWord(const Scalar& a, ScalarUnit unit) {
-        Scalar result(a);
+    inline Scalar<MultiPrecision, false> powFullWord(const Scalar<MultiPrecision, false>& a, ScalarUnit unit) {
+        Scalar<MultiPrecision, false> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
@@ -33,9 +33,10 @@ namespace Physica::Core {
         return result;
     }
 
-    inline Scalar powNumerical(const Scalar& a, const Scalar& n) {
+    inline Scalar<MultiPrecision, false> powNumerical(
+            const Scalar<MultiPrecision, false>& a, const Scalar<MultiPrecision, false>& n) {
         const auto size = n.getSize();
-        Scalar result(a);
+        Scalar<MultiPrecision, false> result(a);
         if(n.getLength() < 0)
             result = reciprocal(a);
 

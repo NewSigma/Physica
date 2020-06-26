@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Physica/Core/Function.h"
+#include "Physica/Core/Math/Calculus/Function.h"
 
 namespace Physica::Core {
     Function::Function(FunctionTree tree, size_t variableCount)

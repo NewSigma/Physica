@@ -1,4 +1,4 @@
-#include <Physica/Core/Differential.h>
+#include <Physica/Core/Math/Calculus/Differential.h>
 #include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {

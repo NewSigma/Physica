@@ -2,7 +2,7 @@
 #define PHYSICA_MATRIX_H
 
 #include <memory>
-#include "Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////

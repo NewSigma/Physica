@@ -4,7 +4,7 @@
 #ifndef PHYSICA_COMPLEXNUMERIC_H
 #define PHYSICA_COMPLEXNUMERIC_H
 
-#include "Scalar.h"
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
     class ComplexNumeric : private Scalar {

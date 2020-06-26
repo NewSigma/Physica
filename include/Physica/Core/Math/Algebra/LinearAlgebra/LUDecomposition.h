@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 #include "Scalar.h"
-#include "Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     class SquareMatrix;

@@ -5,12 +5,12 @@
 #define PHYSICA_ELEMENTARYFUNCTIONIMPL_H
 
 #ifndef PHYSICA_ELEMENTARYFUNCTION_H
-    #include "../ElementaryFunction.h"
+    #include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 #endif
 
 #include <cmath>
-#include <Physica/Core/Solve.h>
-#include "ProbabilityFunctionImpl.h"
+#include <Physica/Core/Math/BasicAlgebra/Solve.h>
+#include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
 
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>

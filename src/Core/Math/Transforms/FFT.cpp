@@ -2,7 +2,7 @@
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
 #include <utility>
-#include "Physica/Core/FFT.h"
+#include "Physica/Core/Math/Transforms/FFT.h"
 
 namespace Physica::Core {
     ///////////////////////////////////FFTBase////////////////////////////////////

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Physica/Core/LUDecomposition.h"
-#include "Physica/Core/SquareMatrix.h"
+#include "Physica/Core/Math/LinearAlgebra/LUDecomposition.h"
+#include "Physica/Core/Math/LinearAlgebra/Matrix/SquareMatrix.h"
 
 namespace Physica::Core {
     LUDecomposition::LUDecomposition(SquareMatrix& square)

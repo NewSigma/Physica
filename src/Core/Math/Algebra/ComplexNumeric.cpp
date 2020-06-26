@@ -3,7 +3,7 @@
  */
 #include <iomanip>
 #include <utility>
-#include "Physica/Core/ComplexNumeric.h"
+#include "Physica/Core/Math/Algebra/ComplexNumeric.h"
 
 namespace Physica::Core {
     ComplexNumeric::ComplexNumeric(Scalar n1, Scalar n2) noexcept
