@@ -4,14 +4,65 @@
 #ifndef PHYSICA_SCALARIMPL_H
 #define PHYSICA_SCALARIMPL_H
 
-#ifndef PHYSICA_SCALAR_H
-    #include "Physica/Core/MultiPrecition/Scalar.h"
-#endif
-
 #include <iomanip>
 #include "Util/Bitwise.h"
-
+/*!
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
+ */
 namespace Physica::Core {
+    //////////////////////////////////////////////Global//////////////////////////////////////////////
+    template<ScalarType type, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& n) {
+        return os << std::setprecision(10) //10 is the max precision of double.
+                  << double(n)
+                  << std::setprecision(6); //6 is the default precision.
+    }
+
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> operator+(const Scalar<type, errorTrack>& s) {
+        return Scalar<type, errorTrack>(s);
+    }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator+=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 + s2; }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator-=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 - s2; }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator*=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 * s2; }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    inline void operator/=(Scalar<type, errorTrack1>& s1
+            , const Scalar<type, errorTrack2>& s2) { s1 = s1 / s2; }
+
+    template<ScalarType type, bool errorTrack>
+    inline void operator^=(Scalar<type, errorTrack>& s1
+            , const Scalar<type, errorTrack>& s2) { s1 = s1 ^ s2; }
+
+    template<ScalarType type, bool errorTrack>
+    inline void operator<<=(Scalar<type, errorTrack>& s
+            , int bits) { s = s << bits; }
+
+    template<ScalarType type, bool errorTrack>
+    inline void operator>>=(Scalar<type, errorTrack>& s
+            , int bits) { s = s >> bits; }
+    /*!
+     * The following two functions handle swap(s1, s2). Use swap of Scalars whose errorTrack is false by default.
+     */
+    template<ScalarType type, bool errorTrack>
+    inline void swap(Scalar<type, false>& s1, Scalar<type, errorTrack>& s2) noexcept {
+        s1.swap(s2);
+    }
+
+    template<ScalarType type, bool errorTrack>
+    inline void swap(Scalar<type, true>& s1, Scalar<type, errorTrack>& s2) noexcept {
+        s2.swap(s1);
+    }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
     //!Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
     template<bool errorTrack1, bool errorTrack2>
@@ -173,58 +224,6 @@ namespace Physica::Core {
      * The abstract value of a equals to the accuracy.
      */
     inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(fabs(a)) {}
-    //////////////////////////////////////////////Global//////////////////////////////////////////////
-    template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& n) {
-        return os << std::setprecision(10) //10 is the max precision of double.
-                  << double(n)
-                  << std::setprecision(6); //6 is the default precision.
-    }
-
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> operator+(const Scalar<type, errorTrack>& s) {
-        return Scalar<type, errorTrack>(s);
-    }
-
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator+=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 + s2; }
-
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator-=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 - s2; }
-
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator*=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 * s2; }
-
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator/=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 / s2; }
-
-    template<ScalarType type, bool errorTrack>
-    inline void operator^=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 ^ s2; }
-
-    template<ScalarType type, bool errorTrack>
-    inline void operator<<=(Scalar<type, errorTrack>& s
-            , int bits) { s = s << bits; }
-
-    template<ScalarType type, bool errorTrack>
-    inline void operator>>=(Scalar<type, errorTrack>& s
-            , int bits) { s = s >> bits; }
-    /*!
-     * The following two functions handle swap(s1, s2). Use swap of Scalars whose errorTrack is false by default.
-     */
-    template<ScalarType type, bool errorTrack>
-    inline void swap(Scalar<type, false>& s1, Scalar<type, errorTrack>& s2) noexcept {
-        s1.swap(s2);
-    }
-
-    template<ScalarType type, bool errorTrack>
-    inline void swap(Scalar<type, true>& s1, Scalar<type, errorTrack>& s2) noexcept {
-        s2.swap(s1);
-    }
 }
 
 #endif

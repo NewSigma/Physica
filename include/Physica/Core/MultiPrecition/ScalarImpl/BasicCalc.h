@@ -4,14 +4,13 @@
 #ifndef PHYSICA_BASICCALC_H
 #define PHYSICA_BASICCALC_H
 
-#ifndef PHYSICA_SCALAR_H
-    #include "Physica/Core/MultiPrecition/Scalar.h"
-#endif
-
 #include "Basic/AddBasic.h"
 #include "Basic/DivBasic.h"
 #include "Util/ArraySupport.h"
-
+/*!
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
+ */
 namespace Physica::Core {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
     //Default implementations

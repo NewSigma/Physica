@@ -88,12 +88,16 @@ namespace Physica::Core {
         inline static void cutZero(Scalar& s);
         /* Friends */
         friend class Scalar<MultiPrecision, true>;
-        template<ScalarType type, bool errorTrack>
-        friend Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
-        template<ScalarType type, bool errorTrack>
-        friend Scalar<type, errorTrack> sqrt(const Scalar<type, errorTrack>& s);
-        template<ScalarType type, bool errorTrack>
-        friend Scalar<type, errorTrack> ln(const Scalar<type, errorTrack>& s);
+        template<bool errorTrack>
+        friend Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
+        template<ScalarType type>
+        friend Scalar<type, false> sqrt(const Scalar<type, false>& s);
+        template<ScalarType type>
+        friend Scalar<type, true> sqrt(const Scalar<type, true>& s);
+        template<ScalarType type>
+        friend Scalar<type, false> ln(const Scalar<type, false>& s);
+        template<ScalarType type>
+        friend Scalar<type, true> ln(const Scalar<type, true>& s);
     };
 
     template<>
@@ -252,6 +256,7 @@ namespace Physica::Core {
     [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
+#include "Physica/Core/Math/Const.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/ScalarImpl.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/BasicCalc.h"
 

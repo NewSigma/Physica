@@ -4,14 +4,13 @@
 #ifndef PHYSICA_ELEMENTARYFUNCTIONIMPL_H
 #define PHYSICA_ELEMENTARYFUNCTIONIMPL_H
 
-#ifndef PHYSICA_ELEMENTARYFUNCTION_H
-    #include "Physica/Core/MultiPrecition/ElementaryFunction.h"
-#endif
-
 #include <cmath>
-#include <Physica/Core/Math/BasicAlgebra/Solve.h>
+#include "Physica/Core/Math/Algebra/BasicAlgebra/Solve.h"
 #include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
-
+/*!
+ * This file is part of implementations of \ElementaryFunction.
+ * Do not include this header file, include ElementaryFunction.h instead.
+ */
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s) {

@@ -3,11 +3,10 @@
  */
 #ifndef PHYSICA_PROBABILITYFUNCTIONIMPL_H
 #define PHYSICA_PROBABILITYFUNCTIONIMPL_H
-
-#ifndef PHYSICA_PROBABILITYFUNCTION_H
-    #include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
-#endif
-
+/*!
+ * This file is part of implementations of \ProbabilityFunction.
+ * Do not include this header file, include ProbabilityFunction.h instead.
+ */
 namespace Physica::Core {
     //!Return a real number between 0 and 1.
     template<ScalarType type, bool errorTrack>

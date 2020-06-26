@@ -5,8 +5,10 @@
 #define PHYSICA_CONST_H
 
 #include <iosfwd>
-#include "Physica/Core/MultiPrecition/Scalar.h"
-
+/*!
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
+ */
 namespace Physica::Core {
     constexpr int GlobalPrecision = 4;
 

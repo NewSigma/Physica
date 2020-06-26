@@ -4,8 +4,6 @@
 #ifndef PHYSICA_ELEMENTARYFUNCTION_H
 #define PHYSICA_ELEMENTARYFUNCTION_H
 
-#include "Scalar.h"
-
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);

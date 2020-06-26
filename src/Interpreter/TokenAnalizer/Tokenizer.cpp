@@ -6,7 +6,7 @@
 #include "Physica/Interpreter/TokenWord.h"
 #include "Physica/Interpreter/TokenNum.h"
 #include "Physica/Interpreter/Tokenizer.h"
-#include "Physica/Core/Const.h"
+#include "Physica/Core/Math/Const.h"
 
 using namespace Physica::Interpreter;
 using namespace Physica::Core;

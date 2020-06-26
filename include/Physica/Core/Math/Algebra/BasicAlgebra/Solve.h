@@ -2,8 +2,6 @@
 #define PHYSICA_SOLVE_H
 
 namespace Physica::Core {
-    class Scalar;
-
     class Solve {
     public:
         static Scalar bisectionMethod(Scalar func(const Scalar&), const Scalar& n
