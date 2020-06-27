@@ -4,9 +4,9 @@
 #ifndef PHYSICA_FUNCTIONTREE_H
 #define PHYSICA_FUNCTIONTREE_H
 
-namespace Physica::Core {
-    class Scalar;
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
+namespace Physica::Core {
     class FunctionTree {
         //A function is a tree.
         union {
@@ -15,14 +15,14 @@ namespace Physica::Core {
                 FunctionTree* right;
             };
             struct {
-                Scalar* constant{};
+                MultiScalar* constant{};
                 void* placeHolder{};
             };
         };
         void* func;
     public:
-        FunctionTree(Scalar (*func)(const Scalar&, const Scalar&), FunctionTree left, FunctionTree right);
-        FunctionTree(Scalar (*func)(const Scalar&), FunctionTree f);
+        FunctionTree(MultiScalar (*func)(const MultiScalar&, const MultiScalar&), FunctionTree left, FunctionTree right);
+        FunctionTree(MultiScalar (*func)(const MultiScalar&), FunctionTree f);
         FunctionTree(const FunctionTree& func) = delete;
         FunctionTree(FunctionTree&& func) noexcept;
         ~FunctionTree();
@@ -30,8 +30,8 @@ namespace Physica::Core {
         FunctionTree& operator=(const FunctionTree& func) = delete;
         FunctionTree& operator=(FunctionTree&& f) noexcept;
     private:
-        explicit FunctionTree(Scalar* constant);
-        [[nodiscard]] Scalar solve() const;
+        explicit FunctionTree(MultiScalar* constant);
+        [[nodiscard]] MultiScalar solve() const;
         friend class Function;
     };
 }

@@ -3,33 +3,32 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
-#include "Physica/Core/ElementaryFunction.h"
-#include "Physica/Core/Scalar.h"
+#include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
 
 namespace Physica::Core {
     //Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()
-    GeneAlgorithm::GeneAlgorithm(Scalar func(const Scalar&), const Scalar& lower, const Scalar& upper, int pop, ChooseMode mode) {
+    GeneAlgorithm::GeneAlgorithm(MultiScalar func(const MultiScalar&), const MultiScalar& lower, const MultiScalar& upper, int pop, ChooseMode mode) {
         population = pop;
-        points = new Scalar*[population];
+        points = new MultiScalar*[population];
 
         fitnessFunction = func;
-        lowerBound = new Scalar(lower);
-        upperBound = new Scalar(upper);
-        regionLength = new Scalar(upper - lower);
+        lowerBound = new MultiScalar(lower);
+        upperBound = new MultiScalar(upper);
+        regionLength = new MultiScalar(upper - lower);
         //Get abs(regionLength).
         regionLength->toAbs();
 
         if (mode == LinearChoose) {
-            Scalar stepLength = *regionLength / Scalar(static_cast<SignedScalarUnit>(population));
-            Scalar temp(1, 0);
+            MultiScalar stepLength = *regionLength / MultiScalar(static_cast<SignedScalarUnit>(population));
+            MultiScalar temp(1, 0);
             for (int i = 0; i < population; i++) {
                 temp[0] = i;
-                points[i] = new Scalar(stepLength * temp + lower);
+                points[i] = new MultiScalar(stepLength * temp + lower);
             }
         }
         else if (mode == RandomChoose) {
             for (int i = 0; i < population; i++)
-                points[i] = new Scalar(randomNumerical() * *regionLength + lower);
+                points[i] = new MultiScalar(randomScalar<MultiPrecision, false>() * *regionLength + lower);
         }
     }
 
@@ -41,7 +40,7 @@ namespace Physica::Core {
         delete regionLength;
     }
 //Get the maximum point. Multiply the function by a -1 to get the minimum.
-    Scalar** GeneAlgorithm::getExtremalPoint() {
+    MultiScalar** GeneAlgorithm::getExtremalPoint() {
         if (fitnessFunction == nullptr) {
             std::cout << "Uninitialized function.\n";
             return nullptr;
@@ -57,14 +56,14 @@ namespace Physica::Core {
 
     void GeneAlgorithm::crossover() {
         for (int i = 0; i < population; i++) {
-            auto r = randomNumerical();
-            if (Scalar(crossoverRate) > r) {
+            auto r = randomScalar<MultiPrecision, false>();
+            if (MultiScalar(crossoverRate) > r) {
                 long randomIndex1 = random() % population;
                 long randomIndex2 = random() % population;
                 auto random1 = points[randomIndex1];
                 auto random2 = points[randomIndex2];
 
-                r = randomNumerical();
+                r = randomScalar<MultiPrecision, false>();
                 //Whether random2 > random1 or not is not important.
                 auto child = (*random2 - *random1) * r + *random1;
                 auto child_y = fitnessFunction(child);
@@ -79,9 +78,9 @@ namespace Physica::Core {
     }
 
     void GeneAlgorithm::mutation() {
-        if (Scalar(mutationRate) > randomNumerical()) {
+        if (MultiScalar(mutationRate) > randomScalar<MultiPrecision, false>()) {
             long randomIndex = random() % population;
-            *points[randomIndex] = randomNumerical() * *regionLength + *lowerBound;
+            *points[randomIndex] = randomScalar<MultiPrecision, false>() * *regionLength + *lowerBound;
         }
     }
 

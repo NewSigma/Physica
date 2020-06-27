@@ -3,23 +3,22 @@
  */
 #include <QtCharts>
 #include <Physica/Core/Math/Calculus/Differential.h>
-#include <Physica/Core/Scalar.h>
 #include "Physica/Gui/Plot.h"
 
 using namespace Physica::Core;
 
-Plot::Plot(Scalar (*func)(const Scalar&), const Scalar& begin, const Scalar& end, QWidget* parent)
+Plot::Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin, const MultiScalar& end, QWidget* parent)
     : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    Scalar maxStepSize = (end - begin) / BasicConst::getInstance().getPlotPoints();
-    Scalar point = Scalar(begin);
+    MultiScalar maxStepSize = (end - begin) / BasicConst::getInstance().getPlotPoints();
+    MultiScalar point = MultiScalar(begin);
     do {
-        Scalar y = func(point);
+        MultiScalar y = func(point);
         *series << QPointF(double(point), double(y));
         /*
         //Changeable step size depending on current derivative.
-        Scalar derivative = D_right(func, point);
+        MultiScalar derivative = D_right(func, point);
         std::cout << derivative << point << std::endl;
         if(derivative.getPower() > basicConst->MaxPower) {
             qWarning("StepSize is too small, suspect encountered a singularity. Ignoring...");
@@ -31,7 +30,7 @@ Plot::Plot(Scalar (*func)(const Scalar&), const Scalar& begin, const Scalar& end
         point.clearA();
     } while(point < end);
     //Handle l = 1.
-    Scalar y = func(point);
+    MultiScalar y = func(point);
     *series << QPointF(double(point), double(y));
 
     auto chart = new QChart();

@@ -4,8 +4,8 @@
 #ifndef PHYSICA_PROBABILITYFUNCTIONIMPL_H
 #define PHYSICA_PROBABILITYFUNCTIONIMPL_H
 /*!
- * This file is part of implementations of \ProbabilityFunction.
- * Do not include this header file, include ProbabilityFunction.h instead.
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
     //!Return a real number between 0 and 1.

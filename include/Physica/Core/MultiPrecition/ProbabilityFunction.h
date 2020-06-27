@@ -3,9 +3,10 @@
  */
 #ifndef PHYSICA_PROBABILITYFUNCTION_H
 #define PHYSICA_PROBABILITYFUNCTION_H
-
-#include "Scalar.h"
-
+/*!
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
+ */
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     inline Scalar<type, errorTrack> randomScalar();
@@ -22,6 +23,6 @@ namespace Physica::Core {
     inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& n);
 }
 
-#include "FunctionsImpl/ProbabilityFunctionImpl.h"
+#include "FunctionImpl/ProbabilityFunctionImpl.h"
 
 #endif

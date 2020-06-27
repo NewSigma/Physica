@@ -3,7 +3,6 @@
  */
 #include <stack>
 #include "Physica/Interpreter/ExprReader.h"
-#include "Physica/Core/Scalar.h"
 
 using namespace Physica::Interpreter;
 
@@ -88,39 +87,39 @@ ExprReader::ExprReader(const std::wstring& str) {
     }
 }
 
-Scalar ExprReader::calc() {
-    std::stack<Scalar> stack{};
+MultiScalar ExprReader::calc() {
+    std::stack<MultiScalar> stack{};
     for(auto& str : anti_poland) {
         switch(str.front()) {
             case '+':
                 if(stack.size() > 1) {
-                    Scalar n1 = stack.top();
+                    MultiScalar n1 = stack.top();
                     stack.pop();
-                    Scalar n2 = stack.top();
+                    MultiScalar n2 = stack.top();
                     stack.pop();
                     stack.push(n1 + n2);
                 }
                 break;
             case L'×':
                 if(stack.size() > 1) {
-                    Scalar n1 = stack.top();
+                    MultiScalar n1 = stack.top();
                     stack.pop();
-                    Scalar n2 = stack.top();
+                    MultiScalar n2 = stack.top();
                     stack.pop();
                     stack.push(n1 * n2);
                 }
                 break;
             case '/':
                 if(stack.size() > 1) {
-                    Scalar n1 = stack.top();
+                    MultiScalar n1 = stack.top();
                     stack.pop();
-                    Scalar n2 = stack.top();
+                    MultiScalar n2 = stack.top();
                     stack.pop();
                     stack.push(n2 / n1);
                 }
                 break;
             default:
-                stack.push(Scalar(str));
+                stack.push(MultiScalar(str.c_str()));
         }
     }
     return stack.top();

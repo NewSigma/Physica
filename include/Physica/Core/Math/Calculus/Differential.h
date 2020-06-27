@@ -1,14 +1,14 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "Scalar.h"
-#include "Function.h"
+#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/Math/Calculus/Function.h"
 
 namespace Physica::Core {
     class Differential {
         Function func;
-        Scalar at;
-        Scalar stepSize;
+        MultiScalar at;
+        MultiScalar stepSize;
     public:
         //Reference: Scalar Recipes in C++
         enum DifferentialMethod {
@@ -16,8 +16,9 @@ namespace Physica::Core {
             Forward,
             Backward
         };
-        Differential(Function func, Scalar at, Scalar stepSize = BasicConst::getInstance().getStepSize());
-        [[nodiscard]] Scalar solve(DifferentialMethod method);
+        Differential(Function func, MultiScalar at
+                , MultiScalar stepSize = MultiScalar(BasicConst::getInstance().getStepSize()));
+        [[nodiscard]] MultiScalar solve(DifferentialMethod method);
     };
 }
 

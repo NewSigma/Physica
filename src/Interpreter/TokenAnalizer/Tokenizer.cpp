@@ -2,11 +2,11 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QtCore/qlogging.h>
-#include <Core/Header/Scalar.h>
+#include <Physica/Core/MultiPrecition/Scalar.h>
 #include "Physica/Interpreter/TokenWord.h"
 #include "Physica/Interpreter/TokenNum.h"
 #include "Physica/Interpreter/Tokenizer.h"
-#include "Physica/Core/Math/Const.h"
+#include "Physica/Core/MultiPrecition/Const.h"
 
 using namespace Physica::Interpreter;
 using namespace Physica::Core;
@@ -126,7 +126,7 @@ bool Tokenizer::readChar(char ch) {
 void Tokenizer::readNum() {
     bool stoppable = true, go_on = true;
     NumBufferState state = NumStart;
-    Scalar num(BasicConst::getInstance().get_0());
+    MultiScalar num(BasicConst::getInstance().get_0());
     Scalar exp(BasicConst::getInstance().get_0());
     SignedScalarUnit power = 0;
     bool isExpPositive = true;
@@ -171,7 +171,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance().get_10();
-                        num += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        num += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
                         ++str;
                         break;
                     case '.':
@@ -189,7 +189,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance().get_10();
-                        num += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        num += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
                         --power;
                         ++str;
                         break;
@@ -210,7 +210,7 @@ void Tokenizer::readNum() {
                         ++str;
                         break;
                     case '1' ... '9':
-                        exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -230,7 +230,7 @@ void Tokenizer::readNum() {
                         break;
                     case '1' ... '9':
                         exp *= BasicConst::getInstance().get_10();
-                        exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -242,7 +242,7 @@ void Tokenizer::readNum() {
                 stoppable = true;
                 if(isdigit(*str)) {
                     exp *= BasicConst::getInstance().get_10();
-                    exp += Scalar(static_cast<SignedScalarUnit>(*str - '0'));
+                    exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
                     ++str;
                 }
                 else
@@ -254,7 +254,7 @@ void Tokenizer::readNum() {
         qFatal("Encountered tokenizer error.");
     if(!isExpPositive)
         exp.toOpposite();
-    num *= (BasicConst::getInstance().get_10() ^ (exp + Scalar(power)));
+    num *= (BasicConst::getInstance().get_10() ^ (exp + MultiScalar(power)));
     tokens.push_back(new TokenNum(num));
 }
 

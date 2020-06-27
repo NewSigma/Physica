@@ -4,19 +4,19 @@
 #ifndef PHYSICA_POLYNOMIAL_H
 #define PHYSICA_POLYNOMIAL_H
 
-namespace Physica::Core {
-    class Scalar;
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
+namespace Physica::Core {
     class Polynomial {
     private:
         int length;
-        const Scalar* variable;
-        const Scalar** coefficients;
+        const MultiScalar* variable;
+        const MultiScalar** coefficients;
     public:
-        Polynomial(int length, const Scalar* variable);
+        Polynomial(int length, const MultiScalar* variable);
         ~Polynomial();
-        void addCoefficients(int index, const Scalar* n);
-        Scalar* calculate();
+        void addCoefficients(int index, const MultiScalar* n);
+        MultiScalar calculate();
     };
 }
 

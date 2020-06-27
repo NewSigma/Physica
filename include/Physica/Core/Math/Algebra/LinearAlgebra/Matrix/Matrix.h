@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////
@@ -23,8 +24,8 @@ namespace Physica::Core {
         Matrix(Matrix&& matrix) noexcept;
         virtual ~Matrix() = default;
         /* Operators */
-        [[nodiscard]] virtual Scalar& operator()(size_t row, size_t column) = 0;
-        [[nodiscard]] virtual const Scalar& operator()(size_t row, size_t column) const = 0;
+        [[nodiscard]] virtual MultiScalar& operator()(size_t row, size_t column) = 0;
+        [[nodiscard]] virtual const MultiScalar& operator()(size_t row, size_t column) const = 0;
         Matrix& operator=(const Matrix& m);
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
@@ -66,12 +67,12 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const Matrix& m);
     std::unique_ptr<Matrix> operator+(const Matrix& m1, const Matrix& m2);
     std::unique_ptr<Matrix> operator-(const Matrix& m1, const Matrix& m2);
-    std::unique_ptr<Matrix> operator*(const Matrix& m, const Scalar& n);
+    std::unique_ptr<Matrix> operator*(const Matrix& m, const MultiScalar& n);
     std::unique_ptr<Matrix> operator*(const Matrix& m1, const Matrix& m2);
     /* Inline Implementations */
     inline void operator+=(Matrix& m1, const Matrix& m2) { m1 = *(m1 + m2); }
     inline void operator-=(Matrix& m1, const Matrix& m2) { m1 = *(m1 - m2); }
-    inline void operator*=(Matrix& m, const Scalar& n) { m = *(m * n); }
+    inline void operator*=(Matrix& m, const MultiScalar& n) { m = *(m * n); }
     inline void operator*=(Matrix& m1, const Matrix& m2) { m1 = *(m1 * m2); }
     /*!
      * Select the main element of a column of Matrix and execute a row swap as well as a column swap to
@@ -88,10 +89,10 @@ namespace Physica::Core {
         Q_ASSERT(column < this->column());
         const auto rank = row();
         size_t main_row_index = 0, main_column_index = 0;
-        const Scalar* main = &BasicConst::getInstance().get_0();
+        const Scalar<MultiPrecision, false>* main = &BasicConst::getInstance().get_0();
         for(size_t i = column; i < rank; ++i) {
             for(size_t j = column; j < rank; ++j) {
-                const Scalar* temp = &(*this)(i, j);
+                const MultiScalar* temp = &(*this)(i, j);
                 bool larger = absCompare(*main, *temp);
                 main = larger ? main : temp;
                 main_row_index = larger ? main_row_index : j;
@@ -115,9 +116,9 @@ namespace Physica::Core {
         Q_ASSERT(column < this->column());
         const auto rank = row();
         size_t main_index = column;
-        const Scalar* main = &(*this)(column, column);
+        const MultiScalar* main = &(*this)(column, column);
         for(size_t j = column + 1; j < rank; ++j) {
-            const Scalar* temp = &(*this)(j, column);
+            const MultiScalar* temp = &(*this)(j, column);
             bool larger = absCompare(*main, *temp);
             main = larger ? main : temp;
             main_index = larger ? main_index : j;
@@ -138,12 +139,12 @@ namespace Physica::Core {
     inline void Matrix::impactPivoting(size_t row) {
         Q_ASSERT(row < this->row());
         const auto col = column();
-        const Scalar* main = &(*this)(row, 0);
+        const MultiScalar* main = &(*this)(row, 0);
         for(size_t i = 1; i < col; ++i) {
-            const Scalar* temp = &(*this)(row, i);
+            const MultiScalar* temp = &(*this)(row, i);
             main = absCompare(*main, *temp) ? main : temp;
         }
-        const Scalar n = reciprocal(*main);
+        const MultiScalar n = reciprocal(*main);
         for(size_t i = 0; i < col; ++i)
             (*this)(row, i) *= n;
     }
@@ -154,9 +155,9 @@ namespace Physica::Core {
     std::unique_ptr<Matrix> sqrt(const Matrix& n);
     std::unique_ptr<Matrix> factorial(const Matrix& n);
     std::unique_ptr<Matrix> ln(const Matrix& n);
-    std::unique_ptr<Matrix> log(const Matrix& n, const Scalar& a);
+    std::unique_ptr<Matrix> log(const Matrix& n, const MultiScalar& a);
     std::unique_ptr<Matrix> exp(const Matrix& n);
-    std::unique_ptr<Matrix> pow(const Matrix& n, const Scalar& a);
+    std::unique_ptr<Matrix> pow(const Matrix& n, const MultiScalar& a);
     std::unique_ptr<Matrix> cos(const Matrix& n);
     std::unique_ptr<Matrix> sin(const Matrix& n);
     std::unique_ptr<Matrix> tan(const Matrix& n);

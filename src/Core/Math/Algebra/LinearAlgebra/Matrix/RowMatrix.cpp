@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/RowMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RowMatrix.h"
 
 namespace Physica::Core {
     RowMatrix::RowMatrix() : Matrix(Row) {}

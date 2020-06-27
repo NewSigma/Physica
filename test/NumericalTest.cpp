@@ -1,11 +1,12 @@
 /*
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/Scalar.h"
 #include <random>
 #include <iomanip>
+#include <iostream>
+#include <Physica/Core/MultiPrecition/Scalar.h>
 
-using namespace Physica::Core;
+using Physica::Core::MultiScalar;
 
 namespace Physica::Test {
     void numericalAddTest(int loop) {
@@ -15,11 +16,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Scalar a(d_a);
+            MultiScalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Scalar b(d_b);
+            MultiScalar b(d_b);
 
             double_extract expect{d_a + d_b};
             double_extract result{double(a + b)};
@@ -46,11 +47,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Scalar a(d_a);
+            MultiScalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Scalar b(d_b);
+            MultiScalar b(d_b);
 
             double_extract expect{d_a - d_b};
             double_extract result{double(a - b)};
@@ -77,11 +78,11 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Scalar a(d_a);
+            MultiScalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
-            Scalar b(d_b);
+            MultiScalar b(d_b);
 
             double_extract expect{d_a * d_b};
             double_extract result{double(a * b)};
@@ -108,7 +109,7 @@ namespace Physica::Test {
         for(int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
             double d_a = d * engine();
-            Scalar a(d_a);
+            MultiScalar a(d_a);
 
             d = 1 - 1.4 * d * d;
             double d_b = d * engine();
@@ -116,7 +117,7 @@ namespace Physica::Test {
                 d = 1 - 1.4 * d * d;
                 d_b = d * engine();
             }
-            Scalar b(d_b);
+            MultiScalar b(d_b);
 
             double_extract expect{d_a / d_b};
             double_extract result{double(a / b)};
@@ -136,7 +137,7 @@ namespace Physica::Test {
         std::cout << "Performing div test: " << " --Passed" << '\n' << std::setprecision(6);
     }
 
-    void printElements(const Scalar& n) {
+    void printElements(const MultiScalar& n) {
         int size = n.getSize();
         for(int i = 0; i < size; ++i)
             std::cout << n[i] << ' ';

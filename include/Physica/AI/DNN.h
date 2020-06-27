@@ -6,9 +6,9 @@
 #define PHYSICA_DNN_H
 
 #include <vector>
-#include "Core/Header/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
 
-using Physica::Core::Scalar;
+using Physica::Core::MultiScalar;
 using Physica::Core::Vector;
 
 namespace Physica::AI {
@@ -18,9 +18,9 @@ namespace Physica::AI {
     class DNN {
         std::vector<Layer*> layers;
         Vector inputs;
-        Scalar expect;
+        MultiScalar expect;
 
-        Scalar learnRate;
+        MultiScalar learnRate;
         int inputSize;
     public:
         DNN(int inputSize, int size, int* nodeCounts);
@@ -33,10 +33,10 @@ namespace Physica::AI {
         [[nodiscard]] int getInputSize() const { return inputSize; }
         [[nodiscard]] int getSize() const { return layers.size(); }
 
-        void loadData(const Vector& loadInputs, const Scalar& loadExpect);
-        void setLearnRate(const Scalar& n) { learnRate = n; }
+        void loadData(const Vector& loadInputs, const MultiScalar& loadExpect);
+        void setLearnRate(const MultiScalar& n) { learnRate = n; }
         void train() const;
-        [[nodiscard]] Scalar predict() const;
+        [[nodiscard]] MultiScalar predict() const;
 
         friend class Node;
     };

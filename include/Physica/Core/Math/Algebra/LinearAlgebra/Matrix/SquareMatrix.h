@@ -17,7 +17,7 @@ namespace Physica::Core {
         };
     public:
         /* Getters */
-        [[nodiscard]] Scalar determinate(SquareMatrixMethod method);
+        [[nodiscard]] MultiScalar determinate(SquareMatrixMethod method);
     protected:
         /* Friends */
         friend class LinearEquations;

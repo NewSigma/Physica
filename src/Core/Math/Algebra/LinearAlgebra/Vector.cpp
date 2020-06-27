@@ -3,36 +3,36 @@
  */
 #include <QtCore/qlogging.h>
 #include <cstring>
-#include "Physica/Core/Math/LinearAlgebra/Vector.h"
-#include "Physica/Core/Scalar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 
 namespace Physica::Core {
-    Vector::Vector() : CStyleArray<Scalar, Dynamic>() {}
+    Vector::Vector() : CStyleArray<MultiScalar, Dynamic>() {}
 
-    Vector::Vector(size_t capacity) : CStyleArray<Scalar, Dynamic>(capacity) {}
+    Vector::Vector(size_t capacity) : CStyleArray<MultiScalar, Dynamic>(capacity) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
-    Vector::Vector(size_t length, size_t capacity) : CStyleArray<Scalar, Dynamic>(length, capacity) {}
+    Vector::Vector(size_t length, size_t capacity) : CStyleArray<MultiScalar, Dynamic>(length, capacity) {}
     //!Convenience function to create a 2D Vector.
-    Vector::Vector(const Scalar& n1, const Scalar& n2) : CStyleArray<Scalar, Dynamic>(2, 2) {
+    Vector::Vector(const MultiScalar& n1, const MultiScalar& n2) : CStyleArray<MultiScalar, Dynamic>(2, 2) {
         allocate(n1, 0);
         allocate(n2, 1);
     }
     //!Convenience function to create a 3D Vector.
-    Vector::Vector(const Scalar& n1, const Scalar& n2, const Scalar& n3)
-            : CStyleArray<Scalar, Dynamic>(3, 3) {
+    Vector::Vector(const MultiScalar& n1, const MultiScalar& n2, const MultiScalar& n3)
+            : CStyleArray<MultiScalar, Dynamic>(3, 3) {
         allocate(n1, 0);
         allocate(n2, 1);
         allocate(n3, 2);
     }
 
-    Vector::Vector(const CStyleArray<Scalar, Dynamic>& array) : CStyleArray<Scalar, Dynamic>(array) {}
+    Vector::Vector(const CStyleArray<MultiScalar, Dynamic>& array) : CStyleArray<MultiScalar, Dynamic>(array) {}
 
-    Vector::Vector(CStyleArray<Scalar, Dynamic>&& array) noexcept : CStyleArray<Scalar, Dynamic>(std::move(array)) {}
+    Vector::Vector(CStyleArray<MultiScalar, Dynamic>&& array) noexcept : CStyleArray<MultiScalar, Dynamic>(std::move(array)) {}
 
-    Vector::Vector(Vector&& vec) noexcept : CStyleArray<Scalar, Dynamic>(std::move(vec))  {}
+    Vector::Vector(Vector&& vec) noexcept : CStyleArray<MultiScalar, Dynamic>(std::move(vec))  {}
 
     std::ostream& operator<<(std::ostream& os, const Vector& v) {
         os << '(';
@@ -43,8 +43,8 @@ namespace Physica::Core {
         return os;
     }
 
-    Scalar Vector::toNorm() const {
-        Scalar norm = getZero();
+    MultiScalar Vector::toNorm() const {
+        MultiScalar norm(static_cast<SignedScalarUnit>(0));
         for(size_t i = 0; i < getLength(); ++i)
             norm += square((*this)[i]);
         return sqrt(norm);
@@ -53,7 +53,7 @@ namespace Physica::Core {
     void Vector::toUnit() {
         if(isZeroVector())
             return;
-        Scalar norm = toNorm();
+        MultiScalar norm = toNorm();
         for(size_t i = 0; i < getLength(); ++i)
             (*this)[i] /= norm;
     }
@@ -69,14 +69,14 @@ namespace Physica::Core {
         return true;
     }
 
-    Scalar Vector::toArg(size_t axe) const {
+    MultiScalar Vector::toArg(size_t axe) const {
         return toNorm() / (*this)[axe];
     }
 
     Vector Vector::randomVector(size_t length) {
         Vector result(length);
         for(size_t i = 0; i < length; ++i)
-            result.grow(randomNumerical());
+            result.grow(randomScalar<MultiPrecision, true>());
         return result;
     }
 
@@ -122,15 +122,15 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar operator*(const Vector& v1, const Vector& v2) {
+    MultiScalar operator*(const Vector& v1, const Vector& v2) {
         const auto length = v1.getLength();
-        Scalar result = getZero();
+        MultiScalar result(static_cast<SignedScalarUnit>(0));
         for(size_t i = 0; i < length; ++i)
             result += v1[i] * v2[i];
         return result;
     }
 
-    Vector operator+(const Vector& v, const Scalar& n) {
+    Vector operator+(const Vector& v, const MultiScalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -138,7 +138,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator-(const Vector& v, const Scalar& n) {
+    Vector operator-(const Vector& v, const MultiScalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -146,7 +146,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator*(const Vector& v, const Scalar& n) {
+    Vector operator*(const Vector& v, const MultiScalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -154,7 +154,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector operator/(const Vector& v, const Scalar& n) {
+    Vector operator/(const Vector& v, const MultiScalar& n) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -194,7 +194,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector log(const Vector& v, const Scalar& a) {
+    Vector log(const Vector& v, const MultiScalar& a) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)
@@ -210,7 +210,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Vector pow(const Vector& v, const Scalar& a) {
+    Vector pow(const Vector& v, const MultiScalar& a) {
         const auto length = v.getLength();
         Vector result(length, length);
         for(size_t i = 0; i < length; ++i)

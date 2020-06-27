@@ -7,6 +7,8 @@
 /*!
  * Inspired by interview question 16.22 on leetcode.
  * This is a kind of cellular automata.
+ *
+ * Optimize: QScatterSeries is implemented using QVector, use QList may improve performance.
  */
 void LongtonAnt::handle() {
     int index;

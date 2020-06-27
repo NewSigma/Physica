@@ -5,26 +5,25 @@
 #ifndef PHYSICA_NODE_H
 #define PHYSICA_NODE_H
 
-#include <Core/Header/Vector.h>
-#include <Core/Header/Scalar.h>
 #include <map>
 #include <set>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector.h>
 
 using Physica::Core::Vector;
-using Physica::Core::Scalar;
+using Physica::Core::MultiScalar;
 
 namespace Physica::AI {
     class Layer;
 
     class Node {
-        //Contains connection between this node to the node at next layer. <index of node, index of Scalar>
+        //Contains connection between this node to the node at next layer. <index of node, index of MultiScalar>
         std::map<int, int> forwardConnections;
-        //Contains connection between this node to the node at previous layer. <index of Scalar, index of node>
+        //Contains connection between this node to the node at previous layer. <index of MultiScalar, index of node>
         std::map<int, int> backwardConnections;
         Vector vector;
-        Scalar bias;
-        Scalar acceptedLoss;
-        Scalar (*activeFunc)(const Scalar&);
+        MultiScalar bias;
+        MultiScalar acceptedLoss;
+        MultiScalar (*activeFunc)(const MultiScalar&);
 
         Layer* parentLayer;
         int id;
@@ -33,11 +32,11 @@ namespace Physica::AI {
         Node(const Node&) = delete;
         Node& operator=(const Node&) = delete;
 
-        [[nodiscard]] Scalar calc() const;
+        [[nodiscard]] MultiScalar calc() const;
         [[nodiscard]] Layer* getLayer() const { return parentLayer; }
         const std::map<int, int>& getForwardConnections() { return forwardConnections; }
         const std::map<int, int>& getBackwardConnections() { return backwardConnections; }
-        void setActiveFunc(Scalar (*func)(const Scalar&)) { activeFunc = func; }
+        void setActiveFunc(MultiScalar (*func)(const MultiScalar&)) { activeFunc = func; }
         bool connect(int toNode, int toPoint);
         void disconnect(int toNode);
 

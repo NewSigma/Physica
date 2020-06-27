@@ -256,8 +256,20 @@ namespace Physica::Core {
     [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
-#include "Physica/Core/Math/Const.h"
+#include "Const.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/ScalarImpl.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/BasicCalc.h"
+#include "ElementaryFunction.h"
+#include "ScalarImpl/Operation/Pow.h"
+
+namespace Physica::Core {
+    //!Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
+    template<bool errorTrack1, bool errorTrack2>
+    inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> operator^(
+            const Scalar<MultiPrecision, errorTrack1>& s1,
+            const Scalar<MultiPrecision, errorTrack2>& s2) {
+        return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
+    }
+}
 
 #endif

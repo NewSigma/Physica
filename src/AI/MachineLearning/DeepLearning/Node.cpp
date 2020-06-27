@@ -4,17 +4,18 @@
 #include "Physica/AI/Node.h"
 #include "Physica/AI/Layer.h"
 #include "Physica/AI/DNN.h"
-#include "Physica/Core/ElementaryFunction.h"
+#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 
 using namespace Physica::Core;
 
 namespace Physica::AI {
     Node::Node(int id, Layer* parent)
-            : vector(Vector::randomVector(parent->getNet()->getInputSize())), bias(randomNumerical())
-            , acceptedLoss(getZero()), activeFunc(nullptr), parentLayer(parent), id(id) {
-    }
+            : vector(Vector::randomVector(parent->getNet()->getInputSize()))
+            , bias(randomScalar<MultiPrecision, false>())
+            , acceptedLoss(static_cast<SignedScalarUnit>(0))
+            , activeFunc(nullptr), parentLayer(parent), id(id) {}
 
-    Scalar Node::calc() const {
+    MultiScalar Node::calc() const {
         if(activeFunc == nullptr)
             return parentLayer->getNet()->getInputs() * vector + bias;
         else
@@ -47,7 +48,7 @@ namespace Physica::AI {
     }
 
     void Node::handleLoss() {
-        Scalar averageLoss = acceptedLoss / Scalar(static_cast<SignedScalarUnit>(vector.getLength()));
+        MultiScalar averageLoss = acceptedLoss / MultiScalar(static_cast<SignedScalarUnit>(vector.getLength()));
         for(int i = 0; i < vector.getLength(); ++i) {
             DNN& net = *parentLayer->getNet();
             if(backwardConnections.find(i) != backwardConnections.end()) {

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include <Core/Header/LUDecomposition.h>
-#include "Core/Header/SquareMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SquareMatrix.h"
 
 namespace Physica::Core {
     /////////////////////////////////////SquareMatrix//////////////////////////////////////////
@@ -15,11 +15,11 @@ namespace Physica::Core {
     /*!
      * Note: This function will broke the origin matrix.
      *
-     * Reference: Scalar Recipes in C++
+     * Reference: MultiScalar Recipes in C++
      */
-    Scalar SquareMatrix::determinate(SquareMatrixMethod method) {
+    MultiScalar SquareMatrix::determinate(SquareMatrixMethod method) {
         const auto rank = row();
-        Scalar result(BasicConst::getInstance().get_1());
+        MultiScalar result(BasicConst::getInstance().get_1());
         switch(method) {
             case GaussMethod:
                 for(size_t i = 0; i < rank; ++i) {
@@ -55,16 +55,16 @@ namespace Physica::Core {
             : Matrix(matrix), ColumnMatrix(matrix) {}
 
     ColumnSquareMatrix ColumnSquareMatrix::getUnitMatrix(size_t size) {
-        const Scalar& _0 = BasicConst::getInstance().get_0();
-        const Scalar& _1 = BasicConst::getInstance().get_1();
+        const auto& _0 = BasicConst::getInstance().get_0();
+        const auto& _1 = BasicConst::getInstance().get_1();
         CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Scalar, Dynamic, Dynamic> array1(size, size);
+            CStyleArray<MultiScalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
-                array1.allocate(Scalar(_0), j);
-            array1.allocate(Scalar(_1), i);
+                array1.allocate(MultiScalar(_0), j);
+            array1.allocate(MultiScalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
-                array1.allocate(Scalar(_0), j);
+                array1.allocate(MultiScalar(_0), j);
             array.allocate(Vector(std::move(array1)), i);
         }
         return ColumnSquareMatrix(std::move(array));
@@ -85,16 +85,16 @@ namespace Physica::Core {
             : Matrix(matrix), RowMatrix(matrix) {}
 
     RowSquareMatrix RowSquareMatrix::getUnitMatrix(size_t size) {
-        const Scalar& _0 = BasicConst::getInstance().get_0();
-        const Scalar& _1 = BasicConst::getInstance().get_1();
+        const auto& _0 = BasicConst::getInstance().get_0();
+        const auto& _1 = BasicConst::getInstance().get_1();
         CStyleArray<Vector, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
-            CStyleArray<Scalar, Dynamic, Dynamic> array1(size, size);
+            CStyleArray<MultiScalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
-                array1.allocate(Scalar(_0), j);
-            array1.allocate(Scalar(_1), i);
+                array1.allocate(MultiScalar(_0), j);
+            array1.allocate(MultiScalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
-                array1.allocate(Scalar(_0), j);
+                array1.allocate(MultiScalar(_0), j);
             array.allocate(Vector(std::move(array1)), i);
         }
         return RowSquareMatrix(std::move(array));

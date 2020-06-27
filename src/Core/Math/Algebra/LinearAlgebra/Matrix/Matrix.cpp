@@ -2,12 +2,9 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <iomanip>
-#include "Core/Header/Const.h"
-#include "Core/Header/Scalar.h"
-#include "Core/Header/Matrix.h"
-#include "Core/Header/Vector.h"
-#include "Core/Header/ColumnMatrix.h"
-#include "Core/Header/RowMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ColumnMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RowMatrix.h"
 
 namespace Physica::Core {
     ////////////////////////////////////////Column Matrix////////////////////////////////////////////
@@ -114,7 +111,7 @@ namespace Physica::Core {
         return result;
     }
 
-    std::unique_ptr<Matrix> operator*(const Matrix& m, const Scalar& n) {
+    std::unique_ptr<Matrix> operator*(const Matrix& m, const MultiScalar& n) {
         const auto length = m.getLength();
         std::unique_ptr<Matrix> result(
                 m.getType() == Matrix::Column
@@ -144,7 +141,7 @@ namespace Physica::Core {
         for(i = 0; i < matrix_size; ++i) {
             Vector new_vector(vector_length, vector_length);
             for(j = 0; j < vector_length; ++j) {
-                Scalar element(BasicConst::getInstance().get_0());
+                MultiScalar element(BasicConst::getInstance().get_0());
                 for(size_t k = 0; k < m1_column; ++k)
                     element += m1(r, k) * m2(k, c);
                 new_vector.allocate(std::move(element), j);
@@ -197,7 +194,7 @@ namespace Physica::Core {
         return result;
     }
 
-    std::unique_ptr<Matrix> log(const Matrix& m, const Scalar& a) {
+    std::unique_ptr<Matrix> log(const Matrix& m, const MultiScalar& a) {
         const auto length = m.getLength();
         std::unique_ptr<Matrix> result(
                 m.getType() == Matrix::Column
@@ -219,7 +216,7 @@ namespace Physica::Core {
         return result;
     }
 
-    std::unique_ptr<Matrix> pow(const Matrix& m, const Scalar& a) {
+    std::unique_ptr<Matrix> pow(const Matrix& m, const MultiScalar& a) {
         const auto length = m.getLength();
         std::unique_ptr<Matrix> result(
                 m.getType() == Matrix::Column

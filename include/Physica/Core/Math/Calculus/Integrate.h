@@ -2,15 +2,16 @@
 #define PHYSICA_INTEGRATE_H
 
 #include "Function.h"
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
     class Integrate {
         Function func;
-        Scalar from;
-        Scalar to;
-        Scalar stepSize;
+        MultiScalar from;
+        MultiScalar to;
+        Scalar<MultiPrecision, false> stepSize;
     public:
-        //Reference: Scalar Recipes in C++
+        //Reference: MultiScalar Recipes in C++
         enum IntegrateMethod {
             Rectangular,
             Ladder,
@@ -18,8 +19,9 @@ namespace Physica::Core {
             Simpson_3_8,
             Bode
         };
-        Integrate(Function func, Scalar from, Scalar to, Scalar stepSize = BasicConst::getInstance().getStepSize());
-        [[nodiscard]] Scalar solve(IntegrateMethod method);
+        Integrate(Function func, MultiScalar from, MultiScalar to
+                , Scalar<MultiPrecision, false> stepSize = BasicConst::getInstance().getStepSize());
+        [[nodiscard]] MultiScalar solve(IntegrateMethod method);
     };
 }
 

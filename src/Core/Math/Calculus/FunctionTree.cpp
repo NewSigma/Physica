@@ -2,20 +2,19 @@
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
 #include "Physica/Core/Math/Calculus/FunctionTree.h"
-#include "Physica/Core/Scalar.h"
 
 namespace Physica::Core {
     /*!
      * Construct a tree which explains the structure of a \class Function.
      * If you want to get a node standing by a constant or a variable, ask it from a \class Function.
      */
-    FunctionTree::FunctionTree(Scalar (*func)(const Scalar&, const Scalar&), FunctionTree left, FunctionTree right)
+    FunctionTree::FunctionTree(MultiScalar (*func)(const MultiScalar&, const MultiScalar&), FunctionTree left, FunctionTree right)
     : func(reinterpret_cast<void*>(func)), left(new FunctionTree(std::move(left))), right(new FunctionTree(std::move(right))) {}
 
-    FunctionTree::FunctionTree(Scalar (*func)(const Scalar&), FunctionTree f)
+    FunctionTree::FunctionTree(MultiScalar (*func)(const MultiScalar&), FunctionTree f)
     : func(reinterpret_cast<void*>(func)), left(new FunctionTree(std::move(f))), right(nullptr) {}
 
-    FunctionTree::FunctionTree(Scalar* constant) //NOLINT No need to initialize left, right.
+    FunctionTree::FunctionTree(MultiScalar* constant) //NOLINT No need to initialize left, right.
     : constant(constant), placeHolder(nullptr), func(nullptr) {}
 
     FunctionTree::FunctionTree(FunctionTree&& func) noexcept : left(func.left), right(func.right), func(func.func) {
@@ -36,12 +35,12 @@ namespace Physica::Core {
         return *this;
     }
 
-    Scalar FunctionTree::solve() const {
+    MultiScalar FunctionTree::solve() const {
         if(!func)
-            return Scalar(*constant);
+            return MultiScalar(*constant);
         if(right)
-            return reinterpret_cast<Scalar (*)(const Scalar&, const Scalar&)>
+            return reinterpret_cast<MultiScalar (*)(const MultiScalar&, const MultiScalar&)>
             (func)((*left).solve(), (*right).solve());
-        return reinterpret_cast<Scalar (*)(const Scalar&)>(func)((*right).solve());
+        return reinterpret_cast<MultiScalar (*)(const MultiScalar&)>(func)((*right).solve());
     }
 }

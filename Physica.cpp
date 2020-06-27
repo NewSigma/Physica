@@ -3,7 +3,7 @@
  */
 #include <QApplication>
 #include <QTime>
-#include "Physica/Core/Math/Const.h"
+#include "Physica/Core/MultiPrecition/Scalar.h"
 #include "Physica/Gui/PhysicaMain.h"
 #include "Physica/Core/Utils/DebugUtil.h"
 

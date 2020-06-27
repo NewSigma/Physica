@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include <Physica/Core/Math/LinearAlgebra/Matrix/SquareMatrix.h>
-#include <Physica/Core/Math/LinearAlgebra/LUDecomposition.h>
-#include "Physica/Core/Math/LinearAlgebra/LinearEquations.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SquareMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations.h"
 
 namespace Physica::Core {
     /*!
@@ -21,7 +21,7 @@ namespace Physica::Core {
      * Change the bias in LU method to solve a family of equations.
      */
     LinearEquations::LinearEquations(Matrix& m) noexcept : matrix(m) {}
-    //!Reference: Scalar Recipes in C++
+    //!Reference: Numerical Recipes in C++
     const Vector& LinearEquations::solve(LinearEquationsMethod method) {
         const auto rank = matrix.row();
         Q_ASSERT(rank + 1 == matrix.column());

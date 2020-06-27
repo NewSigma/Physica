@@ -5,7 +5,7 @@
 #define PHYSICA_FUNCTION_H
 
 #include <utility>
-#include "Physica/Core/Math/LinearAlgebra/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
 #include "FunctionTree.h"
 
 namespace Physica::Core {
@@ -21,22 +21,22 @@ namespace Physica::Core {
 
         Function& operator=(const Function& func) = delete;
         Function& operator=(Function&& func) noexcept;
-        [[nodiscard]] inline Scalar& operator[](size_t index);
-        [[nodiscard]] inline const Scalar& operator[](size_t index) const;
-        [[nodiscard]] Scalar operator()(Scalar n);
-        [[nodiscard]] Scalar operator()(Scalar n1, Scalar n2);
-        [[nodiscard]] Scalar operator()(Scalar n1, Scalar n2, Scalar n3);
+        [[nodiscard]] inline MultiScalar& operator[](size_t index);
+        [[nodiscard]] inline const MultiScalar& operator[](size_t index) const;
+        [[nodiscard]] MultiScalar operator()(MultiScalar n);
+        [[nodiscard]] MultiScalar operator()(MultiScalar n1, MultiScalar n2);
+        [[nodiscard]] MultiScalar operator()(MultiScalar n1, MultiScalar n2, MultiScalar n3);
 
         [[nodiscard]] const FunctionTree& getConstNode(size_t index) const { return constantNodes[index]; }
-        [[nodiscard]] Scalar solve() const { return tree.solve(); }
+        [[nodiscard]] MultiScalar solve() const { return tree.solve(); }
     };
     /* Inline implementations */
-    inline Scalar& Function::operator[](size_t index) {
+    inline MultiScalar& Function::operator[](size_t index) {
         Q_ASSERT(index < length);
         return *constantNodes[index].constant;
     }
 
-    inline const Scalar& Function::operator[](size_t index) const {
+    inline const MultiScalar& Function::operator[](size_t index) const {
         Q_ASSERT(index < length);
         return *constantNodes[index].constant;
     }

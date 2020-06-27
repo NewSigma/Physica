@@ -4,7 +4,7 @@
 #ifndef PHYSICA_FFT_H
 #define PHYSICA_FFT_H
 
-#include "Physica/Core/Math/LinearAlgebra/Matrix/RowMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RowMatrix.h"
 
 namespace Physica::Core {
     ///////////////////////////////////FFTBase////////////////////////////////////
@@ -18,7 +18,7 @@ namespace Physica::Core {
             LadderMethod
         };
         FFTBase(FFTBase&& base) noexcept;
-        Scalar operator()(const Scalar& n);
+        MultiScalar operator()(const MultiScalar& n);
     protected:
         FFTBase(Vector x, Vector y, NormalizationMethod method);
     private:

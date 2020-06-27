@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/MatrixChain.h"
-#include "Core/Header/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixChain.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     /*!

@@ -20,8 +20,11 @@ else()
     set(CMAKE_CXX_FLAGS -O2)
 endif()
 
+set(CMAKE_CXX_FLAGS "\
+${CMAKE_CXX_FLAGS} \
+-fPIC")
+
 set(CMAKE_CUDA_FLAGS "\
---compiler-options -fPIC \
 --gpu-architecture ${GPU_ARCHITECTURE} \
 --gpu-code ${GPU_CODE} \
 --relocatable-device-code=true")
@@ -29,17 +32,26 @@ set(CMAKE_CUDA_FLAGS "\
 if(${RUN_CHECKS})
     add_subdirectory(config)
 endif()
+#############################################Settings#############################################
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+##############################################Libs################################################
+include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 #############################################Project##############################################
+include_directories(./include)
+file(GLOB_RECURSE HEADERS include/*.h)
+add_subdirectory(src)
+
 if(${PHYSICA_COMPILE_TESTS})
     add_subdirectory(test)
 endif()
 
-include_directories(./include)
-file(GLOB_RECURSE HEADERS include/*.h)
-add_subdirectory(src)
 add_executable(Physica Physica.cpp ${HEADERS})
 #############################################Options##############################################
-target_link_libraries(Physica Physica_Core Physica_Gui)
+target_link_libraries(Physica Physica_Core Physica_Gui Qt5::Core Qt5::Widgets)
 if(${PHYSICA_COMPILE_TESTS})
     target_link_libraries(Physica Physica_Test)
 endif()

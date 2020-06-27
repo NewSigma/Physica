@@ -3,7 +3,10 @@
  */
 #ifndef PHYSICA_ELEMENTARYFUNCTION_H
 #define PHYSICA_ELEMENTARYFUNCTION_H
-
+/*!
+ * This file is part of implementations of \Scalar.
+ * Do not include this header file, include Scalar.h instead.
+ */
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
@@ -99,6 +102,6 @@ namespace Physica::Core {
     Scalar<type, errorTrack> arccoth(const Scalar<type, errorTrack>& s);
 }
 
-#include "FunctionsImpl/ElementaryFunctionImpl.h"
+#include "FunctionImpl/ElementaryFunctionImpl.h"
 
 #endif

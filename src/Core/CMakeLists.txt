@@ -4,7 +4,6 @@ find_package(OpenCV REQUIRED)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 #############################################Project##############################################
 file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
-include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 add_library(Physica_Core SHARED ${SOURCES_CORE})
 #############################################Options##############################################
 target_link_libraries(Physica_Core Qt5::Core)

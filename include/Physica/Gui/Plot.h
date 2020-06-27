@@ -6,16 +6,15 @@
 
 #include <QChartView>
 #include <QtCharts/QSplineSeries>
+#include <Physica/Core/MultiPrecition/Scalar.h>
 
-namespace Physica::Core {
-    class Scalar;
-}
-using Physica::Core::Scalar;
+using Physica::Core::MultiScalar;
 
 class Plot : public QtCharts::QChartView {
     QtCharts::QSplineSeries* series;
 public:
-    Plot(Scalar (*func)(const Scalar&), const Scalar& begin, const Scalar& end, QWidget* parent = nullptr);
+    Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
+            , const MultiScalar& end, QWidget* parent = nullptr);
 };
 
 #endif

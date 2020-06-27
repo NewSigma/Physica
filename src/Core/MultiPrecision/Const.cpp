@@ -2,12 +2,11 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 
 namespace Physica::Core {
     BasicConst* BasicConst::instance = nullptr;
     MathConst* MathConst::instance = nullptr;
-    /*
+    /*!
      * Basic consts that initialize directly.
      */
     BasicConst::BasicConst() : MaxPower(16) {
@@ -60,7 +59,7 @@ namespace Physica::Core {
             instance = nullptr;
         }
     }
-    /*
+    /*!
      * Consts that need some calculates.
      * Should call new to Const_1 so as to make calculates available.
      */
@@ -92,7 +91,7 @@ namespace Physica::Core {
             instance = nullptr;
         }
     }
-    /*
+    /*!
      * precision is the number of effective digits in decimal.
      * Reference:
      * http://www.pi314.net/eng/salamin.php

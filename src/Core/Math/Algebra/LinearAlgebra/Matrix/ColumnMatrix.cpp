@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Core/Header/ColumnMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ColumnMatrix.h"
 
 namespace Physica::Core {
     ColumnMatrix::ColumnMatrix() : Matrix(Column) {}

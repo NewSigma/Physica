@@ -6,8 +6,7 @@
 
 #include <vector>
 
-namespace Physica {
-    namespace AI {
+namespace Physica::AI {
         class DNN;
 
         class Layer {
@@ -30,6 +29,5 @@ namespace Physica {
             void handleLoss();
         };
     }
-}
 
 #endif

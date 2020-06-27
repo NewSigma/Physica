@@ -2,9 +2,9 @@
  * Copyright (c) 2019 NewSigma@163.com. All rights reserved.
  */
 #include <QKeyEvent>
-#include "Physica/Core/Scalar.h"
+#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Interpreter/ExprReader.h>
 #include "Physica/Gui/Calculator.h"
-#include "Physica/Interpreter/ExprReader.h"
 
 using Physica::Interpreter::ExprReader;
 
@@ -370,7 +370,7 @@ void Calculator::on_click_right_bracket() {
 
 void Calculator::on_click_sqrt() {
     ExprReader reader(editor_bottom->text().toStdWString());
-    Scalar result = reader.calc();
+    MultiScalar result = reader.calc();
     editor_top->setText(editor_bottom->text());
     if(result.isPositive())
         editor_bottom->setText(QString::number((double)sqrt(result), 'f'));

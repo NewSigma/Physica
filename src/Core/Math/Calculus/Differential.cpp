@@ -1,15 +1,14 @@
-#include <Physica/Core/Math/Calculus/Differential.h>
-#include "Physica/Core/Scalar.h"
+#include "Physica/Core/Math/Calculus/Differential.h"
 
 namespace Physica::Core {
-    Differential::Differential(Function func, Scalar at, Scalar stepSize)
+    Differential::Differential(Function func, MultiScalar at, MultiScalar stepSize)
             : func(std::move(func)), at(std::move(at)), stepSize(std::move(stepSize)) {}
     /*!
      * Optimize: if \at is much larger than \stepsize, the result will be 0. May be use talor series
      * and expend the function to the first order.
      */
-    Scalar Differential::solve(DifferentialMethod method) {
-        Scalar result;
+    MultiScalar Differential::solve(DifferentialMethod method) {
+        MultiScalar result;
         switch(method) {
             case DoublePoint:
                 result = (func(at + stepSize) - func(at - stepSize)) / (stepSize << 1);

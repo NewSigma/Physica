@@ -3,20 +3,17 @@
 
 #include <list>
 #include <iosfwd>
+#include <Physica/Core/MultiPrecition/Scalar.h>
 
-namespace Physica::Core {
-    class Scalar;
-}
-
-using Physica::Core::Scalar;
+using Physica::Core::MultiScalar;
 
 namespace Physica::Interpreter {
     class ExprReader {
     private:
         std::list<std::wstring> anti_poland;
     public:
-        ExprReader(const std::wstring& str);
-        Scalar calc();
+        explicit ExprReader(const std::wstring& str);
+        MultiScalar calc();
     private:
         static bool isSign(wchar_t c);
     };

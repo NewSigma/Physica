@@ -3,9 +3,9 @@
 
 #include <ctime>
 
-namespace Physica::Core {
-    class Scalar;
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
+namespace Physica::Core {
     class GeneAlgorithm {
     public:
         enum ChooseMode {
@@ -15,10 +15,10 @@ namespace Physica::Core {
         double crossoverRate = 0.6;
         double mutationRate = 0.1;
 
-        GeneAlgorithm(Scalar func(const Scalar&), const Scalar& lower, const Scalar& upper, int pop = 100, ChooseMode mode = RandomChoose);
+        GeneAlgorithm(MultiScalar func(const MultiScalar&), const MultiScalar& lower, const MultiScalar& upper, int pop = 100, ChooseMode mode = RandomChoose);
         ~GeneAlgorithm();
 
-        Scalar** getExtremalPoint();
+        MultiScalar** getExtremalPoint();
         void setMaxGenerations(int maxGenerations);
         void setMaxTime(int maxTime);
         void print();
@@ -27,12 +27,12 @@ namespace Physica::Core {
         //The size of initial points we should choose.
         int population;
         //Function args.
-        Scalar (*fitnessFunction)(const Scalar&);
-        const Scalar* lowerBound;
-        const Scalar* upperBound;
-        Scalar* regionLength;
+        MultiScalar (*fitnessFunction)(const MultiScalar&);
+        const MultiScalar* lowerBound;
+        const MultiScalar* upperBound;
+        MultiScalar* regionLength;
         //Save
-        Scalar** points;
+        MultiScalar** points;
         //Stopping args
         int generations = 0;
         clock_t startTime{};

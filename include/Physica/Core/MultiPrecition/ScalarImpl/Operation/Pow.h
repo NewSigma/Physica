@@ -4,14 +4,13 @@
 #ifndef PHYSICA_POW_H
 #define PHYSICA_POW_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/MultiPrecition/ScalarImpl/Util/Bitwise.h"
-#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
 //TODO Not tested
 namespace Physica::Core {
     //!Compute a ^ unit.
-    inline Scalar<MultiPrecision, false> powWord(const Scalar<MultiPrecision, false>& a, ScalarUnit unit) {
-        Scalar<MultiPrecision, false> result(a);
+    template<bool errorTrack>
+    inline Scalar<MultiPrecision, errorTrack> powWord(
+            const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
+        Scalar<MultiPrecision, errorTrack> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
         for(int j = 0; j < ScalarUnitWidth - lastUnitBits; ++j) {
             result = square(result);
@@ -21,9 +20,11 @@ namespace Physica::Core {
         }
         return result;
     }
+    template<bool errorTrack>
     //Compute a ^ unit, the highest bit of unit must be set.
-    inline Scalar<MultiPrecision, false> powFullWord(const Scalar<MultiPrecision, false>& a, ScalarUnit unit) {
-        Scalar<MultiPrecision, false> result(a);
+    inline Scalar<MultiPrecision, errorTrack> powFullWord(
+            const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
+        Scalar<MultiPrecision, errorTrack> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
@@ -32,11 +33,12 @@ namespace Physica::Core {
         }
         return result;
     }
-
-    inline Scalar<MultiPrecision, false> powNumerical(
-            const Scalar<MultiPrecision, false>& a, const Scalar<MultiPrecision, false>& n) {
+    //!Calculate a^n.
+    template<bool errorTrack1, bool errorTrack2>
+    inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> powScalar(
+            const Scalar<MultiPrecision, errorTrack1>& a, const Scalar<MultiPrecision, errorTrack2>& n) {
         const auto size = n.getSize();
-        Scalar<MultiPrecision, false> result(a);
+        Scalar<MultiPrecision, errorTrack1 | errorTrack2> result(a);
         if(n.getLength() < 0)
             result = reciprocal(a);
 

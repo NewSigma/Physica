@@ -1,21 +1,21 @@
 #ifndef _Physica_C_ClimbMountainAlgorithm_H
 #define _Physica_C_ClimbMountainAlgorithm_H
 
-namespace Physica::Core {
-    class Scalar;
+#include "Physica/Core/MultiPrecition/Scalar.h"
 
+namespace Physica::Core {
     class HillClimbingAlgorithm {
     public:
-        HillClimbingAlgorithm(Scalar* func(Scalar*), Scalar* x_initial, Scalar* stepSize);
+        HillClimbingAlgorithm(MultiScalar* func(MultiScalar*), MultiScalar* x_initial, MultiScalar* stepSize);
         ~HillClimbingAlgorithm();
         void getExtremal();
-        Scalar* getMinStep();
-        void setMinStep(Scalar* minStep);
+        MultiScalar* getMinStep();
+        void setMinStep(MultiScalar* minStep);
     private:
-        Scalar* (*func)(Scalar*);
-        Scalar* x_initial;
-        Scalar* stepSize;
-        Scalar* minStep;
+        MultiScalar* (*func)(MultiScalar*);
+        MultiScalar* x_initial;
+        MultiScalar* stepSize;
+        MultiScalar* minStep;
     };
 }
 

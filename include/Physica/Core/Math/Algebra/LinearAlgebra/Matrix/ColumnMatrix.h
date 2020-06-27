@@ -17,8 +17,8 @@ namespace Physica::Core {
         ColumnMatrix(const ColumnMatrix& matrix) = default;
         ColumnMatrix(ColumnMatrix&& matrix) noexcept;
         /* Operators */
-        [[nodiscard]] Scalar& operator()(size_t row, size_t column) override { return (*this)[column][row]; }
-        [[nodiscard]] const Scalar& operator()(size_t row, size_t column) const override { return (*this)[column][row]; }
+        [[nodiscard]] MultiScalar& operator()(size_t row, size_t column) override { return (*this)[column][row]; }
+        [[nodiscard]] const MultiScalar& operator()(size_t row, size_t column) const override { return (*this)[column][row]; }
         /* Matrix Operations*/
         void appendRow(const Vector& v) override;
         void appendRow(Vector&& v) noexcept override;
