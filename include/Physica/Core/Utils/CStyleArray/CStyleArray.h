@@ -52,6 +52,7 @@ namespace Physica::Core {
     class CStyleArray<T, Dynamic, capacity> : public AbstractArray<T> {
     protected:
         using AbstractArray<T>::arr;
+        //Optimize: Use the end ptr of arr instead of length may improve performance.
         size_t length;
     public:
         inline CStyleArray();
@@ -77,14 +78,15 @@ namespace Physica::Core {
          * \size must larger than current length. Because we can not delete the elements we do not need if not.
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
-        //!
         void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
     };
 
     template<class T>
     class CStyleArray<T, Dynamic, Dynamic> : public AbstractArray<T> {
     protected:
+        //Optimize: Use more effective allocate strategy to avoid reallocate.
         using AbstractArray<T>::arr;
+        //Optimize: Use the end pointer of arr instead of length may improve performance.
         size_t length;
         size_t capacity;
     public:

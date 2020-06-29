@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_ELEMENTARYFUNCTIONIMPL_H
-#define PHYSICA_ELEMENTARYFUNCTIONIMPL_H
+#ifndef PHYSICA_ELEMENTARYIMPL_H
+#define PHYSICA_ELEMENTARYIMPL_H
 
 #include <cmath>
 #include "BisectionMethod.h"
-#include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ProbabilityFunction.h"
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.

@@ -3,7 +3,7 @@
 
 #include <memory>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
-#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ElementaryFunction.h"
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////

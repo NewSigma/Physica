@@ -46,13 +46,13 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> cot(const Scalar<type, errorTrack>& s);
-
+    //!Domain of definition: [0, Pi]
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> arccos(const Scalar<type, errorTrack>& s);
-
+    //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> arcsin(const Scalar<type, errorTrack>& s);
-
+    //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> arctan(const Scalar<type, errorTrack>& s);
 
@@ -102,6 +102,6 @@ namespace Physica::Core {
     Scalar<type, errorTrack> arccoth(const Scalar<type, errorTrack>& s);
 }
 
-#include "FunctionImpl/ElementaryFunctionImpl.h"
+#include "FunctionImpl/ElementaryImpl.h"
 
 #endif

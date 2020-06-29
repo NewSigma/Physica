@@ -87,7 +87,7 @@ namespace Physica::Core {
 
     template<class T, size_t capacity>
     inline CStyleArray<T, Dynamic, capacity>::CStyleArray(CStyleArray<T, Dynamic, capacity>&& array) noexcept
-            : AbstractArray<T>(std::move(array)), length(array.length) {}
+            : AbstractArray<T>(std::move(array)), length(array.length) { array.length = 0; }
 
     template<class T, size_t capacity>
     CStyleArray<T, Dynamic, capacity>::~CStyleArray() {
@@ -167,7 +167,7 @@ namespace Physica::Core {
 
     template<class T>
     inline CStyleArray<T, Dynamic, Dynamic>::CStyleArray(CStyleArray<T, Dynamic, Dynamic>&& array) noexcept
-            : AbstractArray<T>(std::move(array)), length(array.length), capacity(array.capacity) {}
+            : AbstractArray<T>(std::move(array)), length(array.length), capacity(array.capacity) { array.length = 0; }
 
     template<class T>
     CStyleArray<T, Dynamic, Dynamic>::~CStyleArray() {
@@ -267,7 +267,7 @@ namespace Physica::Core {
     }
     /*!
      * Low level api. Designed for performance.
-     * Increase the capacity.
+     * Increase the length.
      * This function can be used when you are sure the current capacity is enough.
      */
     template<class T>

@@ -218,4 +218,8 @@ namespace Physica::Core {
     inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(fabs(a)) {}
 }
 
+#include "BasicCalc.h"
+#include "ElementaryFunction.h"
+#include "Operation/Pow.h"
+
 #endif

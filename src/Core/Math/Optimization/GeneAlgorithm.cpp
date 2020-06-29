@@ -3,7 +3,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
-#include "Physica/Core/MultiPrecition/ProbabilityFunction.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ProbabilityFunction.h"
 
 namespace Physica::Core {
     //Usage: GeneAlgorithm(args)->initFunction(args)->getExtremalPoint()

@@ -23,6 +23,6 @@ namespace Physica::Core {
     inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& n);
 }
 
-#include "FunctionImpl/ProbabilityFunctionImpl.h"
+#include "FunctionImpl/ProbabilityImpl.h"
 
 #endif

@@ -26,7 +26,9 @@ namespace Physica::Core {
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Scalar are same. (when Scalar != 0)
-        */
+         *
+         * Optimize: use the end position of byte instead length may improve performance.
+         */
         int length;
         /*
          * Number = (x0 +- a * (2 ^ __WORDSIZE) ^ (1 - length)) * (2 ^ __WORDSIZE) ^ power
@@ -149,6 +151,7 @@ namespace Physica::Core {
         friend class Scalar<MultiPrecision, false>;
     };
     /* Compare */
+    //FIXME: absCompare behaves different with operator>.
     bool absCompare(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
     bool operator> (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
     bool operator< (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
@@ -173,9 +176,14 @@ namespace Physica::Core {
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         /* Helpers */
+        Scalar& toOpposite() noexcept { f = -f; return *this; }
+        Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] float getTrivial() const { return f; }
+        [[nodiscard]] bool isZero() const { return f == 0; }
+        [[nodiscard]] bool isPositive() const { return f > 0; }
+        [[nodiscard]] bool isNegative() const { return f < 0; }
         /* Friends */
         friend class Scalar<Float, true>;
     };
@@ -196,6 +204,8 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         /* Getters */
         [[nodiscard]] float getA() const noexcept { return a; }
@@ -221,9 +231,14 @@ namespace Physica::Core {
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         /* Helpers */
+        Scalar& toOpposite() noexcept { d = -d; return *this; }
+        Scalar& toAbs() noexcept { d = fabs(d); return *this; }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] double getTrivial() const { return d; }
+        [[nodiscard]] bool isZero() const { return d == 0; }
+        [[nodiscard]] bool isPositive() const { return d > 0; }
+        [[nodiscard]] bool isNegative() const { return d < 0; }
         /* Friends */
         friend class Scalar<Double, true>;
     };
@@ -244,6 +259,8 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         /* Getters */
         [[nodiscard]] double getA() const noexcept { return a; }
@@ -257,10 +274,7 @@ namespace Physica::Core {
 }
 
 #include "Const.h"
-#include "Physica/Core/MultiPrecition/ScalarImpl/ScalarImpl.h"
-#include "Physica/Core/MultiPrecition/ScalarImpl/BasicCalc.h"
-#include "ElementaryFunction.h"
-#include "ScalarImpl/Operation/Pow.h"
+#include "ScalarImpl/ScalarImpl.h"
 
 namespace Physica::Core {
     //!Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45

@@ -30,6 +30,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isZeroVector() const;
         [[nodiscard]] MultiScalar toArg(size_t axe) const;
         /* Helpers */
+        static Vector zeroVector(size_t length);
         static Vector randomVector(size_t length);
         static Vector simplyMultiply(const Vector& v1, const Vector& v2);
     };

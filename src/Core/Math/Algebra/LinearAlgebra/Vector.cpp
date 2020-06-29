@@ -4,7 +4,7 @@
 #include <QtCore/qlogging.h>
 #include <cstring>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
-#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ElementaryFunction.h"
 
 namespace Physica::Core {
     Vector::Vector() : CStyleArray<MultiScalar, Dynamic>() {}
@@ -71,6 +71,13 @@ namespace Physica::Core {
 
     MultiScalar Vector::toArg(size_t axe) const {
         return toNorm() / (*this)[axe];
+    }
+
+    Vector Vector::zeroVector(size_t length) {
+        Vector result(length);
+        for(size_t i = 0; i < length; ++i)
+            result.grow(MultiScalar(static_cast<SignedScalarUnit>(0)));
+        return result;
     }
 
     Vector Vector::randomVector(size_t length) {

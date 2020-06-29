@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#ifndef PHYSICA_PROBABILITYFUNCTIONIMPL_H
-#define PHYSICA_PROBABILITYFUNCTIONIMPL_H
+#ifndef PHYSICA_PROBABILITYIMPL_H
+#define PHYSICA_PROBABILITYIMPL_H
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.

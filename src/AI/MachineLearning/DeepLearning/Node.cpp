@@ -4,7 +4,7 @@
 #include "Physica/AI/Node.h"
 #include "Physica/AI/Layer.h"
 #include "Physica/AI/DNN.h"
-#include "Physica/Core/MultiPrecition/ElementaryFunction.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/ElementaryFunction.h"
 
 using namespace Physica::Core;
 

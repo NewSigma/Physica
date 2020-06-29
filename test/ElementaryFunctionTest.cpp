@@ -3,7 +3,7 @@
  */
 #include <iostream>
 #include <Physica/Core/MultiPrecition/Scalar.h>
-#include <Physica/Core/MultiPrecition/ElementaryFunction.h>
+#include <Physica/Core/MultiPrecition/ScalarImpl/ElementaryFunction.h>
 
 using namespace Physica::Core;
 
