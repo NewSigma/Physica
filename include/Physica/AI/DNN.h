@@ -17,7 +17,7 @@ namespace Physica::AI {
 
     class DNN {
         std::vector<Layer*> layers;
-        Vector inputs;
+        Vector<MultiScalar> inputs;
         MultiScalar expect;
 
         MultiScalar learnRate;
@@ -29,11 +29,11 @@ namespace Physica::AI {
         DNN& operator=(const DNN&) = delete;
 
         Layer& operator[](int i) const { return *layers[i]; }
-        [[nodiscard]] const Vector& getInputs() const { return inputs; }
+        [[nodiscard]] const Vector<MultiScalar>& getInputs() const { return inputs; }
         [[nodiscard]] int getInputSize() const { return inputSize; }
         [[nodiscard]] int getSize() const { return layers.size(); }
 
-        void loadData(const Vector& loadInputs, const MultiScalar& loadExpect);
+        void loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect);
         void setLearnRate(const MultiScalar& n) { learnRate = n; }
         void train() const;
         [[nodiscard]] MultiScalar predict() const;

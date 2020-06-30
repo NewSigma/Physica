@@ -21,7 +21,7 @@ namespace Physica::Core {
     public:
         explicit LinearEquations(Matrix& m) noexcept;
 
-        const Vector& solve(LinearEquationsMethod method);
+        const Vector<MultiScalar>& solve(LinearEquationsMethod method);
     };
 }
 

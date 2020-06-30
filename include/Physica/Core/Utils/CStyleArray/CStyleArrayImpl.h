@@ -60,6 +60,14 @@ namespace Physica::Core {
     }
 
     template<class T, size_t length, size_t capacity>
+    bool CStyleArray<T, length, capacity>::operator==(const CStyleArray<T, length, capacity>& array) const {
+        for(size_t i = 0; i < length; ++i)
+            if(operator[](i) != array[i])
+                return false;
+        return true;
+    }
+
+    template<class T, size_t length, size_t capacity>
     inline void CStyleArray<T, length, capacity>::swap(CStyleArray<T, length, capacity>& array) noexcept {
         AbstractArray<T>::swap(array);
     }
@@ -121,6 +129,16 @@ namespace Physica::Core {
         length = array.length;
         array.length = 0;
         return *this;
+    }
+
+    template<class T, size_t capacity>
+    bool CStyleArray<T, Dynamic, capacity>::operator==(const CStyleArray<T, Dynamic, capacity>& array) const {
+        if(length != array.length)
+            return false;
+        for(size_t i = 0; i < length; ++i)
+            if(operator[](i) != array[i])
+                return false;
+        return true;
     }
 
     template<class T, size_t capacity>
@@ -202,6 +220,18 @@ namespace Physica::Core {
         capacity = array.capacity;
         AbstractArray<T>::operator=(std::move(array));
         return *this;
+    }
+
+    template<class T>
+    bool CStyleArray<T, Dynamic, Dynamic>::operator==(const CStyleArray<T, Dynamic, Dynamic>& array) const {
+        if(length != array.length)
+            return false;
+        if(capacity != array.capacity)
+            return false;
+        for(size_t i = 0; i < length; ++i)
+            if(operator[](i) != array[i])
+                return false;
+        return true;
     }
     /*!
      * Return the sub array of current array. From is included and to is excluded.

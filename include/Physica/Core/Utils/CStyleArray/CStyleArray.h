@@ -23,13 +23,13 @@ namespace Physica::Core {
      * Note:
      * If \T is a complex type, \T must have its copy and move constructors defined.
      *
-     * Optimize:
+     * Unfinished:
      * Copy, move constructors and assign operators maybe able to accept different specializations.
      */
-    template<class T, size_t length, size_t capacity = length>
+    template<class T, size_t length, size_t capacity>
     class CStyleArray : public AbstractArray<T> {
     protected:
-        static_assert(length == capacity && length != 0, "Length must not less than capacity.");
+        static_assert(length == capacity && length != 0, "Length must equal to capacity in a fixed array.");
         using AbstractArray<T>::arr;
     public:
         inline CStyleArray();
@@ -41,11 +41,13 @@ namespace Physica::Core {
         inline CStyleArray<T, length, capacity>& operator=(CStyleArray<T, length, capacity>&& array) noexcept;
         T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
         const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
+        bool operator==(const CStyleArray& array) const;
+        bool operator!=(const CStyleArray& array) const { return !((*this) == array); }
         /* Helpers */
         inline void swap(CStyleArray<T, length, capacity>& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return length; }
-        [[nodiscard]] size_t getCapacity() const { return capacity; }
+        [[nodiscard]] constexpr size_t getLength() const { return length; }
+        [[nodiscard]] constexpr size_t getCapacity() const { return capacity; }
     };
 
     template<class T, size_t capacity>
@@ -65,12 +67,14 @@ namespace Physica::Core {
         CStyleArray<T, Dynamic, capacity>& operator=(CStyleArray<T, Dynamic, capacity>&& array) noexcept;
         T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
         const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
+        bool operator==(const CStyleArray& array) const;
+        bool operator!=(const CStyleArray& array) const { return !((*this) == array); }
         /* Helpers */
         T cutLast();
         void swap(CStyleArray<T, Dynamic, capacity>& array) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return length; }
-        [[nodiscard]] size_t getCapacity() const { return capacity; }
+        [[nodiscard]] constexpr size_t getCapacity() const { return capacity; }
         [[nodiscard]] bool isEmpty() const { return length == 0; }
         /* Setters */
         /*!
@@ -101,6 +105,8 @@ namespace Physica::Core {
         CStyleArray<T, Dynamic, Dynamic>& operator=(CStyleArray<T, Dynamic, Dynamic>&& array) noexcept;
         T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
         const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
+        bool operator==(const CStyleArray& array) const;
+        bool operator!=(const CStyleArray& array) const { return !((*this) == array); }
         CStyleArray<T, Dynamic, Dynamic>& operator<<(const T& t) { append(t); return *this; }
         CStyleArray<T, Dynamic, Dynamic>& operator<<(T&& t) { append(std::move(t)); return *this; }
         /* Helpers */

@@ -7,7 +7,7 @@
 
 namespace Physica::Core {
     ////////////////////////////////////////Matrix////////////////////////////////////////////
-    class Matrix : public CStyleArray<Vector, Dynamic> {
+    class Matrix : public CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic> {
     public:
         enum MatrixType {
             Row, Column
@@ -18,8 +18,8 @@ namespace Physica::Core {
         explicit Matrix(MatrixType type);
         Matrix(size_t capacity, MatrixType type);
         Matrix(size_t length, size_t capacity, MatrixType type);
-        explicit Matrix(const CStyleArray<Vector, Dynamic>& array, MatrixType type);
-        explicit Matrix(CStyleArray<Vector, Dynamic>&& array, MatrixType type) noexcept;
+        explicit Matrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array, MatrixType type);
+        explicit Matrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array, MatrixType type) noexcept;
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         virtual ~Matrix() = default;
@@ -29,16 +29,16 @@ namespace Physica::Core {
         Matrix& operator=(const Matrix& m);
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
-        virtual void appendRow(const Vector& v) = 0;
-        virtual void appendRow(Vector&& v) noexcept = 0;
-        virtual void appendColumn(const Vector& v) = 0;
-        virtual void appendColumn(Vector&& v) noexcept = 0;
+        virtual void appendRow(const Vector<MultiScalar>& v) = 0;
+        virtual void appendRow(Vector<MultiScalar>&& v) noexcept = 0;
+        virtual void appendColumn(const Vector<MultiScalar>& v) = 0;
+        virtual void appendColumn(Vector<MultiScalar>&& v) noexcept = 0;
         virtual void appendMatrixRow(const Matrix& m) = 0;
         virtual void appendMatrixRow(Matrix&& m) = 0;
         virtual void appendMatrixColumn(const Matrix& m) = 0;
         virtual void appendMatrixColumn(Matrix&& m) = 0;
-        virtual Vector cutRow() = 0;
-        virtual Vector cutColumn() = 0;
+        virtual Vector<MultiScalar> cutRow() = 0;
+        virtual Vector<MultiScalar> cutColumn() = 0;
         virtual std::unique_ptr<Matrix> cutMatrixRow(size_t from) = 0;
         virtual std::unique_ptr<Matrix> cutMatrixColumn(size_t from) = 0;
         virtual void rowSwap(size_t r1, size_t r2) noexcept = 0;

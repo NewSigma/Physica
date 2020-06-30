@@ -43,12 +43,12 @@ namespace Physica::Core {
     ColumnSquareMatrix::ColumnSquareMatrix() : Matrix(Column) {}
 
     ColumnSquareMatrix::ColumnSquareMatrix(size_t capacity)
-            : Matrix(CStyleArray<Vector, Dynamic>(capacity), Column) {}
+            : Matrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(capacity), Column) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(const CStyleArray<Vector, Dynamic>& array)
+    ColumnSquareMatrix::ColumnSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array)
             : Matrix(array, Column) {}
 
-    ColumnSquareMatrix::ColumnSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept
+    ColumnSquareMatrix::ColumnSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept
             : Matrix(std::move(array), Column) {}
 
     ColumnSquareMatrix::ColumnSquareMatrix(const ColumnSquareMatrix& matrix) //NOLINT
@@ -57,7 +57,7 @@ namespace Physica::Core {
     ColumnSquareMatrix ColumnSquareMatrix::getUnitMatrix(size_t size) {
         const auto& _0 = BasicConst::getInstance().get_0();
         const auto& _1 = BasicConst::getInstance().get_1();
-        CStyleArray<Vector, Dynamic> array(size, size);
+        CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
             CStyleArray<MultiScalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
@@ -65,7 +65,7 @@ namespace Physica::Core {
             array1.allocate(MultiScalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
                 array1.allocate(MultiScalar(_0), j);
-            array.allocate(Vector(std::move(array1)), i);
+            array.allocate(Vector<MultiScalar>(std::move(array1)), i);
         }
         return ColumnSquareMatrix(std::move(array));
     }
@@ -73,12 +73,12 @@ namespace Physica::Core {
     RowSquareMatrix::RowSquareMatrix() : Matrix(Row) {}
 
     RowSquareMatrix::RowSquareMatrix(size_t capacity)
-            : Matrix(CStyleArray<Vector, Dynamic>(capacity), Row) {}
+            : Matrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(capacity), Row) {}
 
-    RowSquareMatrix::RowSquareMatrix(const CStyleArray<Vector, Dynamic>& array)
+    RowSquareMatrix::RowSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array)
             : Matrix(array, Row) {}
 
-    RowSquareMatrix::RowSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept
+    RowSquareMatrix::RowSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept
             : Matrix(std::move(array), Row) {}
 
     RowSquareMatrix::RowSquareMatrix(const RowSquareMatrix& matrix) //NOLINT
@@ -87,7 +87,7 @@ namespace Physica::Core {
     RowSquareMatrix RowSquareMatrix::getUnitMatrix(size_t size) {
         const auto& _0 = BasicConst::getInstance().get_0();
         const auto& _1 = BasicConst::getInstance().get_1();
-        CStyleArray<Vector, Dynamic> array(size, size);
+        CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic> array(size, size);
         for(size_t i = 0; i < size; ++i) {
             CStyleArray<MultiScalar, Dynamic, Dynamic> array1(size, size);
             for(size_t j = 0; j < i; ++j)
@@ -95,7 +95,7 @@ namespace Physica::Core {
             array1.allocate(MultiScalar(_1), i);
             for(size_t j = i + 1; j < size; ++j)
                 array1.allocate(MultiScalar(_0), j);
-            array.allocate(Vector(std::move(array1)), i);
+            array.allocate(Vector<MultiScalar>(std::move(array1)), i);
         }
         return RowSquareMatrix(std::move(array));
     }

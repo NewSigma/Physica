@@ -12,24 +12,24 @@ namespace Physica::Core {
         RowMatrix();
         explicit RowMatrix(size_t capacity);
         RowMatrix(size_t length, size_t capacity);
-        explicit RowMatrix(const CStyleArray<Vector, Dynamic>& array);
-        explicit RowMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept;
+        explicit RowMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array);
+        explicit RowMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept;
         RowMatrix(const RowMatrix& matrix) = default;
         RowMatrix(RowMatrix&& matrix) noexcept;
         /* Operators */
         [[nodiscard]] MultiScalar& operator()(size_t row, size_t column) override { return (*this)[row][column]; }
         [[nodiscard]] const MultiScalar& operator()(size_t row, size_t column) const override { return (*this)[row][column]; }
         /* Matrix Operations */
-        void appendRow(const Vector& v) override;
-        void appendRow(Vector&& v) noexcept override;
-        void appendColumn(const Vector& v) override;
-        void appendColumn(Vector&& v) noexcept override;
+        void appendRow(const Vector<MultiScalar>& v) override;
+        void appendRow(Vector<MultiScalar>&& v) noexcept override;
+        void appendColumn(const Vector<MultiScalar>& v) override;
+        void appendColumn(Vector<MultiScalar>&& v) noexcept override;
         void appendMatrixRow(const Matrix& m) override;
         void appendMatrixRow(Matrix&& m) override;
         void appendMatrixColumn(const Matrix& m) override;
         void appendMatrixColumn(Matrix&& m) override;
-        Vector cutRow() override;
-        Vector cutColumn() override;
+        Vector<MultiScalar> cutRow() override;
+        Vector<MultiScalar> cutColumn() override;
         std::unique_ptr<Matrix> cutMatrixRow(size_t from) override;
         std::unique_ptr<Matrix> cutMatrixColumn(size_t from) override;
         void rowSwap(size_t r1, size_t r2) noexcept override;

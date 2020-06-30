@@ -27,8 +27,8 @@ namespace Physica::Core {
     public:
         ColumnSquareMatrix();
         explicit ColumnSquareMatrix(size_t capacity);
-        explicit ColumnSquareMatrix(const CStyleArray<Vector, Dynamic>& array);
-        explicit ColumnSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept;
+        explicit ColumnSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array);
+        explicit ColumnSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept;
         ColumnSquareMatrix(const ColumnSquareMatrix& matrix);
 
         static ColumnSquareMatrix getUnitMatrix(size_t size);
@@ -38,8 +38,8 @@ namespace Physica::Core {
     public:
         RowSquareMatrix();
         explicit RowSquareMatrix(size_t capacity);
-        explicit RowSquareMatrix(const CStyleArray<Vector, Dynamic>& array);
-        explicit RowSquareMatrix(CStyleArray<Vector, Dynamic>&& array) noexcept;
+        explicit RowSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array);
+        explicit RowSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept;
         RowSquareMatrix(const RowSquareMatrix& matrix);
 
         static RowSquareMatrix getUnitMatrix(size_t size);

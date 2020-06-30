@@ -66,7 +66,10 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Scalar& s) noexcept;
+        static Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         /* Getters */
+        [[nodiscard]] constexpr static ScalarType getType() { return MultiPrecision; }
+        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getPower() const noexcept { return power; }
         [[nodiscard]] int getSize() const noexcept { return abs(length); }
@@ -138,7 +141,9 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
+        static Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         /* Getters */
+        [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
         [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
         [[nodiscard]] inline Scalar<MultiPrecision, false> getMaximum() const;
@@ -179,7 +184,10 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
+        static Scalar getZero() { return Scalar(0); }
         /* Getters */
+        [[nodiscard]] constexpr static ScalarType getType() { return Float; }
+        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getTrivial() const { return f; }
         [[nodiscard]] bool isZero() const { return f == 0; }
         [[nodiscard]] bool isPositive() const { return f > 0; }
@@ -207,7 +215,9 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
+        static Scalar getZero() { return Scalar(0); }
         /* Getters */
+        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
         /* Friends */
         friend class Scalar<Float, false>;
@@ -234,7 +244,10 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         Scalar& toAbs() noexcept { d = fabs(d); return *this; }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
+        static Scalar getZero() { return Scalar(0); }
         /* Getters */
+        [[nodiscard]] constexpr static ScalarType getType() { return Double; }
+        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] double getTrivial() const { return d; }
         [[nodiscard]] bool isZero() const { return d == 0; }
         [[nodiscard]] bool isPositive() const { return d > 0; }
@@ -262,7 +275,9 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
+        static Scalar getZero() { return Scalar(0); }
         /* Getters */
+        [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
         /* Friends */
         friend class Scalar<Double, false>;
@@ -275,15 +290,5 @@ namespace Physica::Core {
 
 #include "Const.h"
 #include "ScalarImpl/ScalarImpl.h"
-
-namespace Physica::Core {
-    //!Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
-    template<bool errorTrack1, bool errorTrack2>
-    inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> operator^(
-            const Scalar<MultiPrecision, errorTrack1>& s1,
-            const Scalar<MultiPrecision, errorTrack2>& s2) {
-        return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
-    }
-}
 
 #endif

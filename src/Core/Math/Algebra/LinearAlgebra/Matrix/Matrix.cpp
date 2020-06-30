@@ -8,37 +8,37 @@
 
 namespace Physica::Core {
     ////////////////////////////////////////Column Matrix////////////////////////////////////////////
-    Matrix::Matrix(MatrixType type) : CStyleArray<Vector, Dynamic>(), type(type) {}
+    Matrix::Matrix(MatrixType type) : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(), type(type) {}
 
-    Matrix::Matrix(size_t capacity, MatrixType type) : CStyleArray<Vector, Dynamic>(capacity), type(type) {}
+    Matrix::Matrix(size_t capacity, MatrixType type) : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(capacity), type(type) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not allocated. DO NOT try to visit them.
      */
     Matrix::Matrix(size_t length, size_t capacity, MatrixType type)
-            : CStyleArray<Vector, Dynamic>(length, capacity), type(type) {}
+            : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(length, capacity), type(type) {}
 
-    Matrix::Matrix(const CStyleArray<Vector, Dynamic>& array, MatrixType type)
-            : CStyleArray<Vector, Dynamic>(array), type(type) {}
+    Matrix::Matrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array, MatrixType type)
+            : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(array), type(type) {}
 
-    Matrix::Matrix(CStyleArray<Vector, Dynamic>&& array, MatrixType type) noexcept
-            : CStyleArray<Vector, Dynamic>(std::move(array)), type(type) {}
+    Matrix::Matrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array, MatrixType type) noexcept
+            : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(std::move(array)), type(type) {}
 
-    Matrix::Matrix(Matrix&& matrix) noexcept : CStyleArray<Vector, Dynamic>(std::move(matrix)), type(matrix.type) {}
+    Matrix::Matrix(Matrix&& matrix) noexcept : CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>(std::move(matrix)), type(matrix.type) {}
 
     Matrix& Matrix::operator=(const Matrix& m) {
         if(this == &m)
             return *this;
         this->~Matrix();
         type = m.type;
-        CStyleArray<Vector, Dynamic>::operator=(m);
+        CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>::operator=(m);
         return *this;
     }
 
     Matrix& Matrix::operator=(Matrix&& m) noexcept {
         this->~Matrix();
         type = m.type;
-        CStyleArray<Vector, Dynamic>::operator=(std::move(m));
+        CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>::operator=(std::move(m));
         return *this;
     }
     /*!
@@ -66,7 +66,7 @@ namespace Physica::Core {
     }
 
     void Matrix::swap(Matrix& m) noexcept {
-        CStyleArray<Vector, Dynamic>::swap(m);
+        CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>::swap(m);
         auto temp = type;
         type = m.type;
         m.type = temp;
@@ -139,7 +139,7 @@ namespace Physica::Core {
         const size_t& r = isColumn ? j : i;
         const size_t& c = isColumn ? i : j;
         for(i = 0; i < matrix_size; ++i) {
-            Vector new_vector(vector_length, vector_length);
+            Vector<MultiScalar> new_vector(CStyleArray<MultiScalar, Dynamic, Dynamic>(vector_length, vector_length));
             for(j = 0; j < vector_length; ++j) {
                 MultiScalar element(BasicConst::getInstance().get_0());
                 for(size_t k = 0; k < m1_column; ++k)

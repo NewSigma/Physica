@@ -14,7 +14,7 @@ namespace Physica::Core {
      * Length(x) <= Length(y) is required. (Though Length(x) < Length(y) is the often case.)
      * 1 < Length(x) <= Max(SignedScalarUnit) is required.
      */
-    FFTBase::FFTBase(Vector x, Vector y, NormalizationMethod method)
+    FFTBase::FFTBase(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method)
     : data(RowMatrix(2, 2)) {
         data.allocate(std::move(x), 0);
         data.allocate(std::move(y), 1);
@@ -46,7 +46,7 @@ namespace Physica::Core {
         }
     }
     ///////////////////////////////////FFT////////////////////////////////////
-    FFT::FFT(Vector x, Vector y, NormalizationMethod method) : FFTBase(std::move(x), std::move(y), method) {
+    FFT::FFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method) : FFTBase(std::move(x), std::move(y), method) {
         const auto length = data.column();
         auto& vector_x = data[0];
         /* Handle y */ {
@@ -63,7 +63,7 @@ namespace Physica::Core {
             vector_x[i] = averagePhrase * MultiScalar(static_cast<SignedScalarUnit>(i + 1));
     }
     ///////////////////////////////////InvFFT////////////////////////////////////
-    InvFFT::InvFFT(Vector x, Vector y, NormalizationMethod method) : FFTBase(std::move(x), std::move(y), method) {
+    InvFFT::InvFFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method) : FFTBase(std::move(x), std::move(y), method) {
         const auto length = data.column();
         const MultiScalar numericalLength(static_cast<SignedScalarUnit>(length));
         auto& vector_x = data[0];

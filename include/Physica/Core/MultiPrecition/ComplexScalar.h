@@ -17,22 +17,27 @@ namespace Physica::Core {
         ComplexScalar(const ComplexScalar& c) = default;
         ComplexScalar(ComplexScalar&& c) noexcept;
         /* Operators */
-        friend std::ostream& operator<<(std::ostream& os, const ComplexScalar& c);
         ComplexScalar& operator=(const ComplexScalar& c);
         ComplexScalar& operator=(ComplexScalar&& c) noexcept;
         void operator<<=(int i) { real <<= i; imagine<<= i; }
         void operator>>=(int i) { real >>= i; imagine>>= i; }
         /* Helpers */
         void swap(ComplexScalar& c) noexcept;
+        static inline ComplexScalar getZero();
+        static inline ComplexScalar getRandom();
         /* Getters */
         [[nodiscard]] const Scalar<type, errorTrack>& getReal() const { return real; }
         [[nodiscard]] const Scalar<type, errorTrack>& getImagine() const { return imagine; }
+        [[nodiscard]] bool isZero() { return real.isZero() && imagine.isZero(); }
     };
     template<ScalarType type, bool errorTrack>
     [[nodiscard]] inline Scalar<type, errorTrack> norm(const ComplexScalar<type, errorTrack>& c);
 
     template<ScalarType type, bool errorTrack>
     [[nodiscard]] Scalar<type, errorTrack> arg(const ComplexScalar<type, errorTrack>& c);
+
+    template<ScalarType type, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c);
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> operator+(

@@ -20,19 +20,19 @@ namespace Physica::Core {
         FFTBase(FFTBase&& base) noexcept;
         MultiScalar operator()(const MultiScalar& n);
     protected:
-        FFTBase(Vector x, Vector y, NormalizationMethod method);
+        FFTBase(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method);
     private:
         void ladderMethod();
     };
     ///////////////////////////////////FFT////////////////////////////////////
     class FFT : public FFTBase {
     public:
-        FFT(Vector x, Vector y, NormalizationMethod method = RectangularMethod);
+        FFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method = RectangularMethod);
     };
     ///////////////////////////////////InvFFT////////////////////////////////////
     class InvFFT : public FFTBase {
     public:
-        InvFFT(Vector x, Vector y, NormalizationMethod method = RectangularMethod);
+        InvFFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method = RectangularMethod);
     };
 }
 

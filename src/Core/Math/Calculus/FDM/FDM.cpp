@@ -10,7 +10,7 @@ namespace Physica::Core {
 
     FDM::FDM(size_t column, size_t row) : data(column, column) {
         for(size_t i = 0; i < row; ++i)
-            data.allocate(Vector::zeroVector(row), i);
+            data.allocate(Vector<MultiScalar>::zeroVector(row), i);
     }
     /*!
      * By default, edge of the matrix is set zero.

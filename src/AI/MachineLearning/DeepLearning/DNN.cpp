@@ -15,7 +15,7 @@ namespace Physica::AI {
      */
     DNN::DNN(int inputSize, int size, int* nodeCounts)
             : layers(std::vector<Layer*>(size))
-            , inputs(Vector::randomVector(inputSize))
+            , inputs(Vector<MultiScalar>::randomVector(inputSize))
             , expect(static_cast<SignedScalarUnit>(0))
             , learnRate(static_cast<SignedScalarUnit>(0))
             , inputSize(inputSize) {
@@ -28,7 +28,7 @@ namespace Physica::AI {
             delete layer;
     }
 
-    void DNN::loadData(const Vector& loadInputs, const MultiScalar& loadExpect) {
+    void DNN::loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect) {
         if(loadInputs.getLength() != inputSize) {
             qWarning("Insufficient data!");
             return;

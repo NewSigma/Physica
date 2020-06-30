@@ -20,7 +20,7 @@ namespace Physica::AI {
         std::map<int, int> forwardConnections;
         //Contains connection between this node to the node at previous layer. <index of MultiScalar, index of node>
         std::map<int, int> backwardConnections;
-        Vector vector;
+        Vector<MultiScalar> vector;
         MultiScalar bias;
         MultiScalar acceptedLoss;
         MultiScalar (*activeFunc)(const MultiScalar&);

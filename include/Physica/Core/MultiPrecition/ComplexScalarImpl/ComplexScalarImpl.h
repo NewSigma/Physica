@@ -18,13 +18,6 @@ namespace Physica::Core {
             : real(std::move(c.real)), imagine(std::move(c.imagine)) { Q_UNUSED(type) Q_UNUSED(errorTrack) }
 
     template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c) {
-        const auto& imagine = c.imagine;
-        return os << std::setprecision(10) << double(c.real)
-                << (imagine.isNegative() ? " - " : "+" )<< 'i' << fabs(double(imagine)) << std::setprecision(6);
-    }
-
-    template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack>& ComplexScalar<type, errorTrack>::operator=(const ComplexScalar& c) {
         Q_UNUSED(type)
         Q_UNUSED(errorTrack)
@@ -53,6 +46,16 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
+    inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getZero() {
+        return ComplexScalar(Scalar<type, errorTrack>::getZero(), Scalar<type, errorTrack>::getZero());
+    }
+
+    template<ScalarType type, bool errorTrack>
+    inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getRandom() {
+        return ComplexScalar(randomScalar<type, errorTrack>(), randomScalar<type, errorTrack>());
+    }
+
+    template<ScalarType type, bool errorTrack>
     inline Scalar<type, errorTrack> norm(const ComplexScalar<type, errorTrack>& c) {
         return sqrt(square(c.getReal()) + square(c.getImagine()));
     }
@@ -70,6 +73,13 @@ namespace Physica::Core {
         else
             result += MathConst::getInstance().getPI();
         return result;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c) {
+        const auto& imagine = c.getImagine();
+        return os << std::setprecision(10) << double(c.getReal())
+                  << (imagine.isNegative() ? " - " : "+" )<< 'i' << fabs(double(imagine)) << std::setprecision(6);
     }
 
     template<ScalarType type, bool errorTrack>
