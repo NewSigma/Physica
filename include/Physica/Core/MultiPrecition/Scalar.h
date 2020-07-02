@@ -40,8 +40,8 @@ namespace Physica::Core {
         Scalar(int length, int power) noexcept;
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
-        explicit Scalar(SignedScalarUnit unit);
-        explicit Scalar(double d);
+        Scalar(SignedScalarUnit unit); //NOLINT Conversion is always available.
+        Scalar(double d); //NOLINT Conversion is always available.
         explicit Scalar(const char* s);
         explicit Scalar(const wchar_t* s);
         ~Scalar();
@@ -114,10 +114,10 @@ namespace Physica::Core {
         Scalar(int length, int power, ScalarUnit a = 0) noexcept;
         Scalar(const Scalar& s) = default;
         Scalar(Scalar&& s) noexcept;
-        explicit Scalar(const Scalar<MultiPrecision, false>& s);
-        explicit Scalar(Scalar<MultiPrecision, false>&& s) noexcept;
-        explicit Scalar(SignedScalarUnit unit, ScalarUnit a = 0);
-        explicit Scalar(double d, ScalarUnit a = 0);
+        Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
+        Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
+        Scalar(SignedScalarUnit unit, ScalarUnit a = 0); //NOLINT Conversion is always available.
+        Scalar(double d, ScalarUnit a = 0); //NOLINT Conversion is always available.
         explicit Scalar(const char* s, ScalarUnit a = 0);
         explicit Scalar(const wchar_t* s, ScalarUnit a = 0);
         /* Operators */

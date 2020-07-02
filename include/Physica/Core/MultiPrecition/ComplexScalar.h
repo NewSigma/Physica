@@ -7,7 +7,7 @@
 #include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
+    template<ScalarType type = MultiPrecision, bool errorTrack = true>
     class ComplexScalar {
         Scalar<type, errorTrack> real;
         Scalar<type, errorTrack> imagine;

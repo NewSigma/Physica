@@ -9,7 +9,7 @@ namespace Physica::Core {
     /*!
      * T must be either Scalar or ComplexScalar.
      */
-    template<class T, size_t length = Dynamic, size_t maxLength = Dynamic>
+    template<class T = MultiScalar, size_t length = Dynamic, size_t maxLength = Dynamic>
     class Vector : public CStyleArray<T, length, maxLength> {
         typedef CStyleArray<T, length, maxLength> Base;
     public:

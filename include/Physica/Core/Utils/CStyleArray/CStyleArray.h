@@ -6,18 +6,18 @@
 
 #include <cstdlib>
 #include <qglobal.h>
-#include "AbstractArray.h"
+#include "CStyleArrayData.h"
 
 namespace Physica::Core {
+    enum { Dynamic = 0 };
     /*!
-     * This class is a wrapper of of array that is AbstractCStyleArray<T>::allocated by malloc
-     * , whose elements is AbstractCStyleArray<T>::allocated by placement new.
-     * This class is designed to avoid passing incorrect arguments to classes that
-     * use c-style array only.
+     * This class is a wrapper of of array that is AbstractCStyleArray<T>::allocated by malloc,
+     * whose elements is CStyleArrayData<T>::allocated by placement new.
+     * This class is designed to avoid passing incorrect arguments to classes that use c-style array only.
      * (Such as \class Matrix and \class Vector.
-     * If we pass a array AbstractCStyleArray<T>::allocated by new to \class Matrix or \class Vector,
+     * If we pass a array CStyleArrayData<T>::allocated by new to \class Matrix or \class Vector,
      * a memory leak or double free will happen.)
-     * Different from \class QVector in Qt, this class does not call the default constructor of \type T,
+     * Different from containers in other libraries, this class does not call the default constructor of \type T,
      * but directly copy or move existent elements.
      *
      * Note:
@@ -27,10 +27,10 @@ namespace Physica::Core {
      * Copy, move constructors and assign operators maybe able to accept different specializations.
      */
     template<class T, size_t length, size_t capacity>
-    class CStyleArray : public AbstractArray<T> {
+    class CStyleArray : public CStyleArrayData<T> {
     protected:
         static_assert(length == capacity && length != 0, "Length must equal to capacity in a fixed array.");
-        using AbstractArray<T>::arr;
+        using CStyleArrayData<T>::arr;
     public:
         inline CStyleArray();
         inline CStyleArray(const CStyleArray<T, length, capacity>& array);
@@ -46,14 +46,14 @@ namespace Physica::Core {
         /* Helpers */
         inline void swap(CStyleArray<T, length, capacity>& array) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr size_t getLength() const { return length; }
-        [[nodiscard]] constexpr size_t getCapacity() const { return capacity; }
+        [[nodiscard]] constexpr static size_t getLength() { return length; }
+        [[nodiscard]] constexpr static size_t getCapacity() { return capacity; }
     };
 
     template<class T, size_t capacity>
-    class CStyleArray<T, Dynamic, capacity> : public AbstractArray<T> {
+    class CStyleArray<T, Dynamic, capacity> : public CStyleArrayData<T> {
     protected:
-        using AbstractArray<T>::arr;
+        using CStyleArrayData<T>::arr;
         //Optimize: Use the end ptr of arr instead of length may improve performance.
         size_t length;
     public:
@@ -70,11 +70,13 @@ namespace Physica::Core {
         bool operator==(const CStyleArray& array) const;
         bool operator!=(const CStyleArray& array) const { return !((*this) == array); }
         /* Helpers */
+        inline void grow(const T& t);
+        inline void grow(T&& t);
         T cutLast();
         void swap(CStyleArray<T, Dynamic, capacity>& array) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return length; }
-        [[nodiscard]] constexpr size_t getCapacity() const { return capacity; }
+        [[nodiscard]] constexpr static size_t getCapacity() { return capacity; }
         [[nodiscard]] bool isEmpty() const { return length == 0; }
         /* Setters */
         /*!
@@ -86,10 +88,10 @@ namespace Physica::Core {
     };
 
     template<class T>
-    class CStyleArray<T, Dynamic, Dynamic> : public AbstractArray<T> {
+    class CStyleArray<T, Dynamic, Dynamic> : public CStyleArrayData<T> {
     protected:
         //Optimize: Use more effective allocate strategy to avoid reallocate.
-        using AbstractArray<T>::arr;
+        using CStyleArrayData<T>::arr;
         //Optimize: Use the end pointer of arr instead of length may improve performance.
         size_t length;
         size_t capacity;
@@ -109,6 +111,8 @@ namespace Physica::Core {
         bool operator!=(const CStyleArray& array) const { return !((*this) == array); }
         CStyleArray<T, Dynamic, Dynamic>& operator<<(const T& t) { append(t); return *this; }
         CStyleArray<T, Dynamic, Dynamic>& operator<<(T&& t) { append(std::move(t)); return *this; }
+        CStyleArray<T, Dynamic, Dynamic>& operator<<(const CStyleArray<T, Dynamic, Dynamic>& t) { append(t); return *this; }
+        CStyleArray<T, Dynamic, Dynamic>& operator<<(CStyleArray<T, Dynamic, Dynamic>&& t) { append(std::move(t)); return *this; }
         /* Helpers */
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, length); }

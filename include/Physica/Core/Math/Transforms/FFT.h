@@ -4,36 +4,33 @@
 #ifndef PHYSICA_FFT_H
 #define PHYSICA_FFT_H
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RowMatrix.h"
+#include "Physica/Core/MultiPrecition/ComplexScalar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/Math/Calculus/Integrate.h"
 
 namespace Physica::Core {
-    ///////////////////////////////////FFTBase////////////////////////////////////
-    class FFTBase {
+    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    class FFT {
     protected:
-        RowMatrix data;
+        Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> data;
+        Scalar<type, false> distance;
     public:
-        //NormalizationMethod decides the discretization method used for the integration.
-        enum NormalizationMethod {
-            RectangularMethod,
-            LadderMethod
-        };
-        FFTBase(FFTBase&& base) noexcept;
-        MultiScalar operator()(const MultiScalar& n);
-    protected:
-        FFTBase(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method);
+        FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> data, Scalar<type, false> distance);
+        FFT(const FFT& fft);
+        FFT(FFT&& fft) noexcept;
+        ~FFT() = default;
+        /* Operators */
+        FFT& operator=(const FFT& fft);
+        FFT& operator=(FFT&& fft) noexcept;
+        ComplexScalar<type, errorTrack> operator()(size_t i) { return data[i]; }
+        /* Transforms */
+        inline void transform();
+        inline void invTransform();
     private:
-        void ladderMethod();
-    };
-    ///////////////////////////////////FFT////////////////////////////////////
-    class FFT : public FFTBase {
-    public:
-        FFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method = RectangularMethod);
-    };
-    ///////////////////////////////////InvFFT////////////////////////////////////
-    class InvFFT : public FFTBase {
-    public:
-        InvFFT(Vector<MultiScalar> x, Vector<MultiScalar> y, NormalizationMethod method = RectangularMethod);
+        void transformImpl(const Scalar<type, errorTrack>&& phase);
     };
 }
+
+#include "FFTImpl.h"
 
 #endif
