@@ -8,7 +8,7 @@ namespace Physica::Core {
     const int FDM::iterateMax = 100;
     const double FDM::precision = 0.01;
 
-    FDM::FDM(size_t column, size_t row) : data(column, column) {
+    FDM::FDM(size_t column, size_t row) : data(column) {
         for(size_t i = 0; i < row; ++i)
             data.allocate(Vector<MultiScalar>::zeroVector(row), i);
     }

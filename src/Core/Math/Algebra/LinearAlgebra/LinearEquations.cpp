@@ -73,7 +73,7 @@ namespace Physica::Core {
                         ? static_cast<SquareMatrix*>(new ColumnSquareMatrix(std::move(matrix)))
                         : static_cast<SquareMatrix*>(new RowSquareMatrix(std::move(matrix)));
                 LUDecomposition lu(*square);
-                static_cast<CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&>(matrix) = std::move(*square);
+                static_cast<CStyleArray<Vector<MultiScalar>, Dynamic>&>(matrix) = std::move(*square);
                 delete square;
                 for(size_t i = 0; i < rank - 1; ++i) {
                     for(size_t j = i + 1; j < rank; ++j)

@@ -7,15 +7,10 @@ namespace Physica::Core {
     ColumnMatrix::ColumnMatrix() : Matrix(Column) {}
 
     ColumnMatrix::ColumnMatrix(size_t capacity) : Matrix(capacity, Column) {}
-    /*!
-     * Low level api. Designed for performance.
-     * Warning: The first \length elements have not allocated. DO NOT try to visit them.
-     */
-    ColumnMatrix::ColumnMatrix(size_t length, size_t capacity) : Matrix(length, capacity, Column) {}
 
-    ColumnMatrix::ColumnMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array) : Matrix(array, Column) {}
+    ColumnMatrix::ColumnMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array) : Matrix(array, Column) {}
 
-    ColumnMatrix::ColumnMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept : Matrix(std::move(array), Column) {}
+    ColumnMatrix::ColumnMatrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array) noexcept : Matrix(std::move(array), Column) {}
 
     ColumnMatrix::ColumnMatrix(ColumnMatrix&& matrix) noexcept : Matrix(std::move(matrix)) {}
     //!Optimize: may be inline append().
@@ -69,7 +64,7 @@ namespace Physica::Core {
 
     Vector<MultiScalar> ColumnMatrix::cutRow() {
         const auto column = ColumnMatrix::column();
-        Vector<MultiScalar> result(CStyleArray<MultiScalar, Dynamic, Dynamic>(column, column));
+        Vector<MultiScalar> result((CStyleArray<MultiScalar, Dynamic>(column)));
         for(size_t i = 0; i < column; ++i)
             result.allocate((*this)[i].cutLast(), i);
         return result;
@@ -81,7 +76,7 @@ namespace Physica::Core {
 
     std::unique_ptr<Matrix> ColumnMatrix::cutMatrixRow(size_t from) {
         const auto row = ColumnMatrix::row();
-        auto result = new ColumnMatrix(row, row);
+        auto result = new ColumnMatrix(row);
         for(size_t i = 0; i < row; ++i)
             result->allocate(Vector<MultiScalar>((*this)[i].cut(from)), i);
         return std::unique_ptr<Matrix>(result);

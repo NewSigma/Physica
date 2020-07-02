@@ -15,7 +15,7 @@ namespace Physica::Core {
      * 3.A lot of other features.
      */
     template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> data
+    FFT<type, errorTrack>::FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic> data
             , Scalar<type, false> distance) : data(std::move(data)), distance(std::move(distance)) {}
 
     template<ScalarType type, bool errorTrack>
@@ -49,8 +49,8 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     void FFT<type, errorTrack>::transformImpl(const Scalar<type, errorTrack>&& phase) {
         data *= distance;
-        Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> result;
         const auto length = data.getLength();
+        CStyleArray<ComplexScalar<type, errorTrack>, Dynamic> array(length);
         //Optimize: i and j is changeable.
         for(size_t i = 0; i < length; ++i) {
             const auto phase1 = phase * i;
@@ -59,9 +59,9 @@ namespace Physica::Core {
                 const auto phase2 = phase1 * j;
                 result_i += ComplexScalar<type, errorTrack>(cos(phase2), sin(phase2)) * data[j];
             }
-            result.allocate(std::move(result_i), i);
+            array.allocate(std::move(result_i), i);
         }
-        data = std::move(result);
+        data = std::move(array);
     }
 }
 

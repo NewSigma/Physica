@@ -21,7 +21,7 @@ namespace Physica::Test {
         net[1][0].connect(0, 2);
         net[1][1].connect(1, 0);
         net[1][1].connect(1, 1);
-        Vector<MultiScalar> d1(CStyleArray<MultiScalar, Dynamic, Dynamic>(2));
+        Vector<MultiScalar> d1(CStyleArray<MultiScalar, Dynamic>(2));
         d1 << 1 << 1;
         MultiScalar n1((SignedScalarUnit)1);
         net.loadData(d1, n1);
@@ -29,7 +29,7 @@ namespace Physica::Test {
             net.train();
             std::cout << "Train " << i << " finished. Loss:" << double(net.predict()) << '\n';
         }
-        Vector<MultiScalar> d2(CStyleArray<MultiScalar, Dynamic, Dynamic>(2));
+        Vector<MultiScalar> d2(CStyleArray<MultiScalar, Dynamic>(2));
         d2 << 1.1 << 0.9;
         MultiScalar n2((SignedScalarUnit)1);
         net.loadData(d2, n2);

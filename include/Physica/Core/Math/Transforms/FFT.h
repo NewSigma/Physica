@@ -12,10 +12,10 @@ namespace Physica::Core {
     template<ScalarType type = MultiPrecision, bool errorTrack = true>
     class FFT {
     protected:
-        Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> data;
+        Vector<ComplexScalar<type, errorTrack>, Dynamic> data;
         Scalar<type, false> distance;
     public:
-        FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic, Dynamic> data, Scalar<type, false> distance);
+        FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic> data, Scalar<type, false> distance);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT() = default;

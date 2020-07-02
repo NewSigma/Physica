@@ -8,38 +8,38 @@
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength>::Vector() : Base() {}
+    template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector() : Base() {}
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength>::Vector(const Base& array) : Base(array) {}
+    template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector(const Base& array) : Base(array) {}
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength>::Vector(Base&& array) noexcept : Base(std::move(array)) {}
+    template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector(Base&& array) noexcept : Base(std::move(array)) {}
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength>::Vector(Vector&& vec) noexcept : Base(std::move(vec))  {}
+    template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector(Vector&& vec) noexcept : Base(std::move(vec))  {}
 
-    template<class T, size_t length, size_t maxLength>
-    T Vector<T, length, maxLength>::toNorm() const {
+    template<class T, size_t maxLength>
+    T Vector<T, maxLength>::toNorm() const {
         auto norm = T::getZero();
-        for(size_t i = 0; i < CStyleArray<T, length, maxLength>::getLength(); ++i)
-            norm += square(CStyleArray<T, length, maxLength>::operator[](i));
+        for(size_t i = 0; i < CStyleArray<T, maxLength>::getLength(); ++i)
+            norm += square(CStyleArray<T, maxLength>::operator[](i));
         return sqrt(norm);
     }
 
-    template<class T, size_t length, size_t maxLength>
-    void Vector<T, length, maxLength>::toUnit() {
+    template<class T, size_t maxLength>
+    void Vector<T, maxLength>::toUnit() {
         if(isZero())
             return;
         T norm = toNorm();
-        for(size_t i = 0; i < CStyleArray<T, length, maxLength>::getLength(); ++i)
-            CStyleArray<T, length, maxLength>::operator[](i) /= norm;
+        for(size_t i = 0; i < CStyleArray<T, maxLength>::getLength(); ++i)
+            CStyleArray<T, maxLength>::operator[](i) /= norm;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    bool Vector<T, length, maxLength>::isZero() const {
-        const auto len = CStyleArray<T, length, maxLength>::getLength();
+    template<class T, size_t maxLength>
+    bool Vector<T, maxLength>::isZero() const {
+        const auto len = CStyleArray<T, maxLength>::getLength();
         if(len == 0)
             return false;
         for(size_t i = 0; i < len; ++i) {
@@ -49,34 +49,34 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, Dynamic, Dynamic> Vector<T, length, maxLength>::zeroVector(size_t len) {
-        Vector<T, Dynamic, Dynamic> result(CStyleArray<T, Dynamic, Dynamic>(len, len));
+    template<class T, size_t maxLength>
+    Vector<T, Dynamic> Vector<T, maxLength>::zeroVector(size_t len) {
+        Vector<T, Dynamic> result((CStyleArray<T, Dynamic>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(T::getZero(), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, Dynamic, Dynamic> Vector<T, length, maxLength>::randomVector(size_t len) {
-        Vector<T, Dynamic, Dynamic> result(CStyleArray<T, Dynamic, Dynamic>(len, len));
+    template<class T, size_t maxLength>
+    Vector<T, Dynamic> Vector<T, maxLength>::randomVector(size_t len) {
+        Vector<T, Dynamic> result((CStyleArray<T, Dynamic>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(randomScalar<T::getType(), T::getErrorTrack()>(), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> Vector<T, length, maxLength>::simplyMultiply(
-            const Vector<T, length, maxLength>& v1, const Vector<T, length, maxLength>& v2) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> Vector<T, maxLength>::simplyMultiply(
+            const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
         const auto len = v1.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v1[i] * v2[i], i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    std::ostream& operator<<(std::ostream& os, const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    std::ostream& operator<<(std::ostream& os, const Vector<T, maxLength>& v) {
         os << '(';
         const auto length_1 = v.getLength() - 1;
         for(size_t i = 0; i < length_1; ++i)
@@ -85,35 +85,35 @@ namespace Physica::Core {
         return os;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator-(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(-v[i], i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator+(const Vector<T, length, maxLength>& v1, const Vector<T, length, maxLength>& v2) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator+(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
         const auto len = v1.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v1[i] + v2[i], i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator-(const Vector<T, length, maxLength>& v1, const Vector<T, length, maxLength>& v2) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
         const auto len = v1.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v1[i] - v2[i], i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    T operator*(const Vector<T, length, maxLength>& v1, const Vector<T, length, maxLength>& v2) {
+    template<class T, size_t maxLength>
+    T operator*(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
         const auto len = v1.getLength();
         auto result = T::getZero();
         for(size_t i = 0; i < len; ++i)
@@ -121,316 +121,316 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator+(const Vector<T, length, maxLength>& v, const T& n) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator+(const Vector<T, maxLength>& v, const T& n) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v[i] + n, i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator-(const Vector<T, length, maxLength>& v, const T& n) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v, const T& n) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v[i] - n, i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator*(const Vector<T, length, maxLength>& v, const T& n) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator*(const Vector<T, maxLength>& v, const T& n) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v[i] * n, i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> operator/(const Vector<T, length, maxLength>& v, const T& n) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> operator/(const Vector<T, maxLength>& v, const T& n) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v[i] / n, i);
         return result;
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> reciprocal(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> reciprocal(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(reciprocal(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> sqrt(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> sqrt(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(sqrt(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> factorial(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> factorial(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(factorial(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> ln(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> ln(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(ln(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> log(const Vector<T, length, maxLength>& v, const T& a) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> log(const Vector<T, maxLength>& v, const T& a) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(log(v[i], a), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> exp(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> exp(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(exp(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> pow(const Vector<T, length, maxLength>& v, const T& a) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> pow(const Vector<T, maxLength>& v, const T& a) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(v[i] ^ a, i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> cos(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> cos(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(cos(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> sin(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> sin(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(sin(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> tan(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> tan(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(tan(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> sec(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> sec(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(sec(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> csc(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> csc(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(csc(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> cot(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> cot(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(cot(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccos(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccos(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccos(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arcsin(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arcsin(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arcsin(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arctan(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arctan(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arctan(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arcsec(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arcsec(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arcsec(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccsc(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccsc(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccsc(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccot(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccot(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccot(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> cosh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> cosh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(cosh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> sinh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> sinh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(sinh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> tanh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> tanh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(tanh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> sech(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> sech(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(sech(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> csch(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> csch(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(csch(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> coth(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> coth(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(coth(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccosh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccosh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccosh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arcsinh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arcsinh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arcsinh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arctanh(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arctanh(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arctanh(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arcsech(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arcsech(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arcsech(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccsch(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccsch(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccsch(v[i]), i);
         return result;
     }
 
-    template<class T, size_t length, size_t maxLength>
-    Vector<T, length, maxLength> arccoth(const Vector<T, length, maxLength>& v) {
+    template<class T, size_t maxLength>
+    Vector<T, maxLength> arccoth(const Vector<T, maxLength>& v) {
         const auto len = v.getLength();
-        Vector<T, length, maxLength> result(CStyleArray<T, length, maxLength>(len, len));
+        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(arccoth(v[i]), i);
         return result;

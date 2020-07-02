@@ -11,9 +11,8 @@ namespace Physica::Core {
     public:
         ColumnMatrix();
         explicit ColumnMatrix(size_t capacity);
-        ColumnMatrix(size_t length, size_t capacity);
-        explicit ColumnMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array);
-        explicit ColumnMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept;
+        explicit ColumnMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array);
+        explicit ColumnMatrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array) noexcept;
         ColumnMatrix(const ColumnMatrix& matrix) = default;
         ColumnMatrix(ColumnMatrix&& matrix) noexcept;
         /* Operators */

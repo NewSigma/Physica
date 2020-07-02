@@ -11,9 +11,8 @@ namespace Physica::Core {
     public:
         RowMatrix();
         explicit RowMatrix(size_t capacity);
-        RowMatrix(size_t length, size_t capacity);
-        explicit RowMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>& array);
-        explicit RowMatrix(CStyleArray<Vector<MultiScalar>, Dynamic, Dynamic>&& array) noexcept;
+        explicit RowMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array);
+        explicit RowMatrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array) noexcept;
         RowMatrix(const RowMatrix& matrix) = default;
         RowMatrix(RowMatrix&& matrix) noexcept;
         /* Operators */
