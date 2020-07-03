@@ -51,6 +51,11 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
+    inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getOne() {
+        return ComplexScalar(Scalar<type, errorTrack>::getOne(), Scalar<type, errorTrack>::getZero());
+    }
+
+    template<ScalarType type, bool errorTrack>
     inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getRandom() {
         return ComplexScalar(randomScalar<type, errorTrack>(), randomScalar<type, errorTrack>());
     }

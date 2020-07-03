@@ -14,6 +14,7 @@ namespace Physica::Core {
         typedef CStyleArray<T, maxLength> Base;
     public:
         Vector();
+        Vector(size_t length);
         explicit Vector(const Base& array);
         explicit Vector(Base&& array) noexcept;
         Vector(const Vector<T, maxLength>& vec) = default;

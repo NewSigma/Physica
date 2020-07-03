@@ -2,7 +2,6 @@
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixChain.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     /*!
@@ -18,8 +17,10 @@ namespace Physica::Core {
      *
      * Reference: 算法导论 第三版 Page: 210-215
      */
-    MatrixChain::MatrixChain(size_t length)
-            : chain(new Matrix*[length]), length(length), price(new size_t*[length]), point(new size_t*[length - 1]) {
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    MatrixChain<T, type, maxRow, maxColumn>::MatrixChain(size_t length)
+            : chain(new Matrix<T, type, maxRow, maxColumn>*[length])
+            , length(length), price(new size_t*[length]), point(new size_t*[length - 1]) {
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
             price[i] = new size_t[length];
@@ -29,7 +30,8 @@ namespace Physica::Core {
         price[length_1] = new size_t[length];
     }
 
-    MatrixChain::~MatrixChain() {
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
         delete[] chain;
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
@@ -42,7 +44,8 @@ namespace Physica::Core {
         delete[] point;
     }
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
-    std::unique_ptr<Matrix> MatrixChain::solve() {
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;
 
@@ -53,20 +56,20 @@ namespace Physica::Core {
                 auto n = m; //Cut (m ... ) into (m ... n) and (n + 1 ... m_end).
                 auto chain_n = chain[n];
                 /* Handle n = m */ {
-                    price[m][m_end] = price[n + 1][m_end] + chain_n->row() * chain_n->column() * chain[n + 1]->row();
+                    price[m][m_end] = price[n + 1][m_end] + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
                     point[m][m_end] = n;
                     ++n;
                 }
                 for(; n < m_end; ++n) {
                     chain_n = chain[n];
                     size_t temp = price[m][n] + price[n + 1][m_end]
-                                                + chain_n->row() * chain_n->column() * chain[n + 1]->row();
+                                                + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
                     price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
                     point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
                 }
                 /* Handle n = m_end */ {
                     chain_n = chain[n];
-                    size_t temp = price[m][n] + chain_n->row() * chain_n->column() * chain[n + 1]->row();
+                    size_t temp = price[m][n] + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
                     price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
                     point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
                 }
@@ -75,14 +78,13 @@ namespace Physica::Core {
         return multiply(0, length - 1);
     }
     //!Both \from and \to are included.
-    std::unique_ptr<Matrix> MatrixChain::multiply(size_t from, size_t to) {
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
         if(from == to)
-            return std::unique_ptr<Matrix>(chain[from]);
+            return Matrix<T, type, Dynamic, Dynamic>(*chain[from]);
         const auto cut_at = point[from][to];
         auto first = multiply(from, cut_at);
         auto second = multiply(cut_at + 1, to);
-        auto first_p = from == cut_at ? first.release() : first.get();
-        auto second_p = to == cut_at ? second.release() : second.get();
-        return (*first_p * *second_p);
+        return first * second;
     }
 }

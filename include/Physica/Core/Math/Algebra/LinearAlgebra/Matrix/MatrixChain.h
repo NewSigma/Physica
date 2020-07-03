@@ -7,11 +7,12 @@
 #include <cstdlib>
 #include <qglobal.h>
 #include <memory>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
-    class Matrix;
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     class MatrixChain {
-        Matrix** chain;
+        Matrix<T, type, maxRow, maxColumn>** chain;
         size_t** price;
         size_t** point;
         size_t length;
@@ -19,10 +20,10 @@ namespace Physica::Core {
         explicit MatrixChain(size_t length);
         ~MatrixChain();
 
-        Matrix*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
-        std::unique_ptr<Matrix> solve();
+        Matrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
+        Matrix<T, type, Dynamic, Dynamic> solve();
     private:
-        std::unique_ptr<Matrix> multiply(size_t from, size_t to);
+        Matrix<T, type, Dynamic, Dynamic> multiply(size_t from, size_t to);
     };
 }
 

@@ -51,7 +51,9 @@ namespace Physica::Core {
         data *= distance;
         const auto length = data.getLength();
         CStyleArray<ComplexScalar<type, errorTrack>, Dynamic> array(length);
-        //Optimize: i and j is changeable.
+        //Optimize:
+        //1.i and j is changeable.(dynamic programming)
+        //2.Use the formula such as sin(a + b) to avoid calculate sin and cos directly.
         for(size_t i = 0; i < length; ++i) {
             const auto phase1 = phase * i;
             auto result_i = ComplexScalar<type, errorTrack>::getZero();

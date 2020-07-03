@@ -24,6 +24,7 @@ namespace Physica::Core {
         /* Helpers */
         void swap(ComplexScalar& c) noexcept;
         static inline ComplexScalar getZero();
+        static inline ComplexScalar getOne();
         static inline ComplexScalar getRandom();
         /* Getters */
         [[nodiscard]] const Scalar<type, errorTrack>& getReal() const { return real; }

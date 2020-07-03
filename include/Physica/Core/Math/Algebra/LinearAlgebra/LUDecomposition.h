@@ -5,24 +5,31 @@
 #define PHYSICA_LUDECOMPOSITION_H
 
 #include <cstdlib>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Matrix/Matrix.h"
 
 namespace Physica::Core {
-    class SquareMatrix;
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     class LUDecomposition {
-        Matrix* matrix;
+        Matrix<T, type, maxRow, maxColumn> matrix;
         size_t* biasOrder;
     public:
-        explicit LUDecomposition(SquareMatrix& square);
-        explicit LUDecomposition(const SquareMatrix& square);
+        explicit LUDecomposition(const Matrix<T, type, maxRow, maxColumn>& m);
+        explicit LUDecomposition(Matrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        LUDecomposition(const LUDecomposition& l);
+        LUDecomposition(LUDecomposition&& l) noexcept;
         ~LUDecomposition();
+        /* Operators */
+        LUDecomposition& operator=(const LUDecomposition& l);
+        LUDecomposition& operator=(LUDecomposition&& l) noexcept;
         /* Getters */
-        [[nodiscard]] Matrix* release() { auto temp = matrix; matrix = nullptr; return temp; }
-        [[nodiscard]] const Matrix& getMatrix() { return *matrix; }
+        [[nodiscard]] Matrix<T, type, maxRow, maxColumn>&& release() { return std::move(matrix); }
+        [[nodiscard]] const Matrix<T, type, maxRow, maxColumn>& getMatrix() { return matrix; }
         [[nodiscard]] const size_t* getOrder() { return biasOrder; }
     private:
-        static void decompositionColumn(Matrix& m, size_t column);
+        void decompositionColumn(size_t column);
     };
 }
+
+#include "LUDecompositionImpl.h"
 
 #endif

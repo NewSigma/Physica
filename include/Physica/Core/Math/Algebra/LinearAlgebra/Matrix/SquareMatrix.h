@@ -4,46 +4,32 @@
 #ifndef PHYSICA_SQUAREMATRIX_H
 #define PHYSICA_SQUAREMATRIX_H
 
-#include "ColumnMatrix.h"
-#include "RowMatrix.h"
+#include "Matrix.h"
 
 namespace Physica::Core {
-    /////////////////////////////////////SquareMatrix//////////////////////////////////////////
-    class SquareMatrix : virtual public Matrix {
+    template<class T, MatrixType type, size_t maxSize>
+    class SquareMatrix : public Matrix<T, type, maxSize, maxSize> {
     public:
-        enum SquareMatrixMethod {
+        enum DeterminateMethod {
             GaussMethod,
             LUMethod
         };
     public:
+        SquareMatrix();
+        explicit SquareMatrix(size_t length);
+        SquareMatrix(const SquareMatrix& m) = default;
+        SquareMatrix(SquareMatrix&& m) noexcept;
+        ~SquareMatrix() = default;
+        /* Operators */
+        SquareMatrix& operator=(const SquareMatrix& m) = default;
+        SquareMatrix& operator=(SquareMatrix&& m) noexcept;
         /* Getters */
-        [[nodiscard]] MultiScalar determinate(SquareMatrixMethod method);
-    protected:
-        /* Friends */
-        friend class LinearEquations;
-    };
-    /////////////////////////////////////ColumnSquareMatrix//////////////////////////////////////////
-    class ColumnSquareMatrix : public ColumnMatrix, public SquareMatrix {
-    public:
-        ColumnSquareMatrix();
-        explicit ColumnSquareMatrix(size_t capacity);
-        explicit ColumnSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array);
-        explicit ColumnSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array) noexcept;
-        ColumnSquareMatrix(const ColumnSquareMatrix& matrix);
+        [[nodiscard]] T determinate(DeterminateMethod method);
 
-        static ColumnSquareMatrix getUnitMatrix(size_t size);
-    };
-    /////////////////////////////////////RowSquareMatrix//////////////////////////////////////////
-    class RowSquareMatrix : public RowMatrix, public SquareMatrix {
-    public:
-        RowSquareMatrix();
-        explicit RowSquareMatrix(size_t capacity);
-        explicit RowSquareMatrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array);
-        explicit RowSquareMatrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array) noexcept;
-        RowSquareMatrix(const RowSquareMatrix& matrix);
-
-        static RowSquareMatrix getUnitMatrix(size_t size);
+        static SquareMatrix getUnitMatrix(size_t length);
     };
 }
+
+#include "SquareMatrixImpl.h"
 
 #endif

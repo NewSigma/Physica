@@ -37,17 +37,17 @@
 
 //Use of double_extract may cause several warnings in valgrind.
 #if PhysicaEndian == PhysicaBigEndian
-union double_extract {
-    double value;
-    struct {
-        unsigned int sign : 1;
-        unsigned int exp : 11;
-        unsigned int high : 20;
-        unsigned int low : 32;
-    } structure;
-};
+    union double_extract {
+        double value;
+        struct {
+            unsigned int sign : 1;
+            unsigned int exp : 11;
+            unsigned int high : 20;
+            unsigned int low : 32;
+        } structure;
+    };
 #elif PhysicaEndian == PhysicaLittleEndian
-union double_extract {
+    union double_extract {
         double value;
         struct {
             unsigned int low : 32;

@@ -3,184 +3,231 @@
 
 #include <memory>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
-#include "Physica/Core/MultiPrecition/ScalarImpl/ElementaryFunction.h"
 
 namespace Physica::Core {
-    ////////////////////////////////////////Matrix////////////////////////////////////////////
-    class Matrix : public CStyleArray<Vector<MultiScalar>, Dynamic> {
+    enum MatrixType {
+        Row, Column
+    };
+
+    template<class T = MultiScalar, MatrixType type = Column, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
+    class Matrix;
+    /*!
+     * Specialization for column matrix.
+     */
+    template<class T, size_t maxRow, size_t maxColumn>
+    class Matrix<T, Column, maxRow, maxColumn>
+            : public CStyleArray<Vector<T, maxRow>, maxColumn> {
     public:
-        enum MatrixType {
-            Row, Column
-        };
-    protected:
-        MatrixType type;
-    public:
-        explicit Matrix(MatrixType type);
-        Matrix(size_t capacity, MatrixType type);
-        explicit Matrix(const CStyleArray<Vector<MultiScalar>, Dynamic>& array, MatrixType type);
-        explicit Matrix(CStyleArray<Vector<MultiScalar>, Dynamic>&& array, MatrixType type) noexcept;
+        typedef CStyleArray<Vector<T, maxRow>, maxColumn> Base;
+        typedef Vector<T, maxRow> VectorType;
+
+        Matrix() = default;
+        explicit Matrix(size_t length);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
-        virtual ~Matrix() = default;
+        ~Matrix() = default;
         /* Operators */
-        [[nodiscard]] virtual MultiScalar& operator()(size_t row, size_t column) = 0;
-        [[nodiscard]] virtual const MultiScalar& operator()(size_t row, size_t column) const = 0;
-        Matrix& operator=(const Matrix& m);
+        [[nodiscard]] T& operator()(size_t r, size_t c) { return Base::operator[](c)[r]; }
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](c)[r]; }
+        Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
-        virtual void appendRow(const Vector<MultiScalar>& v) = 0;
-        virtual void appendRow(Vector<MultiScalar>&& v) noexcept = 0;
-        virtual void appendColumn(const Vector<MultiScalar>& v) = 0;
-        virtual void appendColumn(Vector<MultiScalar>&& v) noexcept = 0;
-        virtual void appendMatrixRow(const Matrix& m) = 0;
-        virtual void appendMatrixRow(Matrix&& m) = 0;
-        virtual void appendMatrixColumn(const Matrix& m) = 0;
-        virtual void appendMatrixColumn(Matrix&& m) = 0;
-        virtual Vector<MultiScalar> cutRow() = 0;
-        virtual Vector<MultiScalar> cutColumn() = 0;
-        virtual std::unique_ptr<Matrix> cutMatrixRow(size_t from) = 0;
-        virtual std::unique_ptr<Matrix> cutMatrixColumn(size_t from) = 0;
-        virtual void rowSwap(size_t r1, size_t r2) noexcept = 0;
-        virtual void columnSwap(size_t c1, size_t c2) noexcept = 0;
-        virtual void rowReduce(size_t r1, size_t r2, size_t element) = 0;
-        virtual void columnReduce(size_t c1, size_t c2, size_t element) = 0;
-        void upperEliminate(size_t index);
-        void lowerEliminate(size_t index);
-        void impactPivoting();
-        /* Helpers */
-        void swap(Matrix& m) noexcept;
-        [[nodiscard]] MatrixType getType() const noexcept { return type; }
-        [[nodiscard]] virtual size_t row() const = 0;
-        [[nodiscard]] virtual size_t column() const = 0;
-        /* Pivoting */
-        inline size_t completePivoting(size_t column);
-        inline size_t partialPivoting(size_t column);
-        inline void impactPivoting(size_t row);
-        /* Friends */
-        friend class ColumnMatrix;
-        friend class RowMatrix;
-        friend class LinearEquations;
-        friend class LUDecomposition;
+        void appendRow(const Vector<T, maxRow>& v);
+        void appendRow(Vector<T, maxRow>&& v) noexcept;
+        void appendColumn(const Vector<T, maxRow>& v);
+        void appendColumn(Vector<T, maxRow>&& v) noexcept;
+        void appendMatrixRow(const Matrix& m);
+        void appendMatrixRow(Matrix&& m);
+        void appendMatrixColumn(const Matrix& m);
+        void appendMatrixColumn(Matrix&& m);
+        Vector<T, maxRow> cutRow();
+        Vector<T, maxRow> cutColumn();
+        Matrix<T, Column, Dynamic, Dynamic> cutMatrixRow(size_t from);
+        Matrix<T, Column, Dynamic, Dynamic> cutMatrixColumn(size_t from);
+        void rowSwap(size_t r1, size_t r2) noexcept;
+        void columnSwap(size_t c1, size_t c2) noexcept;
+        void rowReduce(size_t r1, size_t r2, size_t element);
+        void columnReduce(size_t c1, size_t c2, size_t element);
+        /* Getters */
+        [[nodiscard]] constexpr static MatrixType getType() { return Column; }
+        [[nodiscard]] size_t getRow() const { return Base::operator[](0).getLength(); }
+        [[nodiscard]] size_t getColumn() const { return Base::getLength(); }
+    };
+    /*!
+     * Specialization for row matrix.
+     */
+    template<class T, size_t maxRow, size_t maxColumn>
+    class Matrix<T, Row, maxRow, maxColumn>
+            : public CStyleArray<Vector<T, maxColumn>, maxRow> {
+    public:
+        typedef CStyleArray<Vector<T, maxColumn>, maxRow> Base;
+        typedef Vector<T, maxRow> VectorType;
+
+        Matrix() = default;
+        explicit Matrix(size_t length);
+        Matrix(const Matrix& matrix) = default;
+        Matrix(Matrix&& matrix) noexcept;
+        ~Matrix() = default;
+        /* Operators */
+        [[nodiscard]] T& operator()(size_t r, size_t c) { return Base::operator[](r)[c]; }
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](r)[c]; }
+        Matrix& operator=(const Matrix& m) = default;
+        Matrix& operator=(Matrix&& m) noexcept;
+        /* Matrix Operations */
+        void appendRow(const Vector<T, maxColumn>& v);
+        void appendRow(Vector<T, maxColumn>&& v) noexcept;
+        void appendColumn(const Vector<T, maxColumn>& v);
+        void appendColumn(Vector<T, maxColumn>&& v) noexcept;
+        void appendMatrixRow(const Matrix& m);
+        void appendMatrixRow(Matrix&& m);
+        void appendMatrixColumn(const Matrix& m);
+        void appendMatrixColumn(Matrix&& m);
+        Vector<T, maxColumn> cutRow();
+        Vector<T, maxColumn> cutColumn();
+        Matrix<T, Row, Dynamic, Dynamic> cutMatrixRow(size_t from);
+        Matrix<T, Row, Dynamic, Dynamic> cutMatrixColumn(size_t from);
+        void rowSwap(size_t r1, size_t r2) noexcept;
+        void columnSwap(size_t c1, size_t c2) noexcept;
+        void rowReduce(size_t r1, size_t r2, size_t element);
+        void columnReduce(size_t c1, size_t c2, size_t element);
+        /* Getters */
+        [[nodiscard]] constexpr static MatrixType getType() { return Row; }
+        [[nodiscard]] size_t getRow() const { return Base::getLength(); }
+        [[nodiscard]] size_t getColumn() const { return Base::operator[](0).getLength(); }
     };
     /* Operators */
-    std::ostream& operator<<(std::ostream& os, const Matrix& m);
-    std::unique_ptr<Matrix> operator+(const Matrix& m1, const Matrix& m2);
-    std::unique_ptr<Matrix> operator-(const Matrix& m1, const Matrix& m2);
-    std::unique_ptr<Matrix> operator*(const Matrix& m, const MultiScalar& n);
-    std::unique_ptr<Matrix> operator*(const Matrix& m1, const Matrix& m2);
-    /* Inline Implementations */
-    inline void operator+=(Matrix& m1, const Matrix& m2) { m1 = *(m1 + m2); }
-    inline void operator-=(Matrix& m1, const Matrix& m2) { m1 = *(m1 - m2); }
-    inline void operator*=(Matrix& m, const MultiScalar& n) { m = *(m * n); }
-    inline void operator*=(Matrix& m1, const Matrix& m2) { m1 = *(m1 * m2); }
-    /*!
-     * Select the main element of a column of Matrix and execute a row swap as well as a column swap to
-     * make it stands at (column, column), return the origin column index of the main element.
-     * The return values should be stored to recover the correct order of the solution.
-     *
-     * Complexity: O((rank - column) ^ 2)
-     *
-     * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
-     */
-    inline size_t Matrix::completePivoting(size_t column) {
-        Q_ASSERT(column < this->column());
-        const auto rank = row();
-        size_t main_row_index = 0, main_column_index = 0;
-        const Scalar<MultiPrecision, false>* main = &BasicConst::getInstance().get_0();
-        for(size_t i = column; i < rank; ++i) {
-            for(size_t j = column; j < rank; ++j) {
-                const MultiScalar* temp = &(*this)(i, j);
-                bool larger = absCompare(*main, *temp);
-                main = larger ? main : temp;
-                main_row_index = larger ? main_row_index : j;
-                main_column_index = larger ? main_column_index : i;
-            }
-        }
-        this->rowSwap(column, main_row_index);
-        return main_column_index;
-    }
-    /*!
-     * Select the main element of a column of Matrix and execute row swaps to make its row index equals to column index,
-     * return the origin row index of the main element.
-     *
-     * Complexity: O(rank - column)
-     *
-     * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
-     */
-    inline size_t Matrix::partialPivoting(size_t column) {
-        Q_ASSERT(column < this->column());
-        const auto rank = row();
-        size_t main_index = column;
-        const MultiScalar* main = &(*this)(column, column);
-        for(size_t j = column + 1; j < rank; ++j) {
-            const MultiScalar* temp = &(*this)(j, column);
-            bool larger = absCompare(*main, *temp);
-            main = larger ? main : temp;
-            main_index = larger ? main_index : j;
-        }
-        this->rowSwap(column, main_index);
-        return main_index;
-    }
-    /*!
-     * Divide the row by the element with the largest abstract value. \row is a row of a matrix.
-     * \rank is the rank of the equations.
-     *
-     * Complexity: O(rank)
-     *
-     * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
-     */
-    inline void Matrix::impactPivoting(size_t row) {
-        Q_ASSERT(row < this->row());
-        const auto col = column();
-        const MultiScalar* main = &(*this)(row, 0);
-        for(size_t i = 1; i < col; ++i) {
-            const MultiScalar* temp = &(*this)(row, i);
-            main = absCompare(*main, *temp) ? main : temp;
-        }
-        const MultiScalar n = reciprocal(*main);
-        for(size_t i = 0; i < col; ++i)
-            (*this)(row, i) *= n;
-    }
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    std::ostream& operator<<(std::ostream& os, const Matrix<T, type, maxRow, maxColumn>& m);
 
-    inline void swap(Matrix& m1, Matrix& m2) noexcept { m1.swap(m2); }
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> operator+(
+            const Matrix<T, type, maxRow, maxColumn>& m1, const Matrix<T, type, maxRow, maxColumn>& m2);
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> operator-(
+            const Matrix<T, type, maxRow, maxColumn>& m1, const Matrix<T, type, maxRow, maxColumn>& m2);
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> operator*(
+            const Matrix<T, type, maxRow, maxColumn>& m1, const Matrix<T, type, maxRow, maxColumn>& m2);
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> operator*(const Matrix<T, type, maxRow, maxColumn>& m, const MultiScalar& n);
+    /* Inline Implementations */
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    inline void operator+=(Matrix<T, type, maxRow, maxColumn>& m1
+            , const Matrix<T, type, maxRow, maxColumn>& m2) { m1 = m1 + m2; }
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    inline void operator-=(Matrix<T, type, maxRow, maxColumn>& m1
+            , const Matrix<T, type, maxRow, maxColumn>& m2) { m1 = m1 - m2; }
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    inline void operator*=(Matrix<T, type, maxRow, maxColumn>& m
+            , const MultiScalar& n) { m = m * n; }
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    inline void operator*=(Matrix<T, type, maxRow, maxColumn>& m1
+            , const Matrix<T, type, maxRow, maxColumn>& m2) { m1 = m1 * m2; }
+
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    inline void swap(Matrix<T, type, maxRow, maxColumn>& m1
+            , Matrix<T, type, maxRow, maxColumn>& m2) noexcept { m1.swap(m2); }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    std::unique_ptr<Matrix> reciprocal(const Matrix& n);
-    std::unique_ptr<Matrix> sqrt(const Matrix& n);
-    std::unique_ptr<Matrix> factorial(const Matrix& n);
-    std::unique_ptr<Matrix> ln(const Matrix& n);
-    std::unique_ptr<Matrix> log(const Matrix& n, const MultiScalar& a);
-    std::unique_ptr<Matrix> exp(const Matrix& n);
-    std::unique_ptr<Matrix> pow(const Matrix& n, const MultiScalar& a);
-    std::unique_ptr<Matrix> cos(const Matrix& n);
-    std::unique_ptr<Matrix> sin(const Matrix& n);
-    std::unique_ptr<Matrix> tan(const Matrix& n);
-    std::unique_ptr<Matrix> sec(const Matrix& n);
-    std::unique_ptr<Matrix> csc(const Matrix& n);
-    std::unique_ptr<Matrix> cot(const Matrix& n);
-    std::unique_ptr<Matrix> arccos(const Matrix& n);
-    std::unique_ptr<Matrix> arcsin(const Matrix& n);
-    std::unique_ptr<Matrix> arctan(const Matrix& n);
-    std::unique_ptr<Matrix> arcsec(const Matrix& n);
-    std::unique_ptr<Matrix> arccsc(const Matrix& n);
-    std::unique_ptr<Matrix> arccot(const Matrix& n);
-    std::unique_ptr<Matrix> cosh(const Matrix& n);
-    std::unique_ptr<Matrix> sinh(const Matrix& n);
-    std::unique_ptr<Matrix> tanh(const Matrix& n);
-    std::unique_ptr<Matrix> sech(const Matrix& n);
-    std::unique_ptr<Matrix> csch(const Matrix& n);
-    std::unique_ptr<Matrix> coth(const Matrix& n);
-    std::unique_ptr<Matrix> arccosh(const Matrix& n);
-    std::unique_ptr<Matrix> arcsinh(const Matrix& n);
-    std::unique_ptr<Matrix> arctanh(const Matrix& n);
-    std::unique_ptr<Matrix> arcsech(const Matrix& n);
-    std::unique_ptr<Matrix> arccsch(const Matrix& n);
-    std::unique_ptr<Matrix> arccoth(const Matrix& n);
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> reciprocal(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> sqrt(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> factorial(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> ln(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> log(const Matrix<T, type, maxRow, maxColumn>& m, const MultiScalar& a);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> exp(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> pow(const Matrix<T, type, maxRow, maxColumn>& m, const MultiScalar& a);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> cos(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> sin(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> tan(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> sec(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> csc(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> cot(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccos(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arcsin(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arctan(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arcsec(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccsc(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccot(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> cosh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> sinh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> tanh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> sech(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> csch(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> coth(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccosh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arcsinh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arctanh(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arcsech(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccsch(const Matrix<T, type, maxRow, maxColumn>& m);
+    
+    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    Matrix<T, type, maxRow, maxColumn> arccoth(const Matrix<T, type, maxRow, maxColumn>& m);
 }
+
+#include "MatrixImpl.h"
 
 #endif

@@ -10,6 +10,11 @@
 namespace Physica::Core {
     template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector() : Base() {}
+    /*!
+     * Elements must not be accessed before they are initialized.
+     */
+    template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector(size_t length) : Base(length) {}
 
     template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector(const Base& array) : Base(array) {}

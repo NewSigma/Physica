@@ -66,7 +66,8 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Scalar& s) noexcept;
-        static Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
+        static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
+        static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return MultiPrecision; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -141,7 +142,8 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
-        static Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
+        static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
+        static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
@@ -184,7 +186,8 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
-        static Scalar getZero() { return Scalar(0); }
+        static inline Scalar getZero() { return Scalar(0); }
+        static inline Scalar getOne() { return Scalar(1); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return Float; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -216,6 +219,7 @@ namespace Physica::Core {
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         static Scalar getZero() { return Scalar(0); }
+        static Scalar getOne() { return Scalar(1); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
@@ -245,6 +249,7 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { d = fabs(d); return *this; }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         static Scalar getZero() { return Scalar(0); }
+        static Scalar getOne() { return Scalar(1); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return Double; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -276,6 +281,7 @@ namespace Physica::Core {
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         static Scalar getZero() { return Scalar(0); }
+        static Scalar getOne() { return Scalar(1); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
