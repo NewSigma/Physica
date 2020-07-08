@@ -42,31 +42,31 @@ namespace Physica::Core {
     const typename Matrix<T, type, maxRow, maxColumn>::VectorType&
     LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
         typedef MatrixOperation<T, type, maxRow, maxColumn> Operation;
-        const auto rank = matrix.row();
-        Q_ASSERT(rank + 1 == matrix.column());
+        const auto rank = matrix.getRow();
+        Q_ASSERT(rank + 1 == matrix.getColumn());
         switch(method) {
             case GaussJordanPartial:
                 for(size_t i = 0; i < rank; ++i) {
-                    Operation::partialPivoting(i);
-                    Operation::upperEliminate(i);
-                    Operation::lowerEliminate(i);
+                    Operation::partialPivoting(matrix, i);
+                    Operation::upperEliminate(matrix, i);
+                    Operation::lowerEliminate(matrix, i);
                 }
                 for(size_t i = 0; i < rank; ++i)
                     matrix(i, rank) /= matrix(i, i);
                 break;
             case GaussJordanComplete:
                 for(size_t i = 0; i < rank; ++i) {
-                    Operation::completePivoting(i);
-                    Operation::upperEliminate(i);
-                    Operation::lowerEliminate(i);
+                    Operation::completePivoting(matrix, i);
+                    Operation::upperEliminate(matrix, i);
+                    Operation::lowerEliminate(matrix, i);
                 }
                 for(size_t i = 0; i < rank; ++i)
                     matrix(i, rank) /= matrix(i, i);
                 break;
             case GaussEliminationPartial:
                 for(size_t i = 0; i < rank; ++i) {
-                    Operation::partialPivoting(i);
-                    Operation::lowerEliminate(i);
+                    Operation::partialPivoting(matrix, i);
+                    Operation::lowerEliminate(matrix, i);
                 }
                 for(size_t i = rank - 1; i > 0; --i) {
                     matrix(i, rank) /= matrix(i, i);
@@ -77,8 +77,8 @@ namespace Physica::Core {
                 break;
             case GaussEliminationComplete:
                 for(size_t i = 0; i < rank; ++i) {
-                    Operation::completePivoting(i);
-                    Operation::lowerEliminate(i);
+                    Operation::completePivoting(matrix, i);
+                    Operation::lowerEliminate(matrix, i);
                 }
                 for(size_t i = rank - 1; i > 0; --i) {
                     matrix(i, rank) /= matrix(i, i);
@@ -102,7 +102,7 @@ namespace Physica::Core {
                 matrix(0, rank) /= matrix(0, 0);
                 break;
         }
-        return matrix[matrix.row()];
+        return matrix[rank];
     }
 }
 

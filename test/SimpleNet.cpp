@@ -22,7 +22,7 @@ namespace Physica::Test {
         net[1][1].connect(1, 0);
         net[1][1].connect(1, 1);
         Vector<MultiScalar> d1(CStyleArray<MultiScalar, Dynamic>(2));
-        d1 << 1 << 1;
+        d1 << 1.0 << 1.0;
         MultiScalar n1((SignedScalarUnit)1);
         net.loadData(d1, n1);
         for(int i = 0; i < 5; ++i) {

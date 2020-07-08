@@ -11,14 +11,14 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> square(const ComplexScalar<type, errorTrack>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         return ComplexScalar<type, errorTrack>(square(real) - square(imagine), (real * imagine) << 1);
     }
 
     template<ScalarType type, bool errorTrack>
     inline ComplexScalar<type, errorTrack> reciprocal(const ComplexScalar<type, errorTrack>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         const auto divisor = reciprocal(square(real) + square(imagine));
         return ComplexScalar<type, errorTrack>(real * divisor, -imagine * divisor);
     }
@@ -40,21 +40,21 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> exp(const ComplexScalar<type, errorTrack>& c) {
         const auto& exp_real = exp(c.getReal());
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         return ComplexScalar<type, errorTrack>(exp_real * cos(imagine), exp_real * sin(imagine));
     }
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> cos(const ComplexScalar<type, errorTrack>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         return ComplexScalar<type, errorTrack>(cos(real) * cosh(imagine), - sin(real) * sinh(imagine));
     }
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> sin(const ComplexScalar<type, errorTrack>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         return ComplexScalar<type, errorTrack>(sin(real) * cosh(imagine), cos(real) * sinh(imagine));
     }
 

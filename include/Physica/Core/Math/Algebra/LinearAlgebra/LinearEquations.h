@@ -7,7 +7,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T = MultiScalar, MatrixType type = Column, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
     class LinearEquations {
     public:
         enum LinearEquationsMethod {

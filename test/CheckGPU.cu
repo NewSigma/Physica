@@ -55,7 +55,7 @@ namespace Physica {
                 std::cout << "  Max Layered Texture Size (dim) x layers        "
                           << "1D=(" << deviceProp.maxTexture1DLayered[0] << ") x " << deviceProp.maxTexture1DLayered[1] << ", "
                           << "2D=(" << deviceProp.maxTexture2DLayered[0] << ", " << deviceProp.maxTexture2DLayered[1] << ") x " << deviceProp.maxTexture2DLayered[2] << '\n';
-                std::cout << "  Total amount of constant memory:               " << deviceProp.totalConstMem << " bytes\n";
+                std::cout << "  Total amount of value memory:               " << deviceProp.totalConstMem << " bytes\n";
                 std::cout << "  Total amount of shared memory per block:       " << deviceProp.sharedMemPerBlock << " bytes\n";
                 std::cout << "  Total number of registers available per block: " << deviceProp.regsPerBlock << '\n';
                 std::cout << "  Warp size:                                     " << deviceProp.warpSize << '\n';

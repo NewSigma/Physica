@@ -23,6 +23,9 @@ namespace Physica::Core {
     Vector<T, maxLength>::Vector(Base&& array) noexcept : Base(std::move(array)) {}
 
     template<class T, size_t maxLength>
+    Vector<T, maxLength>::Vector(const Vector<T, maxLength>& vec) : Base(vec) {}
+
+    template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector(Vector&& vec) noexcept : Base(std::move(vec))  {}
 
     template<class T, size_t maxLength>

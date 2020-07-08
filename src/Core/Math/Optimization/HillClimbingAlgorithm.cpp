@@ -11,7 +11,7 @@ namespace Physica::Core {
      * stepSize: Original step size that depend solving time we will use and whether can we get a global solution or not.
      * minStep: Final step size that depend the precision of our result.
      *
-     * Operators that need memory free : func(arg)
+     * Operators that need memory free : type(arg)
      *
      * Usage: new HillClimbingAlgorithm(args)->getExtremal();
      */

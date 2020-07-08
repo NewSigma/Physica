@@ -199,21 +199,20 @@ namespace Physica::Core {
         std::swap(length, array.length);
     }
     ///////////////////////////////////////CStyleArray<T, Dynamic>//////////////////////////////////////////
-
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray()
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(0) {}
+            : arr(nullptr), length(0), capacity(0) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not AbstractCStyleArray<T>::allocated. DO NOT try to visit them.
      */
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(size_t length)
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(length), capacity(length) {}
+            : arr(reinterpret_cast<T*>(malloc(length * sizeof(T)))), length(length), capacity(length) {}
 
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(const CStyleArray<T, Dynamic>& array)
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(array.length) {
+            : arr(reinterpret_cast<T*>(malloc(array.capacity * sizeof(T)))), length(array.length), capacity(array.capacity) {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
                 new (arr + i) T(array.arr[i]);
@@ -223,7 +222,7 @@ namespace Physica::Core {
 
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(CStyleArray<T, Dynamic>&& array) noexcept
-            : arr(array.arr), length(array.length) {
+            : arr(array.arr), length(array.length), capacity(array.capacity) {
         array.arr = nullptr;
         array.length = 0;
     }

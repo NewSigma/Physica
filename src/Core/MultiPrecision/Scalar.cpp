@@ -427,6 +427,10 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true>::Scalar(int length, int power, ScalarUnit a) noexcept
             : Scalar<MultiPrecision, false>(length, power), a(a) {}
 
+    Scalar<MultiPrecision, true>::Scalar(const Scalar<MultiPrecision, true>& s) : Scalar<MultiPrecision, false>(s) {
+        a = s.a;
+    }
+
     Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, true>&& s) noexcept
             : Scalar<MultiPrecision, false>(std::move(s)), a(s.a) {}
 

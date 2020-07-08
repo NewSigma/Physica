@@ -2,7 +2,7 @@
 #define PHYSICA_DIFFERENTIAL_H
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Math/Calculus/Function.h"
+#include "Physica/Core/Math/Calculus/Function/Function.h"
 
 namespace Physica::Core {
     class Differential {

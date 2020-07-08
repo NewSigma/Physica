@@ -18,7 +18,7 @@ Plot::Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin, co
         *series << QPointF(double(point), double(y));
         /*
         //Changeable step size depending on current derivative.
-        MultiScalar derivative = D_right(func, point);
+        MultiScalar derivative = D_right(type, point);
         std::cout << derivative << point << std::endl;
         if(derivative.getPower() > basicConst->MaxPower) {
             qWarning("StepSize is too small, suspect encountered a singularity. Ignoring...");

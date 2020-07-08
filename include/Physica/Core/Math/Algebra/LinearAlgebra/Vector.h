@@ -14,14 +14,13 @@ namespace Physica::Core {
         typedef CStyleArray<T, maxLength> Base;
     public:
         Vector();
-        Vector(size_t length);
+        explicit Vector(size_t length);
         explicit Vector(const Base& array);
         explicit Vector(Base&& array) noexcept;
-        Vector(const Vector<T, maxLength>& vec) = default;
+        Vector(const Vector<T, maxLength>& vec);
         Vector(Vector<T, maxLength>&& vec) noexcept;
         ~Vector() = default;
         /* Operators */
-        Vector<T, maxLength>& operator<<(double d) { static_cast<Base>(*this) << T(d); return *this; }
         Vector<T, maxLength>& operator=(const Vector<T, maxLength>& v) noexcept { Base::operator=(v); return *this; }
         Vector<T, maxLength>& operator=(Vector<T, maxLength>&& v) noexcept { Base::operator=(std::move(v)); return *this; }
         /* Vector Operations */

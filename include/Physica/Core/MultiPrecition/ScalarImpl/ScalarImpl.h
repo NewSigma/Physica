@@ -13,9 +13,9 @@
 namespace Physica::Core {
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& n) {
+    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
-                  << double(n)
+                  << double(s)
                   << std::setprecision(6); //6 is the default precision.
     }
 
@@ -164,6 +164,10 @@ namespace Physica::Core {
      * The abstract value of a equals to the accuracy.
      */
     inline Scalar<Float, true>::Scalar(float f, float a) : Scalar<Float, false>(f), a(fabsf(a)) {}
+
+    inline Scalar<Float, true>::Scalar(const Scalar<Float, true>& s) : Scalar<Float, false>(s)  {
+        a = s.a;
+    }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
     inline Scalar<Double, errorTrack>& operator++(Scalar<Double, errorTrack>& s) {
@@ -216,6 +220,10 @@ namespace Physica::Core {
      * The abstract value of a equals to the accuracy.
      */
     inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(fabs(a)) {}
+
+    inline Scalar<Double, true>::Scalar(const Scalar<Double, true>& s) : Scalar<Double, false>(s) {
+        a = s.a;
+    }
 }
 
 #include "BasicCalc.h"

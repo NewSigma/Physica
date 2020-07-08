@@ -121,7 +121,7 @@ namespace Physica::Core {
     //!Reduce the element at \r2 using \r1.
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Column, maxRow, maxColumn>::rowReduce(size_t r1, size_t r2, size_t element) {
-        const auto& element_column = (*this)[element];
+        const auto& element_column = Base::operator[](element);
         Scalar dividend = element_column[r2] / element_column[r1];
         const auto length = getColumn();
         for(size_t i = 0; i < length; ++i) {
@@ -257,7 +257,7 @@ namespace Physica::Core {
     //!Reduce the element at \c2 using \c1.
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Row, maxRow, maxColumn>::columnReduce(size_t c1, size_t c2, size_t element) {
-        const auto& element_row = (*this)[element];
+        const auto& element_row = Base::operator[](element);
         Scalar dividend = element_row[c2] / element_row[c1];
         const auto length = getRow();
         for(size_t i = 0; i < length; ++i) {

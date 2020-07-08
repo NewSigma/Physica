@@ -229,22 +229,24 @@ namespace Physica::Core {
                 }
                 bool carry;
                 ScalarUnit a;
-                /* Add and carry */ {
+                /* Sub and carry */ {
                     //usableSmall is the part whose sub result will fall in GlobalPrecision.
                     int usableSmall = small->power - (big->power - GlobalPrecision);
                     a = usableSmall < 0;
                     usableSmall = usableSmall > smallSize
                                    ? smallSize : (a ? 0 : usableSmall);
-                    carry = subArrByArrEq(byte + length + small->power - big->power - usableSmall
+                    //byte[smallEnd] is the element of \byte, which corresponds the end of small->byte.
+                    int smallEnd = length + small->power - big->power;
+                    carry = subArrByArrEq(byte + smallEnd - usableSmall
                             , small->byte + smallSize - usableSmall, usableSmall);
                     //usableSmall is also the index which we should carry to.
                     ScalarUnit temp1, temp2;
-                    while(carry != 0 && usableSmall < length) {
-                        temp1 = byte[usableSmall];
+                    while(carry != 0 && smallEnd < length) {
+                        temp1 = byte[smallEnd];
                         temp2 = temp1 - 1;
-                        byte[usableSmall] = temp2;
+                        byte[smallEnd] = temp2;
                         carry = temp1 < temp2;
-                        ++usableSmall;
+                        ++smallEnd;
                     }
                 }
 
@@ -324,22 +326,23 @@ namespace Physica::Core {
                 }
                 bool carry;
                 ScalarUnit a;
-                /* Add and carry */ {
+                /* Sub and carry */ {
                     //usableSmall is the part whose sub result will fall in GlobalPrecision.
                     int usableSmall = small->power - (big->power - GlobalPrecision);
                     a = usableSmall < 0;
                     usableSmall = usableSmall > smallSize
                                    ? smallSize : (a ? 0 : usableSmall);
-                    carry = subArrByArrEq(byte + length + small->power - big->power - usableSmall
+                    int smallEnd = length + small->power - big->power;
+                    carry = subArrByArrEq(byte + smallEnd - usableSmall
                             , small->byte + smallSize - usableSmall, usableSmall);
                     //usableSmall is also the index which we should carry to.
                     ScalarUnit temp1, temp2;
-                    while(carry != 0 && usableSmall < length) {
-                        temp1 = byte[usableSmall];
+                    while(carry != 0 && smallEnd < length) {
+                        temp1 = byte[smallEnd];
                         temp2 = temp1 - 1;
-                        byte[usableSmall] = temp2;
+                        byte[smallEnd] = temp2;
                         carry = temp1 < temp2;
-                        ++usableSmall;
+                        ++smallEnd;
                     }
                 }
 

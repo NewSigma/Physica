@@ -1,7 +1,7 @@
 #ifndef PHYSICA_INTEGRATE_H
 #define PHYSICA_INTEGRATE_H
 
-#include "Function.h"
+#include "Physica/Core/Math/Calculus/Function/Function.h"
 #include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {

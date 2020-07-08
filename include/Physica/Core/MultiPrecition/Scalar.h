@@ -68,6 +68,7 @@ namespace Physica::Core {
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
+        static inline Scalar getTwo() { return Scalar(static_cast<SignedScalarUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return MultiPrecision; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -113,7 +114,7 @@ namespace Physica::Core {
     public:
         Scalar() noexcept;
         Scalar(int length, int power, ScalarUnit a = 0) noexcept;
-        Scalar(const Scalar& s) = default;
+        Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
         Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
@@ -144,6 +145,7 @@ namespace Physica::Core {
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
+        static inline Scalar getTwo() { return Scalar(static_cast<SignedScalarUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
@@ -172,6 +174,7 @@ namespace Physica::Core {
     public:
         inline Scalar();
         inline Scalar(float f); //NOLINT Intentional implicit conversions.
+        Scalar(const Scalar& s) = default;
         /* Operators */
         explicit operator double() const { return f; }
         Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
@@ -188,6 +191,7 @@ namespace Physica::Core {
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
+        static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return Float; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -205,6 +209,7 @@ namespace Physica::Core {
     public:
         inline Scalar();
         inline explicit Scalar(float f, float a = 0);
+        inline Scalar(const Scalar& s);
         /* Operators */
         Scalar operator+(const Scalar<Float, false>& s) const { return Scalar(f + s.f, getA()); }
         Scalar operator-(const Scalar<Float, false>& s) const { return Scalar(f - s.f, getA()); }
@@ -218,8 +223,9 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
-        static Scalar getZero() { return Scalar(0); }
-        static Scalar getOne() { return Scalar(1); }
+        static inline Scalar getZero() { return Scalar(0); }
+        static inline Scalar getOne() { return Scalar(1); }
+        static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
@@ -234,6 +240,7 @@ namespace Physica::Core {
     public:
         inline Scalar();
         inline Scalar(double d); //NOLINT Intentional implicit conversions.
+        Scalar(const Scalar& s) = default;
         /* Operators */
         explicit operator double() const { return d; }
         Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
@@ -248,8 +255,9 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         Scalar& toAbs() noexcept { d = fabs(d); return *this; }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
-        static Scalar getZero() { return Scalar(0); }
-        static Scalar getOne() { return Scalar(1); }
+        static inline Scalar getZero() { return Scalar(0); }
+        static inline Scalar getOne() { return Scalar(1); }
+        static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return Double; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -267,6 +275,7 @@ namespace Physica::Core {
     public:
         inline Scalar();
         inline explicit Scalar(double d, double a = 0);
+        inline Scalar(const Scalar& s);
         /* Operators */
         Scalar operator+(const Scalar<Double, false>& s) const { return Scalar(d + s.d, getA()); }
         Scalar operator-(const Scalar<Double, false>& s) const { return Scalar(d - s.d, getA()); }
@@ -280,8 +289,9 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
-        static Scalar getZero() { return Scalar(0); }
-        static Scalar getOne() { return Scalar(1); }
+        static inline Scalar getZero() { return Scalar(0); }
+        static inline Scalar getOne() { return Scalar(1); }
+        static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }

@@ -11,11 +11,11 @@ namespace Physica::Core {
     //!Optimize: maybe use && to avoid unnecessary move.
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack>::ComplexScalar(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2)
-            : real(std::move(s1)), imagine(std::move(s2)) {}
+            : real(std::move(s1)), imag(std::move(s2)) {}
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack>::ComplexScalar(ComplexScalar&& c) noexcept
-            : real(std::move(c.real)), imagine(std::move(c.imagine)) { Q_UNUSED(type) Q_UNUSED(errorTrack) }
+            : real(std::move(c.real)), imag(std::move(c.imag)) { Q_UNUSED(type) Q_UNUSED(errorTrack) }
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack>& ComplexScalar<type, errorTrack>::operator=(const ComplexScalar& c) {
@@ -24,7 +24,7 @@ namespace Physica::Core {
         if(this == &c)
             return *this;
         real = c.real;
-        imagine = c.imagine;
+        imag = c.imag;
         return *this;
     }
 
@@ -33,8 +33,23 @@ namespace Physica::Core {
         Q_UNUSED(type)
         Q_UNUSED(errorTrack)
         real = std::move(c.real);
-        imagine = std::move(c.imagine);
+        imag = std::move(c.imag);
         return *this;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    bool ComplexScalar<type, errorTrack>::operator==(const ComplexScalar<type, errorTrack>& c) {
+        return real == c.real && imag == c.imag;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    bool ComplexScalar<type, errorTrack>::operator>(const ComplexScalar<type, errorTrack>& c) {
+        return (square(real) + square(imag)) > (square(c.real) + square(c.imag));
+    }
+
+    template<ScalarType type, bool errorTrack>
+    bool ComplexScalar<type, errorTrack>::operator<(const ComplexScalar<type, errorTrack>& c) {
+        return (square(real) + square(imag)) < (square(c.real) + square(c.imag));
     }
 
     template<ScalarType type, bool errorTrack>
@@ -42,7 +57,7 @@ namespace Physica::Core {
         Q_UNUSED(type)
         Q_UNUSED(errorTrack)
         Physica::Core::swap(real, c.real);
-        Physica::Core::swap(imagine, c.imagine);
+        Physica::Core::swap(imag, c.imag);
     }
 
     template<ScalarType type, bool errorTrack>
@@ -56,19 +71,24 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
+    inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getTwo() {
+        return ComplexScalar(Scalar<type, errorTrack>::getTwo(), Scalar<type, errorTrack>::getZero());
+    }
+
+    template<ScalarType type, bool errorTrack>
     inline ComplexScalar<type, errorTrack> ComplexScalar<type, errorTrack>::getRandom() {
         return ComplexScalar(randomScalar<type, errorTrack>(), randomScalar<type, errorTrack>());
     }
 
     template<ScalarType type, bool errorTrack>
     inline Scalar<type, errorTrack> norm(const ComplexScalar<type, errorTrack>& c) {
-        return sqrt(square(c.getReal()) + square(c.getImagine()));
+        return sqrt(square(c.getReal()) + square(c.getImag()));
     }
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> arg(const ComplexScalar<type, errorTrack>& c) {
         const auto& real = c.getReal();
-        const auto& imagine  = c.getImagine();
+        const auto& imagine  = c.getImag();
         auto result = arctan(imagine / real);
         //arctan is defined on [-Pi / 2, Pi / 2], judging the quadrant is necessary.
         if(real.isPositive()) {
@@ -82,7 +102,7 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c) {
-        const auto& imagine = c.getImagine();
+        const auto& imagine = c.getImag();
         return os << std::setprecision(10) << double(c.getReal())
                   << (imagine.isNegative() ? " - " : "+" )<< 'i' << fabs(double(imagine)) << std::setprecision(6);
     }
@@ -90,22 +110,22 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> operator+(
             const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2) {
-        return ComplexScalar<type, errorTrack>(c1.getReal() + c2.getReal(), c1.getImagine() + c2.getImagine());
+        return ComplexScalar<type, errorTrack>(c1.getReal() + c2.getReal(), c1.getImag() + c2.getImag());
     }
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> operator-(
             const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2) {
-        return ComplexScalar<type, errorTrack>(c1.getReal() - c2.getReal(), c1.getImagine() - c2.getImagine());
+        return ComplexScalar<type, errorTrack>(c1.getReal() - c2.getReal(), c1.getImag() - c2.getImag());
     }
 
     template<ScalarType type, bool errorTrack>
     ComplexScalar<type, errorTrack> operator*(
             const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2) {
         const auto& real_1 = c1.getReal();
-        const auto& imagine_1 = c1.getImagine();
+        const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();
-        const auto& imagine_2 = c2.getImagine();
+        const auto& imagine_2 = c2.getImag();
         /*
          * Optimize:
          * Use (a + ib)(c + id) = (ac - bd) + i((a + b)(c + d) - ac - bd)
@@ -123,9 +143,9 @@ namespace Physica::Core {
     ComplexScalar<type, errorTrack> operator/(
             const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2) {
         const auto& real_1 = c1.getReal();
-        const auto& imagine_1 = c1.getImagine();
+        const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();
-        const auto& imagine_2 = c2.getImagine();
+        const auto& imagine_2 = c2.getImag();
         /*
          * Optimize: Using the same method with operator*().
          */
@@ -139,25 +159,25 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
     ComplexScalar<type, errorTrack1 | errorTrack2> operator+(
             const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s) {
-        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() + s, c.getImagine());
+        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() + s, c.getImag());
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
     ComplexScalar<type, errorTrack1 | errorTrack2> operator-(
             const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s) {
-        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() - s, c.getImagine());
+        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() - s, c.getImag());
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
     ComplexScalar<type, errorTrack1 | errorTrack2> operator*(
             const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s) {
-        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() * s, c.getImagine() * s);
+        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() * s, c.getImag() * s);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
     ComplexScalar<type, errorTrack1 | errorTrack2> operator/(
             const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s) {
-        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() / s, c.getImagine() / s);
+        return ComplexScalar<type, errorTrack1 | errorTrack2>(c.getReal() / s, c.getImag() / s);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
