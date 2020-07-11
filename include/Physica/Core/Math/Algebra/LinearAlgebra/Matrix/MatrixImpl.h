@@ -39,13 +39,13 @@ namespace Physica::Core {
 
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Column, maxRow, maxColumn>::appendColumn(const Vector<T, maxRow>& v) {
-        Q_ASSERT(getRow() == v.getLength());
+        Q_ASSERT(Base::getLength() == 0 || v.getLength() == getRow());
         append(v);
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Column, maxRow, maxColumn>::appendColumn(Vector<T, maxRow>&& v) noexcept {
-        Q_ASSERT(getRow() == v.getLength());
+        Q_ASSERT(Base::getLength() == 0 || v.getLength() == getRow());
         append(std::move(v));
     }
 
@@ -67,14 +67,25 @@ namespace Physica::Core {
 
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Column, maxRow, maxColumn>::appendMatrixColumn(const Matrix<T, Column, maxRow, maxColumn>& m) {
-        Q_ASSERT(getRow() == m.getRow());
+        Q_ASSERT(Base::getLength() == 0 || getRow() == m.getRow());
         append(m);
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Column, maxRow, maxColumn>::appendMatrixColumn(Matrix<T, Column, maxRow, maxColumn>&& m) {
-        Q_ASSERT(getRow() == m.getRow());
+        Q_ASSERT(Base::getLength() == 0 || getRow() == m.getRow());
         append(std::move(m));
+    }
+
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, Column, maxRow, maxColumn>::removeRowAt(size_t index) {
+        for(size_t i = 0; i < getColumn(); ++i)
+            Base::operator[](i).removeAt(index);
+    }
+
+    template<class T, size_t maxRow, size_t maxColumn>
+    inline void Matrix<T, Column, maxRow, maxColumn>::removeColumnAt(size_t index) {
+        Base::removeAt(index);
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
@@ -153,14 +164,14 @@ namespace Physica::Core {
     //!Optimize: may be inline append().
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Row, maxRow, maxColumn>::appendRow(const Vector<T, maxColumn>& v) {
-        Q_ASSERT(v.getLength() == getColumn());
-        append(v);
+        Q_ASSERT(Base::getLength() == 0 || v.getLength() == getColumn());
+        Base::append(v);
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
     void Matrix<T, Row, maxRow, maxColumn>::appendRow(Vector<T, maxColumn>&& v) noexcept {
-        Q_ASSERT(v.getLength() == getColumn());
-        append(std::move(v));
+        Q_ASSERT(Base::getLength() == 0 || v.getLength() == getColumn());
+        Base::append(std::move(v));
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
@@ -205,6 +216,17 @@ namespace Physica::Core {
         Q_ASSERT(length == m.getLength());
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).append(m[i]);
+    }
+
+    template<class T, size_t maxRow, size_t maxColumn>
+    inline void Matrix<T, Row, maxRow, maxColumn>::removeRowAt(size_t index) {
+        Base::removeAt(index);
+    }
+
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, Row, maxRow, maxColumn>::removeColumnAt(size_t index) {
+        for(size_t i = 0; i < getRow(); ++i)
+            Base::operator[](i).removeAt(index);
     }
 
     template<class T, size_t maxRow, size_t maxColumn>

@@ -29,6 +29,13 @@ namespace Physica::Core {
     Vector<T, maxLength>::Vector(Vector&& vec) noexcept : Base(std::move(vec))  {}
 
     template<class T, size_t maxLength>
+    Vector<T, maxLength>& Vector<T, maxLength>::toOpposite() {
+        const auto length = Base::getLength();
+        for(size_t i = 0; i < length; ++i)
+            Base::operator[](i).toOpposite();
+    }
+
+    template<class T, size_t maxLength>
     T Vector<T, maxLength>::toNorm() const {
         auto norm = T::getZero();
         for(size_t i = 0; i < CStyleArray<T, maxLength>::getLength(); ++i)

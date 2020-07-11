@@ -61,6 +61,7 @@ namespace Physica::Core {
         void append(CStyleArray&& t);
         inline void grow(const T& t);
         inline void grow(T&& t);
+        void removeAt(size_t index);
         T cutLast();
         void swap(CStyleArray& array) noexcept;
         /* Getters */
@@ -114,6 +115,7 @@ namespace Physica::Core {
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
+        void removeAt(size_t index);
         T cutLast();
         void swap(CStyleArray& array) noexcept;
         /* Getters */

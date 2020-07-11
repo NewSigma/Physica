@@ -273,7 +273,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), s2.length, s2.power);
+                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = sub<true>(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -369,7 +369,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), s2.length, s2.power);
+                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = sub<false>(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)

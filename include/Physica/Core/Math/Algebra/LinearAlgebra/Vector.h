@@ -24,6 +24,7 @@ namespace Physica::Core {
         Vector<T, maxLength>& operator=(const Vector<T, maxLength>& v) noexcept { Base::operator=(v); return *this; }
         Vector<T, maxLength>& operator=(Vector<T, maxLength>&& v) noexcept { Base::operator=(std::move(v)); return *this; }
         /* Vector Operations */
+        Vector& toOpposite();
         [[nodiscard]] T toNorm() const;
         void toUnit();
         /* Getters */

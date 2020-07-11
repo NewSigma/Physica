@@ -180,6 +180,15 @@ namespace Physica::Core {
         Q_ASSERT(length < capacity);
         allocate(std::move(t), length++);
     }
+
+    template<class T, size_t capacity>
+    void CStyleArray<T, capacity>::removeAt(size_t index) {
+        Q_ASSERT(index < length);
+        if(QTypeInfo<T>::isComplex)
+            (arr + index)->~T();
+        --length;
+        memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));
+    }
     /*!
      * Get the last element in the array and remove it from the array.
      */
@@ -240,6 +249,8 @@ namespace Physica::Core {
         if(this != &array) {
             this->~CStyleArray();
             length = array.length;
+            capacity = array.capacity;
+            arr = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
             if(QTypeInfo<T>::isComplex)
                 for(size_t i = 0; i < length; ++i)
                     new (arr + i) T(array.arr[i]);
@@ -256,6 +267,7 @@ namespace Physica::Core {
         array.arr = nullptr;
         length = array.length;
         array.length = 0;
+        capacity = array.capacity;
         return *this;
     }
 
@@ -409,6 +421,15 @@ namespace Physica::Core {
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
         length = capacity = size;
+    }
+
+    template<class T>
+    void CStyleArray<T, Dynamic>::removeAt(size_t index) {
+        Q_ASSERT(index < length);
+        if(QTypeInfo<T>::isComplex)
+            (arr + index)->~T();
+        --length;
+        memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));
     }
     /*!
      * Get the last element in the array and remove it from the array.

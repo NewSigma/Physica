@@ -40,6 +40,8 @@ namespace Physica::Core {
         void appendMatrixRow(Matrix&& m);
         void appendMatrixColumn(const Matrix& m);
         void appendMatrixColumn(Matrix&& m);
+        void removeRowAt(size_t index);
+        inline void removeColumnAt(size_t index);
         Vector<T, maxRow> cutRow();
         Vector<T, maxRow> cutColumn();
         Matrix<T, Column, Dynamic, Dynamic> cutMatrixRow(size_t from);
@@ -82,6 +84,8 @@ namespace Physica::Core {
         void appendMatrixRow(Matrix&& m);
         void appendMatrixColumn(const Matrix& m);
         void appendMatrixColumn(Matrix&& m);
+        inline void removeRowAt(size_t index);
+        void removeColumnAt(size_t index);
         Vector<T, maxColumn> cutRow();
         Vector<T, maxColumn> cutColumn();
         Matrix<T, Row, Dynamic, Dynamic> cutMatrixRow(size_t from);

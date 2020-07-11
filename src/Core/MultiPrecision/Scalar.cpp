@@ -356,7 +356,8 @@ namespace Physica::Core {
      */
     bool operator> (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         //Judge from sign.
-        if(s1.isPositive()) {
+        const bool positive = s1.isPositive();
+        if(positive) {
             if(!s2.isPositive())
                 return true;
         }
@@ -369,9 +370,9 @@ namespace Physica::Core {
         //If we cannot get a result, judge from power
         bool result;
         if(s1.getPower() > s2.getPower())
-            result = true;
+            result = positive;
         else if(s1.getPower() < s2.getPower())
-            result = false;
+            result = !positive;
         else {
             //The only method left.
             Scalar<MultiPrecision, false> subtract = s1 - s2;
@@ -385,7 +386,8 @@ namespace Physica::Core {
      */
     bool operator< (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         //Judge from sign.
-        if(s1.isPositive()) {
+        const bool positive = s1.isPositive();
+        if(positive) {
             if(!s2.isPositive())
                 return false;
         }
@@ -398,9 +400,9 @@ namespace Physica::Core {
         //If we cannot get a result, judge from power
         bool result;
         if(s1.getPower() > s2.getPower())
-            result = false;
+            result = !positive;
         else if(s1.getPower() < s2.getPower())
-            result = true;
+            result = positive;
         else {
             //The only method left.
             Scalar<MultiPrecision, false> subtract = s1 - s2;
@@ -420,6 +422,15 @@ namespace Physica::Core {
         std::swap(byte, s.byte);
         std::swap(length, s.length);
         std::swap(power, s.power);
+    }
+    /*!
+     * Return true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
+     * This function provide a quick sign check compare to using isPositive() and isNegative().
+     */
+    inline bool Scalar<MultiPrecision, false>::matchSign(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+        Q_ASSERT(!s1.isZero() && !s2.isZero());
+        return (s1.length ^ s2.length) >= 0;
     }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     Scalar<MultiPrecision, true>::Scalar() noexcept : Scalar<MultiPrecision, false>(), a(0) {}

@@ -66,6 +66,7 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Scalar& s) noexcept;
+        static inline bool matchSign(const Scalar& s1, const Scalar& s2);
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
         static inline Scalar getTwo() { return Scalar(static_cast<SignedScalarUnit>(2)); }
