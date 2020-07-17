@@ -25,17 +25,17 @@ namespace Physica::Core {
     }
 
     template<bool errorTrack>
-    Scalar<MultiPrecision, errorTrack> floor(const Scalar<MultiPrecision, errorTrack>& n) {
-        if(n.isInteger())
-            return Scalar(n);
-        const auto size = n.getSize();
-        const auto power = n.getPower();
+    Scalar<MultiPrecision, errorTrack> floor(const Scalar<MultiPrecision, errorTrack>& s) {
+        if(s.isInteger())
+            return Scalar(s);
+        const auto size = s.getSize();
+        const auto power = s.getPower();
         const auto power_1 = power + 1;
         auto length = size > power_1 ? power_1 : size;
-        length = n.isNegative() ? -length : length;
+        length = s.isNegative() ? -length : length;
         Scalar<MultiPrecision, errorTrack> result(length, power);
         for(int i = 0; i < length; ++i)
-            result[i] = n[i];
+            result[i] = s[i];
         return result;
     }
     /*!
@@ -43,13 +43,49 @@ namespace Physica::Core {
      * Fix: May overflow.
      */
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> floor(const Scalar<type, errorTrack>& n) {
-        return Scalar<type, errorTrack>(static_cast<size_t>(n.getTrivial()));
+    Scalar<type, errorTrack> floor(const Scalar<type, errorTrack>& s) {
+        return Scalar<type, errorTrack>(static_cast<size_t>(s.getTrivial()));
     }
 
     template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& n) {
-        return ++floor(n);
+    inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& s) {
+        return ++floor(s);
+    }
+    /*!
+     * Calculate the number of arrangement $A_s1^s2$.
+     * Using the definition, may be possible to optimize.
+     */
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> arrangement(const Scalar<type, errorTrack>& s1, const Scalar<type, errorTrack>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger() && s1 > s2);
+        const Scalar<type, errorTrack> critical = s1 - s2;
+        Scalar<type, errorTrack> temp(s1);
+        Scalar<type, errorTrack> result = Scalar<type, errorTrack>::getOne();
+        while(temp > critical) {
+            result *= temp;
+            --temp;
+        }
+        return result;
+    }
+    /*!
+     * Calculate the number of combination $C_s1^s2$.
+     * Using the definition, may be possible to optimize.
+     */
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> combination(const Scalar<type, errorTrack>& s1, const Scalar<type, errorTrack>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger() && s1 > s2);
+        const Scalar<type, errorTrack> critical = s1 - s2;
+        Scalar<type, errorTrack> result = Scalar<type, errorTrack>::getOne();
+        const bool flag = critical > s2;
+        const Scalar<type, errorTrack>& great = flag ? critical : s1;
+        const Scalar<type, errorTrack>& small = flag ? s2 : critical;
+
+        Scalar<type, errorTrack> temp(s1);
+        while(temp > great) {
+            result *= temp;
+            --temp;
+        }
+        return result / factorial(small);
     }
 }
 

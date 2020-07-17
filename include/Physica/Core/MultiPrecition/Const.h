@@ -10,7 +10,10 @@
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
+    //!GlobalPrecision is the max length of Scalar<MultiPrecision>
     constexpr int GlobalPrecision = 4;
+    //!RelativeError is the stop criteria of iterate method that uses Scalar<Float> or Scalar<Double>.
+    constexpr double RelativeError = 1e-5;
 
     class BasicConst {
         static BasicConst* instance;

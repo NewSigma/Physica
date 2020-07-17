@@ -5,6 +5,7 @@
 #define PHYSICA_SCALAR_H
 
 #include <cmath>
+#include <qglobal.h>
 #include "ScalarType.h"
 
 namespace Physica::Core {
@@ -200,6 +201,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isZero() const { return f == 0; }
         [[nodiscard]] bool isPositive() const { return f > 0; }
         [[nodiscard]] bool isNegative() const { return f < 0; }
+        [[nodiscard]] bool isInteger() const;
+        /* Setters */
+        static void setA(float b) { Q_UNUSED(b) /* Nothing, for the convenience to implement templates */ }
         /* Friends */
         friend class Scalar<Float, true>;
     };
@@ -221,8 +225,6 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -230,6 +232,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
+        /* Setters */
+        void setA(float f) { a = f; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */
         friend class Scalar<Float, false>;
     };
@@ -266,6 +271,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isZero() const { return d == 0; }
         [[nodiscard]] bool isPositive() const { return d > 0; }
         [[nodiscard]] bool isNegative() const { return d < 0; }
+        [[nodiscard]] bool isInteger() const;
+        /* Setters */
+        static void setA(double b) { Q_UNUSED(b) /* Nothing, for the convenience to implement templates */ }
         /* Friends */
         friend class Scalar<Double, true>;
     };
@@ -287,8 +295,6 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -296,6 +302,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
+        /* Setters */
+        void setA(double b) { a = b; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */
         friend class Scalar<Double, false>;
     };

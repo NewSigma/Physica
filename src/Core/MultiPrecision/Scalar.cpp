@@ -37,9 +37,9 @@ namespace Physica::Core {
             return;
         }
         double_extract extract{d};
-        auto quotient = static_cast<int>(extract.structure.exp) - 1023;
+        auto quotient = static_cast<int>(extract.exp) - 1023;
         power = quotient / __WORDSIZE;
-        //Have power * __WORDSIZE < extract.structure.exp, so that remainder > 0.
+        //Have power * __WORDSIZE < extract.exp, so that remainder > 0.
         if(quotient < 0)
             --power;
         unsigned int remainder = quotient - power * __WORDSIZE;
@@ -51,14 +51,14 @@ namespace Physica::Core {
             byte[1] = 1;
             byte[1] <<= remainder;
             if(remainder <= 20) {
-                byte[1] += static_cast<ScalarUnit>(extract.structure.high) >> (20 - remainder);
-                byte[0] = static_cast<ScalarUnit>(extract.structure.high) << (44 + remainder);
-                byte[0] += static_cast<ScalarUnit>(extract.structure.low) << (32 - (20 - remainder));
+                byte[1] += static_cast<ScalarUnit>(extract.high) >> (20 - remainder);
+                byte[0] = static_cast<ScalarUnit>(extract.high) << (44 + remainder);
+                byte[0] += static_cast<ScalarUnit>(extract.low) << (32 - (20 - remainder));
             }
             else {
-                byte[1] += static_cast<ScalarUnit>(extract.structure.high) << (remainder - 20);
-                byte[1] += static_cast<ScalarUnit>(extract.structure.low) >> (32 - (remainder - 20));
-                byte[0] = static_cast<ScalarUnit>(extract.structure.low) << (32 + (remainder - 20));
+                byte[1] += static_cast<ScalarUnit>(extract.high) << (remainder - 20);
+                byte[1] += static_cast<ScalarUnit>(extract.low) >> (32 - (remainder - 20));
+                byte[0] = static_cast<ScalarUnit>(extract.low) << (32 + (remainder - 20));
             }
         }
         else {
@@ -67,9 +67,9 @@ namespace Physica::Core {
             //Hidden bit
             byte[0] = 1;
             byte[0] <<= 20U;
-            byte[0] += static_cast<ScalarUnit>(extract.structure.high);
+            byte[0] += static_cast<ScalarUnit>(extract.high);
             byte[0] <<= 32U;
-            byte[0] += static_cast<ScalarUnit>(extract.structure.low);
+            byte[0] += static_cast<ScalarUnit>(extract.low);
             byte[0] <<= remainder - 52;
         }
     #endif
@@ -80,10 +80,10 @@ namespace Physica::Core {
             //Hidden bit
             byte[2] = 1;
             byte[2] <<= remainder;
-            byte[2] += static_cast<ScalarUnit>(extract.structure.high) >> (20 - remainder);
-            byte[1] = static_cast<ScalarUnit>(extract.structure.high) << (32 - (20 - remainder));
-            byte[1] +=  static_cast<ScalarUnit>(extract.structure.low) >> (20 - remainder);
-            byte[0] = static_cast<ScalarUnit>(extract.structure.low) << remainder;
+            byte[2] += static_cast<ScalarUnit>(extract.high) >> (20 - remainder);
+            byte[1] = static_cast<ScalarUnit>(extract.high) << (32 - (20 - remainder));
+            byte[1] +=  static_cast<ScalarUnit>(extract.low) >> (20 - remainder);
+            byte[0] = static_cast<ScalarUnit>(extract.low) << remainder;
         }
         else {
             length = 2;
@@ -91,12 +91,12 @@ namespace Physica::Core {
             //Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
-            byte[1] += static_cast<ScalarUnit>(extract.structure.high) << (remainder - 20);
-            byte[1] += static_cast<ScalarUnit>(extract.structure.low) >> (32 - (remainder - 20));
-            byte[0] = static_cast<ScalarUnit>(extract.structure.low) << (remainder - 20);
+            byte[1] += static_cast<ScalarUnit>(extract.high) << (remainder - 20);
+            byte[1] += static_cast<ScalarUnit>(extract.low) >> (32 - (remainder - 20));
+            byte[0] = static_cast<ScalarUnit>(extract.low) << (remainder - 20);
         }
     #endif
-        if(extract.structure.sign)
+        if(extract.sign)
             length = -length;
     }
     /*!
@@ -148,55 +148,55 @@ namespace Physica::Core {
         if(isZero())
             return 0.0;
         double_extract extract{0};
-        extract.structure.sign = length < 0;
+        extract.sign = length < 0;
 
         const auto zeroCount = countLeadingZeros(byte[getSize() - 1]);
         auto exp = power * __WORDSIZE + ScalarUnitWidth - zeroCount - 1 + 1023;
         if(exp >= 2047) {
-            extract.structure.high = extract.structure.low = 0;
-            extract.structure.exp = 2047;
+            extract.high = extract.low = 0;
+            extract.exp = 2047;
             return extract.value;
         }
         if(exp <= 0) {
             return 0.0;
         }
-        extract.structure.exp = exp;
+        extract.exp = exp;
 
         auto size = getSize();
         auto temp = byte[size - 1] << (zeroCount + 1);
     #ifdef PHYSICA_64BIT
-        extract.structure.high = temp >> 44U;
+        extract.high = temp >> 44U;
         if(zeroCount <= 11) {
-            extract.structure.low = temp << 20U >> 32U;
+            extract.low = temp << 20U >> 32U;
         }
         else {
             if(zeroCount <= 44 - 1) {
-                extract.structure.low = temp << 20U >> 32U;
+                extract.low = temp << 20U >> 32U;
                 if(size > 1)
-                    extract.structure.low += byte[size - 2] >> (64 - (32 - (64 - 20 - zeroCount - 1)));
+                    extract.low += byte[size - 2] >> (64 - (32 - (64 - 20 - zeroCount - 1)));
             }
             else {
                 if(size > 1) {
-                    extract.structure.high += byte[size - 2] >> (64 - (20 - (64 - zeroCount - 1)));
-                    extract.structure.low = byte[size - 2] << (20 - (64 - zeroCount - 1)) >> 32U;
+                    extract.high += byte[size - 2] >> (64 - (20 - (64 - zeroCount - 1)));
+                    extract.low = byte[size - 2] << (20 - (64 - zeroCount - 1)) >> 32U;
                 }
             }
         }
     #endif
     #ifdef PHYSICA_32BIT
-        extract.structure.high = temp >> 12U;
+        extract.high = temp >> 12U;
         if(zeroCount <= 11) {
-            extract.structure.low = temp << 20U;
+            extract.low = temp << 20U;
             if(size > 1)
-                extract.structure.low = byte[size - 1] >> (32 - 20 - zeroCount - 1);
+                extract.low = byte[size - 1] >> (32 - 20 - zeroCount - 1);
         }
         else {
             if(size > 1) {
-                extract.structure.high += byte[size - 1] >> (32 - (zeroCount + 1 - 12));
-                extract.structure.low = byte[size - 1] << (zeroCount + 1 - 12);
+                extract.high += byte[size - 1] >> (32 - (zeroCount + 1 - 12));
+                extract.low = byte[size - 1] << (zeroCount + 1 - 12);
             }
             if(size > 2)
-                extract.structure.low += byte[size - 2] >> (32 - (zeroCount + 1 - 12));
+                extract.low += byte[size - 2] >> (32 - (zeroCount + 1 - 12));
         }
     #endif
         return extract.value;
@@ -719,9 +719,60 @@ namespace Physica::Core {
         return result;
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
+    /*!
+     * Inspect if a float is a integer through its binary expression.
+     */
+    bool Scalar<Float, false>::isInteger() const {
+        float_extract extract{f};
+        const auto exp = extract.exp;
+        if(exp == 0U)
+            return extract.value == 0;
+
+        unsigned int zeros;
+        if(extract.low == 0U) {
+            if(extract.high == 0U)
+                return true;
+            else
+                zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
+        }
+        else
+            zeros = countBackZeros(extract.low);
+        /*
+         * exp + zeros - 127 >= 23
+         * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
+         * We move 127 to the right hand side to avoid underflow.
+         */
+        return exp + zeros >= 150;
+    }
+
     void Scalar<Float, true>::swap(Scalar<Float, true>& s) noexcept {
         std::swap(a, s.a);
         Scalar<Float, false>::swap(s);
+    }
+    /*!
+     * Inspect if a float is a integer through its binary expression.
+     */
+    bool Scalar<Double, false>::isInteger() const {
+        double_extract extract{d};
+        const auto exp = extract.exp;
+        if(exp == 0U)
+            return extract.value == 0;
+
+        unsigned int zeros;
+        if(extract.low == 0U) {
+            if(extract.high == 0U)
+                return true;
+            else
+                zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
+        }
+        else
+            zeros = countBackZeros(extract.low);
+        /*
+         * exp + zeros - 1023 >= 52
+         * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.
+         * We move 1023 to the right hand side to avoid underflow.
+         */
+        return exp + zeros >= 1075;
     }
 
     void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {

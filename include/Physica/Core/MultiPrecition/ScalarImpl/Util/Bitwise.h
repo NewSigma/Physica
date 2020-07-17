@@ -11,8 +11,8 @@ namespace Physica::Core {
     inline unsigned int countLeadingZeros(ScalarUnit n) {
         if(n == 0)
             return ScalarUnitWidth;
-    #if UseASM
         ScalarUnit count;
+    #if UseASM
         asm volatile (
                 "bsrq %1, %0\n\t"
                 : "=r" (count)
@@ -20,10 +20,30 @@ namespace Physica::Core {
         );
         (count) ^= 63U;
     #else
-        ScalarUnit count = 0U;
+        count = 0;
         while((n & ScalarUnitHighestBitMask) == 0) {
             ++count;
             n <<= 1U;
+        }
+    #endif
+        return count;
+    }
+
+    inline unsigned int countBackZeros(unsigned long n) {
+        if(n == 0)
+            return ScalarUnitWidth;
+        unsigned int count;
+    #if UseASM
+        asm volatile (
+        "bsfq %1, %0\n\t"
+        : "=r" (count)
+        : "rm" (n)
+        );
+    #else
+        count = 0;
+        while((n & 1U) == 0) {
+            ++count;
+            n >>= 1U;
         }
     #endif
         return count;

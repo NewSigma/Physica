@@ -231,14 +231,58 @@ namespace Physica::Core {
 #include "Operation/Pow.h"
 
 namespace Physica::Core {
-    /*!
-     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
-     */
-    template<bool errorTrack1, bool errorTrack2>
-    inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> operator^(
-            const Scalar<MultiPrecision, errorTrack1>& s1,
-            const Scalar<MultiPrecision, errorTrack2>& s2) {
+    template<ScalarType type>
+    inline Scalar<type, false> operator^(
+            const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
+        return Scalar<type, false>(std::pow(s1.getTrivial(), s2.getTrivial()));
+    }
+
+    template<ScalarType type>
+    inline Scalar<type, true> operator^(
+            const Scalar<type, true>& s1, const Scalar<type, false>& s2) {
+        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
+        return Scalar<type, true>(result, std::pow(s1.getTrivial(), s2.getTrivial() + s2.getA()) - result);
+    }
+
+    template<ScalarType type>
+    inline Scalar<type, true> operator^(
+            const Scalar<type, false>& s1, const Scalar<type, true>& s2) {
+        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
+        return Scalar<type, true>(result
+                , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA()), s2.getTrivial()) - result);
+    }
+
+    template<ScalarType type>
+    inline Scalar<type, true> operator^(
+            const Scalar<type, true>& s1, const Scalar<type, true>& s2) {
+        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
+        return Scalar<type, true>(result
+                , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA())
+                        , s2.getTrivial() + s2.getA()) - result);
+    }
+
+    template<>
+    inline Scalar<MultiPrecision, false> operator^(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
+    }
+
+    template<>
+    inline Scalar<MultiPrecision, true> operator^(
+            const Scalar<MultiPrecision, true>& s1, const Scalar<MultiPrecision, false>& s2) {
+        return exp(ln(s1) * s2);
+    }
+
+    template<>
+    inline Scalar<MultiPrecision, true> operator^(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, true>& s2) {
+        return exp(ln(s1) * s2);
+    }
+
+    template<>
+    inline Scalar<MultiPrecision, true> operator^(
+            const Scalar<MultiPrecision, true>& s1, const Scalar<MultiPrecision, true>& s2) {
+        return exp(ln(s1) * s2);
     }
 }
 

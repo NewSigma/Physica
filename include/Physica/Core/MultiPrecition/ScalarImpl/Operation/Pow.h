@@ -21,7 +21,7 @@ namespace Physica::Core {
         return result;
     }
     template<bool errorTrack>
-    //Compute a ^ unit, the highest bit of unit must be set.
+    //!Compute a ^ unit, the highest bit of unit must be set.
     inline Scalar<MultiPrecision, errorTrack> powFullWord(
             const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
         Scalar<MultiPrecision, errorTrack> result(a);
@@ -33,7 +33,11 @@ namespace Physica::Core {
         }
         return result;
     }
-    //!Calculate a^n.
+    /*!
+     * Calculate a^n.
+     *
+     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
+     */
     template<bool errorTrack1, bool errorTrack2>
     inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> powScalar(
             const Scalar<MultiPrecision, errorTrack1>& a, const Scalar<MultiPrecision, errorTrack2>& n) {

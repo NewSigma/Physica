@@ -104,14 +104,11 @@ namespace Physica::Core {
     Scalar<MultiPrecision, errorTrack> factorial(const Scalar<MultiPrecision, errorTrack>& s) {
         //Optimize: Unnecessary copy during floor() if s is a integer itself.
         const Scalar<MultiPrecision, false> integer = floor<false>(s);
-        const auto& _1 = BasicConst::getInstance().get_1();
 
         Scalar<MultiPrecision, errorTrack> result(SignedScalarUnit(1));
         Scalar<MultiPrecision, errorTrack> temp(SignedScalarUnit(1));
-        while(temp < integer) {
-            temp += _1;
-            result *= temp;
-        }
+        while(temp < integer)
+            result *= ++temp;
         return result;
     }
 
