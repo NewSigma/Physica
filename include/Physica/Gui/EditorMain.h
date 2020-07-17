@@ -3,25 +3,26 @@
 
 #include "QTextEdit"
 
-class LineNumberArea;
+namespace Physica::Gui {
+    class LineNumberArea;
 
-class EditorMain : public QTextEdit {
-    LineNumberArea* lineNumberArea;
-    //Should be put into settings.
-    QFont defaultFont;
-public:
-    explicit EditorMain(QWidget* parent);
-protected:
-    void resizeEvent(QResizeEvent* event) override;
-private:
-    int lineNumberAreaWidth() const;
-    void doHighLight();
-private slots:
-    void updateLineNumberAreaWidth();
-    void onCursorPositionChanged();
+    class EditorMain : public QTextEdit {
+        LineNumberArea* lineNumberArea;
+        //Should be put into settings.
+        QFont defaultFont;
+    public:
+        explicit EditorMain(QWidget* parent);
+    protected:
+        void resizeEvent(QResizeEvent* event) override;
+    private:
+        int lineNumberAreaWidth() const;
+        void doHighLight();
+    private slots:
+        void updateLineNumberAreaWidth();
+        void onCursorPositionChanged();
 
-    friend class LineNumberArea;
-};
-
+        friend class LineNumberArea;
+    };
+}
 
 #endif

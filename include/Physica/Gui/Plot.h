@@ -10,11 +10,13 @@
 
 using Physica::Core::MultiScalar;
 
-class Plot : public QtCharts::QChartView {
-    QtCharts::QSplineSeries* series;
-public:
-    Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
-            , const MultiScalar& end, QWidget* parent = nullptr);
-};
+namespace Physica::Gui {
+    class Plot : public QtCharts::QChartView {
+        QtCharts::QSplineSeries* series;
+    public:
+        Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
+                , const MultiScalar& end, QWidget* parent = nullptr);
+    };
+}
 
 #endif

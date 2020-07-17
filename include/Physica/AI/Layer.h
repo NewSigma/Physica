@@ -7,27 +7,27 @@
 #include <vector>
 
 namespace Physica::AI {
-        class DNN;
+    class DNN;
 
-        class Layer {
-            std::vector<Node*> nodes;
-            DNN* parentNet;
-            //index of current layer in the net
-            int id;
-        public:
-            explicit Layer(int id, int nodeCount, DNN* parent);
-            ~Layer();
-            Layer(const Layer&) = delete;
-            Layer& operator=(const Layer&) = delete;
+    class Layer {
+        std::vector<Node*> nodes;
+        DNN* parentNet;
+        //index of current layer in the net
+        int id;
+    public:
+        explicit Layer(int id, int nodeCount, DNN* parent);
+        ~Layer();
+        Layer(const Layer&) = delete;
+        Layer& operator=(const Layer&) = delete;
 
-            Node& operator[](int i) { return *nodes[i]; }
-            DNN* getNet() const { return parentNet; }
-            int getSize() const { return nodes.size(); }
-            int getId() const { return id; }
+        Node& operator[](int i) { return *nodes[i]; }
+        DNN* getNet() const { return parentNet; }
+        int getSize() const { return nodes.size(); }
+        int getId() const { return id; }
 
-            void update();
-            void handleLoss();
-        };
-    }
+        void update();
+        void handleLoss();
+    };
+}
 
 #endif

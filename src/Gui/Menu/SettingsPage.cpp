@@ -4,12 +4,14 @@
 
 #include "Physica/Gui/SettingsPage.h"
 
-SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
-    default_layout = new QVBoxLayout(this);
+namespace Physica::Gui {
+    SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
+        default_layout = new QVBoxLayout(this);
 
-    themeLabel = new QLabel("Theme", this);
-    default_layout->addWidget(themeLabel);
+        themeLabel = new QLabel("Theme", this);
+        default_layout->addWidget(themeLabel);
 
-    themeBox = new QComboBox(this);
-    default_layout->addWidget(themeBox);
+        themeBox = new QComboBox(this);
+        default_layout->addWidget(themeBox);
+    }
 }

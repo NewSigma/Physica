@@ -10,16 +10,18 @@
 #include "QDialog"
 #include "SettingsPage.h"
 
-class Settings : public QDialog {
-    Q_OBJECT
+namespace Physica::Gui {
+    class Settings : public QDialog {
+        Q_OBJECT
 
-    PhysicaMain* parent;
-    QHBoxLayout* default_layout;
-    QListWidget* list;
-    SettingsPage* page;
-public:
-    explicit Settings(PhysicaMain* parent);
-};
+        PhysicaMain* parent;
+        QHBoxLayout* default_layout;
+        QListWidget* list;
+        SettingsPage* page;
+    public:
+        explicit Settings(PhysicaMain* parent);
+    };
 
+}
 
 #endif

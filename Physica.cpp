@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
-    new PhysicaMain();
+    new Physica::Gui::PhysicaMain();
 
     int exit_code = QApplication::exec();
 

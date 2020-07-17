@@ -6,16 +6,18 @@
 
 #include "QWidget"
 
-class EditorMain;
+namespace Physica::Gui {
+    class EditorMain;
 
-class LineNumberArea : public QWidget {
-    const EditorMain* const editor;
-public:
-    explicit LineNumberArea(EditorMain* parent);
-protected:
-    void paintEvent(QPaintEvent* event) override;
+    class LineNumberArea : public QWidget {
+        const EditorMain* const editor;
+    public:
+        explicit LineNumberArea(EditorMain* parent);
+    protected:
+        void paintEvent(QPaintEvent* event) override;
 
-    Q_DISABLE_COPY_MOVE(LineNumberArea)
-};
+        Q_DISABLE_COPY_MOVE(LineNumberArea)
+    };
+}
 
 #endif
