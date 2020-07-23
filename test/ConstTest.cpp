@@ -31,6 +31,7 @@ namespace Physica::Test {
             else {
                 std::cout << "Testing Pi --Failed" << '\n' << "Pi: ";
                 printElements(MathConst::getInstance().getPI());
+                std::cout << '\n';
             }
         }
         /* test E */ {
@@ -42,6 +43,7 @@ namespace Physica::Test {
             else {
                 std::cout << "Testing E --Failed" << '\n' << "Pi: ";
                 printElements(MathConst::getInstance().getE());
+                std::cout << '\n';
             }
         }
         std::cout << "Pi / 2: " << MathConst::getInstance().getPI_2() << '\n';

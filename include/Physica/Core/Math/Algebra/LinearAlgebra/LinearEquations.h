@@ -7,8 +7,10 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar, MatrixType type = Column, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
-    class LinearEquations {
+    /*!
+     * Declare common parts for template instances of LinearEquations.
+     */
+    class AbstractLinearEquations {
     public:
         enum LinearEquationsMethod {
             GaussJordanPartial,
@@ -17,7 +19,12 @@ namespace Physica::Core {
             GaussEliminationComplete,
             LUMethod
         };
-    private:
+    };
+    /*!
+     * Solve linear equations.
+     */
+    template<class T = MultiScalar, MatrixType type = Column, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
+    class LinearEquations : AbstractLinearEquations{
         Matrix<T, type, maxRow, maxColumn> matrix;
     public:
         explicit LinearEquations(const Matrix<T, type, maxRow, maxColumn>& m);
@@ -29,11 +36,12 @@ namespace Physica::Core {
         LinearEquations& operator=(const LinearEquations& l) = default;
         LinearEquations& operator=(LinearEquations&& l) noexcept;
         /* Operations */
-        const typename Matrix<T, type, maxRow, maxColumn>::VectorType& solve(LinearEquationsMethod method);
+        void solve(LinearEquationsMethod method);
         /* Helpers */
         [[nodiscard]] Matrix<T, type, maxRow, maxColumn>&& release() noexcept { return std::move(matrix); }
         /* Getters */
         [[nodiscard]] const Matrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
+        [[nodiscard]] T& getResult(size_t index) { return matrix(index, matrix.getColumn() - 1); }
     };
 }
 

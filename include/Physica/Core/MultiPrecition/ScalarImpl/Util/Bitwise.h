@@ -32,7 +32,7 @@ namespace Physica::Core {
     inline unsigned int countBackZeros(unsigned long n) {
         if(n == 0)
             return ScalarUnitWidth;
-        unsigned int count;
+        ScalarUnit count;
     #if UseASM
         asm volatile (
         "bsfq %1, %0\n\t"

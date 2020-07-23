@@ -24,16 +24,16 @@ namespace Physica::Test {
 
             double_extract expect{d_a + d_b};
             double_extract result{double(a + b)};
-            if((expect.structure.sign != result.structure.sign) //NOLINT
-               || (expect.structure.exp != result.structure.exp) //NOLINT
-               || (expect.structure.high != result.structure.high) //NOLINT
-               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+            if((expect.sign != result.sign) //NOLINT
+               || (expect.exp != result.exp) //NOLINT
+               || (expect.high != result.high) //NOLINT
+               || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
                 std::cout << "Performing add test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                        << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
-                        << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
-                        << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
-                        << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
+                        << "low:\t" << expect.low << '\t' << result.low << '\n'
+                        << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                        << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                        << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
                 return;
             }
         }
@@ -55,16 +55,16 @@ namespace Physica::Test {
 
             double_extract expect{d_a - d_b};
             double_extract result{double(a - b)};
-            if((expect.structure.sign != result.structure.sign) //NOLINT
-               || (expect.structure.exp != result.structure.exp) //NOLINT
-               || (expect.structure.high != result.structure.high) //NOLINT
-               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+            if((expect.sign != result.sign) //NOLINT
+               || (expect.exp != result.exp) //NOLINT
+               || (expect.high != result.high) //NOLINT
+               || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
                 std::cout << "Performing sub test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
-                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
-                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
-                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
                 return;
             }
         }
@@ -86,16 +86,16 @@ namespace Physica::Test {
 
             double_extract expect{d_a * d_b};
             double_extract result{double(a * b)};
-            if((expect.structure.sign != result.structure.sign) //NOLINT
-               || (expect.structure.exp != result.structure.exp) //NOLINT
-               || (expect.structure.high != result.structure.high) //NOLINT
-               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+            if((expect.sign != result.sign) //NOLINT
+               || (expect.exp != result.exp) //NOLINT
+               || (expect.high != result.high) //NOLINT
+               || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
                 std::cout << "Performing mul test " "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
-                          << "\nhigh:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
-                          << "\nexp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
-                          << "\nsign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
                 return;
             }
         }
@@ -121,16 +121,16 @@ namespace Physica::Test {
 
             double_extract expect{d_a / d_b};
             double_extract result{double(a / b)};
-            if((expect.structure.sign != result.structure.sign) //NOLINT
-               || (expect.structure.exp != result.structure.exp) //NOLINT
-               || (expect.structure.high != result.structure.high) //NOLINT
-               || abs(static_cast<int>(expect.structure.low) - static_cast<int>(result.structure.low)) > 1) {
+            if((expect.sign != result.sign) //NOLINT
+               || (expect.exp != result.exp) //NOLINT
+               || (expect.high != result.high) //NOLINT
+               || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
                 std::cout << "Performing div test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.structure.low << '\t' << result.structure.low << '\n'
-                          << "high:\t" << expect.structure.high << '\t' << result.structure.high << '\n'
-                          << "exp:\t" << expect.structure.exp << '\t' << result.structure.exp << '\n'
-                          << "sign:\t" << expect.structure.sign << '\t' << result.structure.sign << '\n';
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "high:\t" << expect.high << '\t' << result.high << '\n'
+                          << "exp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "sign:\t" << expect.sign << '\t' << result.sign << '\n';
                 return;
             }
         }

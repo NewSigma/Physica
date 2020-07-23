@@ -8,7 +8,6 @@
 namespace Physica {
     namespace Test {
         void checkGPU() {
-            cudaHostAlloc()
             std::cout << "Checking for CUDA devices.\n";
             /* Version */ {
                 int driverVersion = 0, runtimeVersion = 0;

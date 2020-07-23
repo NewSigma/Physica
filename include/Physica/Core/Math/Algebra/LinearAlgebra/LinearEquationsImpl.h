@@ -39,8 +39,7 @@ namespace Physica::Core {
     */
     //!Reference: Numerical Recipes in C++
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
-    const typename Matrix<T, type, maxRow, maxColumn>::VectorType&
-    LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
+    void LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
         typedef MatrixOperation<T, type, maxRow, maxColumn> Operation;
         const auto rank = matrix.getRow();
         Q_ASSERT(rank + 1 == matrix.getColumn());
@@ -102,7 +101,6 @@ namespace Physica::Core {
                 matrix(0, rank) /= matrix(0, 0);
                 break;
         }
-        return matrix[rank];
     }
 }
 

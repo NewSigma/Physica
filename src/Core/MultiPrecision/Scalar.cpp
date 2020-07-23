@@ -326,6 +326,8 @@ namespace Physica::Core {
      * Is subtract faster than comparing the elements?
      */
     bool absCompare(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+        if(s1.isZero() || s2.isZero())
+            return true;
         if(s1.getPower() > s2.getPower())
             return true;
         if(s1.getPower() < s2.getPower())
