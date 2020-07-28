@@ -29,6 +29,27 @@ namespace Physica::Core {
             Node* last;
             Node* next;
         };
+
+        class Iterator {
+            Node* node;
+        public:
+            ~Iterator() = default;
+
+            Iterator(const Iterator& ite);
+            Iterator(Iterator&& ite) noexcept;
+
+            /* Operators */
+            Iterator& operator=(const Iterator& ite);
+            Iterator& operator=(Iterator&& ite) noexcept;
+            bool operator==(const Iterator& ite) const noexcept { return node == ite; }
+            bool operator!=(const Iterator& ite) const noexcept { return node != ite; }
+            Iterator& operator++();
+            const Iterator operator++(int);
+            T& operator*();
+        private:
+            explicit Iterator(Node* node);
+            Node* getNode() const { return node; }
+        };
     private:
         //Array of nodes, allocated by malloc.
         Node* arr;
@@ -49,13 +70,15 @@ namespace Physica::Core {
         /* Operations */
         void allocate(const T& t);
         void allocate(T&& t);
-        void freeze(Node* node);
-        void restore(Node* node);
+        void freeze(const Iterator& ite);
+        void restore(const Iterator& ite);
         /* Getters */
         //Data must be initialized or the access will be refused.
-        [[nodiscard]] Node* front() const { Q_ASSERT(length == inited); return start; }
         [[nodiscard]] size_t size() const { return length; }
         [[nodiscard]] bool empty() const { return start == nullptr; }
+        ////////////////////////////////////Iterator////////////////////////////////////
+        [[nodiscard]] Iterator begin() const { Iterator(this->start); }
+        [[nodiscard]] Iterator end() const { return Iterator(nullptr); }
     };
 }
 

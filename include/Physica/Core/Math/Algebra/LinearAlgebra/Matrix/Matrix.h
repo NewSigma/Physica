@@ -8,19 +8,77 @@ namespace Physica::Core {
     enum MatrixType {
         Row, Column
     };
-
+    /*!
+     * Matrix class
+     * A matrix can be either fixed matrix, which have its max size defined, or dynamic matrix
+     * , whose size is dynamically changed.
+     * A fixed matrix stores all elements consistently, while dynamic stores a line of elements consistently.
+     * It is recommended that use fixed matrix as small matrix.
+     */
     template<class T = MultiScalar, MatrixType type = Column, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
     class Matrix;
     /*!
-     * Specialization for column matrix.
+     * Specialization for fixed column matrix.
      */
     template<class T, size_t maxRow, size_t maxColumn>
-    class Matrix<T, Column, maxRow, maxColumn>
-            : public CStyleArray<Vector<T, maxRow>, maxColumn> {
+    class Matrix<T, Column, maxRow, maxColumn> : private CStyleArray<T, maxRow * maxColumn> {
     public:
-        typedef CStyleArray<Vector<T, maxRow>, maxColumn> Base;
-        typedef Vector<T, maxRow> VectorType;
-
+        typedef CStyleArray<T, maxRow * maxColumn> Base;
+    private:
+        size_t row;
+        size_t column;
+    public:
+        Matrix() : row(0), column(0) {}
+        Matrix(size_t row, size_t column);
+        Matrix(const Matrix& matrix) = default;
+        Matrix(Matrix&& matrix) noexcept;
+        ~Matrix() = default;
+        /* Operators */
+        [[nodiscard]] T& operator()(size_t r, size_t c) { return Base::operator[](row * r + c); }
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](row * r + c); }
+        Matrix& operator=(const Matrix& m) = default;
+        Matrix& operator=(Matrix&& m) noexcept;
+        /* Getters */
+        [[nodiscard]] constexpr static MatrixType getType() { return Column; }
+        [[nodiscard]] size_t getRow() const { return row; }
+        [[nodiscard]] size_t getColumn() const { return column; }
+    };
+    /*!
+     * Specialization for fixed row matrix.
+     */
+    template<class T, size_t maxRow, size_t maxColumn>
+    class Matrix<T, Row, maxRow, maxColumn> : private CStyleArray<T, maxRow * maxColumn> {
+    public:
+        typedef CStyleArray<T, maxRow * maxColumn> Base;
+    private:
+        size_t row;
+        size_t column;
+    public:
+        Matrix() : row(0), column(0) {}
+        Matrix(size_t row, size_t column);
+        Matrix(const Matrix& matrix) = default;
+        Matrix(Matrix&& matrix) noexcept;
+        ~Matrix() = default;
+        /* Operators */
+        [[nodiscard]] T& operator()(size_t r, size_t c) { return Base::operator[](column * c + r); }
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](column * c + r); }
+        Matrix& operator=(const Matrix& m) = default;
+        Matrix& operator=(Matrix&& m) noexcept;
+        /* Getters */
+        [[nodiscard]] constexpr static MatrixType getType() { return Row; }
+        [[nodiscard]] size_t getRow() const { return row; }
+        [[nodiscard]] size_t getColumn() const { return column; }
+    };
+    /*!
+     * Specialization for dynamic column matrix.
+     */
+    template<class T>
+    class Matrix<T, Column, Dynamic, Dynamic>
+            : public CStyleArray<Vector<T, Dynamic>, Dynamic> {
+    public:
+        typedef CStyleArray<Vector<T, Dynamic>, Dynamic> Base;
+        typedef Vector<T, Dynamic> VectorType;
+    public:
         Matrix() = default;
         explicit Matrix(size_t length);
         Matrix(const Matrix& matrix) = default;
@@ -32,18 +90,18 @@ namespace Physica::Core {
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
-        void appendRow(const Vector<T, maxRow>& v);
-        void appendRow(Vector<T, maxRow>&& v) noexcept;
-        void appendColumn(const Vector<T, maxRow>& v);
-        void appendColumn(Vector<T, maxRow>&& v) noexcept;
+        void appendRow(const Vector<T, Dynamic>& v);
+        void appendRow(Vector<T, Dynamic>&& v) noexcept;
+        void appendColumn(const Vector<T, Dynamic>& v);
+        void appendColumn(Vector<T, Dynamic>&& v) noexcept;
         void appendMatrixRow(const Matrix& m);
         void appendMatrixRow(Matrix&& m);
         void appendMatrixColumn(const Matrix& m);
         void appendMatrixColumn(Matrix&& m);
         void removeRowAt(size_t index);
         inline void removeColumnAt(size_t index);
-        Vector<T, maxRow> cutRow();
-        Vector<T, maxRow> cutColumn();
+        Vector<T, Dynamic> cutRow();
+        Vector<T, Dynamic> cutColumn();
         Matrix<T, Column, Dynamic, Dynamic> cutMatrixRow(size_t from);
         Matrix<T, Column, Dynamic, Dynamic> cutMatrixColumn(size_t from);
         void rowSwap(size_t r1, size_t r2) noexcept;
@@ -56,15 +114,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const { return Base::getLength(); }
     };
     /*!
-     * Specialization for row matrix.
+     * Specialization for dynamic row matrix.
      */
-    template<class T, size_t maxRow, size_t maxColumn>
-    class Matrix<T, Row, maxRow, maxColumn>
-            : public CStyleArray<Vector<T, maxColumn>, maxRow> {
+    template<class T>
+    class Matrix<T, Row, Dynamic, Dynamic>
+            : public CStyleArray<Vector<T, Dynamic>, Dynamic> {
     public:
-        typedef CStyleArray<Vector<T, maxColumn>, maxRow> Base;
-        typedef Vector<T, maxRow> VectorType;
-
+        typedef CStyleArray<Vector<T, Dynamic>, Dynamic> Base;
+        typedef Vector<T, Dynamic> VectorType;
+    public:
         Matrix() = default;
         explicit Matrix(size_t length);
         Matrix(const Matrix& matrix) = default;
@@ -76,18 +134,18 @@ namespace Physica::Core {
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
         /* Matrix Operations */
-        void appendRow(const Vector<T, maxColumn>& v);
-        void appendRow(Vector<T, maxColumn>&& v) noexcept;
-        void appendColumn(const Vector<T, maxColumn>& v);
-        void appendColumn(Vector<T, maxColumn>&& v) noexcept;
+        void appendRow(const Vector<T, Dynamic>& v);
+        void appendRow(Vector<T, Dynamic>&& v) noexcept;
+        void appendColumn(const Vector<T, Dynamic>& v);
+        void appendColumn(Vector<T, Dynamic>&& v) noexcept;
         void appendMatrixRow(const Matrix& m);
         void appendMatrixRow(Matrix&& m);
         void appendMatrixColumn(const Matrix& m);
         void appendMatrixColumn(Matrix&& m);
         inline void removeRowAt(size_t index);
         void removeColumnAt(size_t index);
-        Vector<T, maxColumn> cutRow();
-        Vector<T, maxColumn> cutColumn();
+        Vector<T, Dynamic> cutRow();
+        Vector<T, Dynamic> cutColumn();
         Matrix<T, Row, Dynamic, Dynamic> cutMatrixRow(size_t from);
         Matrix<T, Row, Dynamic, Dynamic> cutMatrixColumn(size_t from);
         void rowSwap(size_t r1, size_t r2) noexcept;

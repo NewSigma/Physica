@@ -59,7 +59,8 @@ namespace Physica::Core {
      * Freeze the node if the node belongs to this list.
      */
     template<class T>
-    void FreezingList<T>::freeze(Node* node) {
+    void FreezingList<T>::freeze(const Iterator& ite) {
+        Node* node = ite.getNode();
         if(node >= arr && node - arr < length) {
             Node* n_last = node->last;
             Node* n_next = node->next;
@@ -74,7 +75,8 @@ namespace Physica::Core {
      * Restore the node if the node belongs to this list.
      */
     template<class T>
-    void FreezingList<T>::restore(Node* node) {
+    void FreezingList<T>::restore(const Iterator& ite) {
+        Node* node = ite.getNode();
         if(node >= arr && node - arr < length) {
             //List is empty.
             if(start == nullptr) {
@@ -109,6 +111,39 @@ namespace Physica::Core {
             node->last = p;
             node->next = nullptr;
         }
+    }
+    ////////////////////////////////////Iterator////////////////////////////////////
+    template<class T>
+    FreezingList<T>::Iterator::Iterator(Node *node) : node(node) {}
+
+    template<class T>
+    FreezingList<T>::Iterator::Iterator(const Iterator& ite) : node(ite.node) {}
+
+    template<class T>
+    FreezingList<T>::Iterator::Iterator(Iterator&& ite) noexcept : node(ite.node) {}
+
+    template<class T>
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(const Iterator &ite) { node = ite.node; } //NOLINT Self assign is ok.
+
+    template<class T>
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(Iterator &&ite) noexcept { node = ite.node; }
+
+    template<class T>
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator++() {
+        node = node->next;
+        return *this;
+    }
+
+    template<class T>
+    const typename FreezingList<T>::Iterator FreezingList<T>::Iterator::operator++(int) { //NOLINT Must return const value.
+        Iterator ite(*this);
+        node = node->next;
+        return ite;
+    }
+
+    template<class T>
+    T& FreezingList<T>::Iterator::operator*() {
+        return node->t;
     }
 }
 

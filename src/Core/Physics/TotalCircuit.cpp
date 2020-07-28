@@ -47,8 +47,9 @@ namespace Physica::Core {
         }
 
         typedef FreezingList<MultiScalar>::Node Node;
-        for(Node* node = resistances.front(); node != nullptr; node = node->next) {
-            resistances.freeze(node);
+        const auto end = resistances.end();
+        for(auto ite = resistances.begin(); ite != end; ++ite) {
+            resistances.freeze(ite);
             /*
              * We first handle the connection between node[0] and the other nodes, except empty node.
              * In the mean time, we will get the position of empty node.
@@ -59,7 +60,7 @@ namespace Physica::Core {
             /* Handle node[0] */ {
                 const int size_1 = static_cast<int>(size) + 1;
                 for(int i = 0; i < nodesCount_1; ++i) {
-                    copyCurrent->setData(&node->t, i, size_1);
+                    copyCurrent->setData(&*ite, i, size_1);
                     connect();
                 }
             }
@@ -67,7 +68,7 @@ namespace Physica::Core {
                 const int nodesCount_2 = nodesCount_1 - 1;
                 for(int i = 0; i < nodesCount_2; ++i) {
                     for(int j = i + 1; j < nodesCount_1; ++j) {
-                        copyCurrent->setData(&node->t, i, j);
+                        copyCurrent->setData(&*ite, i, j);
                         connect();
                     }
                 }
@@ -75,14 +76,14 @@ namespace Physica::Core {
             //Finally, we handle the empty node which connect to other nodes.
             ++nodesCount;
             for(int i = 0; i < nodesCount_1; ++i) {
-                copyCurrent->setData(&node->t, i, nodesCount_1);
+                copyCurrent->setData(&*ite, i, nodesCount_1);
                 connect();
             }
             --nodesCount;
 
             --orderCurrent;
             //This branch finished. Add the temp back.
-            resistances.restore(node);
+            resistances.restore(ite);
         }
     }
     /*!
