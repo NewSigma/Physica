@@ -8,18 +8,18 @@ namespace Physica::Core {
     //////////////////////////////////////////CStyleArray<T, capacity>//////////////////////////////////////////
     template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray()
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(0) {}
+            : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(capacity * sizeof(T))), 0) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not AbstractCStyleArray<T>::allocated. DO NOT try to visit them.
      */
     template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray(size_t length)
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(length) {}
+            : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(capacity * sizeof(T))), length) {}
 
     template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray(const CStyleArray<T, capacity>& array)
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))), length(array.length) {
+            : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(capacity * sizeof(T))), array.length) {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
                 new (arr + i) T(array.arr[i]);
@@ -29,28 +29,17 @@ namespace Physica::Core {
 
     template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray(CStyleArray<T, capacity>&& array) noexcept
-            : arr(array.arr), length(array.length) {
-        array.arr = nullptr;
-        array.length = 0;
-    }
-
-    template<class T, size_t capacity>
-    CStyleArray<T, capacity>::~CStyleArray() {
-        Q_UNUSED(capacity)
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
-        free(arr);
-    }
+            : AbstractCStyleArray<T>(static_cast<Base&&>(array)) {}
 
     template<class T, size_t capacity>
     CStyleArray<T, capacity>& CStyleArray<T, capacity>::operator=(const CStyleArray<T, capacity>& array) {
         if(this != &array) {
             this->~CStyleArray();
-            length = array.length;
+
+            arr = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
             if(QTypeInfo<T>::isComplex)
                 for(size_t i = 0; i < length; ++i)
-                    new (arr + i) T(array.arr[i]);
+                    new (arr + i) T(array[i]);
             else
                 memcpy(arr, array.arr, length * sizeof(T));
         }
@@ -60,22 +49,8 @@ namespace Physica::Core {
     template<class T, size_t capacity>
     CStyleArray<T, capacity>&
     CStyleArray<T, capacity>::operator=(CStyleArray<T, capacity>&& array) noexcept {
-        this->~CStyleArray();
-        arr = array.arr;
-        array.arr = nullptr;
-        length = array.length;
-        array.length = 0;
+        Base::operator=(static_cast<Base&&>(array));
         return *this;
-    }
-
-    template<class T, size_t capacity>
-    bool CStyleArray<T, capacity>::operator==(const CStyleArray<T, capacity>& array) const {
-        if(length != array.length)
-            return false;
-        for(size_t i = 0; i < length; ++i)
-            if(operator[](i) != array[i])
-                return false;
-        return true;
     }
     /*!
      * Return the sub array of current array. \from is included and \to is excluded.
@@ -101,30 +76,10 @@ namespace Physica::Core {
         auto result_length = length - from;
         CStyleArray<T, Dynamic> result(result_length);
         for(size_t i = 0; from < length; ++from, ++i)
-            result.allocate(std::move(arr[from]), i);
-        length = from;
+            result.allocate(std::move(Base::operator[](from)), i);
         return result;
     }
-    /*!
-     * Low level api. Designed for performance.
-     * Simply allocate a \T at position \index.
-     * You must ensure position \index is usable or a memory leak will occur.
-     */
-    template<class T, size_t capacity>
-    inline void CStyleArray<T, capacity>::allocate(const T& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
-            new (arr + index) T(t);
-        else
-            *(arr + index) = t;
-    }
 
-    template<class T, size_t capacity>
-    inline void CStyleArray<T, capacity>::allocate(T&& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
-            new (arr + index) T(std::move(t));
-        else
-            *(arr + index) = t;
-    }
     /*!
      * append() will add a element or array to the end of this array.
      * Wrap structure: append() <- grow() <- allocate()
@@ -149,7 +104,7 @@ namespace Physica::Core {
         const auto new_length = length + t_length;
         t_length = new_length > capacity ? capacity - length : t_length;
         for(size_t i = 0; i < t_length; ++i, ++length)
-            allocate(t[i], length);
+            Base::allocate(t[i], length);
     }
 
     template<class T, size_t capacity>
@@ -172,13 +127,13 @@ namespace Physica::Core {
     template<class T, size_t capacity>
     inline void CStyleArray<T, capacity>::grow(const T& t) {
         Q_ASSERT(length < capacity);
-        allocate(t, length++);
+        Base::allocate(t, length++);
     }
 
     template<class T, size_t capacity>
     inline void CStyleArray<T, capacity>::grow(T&& t) {
         Q_ASSERT(length < capacity);
-        allocate(std::move(t), length++);
+        Base::allocate(std::move(t), length++);
     }
 
     template<class T, size_t capacity>
@@ -189,39 +144,22 @@ namespace Physica::Core {
         --length;
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));
     }
-    /*!
-     * Get the last element in the array and remove it from the array.
-     */
-    template<class T, size_t capacity>
-    T CStyleArray<T, capacity>::cutLast() {
-        Q_ASSERT(length > 0);
-        --length;
-        if(QTypeInfo<T>::isComplex)
-            return T(std::move(arr[length]));
-        else
-            return arr[length];
-    }
-
-    template<class T, size_t capacity>
-    void CStyleArray<T, capacity>::swap(CStyleArray<T, capacity>& array) noexcept {
-        std::swap(arr, array.arr);
-        std::swap(length, array.length);
-    }
     ///////////////////////////////////////CStyleArray<T, Dynamic>//////////////////////////////////////////
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray()
-            : arr(nullptr), length(0), capacity(0) {}
+            : AbstractCStyleArray<T>(nullptr, 0), capacity(0) {}
     /*!
      * Low level api. Designed for performance.
      * Warning: The first \length elements have not AbstractCStyleArray<T>::allocated. DO NOT try to visit them.
      */
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(size_t length)
-            : arr(reinterpret_cast<T*>(malloc(length * sizeof(T)))), length(length), capacity(length) {}
+            : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(length * sizeof(T))), length), capacity(length) {}
 
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(const CStyleArray<T, Dynamic>& array)
-            : arr(reinterpret_cast<T*>(malloc(array.capacity * sizeof(T)))), length(array.length), capacity(array.capacity) {
+            : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(array.capacity * sizeof(T))), array.length)
+            , capacity(array.capacity) {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
                 new (arr + i) T(array.arr[i]);
@@ -231,29 +169,19 @@ namespace Physica::Core {
 
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(CStyleArray<T, Dynamic>&& array) noexcept
-            : arr(array.arr), length(array.length), capacity(array.capacity) {
-        array.arr = nullptr;
-        array.length = 0;
-    }
-
-    template<class T>
-    CStyleArray<T, Dynamic>::~CStyleArray() {
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
-        free(arr);
-    }
+            : AbstractCStyleArray<T>(static_cast<Base&&>(array)), capacity(array.capacity) {}
 
     template<class T>
     CStyleArray<T, Dynamic>& CStyleArray<T, Dynamic>::operator=(const CStyleArray<T, Dynamic>& array) {
         if(this != &array) {
             this->~CStyleArray();
+
             length = array.length;
             capacity = array.capacity;
             arr = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
             if(QTypeInfo<T>::isComplex)
                 for(size_t i = 0; i < length; ++i)
-                    new (arr + i) T(array.arr[i]);
+                    new (arr + i) T(array[i]);
             else
                 memcpy(arr, array.arr, length * sizeof(T));
         }
@@ -262,23 +190,14 @@ namespace Physica::Core {
 
     template<class T>
     CStyleArray<T, Dynamic>& CStyleArray<T, Dynamic>::operator=(CStyleArray<T, Dynamic>&& array) noexcept {
-        this->~CStyleArray();
-        arr = array.arr;
-        array.arr = nullptr;
-        length = array.length;
-        array.length = 0;
+        Base::operator=(static_cast<Base&&>(array));
         capacity = array.capacity;
         return *this;
     }
 
     template<class T>
     bool CStyleArray<T, Dynamic>::operator==(const CStyleArray<T, Dynamic>& array) const {
-        if(length != array.length)
-            return false;
-        for(size_t i = 0; i < length; ++i)
-            if(operator[](i) != array[i])
-                return false;
-        return true;
+        return Base::operator==(array) && capacity == array.capacity;
     }
     /*!
      * Return the sub array of current array. \from is included and \to is excluded.
@@ -308,26 +227,6 @@ namespace Physica::Core {
         length = from;
         return result;
     }
-    /*!
-     * Low level api. Designed for performance.
-     * Simply allocate a \T at position \index.
-     * You must ensure position \index is usable or a memory leak will occur.
-     */
-    template<class T>
-    inline void CStyleArray<T, Dynamic>::allocate(const T& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
-            new (arr + index) T(t);
-        else
-            *(arr + index) = t;
-    }
-
-    template<class T>
-    inline void CStyleArray<T, Dynamic>::allocate(T&& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
-            new (arr + index) T(std::move(t));
-        else
-            *(arr + index) = t;
-    }
     template<class T>
     void CStyleArray<T, Dynamic>::append(const T& t) {
         if(length == capacity)
@@ -349,7 +248,7 @@ namespace Physica::Core {
         if(new_length > capacity)
             resize(new_length);
         for(size_t i = 0; i < t_length; ++i, ++length)
-            allocate(t[i], length);
+            Base::allocate(t[i], length);
     }
 
     template<class T>
@@ -371,20 +270,20 @@ namespace Physica::Core {
     template<class T>
     inline void CStyleArray<T, Dynamic>::grow(const T& t) {
         Q_ASSERT(length < capacity);
-        allocate(t, length++);
+        Base::allocate(t, length++);
     }
 
     template<class T>
     inline void CStyleArray<T, Dynamic>::grow(T&& t) {
         Q_ASSERT(length < capacity);
-        allocate(std::move(t), length++);
+        Base::allocate(std::move(t), length++);
     }
 
     template<class T>
     void CStyleArray<T, Dynamic>::resize(size_t size) {
         if(QTypeInfo<T>::isComplex) {
             if(length > size) {
-                for(size_t i = size; size < length; ++i)
+                for(size_t i = size; i < length; ++i)
                     (arr + i)->~T();
                 length = size;
             }
@@ -416,7 +315,7 @@ namespace Physica::Core {
     void CStyleArray<T, Dynamic>::decrease(size_t size) {
         Q_ASSERT(size <= capacity);
         if(QTypeInfo<T>::isComplex) {
-            for(size_t i = size; size < length; ++i)
+            for(size_t i = size; i < length; ++i)
                 (arr + i)->~T();
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
@@ -431,23 +330,10 @@ namespace Physica::Core {
         --length;
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));
     }
-    /*!
-     * Get the last element in the array and remove it from the array.
-     */
-    template<class T>
-    T CStyleArray<T, Dynamic>::cutLast() {
-        Q_ASSERT(length > 0);
-        --length;
-        if(QTypeInfo<T>::isComplex)
-            return T(std::move(arr[length]));
-        else
-            return arr[length];
-    }
 
     template<class T>
     void CStyleArray<T, Dynamic>::swap(CStyleArray& array) noexcept {
-        std::swap(arr, array.arr);
-        std::swap(length, array.length);
+        Base::swap(array);
         std::swap(capacity, array.capacity);
     }
 }

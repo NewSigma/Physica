@@ -114,19 +114,16 @@ namespace Physica::Core {
     }
     ////////////////////////////////////Iterator////////////////////////////////////
     template<class T>
-    FreezingList<T>::Iterator::Iterator(Node *node) : node(node) {}
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(const Iterator &ite) {
+        node = ite.node;
+        return *this;
+    }
 
     template<class T>
-    FreezingList<T>::Iterator::Iterator(const Iterator& ite) : node(ite.node) {}
-
-    template<class T>
-    FreezingList<T>::Iterator::Iterator(Iterator&& ite) noexcept : node(ite.node) {}
-
-    template<class T>
-    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(const Iterator &ite) { node = ite.node; } //NOLINT Self assign is ok.
-
-    template<class T>
-    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(Iterator &&ite) noexcept { node = ite.node; }
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(Iterator &&ite) noexcept {
+        node = ite.node;
+        return *this;
+    }
 
     template<class T>
     typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator++() {
@@ -139,11 +136,6 @@ namespace Physica::Core {
         Iterator ite(*this);
         node = node->next;
         return ite;
-    }
-
-    template<class T>
-    T& FreezingList<T>::Iterator::operator*() {
-        return node->t;
     }
 }
 

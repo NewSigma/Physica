@@ -35,20 +35,22 @@ namespace Physica::Core {
         public:
             ~Iterator() = default;
 
-            Iterator(const Iterator& ite);
-            Iterator(Iterator&& ite) noexcept;
+            Iterator(const Iterator& ite) : node(ite.node) {}
+            Iterator(Iterator&& ite) noexcept : node(ite.node) {}
 
             /* Operators */
             Iterator& operator=(const Iterator& ite);
             Iterator& operator=(Iterator&& ite) noexcept;
-            bool operator==(const Iterator& ite) const noexcept { return node == ite; }
-            bool operator!=(const Iterator& ite) const noexcept { return node != ite; }
+            bool operator==(const Iterator& ite) const noexcept { return node == ite.node; }
+            bool operator!=(const Iterator& ite) const noexcept { return node != ite.node; }
             Iterator& operator++();
             const Iterator operator++(int);
-            T& operator*();
+            T& operator*() { return node->t; }
         private:
-            explicit Iterator(Node* node);
+            explicit Iterator(Node* node) : node(node) {}
             Node* getNode() const { return node; }
+
+            friend class FreezingList;
         };
     private:
         //Array of nodes, allocated by malloc.
@@ -76,7 +78,7 @@ namespace Physica::Core {
         //Data must be initialized or the access will be refused.
         [[nodiscard]] size_t size() const { return length; }
         [[nodiscard]] bool empty() const { return start == nullptr; }
-        ////////////////////////////////////Iterator////////////////////////////////////
+        /* Iterator */
         [[nodiscard]] Iterator begin() const { Iterator(this->start); }
         [[nodiscard]] Iterator end() const { return Iterator(nullptr); }
     };

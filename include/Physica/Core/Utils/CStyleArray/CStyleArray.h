@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <qglobal.h>
+#include "AbstractCStyleArray.h"
 
 namespace Physica::Core {
     enum { Dynamic = 0 };
@@ -29,32 +30,27 @@ namespace Physica::Core {
      * 2. Use the end pointer of arr instead of length may improve performance.
      */
     template<class T, size_t capacity>
-    class CStyleArray {
-        T* __restrict arr;
-        size_t length;
+    class CStyleArray : public AbstractCStyleArray<T> {
+        typedef AbstractCStyleArray<T> Base;
+        using Base::arr;
+        using Base::length;
     public:
         inline CStyleArray();
         inline explicit CStyleArray(size_t length);
         inline CStyleArray(const CStyleArray& array);
         inline CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray();
+        ~CStyleArray() = default;
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;
-        T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
-        const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
-        bool operator==(const CStyleArray& array) const;
-        bool operator!=(const CStyleArray& array) const { return !(operator==(array)); }
         CStyleArray& operator<<(const T& t) { append(t); return *this; }
         CStyleArray& operator<<(T&& t) { append(std::move(t)); return *this; }
         CStyleArray& operator<<(const CStyleArray& t) { append(t); return *this; }
         CStyleArray& operator<<(CStyleArray&& t) { append(std::move(t)); return *this; }
         /* Helpers */
         CStyleArray<T, Dynamic> subArray(size_t from, size_t to);
-        CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, length); }
+        CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, Base::getLength()); }
         CStyleArray<T, Dynamic> cut(size_t from);
-        inline void allocate(const T& t, size_t index);
-        inline void allocate(T&& t, size_t index);
         void append(const T& t);
         void append(T&& t);
         void append(const CStyleArray& t);
@@ -62,37 +58,26 @@ namespace Physica::Core {
         inline void grow(const T& t);
         inline void grow(T&& t);
         void removeAt(size_t index);
-        T cutLast();
-        void swap(CStyleArray& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return capacity; }
-        [[nodiscard]] bool isEmpty() const { return length == 0; }
-        /* Setters */
-        /*!
-         * Low level api. Designed for performance.
-         * \size must larger than current length. Because we can not delete the elements we do not need if not.
-         * Elements between old length and \size have not allocated. DO NOT try to visit them.
-         */
-        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
     };
 
     template<class T>
-    class CStyleArray<T, Dynamic> {
-        T* __restrict arr;
-        size_t length;
+    class CStyleArray<T, Dynamic> : public AbstractCStyleArray<T> {
+        typedef AbstractCStyleArray<T> Base;
+        using Base::arr;
+        using Base::length;
+
         size_t capacity;
     public:
         inline CStyleArray();
         inline explicit CStyleArray(size_t length);
         inline CStyleArray(const CStyleArray& array);
         inline CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray();
+        ~CStyleArray() = default;
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;
-        T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
-        const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
         bool operator==(const CStyleArray& array) const;
         bool operator!=(const CStyleArray& array) const { return !(operator==(array)); }
         CStyleArray& operator<<(const T& t) { append(t); return *this; }
@@ -103,8 +88,6 @@ namespace Physica::Core {
         CStyleArray<T, Dynamic> subArray(size_t from, size_t to);
         CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, length); }
         CStyleArray<T, Dynamic> cut(size_t from);
-        inline void allocate(const T& t, size_t index);
-        inline void allocate(T&& t, size_t index);
         void append(const T& t);
         void append(T&& t);
         void append(const CStyleArray& t);
@@ -116,19 +99,9 @@ namespace Physica::Core {
         void increase(size_t size);
         void decrease(size_t size);
         void removeAt(size_t index);
-        T cutLast();
         void swap(CStyleArray& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return length; }
         [[nodiscard]] size_t getCapacity() const { return capacity; }
-        [[nodiscard]] bool isEmpty() const { return length == 0; }
-        /* Setters */
-        /*!
-         * Low level api. Designed for performance.
-         * \size must larger than current length. Because we can not delete the elements we do not need if not.
-         * Elements between old length and \size have not allocated. DO NOT try to visit them.
-         */
-        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
     };
 
     template<class T, size_t capacity>
