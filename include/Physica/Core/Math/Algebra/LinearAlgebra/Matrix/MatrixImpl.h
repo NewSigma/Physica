@@ -8,7 +8,32 @@ namespace Physica::Core {
     /////////////////////////////////////Fixed Column Matrix//////////////////////////////////////////
     template<class T, size_t maxRow, size_t maxColumn>
     Matrix<T, Column, maxRow, maxColumn>::Matrix(size_t row, size_t column)
-            : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {}
+            : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
+        Q_ASSERT(row <= maxRow && column <= maxColumn);
+    }
+    /*!
+     * Initializer list constructor for column matrix.
+     *
+     * e.g.
+     * Matrix<T, Column, maxRow, maxColumn> m{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+     * We get a matrix looks like this:
+     * (1, 4, 7)
+     * (2, 5, 8)
+     * (3, 6, 9)
+     */
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, Column, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxRow>> list)
+            : CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
+            , row(list.begin()->getLength()), column(list.size()) {
+        Q_ASSERT(row <= maxRow && column <= maxColumn);
+        size_t i = 0;
+        const auto end = list.end();
+        for(auto ite = list.begin(); ite != end; ++ite, ++i) {
+            const auto& array = *ite;
+            for(size_t j = 0; j < row; ++j)
+                Base::allocate(array[j], i * row + j);
+        }
+    }
 
     template<class T, size_t maxRow, size_t maxColumn>
     Matrix<T, Column, maxRow, maxColumn>::Matrix(Matrix<T, Column, maxRow, maxColumn>&& m) noexcept
@@ -24,7 +49,32 @@ namespace Physica::Core {
     /////////////////////////////////////Fixed Row Matrix//////////////////////////////////////////
     template<class T, size_t maxRow, size_t maxColumn>
     Matrix<T, Row, maxRow, maxColumn>::Matrix(size_t row, size_t column)
-            : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {}
+            : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
+        Q_ASSERT(row <= maxRow && column <= maxColumn);
+    }
+    /*!
+     * Initializer list constructor for row matrix.
+     *
+     * e.g.
+     * Matrix<T, Row, maxRow, maxColumn> m{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+     * We get a matrix looks like this:
+     * (1, 2, 3)
+     * (4, 5, 6)
+     * (7, 8, 9)
+     */
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, Row, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxColumn>> list)
+            : CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
+            , row(list.size()), column(list.begin()->getLength()) {
+        Q_ASSERT(row <= maxRow && column <= maxColumn);
+        size_t i = 0;
+        const auto end = list.end();
+        for(auto ite = list.begin(); ite != end; ++ite, ++i) {
+            const auto& array = *ite;
+            for(size_t j = 0; j < column; ++j)
+                Base::allocate(array[j], i * column + j);
+        }
+    }
 
     template<class T, size_t maxRow, size_t maxColumn>
     Matrix<T, Row, maxRow, maxColumn>::Matrix(Matrix<T, Row, maxRow, maxColumn>&& m) noexcept
@@ -46,7 +96,11 @@ namespace Physica::Core {
     Matrix<T, Column, Dynamic, Dynamic>::Matrix(
             Matrix<T, Column, Dynamic, Dynamic>&& m) noexcept
             : CStyleArray<Vector<T, Dynamic>, Dynamic>(std::move(m)) {}
-            
+
+    template<class T>
+    Matrix<T, Column, Dynamic, Dynamic>::Matrix(std::initializer_list<VectorType> list)
+            : CStyleArray<Vector<T, Dynamic>, Dynamic>(list) {}
+
     template<class T>
     Matrix<T, Column, Dynamic, Dynamic>&
     Matrix<T, Column, Dynamic, Dynamic>::operator=(Matrix<T, Column, Dynamic, Dynamic>&& m) noexcept {
@@ -182,7 +236,11 @@ namespace Physica::Core {
     template<class T>
     Matrix<T, Row, Dynamic, Dynamic>::Matrix(size_t length)
             : CStyleArray<Vector<T, Dynamic>, Dynamic>(length) {}
-    
+
+    template<class T>
+    Matrix<T, Row, Dynamic, Dynamic>::Matrix(std::initializer_list<VectorType> list)
+            : CStyleArray<Vector<T, Dynamic>, Dynamic>(list) {}
+
     template<class T>
     Matrix<T, Row, Dynamic, Dynamic>::Matrix(
             Matrix<T, Row, Dynamic, Dynamic>&& m) noexcept

@@ -18,6 +18,11 @@ namespace Physica::Core {
             : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(capacity * sizeof(T))), length) {}
 
     template<class T, size_t capacity>
+    CStyleArray<T, capacity>::CStyleArray(std::initializer_list<T> list) : AbstractCStyleArray<T>(list) {
+        static_assert(list.size() <= capacity);
+    }
+
+    template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray(const CStyleArray<T, capacity>& array)
             : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(capacity * sizeof(T))), array.length) {
         if(QTypeInfo<T>::isComplex)
@@ -155,6 +160,10 @@ namespace Physica::Core {
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(size_t length)
             : AbstractCStyleArray<T>(reinterpret_cast<T*>(malloc(length * sizeof(T))), length), capacity(length) {}
+
+    template<class T>
+    CStyleArray<T, Dynamic>::CStyleArray(std::initializer_list<T> list)
+            : AbstractCStyleArray<T>(list), capacity(list.size()) {}
 
     template<class T>
     inline CStyleArray<T, Dynamic>::CStyleArray(const CStyleArray<T, Dynamic>& array)

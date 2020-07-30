@@ -29,6 +29,15 @@ namespace Physica::Core {
     }
 
     template<class T>
+    AbstractCStyleArray<T>::AbstractCStyleArray(std::initializer_list<T> list)
+            : arr(reinterpret_cast<T*>(malloc(list.size() * sizeof(T)))), length(list.size()) {
+        size_t i = 0;
+        const auto end = list.end();
+        for(auto ite = list.begin(); ite != end; ++ite, ++i)
+            allocate(T(*ite), i);
+    }
+
+    template<class T>
     AbstractCStyleArray<T>::AbstractCStyleArray(AbstractCStyleArray<T>&& array) noexcept
             : arr(array.arr), length(array.length) {
         array.arr = nullptr;

@@ -30,6 +30,7 @@ namespace Physica::Core {
     public:
         Matrix() : row(0), column(0) {}
         Matrix(size_t row, size_t column);
+        Matrix(std::initializer_list<CStyleArray<T, maxRow>> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;
@@ -56,6 +57,7 @@ namespace Physica::Core {
     public:
         Matrix() : row(0), column(0) {}
         Matrix(size_t row, size_t column);
+        Matrix(std::initializer_list<CStyleArray<T, maxColumn>> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;
@@ -81,6 +83,7 @@ namespace Physica::Core {
     public:
         Matrix() = default;
         explicit Matrix(size_t length);
+        Matrix(std::initializer_list<VectorType> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;
@@ -125,6 +128,7 @@ namespace Physica::Core {
     public:
         Matrix() = default;
         explicit Matrix(size_t length);
+        Matrix(std::initializer_list<VectorType> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;

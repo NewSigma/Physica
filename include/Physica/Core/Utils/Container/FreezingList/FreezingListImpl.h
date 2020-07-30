@@ -20,6 +20,12 @@ namespace Physica::Core {
     }
 
     template<class T>
+    FreezingList<T>::FreezingList(std::initializer_list<T> list) : FreezingList(list.size()) {
+        for(auto& item : list)
+            allocate(item);
+    }
+
+    template<class T>
     FreezingList<T>::~FreezingList() {
         free(arr);
     }

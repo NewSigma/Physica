@@ -63,6 +63,7 @@ namespace Physica::Core {
         size_t inited;
     public:
         explicit FreezingList(size_t length);
+        FreezingList(std::initializer_list<T> list);
         FreezingList(const FreezingList& list) = delete;
         FreezingList(FreezingList&& list) noexcept = delete;
         ~FreezingList();

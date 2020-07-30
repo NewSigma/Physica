@@ -7,7 +7,7 @@
 #include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
-    template<size_t dim = 3, ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<size_t dim, ScalarType type = Float, bool errorTrack = false>
     class Point {
         Scalar<type, errorTrack>* arr;
     public:

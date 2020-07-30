@@ -72,6 +72,7 @@ namespace Physica::Core {
          * @p arr should be allocated by its subclasses using malloc.
          */
         AbstractCStyleArray(T* __restrict arr, size_t length) : arr(arr), length(length) {}
+        AbstractCStyleArray(std::initializer_list<T> list);
     };
 
     template<class T>

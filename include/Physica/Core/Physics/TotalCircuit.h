@@ -6,7 +6,7 @@
 
 #include <vector>
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/FreezingList/FreezingList.h"
+#include "Physica/Core/Utils/Container/FreezingList/FreezingList.h"
 
 namespace Physica::Core {
     class TotalCircuit {

@@ -37,6 +37,7 @@ namespace Physica::Core {
     public:
         inline CStyleArray();
         inline explicit CStyleArray(size_t length);
+        CStyleArray(std::initializer_list<T> list);
         inline CStyleArray(const CStyleArray& array);
         inline CStyleArray(CStyleArray&& array) noexcept;
         ~CStyleArray() = default;
@@ -72,6 +73,7 @@ namespace Physica::Core {
     public:
         inline CStyleArray();
         inline explicit CStyleArray(size_t length);
+        CStyleArray(std::initializer_list<T> list);
         inline CStyleArray(const CStyleArray& array);
         inline CStyleArray(CStyleArray&& array) noexcept;
         ~CStyleArray() = default;

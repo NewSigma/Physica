@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/CStyleArray/CStyleArray.h"
+#include "Physica/Core/Utils/Container/CStyleArray/CStyleArray.h"
 
 namespace Physica::Core {
     /*!
@@ -17,6 +17,7 @@ namespace Physica::Core {
         explicit Vector(size_t length);
         explicit Vector(const Base& array);
         explicit Vector(Base&& array) noexcept;
+        Vector(std::initializer_list<T> list);
         Vector(const Vector<T, maxLength>& vec);
         Vector(Vector<T, maxLength>&& vec) noexcept;
         ~Vector() = default;
