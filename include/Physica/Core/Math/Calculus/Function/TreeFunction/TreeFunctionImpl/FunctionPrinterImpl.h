@@ -1,14 +1,17 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Physica/Core/Math/Calculus/Function/FunctionPrinter.h"
+#ifndef PHYSICA_FUNCTIONPRINTERIMPL_H
+#define PHYSICA_FUNCTIONPRINTERIMPL_H
 
 namespace Physica::Core {
-    FunctionPrinter::FunctionPrinter(const Function& f, std::ostream& os) : f(f), os(os) {}
+    template<ScalarType type, bool errorTrack>
+    FunctionPrinter<type, errorTrack>::FunctionPrinter(const TreeFunction<type, errorTrack>& f, std::ostream& os) : f(f), os(os) {}
 
-    void FunctionPrinter::printImpl(const FunctionTree& functionTree) {
+    template<ScalarType type, bool errorTrack>
+    void FunctionPrinter<type, errorTrack>::printImpl(const TreeFunctionData<type, errorTrack>& functionTree) {
         switch(functionTree.getType()) {
-            case FunctionTree::Value: {
+            case AbstractFunctionTree::Value: {
                 auto pos = f.getVariablePos(functionTree);
                 if(pos != 0)
                     os << "x" << pos;
@@ -16,123 +19,123 @@ namespace Physica::Core {
                     os << double(*functionTree.getValue());
                 return;
             }
-            case FunctionTree::Add:
+            case AbstractFunctionTree::Add:
                 printImpl(*functionTree.getLeft());
                 os << " + ";
                 printImpl(*functionTree.getRight());
                 break;
-            case FunctionTree::Sub:
+            case AbstractFunctionTree::Sub:
                 printImpl(*functionTree.getLeft());
                 os << " - ";
                 printImpl(*functionTree.getRight());
                 break;
-            case FunctionTree::Mul:
+            case AbstractFunctionTree::Mul:
                 printImpl(*functionTree.getLeft());
                 os << " * ";
                 printImpl(*functionTree.getRight());
                 break;
-            case FunctionTree::Div:
+            case AbstractFunctionTree::Div:
                 printImpl(*functionTree.getLeft());
                 os << " / ";
                 printImpl(*functionTree.getRight());
                 break;
-            case FunctionTree::Square:
+            case AbstractFunctionTree::Square:
                 os << '(';
                 printImpl(*functionTree.getLeft());
                 os << ")^2";
                 break;
-            case FunctionTree::Reciprocal:
+            case AbstractFunctionTree::Reciprocal:
                 os << "1 / ";
                 break;
-            case FunctionTree::Sqrt:
+            case AbstractFunctionTree::Sqrt:
                 os << "sqrt";
                 break;
-            case FunctionTree::Factorial:
+            case AbstractFunctionTree::Factorial:
                 os << "factorial";
                 break;
-            case FunctionTree::Ln:
+            case AbstractFunctionTree::Ln:
                 os << "ln";
                 break;
-            case FunctionTree::Log:
+            case AbstractFunctionTree::Log:
                 os << "log_(";
                 printImpl(*functionTree.getLeft());
                 os << ")^(";
                 printImpl(*functionTree.getRight());
                 os << ')';
                 return;
-            case FunctionTree::Exp:
+            case AbstractFunctionTree::Exp:
                 os << "exp";
                 break;
-            case FunctionTree::Cos:
+            case AbstractFunctionTree::Cos:
                 os << "cos";
                 break;
-            case FunctionTree::Sin:
+            case AbstractFunctionTree::Sin:
                 os << "sin";
                 break;
-            case FunctionTree::Tan:
+            case AbstractFunctionTree::Tan:
                 os << "tan";
                 break;
-            case FunctionTree::Sec:
+            case AbstractFunctionTree::Sec:
                 os << "sec";
                 break;
-            case FunctionTree::Csc:
+            case AbstractFunctionTree::Csc:
                 os << "csc";
                 break;
-            case FunctionTree::Cot:
+            case AbstractFunctionTree::Cot:
                 os << "cot";
                 break;
-            case FunctionTree::ArcCos:
+            case AbstractFunctionTree::ArcCos:
                 os << "arccos";
                 break;
-            case FunctionTree::ArcSin:
+            case AbstractFunctionTree::ArcSin:
                 os << "arcsin";
                 break;
-            case FunctionTree::ArcTan:
+            case AbstractFunctionTree::ArcTan:
                 os << "arctan";
                 break;
-            case FunctionTree::ArcSec:
+            case AbstractFunctionTree::ArcSec:
                 os << "arcsec";
                 break;
-            case FunctionTree::ArcCsc:
+            case AbstractFunctionTree::ArcCsc:
                 os << "arccsc";
                 break;
-            case FunctionTree::ArcCot:
+            case AbstractFunctionTree::ArcCot:
                 os << "arccot";
                 break;
-            case FunctionTree::Cosh:
+            case AbstractFunctionTree::Cosh:
                 os << "cosh";
                 break;
-            case FunctionTree::Sinh:
+            case AbstractFunctionTree::Sinh:
                 os << "sinh";
                 break;
-            case FunctionTree::Tanh:
+            case AbstractFunctionTree::Tanh:
                 os << "tanh";
                 break;
-            case FunctionTree::Sech:
+            case AbstractFunctionTree::Sech:
                 os << "sech";
                 break;
-            case FunctionTree::Csch:
+            case AbstractFunctionTree::Csch:
                 os << "csch";
                 break;
-            case FunctionTree::Coth:
+            case AbstractFunctionTree::Coth:
                 os << "coth";
                 break;
-            case FunctionTree::ArcCosh:
+            case AbstractFunctionTree::ArcCosh:
                 os << "arccosh";
                 break;
-            case FunctionTree::ArcSinh:
+            case AbstractFunctionTree::ArcSinh:
                 os << "arcsinh";
                 break;
-            case FunctionTree::ArcTanh:
+            case AbstractFunctionTree::ArcTanh:
                 os << "arctanh";
                 break;
-            case FunctionTree::ArcSech:
+            case AbstractFunctionTree::ArcSech:
                 os << "arcsech";
                 break;
-            case FunctionTree::ArcCsch:
+            case AbstractFunctionTree::ArcCsch:
                 os << "arccsch";
                 break;
-            case FunctionTree::ArcCoth:
+            case AbstractFunctionTree::ArcCoth:
                 os << "arccoth";
                 break;
         }
@@ -141,3 +144,5 @@ namespace Physica::Core {
         os << ')';
     }
 }
+
+#endif

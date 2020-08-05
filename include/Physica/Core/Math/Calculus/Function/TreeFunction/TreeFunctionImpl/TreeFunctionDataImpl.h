@@ -1,44 +1,50 @@
 /*
  * Copyright (c) 2020 NewSigma@163.com. All rights reserved.
  */
-#include "Physica/Core/Math/Calculus/Function/FunctionTree.h"
-
-#include <utility>
+#ifndef PHYSICA_TREEFUNCTIONDATAIMPL_H
+#define PHYSICA_TREEFUNCTIONDATAIMPL_H
 
 namespace Physica::Core {
     /*!
-     * Construct a tree which explains the structure of a \class Function.
-     * If you want to get a node standing by a value or a variable, ask it from a \class Function.
+     * Construct a tree which explains the structure of a \class TreeFunction.
+     * If you want to get a node standing by a value or a variable, ask it from a \class TreeFunction.
      */
-    FunctionTree::FunctionTree(MultiScalar* value) //NOLINT No need to initialize left, right.
-            : value(value), placeHolder(nullptr), type(Value) {}
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(Scalar<scalarType, errorTrack>* value) //NOLINT No need to initialize left, right.
+            : type(Value), value(value), placeHolder(nullptr) {}
 
-    FunctionTree::FunctionTree(FunctionType type, FunctionTree&& left)
-            : type(type), left(new FunctionTree(std::move(left))), right(nullptr) {}
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left)
+            : type(type), left(new TreeFunctionData(std::move(left))), right(nullptr) {}
 
-    FunctionTree::FunctionTree(FunctionType type, FunctionTree&& left, FunctionTree&& right)
-    : type(type), left(new FunctionTree(std::move(left))), right(new FunctionTree(std::move(right))) {}
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right)
+            : type(type), left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))) {}
     /*!
      * May be a large cost function. Declared private to avoid incorrect use.
      */
-    FunctionTree::FunctionTree(const FunctionTree &func) : type(func.type) {
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const TreeFunctionData &func) : AbstractFunctionData(func.getType()) {
         //Optimize: may be use operator ? and reinterpret_cast to avoid branches.
         if(func.type == Value) {
             value = func.value;
             placeHolder = nullptr;
         }
         else {
-            left = new FunctionTree(*func.left);
-            right = new FunctionTree(*func.right);
+            left = new TreeFunctionData(*func.left);
+            right = new TreeFunctionData(*func.right);
         }
     }
 
-    FunctionTree::FunctionTree(FunctionTree&& func) noexcept : left(func.left), right(func.right), type(func.type) {
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(TreeFunctionData&& func) noexcept
+            : AbstractFunctionData(func.getType()), left(func.left), right(func.right) {
         func.left = func.right = nullptr;
     }
 
-    FunctionTree::~FunctionTree() {
-        if(type != Value) {
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>::~TreeFunctionData() {
+        if(getType() != Value) {
             delete left;
             delete right;
         }
@@ -46,34 +52,37 @@ namespace Physica::Core {
     /*!
      * May be a large cost function. Declared private to avoid incorrect use.
      */
-    FunctionTree& FunctionTree::operator=(const FunctionTree& f) {
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(const TreeFunctionData& f) {
         if(this != &f) {
-            this->~FunctionTree();
-            if(f.type == Value) {
+            this->~TreeFunctionData();
+            if(f.getType() == Value) {
                 value = f.value;
                 placeHolder = nullptr;
             }
             else {
-                left = new FunctionTree(*f.left);
-                right = new FunctionTree(*f.right);
+                left = new TreeFunctionData(*f.left);
+                right = new TreeFunctionData(*f.right);
             }
-            type = f.type;
+            AbstractFunctionData::operator=(f);
         }
         return *this;
     }
 
-    FunctionTree& FunctionTree::operator=(FunctionTree&& f) noexcept {
+    template<ScalarType scalarType, bool errorTrack>
+    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(TreeFunctionData&& f) noexcept {
+        AbstractFunctionData::operator=(f);
         left = f.left;
         right = f.right;
-        type = f.type;
         f.left = f.right = nullptr;
         return *this;
     }
 
-    MultiScalar FunctionTree::solve() const {
-        switch(type) {
+    template<ScalarType scalarType, bool errorTrack>
+    Scalar<scalarType, errorTrack> TreeFunctionData<scalarType, errorTrack>::solve() const {
+        switch(getType()) {
             case Value:
-                return MultiScalar(*value);
+                return Scalar<scalarType, errorTrack>(*value);
             case Add:
                 return left->solve() + right->solve();
             case Sub:
@@ -147,3 +156,5 @@ namespace Physica::Core {
         }
     }
 }
+
+#endif

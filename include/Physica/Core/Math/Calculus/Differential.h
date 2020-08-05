@@ -2,11 +2,11 @@
 #define PHYSICA_DIFFERENTIAL_H
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Math/Calculus/Function/Function.h"
+#include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunction.h"
 
 namespace Physica::Core {
     class Differential {
-        Function func;
+        TreeFunction func;
         MultiScalar at;
         MultiScalar stepSize;
     public:
@@ -16,7 +16,7 @@ namespace Physica::Core {
             Forward,
             Backward
         };
-        Differential(Function func, MultiScalar at
+        Differential(TreeFunction func, MultiScalar at
                 , MultiScalar stepSize = MultiScalar(BasicConst::getInstance().getStepSize()));
         [[nodiscard]] MultiScalar solve(DifferentialMethod method);
     };

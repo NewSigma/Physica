@@ -9,11 +9,6 @@
 #include "ScalarType.h"
 
 namespace Physica::Core {
-    enum ScalarType {
-        Float,
-        Double,
-        MultiPrecision
-    };
     /*!
      * \Scalar is a advanced float type that supports multiple precision and error track,
      * which is also compatible with float and double.

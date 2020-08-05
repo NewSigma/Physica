@@ -8,6 +8,14 @@
 /*!
  * This header contains some types and definitions used by Scalar.
  */
+namespace Physica::Core {
+    enum ScalarType {
+        Float,
+        Double,
+        MultiPrecision
+    };
+}
+
 #ifdef PHYSICA_64BIT
     #define ScalarUnitWidth (64U)
 #endif

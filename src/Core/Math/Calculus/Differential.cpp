@@ -1,7 +1,7 @@
 #include "Physica/Core/Math/Calculus/Differential.h"
 
 namespace Physica::Core {
-    Differential::Differential(Function func, MultiScalar at, MultiScalar stepSize)
+    Differential::Differential(TreeFunction func, MultiScalar at, MultiScalar stepSize)
             : func(std::move(func)), at(std::move(at)), stepSize(std::move(stepSize)) {}
     /*!
      * Optimize: if \at is much larger than \stepsize, the result will be 0. May be use talor series
