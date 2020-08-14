@@ -23,6 +23,8 @@ namespace Physica::Core {
         s.byte = nullptr;
     }
 
+    Scalar<MultiPrecision, false>::Scalar(int i) : Scalar(static_cast<SignedScalarUnit>(i)) {}
+
     Scalar<MultiPrecision, false>::Scalar(SignedScalarUnit unit)
             : byte(reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit))))
             , length(unit > 0 ? 1 : -1), power(0) {
@@ -452,6 +454,9 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, false>&& s) noexcept
             : Scalar<MultiPrecision, false>(std::move(s)), a(0) {}
+
+    Scalar<MultiPrecision, true>::Scalar(int i, ScalarUnit a)
+            : Scalar<MultiPrecision, false>(i), a(a) {}
 
     Scalar<MultiPrecision, true>::Scalar(SignedScalarUnit unit, ScalarUnit a)
             : Scalar<MultiPrecision, false>(unit), a(a) {}

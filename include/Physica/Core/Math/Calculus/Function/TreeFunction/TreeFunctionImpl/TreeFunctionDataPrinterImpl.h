@@ -10,7 +10,7 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     void TreeFunctionPrinter<type, errorTrack>::printImpl(const TreeFunctionData<type, errorTrack>& functionTree, bool isLeft) {
-        if(functionTree.getType() == AbstractFunctionTree::Value) {
+        if(functionTree.getType() == Value) {
             auto pos = f.getVariablePos(functionTree);
             if(pos != 0) {
                 printList();
@@ -42,109 +42,109 @@ namespace Physica::Core {
         list.pop_back();
         list.pop_back();
         switch(functionTree.type) {
-            case AbstractFunctionTree::Add:
+            case Add:
                 os << "+";
                 break;
-            case AbstractFunctionTree::Sub:
+            case Sub:
                 os << "-";
                 break;
-            case AbstractFunctionTree::Mul:
+            case Mul:
                 os << "*";
                 break;
-            case AbstractFunctionTree::Div:
+            case Div:
                 os << "/";
                 break;
-            case AbstractFunctionTree::Square:
+            case Square:
                 os << "square";
                 break;
-            case AbstractFunctionTree::Reciprocal:
+            case Reciprocal:
                 os << "reciprocal";
                 break;
-            case AbstractFunctionTree::Sqrt:
+            case Sqrt:
                 os << "sqrt";
                 break;
-            case AbstractFunctionTree::Factorial:
+            case Factorial:
                 os << "factorial";
                 break;
-            case AbstractFunctionTree::Ln:
+            case Ln:
                 os << "ln";
                 break;
-            case AbstractFunctionTree::Log:
+            case Log:
                 os << "log";
                 break;
-            case AbstractFunctionTree::Exp:
+            case Exp:
                 os << "exp";
                 break;
-            case AbstractFunctionTree::Cos:
+            case Cos:
                 os << "cos";
                 break;
-            case AbstractFunctionTree::Sin:
+            case Sin:
                 os << "sin";
                 break;
-            case AbstractFunctionTree::Tan:
+            case Tan:
                 os << "tan";
                 break;
-            case AbstractFunctionTree::Sec:
+            case Sec:
                 os << "sec";
                 break;
-            case AbstractFunctionTree::Csc:
+            case Csc:
                 os << "csc";
                 break;
-            case AbstractFunctionTree::Cot:
+            case Cot:
                 os << "cot";
                 break;
-            case AbstractFunctionTree::ArcCos:
+            case ArcCos:
                 os << "arccos";
                 break;
-            case AbstractFunctionTree::ArcSin:
+            case ArcSin:
                 os << "arcsin";
                 break;
-            case AbstractFunctionTree::ArcTan:
+            case ArcTan:
                 os << "arctan";
                 break;
-            case AbstractFunctionTree::ArcSec:
+            case ArcSec:
                 os << "arcsec";
                 break;
-            case AbstractFunctionTree::ArcCsc:
+            case ArcCsc:
                 os << "arccsc";
                 break;
-            case AbstractFunctionTree::ArcCot:
+            case ArcCot:
                 os << "arccot";
                 break;
-            case AbstractFunctionTree::Cosh:
+            case Cosh:
                 os << "cosh";
                 break;
-            case AbstractFunctionTree::Sinh:
+            case Sinh:
                 os << "sinh";
                 break;
-            case AbstractFunctionTree::Tanh:
+            case Tanh:
                 os << "tanh";
                 break;
-            case AbstractFunctionTree::Sech:
+            case Sech:
                 os << "sech";
                 break;
-            case AbstractFunctionTree::Csch:
+            case Csch:
                 os << "csch";
                 break;
-            case AbstractFunctionTree::Coth:
+            case Coth:
                 os << "coth";
                 break;
-            case AbstractFunctionTree::ArcCosh:
+            case ArcCosh:
                 os << "arccosh";
                 break;
-            case AbstractFunctionTree::ArcSinh:
+            case ArcSinh:
                 os << "arcsinh";
                 break;
-            case AbstractFunctionTree::ArcTanh:
+            case ArcTanh:
                 os << "arctanh";
                 break;
-            case AbstractFunctionTree::ArcSech:
+            case ArcSech:
                 os << "arcsech";
                 break;
-            case AbstractFunctionTree::ArcCsch:
+            case ArcCsch:
                 os << "arccsch";
                 break;
-            case AbstractFunctionTree::ArcCoth:
+            case ArcCoth:
                 os << "arccoth";
                 break;
             default:;

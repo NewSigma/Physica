@@ -22,36 +22,43 @@ namespace Physica::Core {
 
         std::shared_ptr<TreeFunctionData<type, errorTrack>> tree;
     public:
-        TreeFunction(std::shared_ptr<TreeFunctionData<type, errorTrack>> f, size_t variablesLength, size_t constantsLength);
+        TreeFunction(size_t variablesLength, size_t constantsLength);
         TreeFunction(const TreeFunction& func);
         TreeFunction(TreeFunction&& func) noexcept;
         ~TreeFunction() = default;
         /* Operators */
         TreeFunction& operator=(const TreeFunction& func);
         TreeFunction& operator=(TreeFunction&& func) noexcept;
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s);
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2);
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3);
-        friend std::ostream& operator<<(std::ostream& os, const TreeFunction& f);
+        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1) const;
+        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2) const;
+        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3) const;
         /* Operations */
-        [[nodiscard]] Scalar<type, errorTrack> solve() const { return tree->solve(); }
+        [[nodiscard]] Scalar<type, errorTrack> solve() const { Q_ASSERT(tree.get()); return tree->solve(); };
         /* Getters */
         void printTree(std::ostream& os);
         [[nodiscard]] const TreeFunctionData<type, errorTrack>& getTree() const { return *tree; }
         [[nodiscard]] inline TreeFunctionData<type, errorTrack> getVariableNode(size_t index) const;
         [[nodiscard]] inline TreeFunctionData<type, errorTrack> getConstantNode(size_t index) const;
+        /* Setters */
+        void setTree(std::shared_ptr<TreeFunctionData<type, errorTrack>> p) noexcept { tree = std::move(p); }
     };
 
     template<ScalarType type, bool errorTrack>
     inline TreeFunctionData<type, errorTrack> TreeFunction<type, errorTrack>::getVariableNode(size_t index) const {
         Q_ASSERT(index < Base::variables.getLength());
-        return TreeFunctionData(&Base::variables[index]);
+        return TreeFunctionData<type, errorTrack>(&Base::variables[index]);
     }
 
     template<ScalarType type, bool errorTrack>
     inline TreeFunctionData<type, errorTrack> TreeFunction<type, errorTrack>::getConstantNode(size_t index) const {
         Q_ASSERT(index < Base::constants.getLength());
-        return TreeFunctionData(&Base::constants[index]);
+        return TreeFunctionData<type, errorTrack>(&Base::constants[index]);
+    }
+
+    template<ScalarType type, bool errorTrack>
+    inline std::ostream& operator<<(std::ostream& os, const TreeFunction<type, errorTrack>& f) {
+        FunctionPrinter(f, os).print();
+        return os;
     }
 }
 

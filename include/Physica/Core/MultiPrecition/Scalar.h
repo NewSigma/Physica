@@ -36,6 +36,7 @@ namespace Physica::Core {
         Scalar(int length, int power) noexcept;
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
+        Scalar(int i);
         Scalar(SignedScalarUnit unit); //NOLINT Conversion is always available.
         Scalar(double d); //NOLINT Conversion is always available.
         explicit Scalar(const char* s);
@@ -115,6 +116,7 @@ namespace Physica::Core {
         Scalar(Scalar&& s) noexcept;
         Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
         Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
+        Scalar(int i, ScalarUnit a = 0);
         Scalar(SignedScalarUnit unit, ScalarUnit a = 0); //NOLINT Conversion is always available.
         Scalar(double d, ScalarUnit a = 0); //NOLINT Conversion is always available.
         explicit Scalar(const char* s, ScalarUnit a = 0);

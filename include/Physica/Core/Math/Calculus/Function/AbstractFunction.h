@@ -14,10 +14,12 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     class AbstractFunction {
     protected:
-        CStyleArray<Scalar<type, errorTrack>, Dynamic> variables;
-        CStyleArray<Scalar<type, errorTrack>, Dynamic> constants;
+        mutable CStyleArray<Scalar<type, errorTrack>, Dynamic> variables;
+        mutable CStyleArray<Scalar<type, errorTrack>, Dynamic> constants;
     public:
         ~AbstractFunction() = default;
+        /* Setters */
+        void setConstant(Scalar<type, errorTrack> s, size_t index) const;
     protected:
         AbstractFunction(size_t variablesLength, size_t constantsLength);
         AbstractFunction(const AbstractFunction& f);
@@ -26,10 +28,12 @@ namespace Physica::Core {
         AbstractFunction& operator=(const AbstractFunction& f);
         AbstractFunction& operator=(AbstractFunction&& f) noexcept;
         /* Getters */
-        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getVariables() { return variables; }
-        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getConstants() { return constants; }
+        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getVariables() const { return variables; }
+        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getConstants() const { return constants; }
         [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
         [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
+        /* Setters */
+        void setVariable(Scalar<type, errorTrack> s, size_t index) const;
     };
     /*!
      * Get the position of s in \variable, starts from 1.
@@ -48,6 +52,16 @@ namespace Physica::Core {
     size_t AbstractFunction<type, errorTrack>::getConstantPos(Scalar<type, errorTrack>* s) const {
         const size_t distance = s - &constants[0];
         return distance < variables.getLength() ? distance + 1 : 0;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    void AbstractFunction<type, errorTrack>::setVariable(Scalar<type, errorTrack> s, size_t index) const {
+        variables[index] = std::move(s);
+    }
+
+    template<ScalarType type, bool errorTrack>
+    void AbstractFunction<type, errorTrack>::setConstant(Scalar<type, errorTrack> s, size_t index) const {
+        constants[index] = std::move(s);
     }
 }
 

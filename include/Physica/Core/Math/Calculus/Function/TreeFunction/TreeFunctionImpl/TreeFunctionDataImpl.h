@@ -10,7 +10,7 @@ namespace Physica::Core {
      * If you want to get a node standing by a value or a variable, ask it from a \class TreeFunction.
      */
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(Scalar<scalarType, errorTrack>* value) //NOLINT No need to initialize left, right.
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const Scalar<scalarType, errorTrack>* value) //NOLINT No need to initialize left, right.
             : type(Value), value(value), placeHolder(nullptr) {}
 
     template<ScalarType scalarType, bool errorTrack>
@@ -24,22 +24,22 @@ namespace Physica::Core {
      * May be a large cost function. Declared private to avoid incorrect use.
      */
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const TreeFunctionData &func) : AbstractFunctionData(func.getType()) {
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const TreeFunctionData& data) : type(data.type) {
         //Optimize: may be use operator ? and reinterpret_cast to avoid branches.
-        if(func.type == Value) {
-            value = func.value;
+        if(data.type == Value) {
+            value = data.value;
             placeHolder = nullptr;
         }
         else {
-            left = new TreeFunctionData(*func.left);
-            right = new TreeFunctionData(*func.right);
+            left = new TreeFunctionData(*data.left);
+            right = new TreeFunctionData(*data.right);
         }
     }
 
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(TreeFunctionData&& func) noexcept
-            : AbstractFunctionData(func.getType()), left(func.left), right(func.right) {
-        func.left = func.right = nullptr;
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(TreeFunctionData&& data) noexcept
+            : type(data.type), left(data.left), right(data.right) {
+        data.left = data.right = nullptr;
     }
 
     template<ScalarType scalarType, bool errorTrack>
@@ -53,28 +53,28 @@ namespace Physica::Core {
      * May be a large cost function. Declared private to avoid incorrect use.
      */
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(const TreeFunctionData& f) {
-        if(this != &f) {
+    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(const TreeFunctionData& data) {
+        if(this != &data) {
             this->~TreeFunctionData();
-            if(f.getType() == Value) {
-                value = f.value;
+            type = data.type;
+            if(data.type == Value) {
+                value = data.value;
                 placeHolder = nullptr;
             }
             else {
-                left = new TreeFunctionData(*f.left);
-                right = new TreeFunctionData(*f.right);
+                left = new TreeFunctionData(*data.left);
+                right = new TreeFunctionData(*data.right);
             }
-            AbstractFunctionData::operator=(f);
         }
         return *this;
     }
 
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(TreeFunctionData&& f) noexcept {
-        AbstractFunctionData::operator=(f);
-        left = f.left;
-        right = f.right;
-        f.left = f.right = nullptr;
+    TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(TreeFunctionData&& data) noexcept {
+        type = data.type;
+        left = data.left;
+        right = data.right;
+        data.left = data.right = nullptr;
         return *this;
     }
 

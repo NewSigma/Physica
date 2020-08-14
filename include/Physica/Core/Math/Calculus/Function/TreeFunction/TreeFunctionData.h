@@ -26,7 +26,7 @@ namespace Physica::Core {
             };
             struct {
                 //value must be allocated by @class Function. value must not be deleted by TreeFunctionData.
-                Scalar<scalarType, errorTrack>* value{};
+                const Scalar<scalarType, errorTrack>* value{};
                 void* placeHolder{};
             };
         };
@@ -35,20 +35,20 @@ namespace Physica::Core {
     public:
         TreeFunctionData(FunctionType type, TreeFunctionData&& left);
         TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right);
-        TreeFunctionData(TreeFunctionData&& func) noexcept;
+        TreeFunctionData(TreeFunctionData&& data) noexcept;
         ~TreeFunctionData();
 
-        TreeFunctionData& operator=(TreeFunctionData&& f) noexcept;
+        TreeFunctionData& operator=(TreeFunctionData&& data) noexcept;
         /* Getters */
         [[nodiscard]] FunctionType getType() const noexcept { return type; }
         [[nodiscard]] const TreeFunctionData* getLeft() const { return getType() == Value ? nullptr : left; }
         [[nodiscard]] const TreeFunctionData* getRight() const { return getType() == Value ? nullptr : right; }
         [[nodiscard]] const Scalar<scalarType, errorTrack>* getValue() const { return getType() == Value ? value : nullptr; }
     private:
-        explicit TreeFunctionData(Scalar<scalarType, errorTrack>* value);
-        TreeFunctionData(const TreeFunctionData& func);
+        explicit TreeFunctionData(const Scalar<scalarType, errorTrack>* value);
+        TreeFunctionData(const TreeFunctionData& data);
 
-        TreeFunctionData& operator=(const TreeFunctionData& func);
+        TreeFunctionData& operator=(const TreeFunctionData& data);
 
         [[nodiscard]] Scalar<scalarType, errorTrack> solve() const;
         friend class TreeFunction<scalarType, errorTrack>;

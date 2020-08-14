@@ -5,9 +5,15 @@
 #define PHYSICA_TREEFUNCTIONIMPL_H
 
 namespace Physica::Core {
+    /*!
+     * Set the variable count and the constant count of this function, but the exact function form has not been initialized.
+     * Use setTree() to initialize the exact form before calling solve() or a exception will be thrown.
+     *
+     * Optimize: Initialize the tree in the constructor to avoid exceptions.
+     */
     template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>::TreeFunction(std::shared_ptr<TreeFunctionData<type, errorTrack>> f, size_t variablesLength, size_t constantsLength)
-            : Base(variablesLength, constantsLength), tree(std::move(f)) {}
+    TreeFunction<type, errorTrack>::TreeFunction(size_t variablesLength, size_t constantsLength)
+            : Base(variablesLength, constantsLength) {}
 
     template<ScalarType type, bool errorTrack>
     TreeFunction<type, errorTrack>::TreeFunction(const TreeFunction& func)
@@ -34,23 +40,25 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s) {
-        setVariable(std::move(s), 0);
+    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1) const {
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
         return solve();
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2) {
-        setVariable(std::move(s1), 0);
-        setVariable(std::move(s2), 1);
+    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1
+            , Scalar<type, errorTrack> s2) const {
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s2), 1);
         return solve();
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3) {
-        setVariable(std::move(s1), 0);
-        setVariable(std::move(s2), 1);
-        setVariable(std::move(s3), 2);
+    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1
+            , Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3) const {
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s2), 1);
+        AbstractFunction<type, errorTrack>::setVariable(std::move(s3), 2);
         return solve();
     }
 
@@ -58,12 +66,6 @@ namespace Physica::Core {
     void TreeFunction<type, errorTrack>::printTree(std::ostream& os) {
         TreeFunctionPrinter printer(*this, os);
         printer.print();
-    }
-
-    template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const TreeFunction<type, errorTrack>& f) {
-        FunctionPrinter(f, os).print();
-        return os;
     }
 }
 

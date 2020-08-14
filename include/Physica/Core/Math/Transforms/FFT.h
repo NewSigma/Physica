@@ -6,7 +6,7 @@
 
 #include "Physica/Core/MultiPrecition/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
-#include "Physica/Core/Math/Calculus/Integrate.h"
+#include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
     template<ScalarType type = MultiPrecision, bool errorTrack = true>

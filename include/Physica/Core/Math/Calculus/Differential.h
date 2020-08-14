@@ -6,7 +6,7 @@
 
 namespace Physica::Core {
     class Differential {
-        TreeFunction func;
+        TreeFunction<> func;
         MultiScalar at;
         MultiScalar stepSize;
     public:
@@ -16,7 +16,7 @@ namespace Physica::Core {
             Forward,
             Backward
         };
-        Differential(TreeFunction func, MultiScalar at
+        Differential(TreeFunction<> func, MultiScalar at
                 , MultiScalar stepSize = MultiScalar(BasicConst::getInstance().getStepSize()));
         [[nodiscard]] MultiScalar solve(DifferentialMethod method);
     };
