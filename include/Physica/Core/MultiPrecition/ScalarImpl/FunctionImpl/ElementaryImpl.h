@@ -4,7 +4,6 @@
 #ifndef PHYSICA_ELEMENTARYIMPL_H
 #define PHYSICA_ELEMENTARYIMPL_H
 
-#include <cmath>
 #include "BisectionMethod.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/ProbabilityFunction.h"
 /*!
@@ -16,35 +15,53 @@ namespace Physica::Core {
     Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s) {
         return s * s;
     }
-    //!Reference: GMP Doc BaseCase Multiplication
+    /*!
+     * Calculate @param s * @param s, while this function is faster than simply multiply.
+     *
+     * Reference: GMP Doc BaseCase Multiplication
+     */
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s) {
         if(s == BasicConst::getInstance().get_1())
             return Scalar(s);
         else {
-            auto s_size = s.getSize();
-            //Estimate the ed of result first. we will calculate it accurately later.
-            const auto length = 2 * s_size;
+            const auto s_size = s.getSize();
+            //Estimate the length of result first. we will calculate it accurately later.
+            auto length = 2 * s_size;
             Scalar<MultiPrecision, errorTrack> result(length, s.power * 2 + 1);
 
+            memset(result.byte, 0, length * sizeof(ScalarUnit));
             for(int i = 0; i < s_size - 1; ++i)
-                result[i + s_size] = mulAddArrByWord(result.byte + i + i + 1
-                        , s.byte + i + 1, s_size - i - 1, s.byte[i]);
+                result[i + s_size] = mulAddArrByWord(result.byte + i + i + 1, s.byte + i + 1, s_size - i - 1, s.byte[i]);
             //Optimize: Shift count is known, possible to optimize the performance.
             //Fix: accuracy is ignored.
             byteLeftShiftEq(result.byte, length, 1);
 
-            ScalarUnit high, low;
-            for(int i = 0; i < s_size; ++i) {
+            ScalarUnit high, low, copy, temp;
+            bool carry = false;
+            for(unsigned int i = 0; i < s_size; ++i) {
                 mulWordByWord(high, low, s.byte[i], s.byte[i]);
-                result[2 * i] += low;
-                result[2 * i + 1] += high;
+                unsigned int double_i = i << 1U;
+                /* Handle 2 * i */ {
+                    copy = result[double_i];
+                    temp = copy + low + carry;
+                    carry = copy > temp;
+                    result[double_i] = temp;
+                }
+                /* Handle 2 * i + 1 */ {
+                    copy = result[double_i + 1];
+                    temp = copy + high + carry;
+                    carry = copy > temp;
+                    result[double_i + 1] = temp;
+                }
             }
 
-            if(high == 0) {
+            if(high + carry == 0) {
                 --result.power;
+                --length;
+                result.length = length;
                 result.byte =
-                        reinterpret_cast<ScalarUnit*>(realloc(result.byte, (length - 1) * sizeof(ScalarUnit)));
+                        reinterpret_cast<ScalarUnit*>(realloc(result.byte, length * sizeof(ScalarUnit)));
             }
             return result;
         }

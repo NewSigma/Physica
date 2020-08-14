@@ -27,6 +27,7 @@ namespace Physica::Core {
             start += stepSize;
         }
         result *= stepSize;
+        return result;
     }
     //////////////////////////////////Ladder//////////////////////////////////
     template<ScalarType type, bool errorTrack>
@@ -46,6 +47,7 @@ namespace Physica::Core {
             start += stepSize;
         }
         result *= stepSize;
+        return result;
     }
     //////////////////////////////////Simpson//////////////////////////////////
     template<ScalarType type, bool errorTrack>
@@ -74,12 +76,17 @@ namespace Physica::Core {
         result += odd + even;
         result *= stepSize;
         result /= BasicConst::getInstance().get_3();
+        return result;
     }
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     template<ScalarType type, bool errorTrack>
     IntegrateSolver<Tanh_Sinh, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize, size_t pointCount)
             : stepSize(std::move(stepSize)), pointCount(pointCount) {}
-
+    /*!
+     * Reference:
+     * [1] Vanherck, Joren Sorée, Bart Magnus, Wim.
+     * Tanh-sinh quadrature for single and multiple integration using floating-point arithmetic. http://arxiv.org/abs/2007.15057
+     */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> IntegrateSolver<Tanh_Sinh, 1, type, errorTrack>::solve(
             const Integrate<1, type, errorTrack>& i) const {
@@ -87,12 +94,12 @@ namespace Physica::Core {
         const Scalar<type, errorTrack>& to = i.getTo();
 
         const Scalar<type, errorTrack> constant1 = (to - from) >> 1;
-        const Scalar<type, errorTrack> constant2 = (to + from) >> 1;
+        const Scalar<type, errorTrack> constant2 = constant1 + from;
         const auto& PI_2 = MathConst::getInstance().getPI_2();
 
         const TreeFunction<type, errorTrack>& f = i.getFunction();
         //Integrate value on the origin.
-        Scalar<type, errorTrack> result = f(constant2);
+        Scalar<type, errorTrack> result = PI_2 * f(constant2);
         Scalar<type, errorTrack> point_x = 0;
         for(size_t j = 0; j < pointCount; ++j) {
             point_x += stepSize;
@@ -103,6 +110,7 @@ namespace Physica::Core {
             result += phi_derivative * (f(constant2 + constant1 * phi) + f(constant2 - constant1 * phi));
         }
         result *= constant1 * stepSize;
+        return result;
     }
 }
 

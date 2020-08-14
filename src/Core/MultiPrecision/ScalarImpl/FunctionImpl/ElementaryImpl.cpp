@@ -150,15 +150,25 @@ namespace Physica::Core {
         }
         return result;
     }
-
+    /*!
+     * Implemented using taylor's series: e^x = 1 + x + x^2/2 + x^3/3! + ... + x^n/n! + e^(ax)*x^(n+1)/(n+1)!  (0 < a < 1)
+     * We use the first n terms and have a error: E = e^(ax)*x^(n+1)/(n+1)!
+     *
+     * If x > 0, we have E = e^(ax)*x^(n+1)/(n+1)! < e^(x)*x^(n+1)/(n+1)!
+     * So the relative error is E/e^x < x^(n+1)/(n+1)!
+     * If x < 0, we calculate reciprocal of e^-x instead.
+     */
     template<>
     Scalar<MultiPrecision, false> exp(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(1));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        if(s.isNegative())
+            return reciprocal(exp(-s));
+        Scalar<MultiPrecision, false> result = 1;
+        Scalar<MultiPrecision, false> rank = 1;
         Scalar<MultiPrecision, false> temp(s);
+        const auto& relativeError = BasicConst::getInstance().getExpectedRelativeError();
         while(true) {
             temp /= rank;
-            if(temp < BasicConst::getInstance().getExpectedRelativeError())
+            if(absCompare(relativeError, temp))
                 break;
             result += temp;
             temp *= s;
@@ -169,12 +179,17 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> exp(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(1));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        if(s.isNegative())
+            return reciprocal(exp(-s));
+        Scalar<MultiPrecision, true> result = 1;
+        Scalar<MultiPrecision, false> rank = 1;
         Scalar<MultiPrecision, true> temp(s);
+        const auto& relativeError = BasicConst::getInstance().getExpectedRelativeError();
+        int a = 0;
         while(true) {
+            ++a;
             temp /= rank;
-            if(temp < BasicConst::getInstance().getExpectedRelativeError())
+            if(absCompare(relativeError, temp))
                 break;
             result += temp;
             temp *= s;

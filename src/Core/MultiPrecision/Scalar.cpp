@@ -153,7 +153,8 @@ namespace Physica::Core {
         extract.sign = length < 0;
 
         const auto zeroCount = countLeadingZeros(byte[getSize() - 1]);
-        auto exp = power * __WORDSIZE + ScalarUnitWidth - zeroCount - 1 + 1023;
+        //Using long to avoid overflow.
+        const long exp = power * __WORDSIZE + static_cast<long>(ScalarUnitWidth - zeroCount) - 1 + 1023;
         if(exp >= 2047) {
             extract.high = extract.low = 0;
             extract.exp = 2047;
@@ -278,17 +279,24 @@ namespace Physica::Core {
         const int size = getSize();
         const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
+        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        if(remainder == 0) {
+            Scalar copy(*this);
+            copy.power += quotient;
+            return copy;
+        }
 
+        const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry);
         result[0] = 0;
-        for(int i = 0; i < size - 1; ++i) {
+        const int size_1 = size - 1;
+        for(int i = 0; i < size_1; ++i) {
             result[i] |= byte[i] << remainder;
             result[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
         }
-        result[size - 1] |= byte[size - 1] << remainder;
+        result[size_1] |= byte[size_1] << remainder;
         if(carry)
-            result[size] = byte[size - 1] >> (ScalarUnitWidth - remainder);
+            result[size] = byte[size_1] >> (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -300,8 +308,14 @@ namespace Physica::Core {
         const int size = getSize();
         const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
+        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        if(remainder == 0) {
+            Scalar copy(*this);
+            copy.power -= quotient;
+            return copy;
+        }
 
+        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
         if(carry)
             result[size] = byte[size - 1] >> remainder;
@@ -434,7 +448,7 @@ namespace Physica::Core {
     inline bool Scalar<MultiPrecision, false>::matchSign(
             const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         Q_ASSERT(!s1.isZero() && !s2.isZero());
-        return (s1.length ^ s2.length) >= 0;
+        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
     }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     Scalar<MultiPrecision, true>::Scalar() noexcept : Scalar<MultiPrecision, false>(), a(0) {}
@@ -617,21 +631,28 @@ namespace Physica::Core {
         int size = Scalar<MultiPrecision, false>::getSize();
         const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
-        const bool a_carry = countLeadingZeros(a) < remainder;
+        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        if(remainder == 0) {
+            Scalar copy(*this);
+            copy.power += quotient;
+            return copy;
+        }
 
+        const int size_1 = size - 1;
+        const bool carry = countLeadingZeros(byte[size_1]) < remainder;
+        const bool a_carry = countLeadingZeros(a) < remainder;
         Scalar result(length >= 0 ? (size + carry - a_carry) : -(size + carry - a_carry), power + quotient + carry,
                       a_carry ? a >> (ScalarUnitWidth - remainder) : a << remainder); //Add 1 to a if a_carry is true to get more accurate estimation.
         const auto byte_start = byte + a_carry;
         size -= a_carry;
         result[0] = 0;
-        for(int i = 0; i < size - 1; ++i) {
+        for(int i = 0; i < size_1; ++i) {
             result[i] |= byte_start[i] << remainder;
             result[i + 1] = byte_start[i] >> (ScalarUnitWidth - remainder);
         }
-        result[size - 1] |= byte_start[size - 1] << remainder;
+        result[size_1] |= byte_start[size_1] << remainder;
         if(carry)
-            result[size] = byte_start[size - 1] >> (ScalarUnitWidth - remainder);
+            result[size] = byte_start[size_1] >> (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -643,15 +664,22 @@ namespace Physica::Core {
         const int size = Scalar<MultiPrecision, false>::getSize();
         const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
         const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
-        const ScalarUnit accuracy = a >> remainder;
+        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        if(remainder == 0) {
+            Scalar copy(*this);
+            copy.power -= quotient;
+            return copy;
+        }
 
+        const int size_1 = size - 1;
+        const bool carry = (countLeadingZeros(byte[size_1]) + remainder) < ScalarUnitWidth;
+        const ScalarUnit accuracy = a >> remainder;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry)
                 , power - quotient + carry - 1, accuracy > 0 ? accuracy : 0);
         if(carry)
-            result[size] = byte[size - 1] >> remainder;
+            result[size] = byte[size_1] >> remainder;
 
-        for(int i = size - 1; i > 0; --i) {
+        for(int i = size_1; i > 0; --i) {
             result[i] = byte[i] << (ScalarUnitWidth - remainder);
             result[i] |= byte[i - 1] >> remainder;
         }

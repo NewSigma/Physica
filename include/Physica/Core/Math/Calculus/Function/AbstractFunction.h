@@ -19,7 +19,7 @@ namespace Physica::Core {
     public:
         ~AbstractFunction() = default;
         /* Setters */
-        void setConstant(Scalar<type, errorTrack> s, size_t index) const;
+        inline void setConstant(Scalar<type, errorTrack> s, size_t index) const;
     protected:
         AbstractFunction(size_t variablesLength, size_t constantsLength);
         AbstractFunction(const AbstractFunction& f);
@@ -33,7 +33,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
         [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
         /* Setters */
-        void setVariable(Scalar<type, errorTrack> s, size_t index) const;
+        inline void setVariable(Scalar<type, errorTrack> s, size_t index) const;
     };
     /*!
      * Get the position of s in \variable, starts from 1.
@@ -55,12 +55,12 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    void AbstractFunction<type, errorTrack>::setVariable(Scalar<type, errorTrack> s, size_t index) const {
+    inline void AbstractFunction<type, errorTrack>::setVariable(Scalar<type, errorTrack> s, size_t index) const {
         variables[index] = std::move(s);
     }
 
     template<ScalarType type, bool errorTrack>
-    void AbstractFunction<type, errorTrack>::setConstant(Scalar<type, errorTrack> s, size_t index) const {
+    inline void AbstractFunction<type, errorTrack>::setConstant(Scalar<type, errorTrack> s, size_t index) const {
         constants[index] = std::move(s);
     }
 }

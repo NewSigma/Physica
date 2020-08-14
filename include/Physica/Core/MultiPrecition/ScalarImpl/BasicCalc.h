@@ -439,7 +439,7 @@ namespace Physica::Core {
         if(!s1.isZero()) {
             if(s2 != BasicConst::getInstance().get_1()) {
                 const auto s1_size = s1.getSize(), s2_size = s2.getSize();
-                //Add one to avoid precision loss during right shift.
+                //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;
                 auto s1_blank = arr1_len - s1_size;
                 auto arr1 = new ScalarUnit[arr1_len];
@@ -451,7 +451,10 @@ namespace Physica::Core {
                 auto arr2 = new ScalarUnit[arr2_len];
                 memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(ScalarUnit));
                 memset(arr2, 0, s2_blank * sizeof(ScalarUnit));
-
+                /*
+                 * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
+                 * to meet the acquirement of the function divArrByFullArrWith1Word().
+                 */
                 const int s1_shift = static_cast<int>(countLeadingZeros(s1.byte[s1_size - 1])) - 1;
                 if(s1_shift > 0)
                     byteLeftShiftEq(arr1, arr1_len, s1_shift);
@@ -462,7 +465,6 @@ namespace Physica::Core {
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
                 int length = GlobalPrecision;
-                //let s1_copy's power equal to s2_copy, power of the result will change correspondingly.
                 auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
 
                 for(int i = length - 1; i >= 0; --i) {
@@ -473,7 +475,7 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                //1 comes from the algorithm
+                //Accuracy 1 comes from the algorithm
                 return Scalar<MultiPrecision, true>(byte, (s1.length ^ s2.length) < 0 ? -length : length //NOLINT
                         , s1.getPower() - s2.getPower() - 1, 1) >> (s1_shift - s2_shift);
             }
@@ -492,7 +494,7 @@ namespace Physica::Core {
         if(!s1.isZero()) {
             if(s2 != BasicConst::getInstance().get_1()) {
                 const auto s1_size = s1.getSize(), s2_size = s2.getSize();
-                //Add one to avoid precision loss during right shift.
+                //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;
                 auto s1_blank = arr1_len - s1_size;
                 auto arr1 = new ScalarUnit[arr1_len];
@@ -504,7 +506,10 @@ namespace Physica::Core {
                 auto arr2 = new ScalarUnit[arr2_len];
                 memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(ScalarUnit));
                 memset(arr2, 0, s2_blank * sizeof(ScalarUnit));
-
+                /*
+                 * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
+                 * to meet the acquirement of the function divArrByFullArrWith1Word().
+                 */
                 const int s1_shift = static_cast<int>(countLeadingZeros(s1.byte[s1_size - 1])) - 1;
                 if(s1_shift > 0)
                     byteLeftShiftEq(arr1, arr1_len, s1_shift);
@@ -515,7 +520,6 @@ namespace Physica::Core {
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
                 int length = GlobalPrecision;
-                //let s1_copy's power equal to s2_copy, power of the result will change correspondingly.
                 auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
 
                 for(int i = length - 1; i >= 0; --i) {
@@ -526,7 +530,6 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                //1 comes from the algorithm
                 return Scalar(byte, (s1.length ^ s2.length) < 0 ? -length : length //NOLINT
                         , s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
             }

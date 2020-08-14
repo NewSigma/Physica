@@ -7,7 +7,7 @@
 #include "Physica/SystemBits.h"
 
 namespace Physica::Core {
-    /*
+    /*!
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
@@ -47,7 +47,7 @@ namespace Physica::Core {
         return hh + (lh >> (64U / 2U));
     #endif
     }
-    /*
+    /*!
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
@@ -84,7 +84,10 @@ namespace Physica::Core {
         low = (lh << (ScalarUnitWidth / 2U)) + (ll & ScalarUnitLowerMask);
     #endif
     }
-    //Length of result should at least as long as arr.
+    /*!
+     * Multiply the array @param arr with @param n. Write the result to array @param result.
+     * Length of result should at least as long as arr.
+     */
     inline ScalarUnit mulArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
             , size_t length, ScalarUnit n) {
         ScalarUnit carry = 0, high, low;
@@ -96,7 +99,10 @@ namespace Physica::Core {
         }
         return carry;
     }
-    //Length of result should at least as long as arr.
+    /*!
+     * Multiply the array @param arr with @param n. Add the result to array @param result.
+     * Length of result should at least as long as arr.
+     */
     inline ScalarUnit mulAddArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
             , size_t length, ScalarUnit n) {
         ScalarUnit carry = 0, high, low;
@@ -109,7 +115,10 @@ namespace Physica::Core {
         }
         return carry;
     }
-    //Length of result should at least as long as arr.
+    /*!
+     * Multiply the array @param arr with @param n. Subtract the result from array @param result.
+     * Length of result should at least as long as arr.
+     */
     inline ScalarUnit mulSubArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr, size_t length, ScalarUnit n) {
         ScalarUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
