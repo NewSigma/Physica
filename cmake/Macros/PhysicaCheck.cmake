@@ -1,0 +1,11 @@
+macro(PHYSICA_CHECK _name)
+    message(STATUS "Performing ${_name}")
+    try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR ${CMAKE_BINARY_DIR} ${CMAKE_HOME_DIRECTORY}/config/Check/${_name}.cpp)
+    if(NOT ${COMPILE_RESULT_VAR})
+        message(FATAL_ERROR Failed to compile ${_name}.cpp)
+    endif()
+
+    if(${RUN_RESULT_VAR} MATCHES FAILED_TO_RUN)
+        message(FATAL_ERROR Failed to run ${_name})
+    endif()
+endmacro()

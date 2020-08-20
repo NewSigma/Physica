@@ -11,6 +11,7 @@
     #define USE_IN_ASM(x) (void)x
 #endif
 
+//Equals to sizeof(void*).
 #cmakedefine PhysicaWordSize @PhysicaWordSize@
 
 #define PhysicaLittleEndian 0

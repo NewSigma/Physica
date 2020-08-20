@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(Physica VERSION 0.0.1 LANGUAGES CXX CUDA)
+#include all macros
+include(cmake/Macros/PhysicaCheck.cmake)
 #############################################Settings#############################################
 option(RUN_CHECKS "Run Checks" OFF)
+set(UseASM 1)
 set(PHYSICA_COMPILE_TESTS True)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
