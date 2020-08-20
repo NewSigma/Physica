@@ -3,6 +3,7 @@
  */
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecition/ScalarImpl/FunctionImpl/BisectionMethod.h"
 
 namespace Physica::Core {
     template<>
@@ -336,26 +337,28 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arccos(const Scalar<MultiPrecision, false>& s) {
-        return bisectionMethod<false>(cos, s, BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
+        return bisectionMethod<MultiPrecision, false>(cos, s
+                , BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
                 , BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
     }
 
     template<>
     Scalar<MultiPrecision, true> arccos(const Scalar<MultiPrecision, true>& s) {
-        return bisectionMethod<true>(cos, s
+        return bisectionMethod<MultiPrecision, true>(cos, s
                 , BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
                 , BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
     }
 
     template<>
     Scalar<MultiPrecision, false> arcsin(const Scalar<MultiPrecision, false>& s) {
-        return bisectionMethod<false>(sin, s, MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
+        return bisectionMethod<MultiPrecision, false>(sin, s
+                , MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
                 , BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
     }
 
     template<>
     Scalar<MultiPrecision, true> arcsin(const Scalar<MultiPrecision, true>& s) {
-        return bisectionMethod<true>(sin, s
+        return bisectionMethod<MultiPrecision, true>(sin, s
                 , MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
                 , BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
     }

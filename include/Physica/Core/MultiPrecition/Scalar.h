@@ -36,7 +36,7 @@ namespace Physica::Core {
         Scalar(int length, int power) noexcept;
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
-        Scalar(int i);
+        Scalar(int i); //NOLINT Conversion is always available.
         Scalar(SignedScalarUnit unit); //NOLINT Conversion is always available.
         Scalar(double d); //NOLINT Conversion is always available.
         explicit Scalar(const char* s);
@@ -77,6 +77,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
+        /* Setters */
+        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
+        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:
         //Should only be used in add(), sub(), mul() and div(). \byte must be allocated by malloc().
         Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
@@ -116,7 +119,7 @@ namespace Physica::Core {
         Scalar(Scalar&& s) noexcept;
         Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
         Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
-        Scalar(int i, ScalarUnit a = 0);
+        Scalar(int i, ScalarUnit a = 0); //NOLINT Conversion is always available.
         Scalar(SignedScalarUnit unit, ScalarUnit a = 0); //NOLINT Conversion is always available.
         Scalar(double d, ScalarUnit a = 0); //NOLINT Conversion is always available.
         explicit Scalar(const char* s, ScalarUnit a = 0);
@@ -139,8 +142,6 @@ namespace Physica::Core {
         Scalar operator-() const;
         /* Helpers */
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
@@ -151,6 +152,9 @@ namespace Physica::Core {
         [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
         [[nodiscard]] inline Scalar<MultiPrecision, false> getMaximum() const;
         [[nodiscard]] inline Scalar<MultiPrecision, false> getMinimum() const;
+        /* Setters */
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
+        Scalar& clearA() noexcept { a = 0; return *this; }
     private:
         //Should only be used in add(), sub(), mul() and div().
         Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0)
@@ -200,7 +204,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return f < 0; }
         [[nodiscard]] bool isInteger() const;
         /* Setters */
-        static void setA(float b) { Q_UNUSED(b) /* Nothing, for the convenience to implement templates */ }
+        static void setA(float b) { Q_UNUSED(b) /* Nothing, for the convenience of implement templates */ }
+        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
+        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */
         friend class Scalar<Float, true>;
     };
@@ -231,6 +237,7 @@ namespace Physica::Core {
         [[nodiscard]] float getA() const noexcept { return a; }
         /* Setters */
         void setA(float f) { a = f; }
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */
         friend class Scalar<Float, false>;
@@ -270,7 +277,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return d < 0; }
         [[nodiscard]] bool isInteger() const;
         /* Setters */
-        static void setA(double b) { Q_UNUSED(b) /* Nothing, for the convenience to implement templates */ }
+        static void setA(double d) { Q_UNUSED(d) /* Nothing, for the convenience of implement templates */ }
+        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
+        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */
         friend class Scalar<Double, true>;
     };
@@ -300,7 +309,8 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
         /* Setters */
-        void setA(double b) { a = b; }
+        void setA(double d) { a = d; }
+        Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */
         friend class Scalar<Double, false>;

@@ -4,7 +4,6 @@
 #ifndef PHYSICA_ELEMENTARYIMPL_H
 #define PHYSICA_ELEMENTARYIMPL_H
 
-#include "BisectionMethod.h"
 #include "Physica/Core/MultiPrecition/ScalarImpl/ProbabilityFunction.h"
 /*!
  * This file is part of implementations of \Scalar.
