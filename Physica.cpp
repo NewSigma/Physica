@@ -3,17 +3,16 @@
  */
 #include <QApplication>
 #include <QTime>
+#include "Physica/Physica.h"
 #include "Physica/Core/MultiPrecition/Scalar.h"
 #include "Physica/Gui/PhysicaMain.h"
 #include "Physica/Core/Utils/DebugUtil.h"
 
 using namespace Physica::Core;
 static QtMessageHandler handler;
-void init();
-void deInit();
 
 int main(int argc, char** argv) {
-    init();
+    initPhysica();
 
     QApplication::setApplicationName("Physica");
     QApplication::setApplicationVersion("0.0.1");
@@ -28,11 +27,11 @@ int main(int argc, char** argv) {
 
     int exit_code = QApplication::exec();
 
-    deInit();
+    deInitPhysica();
     return exit_code;
 }
 
-void init() {
+void initPhysica() {
     handler = qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {
         QString prefix{};
         prefix.push_back('[');
@@ -68,7 +67,7 @@ void init() {
     MathConst::init();
 }
 
-void deInit() {
+void deInitPhysica() {
     BasicConst::deInit();
     MathConst::deInit();
 }

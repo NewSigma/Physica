@@ -2,11 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 
 project(Physica VERSION 0.0.1 LANGUAGES CXX CUDA)
 #include all macros
-include(cmake/Macros/PhysicaCheck.cmake)
+include(cmake/Modules/PhysicaCheck.cmake)
 #############################################Settings#############################################
 option(RUN_CHECKS "Run Checks" OFF)
 set(UseASM 1)
-set(PHYSICA_COMPILE_TESTS True)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 #Platform related
@@ -49,14 +48,10 @@ find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 include_directories(./include)
 file(GLOB_RECURSE HEADERS include/*.h)
 add_subdirectory(src)
-
-if(${PHYSICA_COMPILE_TESTS})
-    add_subdirectory(test)
-endif()
+#Enable Tests
+enable_testing()
+add_subdirectory(test)
 
 add_executable(Physica Physica.cpp ${HEADERS})
 #############################################Options##############################################
 target_link_libraries(Physica Physica_Core Physica_Gui Qt5::Core Qt5::Widgets)
-if(${PHYSICA_COMPILE_TESTS})
-    target_link_libraries(Physica Physica_Test)
-endif()
