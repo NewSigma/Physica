@@ -55,6 +55,20 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
+    VectorFunction<type, errorTrack>::VectorFunction(const VectorFunction& f)
+            : AbstractFunction<type, errorTrack>(f)
+            , typeVector(f.typeVector)
+            , valueVector(f.valueVector)
+            , valueIte(f.valueIte) {}
+
+    template<ScalarType type, bool errorTrack>
+    VectorFunction<type, errorTrack>::VectorFunction(VectorFunction&& f) noexcept
+            : AbstractFunction<type, errorTrack>(f)
+            , typeVector(std::move(f.typeVector))
+            , valueVector(std::move(f.valueVector))
+            , valueIte(f.valueIte) {}
+
+    template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> VectorFunction<type, errorTrack>::solveImpl(
             typename VectorFunction<type, errorTrack>::FunctionTypeVector::const_iterator& typeIte) const {
         switch(*typeIte++) {

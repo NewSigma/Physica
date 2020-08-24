@@ -20,16 +20,7 @@
 #include "Physica/Core/Math/Optimization/HillClimbingAlgorithm.h"
 
 namespace Physica::Core {
-    /*
-     * The climb mountain algorithm should only be used in simple situation external point to get a global best solution.
-     *
-     * stepSize: Original step size that depend solving time we will use and whether can we get a global solution or not.
-     * minStep: Final step size that depend the precision of our result.
-     *
-     * Operators that need memory free : type(arg)
-     *
-     * Usage: new HillClimbingAlgorithm(args)->getExtremal();
-     */
+
     //TODO Optional: Auto step-size
     HillClimbingAlgorithm::HillClimbingAlgorithm(MultiScalar* f(MultiScalar*), MultiScalar* init, MultiScalar* size) {
         func = f;

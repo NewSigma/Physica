@@ -77,6 +77,9 @@ namespace Physica::Core {
         typename ValueVector::const_iterator valueIte;
     public:
         explicit VectorFunction(const TreeFunction<type, errorTrack>& treeFunc);
+        VectorFunction(const VectorFunction& f);
+        VectorFunction(VectorFunction&& f) noexcept;
+        ~VectorFunction() = default;
         /* Operations */
         Scalar<type, errorTrack> solve() const { valueIte = valueVector.cbegin(); return solveImpl(typeVector.cbegin()); }
     private:

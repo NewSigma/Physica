@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef _Physica_C_GeneAlgorithm_H
-#define _Physica_C_GeneAlgorithm_H
+#ifndef PHYSICA_GENEALGORITHM_H
+#define PHYSICA_GENEALGORITHM_H
 
 #include <ctime>
 
