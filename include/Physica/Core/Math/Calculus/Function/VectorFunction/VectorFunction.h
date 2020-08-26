@@ -80,6 +80,8 @@ namespace Physica::Core {
         VectorFunction(const VectorFunction& f);
         VectorFunction(VectorFunction&& f) noexcept;
         ~VectorFunction() = default;
+        /* Operators */
+        Scalar<type, errorTrack> operator()(const Scalar<type, errorTrack>& s) const;
         /* Operations */
         Scalar<type, errorTrack> solve() const { valueIte = valueVector.cbegin(); return solveImpl(typeVector.cbegin()); }
     private:

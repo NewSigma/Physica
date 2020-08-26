@@ -69,6 +69,12 @@ namespace Physica::Core {
             , valueIte(f.valueIte) {}
 
     template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> VectorFunction<type, errorTrack>::operator()(const Scalar<type, errorTrack>& s) const {
+        AbstractFunction<type, errorTrack>::setVariable(s, 0);
+        return solve();
+    }
+
+    template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> VectorFunction<type, errorTrack>::solveImpl(
             typename VectorFunction<type, errorTrack>::FunctionTypeVector::const_iterator& typeIte) const {
         switch(*typeIte++) {

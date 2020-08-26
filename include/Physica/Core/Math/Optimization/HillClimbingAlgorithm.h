@@ -19,7 +19,6 @@
 #ifndef PHYSICA_HILLCLIMBINGALGORITHM_H
 #define PHYSICA_HILLCLIMBINGALGORITHM_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
 #include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
 
 namespace Physica::Core {

@@ -20,49 +20,66 @@
 #define PHYSICA_GENEALGORITHM_H
 
 #include <ctime>
-
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
+#include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica::Core {
-    class GeneAlgorithm {
+    class AbstractGeneAlgorithm {
     public:
         enum ChooseMode {
             LinearChoose,
             RandomChoose
         };
-        double crossoverRate = 0.6;
-        double mutationRate = 0.1;
 
-        GeneAlgorithm(MultiScalar func(const MultiScalar&), const MultiScalar& lower, const MultiScalar& upper, int pop = 100, ChooseMode mode = RandomChoose);
-        ~GeneAlgorithm();
-
-        MultiScalar** getExtremalPoint();
-        void setMaxGenerations(int maxGenerations);
-        void setMaxTime(int maxTime);
-        void print();
+        struct AlgorithmConfig {
+            float crossoverRate = 0.6;
+            float mutationRate = 0.1;
+            //The size of initial points we will spawn.
+            unsigned int population = 100;
+            //Stopping args
+            unsigned int maxGeneration = 100;
+            ChooseMode mode = LinearChoose;
+        };
+    protected:
+        AlgorithmConfig config;
+    public:
+        ~AbstractGeneAlgorithm() = default;
+        /* Getters */
+        [[nodiscard]] const AlgorithmConfig& getConfig() const { return config; }
+        /* Setters */
+        void setConfig(const AlgorithmConfig& c) { config = c; }
+    protected:
+        explicit AbstractGeneAlgorithm(const AlgorithmConfig& c);
+    };
+    
+    template<size_t dim, ScalarType type>
+    class GeneAlgorithm : public AbstractGeneAlgorithm {
+        static_assert(dim > 0, "dim must be positive.");
+    };
+    
+    template<ScalarType type>
+    class GeneAlgorithm<1, type> : public AbstractGeneAlgorithm {
+    public:
+        struct Range {
+            Scalar<type, false> lowerBound;
+            Scalar<type, false> upperBound;
+        };
     private:
-        //Algorithm basic args.
-        //The size of initial points we should choose.
-        int population;
-        //Function args.
-        MultiScalar (*fitnessFunction)(const MultiScalar&);
-        const MultiScalar* lowerBound;
-        const MultiScalar* upperBound;
-        MultiScalar* regionLength;
-        //Save
-        MultiScalar** points;
-        //Stopping args
-        int generations = 0;
-        clock_t startTime{};
-        int maxGenerations = 100;
-        int maxTime = 600000;
+        VectorFunction<type, false> func;
+        Range range;
+        Scalar<type, false> regionLength;
+        std::vector<Scalar<type, false>> points;
+    public:
+        GeneAlgorithm(const VectorFunction<type, false>& func, const Range& range, const AlgorithmConfig& config);
+        ~GeneAlgorithm() = default;
 
+        Point<2, type> solve() const;
+    private:
         void crossover();
         void mutation();
-        bool shouldStop();
     };
 }
 
-
+#include "GeneAlgorithmImpl.h"
 
 #endif
