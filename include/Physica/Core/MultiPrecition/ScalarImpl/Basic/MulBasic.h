@@ -26,15 +26,16 @@ namespace Physica::Core {
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
-    //FIXME inline will cause incorrect results in release mode.
     inline ScalarUnit mulWordByWordHigh(ScalarUnit n1, ScalarUnit n2) {
     #if UseASM
         ScalarUnit result;
         #ifdef PHYSICA_64BIT
             asm (
-                    "mulq %2"
-                    : "=d"(result)
+                    "mulq %2\n\t"
+                    "movq %%rdx, %0"
+                    : "=a"(result)
                     : "a"(n1), "rm"(n2)
+                    : "%rdx"
             );
         #else
             asm (

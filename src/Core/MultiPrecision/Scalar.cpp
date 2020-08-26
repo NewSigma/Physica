@@ -408,6 +408,7 @@ namespace Physica::Core {
             result = !positive;
         else {
             //The only method left.
+            //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
             Scalar<MultiPrecision, false> subtract = s1 - s2;
             result = subtract.isPositive();
         }
@@ -438,6 +439,7 @@ namespace Physica::Core {
             result = positive;
         else {
             //The only method left.
+            //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
             Scalar<MultiPrecision, false> subtract = s1 - s2;
             result = subtract.isNegative();
         }
@@ -448,6 +450,7 @@ namespace Physica::Core {
         return s1.getPower() == s2.getPower()
                //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
+               //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
                && (s1 - s2).isZero();
     }
 

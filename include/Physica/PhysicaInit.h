@@ -18,8 +18,10 @@
  */
 #ifndef PHYSICA_PHYSICA_H
 #define PHYSICA_PHYSICA_H
-
+/*!
+ * This file contains functions that initialize Physica, tests and examples.
+ */
 void initPhysica();
 void deInitPhysica();
 
-#endif //PHYSICA_PHYSICA_H
+#endif

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Physica.h>
+#include <Physica/PhysicaInit.h>
 #include <Physica/Core/MultiPrecition/Scalar.h>
 
 using namespace Physica::Core;

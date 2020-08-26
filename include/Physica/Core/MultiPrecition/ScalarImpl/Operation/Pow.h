@@ -19,7 +19,6 @@
 #ifndef PHYSICA_POW_H
 #define PHYSICA_POW_H
 
-//TODO Not tested
 namespace Physica::Core {
     //!Compute a ^ unit.
     template<bool errorTrack>

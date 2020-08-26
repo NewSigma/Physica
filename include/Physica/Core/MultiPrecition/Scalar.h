@@ -178,7 +178,6 @@ namespace Physica::Core {
         friend class Scalar<MultiPrecision, false>;
     };
     /* Compare */
-    //FIXME: absCompare behaves different with operator>.
     bool absCompare(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
     bool operator> (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
     bool operator< (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);

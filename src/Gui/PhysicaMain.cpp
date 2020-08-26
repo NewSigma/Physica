@@ -79,7 +79,7 @@ namespace Physica::Gui {
                 auto keyEvent = (QKeyEvent*)event;
                 if(keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Return) {
                     lastCalcTime = clock();
-                    //TODO
+                    //Execute something, not implemented.
                     clock_t end = clock();
                     statusBar()->showMessage(QString::fromStdString("Calculate Time: " + std::to_string(end - lastCalcTime) + " ms"));
                     return true;
