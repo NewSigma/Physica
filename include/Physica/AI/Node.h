@@ -44,18 +44,21 @@ namespace Physica::AI {
     public:
         explicit Node(int id, Layer* layer);
         Node(const Node&) = delete;
+        /* Operators */
         Node& operator=(const Node&) = delete;
-
+        /* Operations */
         [[nodiscard]] MultiScalar calc() const;
-        [[nodiscard]] Layer* getLayer() const { return parentLayer; }
-        const std::map<int, int>& getForwardConnections() { return forwardConnections; }
-        const std::map<int, int>& getBackwardConnections() { return backwardConnections; }
-        void setActiveFunc(MultiScalar (*func)(const MultiScalar&)) { activeFunc = func; }
         bool connect(int toNode, int toPoint);
         void disconnect(int toNode);
-
+        /* Getters */
+        [[nodiscard]] Layer* getLayer() const { return parentLayer; }
+        [[nodiscard]] const std::map<int, int>& getForwardConnections() { return forwardConnections; }
+        [[nodiscard]] const std::map<int, int>& getBackwardConnections() { return backwardConnections; }
+        /* Getters */
+        void setActiveFunc(MultiScalar (*func)(const MultiScalar&)) { activeFunc = func; }
+    private:
         void handleLoss();
-
+        /* Friends */
         friend class DNN;
         friend class Layer;
     };

@@ -48,7 +48,7 @@ namespace Physica::Core {
         QVector<Boundary> boundaries;
     public:
         FDM(size_t column, size_t row);
-
+        /* Operations */
         void addBoundary(const Boundary& boundary, const T& value);
         void loop();
         /* Getters */

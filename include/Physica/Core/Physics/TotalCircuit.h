@@ -62,12 +62,12 @@ namespace Physica::Core {
         Connection* orderCurrent;
     public:
         explicit TotalCircuit(std::vector<MultiScalar> v);
-        TotalCircuit(const TotalCircuit&) = default;
-        TotalCircuit(TotalCircuit&&) noexcept = default;
+        TotalCircuit(const TotalCircuit&) = delete;
+        TotalCircuit(TotalCircuit&&) noexcept = delete;
         ~TotalCircuit();
         /* Operators */
-        TotalCircuit& operator=(const TotalCircuit&) = default;
-        TotalCircuit& operator=(TotalCircuit&&) noexcept = default;
+        TotalCircuit& operator=(const TotalCircuit&) = delete;
+        TotalCircuit& operator=(TotalCircuit&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] const std::vector<MultiScalar>& getResult() const noexcept { return result; }
     private:

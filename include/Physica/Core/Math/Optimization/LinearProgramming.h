@@ -73,12 +73,11 @@ namespace Physica::Core {
         bool setTarget(const Vector<>& v);
         bool setTarget(Vector<>&& v);
     private:
-    public:
         void initialize();
         void pivot(size_t basic, size_t nonBasic);
         void solveImpl();
-        size_t findMinConst() const;
-        size_t findPositiveVariable() const;
+        [[nodiscard]] size_t findMinConst() const;
+        [[nodiscard]] size_t findPositiveVariable() const;
     };
 }
 

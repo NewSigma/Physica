@@ -24,7 +24,7 @@ namespace Physica::Core {
     /*!
      * Basic consts that initialize directly.
      */
-    BasicConst::BasicConst() : MaxPower(16) {
+    BasicConst::BasicConst() {
         plotPoints = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(20));
         auto temp = new Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
         (*temp)[0] = 1;

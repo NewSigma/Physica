@@ -22,6 +22,8 @@
  * This file is part of implementations of \FFT.
  * Do not include this header file, include FFT.h instead.
  */
+#include "FFT.h"
+
 namespace Physica::Core {
     /*!
      * Improve:
@@ -34,30 +36,44 @@ namespace Physica::Core {
             , Scalar<type, false> distance) : data(std::move(data)), distance(std::move(distance)) {}
 
     template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(const FFT& fft) : data(fft.data) {}
+    FFT<type, errorTrack>::FFT(const FFT& fft) : data(fft.data) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(FFT&& fft) noexcept : data(std::move(fft.data)) {}
+    FFT<type, errorTrack>::FFT(FFT&& fft) noexcept : data(std::move(fft.data)) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     FFT<type, errorTrack>& FFT<type, errorTrack>::operator=(const FFT& fft) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         data = fft.data;
         return *this;
     }
 
     template<ScalarType type, bool errorTrack>
     FFT<type, errorTrack>& FFT<type, errorTrack>::operator=(FFT&& fft) noexcept {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         data = std::move(fft.data);
         return *this;
     }
 
     template<ScalarType type, bool errorTrack>
     inline void FFT<type, errorTrack>::transform() {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         transformImpl((MathConst::getInstance() / data.getLength()) << 1);
     }
 
     template<ScalarType type, bool errorTrack>
     inline void FFT<type, errorTrack>::invTransform() {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         transformImpl(-(MathConst::getInstance() / data.getLength()) << 1);
     }
 

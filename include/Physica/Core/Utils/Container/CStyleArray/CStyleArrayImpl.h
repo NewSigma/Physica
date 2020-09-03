@@ -34,6 +34,7 @@ namespace Physica::Core {
 
     template<class T, size_t capacity>
     CStyleArray<T, capacity>::CStyleArray(std::initializer_list<T> list) : AbstractCStyleArray<T>(list) {
+        Q_UNUSED(capacity)
         static_assert(list.size() <= capacity);
     }
 
@@ -77,6 +78,7 @@ namespace Physica::Core {
      */
     template<class T, size_t capacity>
     CStyleArray<T, Dynamic> CStyleArray<T, capacity>::subArray(size_t from, size_t to) {
+        Q_UNUSED(capacity)
         Q_ASSERT(from < to && to <= length);
         const auto result_length = to - from;
         CStyleArray<T, Dynamic> result(result_length);
@@ -92,6 +94,7 @@ namespace Physica::Core {
      */
     template<class T, size_t capacity>
     CStyleArray<T, Dynamic> CStyleArray<T, capacity>::cut(size_t from) {
+        Q_UNUSED(capacity)
         Q_ASSERT(from < length);
         auto result_length = length - from;
         CStyleArray<T, Dynamic> result(result_length);
@@ -158,6 +161,7 @@ namespace Physica::Core {
 
     template<class T, size_t capacity>
     void CStyleArray<T, capacity>::removeAt(size_t index) {
+        Q_UNUSED(capacity)
         Q_ASSERT(index < length);
         if(QTypeInfo<T>::isComplex)
             (arr + index)->~T();
@@ -356,7 +360,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    void CStyleArray<T, Dynamic>::swap(CStyleArray& array) noexcept {
+    void CStyleArray<T, Dynamic>::swap(CStyleArray<T, Dynamic>& array) noexcept {
         Base::swap(array);
         std::swap(capacity, array.capacity);
     }

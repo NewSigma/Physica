@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Calculus/Function/TreeFunction/FunctionDerivative.h"
+
 /*!
- * Empty file, created to avoid compile error.
+ * This file is created to help IDE inspect template codes,
+ * it is not necessary and may be removed in the future versions.
  */

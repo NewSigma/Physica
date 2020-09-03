@@ -34,7 +34,7 @@ namespace Physica::Core {
         start = arr;
     }
 
-    template<class T>
+    template<class T> //NOLINT length and inited will be initialized.
     FreezingList<T>::FreezingList(std::initializer_list<T> list) : FreezingList(list.size()) {
         for(auto& item : list)
             allocate(item);
@@ -135,7 +135,7 @@ namespace Physica::Core {
     }
     ////////////////////////////////////Iterator////////////////////////////////////
     template<class T>
-    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(const Iterator &ite) {
+    typename FreezingList<T>::Iterator& FreezingList<T>::Iterator::operator=(const Iterator &ite) { //NOLINT Self assign is ok.
         node = ite.node;
         return *this;
     }

@@ -47,6 +47,9 @@ namespace Physica::Core {
 
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         delete[] chain;
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
@@ -61,6 +64,9 @@ namespace Physica::Core {
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;
 
@@ -95,6 +101,8 @@ namespace Physica::Core {
     //!Both \from and \to are included.
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         if(from == to)
             return Matrix<T, type, Dynamic, Dynamic>(*chain[from]);
         const auto cut_at = point[from][to];

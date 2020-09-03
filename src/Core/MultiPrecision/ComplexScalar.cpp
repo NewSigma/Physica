@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/MultiPrecition/ComplexScalar.h"
+
 /*!
- * This file is exist to avoid compiling errors. Detailed implementations are in ComplexScalarImpl.h.
+ * This file is created to help IDE inspect template codes,
+ * it is not necessary and may be removed in the future versions.
  */

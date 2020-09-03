@@ -36,7 +36,9 @@ namespace Physica::AI {
         else
             return activeFunc(parentLayer->getNet()->getInputs() * vector + bias);
     }
-//Return true if connection is successfully built or false if failed.
+    /*!
+     * Return true if connection is successfully built or false if failed.
+     */
     bool Node::connect(int toNode, int toPoint) {
         DNN& net = *parentLayer->getNet();
         if(parentLayer->getId() < net.getSize() - 1) {
@@ -50,7 +52,10 @@ namespace Physica::AI {
         }
         return false;
     }
-//After this operation, we ensure no connection exists between *this and the node with the index toNode at next layer.
+    /*!
+     * After this operation,
+     * we ensure no connection exists between *this and the node with the index toNode at next layer.
+     */
     void Node::disconnect(int toNode) {
         auto ite = forwardConnections.find(toNode);
         if(ite != forwardConnections.end()) {

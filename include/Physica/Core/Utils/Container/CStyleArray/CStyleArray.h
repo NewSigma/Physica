@@ -74,6 +74,10 @@ namespace Physica::Core {
         inline void grow(const T& t);
         inline void grow(T&& t);
         void removeAt(size_t index);
+        /*
+         * Swap() is not provided, using the swap() of father class instead. That is enough.
+         */
+        //void swap(CStyleArray& array) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getCapacity() { return capacity; }
     };

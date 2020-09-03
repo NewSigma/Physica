@@ -22,10 +22,15 @@
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
  */
+#include "IntegrateSolver.h"
+
 namespace Physica::Core {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<ScalarType type, bool errorTrack>
-    IntegrateSolver<Rectangular, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize) : stepSize(std::move(stepSize)) {}
+    IntegrateSolver<Rectangular, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize)
+            : stepSize(std::move(stepSize)) {
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> IntegrateSolver<Rectangular, 1, type, errorTrack>::solve(
@@ -46,7 +51,10 @@ namespace Physica::Core {
     }
     //////////////////////////////////Ladder//////////////////////////////////
     template<ScalarType type, bool errorTrack>
-    IntegrateSolver<Ladder, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize) : stepSize(std::move(stepSize)) {}
+    IntegrateSolver<Ladder, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize)
+            : stepSize(std::move(stepSize)) {
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> IntegrateSolver<Ladder, 1, type, errorTrack>::solve(
@@ -66,7 +74,10 @@ namespace Physica::Core {
     }
     //////////////////////////////////Simpson//////////////////////////////////
     template<ScalarType type, bool errorTrack>
-    IntegrateSolver<Simpson, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize) : stepSize(std::move(stepSize)) {}
+    IntegrateSolver<Simpson, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize)
+            : stepSize(std::move(stepSize)) {
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> IntegrateSolver<Simpson, 1, type, errorTrack>::solve(
@@ -96,7 +107,9 @@ namespace Physica::Core {
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     template<ScalarType type, bool errorTrack>
     IntegrateSolver<Tanh_Sinh, 1, type, errorTrack>::IntegrateSolver(Scalar<type, false> stepSize, size_t pointCount)
-            : stepSize(std::move(stepSize)), pointCount(pointCount) {}
+            : stepSize(std::move(stepSize)), pointCount(pointCount) {
+        Q_UNUSED(errorTrack)
+    }
     /*!
      * Reference:
      * [1] Vanherck, Joren Sorée, Bart Magnus, Wim.

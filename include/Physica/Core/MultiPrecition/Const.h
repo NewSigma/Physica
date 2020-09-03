@@ -48,8 +48,6 @@ namespace Physica::Core {
         const Scalar<MultiPrecision, false>* Minus_4;
         const Scalar<MultiPrecision, false>* _10;
     public:
-        const int MaxPower;
-
         BasicConst();
         ~BasicConst();
         static void init();

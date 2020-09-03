@@ -33,11 +33,18 @@ namespace Physica::Core {
 
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(LinearEquations&& l) noexcept
-            : matrix(std::move(l.matrix)) {}
+            : matrix(std::move(l.matrix)) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
+    }
 
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>& LinearEquations<T, type, maxRow, maxColumn>::operator=(
             LinearEquations&& l) noexcept {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         matrix = std::move(l.matrix);
     }
     /*!
@@ -55,6 +62,10 @@ namespace Physica::Core {
     //!Reference: Numerical Recipes in C++
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     void LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
+
         typedef MatrixOperation<T, type, maxRow, maxColumn> Operation;
         const auto rank = matrix.getRow();
         Q_ASSERT(rank + 1 == matrix.getColumn());

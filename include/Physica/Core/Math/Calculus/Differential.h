@@ -28,7 +28,7 @@ namespace Physica::Core {
         MultiScalar at;
         MultiScalar stepSize;
     public:
-        //Reference: Scalar Recipes in C++
+        //Reference: Numerical Recipes in C++
         enum DifferentialMethod {
             DoublePoint,
             Forward,

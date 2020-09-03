@@ -40,9 +40,14 @@ namespace Physica::Core {
                 TreeFunctionData* right;
             };
             struct {
-                //value must be allocated by @class Function. value must not be deleted by TreeFunctionData.
+                //value must be allocated by @class Function and must not be deleted by TreeFunctionData.
                 const Scalar<scalarType, errorTrack>* value{};
-                void* placeHolder{};
+                /*
+                 * This place holder is declared to help clear the data of the first union,
+                 * that is, we use 'placeHolder = nullptr' rather than 'right = nullptr' to
+                 * indicate thar we are operating the second struct instead of the first.
+                 */
+                [[maybe_unused]] void* placeHolder{};
             };
         };
         //If type equals to @enum Value, we use the second struct in the union.

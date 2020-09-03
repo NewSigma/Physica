@@ -20,6 +20,7 @@
 #define PHYSICA_HILLCLIMBINGALGORITHM_H
 
 #include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
+#include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica::Core {
     /*!
@@ -57,7 +58,7 @@ namespace Physica::Core {
         HillClimbingAlgorithm(HillClimbingAlgorithm& alg);
         ~HillClimbingAlgorithm() = default;
         /* Operations */
-        Scalar<type, false> solve() const;
+        Point<2, type, false> solve() const;
         /* Getters */
         [[nodiscard]] Scalar<type, false> getMinStep() const { return minStep; }
         [[nodiscard]] State getState() const { return state; }

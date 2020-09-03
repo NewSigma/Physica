@@ -19,5 +19,6 @@
 #include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
 
 /*!
- * This is a empty file, created to avoid compile errors.
+ * This file is created to help IDE inspect template codes,
+ * it is not necessary and may be removed in the future versions.
  */

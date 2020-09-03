@@ -16,4 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
+#include "Physica/Core/Math/Calculus/Integrate/IntegrateSolver.h"
+
+/*!
+ * This file is created to help IDE inspect template codes,
+ * it is not necessary and may be removed in the future versions.
+ */

@@ -34,12 +34,13 @@ namespace Physica::AI {
         ~Layer();
         Layer(const Layer&) = delete;
         Layer& operator=(const Layer&) = delete;
-
+        /* Operators */
         Node& operator[](int i) { return *nodes[i]; }
-        DNN* getNet() const { return parentNet; }
-        int getSize() const { return nodes.size(); }
-        int getId() const { return id; }
-
+        /* Getters */
+        [[nodiscard]] DNN* getNet() const { return parentNet; }
+        [[nodiscard]] int getSize() const { return nodes.size(); }
+        [[nodiscard]] int getId() const { return id; }
+        /* Operations */
         void update();
         void handleLoss();
     };

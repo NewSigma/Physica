@@ -177,6 +177,8 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     void TreeFunctionPrinter<type, errorTrack>::printList() {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         for(const char* str : list)
             os << str;
     }

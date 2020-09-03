@@ -49,6 +49,7 @@ namespace Physica::Core {
 
     template<ScalarType type>
     Point<2, type> GeneAlgorithm<1, type>::solve() const {
+        Q_UNUSED(type)
         unsigned int generation = 0;
         while (generation < config.maxGeneration) {
             crossover();
@@ -86,7 +87,8 @@ namespace Physica::Core {
 
     template<ScalarType type>
     void GeneAlgorithm<1, type>::mutation() {
-        if(double(randomScalar<MultiPrecision, false>()) < config.mutationRate) {
+        Q_UNUSED(type)
+        if(double(Physica::Core::randomScalar<MultiPrecision, false>()) < config.mutationRate) {
             unsigned int randomIndex = random() % config.population;
             points[randomIndex] =
                     range.lowerBound + randomScalar<MultiPrecision, false>() * regionLength;

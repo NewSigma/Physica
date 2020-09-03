@@ -41,17 +41,19 @@ namespace Physica::AI {
         ~DNN();
         DNN(const DNN&) = delete;
         DNN& operator=(const DNN&) = delete;
-
+        /* Operators */
         Layer& operator[](int i) const { return *layers[i]; }
+        /* Operations */
+        void loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect);
+        void train() const;
+        [[nodiscard]] MultiScalar predict() const;
+        /* Getters */
         [[nodiscard]] const Vector<MultiScalar>& getInputs() const { return inputs; }
         [[nodiscard]] int getInputSize() const { return inputSize; }
         [[nodiscard]] int getSize() const { return layers.size(); }
-
-        void loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect);
+        /* Setters */
         void setLearnRate(const MultiScalar& n) { learnRate = n; }
-        void train() const;
-        [[nodiscard]] MultiScalar predict() const;
-
+        /* Friends */
         friend class Node;
     };
 }

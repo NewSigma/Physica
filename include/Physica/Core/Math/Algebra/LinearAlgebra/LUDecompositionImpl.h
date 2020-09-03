@@ -41,6 +41,9 @@ namespace Physica::Core {
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(const LUDecomposition& l)
             : matrix(l.matrix), biasOrder(reinterpret_cast<size_t*>(malloc(l.matrix.getRow() * sizeof(size_t)))) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         const auto rank = l.matrix.getRow();
         for(size_t i = 0; i < rank; ++i) {
             biasOrder[i] = l.biasOrder[i];
@@ -50,12 +53,18 @@ namespace Physica::Core {
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(LUDecomposition&& l) noexcept
             : matrix(std::move(l.matrix)), biasOrder(l.biasOrder) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         l.biasOrder = nullptr;
     }
 
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
             const LUDecomposition& l) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         if(this != &l) {
             matrix = l.matrix;
             realloc(biasOrder, matrix.getRow() * sizeof(size_t));
@@ -66,6 +75,9 @@ namespace Physica::Core {
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
             LUDecomposition&& l) noexcept {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         this->~LUDecomposition();
         matrix = std::move(l.matrix);
         biasOrder = l.biasOrder;
@@ -74,6 +86,9 @@ namespace Physica::Core {
 
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::~LUDecomposition() {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         free(biasOrder);
     }
     /*!
@@ -85,6 +100,9 @@ namespace Physica::Core {
      */
     template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
     void LUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
+        Q_UNUSED(type)
+        Q_UNUSED(maxRow)
+        Q_UNUSED(maxColumn)
         const auto startAlphaIndex = column + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
             T temp(matrix(j, column));

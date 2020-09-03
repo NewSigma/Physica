@@ -39,7 +39,7 @@ namespace Physica::Core {
             , state(alg.state) {}
 
     template<ScalarType type>
-    Scalar<type, false> HillClimbingAlgorithm<1, type>::solve() const {
+    Point<2, type, false> HillClimbingAlgorithm<1, type>::solve() const {
         if(state != Ready)
             return func(x_initial);
 
@@ -80,7 +80,7 @@ namespace Physica::Core {
             x = x_last + stepSize;
             y = func(x);
         }
-        return y_result;
+        return Point<2, type, false>(x_result, y_result);
     }
 }
 

@@ -28,15 +28,24 @@ namespace Physica::Core {
      */
     template<ScalarType type, bool errorTrack>
     TreeFunction<type, errorTrack>::TreeFunction(size_t variablesLength, size_t constantsLength)
-            : Base(variablesLength, constantsLength) {}
+            : Base(variablesLength, constantsLength) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     TreeFunction<type, errorTrack>::TreeFunction(const TreeFunction& func)
-            : Base(func), tree(func.tree) {}
+            : Base(func), tree(func.tree) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     TreeFunction<type, errorTrack>::TreeFunction(TreeFunction&& func) noexcept
-            : Base(std::move(func)), tree(std::move(func.tree)) {}
+            : Base(std::move(func)), tree(std::move(func.tree)) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType type, bool errorTrack>
     TreeFunction<type, errorTrack>& TreeFunction<type, errorTrack>::operator=(const TreeFunction<type, errorTrack>& func) {
@@ -79,6 +88,8 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     void TreeFunction<type, errorTrack>::printTree(std::ostream& os) {
+        Q_UNUSED(type)
+        Q_UNUSED(errorTrack)
         TreeFunctionPrinter printer(*this, os);
         printer.print();
     }

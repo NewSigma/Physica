@@ -30,16 +30,24 @@ namespace Physica::Core {
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left)
-            : type(type), left(new TreeFunctionData(std::move(left))), right(nullptr) {}
+            : type(type), left(new TreeFunctionData(std::move(left))), right(nullptr) {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
+    }
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right)
-            : type(type), left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))) {}
+            : type(type), left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))) {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
+    }
     /*!
      * May be a large cost function. Declared private to avoid incorrect use.
      */
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const TreeFunctionData& data) : type(data.type) {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
         //Optimize: may be use operator ? and reinterpret_cast to avoid branches.
         if(data.type == Value) {
             value = data.value;
@@ -54,11 +62,15 @@ namespace Physica::Core {
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(TreeFunctionData&& data) noexcept
             : type(data.type), left(data.left), right(data.right) {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
         data.left = data.right = nullptr;
     }
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::~TreeFunctionData() {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
         if(getType() != Value) {
             delete left;
             delete right;
@@ -69,6 +81,8 @@ namespace Physica::Core {
      */
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(const TreeFunctionData& data) {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
         if(this != &data) {
             this->~TreeFunctionData();
             type = data.type;
@@ -86,6 +100,8 @@ namespace Physica::Core {
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>& TreeFunctionData<scalarType, errorTrack>::operator=(TreeFunctionData&& data) noexcept {
+        Q_UNUSED(scalarType)
+        Q_UNUSED(errorTrack)
         type = data.type;
         left = data.left;
         right = data.right;
