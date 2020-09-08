@@ -453,6 +453,27 @@ namespace Physica::Core {
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
                && (s1 - s2).isZero();
     }
+    /*!
+     * Set this scalar to its integer approximation which is closer to 0.
+     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
+     */
+    void Scalar<MultiPrecision, false>::toInteger() noexcept {
+        if(power < 0) {
+            byte = reinterpret_cast<ScalarUnit*>(realloc(byte, sizeof(ScalarUnit)));
+            length = 1;
+            power = 0;
+            return;
+        }
+        const long new_length = power + 1; //Declared long to avoid overflow.
+        if(new_length >= length)
+            return;
+        /* Move and adjust the size */ {
+            const auto new_size = new_length * sizeof(ScalarUnit);
+            memmove(byte, byte + length - new_length, new_size); //Optimize: possible to optimize it if there is no overlapping
+            byte = reinterpret_cast<ScalarUnit*>(realloc(byte, new_size));
+        }
+        length = static_cast<int>(new_length); //We have proved that length > temp.
+    }
 
     void Scalar<MultiPrecision, false>::swap(Scalar<MultiPrecision, false>& s) noexcept {
         std::swap(byte, s.byte);
@@ -757,6 +778,13 @@ namespace Physica::Core {
             length = length < 0 ? -size : size;
         }
         return *this;
+    }
+    /*!
+     * Change this scalar to a integer and set its accuracy to 0. See also Scalar<MultiPrecision, false>::toInteger().
+     */
+    void Scalar<MultiPrecision, true>::toInteger() noexcept {
+        Scalar<MultiPrecision, false>::toInteger();
+        a = 0;
     }
 
     void Scalar<MultiPrecision, true>::swap(

@@ -77,6 +77,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
+        void toInteger() noexcept;
         void swap(Scalar& s) noexcept;
         static inline bool matchSign(const Scalar& s1, const Scalar& s2);
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
@@ -157,6 +158,7 @@ namespace Physica::Core {
         Scalar operator-() const;
         /* Helpers */
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
+        void toInteger() noexcept;
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
