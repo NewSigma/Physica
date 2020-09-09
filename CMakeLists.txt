@@ -36,10 +36,6 @@ set(CMAKE_CUDA_FLAGS "\
 if(${RUN_CHECKS})
     add_subdirectory(config)
 endif()
-#############################################Settings#############################################
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 ##############################################Libs################################################
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 

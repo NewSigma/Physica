@@ -460,6 +460,7 @@ namespace Physica::Core {
     void Scalar<MultiPrecision, false>::toInteger() noexcept {
         if(power < 0) {
             byte = reinterpret_cast<ScalarUnit*>(realloc(byte, sizeof(ScalarUnit)));
+            byte[0] = 0;
             length = 1;
             power = 0;
             return;
