@@ -2,7 +2,7 @@
  * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -57,6 +57,22 @@ namespace Physica::Core {
         for(; temp < s; ++temp)
             result -= combination(s, temp) * bernoulli(temp) / (s - temp + 1);
         return result;
+    }
+    /*!
+     * Calculates the division which is a integer. s1 and s2 must be integer.
+     */
+    template<ScalarType type>
+    Scalar<type, false> div(const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger());
+        return (s1 / s2).toInteger();
+    }
+    /*!
+     * Calculate the remainder. s1 and s2 must be integer.
+     */
+    template<ScalarType type>
+    Scalar<type, false> mod(const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger());
+        return s1 - div(s1, s2) * s2;
     }
 }
 

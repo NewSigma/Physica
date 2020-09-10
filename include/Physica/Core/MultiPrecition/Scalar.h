@@ -2,7 +2,7 @@
  * Copyright 2019 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -77,7 +77,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
-        void toInteger() noexcept;
+        void toInteger();
         void swap(Scalar& s) noexcept;
         static inline bool matchSign(const Scalar& s1, const Scalar& s2);
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
@@ -158,7 +158,7 @@ namespace Physica::Core {
         Scalar operator-() const;
         /* Helpers */
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
-        void toInteger() noexcept;
+        void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
         static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
@@ -207,6 +207,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
+        void toInteger();
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -244,6 +245,7 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
+        void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -280,6 +282,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         Scalar& toAbs() noexcept { d = fabs(d); return *this; }
+        void toInteger();
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -317,6 +320,7 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
+        void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }

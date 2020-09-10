@@ -21,7 +21,7 @@
 #include <Physica/PhysicaInit.h>
 #include <Physica/Core/MultiPrecition/Scalar.h>
 
-using Physica::Core::MultiScalar;
+using namespace Physica::Core;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 /*!
@@ -153,17 +153,46 @@ bool numericalDivTest(unsigned int loop) {
     return true;
 }
 /*!
+ * Get the type name of the scalar from its type.
+ */
+constexpr const char* fromTypeToString(ScalarType type) {
+    switch(type) {
+        case Float:
+            return "Float";
+        case Double:
+            return "Double";
+        case MultiPrecision:
+            return "MultiPrecision";
+    }
+}
+
+template<ScalarType type>
+inline bool isEqual(Scalar<type, false>& s, double d) {
+    return s[0] == static_cast<long>(d);
+}
+
+template<>
+inline bool isEqual<Float>(Scalar<Float, false>& s, double d) {
+    return double(s) == d;
+}
+
+template<>
+inline bool isEqual<Double>(Scalar<Double, false>& s, double d) {
+    return double(s) == d;
+}
+/*!
  * Tests function toInteger(), return true if passed.
  */
+template<ScalarType type>
 bool toIntegerTest(unsigned int loop) {
     const double max_2 = std::default_random_engine::max() >> 1U;
     for(unsigned int i = 0; i < loop; ++i) {
         //100000 is a arbitrary big number.
         const double temp = (engine() >> 1U) / max_2 * 100000;
-        MultiScalar s(temp);
+        Scalar<type, false> s(temp);
         s.toInteger();
-        if(s[0] != static_cast<long>(temp)) { //s and static_cast<long>(temp) must not larger than 2^63.
-            std::cout << "toIntegerTest failed: Casting " << temp;
+        if(isEqual(s, temp)) {
+            std::cout << "toIntegerTest<" << fromTypeToString(type) << "> failed: Casting " << temp;
             return false;
         }
     }
@@ -178,7 +207,9 @@ int main(int argc, char** argv) {
             && numericalSubTest(iterateCount)
             && numericalMulTest(iterateCount)
             && numericalDivTest(iterateCount)
-            && toIntegerTest(iterateCount);
+            && toIntegerTest<Float>(iterateCount)
+            && toIntegerTest<Double>(iterateCount)
+            && toIntegerTest<MultiPrecision>(iterateCount);
     deInitPhysica();
     return !result;
 }

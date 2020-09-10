@@ -2,7 +2,7 @@
  * Copyright 2019 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -457,7 +457,7 @@ namespace Physica::Core {
      * Set this scalar to its integer approximation which is closer to 0.
      * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
      */
-    void Scalar<MultiPrecision, false>::toInteger() noexcept {
+    void Scalar<MultiPrecision, false>::toInteger() {
         if(power < 0) {
             byte = reinterpret_cast<ScalarUnit*>(realloc(byte, sizeof(ScalarUnit)));
             byte[0] = 0;
@@ -783,7 +783,7 @@ namespace Physica::Core {
     /*!
      * Change this scalar to a integer and set its accuracy to 0. See also Scalar<MultiPrecision, false>::toInteger().
      */
-    void Scalar<MultiPrecision, true>::toInteger() noexcept {
+    void Scalar<MultiPrecision, true>::toInteger() {
         Scalar<MultiPrecision, false>::toInteger();
         a = 0;
     }
@@ -801,6 +801,34 @@ namespace Physica::Core {
         return result;
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
+    /*!
+     * Set this scalar to its integer approximation which is closer to 0.
+     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
+     */
+    void Scalar<Float, false>::toInteger() {
+        float_extract extract{f};
+        const auto exp = extract.exp;
+        if(exp <= 0) {
+            f = 0;
+            return;
+        }
+        //exp > 0
+        unsigned int mask = ~0U;
+        unsigned int shift;
+        if(exp <= 16) {
+            shift = 16 - exp;
+            mask >>= shift;
+            mask <<= shift;
+            extract.low = 0;
+            extract.high = extract.high & mask;
+        }
+        else if(exp <= 23) {
+            shift = 23 - exp;
+            mask >>= shift;
+            mask <<= shift;
+            extract.low = extract.low & mask;
+        }
+    }
     /*!
      * Inspect if a float is a integer through its binary expression.
      */
@@ -827,9 +855,42 @@ namespace Physica::Core {
         return exp + zeros >= 150;
     }
 
+    void Scalar<Float, true>::toInteger() {
+        Scalar<Float, false>::toInteger();
+        a = 0;
+    }
+
     void Scalar<Float, true>::swap(Scalar<Float, true>& s) noexcept {
         std::swap(a, s.a);
         Scalar<Float, false>::swap(s);
+    }
+    /*!
+     * Set this scalar to its integer approximation which is closer to 0.
+     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
+     */
+    void Scalar<Double, false>::toInteger() {
+        double_extract extract{d};
+        const auto exp = extract.exp;
+        if(exp <= 0) {
+            d = 0;
+            return;
+        }
+        //exp > 0
+        unsigned int mask = ~0U;
+        unsigned int shift;
+        if(exp <= 32) {
+            shift = 32 - exp;
+            mask >>= shift;
+            mask <<= shift;
+            extract.low = 0;
+            extract.high = extract.high & mask;
+        }
+        else if(exp <= 52) {
+            shift = 52 - exp;
+            mask >>= shift;
+            mask <<= shift;
+            extract.low = extract.low & mask;
+        }
     }
     /*!
      * Inspect if a float is a integer through its binary expression.
@@ -855,6 +916,11 @@ namespace Physica::Core {
          * We move 1023 to the right hand side to avoid underflow.
          */
         return exp + zeros >= 1075;
+    }
+
+    void Scalar<Double, true>::toInteger() {
+        Scalar<Double, false>::toInteger();
+        a = 0;
     }
 
     void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {
