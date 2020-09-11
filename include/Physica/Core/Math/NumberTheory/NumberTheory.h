@@ -74,6 +74,63 @@ namespace Physica::Core {
         Q_ASSERT(s1.isInteger() && s2.isInteger());
         return s1 - div(s1, s2) * s2;
     }
+    /*!
+     * Implementation of Euclidean algorithm.
+     * Different from decreasesTechnique(), it has better performance to big integers.
+     */
+    template<ScalarType type>
+    Scalar<type, false> euclideanAlgorithm(const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger());
+        Scalar<type, false>* bigger, *smaller;
+        if(s1 < s2) {
+            smaller = s1;
+            bigger = s2;
+        }
+        else {
+            smaller = s2;
+            bigger = s1;
+        }
+        Scalar<type, false> x(bigger), y(smaller);
+        while(!y.isZero()) {
+            x = mod(x, y);
+            swap(x, y);
+        }
+        return x;
+    }
+    /*!
+     * Implementation of decreases technique.
+     * Different from euclideanAlgorithm(),
+     * it has better performance to small integers because subtract is faster than division.
+     *
+     * It is recommended that s1 and s2 are less than INT_MAX(approximately) to avoid overflow.
+     */
+    template<ScalarType type>
+    Scalar<type, false> decreasesTechnique(const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
+        Q_ASSERT(s1.isInteger() && s2.isInteger());
+        Scalar<type, false>* bigger, *smaller;
+        if(s1 < s2) {
+            smaller = s1;
+            bigger = s2;
+        }
+        else {
+            smaller = s2;
+            bigger = s1;
+        }
+        Scalar<type, false> x(bigger), y(smaller);
+        int shift = 0; //May overflow here
+        while(isEven(x) && isEven(y)) {
+            Q_ASSERT(shift < INT_MAX); //Add a check
+            x >>= 1;
+            y >>= 1;
+            ++shift;
+        }
+
+        while(!y.isZero()) {
+            x = x - y;
+            swap(x, y);
+        }
+        return x << shift;
+    }
 }
 
 #endif

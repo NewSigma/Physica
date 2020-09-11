@@ -207,7 +207,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
-        void toInteger();
+        inline void toInteger();
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -282,7 +282,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         Scalar& toAbs() noexcept { d = fabs(d); return *this; }
-        void toInteger();
+        inline void toInteger();
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }

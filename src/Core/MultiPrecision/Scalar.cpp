@@ -806,28 +806,7 @@ namespace Physica::Core {
      * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
      */
     void Scalar<Float, false>::toInteger() {
-        float_extract extract{f};
-        const auto exp = extract.exp;
-        if(exp <= 0) {
-            f = 0;
-            return;
-        }
-        //exp > 0
-        unsigned int mask = ~0U;
-        unsigned int shift;
-        if(exp <= 16) {
-            shift = 16 - exp;
-            mask >>= shift;
-            mask <<= shift;
-            extract.low = 0;
-            extract.high = extract.high & mask;
-        }
-        else if(exp <= 23) {
-            shift = 23 - exp;
-            mask >>= shift;
-            mask <<= shift;
-            extract.low = extract.low & mask;
-        }
+        modff(f, &f);
     }
     /*!
      * Inspect if a float is a integer through its binary expression.
@@ -869,28 +848,7 @@ namespace Physica::Core {
      * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
      */
     void Scalar<Double, false>::toInteger() {
-        double_extract extract{d};
-        const auto exp = extract.exp;
-        if(exp <= 0) {
-            d = 0;
-            return;
-        }
-        //exp > 0
-        unsigned int mask = ~0U;
-        unsigned int shift;
-        if(exp <= 32) {
-            shift = 32 - exp;
-            mask >>= shift;
-            mask <<= shift;
-            extract.low = 0;
-            extract.high = extract.high & mask;
-        }
-        else if(exp <= 52) {
-            shift = 52 - exp;
-            mask >>= shift;
-            mask <<= shift;
-            extract.low = extract.low & mask;
-        }
+        modf(d, &d);
     }
     /*!
      * Inspect if a float is a integer through its binary expression.
