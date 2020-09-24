@@ -25,6 +25,14 @@
 namespace Physica::Core {
     template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector() : Base() {}
+
+    template<class T, size_t maxLength>
+    template<ExpressionType type, class T1, class T2>
+    Vector<T, maxLength>::Vector(const VectorExpression<type, T1, T2>& expression) : Base(expression.getLength()) {
+        const size_t length = expression.getLength();
+        for(size_t i = 0; i < length; ++i)
+            Base::allocate(expression[i], i);
+    }
     /*!
      * Elements must not be accessed before they are initialized.
      */
@@ -51,6 +59,17 @@ namespace Physica::Core {
         const auto length = Base::getLength();
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).toOpposite();
+    }
+
+    template<class T, size_t maxLength>
+    template<ExpressionType type, class T1, class T2>
+    Vector<T, maxLength>& Vector<T, maxLength>::operator=(const VectorExpression<type, T1, T2>& exp) {
+        static_assert(maxLength == 0, "The length of expression is uncertain, which can not be assigned to a vector with fixed size.");
+        this->~Vector();
+        for(size_t i = 0; i < exp.getLength(); ++i) {
+            Base::allocate(exp[i], i);
+        }
+        return *this;
     }
 
     template<class T, size_t maxLength>
@@ -111,38 +130,32 @@ namespace Physica::Core {
     template<class T, size_t maxLength>
     std::ostream& operator<<(std::ostream& os, const Vector<T, maxLength>& v) {
         os << '(';
-        const auto length_1 = v.getLength() - 1;
-        for(size_t i = 0; i < length_1; ++i)
-            os << v[i] << ", ";
-        os << v[length_1] << ')';
+        auto length = v.getLength();
+        if(length) {
+            --length;
+            for(size_t i = 0; i < length; ++i)
+                os << v[i] << ", ";
+            os << v[length];
+        }
+        os << ')';
         return os;
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v) {
-        const auto len = v.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(-v[i], i);
-        return result;
+    inline VectorExpression<ExpressionType::Minus, Vector<T, maxLength>> operator-(const Vector<T, maxLength>& v) {
+        return VectorExpression<ExpressionType::Minus, Vector<T, maxLength>>(v);
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator+(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
-        const auto len = v1.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v1[i] + v2[i], i);
-        return result;
+    inline VectorExpression<ExpressionType::Add, Vector<T, maxLength>, Vector<T, maxLength>>
+            operator+(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
+        return VectorExpression<ExpressionType::Add, Vector<T, maxLength>, Vector<T, maxLength>>(v1, v2);
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
-        const auto len = v1.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v1[i] - v2[i], i);
-        return result;
+    inline VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, Vector<T, maxLength>>
+            operator-(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) {
+        return VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, Vector<T, maxLength>>(v1, v2);
     }
 
     template<class T, size_t maxLength>
@@ -155,39 +168,23 @@ namespace Physica::Core {
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator+(const Vector<T, maxLength>& v, const T& n) {
-        const auto len = v.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v[i] + n, i);
-        return result;
+    VectorExpression<ExpressionType::Add, Vector<T, maxLength>, T> operator+(const Vector<T, maxLength>& v, const T& s) {
+        return VectorExpression<ExpressionType::Add, Vector<T, maxLength>, T>(v, s);
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator-(const Vector<T, maxLength>& v, const T& n) {
-        const auto len = v.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v[i] - n, i);
-        return result;
+    VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, T> operator-(const Vector<T, maxLength>& v, const T& s) {
+        return VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, T>(v, s);
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator*(const Vector<T, maxLength>& v, const T& n) {
-        const auto len = v.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v[i] * n, i);
-        return result;
+    VectorExpression<ExpressionType::Mul, Vector<T, maxLength>, T> operator*(const Vector<T, maxLength>& v, const T& s) {
+        return VectorExpression<ExpressionType::Mul, Vector<T, maxLength>, T>(v, s);
     }
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength> operator/(const Vector<T, maxLength>& v, const T& n) {
-        const auto len = v.getLength();
-        Vector<T, maxLength> result((CStyleArray<T, maxLength>(len)));
-        for(size_t i = 0; i < len; ++i)
-            result.allocate(v[i] / n, i);
-        return result;
+    VectorExpression<ExpressionType::Div, Vector<T, maxLength>, T> operator/(const Vector<T, maxLength>& v, const T& s) {
+        return VectorExpression<ExpressionType::Div, Vector<T, maxLength>, T>(v, s);
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class T, size_t maxLength>

@@ -48,6 +48,7 @@ add_subdirectory(src)
 enable_testing()
 add_subdirectory(test)
 
+set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid other unnecessary targets.(e.g. xxx_autogen)
 add_executable(Physica Physica.cpp ${HEADERS})
 #############################################Options##############################################
 target_link_libraries(Physica Physica_Core Physica_Gui Qt5::Core Qt5::Widgets)

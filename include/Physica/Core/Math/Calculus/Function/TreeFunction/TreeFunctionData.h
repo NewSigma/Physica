@@ -47,7 +47,7 @@ namespace Physica::Core {
                  * that is, we use 'placeHolder = nullptr' rather than 'right = nullptr' to
                  * indicate thar we are operating the second struct instead of the first.
                  */
-                [[maybe_unused]] void* placeHolder{};
+                void* placeHolder{};
             };
         };
         //If type equals to @enum Value, we use the second struct in the union.
