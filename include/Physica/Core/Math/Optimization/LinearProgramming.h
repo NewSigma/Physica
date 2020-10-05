@@ -47,7 +47,7 @@ namespace Physica::Core {
          * target[0] is the constant term, target[n] is the coefficient before the n.th variable.
          */
         Vector<> target;
-        Matrix<MultiScalar, Row> data;
+        Matrix<MultiScalar, MatrixType::VectorRow> data;
         //Refactor: devide into two arrays
         size_t* order;
         LPState state;
@@ -65,7 +65,7 @@ namespace Physica::Core {
         void solve();
         /* Getters */
         [[nodiscard]] const Vector<>& getTarget() const { return target; }
-        [[nodiscard]] const Matrix<MultiScalar, Row>& getData() const { return data; }
+        [[nodiscard]] const Matrix<MultiScalar, MatrixType::VectorRow>& getData() const { return data; }
         [[nodiscard]] const size_t* getOrder() const { return order; }
         [[nodiscard]] size_t getOrderLength() const { return data.getRow() + data.getColumn(); }
         [[nodiscard]] LPState getState() const { return state; }

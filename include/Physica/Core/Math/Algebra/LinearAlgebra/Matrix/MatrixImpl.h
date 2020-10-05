@@ -20,9 +20,12 @@
 #define PHYSICA_MATRIXIMPL_H
 
 namespace Physica::Core {
-    /////////////////////////////////////Fixed Column Matrix//////////////////////////////////////////
+    /////////////////////////////////////ElementColumn Matrix//////////////////////////////////////////
+    /*!
+     * Warning: The elements have not been initialized, do not try to access them.
+     */
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Column, maxRow, maxColumn>::Matrix(size_t row, size_t column)
+    Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>::Matrix(size_t row, size_t column)
             : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
     }
@@ -37,7 +40,7 @@ namespace Physica::Core {
      * (3, 6, 9)
      */
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Column, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxRow>> list)
+    Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxRow>> list)
             : CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
             , row(list.begin()->getLength()), column(list.size()) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
@@ -51,19 +54,23 @@ namespace Physica::Core {
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Column, maxRow, maxColumn>::Matrix(Matrix<T, Column, maxRow, maxColumn>&& m) noexcept
+    Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>::Matrix(
+            Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>&& m) noexcept
             : CStyleArray<T, maxRow * maxColumn>(std::move(m)), row(m.row), column(m.column) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Column, maxRow, maxColumn>&
-            Matrix<T, Column, maxRow, maxColumn>::operator=(Matrix<T, Column, maxRow, maxColumn>&& m) noexcept {
+    Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>&
+            Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>::operator=(Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn>&& m) noexcept {
         Base::operator=(static_cast<Base&&>(m));
         row = m.row;
         column = m.column;
     }
-    /////////////////////////////////////Fixed Row Matrix//////////////////////////////////////////
+    /////////////////////////////////////ElementRow Matrix//////////////////////////////////////////
+    /*!
+    * Warning: The elements have not been initialized, do not try to access them.
+    */
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Row, maxRow, maxColumn>::Matrix(size_t row, size_t column)
+    Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>::Matrix(size_t row, size_t column)
             : CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
     }
@@ -78,7 +85,7 @@ namespace Physica::Core {
      * (7, 8, 9)
      */
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Row, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxColumn>> list)
+    Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>::Matrix(std::initializer_list<CStyleArray<T, maxColumn>> list)
             : CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
             , row(list.size()), column(list.begin()->getLength()) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
@@ -92,133 +99,138 @@ namespace Physica::Core {
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Row, maxRow, maxColumn>::Matrix(Matrix<T, Row, maxRow, maxColumn>&& m) noexcept
+    Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>::Matrix(
+            Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>&& m) noexcept
             : CStyleArray<T, maxRow * maxColumn>(static_cast<Base&&>(m)), row(m.row), column(m.column) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
-    Matrix<T, Row, maxRow, maxColumn>&
-    Matrix<T, Row, maxRow, maxColumn>::operator=(Matrix<T, Row, maxRow, maxColumn>&& m) noexcept {
+    Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>&
+    Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>::operator=(
+            Matrix<T, MatrixType::ElementRow, maxRow, maxColumn>&& m) noexcept {
         Base::operator=(static_cast<Base&&>(m));
         row = m.row;
         column = m.column;
     }
     /////////////////////////////////////Dynamic Column Matrix//////////////////////////////////////////
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic>::Matrix(size_t length)
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(length) {}
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::Matrix(size_t length)
+            : CStyleArray<Vector<T, maxRow>, maxColumn>(length) {}
             
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic>::Matrix(
-            Matrix<T, Column, Dynamic, Dynamic>&& m) noexcept
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(std::move(m)) {}
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::Matrix(
+            Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&& m) noexcept
+            : CStyleArray<Vector<T, maxRow>, maxColumn>(std::move(m)) {}
 
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic>::Matrix(std::initializer_list<VectorType> list)
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(list) {}
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::Matrix(std::initializer_list<VectorType> list)
+            : CStyleArray<Vector<T, maxRow>, maxColumn>(list) {}
 
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic>&
-    Matrix<T, Column, Dynamic, Dynamic>::operator=(Matrix<T, Column, Dynamic, Dynamic>&& m) noexcept {
-        CStyleArray<Vector<T, Dynamic>, Dynamic>::operator=(std::move(m));
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&
+    Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::operator=(
+            Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&& m) noexcept {
+        CStyleArray<Vector<T, maxRow>, maxColumn>::operator=(std::move(m));
     }
     //!Optimize: may be inline append().
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendRow(const Vector<T, Dynamic>& v) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendRow(const VectorType& v) {
         const auto c = getColumn();
         Q_ASSERT(c == v.getLength());
         for(size_t i = 0; i < c; ++i)
             Base::operator[](i).append(v[i]);
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendRow(Vector<T, Dynamic>&& v) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendRow(VectorType&& v) noexcept {
         const auto c = getColumn();
         Q_ASSERT(c == v.getLength());
         for(size_t i = 0; i < c; ++i)
             Base::operator[](i).append(std::move(v[i]));
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendColumn(const Vector<T, Dynamic>& v) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendColumn(const VectorType& v) {
         Q_ASSERT(Base::getLength() == 0 || v.getLength() == getRow());
         append(v);
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendColumn(Vector<T, Dynamic>&& v) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendColumn(VectorType&& v) noexcept {
         Q_ASSERT(Base::getLength() == 0 || v.getLength() == getRow());
         append(std::move(v));
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendMatrixRow(const Matrix<T, Column, Dynamic, Dynamic>& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendMatrixRow(const Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>& m) {
         const auto c = getColumn();
         Q_ASSERT(c == m.getColumn());
         for(size_t i = 0; i < c; ++i)
             Base::operator[](i).append(m[i]);
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendMatrixRow(Matrix<T, Column, Dynamic, Dynamic>&& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendMatrixRow(Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&& m) {
         const auto c = getColumn();
         Q_ASSERT(c == m.getColumn());
         for(size_t i = 0; i < c; ++i)
             Base::operator[](i).append(std::move(m[i]));
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendMatrixColumn(const Matrix<T, Column, Dynamic, Dynamic>& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendMatrixColumn(const Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>& m) {
         Q_ASSERT(Base::getLength() == 0 || getRow() == m.getRow());
         append(m);
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::appendMatrixColumn(Matrix<T, Column, Dynamic, Dynamic>&& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::appendMatrixColumn(Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&& m) {
         Q_ASSERT(Base::getLength() == 0 || getRow() == m.getRow());
         append(std::move(m));
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::removeRowAt(size_t index) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::removeRowAt(size_t index) {
         for(size_t i = 0; i < getColumn(); ++i)
             Base::operator[](i).removeAt(index);
     }
 
-    template<class T>
-    inline void Matrix<T, Column, Dynamic, Dynamic>::removeColumnAt(size_t index) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    inline void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::removeColumnAt(size_t index) {
         Base::removeAt(index);
     }
 
-    template<class T>
-    Vector<T, Dynamic> Matrix<T, Column, Dynamic, Dynamic>::cutRow() {
+    template<class T, size_t maxRow, size_t maxColumn>
+    Vector<T, maxRow> Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::cutRow() {
         const auto c = getColumn();
-        Vector<T, Dynamic> result((CStyleArray<MultiScalar, Dynamic>(c)));
+        VectorType result((CStyleArray<MultiScalar, Dynamic>(c)));
         for(size_t i = 0; i < c; ++i)
             result.allocate(Base::operator[](i).cutLast(), i);
         return result;
     }
 
-    template<class T>
-    Vector<T, Dynamic> Matrix<T, Column, Dynamic, Dynamic>::cutColumn() {
-        return CStyleArray<Vector<T, Dynamic>, Dynamic>::cutLast();
+    template<class T, size_t maxRow, size_t maxColumn>
+    Vector<T, maxRow> Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::cutColumn() {
+        return CStyleArray<Vector<T, maxRow>, maxColumn>::cutLast();
     }
 
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic> Matrix<T, Column, Dynamic, Dynamic>::cutMatrixRow(size_t from) {
-        const auto row = Matrix<T, Column, Dynamic, Dynamic>::row();
-        Matrix<T, Column, Dynamic, Dynamic> result(row);
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, Dynamic, maxColumn>
+            Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::cutMatrixRow(size_t from) {
+        const auto row = Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::row();
+        Matrix<T, MatrixType::VectorColumn, Dynamic, maxColumn> result(row);
         for(size_t i = 0; i < row; ++i)
-            result.allocate(Vector<T, Dynamic>(Base::operator[](i).cut(from)), i);
+            result.allocate(VectorType(Base::operator[](i).cut(from)), i);
         return result;
     }
 
-    template<class T>
-    Matrix<T, Column, Dynamic, Dynamic> Matrix<T, Column, Dynamic, Dynamic>::cutMatrixColumn(size_t from) {
-        return Matrix<T, Column, Dynamic, Dynamic>(Base::cut(from));
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorColumn, maxRow, Dynamic>
+            Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::cutMatrixColumn(size_t from) {
+        return Matrix<T, MatrixType::VectorColumn, maxRow, Dynamic>(Base::cut(from));
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::rowSwap(size_t r1, size_t r2) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::rowSwap(size_t r1, size_t r2) noexcept {
         const auto length = getColumn();
         for(size_t i = 0; i < length; ++i) {
             auto& column = Base::operator[](i);
@@ -226,13 +238,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::columnSwap(size_t c1, size_t c2) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::columnSwap(size_t c1, size_t c2) noexcept {
         Physica::Core::swap(Base::operator[](c1), Base::operator[](c2));
     }
     //!Reduce the element at \r2 using \r1.
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::rowReduce(size_t r1, size_t r2, size_t element) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::rowReduce(size_t r1, size_t r2, size_t element) {
         const auto& element_column = Base::operator[](element);
         Scalar dividend = element_column[r2] / element_column[r1];
         const auto length = getColumn();
@@ -242,133 +254,136 @@ namespace Physica::Core {
         }
     }
     //!Reduce the element at \c2 using \c1.
-    template<class T>
-    void Matrix<T, Column, Dynamic, Dynamic>::columnReduce(size_t c1, size_t c2, size_t element) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::columnReduce(size_t c1, size_t c2, size_t element) {
         Scalar dividend = operator()(element, c2) / operator()(element, c1);
         Base::operator[](c2) -= Base::operator[](c1) * dividend;
     }
-    /////////////////////////////////////Dynamic Row Matrix//////////////////////////////////////////
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic>::Matrix(size_t length)
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(length) {}
+    /////////////////////////////////////VectorRow Matrix//////////////////////////////////////////
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::Matrix(size_t length)
+            : CStyleArray<VectorType, Dynamic>(length) {}
 
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic>::Matrix(std::initializer_list<VectorType> list)
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(list) {}
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::Matrix(std::initializer_list<VectorType> list)
+            : CStyleArray<VectorType, Dynamic>(list) {}
 
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic>::Matrix(
-            Matrix<T, Row, Dynamic, Dynamic>&& m) noexcept
-            : CStyleArray<Vector<T, Dynamic>, Dynamic>(std::move(m)) {}
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::Matrix(
+            Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&& m) noexcept
+            : CStyleArray<VectorType, Dynamic>(std::move(m)) {}
 
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic>&
-    Matrix<T, Row, Dynamic, Dynamic>::operator=(Matrix<T, Row, Dynamic, Dynamic>&& m) noexcept {
-        CStyleArray<Vector<T, Dynamic>, Dynamic>::operator=(std::move(m));
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&
+    Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::operator=(
+            Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&& m) noexcept {
+        CStyleArray<VectorType, Dynamic>::operator=(std::move(m));
     }
     //!Optimize: may be inline append().
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendRow(const Vector<T, Dynamic>& v) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendRow(const VectorType& v) {
         Q_ASSERT(Base::getLength() == 0 || v.getLength() == getColumn());
         Base::append(v);
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendRow(Vector<T, Dynamic>&& v) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendRow(VectorType&& v) noexcept {
         Q_ASSERT(Base::getLength() == 0 || v.getLength() == getColumn());
         Base::append(std::move(v));
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendColumn(const Vector<T, Dynamic>& v) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendColumn(const VectorType& v) {
         const auto length = (*this)[0].getLength();
         Q_ASSERT(length == v.getLength());
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).append(v[i]);
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendColumn(Vector<T, Dynamic>&& v) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendColumn(VectorType&& v) noexcept {
         const auto length = (*this)[0].getLength();
         Q_ASSERT(length == v.getLength());
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).append(std::move(v[i]));
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendMatrixRow(const Matrix& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendMatrixRow(const Matrix& m) {
         Q_ASSERT(Base::operator[](0).getLength() == m[0].getLength());
         append(m);
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendMatrixRow(Matrix<T, Row, Dynamic, Dynamic>&& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendMatrixRow(Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&& m) {
         Q_ASSERT(Base::operator[](0).getLength() == m[0].getLength());
         append(std::move(m));
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendMatrixColumn(Matrix<T, Row, Dynamic, Dynamic>&& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendMatrixColumn(Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&& m) {
         const auto length = getRow();
         Q_ASSERT(length == m.getLength());
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).append(std::move(m[i]));
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::appendMatrixColumn(const Matrix<T, Row, Dynamic, Dynamic>& m) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::appendMatrixColumn(const Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>& m) {
         const auto length = getRow();
         Q_ASSERT(length == m.getLength());
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).append(m[i]);
     }
 
-    template<class T>
-    inline void Matrix<T, Row, Dynamic, Dynamic>::removeRowAt(size_t index) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    inline void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::removeRowAt(size_t index) {
         Base::removeAt(index);
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::removeColumnAt(size_t index) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::removeColumnAt(size_t index) {
         for(size_t i = 0; i < getRow(); ++i)
             Base::operator[](i).removeAt(index);
     }
 
-    template<class T>
-    Vector<T, Dynamic> Matrix<T, Row, Dynamic, Dynamic>::cutRow() {
+    template<class T, size_t maxRow, size_t maxColumn>
+    Vector<T, maxColumn> Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::cutRow() {
         return Base::cutLast();
     }
 
-    template<class T>
-    Vector<T, Dynamic> Matrix<T, Row, Dynamic, Dynamic>::cutColumn() {
-        const auto row = Matrix<T, Row, Dynamic, Dynamic>::row();
-        Vector<T, Dynamic> result((CStyleArray<MultiScalar, Dynamic>(row)));
+    template<class T, size_t maxRow, size_t maxColumn>
+    Vector<T, maxColumn> Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::cutColumn() {
+        const auto row = Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::row();
+        VectorType result((CStyleArray<MultiScalar, Dynamic>(row)));
         for(size_t i = 0; i < row; ++i)
             result.allocate((*this)[i].cutLast(), i);
         return result;
     }
 
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic> Matrix<T, Row, Dynamic, Dynamic>::cutMatrixRow(size_t from) {
-        return Matrix<T, Row, Dynamic, Dynamic>(Base::cut(from));
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, Dynamic, maxColumn>
+            Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::cutMatrixRow(size_t from) {
+        return Matrix<T, MatrixType::VectorRow, Dynamic, maxColumn>(Base::cut(from));
     }
 
-    template<class T>
-    Matrix<T, Row, Dynamic, Dynamic> Matrix<T, Row, Dynamic, Dynamic>::cutMatrixColumn(size_t from) {
-        const auto column = Matrix<T, Row, Dynamic, Dynamic>::column();
-        Matrix<T, Row, Dynamic, Dynamic> result(column);
+    template<class T, size_t maxRow, size_t maxColumn>
+    Matrix<T, MatrixType::VectorRow, maxRow, Dynamic>
+            Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::cutMatrixColumn(size_t from) {
+        const auto column = Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::column();
+        Matrix<T, MatrixType::VectorRow, maxRow, Dynamic> result(column);
         for(size_t i = 0; i < column; ++i)
-            result.allocate(Vector<T, Dynamic>((*this)[i].cut(from)), i);
+            result.allocate(VectorType((*this)[i].cut(from)), i);
         return result;
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::rowSwap(size_t r1, size_t r2) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::rowSwap(size_t r1, size_t r2) noexcept {
         Physica::Core::swap((*this)[r1], (*this)[r2]);
     }
 
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::columnSwap(size_t c1, size_t c2) noexcept {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::columnSwap(size_t c1, size_t c2) noexcept {
         const auto length = getRow();
         for(size_t i = 0; i < length; ++i) {
             auto& row = (*this)[i];
@@ -376,14 +391,14 @@ namespace Physica::Core {
         }
     }
     //!Reduce the element at \r2 using \r1
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::rowReduce(size_t r1, size_t r2, size_t element) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::rowReduce(size_t r1, size_t r2, size_t element) {
         Scalar dividend = (*this)(element, r2) / (*this)(element, r1);
         (*this)[r2] -= (*this)[r1] * dividend;
     }
     //!Reduce the element at \c2 using \c1.
-    template<class T>
-    void Matrix<T, Row, Dynamic, Dynamic>::columnReduce(size_t c1, size_t c2, size_t element) {
+    template<class T, size_t maxRow, size_t maxColumn>
+    void Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::columnReduce(size_t c1, size_t c2, size_t element) {
         const auto& element_row = Base::operator[](element);
         Scalar dividend = element_row[c2] / element_row[c1];
         const auto length = getRow();
@@ -437,7 +452,7 @@ namespace Physica::Core {
     Matrix<T, type, maxRow, maxColumn> operator*(
             const Matrix<T, type, maxRow, maxColumn>& m1, const Matrix<T, type, maxRow, maxColumn>& m2) {
         Q_ASSERT(m1.getColumn() == m2.getRow());
-        constexpr bool isColumn = type == Column;
+        constexpr bool isColumn = type == MatrixType::ElementColumn || type == MatrixType::VectorColumn;
 
         const auto result_row = m1.row();
         const auto result_column = m2.column();
