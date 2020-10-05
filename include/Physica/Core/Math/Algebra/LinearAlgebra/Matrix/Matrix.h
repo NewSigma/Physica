@@ -57,6 +57,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](row * r + c); }
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
+        /* Iterators */
+        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
+        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
         /* Getters */
         [[nodiscard]] constexpr static MatrixType getType() { return Column; }
         [[nodiscard]] size_t getRow() const { return row; }
@@ -84,6 +87,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](column * c + r); }
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
+        /* Iterators */
+        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
+        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
         /* Getters */
         [[nodiscard]] constexpr static MatrixType getType() { return Row; }
         [[nodiscard]] size_t getRow() const { return row; }
@@ -110,6 +116,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](c)[r]; }
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
+        /* Iterators */
+        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
+        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
         /* Matrix Operations */
         void appendRow(const Vector<T, Dynamic>& v);
         void appendRow(Vector<T, Dynamic>&& v) noexcept;
@@ -155,6 +164,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  { return Base::operator[](r)[c]; }
         Matrix& operator=(const Matrix& m) = default;
         Matrix& operator=(Matrix&& m) noexcept;
+        /* Iterators */
+        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
+        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
         /* Matrix Operations */
         void appendRow(const Vector<T, Dynamic>& v);
         void appendRow(Vector<T, Dynamic>&& v) noexcept;
