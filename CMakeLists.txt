@@ -42,7 +42,7 @@ include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 #############################################Project##############################################
 include_directories(./include)
-file(GLOB_RECURSE HEADERS include/*.h)
+file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
 add_subdirectory(src)
 #Enable Tests
 enable_testing()
