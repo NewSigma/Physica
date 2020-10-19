@@ -69,8 +69,6 @@ namespace Physica::Gui {
         setCentralWidget(textEdit);
         //StatusBar
         statusBar()->showMessage("Calculate Time: 0 ms");
-
-        show();
     }
     ////////////////////////////////////////////Events////////////////////////////////////////////
     bool PhysicaMain::eventFilter(QObject* obj, QEvent* event) {
