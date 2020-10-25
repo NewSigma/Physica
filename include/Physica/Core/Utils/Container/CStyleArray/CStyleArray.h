@@ -29,10 +29,10 @@ namespace Physica::Core {
      * This class is a wrapper of of array that is allocated by malloc and whose elements is allocated by placement new.
      * This class is designed to avoid passing incorrect arguments to classes that use c-style array only.
      * (Such as \class Matrix and \class Vector.
-     * If we pass a array CStyleArrayData<T>::allocated by new to \class Matrix or \class Vector,
+     * If we pass a array allocated by new to \class Matrix or \class Vector,
      * a memory leak or double free will happen.)
      * Different from containers in other libraries, this class does not call the default constructor of \type T,
-     * but directly copy or move existent elements.
+     * but directly copy or move existent objects.
      *
      * Note:
      * If \T is a complex type, \T must have its copy and move constructors defined.

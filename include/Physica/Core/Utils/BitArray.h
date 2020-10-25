@@ -28,10 +28,9 @@ namespace Physica::Core {
     class BitArray {
         //Every bit of arr stands for a bool.
         unsigned char* __restrict__ arr;
-        //Length of arr
-        size_t length;
+        size_t bitCount;
     public:
-        explicit BitArray(unsigned int bitCount);
+        explicit BitArray(size_t bitCount);
         BitArray(const BitArray& array);
         BitArray(BitArray&& array) noexcept;
         ~BitArray();
@@ -44,9 +43,16 @@ namespace Physica::Core {
         BitArray operator~() const;
         /* Operations */
         void setBit(bool b, size_t s);
+        /* Getters */
+        [[nodiscard]] inline size_t getLength() const;
     private:
-        BitArray(unsigned char* arr, size_t length);
+        BitArray(unsigned char* arr, size_t bitCount);
     };
+
+    inline size_t BitArray::getLength() const {
+        //((bitCount >> 3U) + (bitCount & 8U)) is the upper approximation of (bitCount / 8).
+        return (bitCount >> 3U) + (bitCount & 8U);
+    }
 }
 
 #endif
