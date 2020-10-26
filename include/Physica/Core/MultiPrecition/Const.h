@@ -32,7 +32,11 @@ namespace Physica::Core {
 
     class BasicConst {
         static BasicConst* instance;
-
+    public:
+        const double ln_2;
+        const double ln_10;
+        const double ln_2_10;
+    private:
         const Scalar<MultiPrecision, false>* plotPoints;
         const Scalar<MultiPrecision, false>* expectedRelativeError;
         const Scalar<MultiPrecision, false>* stepSize;

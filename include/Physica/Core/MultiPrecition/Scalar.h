@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <qglobal.h>
+#include <ostream>
 #include "ScalarType.h"
 
 namespace Physica::Core {
@@ -32,7 +33,7 @@ namespace Physica::Core {
 
     template<>
     class Scalar<MultiPrecision, false> {
-        //Store effective digits.
+        //Store effective digits using little endian standard.
         ScalarUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
@@ -335,6 +336,13 @@ namespace Physica::Core {
         /* Friends */
         friend class Scalar<Double, false>;
     };
+    /* Output */
+    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s);
+    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, true>& s);
+    std::ostream& operator<<(std::ostream& os, const Scalar<Float, false>& s);
+    std::ostream& operator<<(std::ostream& os, const Scalar<Float, true>& s);
+    std::ostream& operator<<(std::ostream& os, const Scalar<Double, false>& s);
+    std::ostream& operator<<(std::ostream& os, const Scalar<Double, true>& s);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

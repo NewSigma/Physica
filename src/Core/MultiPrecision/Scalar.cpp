@@ -348,7 +348,6 @@ namespace Physica::Core {
         memcpy(result.byte, byte, getSize() * sizeof(ScalarUnit));
         return result;
     }
-
     /*!
      * return true if the abstract value of s1 is larger or equal than the abstract value of s2.
      * return false if the abstract value of s1 is smaller to the abstract value of s2.
@@ -884,5 +883,18 @@ namespace Physica::Core {
     void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {
         std::swap(a, s.a);
         Scalar<Double, false>::swap(s);
+    }
+    ///////////////////////////////////////////Global////////////////////////////////////////////////
+    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s) {
+        const auto& basicConst = BasicConst::getInstance();
+        const int power = s.getPower();
+        int exp = int(power * basicConst.ln_2_10);
+        double coefficient = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * s[s.getSize() - 1];
+        while(coefficient > 10) {
+            ++exp;
+            coefficient /= 10;
+        }
+        os << coefficient << " * 10 ^ " << exp;
+        return os;
     }
 }

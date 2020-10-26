@@ -24,7 +24,10 @@ namespace Physica::Core {
     /*!
      * Basic consts that initialize directly.
      */
-    BasicConst::BasicConst() {
+    BasicConst::BasicConst()
+            : ln_2(std::log(2))
+            , ln_10(std::log(10))
+            , ln_2_10(std::log(2) / std::log(10)) {
         plotPoints = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(20));
         auto temp = new Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
         (*temp)[0] = 1;
