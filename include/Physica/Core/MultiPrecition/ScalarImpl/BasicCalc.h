@@ -396,9 +396,9 @@ namespace Physica::Core {
 
     template<>
     inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::mul(const Scalar& s1, const Scalar& s2) {
-        if(s1 == BasicConst::getInstance().get_1())
+        if(s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, true>(s2);
-        else if(s2 == BasicConst::getInstance().get_1())
+        else if(s2 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, true>(s1);
         else {
             const int size1 = s1.getSize();
@@ -422,9 +422,9 @@ namespace Physica::Core {
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
     template<>
     inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::mul(const Scalar& s1, const Scalar& s2) {
-        if(s1 == BasicConst::getInstance().get_1())
+        if(s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, false>(s2);
-        else if(s2 == BasicConst::getInstance().get_1())
+        else if(s2 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, false>(s1);
         else {
             const int size1 = s1.getSize();
@@ -452,7 +452,7 @@ namespace Physica::Core {
             qFatal("Encountered dividing by zero exception.");
 
         if(!s1.isZero()) {
-            if(s2 != BasicConst::getInstance().get_1()) {
+            if(s2 != BasicConst::getInstance()._1) {
                 const auto s1_size = s1.getSize(), s2_size = s2.getSize();
                 //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;
@@ -507,7 +507,7 @@ namespace Physica::Core {
             qFatal("Encountered dividing by zero exception.");
 
         if(!s1.isZero()) {
-            if(s2 != BasicConst::getInstance().get_1()) {
+            if(s2 != BasicConst::getInstance()._1) {
                 const auto s1_size = s1.getSize(), s2_size = s2.getSize();
                 //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;

@@ -58,7 +58,7 @@ namespace Physica::Core {
         result.setA(temp.getTrivial());
 
         const auto term1 = (s - (Scalar<type, errorTrack>::getOne() >> 1)) * ln(s);
-        const auto term2 = ln(MathConst::getInstance().getPI() << 1) >> 1;
+        const auto term2 = ln(MathConst::getInstance().PI << 1) >> 1;
         result = term1 - s + term2 + result;
         return result;
     }
@@ -91,7 +91,7 @@ namespace Physica::Core {
         result.toUnitA();
 
         const auto term1 = (s - (Scalar<MultiPrecision, errorTrack>::getOne() >> 1)) * ln(s);
-        const auto term2 = ln(MathConst::getInstance().getPI() << 1) >> 1;
+        const auto term2 = ln(MathConst::getInstance().PI << 1) >> 1;
         result = term1 - s + term2 + result;
         return result;
     }

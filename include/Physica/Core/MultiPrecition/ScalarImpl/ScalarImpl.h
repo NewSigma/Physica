@@ -80,26 +80,26 @@ namespace Physica::Core {
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
     inline Scalar<MultiPrecision, false>& operator++(Scalar<MultiPrecision, false>& s) {
-        s += BasicConst::getInstance().get_1();
+        s += BasicConst::getInstance()._1;
         return s;
     }
     
     inline Scalar<MultiPrecision, false>& operator--(Scalar<MultiPrecision, false>& s) {
-        s -= BasicConst::getInstance().get_1();
+        s -= BasicConst::getInstance()._1;
         return s;
     }
 
     template<bool errorTrack>
     inline Scalar<MultiPrecision, errorTrack> operator++(Scalar<MultiPrecision, errorTrack>& s, int) { //NOLINT confusing-warning
         Scalar<MultiPrecision, errorTrack> temp(s);
-        s += BasicConst::getInstance().get_1();
+        s += BasicConst::getInstance()._1;
         return temp;
     }
 
     template<bool errorTrack>
     inline Scalar<MultiPrecision, errorTrack> operator--(Scalar<MultiPrecision, errorTrack>& s, int) { //NOLINT confusing-warning
         Scalar<MultiPrecision, errorTrack> temp(s);
-        s -= BasicConst::getInstance().get_1();
+        s -= BasicConst::getInstance()._1;
         return temp;
     }
     //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
@@ -173,6 +173,13 @@ namespace Physica::Core {
     inline Scalar<Float, true> Scalar<Float, false>::operator/(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f / s.f, fabsf((s.f * s.getA()) / (s.f * (s.f - s.getA()))));
     }
+    /*!
+     * Set this scalar to its integer approximation which is closer to 0.
+     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
+     */
+    inline void Scalar<Float, false>::toInteger() {
+        modff(f, &f);
+    }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
     inline Scalar<Float, true>::Scalar() : Scalar<Float, false>(), a(0) {}
     /*!
@@ -182,6 +189,11 @@ namespace Physica::Core {
 
     inline Scalar<Float, true>::Scalar(const Scalar<Float, true>& s) : Scalar<Float, false>(s)  {
         a = s.a;
+    }
+
+    inline void Scalar<Float, true>::toInteger() {
+        Scalar<Float, false>::toInteger();
+        a = 0;
     }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
@@ -229,6 +241,13 @@ namespace Physica::Core {
     inline Scalar<Double, true> Scalar<Double, false>::operator/(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d / s.d, fabs((s.d * s.getA()) / (s.d * (s.d - s.getA()))));
     }
+    /*!
+     * Set this scalar to its integer approximation which is closer to 0.
+     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
+     */
+    inline void Scalar<Double, false>::toInteger() {
+        modf(d, &d);
+    }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////
     inline Scalar<Double, true>::Scalar() : Scalar<Double, false>(), a(0) {}
     /*!
@@ -238,6 +257,11 @@ namespace Physica::Core {
 
     inline Scalar<Double, true>::Scalar(const Scalar<Double, true>& s) : Scalar<Double, false>(s) {
         a = s.a;
+    }
+
+    inline void Scalar<Double, true>::toInteger() {
+        Scalar<Double, false>::toInteger();
+        a = 0;
     }
 }
 

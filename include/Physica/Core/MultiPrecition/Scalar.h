@@ -246,7 +246,7 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
-        void toInteger();
+        inline void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
@@ -321,7 +321,7 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
-        void toInteger();
+        inline void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }

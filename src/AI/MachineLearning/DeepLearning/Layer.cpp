@@ -49,7 +49,7 @@ namespace Physica::AI {
         if(id != 0) {
             Layer& lastLayer = (*parentNet)[id - 1];
             for(int i = 0; i < lastLayer.getSize(); ++i)
-                lastLayer[i].acceptedLoss = BasicConst::getInstance().get_0();
+                lastLayer[i].acceptedLoss = BasicConst::getInstance()._0;
         }
         for(int j = 0; j < getSize(); ++j)
             nodes[j]->handleLoss();

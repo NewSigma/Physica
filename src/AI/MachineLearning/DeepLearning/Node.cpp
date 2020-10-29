@@ -77,7 +77,7 @@ namespace Physica::AI {
                 target.acceptedLoss += averageLoss;
                 continue;
             }
-            vector[i] += BasicConst::getInstance().get_2() * net.learnRate * acceptedLoss * net.getInputs()[i];
+            vector[i] += BasicConst::getInstance()._2 * net.learnRate * acceptedLoss * net.getInputs()[i];
         }
     }
 }

@@ -108,10 +108,10 @@ namespace Physica::Core {
         //arctan is defined on [-Pi / 2, Pi / 2], judging the quadrant is necessary.
         if(real.isPositive()) {
             if(imagine.isNegative())
-                result += MathConst::getInstance().getPI() << 1;
+                result += MathConst::getInstance().PI << 1;
         }
         else
-            result += MathConst::getInstance().getPI();
+            result += MathConst::getInstance().PI;
         return result;
     }
 

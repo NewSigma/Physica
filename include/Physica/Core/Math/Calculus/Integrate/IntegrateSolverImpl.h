@@ -22,8 +22,6 @@
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
  */
-#include "IntegrateSolver.h"
-
 namespace Physica::Core {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<ScalarType type, bool errorTrack>
@@ -39,7 +37,7 @@ namespace Physica::Core {
         const Scalar<type, errorTrack>& to = i.getTo();
         const TreeFunction<type, errorTrack>& f = i.getFunction();
 
-        Scalar<type, errorTrack> result(BasicConst::getInstance().get_0());
+        Scalar<type, errorTrack> result(BasicConst::getInstance()._0);
 
         Scalar<type, errorTrack> start(from);
         while(start < to) {
@@ -87,8 +85,9 @@ namespace Physica::Core {
         const TreeFunction<type, errorTrack>& f = i.getFunction();
 
         Scalar<type, errorTrack> result = f(from) + f(to);
-        Scalar<type, errorTrack> odd(BasicConst::getInstance().get_0());
-        Scalar<type, errorTrack> even(BasicConst::getInstance().get_0());
+        const auto& _0 = BasicConst::getInstance()._0;
+        Scalar<type, errorTrack> odd(_0);
+        Scalar<type, errorTrack> even(_0);
         bool b = true;
         Scalar<type, errorTrack> start = from + stepSize;
         while(start < to) {
@@ -101,7 +100,7 @@ namespace Physica::Core {
         even <<= 1;
         result += odd + even;
         result *= stepSize;
-        result /= BasicConst::getInstance().get_3();
+        result /= BasicConst::getInstance()._3;
         return result;
     }
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
@@ -123,7 +122,7 @@ namespace Physica::Core {
 
         const Scalar<type, errorTrack> constant1 = (to - from) >> 1;
         const Scalar<type, errorTrack> constant2 = constant1 + from;
-        const auto& PI_2 = MathConst::getInstance().getPI_2();
+        const auto& PI_2 = MathConst::getInstance().PI_2;
 
         const TreeFunction<type, errorTrack>& f = i.getFunction();
         //Integrate value on the origin.

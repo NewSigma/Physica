@@ -27,7 +27,7 @@ namespace Physica::Gui {
             : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
         setAttribute(Qt::WA_DeleteOnClose);
 
-        MultiScalar maxStepSize = (end - begin) / BasicConst::getInstance().getPlotPoints();
+        MultiScalar maxStepSize = (end - begin) / BasicConst::getInstance().plotPoints;
         MultiScalar point = MultiScalar(begin);
         do {
             MultiScalar y = func(point);

@@ -22,8 +22,6 @@
  * This file is part of implementations of \FFT.
  * Do not include this header file, include FFT.h instead.
  */
-#include "FFT.h"
-
 namespace Physica::Core {
     /*!
      * Improve:

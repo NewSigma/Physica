@@ -25,7 +25,7 @@ namespace Physica::Core {
         if(s.isNegative())
             qFatal("Can not resolve the square root of a minus value.");
         if(s.isZero())
-            return Scalar(BasicConst::getInstance().get_0());
+            return Scalar(BasicConst::getInstance()._0);
         Scalar copy_s(s);
         //Let s < 1 so as to control error.
         int add_power = 0;
@@ -53,7 +53,7 @@ namespace Physica::Core {
         if(s.isNegative())
             qFatal("Can not resolve the square root of a minus value.");
         if(s.isZero())
-            return Scalar<MultiPrecision, true>(BasicConst::getInstance().get_0());
+            return Scalar<MultiPrecision, true>(BasicConst::getInstance()._0);
         Scalar copy_s(s);
         //Let s < 1 so as to control error.
         int add_power = 0;
@@ -93,9 +93,9 @@ namespace Physica::Core {
         if(!s.isPositive())
             qFatal("Can not resolve the logarithm of zero or a negative value.");
         Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(0));
-        if(s == BasicConst::getInstance().get_1())
+        if(s == BasicConst::getInstance()._1)
             return result;
-        const auto& _1 = BasicConst::getInstance().get_1();
+        const auto& _1 = BasicConst::getInstance()._1;
         auto temp_1 = Scalar<MultiPrecision, false>::sub<false>(s, _1)
                       / Scalar<MultiPrecision, false>::add<false>(s, _1);
         Scalar<MultiPrecision, false> copy_temp_1(temp_1);
@@ -107,7 +107,7 @@ namespace Physica::Core {
             result += temp;
 
             temp_1 *= copy_temp_1;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             Scalar criteria = temp_1 / rank;
             //Break if result meets the precision goal.
             if(result.getPower() - criteria.getPower() >= GlobalPrecision)
@@ -116,7 +116,7 @@ namespace Physica::Core {
             temp_1 *= copy_temp_1;
             rank += _1;
         }
-        result *= BasicConst::getInstance().get_2();
+        result *= BasicConst::getInstance()._2;
         return result;
     }
 
@@ -125,9 +125,9 @@ namespace Physica::Core {
         if(!s.isPositive())
             qFatal("Can not resolve the logarithm of zero or a negative value.");
         Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(0));
-        if(s == BasicConst::getInstance().get_1())
+        if(s == BasicConst::getInstance()._1)
             return result;
-        const auto& _1 = BasicConst::getInstance().get_1();
+        const auto& _1 = BasicConst::getInstance()._1;
         auto temp_1 = Scalar<MultiPrecision, false>::sub<true>(s, _1)
                       / Scalar<MultiPrecision, false>::add<false>(s, _1);
         Scalar<MultiPrecision, true> copy_temp_1(temp_1);
@@ -142,7 +142,7 @@ namespace Physica::Core {
             result += temp;
 
             temp_1 *= copy_temp_1;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             Scalar criteria = temp_1 / rank;
             //Break if result meets the precision goal.
             if(result.getPower() - criteria.getPower() >= GlobalPrecision)
@@ -151,7 +151,7 @@ namespace Physica::Core {
             temp_1 *= copy_temp_1;
             rank += _1;
         }
-        result *= BasicConst::getInstance().get_2();
+        result *= BasicConst::getInstance()._2;
 
         if(s.getA() != 0) {
             Scalar<MultiPrecision, false> s_error = s.getMinimum();
@@ -180,7 +180,7 @@ namespace Physica::Core {
         Scalar<MultiPrecision, false> result = 1;
         Scalar<MultiPrecision, false> rank = 1;
         Scalar<MultiPrecision, false> temp(s);
-        const auto& relativeError = BasicConst::getInstance().getExpectedRelativeError();
+        const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
         while(true) {
             temp /= rank;
             if(absCompare(relativeError, temp))
@@ -199,7 +199,7 @@ namespace Physica::Core {
         Scalar<MultiPrecision, true> result = 1;
         Scalar<MultiPrecision, false> rank = 1;
         Scalar<MultiPrecision, true> temp(s);
-        const auto& relativeError = BasicConst::getInstance().getExpectedRelativeError();
+        const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
         int a = 0;
         while(true) {
             ++a;
@@ -216,7 +216,7 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, false> cos(const Scalar<MultiPrecision, false>& s) {
         Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(1));
-        if(s == BasicConst::getInstance().get_0())
+        if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, false> square_n = square(s);
         Scalar<MultiPrecision, false> temp_1(square_n);
@@ -233,7 +233,7 @@ namespace Physica::Core {
             result += temp;
             //Here the temp means the criteria of break.
             temp *= s;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
             if(result.getPower() - temp.getPower() >= GlobalPrecision)
@@ -241,7 +241,7 @@ namespace Physica::Core {
             //Prepare for next calculate.
             temp_1 *= square_n;
             temp_2 *= rank;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
         return result;
@@ -250,7 +250,7 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> cos(const Scalar<MultiPrecision, true>& s) {
         Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(1));
-        if(s == BasicConst::getInstance().get_0())
+        if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, true> square_n = square(s);
         Scalar<MultiPrecision, true> temp_1(square_n);
@@ -267,7 +267,7 @@ namespace Physica::Core {
             result += temp;
             //Here the temp means the criteria of break.
             temp *= s;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
             if(result.getPower() - temp.getPower() >= GlobalPrecision)
@@ -275,7 +275,7 @@ namespace Physica::Core {
             //Prepare for next calculate.
             temp_1 *= square_n;
             temp_2 *= rank;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
         return result;
@@ -284,7 +284,7 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, false> sin(const Scalar<MultiPrecision, false>& s) {
         Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(0));
-        if(s == BasicConst::getInstance().get_0())
+        if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, false> square_s = square(s);
         Scalar<MultiPrecision, false> temp_1(s);
@@ -301,7 +301,7 @@ namespace Physica::Core {
             result += temp;
             //Here the temp means the criteria of break.
             temp *= s;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
             if(result.getPower() - temp.getPower() >= GlobalPrecision)
@@ -309,7 +309,7 @@ namespace Physica::Core {
             //Prepare for next calculate.
             temp_1 *= square_s;
             temp_2 *= rank;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
         return Scalar<MultiPrecision, false>(result);
@@ -318,7 +318,7 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> sin(const Scalar<MultiPrecision, true>& s) {
         Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(0));
-        if(s == BasicConst::getInstance().get_0())
+        if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, true> square_s = square(s);
         Scalar<MultiPrecision, true> temp_1(s);
@@ -335,7 +335,7 @@ namespace Physica::Core {
             result += temp;
             //Here the temp means the criteria of break.
             temp *= s;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp /= rank;
             //Break if result meets the precision goal.
             if(result.getPower() - temp.getPower() >= GlobalPrecision)
@@ -343,7 +343,7 @@ namespace Physica::Core {
             //Prepare for next calculate.
             temp_1 *= square_s;
             temp_2 *= rank;
-            rank += BasicConst::getInstance().get_1();
+            rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
         return Scalar<MultiPrecision, true>(result);
@@ -352,34 +352,34 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, false> arccos(const Scalar<MultiPrecision, false>& s) {
         return bisectionMethod<MultiPrecision, false>(cos, s
-                , BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
-                , BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
+                , BasicConst::getInstance()._0, MathConst::getInstance().PI
+                , BasicConst::getInstance()._1, BasicConst::getInstance().Minus_1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arccos(const Scalar<MultiPrecision, true>& s) {
         return bisectionMethod<MultiPrecision, true>(cos, s
-                , BasicConst::getInstance().get_0(), MathConst::getInstance().getPI()
-                , BasicConst::getInstance().get_1(), BasicConst::getInstance().getMinus_1());
+                , BasicConst::getInstance()._0, MathConst::getInstance().PI
+                , BasicConst::getInstance()._1, BasicConst::getInstance().Minus_1);
     }
 
     template<>
     Scalar<MultiPrecision, false> arcsin(const Scalar<MultiPrecision, false>& s) {
         return bisectionMethod<MultiPrecision, false>(sin, s
-                , MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
-                , BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
+                , MathConst::getInstance().Minus_PI_2, MathConst::getInstance().PI_2
+                , BasicConst::getInstance().Minus_1, BasicConst::getInstance()._1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arcsin(const Scalar<MultiPrecision, true>& s) {
         return bisectionMethod<MultiPrecision, true>(sin, s
-                , MathConst::getInstance().getMinus_PI_2(), MathConst::getInstance().getPI_2()
-                , BasicConst::getInstance().getMinus_1(), BasicConst::getInstance().get_1());
+                , MathConst::getInstance().Minus_PI_2, MathConst::getInstance().PI_2
+                , BasicConst::getInstance().Minus_1, BasicConst::getInstance()._1);
     }
     //!FixIt: arctan() does not consider accuracy.
     template<>
     Scalar<MultiPrecision, true> arctan(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance().get_1()));
+        Scalar<MultiPrecision, true> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance()._1));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
@@ -387,7 +387,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arctan(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance().get_1()));
+        Scalar<MultiPrecision, false> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance()._1));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
@@ -503,41 +503,41 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arccosh(const Scalar<MultiPrecision, false>& s) {
-        return ln(sqrt(square(s) - BasicConst::getInstance().get_1()) + s);
+        return ln(sqrt(square(s) - BasicConst::getInstance()._1) + s);
     }
 
     template<>
     Scalar<MultiPrecision, true> arccosh(const Scalar<MultiPrecision, true>& s) {
-        return ln(sqrt(square(s) - BasicConst::getInstance().get_1()) + s);
+        return ln(sqrt(square(s) - BasicConst::getInstance()._1) + s);
     }
 
     template<>
     Scalar<MultiPrecision, false> arcsinh(const Scalar<MultiPrecision, false>& s) {
-        return ln(sqrt(square(s) + BasicConst::getInstance().get_1()) + s);
+        return ln(sqrt(square(s) + BasicConst::getInstance()._1) + s);
     }
 
     template<>
     Scalar<MultiPrecision, true> arcsinh(const Scalar<MultiPrecision, true>& s) {
-        return ln(sqrt(square(s) + BasicConst::getInstance().get_1()) + s);
+        return ln(sqrt(square(s) + BasicConst::getInstance()._1) + s);
     }
 
     template<>
     Scalar<MultiPrecision, false> arctanh(const Scalar<MultiPrecision, false>& s) {
-        return ln((BasicConst::getInstance().get_1() + s) / (BasicConst::getInstance().get_1() - s)) >> 1;
+        return ln((BasicConst::getInstance()._1 + s) / (BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, true> arctanh(const Scalar<MultiPrecision, true>& s) {
-        return ln((BasicConst::getInstance().get_1() + s) / (BasicConst::getInstance().get_1() - s)) >> 1;
+        return ln((BasicConst::getInstance()._1 + s) / (BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, false> arccoth(const Scalar<MultiPrecision, false>& s) {
-        return ln((s + BasicConst::getInstance().get_1()) / (s - BasicConst::getInstance().get_1())) >> 1;
+        return ln((s + BasicConst::getInstance()._1) / (s - BasicConst::getInstance()._1)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, true> arccoth(const Scalar<MultiPrecision, true>& s) {
-        return ln((s + BasicConst::getInstance().get_1()) / (s - BasicConst::getInstance().get_1())) >> 1;
+        return ln((s + BasicConst::getInstance()._1) / (s - BasicConst::getInstance()._1)) >> 1;
     }
 }

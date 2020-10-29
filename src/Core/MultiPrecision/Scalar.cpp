@@ -801,13 +801,6 @@ namespace Physica::Core {
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
     /*!
-     * Set this scalar to its integer approximation which is closer to 0.
-     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
-     */
-    void Scalar<Float, false>::toInteger() {
-        modff(f, &f);
-    }
-    /*!
      * Inspect if a float is a integer through its binary expression.
      */
     bool Scalar<Float, false>::isInteger() const {
@@ -833,21 +826,9 @@ namespace Physica::Core {
         return exp + zeros >= 150;
     }
 
-    void Scalar<Float, true>::toInteger() {
-        Scalar<Float, false>::toInteger();
-        a = 0;
-    }
-
     void Scalar<Float, true>::swap(Scalar<Float, true>& s) noexcept {
         std::swap(a, s.a);
         Scalar<Float, false>::swap(s);
-    }
-    /*!
-     * Set this scalar to its integer approximation which is closer to 0.
-     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
-     */
-    void Scalar<Double, false>::toInteger() {
-        modf(d, &d);
     }
     /*!
      * Inspect if a float is a integer through its binary expression.
@@ -873,11 +854,6 @@ namespace Physica::Core {
          * We move 1023 to the right hand side to avoid underflow.
          */
         return exp + zeros >= 1075;
-    }
-
-    void Scalar<Double, true>::toInteger() {
-        Scalar<Double, false>::toInteger();
-        a = 0;
     }
 
     void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {

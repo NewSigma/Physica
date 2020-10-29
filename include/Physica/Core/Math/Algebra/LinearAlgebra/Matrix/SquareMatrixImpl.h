@@ -63,7 +63,7 @@ namespace Physica::Core {
         typedef MatrixOperation<T, type, maxSize, maxSize> Operation;
 
         const auto rank = Matrix<T, type, maxSize, maxSize>::getRow();
-        MultiScalar result(BasicConst::getInstance().get_1());
+        MultiScalar result(BasicConst::getInstance()._1);
         switch(method) {
             case GaussMethod:
                 for(size_t i = 0; i < rank; ++i) {

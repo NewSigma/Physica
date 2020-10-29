@@ -19,6 +19,8 @@
 #ifndef PHYSICA_CSTYLEARRAYIMPL_H
 #define PHYSICA_CSTYLEARRAYIMPL_H
 
+#include <cstring>
+
 namespace Physica::Core {
     //////////////////////////////////////////CStyleArray<T, capacity>//////////////////////////////////////////
     template<class T, size_t capacity>

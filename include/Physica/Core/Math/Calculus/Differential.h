@@ -35,7 +35,7 @@ namespace Physica::Core {
             Backward
         };
         Differential(TreeFunction<> func, MultiScalar at
-                , MultiScalar stepSize = MultiScalar(BasicConst::getInstance().getStepSize()));
+                , MultiScalar stepSize = MultiScalar(BasicConst::getInstance().stepSize));
         [[nodiscard]] MultiScalar solve(DifferentialMethod method);
     };
 }

@@ -36,7 +36,7 @@ namespace Physica::Core {
      */
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s) {
-        if(s == BasicConst::getInstance().get_1())
+        if(s == BasicConst::getInstance()._1)
             return Scalar(s);
         else {
             const auto s_size = s.getSize();
@@ -88,7 +88,7 @@ namespace Physica::Core {
 
     template<bool errorTrack>
     inline Scalar<MultiPrecision, errorTrack> reciprocal(const Scalar<MultiPrecision, errorTrack>& s) {
-        return BasicConst::getInstance().get_1() / s;
+        return BasicConst::getInstance()._1 / s;
     }
 
     template<ScalarType type>

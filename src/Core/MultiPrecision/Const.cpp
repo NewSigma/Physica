@@ -27,43 +27,25 @@ namespace Physica::Core {
     BasicConst::BasicConst()
             : ln_2(std::log(2))
             , ln_10(std::log(10))
-            , ln_2_10(std::log(2) / std::log(10)) {
-        plotPoints = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(20));
-        auto temp = new Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
-        (*temp)[0] = 1;
-        expectedRelativeError = temp;
-        temp = new Scalar<MultiPrecision, false>(1, - GlobalPrecision / 2);
-        (*temp)[0] = 1;
-        //Value (- GlobalPrecision / 2) still need a proof.
-        stepSize = temp;
-        R_MAX = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(2147483647));
-        _0 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(0));
-        _1 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(1));
-        Minus_1 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-1));
-        _2 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(2));
-        Minus_2 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-2));
-        _3 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(3));
-        Minus_3 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-3));
-        _4 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(4));
-        Minus_4 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(-4));
-        _10 = new Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(10));
-    }
+            , ln_2_10(std::log(2) / std::log(10))
+            , plotPoints(static_cast<SignedScalarUnit>(20)) {
+        expectedRelativeError = Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
+        expectedRelativeError[0] = 1;
 
-    BasicConst::~BasicConst() {
-        delete plotPoints;
-        delete expectedRelativeError;
-        delete stepSize;
-        delete R_MAX;
-        delete _0;
-        delete _1;
-        delete Minus_1;
-        delete _2;
-        delete Minus_2;
-        delete _3;
-        delete Minus_3;
-        delete _4;
-        delete Minus_4;
-        delete _10;
+        stepSize = Scalar<MultiPrecision, false>(1, - GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
+        stepSize[0] = 1;
+
+        R_MAX = 2147483647;
+        _0 = 0;
+        _1 = 1;
+        Minus_1 = -1;
+        _2 = 2;
+        Minus_2 = -2;
+        _3 = 3;
+        Minus_3 = -3;
+        _4 = 4;
+        Minus_4 = -4;
+        _10 = 10;
     }
 
     void BasicConst::init() {
@@ -83,19 +65,12 @@ namespace Physica::Core {
      */
     MathConst::MathConst() {
         //0.31 is the big approximation of ln(2) / ln(10)
-        PI = new MultiScalar(calcPI(
+        PI = MultiScalar(calcPI(
                 static_cast<int>(static_cast<double>(ScalarUnitWidth) * GlobalPrecision * 0.31) + 1));
-        E = new MultiScalar(exp(BasicConst::getInstance().get_1()));
+        E = MultiScalar(exp(BasicConst::getInstance()._1));
 
-        PI_2 = new MultiScalar(*PI >> 1);
-        Minus_PI_2 = new MultiScalar(-*PI_2);
-    }
-
-    MathConst::~MathConst() {
-        delete PI;
-        delete E;
-        delete PI_2;
-        delete Minus_PI_2;
+        PI_2 = MultiScalar(PI >> 1);
+        Minus_PI_2 = MultiScalar(-PI_2);
     }
 
     void MathConst::init() {
@@ -116,10 +91,12 @@ namespace Physica::Core {
      * https://blog.csdn.net/liangbch/article/details/78724041
      */
     MultiScalar MathConst::calcPI(int precision) {
+        const auto& basicConst = BasicConst::getInstance();
+
         MultiScalar a(static_cast<SignedScalarUnit>(1));
         MultiScalar x(static_cast<SignedScalarUnit>(1));
-        MultiScalar b(reciprocal(sqrt(BasicConst::getInstance().get_2())));
-        MultiScalar c(reciprocal(BasicConst::getInstance().get_4()));
+        MultiScalar b(reciprocal(sqrt(basicConst._2)));
+        MultiScalar c(reciprocal(basicConst._4));
 
         int goal = 1;
         while(goal < precision) {
@@ -128,7 +105,7 @@ namespace Physica::Core {
             b = sqrt(b * y);
             y -= a;
             c -= y * y * x;
-            x *= BasicConst::getInstance().get_2();
+            x *= basicConst._2;
             goal *= 2;
         }
         a = (a + b) >> 1;

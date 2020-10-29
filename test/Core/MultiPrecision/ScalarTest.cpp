@@ -167,18 +167,18 @@ constexpr const char* fromTypeToString(ScalarType type) {
 }
 
 template<ScalarType type>
-inline bool isEqual(Scalar<type, false>& s, double d) {
-    return s[0] == static_cast<long>(d);
+inline bool isEqual(Scalar<type, false>& s, long l) {
+    return s[0] == l;
 }
 
 template<>
-inline bool isEqual<Float>(Scalar<Float, false>& s, double d) {
-    return double(s) == d;
+inline bool isEqual<Float>(Scalar<Float, false>& s, long l) {
+    return static_cast<long>(s.getTrivial()) == l;
 }
 
 template<>
-inline bool isEqual<Double>(Scalar<Double, false>& s, double d) {
-    return double(s) == d;
+inline bool isEqual<Double>(Scalar<Double, false>& s, long l) {
+    return static_cast<long>(s.getTrivial()) == l;
 }
 /*!
  * Tests function toInteger(), return true if passed.
@@ -191,8 +191,8 @@ bool toIntegerTest(unsigned int loop) {
         const double temp = (engine() >> 1U) / max_2 * 100000;
         Scalar<type, false> s(temp);
         s.toInteger();
-        if(isEqual(s, temp)) {
-            std::cout << "toIntegerTest<" << fromTypeToString(type) << "> failed: Casting " << temp;
+        if(!isEqual(s, static_cast<long>(temp))) {
+            std::cout << "toIntegerTest<" << fromTypeToString(type) << "> failed: Casting " << temp << " to " << double(s);
             return false;
         }
     }
