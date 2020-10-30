@@ -50,7 +50,7 @@ namespace Physica::Core {
         length = s.isNegative() ? -length : length;
         Scalar<MultiPrecision, errorTrack> result(length, power);
         for(int i = 0; i < length; ++i)
-            result[i] = s[i];
+            result.setByte(i, s[i]);
         return result;
     }
     /*!

@@ -303,15 +303,15 @@ namespace Physica::Core {
 
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry);
-        result[0] = 0;
+        result.byte[0] = 0;
         const int size_1 = size - 1;
         for(int i = 0; i < size_1; ++i) {
-            result[i] |= byte[i] << remainder;
-            result[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
+            result.byte[i] |= byte[i] << remainder;
+            result.byte[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
         }
-        result[size_1] |= byte[size_1] << remainder;
+        result.byte[size_1] |= byte[size_1] << remainder;
         if(carry)
-            result[size] = byte[size_1] >> (ScalarUnitWidth - remainder);
+            result.byte[size] = byte[size_1] >> (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -333,13 +333,13 @@ namespace Physica::Core {
         const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
         if(carry)
-            result[size] = byte[size - 1] >> remainder;
+            result.byte[size] = byte[size - 1] >> remainder;
 
         for(int i = size - 1; i > 0; --i) {
-            result[i] = byte[i] << (ScalarUnitWidth - remainder);
-            result[i] |= byte[i - 1] >> remainder;
+            result.byte[i] = byte[i] << (ScalarUnitWidth - remainder);
+            result.byte[i] |= byte[i - 1] >> remainder;
         }
-        result[0] = byte[0] << (ScalarUnitWidth - remainder);
+        result.byte[0] = byte[0] << (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -684,14 +684,14 @@ namespace Physica::Core {
                       a_carry ? a >> (ScalarUnitWidth - remainder) : a << remainder); //Add 1 to a if a_carry is true to get more accurate estimation.
         const auto byte_start = byte + a_carry;
         size -= a_carry;
-        result[0] = 0;
+        result.byte[0] = 0;
         for(int i = 0; i < size_1; ++i) {
-            result[i] |= byte_start[i] << remainder;
-            result[i + 1] = byte_start[i] >> (ScalarUnitWidth - remainder);
+            result.byte[i] |= byte_start[i] << remainder;
+            result.byte[i + 1] = byte_start[i] >> (ScalarUnitWidth - remainder);
         }
-        result[size_1] |= byte_start[size_1] << remainder;
+        result.byte[size_1] |= byte_start[size_1] << remainder;
         if(carry)
-            result[size] = byte_start[size_1] >> (ScalarUnitWidth - remainder);
+            result.byte[size] = byte_start[size_1] >> (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -716,13 +716,13 @@ namespace Physica::Core {
         Scalar result(length >= 0 ? (size + carry) : -(size + carry)
                 , power - quotient + carry - 1, accuracy > 0 ? accuracy : 0);
         if(carry)
-            result[size] = byte[size_1] >> remainder;
+            result.byte[size] = byte[size_1] >> remainder;
 
         for(int i = size_1; i > 0; --i) {
-            result[i] = byte[i] << (ScalarUnitWidth - remainder);
-            result[i] |= byte[i - 1] >> remainder;
+            result.byte[i] = byte[i] << (ScalarUnitWidth - remainder);
+            result.byte[i] |= byte[i - 1] >> remainder;
         }
-        result[0] = byte[0] << (ScalarUnitWidth - remainder);
+        result.byte[0] = byte[0] << (ScalarUnitWidth - remainder);
         return result;
     }
 
@@ -796,7 +796,7 @@ namespace Physica::Core {
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getAccuracy() const {
         Scalar<MultiPrecision, false> result(
                 1, power - Scalar<MultiPrecision, true>::getSize() + 1);
-        result[0] = a;
+        result.byte[0] = a;
         return result;
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////

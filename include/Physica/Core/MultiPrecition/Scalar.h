@@ -62,8 +62,7 @@ namespace Physica::Core {
         Scalar& operator=(const Scalar& s);
         Scalar& operator=(Scalar&& s) noexcept;
         explicit operator double() const;
-        ScalarUnit& operator[](unsigned int index) { return byte[index]; }
-        const ScalarUnit& operator[](unsigned int index) const { return byte[index]; }
+        ScalarUnit operator[](unsigned int index) const { Q_ASSERT(index < getSize()); return byte[index]; }
         Scalar operator+(const Scalar& s) const;
         Scalar operator-(const Scalar& s) const;
         Scalar operator*(const Scalar& s) const;
@@ -95,6 +94,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
         /* Setters */
+        void setByte(unsigned int index, ScalarUnit value) { Q_ASSERT(index < getSize()); byte[index] = value; }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:

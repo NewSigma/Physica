@@ -30,10 +30,10 @@ namespace Physica::Core {
             , ln_2_10(std::log(2) / std::log(10))
             , plotPoints(static_cast<SignedScalarUnit>(20)) {
         expectedRelativeError = Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
-        expectedRelativeError[0] = 1;
+        expectedRelativeError.setByte(0, 1);
 
         stepSize = Scalar<MultiPrecision, false>(1, - GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
-        stepSize[0] = 1;
+        stepSize.setByte(0, 1);
 
         R_MAX = 2147483647;
         _0 = 0;

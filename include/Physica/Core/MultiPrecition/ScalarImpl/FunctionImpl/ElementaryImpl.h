@@ -46,7 +46,8 @@ namespace Physica::Core {
 
             memset(result.byte, 0, length * sizeof(ScalarUnit));
             for(int i = 0; i < s_size - 1; ++i)
-                result[i + s_size] = mulAddArrByWord(result.byte + i + i + 1, s.byte + i + 1, s_size - i - 1, s.byte[i]);
+                result.setByte(i + s_size
+                               , mulAddArrByWord(result.byte + i + i + 1, s.byte + i + 1, s_size - i - 1, s.byte[i]));
             //Optimize: Shift count is known, possible to optimize the performance.
             //Fix: accuracy is ignored.
             byteLeftShiftEq(result.byte, length, 1);
@@ -60,13 +61,13 @@ namespace Physica::Core {
                     copy = result[double_i];
                     temp = copy + low + carry;
                     carry = copy > temp;
-                    result[double_i] = temp;
+                    result.setByte(double_i, temp);
                 }
                 /* Handle 2 * i + 1 */ {
                     copy = result[double_i + 1];
                     temp = copy + high + carry;
                     carry = copy > temp;
-                    result[double_i + 1] = temp;
+                    result.setByte(double_i + 1, temp);
                 }
             }
 

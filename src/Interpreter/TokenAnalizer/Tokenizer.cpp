@@ -141,7 +141,7 @@ bool Tokenizer::readChar(char ch) {
 void Tokenizer::readNum() {
     bool stoppable = true, go_on = true;
     NumBufferState state = NumStart;
-    MultiScalar num(BasicConst::getInstance()._0);
+    Scalar<MultiPrecision, false> num(BasicConst::getInstance()._0);
     Scalar exp(BasicConst::getInstance()._0);
     SignedScalarUnit power = 0;
     bool isExpPositive = true;
@@ -154,7 +154,7 @@ void Tokenizer::readNum() {
                         ++str;
                         break;
                     case '1' ... '9':
-                        num[0] = *str - '0';
+                        num = Scalar<MultiPrecision, false>(*str - '0');
                         state = Int;
                         ++str;
                         break;
@@ -167,7 +167,7 @@ void Tokenizer::readNum() {
                     case '0':
                         break;
                     case '1' ... '9':
-                        num[0] = *str - '0';
+                        num = Scalar<MultiPrecision, false>(*str - '0');
                         state = Int;
                         ++str;
                         break;
