@@ -57,11 +57,7 @@ void initPhysica() {
         if(handler)
             handler(type, context, prefix + msg);
     });
-    BasicConst::init();
-    MathConst::init();
 }
 
 void deInitPhysica() {
-    BasicConst::deInit();
-    MathConst::deInit();
 }

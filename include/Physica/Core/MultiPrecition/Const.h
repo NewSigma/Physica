@@ -2,7 +2,7 @@
  * Copyright 2019 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +31,6 @@ namespace Physica::Core {
     constexpr double RelativeError = 1e-5;
 
     class BasicConst {
-        static BasicConst* instance;
     public:
         double ln_2;
         double ln_10;
@@ -58,15 +57,12 @@ namespace Physica::Core {
         BasicConst& operator=(const BasicConst&) = delete;
         BasicConst& operator=(BasicConst&&) noexcept = delete;
         /* Operations */
-        static void init();
-        static void deInit();
-        inline static const BasicConst& getInstance() { return *instance; }
+        [[nodiscard]] inline static const BasicConst& getInstance();
     private:
         BasicConst();
     };
 
     class MathConst {
-        static MathConst* instance;
     public:
         MultiScalar PI;
         MultiScalar E;
@@ -81,14 +77,22 @@ namespace Physica::Core {
         MathConst& operator=(const MathConst&) = delete;
         MathConst& operator=(MathConst&&) noexcept = delete;
         /* Operations */
-        static void init();
-        static void deInit();
-        inline static const MathConst& getInstance() { return *instance; }
+        [[nodiscard]] inline static const MathConst& getInstance();
     private:
         MathConst();
 
         static MultiScalar calcPI(int precision);
     };
+
+    inline const BasicConst& BasicConst::getInstance() {
+        static BasicConst basicConst{};
+        return basicConst;
+    }
+
+    inline const MathConst& MathConst::getInstance() {
+        static MathConst mathConst{};
+        return mathConst;
+    }
 }
 
 #endif

@@ -2,7 +2,7 @@
  * Copyright 2019 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,8 +19,6 @@
 #include "Physica/Core/MultiPrecition/Scalar.h"
 
 namespace Physica::Core {
-    BasicConst* BasicConst::instance = nullptr;
-    MathConst* MathConst::instance = nullptr;
     /*!
      * Basic consts that initialize directly.
      */
@@ -47,18 +45,6 @@ namespace Physica::Core {
         Minus_4 = -4;
         _10 = 10;
     }
-
-    void BasicConst::init() {
-        if(instance == nullptr)
-            instance = new BasicConst();
-    }
-
-    void BasicConst::deInit() {
-        if(instance != nullptr) {
-            delete instance;
-            instance = nullptr;
-        }
-    }
     /*!
      * Consts that need some calculates.
      * Should call new to Const_1 so as to make calculates available.
@@ -71,18 +57,6 @@ namespace Physica::Core {
 
         PI_2 = MultiScalar(PI >> 1);
         Minus_PI_2 = MultiScalar(-PI_2);
-    }
-
-    void MathConst::init() {
-        if(instance == nullptr)
-            instance = new MathConst();
-    }
-
-    void MathConst::deInit() {
-        if(instance != nullptr) {
-            delete instance;
-            instance = nullptr;
-        }
     }
     /*!
      * precision is the number of effective digits in decimal.
