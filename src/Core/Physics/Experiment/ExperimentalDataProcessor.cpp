@@ -34,7 +34,9 @@ namespace Physica::Core::Physics {
         for(auto& item : data)
             item[0] -= s;
     }
-
+    /*!
+     * Enhancement:Grubbs rule may be applied to verify whether a statistic is believable.
+     */
     void ExperimentalDataProcessor::updateInfo() {
         /* Calc total */ {
             Scalar<MultiPrecision, false> total(0);

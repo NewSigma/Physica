@@ -22,44 +22,47 @@
 namespace Physica {
     namespace Core {
         /*!
-         * CUUniquePtr is the unique_ptr in CUDA.
+         * CUUniquePtr is the unique_ptr in CUDA,
+         * which is allocated on host and handles pointers on GPU.
+         *
+         * T must be a trivial type because we can not call destructor functions on device.
          */
         template<class T>
         class CUUniquePtr {
             T* pointer;
         public:
-            __device__ CUUniquePtr(T* t) : pointer(t) {}
-            __device__ CUUniquePtr(const CUUniquePtr<T>&) = delete;
-            __device__ CUUniquePtr(CUUniquePtr<T>&& ptr) : pointer(ptr.pointer) { ptr.pointer = 0; }
-            __device__ ~CUUniquePtr() { delete pointer; }
+            CUUniquePtr(T* t) : pointer(t) {}
+            CUUniquePtr(const CUUniquePtr<T>&) = delete;
+            CUUniquePtr(CUUniquePtr<T>&& ptr) : pointer(ptr.pointer) { ptr.pointer = 0; }
+            ~CUUniquePtr() { cudaFree(pointer); }
             /* Operators */
-            __device__ CUUniquePtr& operator=(const CUUniquePtr<T>) = delete;
-            __device__ CUUniquePtr& operator=(CUUniquePtr<T>&& ptr);
-            __device__ T& operator*() { return *pointer; }
-            __device__ T* operator->() { return pointer; }
+            CUUniquePtr& operator=(const CUUniquePtr<T>) = delete;
+            CUUniquePtr& operator=(CUUniquePtr<T>&& ptr);
+            T& operator*() { return *pointer; }
+            T* operator->() { return pointer; }
             /* Operations */
-            __device__ T* get() { return pointer; }
-            __device__ T* release();
-            __device__ void reset(T* p);
-            __device__ void swap(CUUniquePtr<T>& ptr);
+            T* get() { return pointer; }
+            T* release();
+            void reset(T* p);
+            void swap(CUUniquePtr<T>& ptr);
         };
 
         template<class T>
-        __device__ CUUniquePtr<T>& CUUniquePtr<T>::operator=(CUUniquePtr<T>&& ptr) {
+        CUUniquePtr<T>& CUUniquePtr<T>::operator=(CUUniquePtr<T>&& ptr) {
             ~CUUniquePtr();
             pointer = ptr.pointer;
             ptr.pointer = 0;
         }
 
         template<class T>
-        __device__ T* CUUniquePtr<T>::release() {
+        T* CUUniquePtr<T>::release() {
             auto temp = pointer;
             pointer = 0;
             return temp;
         }
 
         template<class T>
-        __device__ void CUUniquePtr<T>::reset(T* p) {
+        void CUUniquePtr<T>::reset(T* p) {
             auto temp = pointer;
             pointer = p;
             p = temp;
@@ -68,7 +71,7 @@ namespace Physica {
         }
 
         template<class T>
-        __device__ void CUUniquePtr<T>::swap(CUUniquePtr<T>& ptr) {
+        void CUUniquePtr<T>::swap(CUUniquePtr<T>& ptr) {
             auto temp = pointer;
             pointer = ptr.pointer;
             ptr.pointer = temp;
