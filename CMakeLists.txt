@@ -26,7 +26,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "\
 ${CMAKE_CXX_FLAGS} \
--fPIC")
+-fPIC \
+-D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
 
 set(CMAKE_CUDA_FLAGS "\
 --gpu-architecture ${GPU_ARCHITECTURE} \
