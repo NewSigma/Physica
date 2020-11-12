@@ -17,15 +17,16 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QTime>
+#include <Physica/Logger/LoggerRuntime.h>
 #include "Physica/PhysicaInit.h"
-#include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/DebugUtil.h"
-
-using namespace Physica::Core;
+#include "Physica/Logger/Cycler.h"
 
 static QtMessageHandler handler;
 
 void initPhysica() {
+    using namespace Physica::Logger;
+    Cycler::init();
+    LoggerRuntime::getInstance();
     handler = qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {
         QString prefix{};
         prefix.push_back('[');
@@ -49,7 +50,7 @@ void initPhysica() {
                 break;
         }
         prefix.push_back("] [");
-        prefix.push_back(FILENAME(context.file));
+        prefix.push_back(context.file);
         prefix.push_back(':');
         prefix.push_back(QString::fromStdString(std::to_string(context.line)));
         prefix.push_back("]: ");
