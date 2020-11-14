@@ -19,12 +19,4 @@
 #include "Physica/Logger/Logger.h"
 
 namespace Physica::Logger {
-    void Logger::log(const LogInfo* info, ...) {
-        printf("[time] [%s]", info->level);
-        std::va_list list;
-        va_start(list, reinterpret_cast<const void*>(info));
-        vprintf(info->format, list);
-        va_end(list);
-        printf("\n");
-    }
 }

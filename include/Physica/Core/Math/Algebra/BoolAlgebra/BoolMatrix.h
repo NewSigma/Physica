@@ -19,10 +19,11 @@
 #ifndef PHYSICA_BOOLMATRIX_H
 #define PHYSICA_BOOLMATRIX_H
 
-#include "Physica/Core/Utils/BitArray.h"
-#include "Physica/Core/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/BitArray.h"
+#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 namespace Physica::Core {
+    using namespace Utils;
     /*!
      * Optimize:
      * 1. Fixed size matrix

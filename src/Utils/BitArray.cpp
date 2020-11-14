@@ -19,9 +19,9 @@
 #include <cstdlib>
 #include <climits>
 #include "qglobal.h"
-#include "Physica/Core/Utils/BitArray.h"
+#include "Physica/Utils/BitArray.h"
 
-namespace Physica::Core {
+namespace Physica::Utils {
     /*!
      * bitCount is the number of bool types you need.
      * bitCount is different from BitArray::length.

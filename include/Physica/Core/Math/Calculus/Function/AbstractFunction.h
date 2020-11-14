@@ -20,9 +20,10 @@
 #define PHYSICA_ABSTRACTFUNCTION_H
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 namespace Physica::Core {
+    using namespace Utils;
     /*!
      * @class AbstractFunction contains common parts between @class TreeFunction and @class VectorFunction.
      */

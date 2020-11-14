@@ -40,22 +40,22 @@ namespace Physica::Core {
      * A matrix can be either fixed matrix, which have its max size defined,
      * or dynamic matrix, whose size is dynamically changed.
      */
-    template<class T = MultiScalar, MatrixType type = MatrixType::VectorColumn, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
+    template<class T = MultiScalar, MatrixType type = MatrixType::VectorColumn, size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class Matrix;
     /*!
      * Specialization for ElementColumn matrix.
      */
     template<class T, size_t maxRow, size_t maxColumn>
-    class Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn> : private CStyleArray<T, maxRow * maxColumn> {
+    class Matrix<T, MatrixType::ElementColumn, maxRow, maxColumn> : private Utils::CStyleArray<T, maxRow * maxColumn> {
     public:
-        typedef CStyleArray<T, maxRow * maxColumn> Base;
+        typedef Utils::CStyleArray<T, maxRow * maxColumn> Base;
     private:
         size_t row;
         size_t column;
     public:
         Matrix() : row(0), column(0) {}
         Matrix(size_t row, size_t column);
-        Matrix(std::initializer_list<CStyleArray<T, maxRow>> list);
+        Matrix(std::initializer_list<Utils::CStyleArray<T, maxRow>> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;
@@ -76,16 +76,16 @@ namespace Physica::Core {
      * Specialization for ElementRow matrix.
      */
     template<class T, size_t maxRow, size_t maxColumn>
-    class Matrix<T, MatrixType::ElementRow, maxRow, maxColumn> : private CStyleArray<T, maxRow * maxColumn> {
+    class Matrix<T, MatrixType::ElementRow, maxRow, maxColumn> : private Utils::CStyleArray<T, maxRow * maxColumn> {
     public:
-        typedef CStyleArray<T, maxRow * maxColumn> Base;
+        typedef Utils::CStyleArray<T, maxRow * maxColumn> Base;
     private:
         size_t row;
         size_t column;
     public:
         Matrix() : row(0), column(0) {}
         Matrix(size_t row, size_t column);
-        Matrix(std::initializer_list<CStyleArray<T, maxColumn>> list);
+        Matrix(std::initializer_list<Utils::CStyleArray<T, maxColumn>> list);
         Matrix(const Matrix& matrix) = default;
         Matrix(Matrix&& matrix) noexcept;
         ~Matrix() = default;
@@ -107,10 +107,10 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>
-            : public CStyleArray<Vector<T, maxRow>, maxColumn> {
+            : public Utils::CStyleArray<Vector<T, maxRow>, maxColumn> {
     public:
         typedef Vector<T, maxRow> VectorType;
-        typedef CStyleArray<VectorType, maxColumn> Base;
+        typedef Utils::CStyleArray<VectorType, maxColumn> Base;
     public:
         Matrix() = default;
         explicit Matrix(size_t length);
@@ -139,8 +139,8 @@ namespace Physica::Core {
         inline void removeColumnAt(size_t index);
         VectorType cutRow();
         VectorType cutColumn();
-        Matrix<T, MatrixType::VectorColumn, Dynamic, maxColumn> cutMatrixRow(size_t from);
-        Matrix<T, MatrixType::VectorColumn, maxRow, Dynamic> cutMatrixColumn(size_t from);
+        Matrix<T, MatrixType::VectorColumn, Utils::Dynamic, maxColumn> cutMatrixRow(size_t from);
+        Matrix<T, MatrixType::VectorColumn, maxRow, Utils::Dynamic> cutMatrixColumn(size_t from);
         void rowSwap(size_t r1, size_t r2) noexcept;
         void columnSwap(size_t c1, size_t c2) noexcept;
         void rowReduce(size_t r1, size_t r2, size_t element);
@@ -155,10 +155,10 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>
-            : public CStyleArray<Vector<T, maxColumn>, maxRow> {
+            : public Utils::CStyleArray<Vector<T, maxColumn>, maxRow> {
     public:
         typedef Vector<T, maxColumn> VectorType;
-        typedef CStyleArray<VectorType, maxRow> Base;
+        typedef Utils::CStyleArray<VectorType, maxRow> Base;
     public:
         Matrix() = default;
         explicit Matrix(size_t length);
@@ -187,8 +187,8 @@ namespace Physica::Core {
         void removeColumnAt(size_t index);
         VectorType cutRow();
         VectorType cutColumn();
-        Matrix<T, MatrixType::VectorRow, Dynamic, maxColumn> cutMatrixRow(size_t from);
-        Matrix<T, MatrixType::VectorRow, maxRow, Dynamic> cutMatrixColumn(size_t from);
+        Matrix<T, MatrixType::VectorRow, Utils::Dynamic, maxColumn> cutMatrixRow(size_t from);
+        Matrix<T, MatrixType::VectorRow, maxRow, Utils::Dynamic> cutMatrixColumn(size_t from);
         void rowSwap(size_t r1, size_t r2) noexcept;
         void columnSwap(size_t c1, size_t c2) noexcept;
         void rowReduce(size_t r1, size_t r2, size_t element);

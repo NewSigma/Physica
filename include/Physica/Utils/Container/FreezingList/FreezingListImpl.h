@@ -22,7 +22,7 @@
  * This File is the implementation of FreezingList,
  * Do not include this file, include FreezingList.h instead.
  */
-namespace Physica::Core {
+namespace Physica::Utils {
     /*!
      * Allocate the space, but no data is stored.
      *

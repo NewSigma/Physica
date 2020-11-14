@@ -38,7 +38,7 @@ namespace Physica::Core {
     /*!
      * Solve linear equations.
      */
-    template<class T = MultiScalar, MatrixType type = MatrixType::VectorColumn, size_t maxRow = Dynamic, size_t maxColumn = Dynamic>
+    template<class T = MultiScalar, MatrixType type = MatrixType::VectorColumn, size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class LinearEquations : AbstractLinearEquations{
         Matrix<T, type, maxRow, maxColumn> matrix;
     public:

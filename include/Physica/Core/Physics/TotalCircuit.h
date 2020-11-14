@@ -21,7 +21,7 @@
 
 #include <vector>
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/Container/FreezingList/FreezingList.h"
+#include "Physica/Utils/Container/FreezingList/FreezingList.h"
 
 namespace Physica::Core {
     class TotalCircuit {
@@ -47,7 +47,7 @@ namespace Physica::Core {
         };
     private:
         //Value of resistances.
-        FreezingList<MultiScalar> resistances;
+        Utils::FreezingList<MultiScalar> resistances;
         std::vector<MultiScalar> result;
         //Size of all resistances. Not always equals to resistances.size().
         size_t size;

@@ -21,7 +21,7 @@
 
 #include <iosfwd>
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 #include "VectorExpression.h"
 
@@ -30,8 +30,8 @@ namespace Physica::Core {
      * T must be either Scalar or ComplexScalar.
      */
     template<class T, size_t maxLength>
-    class Vector : public CStyleArray<T, maxLength> {
-        typedef CStyleArray<T, maxLength> Base;
+    class Vector : public Utils::CStyleArray<T, maxLength> {
+        typedef Utils::CStyleArray<T, maxLength> Base;
         typedef T ScalarType;
     public:
         Vector();
@@ -56,8 +56,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] bool isZero() const;
         /* Helpers */
-        static Vector<T, Dynamic> zeroVector(size_t len);
-        static Vector<T, Dynamic> randomVector(size_t len);
+        static Vector<T, Utils::Dynamic> zeroVector(size_t len);
+        static Vector<T, Utils::Dynamic> randomVector(size_t len);
         static Vector simplyMultiply(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2);
     };
     /* Operators */

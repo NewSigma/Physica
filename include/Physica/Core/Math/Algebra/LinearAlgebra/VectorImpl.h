@@ -23,6 +23,7 @@
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
+    using namespace Utils;
     template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector() : Base() {}
 
@@ -46,7 +47,7 @@ namespace Physica::Core {
     Vector<T, maxLength>::Vector(Base&& array) noexcept : Base(std::move(array)) {}
 
     template<class T, size_t maxLength>
-    Vector<T, maxLength>::Vector(std::initializer_list<T> list) : CStyleArray<T, maxLength>(list) {}
+    Vector<T, maxLength>::Vector(std::initializer_list<T> list) : CStyleArray<T, maxLength>(list) { Q_UNUSED(maxLength) }
 
     template<class T, size_t maxLength>
     Vector<T, maxLength>::Vector(const Vector<T, maxLength>& vec) : Base(vec) {}
@@ -103,6 +104,7 @@ namespace Physica::Core {
 
     template<class T, size_t maxLength>
     Vector<T, Dynamic> Vector<T, maxLength>::zeroVector(size_t len) {
+        Q_UNUSED(maxLength)
         Vector<T, Dynamic> result((CStyleArray<T, Dynamic>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(T::getZero(), i);
@@ -111,6 +113,7 @@ namespace Physica::Core {
 
     template<class T, size_t maxLength>
     Vector<T, Dynamic> Vector<T, maxLength>::randomVector(size_t len) {
+        Q_UNUSED(maxLength)
         Vector<T, Dynamic> result((CStyleArray<T, Dynamic>(len)));
         for(size_t i = 0; i < len; ++i)
             result.allocate(randomScalar<T::getType(), T::getErrorTrack()>(), i);

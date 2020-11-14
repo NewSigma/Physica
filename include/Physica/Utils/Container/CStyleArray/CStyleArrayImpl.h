@@ -21,7 +21,7 @@
 
 #include <cstring>
 
-namespace Physica::Core {
+namespace Physica::Utils {
     //////////////////////////////////////////CStyleArray<T, capacity>//////////////////////////////////////////
     template<class T, size_t capacity>
     inline CStyleArray<T, capacity>::CStyleArray()

@@ -20,7 +20,7 @@
 #define PHYSICA_LONGTONANT_H
 
 #include <set>
-#include "QtCharts"
+#include <QtCharts/QtCharts>
 
 using namespace std;
 

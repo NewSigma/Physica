@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/LoggerRuntime.h"
+#ifndef PHYSICA_RINGBUFFER_H
+#define PHYSICA_RINGBUFFER_H
 
-namespace Physica::Logger {
-    LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
+namespace Physica::Utils {
+    class RingBuffer {
 
-    LoggerRuntime::LoggerRuntime() : bufferReadPtr(buffer), bufferWritePtr(buffer) {}
-
-    void LoggerRuntime::registerLogger(const LogInfo& info) {
-        logInfos.push_back(info);
-    }
+    };
 }
+
+#endif

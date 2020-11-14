@@ -20,7 +20,7 @@
 #define PHYSICA_CU_UNIQUE_PTR_H
 
 namespace Physica {
-    namespace Core {
+    namespace Utils {
         /*!
          * CUUniquePtr is the unique_ptr in CUDA,
          * which is allocated on host and handles pointers on GPU.

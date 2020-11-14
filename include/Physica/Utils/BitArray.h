@@ -21,7 +21,7 @@
 
 #include <cstddef>
 
-namespace Physica::Core {
+namespace Physica::Utils {
     /*!
      * BitArray is similar to bool[] but it has a better use of space.
      */

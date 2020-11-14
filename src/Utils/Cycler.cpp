@@ -20,12 +20,11 @@
 #include <sys/time.h>
 #include <cstring>
 #include <iostream>
-#include <cassert>
 #include <qglobal.h>
-#include "Physica/Logger/Cycler.h"
+#include "Physica/Utils/Cycler.h"
 
 
-namespace Physica::Logger {
+namespace Physica::Utils {
     double Cycler::localCyclesPerSec = 0;
     /*!
      * Perform once-only overall initialization for the Cycler class, such

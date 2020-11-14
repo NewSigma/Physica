@@ -36,9 +36,9 @@ namespace Physica::Core {
         ~MatrixChain();
 
         Matrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
-        Matrix<T, type, Dynamic, Dynamic> solve();
+        Matrix<T, type, Utils::Dynamic, Utils::Dynamic> solve();
     private:
-        Matrix<T, type, Dynamic, Dynamic> multiply(size_t from, size_t to);
+        Matrix<T, type, Utils::Dynamic, Utils::Dynamic> multiply(size_t from, size_t to);
     };
 }
 

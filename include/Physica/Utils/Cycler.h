@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace Physica::Logger {
+namespace Physica::Utils {
     /*!
      * This class provides static methods that read the fine-grain CPU
      * cycle counter and translate between cycle-level times and absolute

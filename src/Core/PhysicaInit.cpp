@@ -19,13 +19,13 @@
 #include <QTime>
 #include <Physica/Logger/LoggerRuntime.h>
 #include "Physica/PhysicaInit.h"
-#include "Physica/Logger/Cycler.h"
+#include "Physica/Utils/Cycler.h"
 
 static QtMessageHandler handler;
 
 void initPhysica() {
     using namespace Physica::Logger;
-    Cycler::init();
+    Physica::Utils::Cycler::init();
     LoggerRuntime::getInstance();
     handler = qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {
         QString prefix{};

@@ -20,13 +20,13 @@
 #define PHYSICA_VECTOREXPRESSION_H
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 /*!
  * This file contains implementation of expression templates of @class Vector.
  */
 namespace Physica::Core {
-    template<class T = MultiScalar, size_t maxLength = Dynamic>
+    template<class T = MultiScalar, size_t maxLength = Utils::Dynamic>
     class Vector;
 
     enum class ExpressionType {

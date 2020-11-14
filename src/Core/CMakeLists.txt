@@ -4,9 +4,9 @@ find_package(OpenCV REQUIRED)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 #############################################Project##############################################
 file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
-add_library(Physica_Core SHARED ${SOURCES_CORE})
+add_library(PhysicaCore SHARED ${SOURCES_CORE})
 #############################################Options##############################################
-target_link_libraries(Physica_Core Qt5::Core)
+target_link_libraries(PhysicaCore Qt5::Core PhysicaUtils)
 #Qt::Core will pass wrong option -fPIC to nvcc, so we have to remove it.
 if(TARGET Qt5::Core)
     get_property(core_options TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS)

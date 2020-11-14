@@ -21,7 +21,7 @@
 
 #include <cstddef>
 
-namespace Physica::Core {
+namespace Physica::Utils {
     /*!
      * Public parts among specializations of CStyleArray.
      */

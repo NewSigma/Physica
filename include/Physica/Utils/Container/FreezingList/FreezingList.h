@@ -21,7 +21,7 @@
 
 #include <cstddef>
 
-namespace Physica::Core {
+namespace Physica::Utils {
     /*!
      * Comparision:
      * This class is similar to std::vector because it is stored consistently and

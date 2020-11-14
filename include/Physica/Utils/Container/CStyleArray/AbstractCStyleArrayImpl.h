@@ -19,7 +19,7 @@
 #ifndef PHYSICA_ABSTRACTCSTYLEARRAYIMPL_H
 #define PHYSICA_ABSTRACTCSTYLEARRAYIMPL_H
 
-namespace Physica::Core {
+namespace Physica::Utils {
     template<class T>
     typename AbstractCStyleArray<T>::Iterator& AbstractCStyleArray<T>::Iterator::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
