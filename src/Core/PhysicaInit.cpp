@@ -61,4 +61,6 @@ void initPhysica() {
 }
 
 void deInitPhysica() {
+    using namespace Physica::Logger;
+    LoggerRuntime::getInstance().loggerShouldExit();
 }

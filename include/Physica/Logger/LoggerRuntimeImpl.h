@@ -16,7 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/Logger.h"
+#ifndef PHYSICA_LOGGERRUNTIMEIMPL_H
+#define PHYSICA_LOGGERRUNTIMEIMPL_H
+
+#include "Physica/Utils/Cycler.h"
 
 namespace Physica::Logger {
+    template<typename T1, typename... Ts>
+    inline void writeArgs(T1 head, Ts... args) {
+        LoggerRuntime::getInstance().getBuffer().write(head);
+        writeArgs(args...);
+    }
+
+    inline void writeArgs() { /* Do nothing */ }
+
+    template<typename... Ts>
+    void log(size_t logID, Ts... args) {
+        size_t time = Utils::Cycler::now();
+        writeArgs(logID);
+        writeArgs(time);
+        writeArgs(args...);
+    }
 }
+
+#endif

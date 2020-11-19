@@ -16,14 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Logger/Logger.h"
 #include "Physica/Logger/LoggerRuntime.h"
 
-namespace Physica::Logger {
-    LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
+using namespace Physica::Logger;
 
-    LoggerRuntime::LoggerRuntime() : bufferReadPtr(buffer), bufferWritePtr(buffer) {}
+int main(int argc, char** argv) {
+    using namespace Physica::Logger;
+    Physica::Utils::Cycler::init();
+    LoggerRuntime::getInstance();
 
-    void LoggerRuntime::registerLogger(const LogInfo& info) {
-        logInfos.push_back(info);
-    }
+    Logger logger{};
+    Info(logger, "Test begin.");
+    Warning(logger, "This is %c %s%c", 'a', "Logger", '.');
+
+    LoggerRuntime::getInstance().loggerShouldExit();
 }

@@ -16,29 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_FORMATANALYZER_H
-#define PHYSICA_FORMATANALYZER_H
-
-#include <stdexcept>
-#include <array>
-#include "LoggerType.h"
+#include "Physica/Logger/Logger.h"
 
 namespace Physica::Logger {
-    template<size_t N>
-    constexpr size_t getArgCount(const char (&format)[N]);
-
-    template<size_t N>
-    constexpr ArgType getArgType(const char (&format)[N], int index);
-
-    template<size_t ArgCount, size_t N>
-    constexpr std::array<ArgType, ArgCount> analyzeFormatString(const char(&format)[N]);
-
-    template<size_t N, std::size_t... Indices>
-    constexpr std::array<ArgType, sizeof...(Indices)>
-    analyzeFormatStringHelper(const char (&format)[N], std::index_sequence<Indices...>);
-
+    LogLevel Logger::globalLevel = LogLevel::Info;
 }
-
-#include "FormatAnalyzerImpl.h"
-
-#endif

@@ -21,9 +21,9 @@
 
 #include <cstdarg>
 #include <iostream>
+#include <array>
 #include "Physica/Config.h"
 #include "LoggerType.h"
-#include "LoggerRuntime.h"
 #include "FormatAnalyzer.h"
 
 namespace Physica::Logger {
@@ -31,6 +31,7 @@ namespace Physica::Logger {
      * Abstract father class for all loggers.
      */
     class Logger {
+        static LogLevel globalLevel;
     public:
         LogLevel localLevel;
     public:
@@ -42,13 +43,19 @@ namespace Physica::Logger {
         Logger& operator=(const Logger&) = default;
         Logger& operator=(Logger&&) noexcept = default;
         /* Operations */
-        static void log(const LogInfo* info, ...);
         /* Getters */
         [[nodiscard]] inline LogLevel getCurrentLevel() const;
+        /* Static members */
+        [[nodiscard]] static LogLevel getGlobalLevel() noexcept { return globalLevel; }
+        static inline void setGlobalLevel(LogLevel level) noexcept;
     };
 
     inline LogLevel Logger::getCurrentLevel() const {
-        return localLevel == LogLevel::Global ? LoggerRuntime::getGlobalLevel() : localLevel;
+        return localLevel == LogLevel::Global ? globalLevel : localLevel;
+    }
+
+    inline void Logger::setGlobalLevel(LogLevel level) noexcept {
+        globalLevel = level == LogLevel::Global ? LogLevel::Off : level;
     }
     /*!
      * No-Op function that triggers the GNU preprocessor's format checker for
@@ -62,28 +69,39 @@ namespace Physica::Logger {
     inline void __attribute__ ((format (printf, 1, 2))) checkFormat(const char*, ...) {}
 }
 
-#define Log(severity, format, ...)                                                      \
-    do {                                                                                \
-        using namespace Physica::Logger;                                                \
-        LogLevel level = logger.getCurrentLevel();                                      \
-        if(level >= LogLevel::severity) {                                               \
-            if(false)                                                                   \
-                Physica::Logger::checkFormat(format, ##__VA_ARGS__);                    \
-            constexpr LogInfo info{                                                     \
-                    LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],   \
-                    format,                                                             \
-                    __FILENAME__,                                                       \
-                    __LINE__};                                                          \
-            logger.log(&info, ##__VA_ARGS__);                                           \
-        }                                                                               \
+#define Log(logger, severity, format, ...)                                                          \
+    do {                                                                                            \
+        using namespace Physica::Logger;                                                            \
+        LogLevel level = logger.getCurrentLevel();                                                  \
+        if(level >= LogLevel::severity) {                                                           \
+            if(false)                                                                               \
+                Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
+            static size_t logID = 0;                                                                \
+                                                                                                    \
+            constexpr size_t argCount = getArgCount(format);                                        \
+            static constexpr std::array<ArgType, argCount> argArray                                 \
+                                                        = analyzeFormatString<argCount>(format);    \
+            if(!LoggerRuntime::getInstance().isIDRegistered(logID)) {                               \
+                constexpr LogInfo info{                                                             \
+                        LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
+                        format,                                                                     \
+                        __FILENAME__,                                                               \
+                        __LINE__,                                                                   \
+                        argArray.data(),                                                            \
+                        argCount};                                                                  \
+                LoggerRuntime::getInstance().registerLogger(info);                                  \
+                logID = LoggerRuntime::getInstance().getNextLogID();                                \
+            }                                                                                       \
+            log(logID, ##__VA_ARGS__);                                                              \
+        }                                                                                           \
     } while(false)
 
-#define Debug(logger, format, ...) Log(Debug, format, ##__VA_ARGS__)
+#define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
 
-#define Info(logger, format, ...) Log(Info, format, ##__VA_ARGS__)
+#define Info(logger, format, ...) Log(logger, Info, format, ##__VA_ARGS__)
 
-#define Warning(logger, format, ...) Log(Warning, format, ##__VA_ARGS__)
+#define Warning(logger, format, ...) Log(logger, Warning, format, ##__VA_ARGS__)
 
-#define Fatal(logger, format, ...) Log(Fatal, format, ##__VA_ARGS__)
+#define Fatal(logger, format, ...) Log(logger, Fatal, format, ##__VA_ARGS__)
 
 #endif

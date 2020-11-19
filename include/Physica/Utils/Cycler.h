@@ -101,11 +101,11 @@ namespace Physica::Utils {
         [[nodiscard]] static __inline __attribute__((always_inline))
         double getCyclesPerSec() { return localCyclesPerSec; }
 
-        static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = 0);
-        static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = 0);
-        static double toSeconds(int64_t cycles, double cyclesPerSec = 0);
-        static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = 0);
-        static uint64_t fromSeconds(double seconds, double cyclesPerSec = 0);
+        static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
+        static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
+        static double toSeconds(int64_t cycles, double cyclesPerSec = localCyclesPerSec);
+        static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = localCyclesPerSec);
+        static uint64_t fromSeconds(double seconds, double cyclesPerSec = localCyclesPerSec);
     private:
         Cycler() = default;
     };

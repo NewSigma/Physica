@@ -19,23 +19,50 @@
 #ifndef PHYSICA_LOGGERRUNTIME_H
 #define PHYSICA_LOGGERRUNTIME_H
 
+#include <vector>
+#include <thread>
+#include "Physica/Utils/RingBuffer.h"
 #include "LoggerType.h"
+#include "Logger.h"
 
 namespace Physica::Logger {
     class LoggerRuntime {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
-        static LogLevel globalLevel;
     private:
+        Utils::RingBuffer buffer;
         /*!
-         * The buffer between the producer and the consumer.
+         * Store info of logged logs.
          */
-        char buffer[1U << 20U];
+        std::vector<LogInfo> logInfos;
+        /*!
+         * The thread used to output logs.
+         */
+        std::thread logThread;
+        /*!
+         * Does log thread should exit.
+         */
+        bool shouldExit;
     public:
+        LoggerRuntime(const LoggerRuntime&) = delete;
+        LoggerRuntime(LoggerRuntime&&) noexcept = delete;
+        ~LoggerRuntime();
+        /* Operators */
+        LoggerRuntime& operator=(const LoggerRuntime&) = delete;
+        LoggerRuntime& operator=(LoggerRuntime&&) noexcept = delete;
+        /* Operations */
+        void registerLogger(const LogInfo& info);
+        void loggerShouldExit() { shouldExit = true; }
+        /* Getters */
+        [[nodiscard]] bool isIDRegistered(size_t id) const noexcept { return id != 0 && logInfos.size() >= id; }
+        [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
+        [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
         static inline LoggerRuntime& getInstance();
-        [[nodiscard]] static LogLevel getGlobalLevel() { return globalLevel; }
-        static inline void setGlobalLevel(LogLevel level);
+    private:
+        LoggerRuntime();
+
+        void logThreadMain();
     };
 
     inline LoggerRuntime& LoggerRuntime::getInstance() {
@@ -43,9 +70,15 @@ namespace Physica::Logger {
         return runtime;
     }
 
-    inline void LoggerRuntime::setGlobalLevel(LogLevel level) {
-        globalLevel = level == LogLevel::Global ? LogLevel::Off : level;
-    }
+    template<typename T1, typename... Ts>
+    inline void writeArgs(T1 head, Ts... args);
+
+    inline void writeArgs();
+
+    template<typename... Ts>
+    void log(size_t logID, Ts... args);
 }
+
+#include "LoggerRuntimeImpl.h"
 
 #endif

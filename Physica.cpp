@@ -34,5 +34,8 @@ int main(int argc, char** argv) {
     QApplication::connect(&app, &QApplication::aboutToQuit, []{ deInitPhysica(); });
 
     (new Physica::Gui::PhysicaMain())->show();
-    return QApplication::exec();
+
+    int exitCode = QApplication::exec();
+    deInitPhysica();
+    return exitCode;
 }

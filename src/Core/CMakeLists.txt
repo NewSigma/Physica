@@ -6,7 +6,7 @@ find_package(Qt5 COMPONENTS Core REQUIRED)
 file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
 add_library(PhysicaCore SHARED ${SOURCES_CORE})
 #############################################Options##############################################
-target_link_libraries(PhysicaCore Qt5::Core PhysicaUtils)
+target_link_libraries(PhysicaCore PhysicaLogger Qt5::Core PhysicaUtils)
 #Qt::Core will pass wrong option -fPIC to nvcc, so we have to remove it.
 if(TARGET Qt5::Core)
     get_property(core_options TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS)
