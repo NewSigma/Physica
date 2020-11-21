@@ -22,6 +22,7 @@
 #include "Basic/AddBasic.h"
 #include "Basic/DivBasic.h"
 #include "Util/ArraySupport.h"
+#include "Physica/Core/Exception/DivideByZeroException.h"
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.
@@ -449,7 +450,7 @@ namespace Physica::Core {
     template<>
     inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::div(const Scalar& s1, const Scalar& s2) {
         if(Q_UNLIKELY(s2.isZero()))
-            qFatal("Encountered dividing by zero exception.");
+            throw DivideByZeroException();
 
         if(!s1.isZero()) {
             if(s2 != BasicConst::getInstance()._1) {
@@ -504,7 +505,7 @@ namespace Physica::Core {
     template<>
     inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::div(const Scalar& s1, const Scalar& s2) {
         if(Q_UNLIKELY(s2.isZero()))
-            qFatal("Encountered dividing by zero exception.");
+            throw DivideByZeroException();
 
         if(!s1.isZero()) {
             if(s2 != BasicConst::getInstance()._1) {
