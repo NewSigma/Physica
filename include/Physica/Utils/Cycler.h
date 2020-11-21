@@ -27,10 +27,13 @@ namespace Physica::Utils {
      * cycle counter and translate between cycle-level times and absolute
      * times.
      *
+     * Warning:
+     * It is rare that some operating system will not enable the users use rdstc instruction,
+     * but they are likely to provide a interface for users to call.
+     *
      * Questions:
-     * 1.Does this algorithm available to AMD CPUs?
-     * 2.According to [1], we can force a program run in kernel to avoid interrupts, may be we can use of it?
-     * 3.According to [1], we can make use of asm CPUID to get a preciser result.
+     * 1.According to [1], we can force a program run in kernel to avoid interrupts, may be we can use of it?
+     * 2.According to [1], we can make use of asm CPUID to get a preciser result.
      *
      * Reference:
      * [1] PAOLONI, G. How to benchmark code execution times on intel ia-32 and ia-64 instruction set

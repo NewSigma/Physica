@@ -76,12 +76,12 @@ namespace Physica::Logger {
         if(level >= LogLevel::severity) {                                                           \
             if(false)                                                                               \
                 Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
-            static size_t logID = 0;                                                                \
+            static size_t logID = LoggerRuntime::unassignedLogID;                                   \
                                                                                                     \
             constexpr size_t argCount = getArgCount(format);                                        \
             static constexpr std::array<ArgType, argCount> argArray                                 \
                                                         = analyzeFormatString<argCount>(format);    \
-            if(!LoggerRuntime::getInstance().isIDRegistered(logID)) {                               \
+            if(logID == LoggerRuntime::unassignedLogID) {                                           \
                 constexpr LogInfo info{                                                             \
                         LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
                         format,                                                                     \

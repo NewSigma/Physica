@@ -29,6 +29,7 @@ namespace Physica::Logger {
     class LoggerRuntime {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
+        constexpr static const size_t unassignedLogID = 0;
     private:
         Utils::RingBuffer buffer;
         /*!
@@ -54,7 +55,6 @@ namespace Physica::Logger {
         void registerLogger(const LogInfo& info);
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */
-        [[nodiscard]] bool isIDRegistered(size_t id) const noexcept { return id != 0 && logInfos.size() >= id; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
