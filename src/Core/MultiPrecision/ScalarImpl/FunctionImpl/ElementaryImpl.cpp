@@ -43,7 +43,7 @@ namespace Physica::Core {
         Scalar result = Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(1));
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
-            result = (result + Scalar<MultiPrecision, false>::div<false>(copy_s, result)) >> 1U;
+            result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
     }
@@ -71,7 +71,7 @@ namespace Physica::Core {
         Scalar result = Scalar<MultiPrecision, true>(static_cast<SignedScalarUnit>(1));
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
-            result = (result + Scalar<MultiPrecision, false>::div<false>(copy_s, result)) >> 1U;
+            result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
         result.power += add_power;
 
         result.toUnitA();
@@ -96,8 +96,8 @@ namespace Physica::Core {
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
-        auto temp_1 = Scalar<MultiPrecision, false>::sub<false>(s, _1)
-                      / Scalar<MultiPrecision, false>::add<false>(s, _1);
+        auto temp_1 = Scalar<MultiPrecision, false>::subNoError(s, _1)
+                      / Scalar<MultiPrecision, false>::addNoError(s, _1);
         Scalar<MultiPrecision, false> copy_temp_1(temp_1);
         Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
 
@@ -128,8 +128,8 @@ namespace Physica::Core {
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
-        auto temp_1 = Scalar<MultiPrecision, false>::sub<true>(s, _1)
-                      / Scalar<MultiPrecision, false>::add<false>(s, _1);
+        auto temp_1 = Scalar<MultiPrecision, false>::subWithError(s, _1)
+                      / Scalar<MultiPrecision, false>::addNoError(s, _1);
         Scalar<MultiPrecision, true> copy_temp_1(temp_1);
         Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
 

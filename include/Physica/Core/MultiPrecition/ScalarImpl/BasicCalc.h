@@ -29,28 +29,12 @@
  */
 namespace Physica::Core {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
-    //Default implementations
-    template<bool errorTrack>
-    [[maybe_unused]] inline Scalar<MultiPrecision, errorTrack> Scalar<MultiPrecision, false>::add (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) { Q_UNUSED(errorTrack) }
-    template<bool errorTrack>
-    [[maybe_unused]] inline Scalar<MultiPrecision, errorTrack> Scalar<MultiPrecision, false>::sub (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) { Q_UNUSED(errorTrack) }
-    template<bool errorTrack>
-    [[maybe_unused]] inline Scalar<MultiPrecision, errorTrack> Scalar<MultiPrecision, false>::mul (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) { Q_UNUSED(errorTrack) }
-    template<bool errorTrack>
-    [[maybe_unused]] inline Scalar<MultiPrecision, errorTrack> Scalar<MultiPrecision, false>::div (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) { Q_UNUSED(errorTrack) }
-    //Forward declaration.
-    template<> inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::sub (const Scalar& s1, const Scalar& s2);
-    template<> inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::sub (const Scalar& s1, const Scalar& s2);
     /*!
-     * If \errorTrack is true, the return type will contain errorTrack. The following functions has slightly difference
-     * between them and their specializations.
+     * WithError functions will calculate the error while NoError functions will not.
+     * They have slightly difference between each other.
      */
-    template<>
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::add (const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::addWithError (
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1.isZero())
             return Scalar<MultiPrecision, true>(s2);
         else if(s2.isZero())
@@ -58,14 +42,14 @@ namespace Physica::Core {
         else if ((s1.length ^ s2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
             if (s1.length > 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                auto result = sub<true>(s1, shallow_copy);
+                auto result = subWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
-                auto result = sub<true>(s2, shallow_copy);
+                auto result = subWithError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
@@ -126,8 +110,8 @@ namespace Physica::Core {
         }
     }
 
-    template<>
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::add (const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::addNoError (
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1.isZero())
             return Scalar(s2);
         else if(s2.isZero())
@@ -135,14 +119,14 @@ namespace Physica::Core {
         else if ((s1.length ^ s2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
             if (s1.length > 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                auto result = sub<false>(s1, shallow_copy);
+                auto result = subNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
-                auto result = sub<false>(s2, shallow_copy);
+                auto result = subNoError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
@@ -202,8 +186,8 @@ namespace Physica::Core {
         }
     }
 
-    template<>
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::sub(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::subWithError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1.isZero())
             return Scalar<MultiPrecision, true>(-s2);
         else if(s2.isZero())
@@ -211,7 +195,7 @@ namespace Physica::Core {
         else if (s1.length > 0) {
             if (s2.length < 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                auto result = add<true>(s1, shallow_copy);
+                auto result = addWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
@@ -282,7 +266,7 @@ namespace Physica::Core {
         else {
             Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
-                auto result = add<true>(shallow_copy, s2);
+                auto result = addWithError(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -290,7 +274,7 @@ namespace Physica::Core {
             }
             else {
                 Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                auto result = sub<true>(shallow_copy_1, shallow_copy);
+                auto result = subWithError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 Q_UNUSED(shallow_copy_1)
@@ -299,8 +283,8 @@ namespace Physica::Core {
         }
     }
 
-    template<>
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::sub(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::subNoError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1.isZero())
             return Scalar(-s2);
         else if(s2.isZero())
@@ -308,7 +292,7 @@ namespace Physica::Core {
         else if (s1.length > 0) {
             if (s2.length < 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = add<false>(s1, shallow_copy);
+                Scalar result = addNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
@@ -378,7 +362,7 @@ namespace Physica::Core {
         else {
             Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
-                Scalar result = add<false>(shallow_copy, s2);
+                Scalar result = addNoError(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -386,7 +370,7 @@ namespace Physica::Core {
             }
             else {
                 Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = sub<false>(shallow_copy_1, shallow_copy);
+                Scalar result = subNoError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 Q_UNUSED(shallow_copy_1)
@@ -395,8 +379,8 @@ namespace Physica::Core {
         }
     }
 
-    template<>
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::mul(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::mulWithError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, true>(s2);
         else if(s2 == BasicConst::getInstance()._1)
@@ -421,8 +405,8 @@ namespace Physica::Core {
         }
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-    template<>
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::mul(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::mulNoError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, false>(s2);
         else if(s2 == BasicConst::getInstance()._1)
@@ -447,8 +431,8 @@ namespace Physica::Core {
         }
     }
 
-    template<>
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::div(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::divWithError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(Q_UNLIKELY(s2.isZero()))
             throw DivideByZeroException();
 
@@ -502,8 +486,8 @@ namespace Physica::Core {
             return Scalar<MultiPrecision, true>(static_cast<SignedScalarUnit>(0));
     }
 
-    template<>
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::div(const Scalar& s1, const Scalar& s2) {
+    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::divNoError(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
         if(Q_UNLIKELY(s2.isZero()))
             throw DivideByZeroException();
 

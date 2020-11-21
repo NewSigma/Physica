@@ -222,33 +222,33 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator+(
             const Scalar<MultiPrecision, false>& s) const {
-        auto result = add<false>(*this, s);
+        auto result = addNoError(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-(
             const Scalar<MultiPrecision, false>& s) const {
-        auto result = sub<false>(*this, s);
+        auto result = subNoError(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
-        auto result = mul<false>(*this, s);
+        auto result = mulNoError(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator/(
             const Scalar<MultiPrecision, false>& s) const {
-        return div<false>(*this, s);
+        return divNoError(*this, s);
     }
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator+(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = add<true>(*this, s);
+        auto result = addWithError(*this, s);
         cutLength(result);
         if(s.getA() != 0)
             result.applyError(s.getAccuracy());
@@ -257,7 +257,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator-(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = sub<true>(*this, s);
+        auto result = subWithError(*this, s);
         cutLength(result);
         if(s.getA() != 0)
             result.applyError(s.getAccuracy());
@@ -266,7 +266,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator*(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = mul<true>(*this, s);
+        auto result = mulWithError(*this, s);
         cutLength(result);
         if(s.getA() != 0)
             result.applyError(*this * s.getAccuracy());
@@ -275,7 +275,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator/(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = div<true>(*this, s);
+        auto result = divWithError(*this, s);
         if(s.getA() != 0) {
             const Scalar<MultiPrecision, false>& casted = s;
             Scalar s_a = s.getAccuracy();
@@ -549,7 +549,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
             const Scalar<MultiPrecision, false>& s) const {
-        auto result = add<true>(*this, s);
+        auto result = addWithError(*this, s);
         cutLength(result);
         if(getA() != 0)
             result.applyError(getAccuracy());
@@ -559,7 +559,7 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
             const Scalar<MultiPrecision, false>& s) const {
         Q_UNUSED(MultiPrecision)
-        auto result = sub<true>(*this, s);
+        auto result = subWithError(*this, s);
         cutLength(result);
         if(getA() != 0)
             result.applyError(getAccuracy());
@@ -569,7 +569,7 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
         Q_UNUSED(MultiPrecision)
-        auto result = mul<true>(*this, s);
+        auto result = mulWithError(*this, s);
         cutLength(result);
         if(getA() != 0)
             result.applyError(s * getAccuracy());
@@ -579,7 +579,7 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator/(
             const Scalar<MultiPrecision, false>& s) const {
         Q_UNUSED(MultiPrecision)
-        auto result = div<true>(*this, s);
+        auto result = divWithError(*this, s);
         if(getA() != 0)
             result.applyError(getAccuracy() / s);
         return result;
@@ -587,7 +587,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = add<true>(*this, s);
+        auto result = addWithError(*this, s);
         cutLength(result);
         if(getA() != 0 || s.getA() != 0) {
             if(getA() == 0)
@@ -602,7 +602,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = sub<true>(*this, s);
+        auto result = subWithError(*this, s);
         cutLength(result);
         if(getA() != 0 || s.getA() != 0) {
             if(getA() == 0)
@@ -617,7 +617,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = mul<true>(*this, s);
+        auto result = mulWithError(*this, s);
         cutLength(result);
         if(getA() != 0 || s.getA() != 0) {
             const Scalar<MultiPrecision, false>& casted = s;
@@ -639,7 +639,7 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator/(
             const Scalar<MultiPrecision, true>& s) const {
-        auto result = div<true>(*this, s);
+        auto result = divWithError(*this, s);
         if(getA() != 0 || s.getA() != 0) {
             const Scalar<MultiPrecision, false>& casted = s;
             if(getA() == 0) {

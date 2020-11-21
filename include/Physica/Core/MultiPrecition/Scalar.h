@@ -100,14 +100,14 @@ namespace Physica::Core {
     protected:
         //Should only be used in add(), sub(), mul() and div(). \byte must be allocated by malloc().
         Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
-        template<bool errorTrack>
-        inline static Scalar<MultiPrecision, errorTrack> add (const Scalar& s1, const Scalar& s2);
-        template<bool errorTrack>
-        inline static Scalar<MultiPrecision, errorTrack> sub (const Scalar& s1, const Scalar& s2);
-        template<bool errorTrack>
-        inline static Scalar<MultiPrecision, errorTrack> mul (const Scalar& s1, const Scalar& s2);
-        template<bool errorTrack>
-        inline static Scalar<MultiPrecision, errorTrack> div (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, true> addWithError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, false> addNoError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, true> subWithError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, false> subNoError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, true> mulWithError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, false> mulNoError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, true> divWithError (const Scalar& s1, const Scalar& s2);
+        inline static Scalar<MultiPrecision, false> divNoError (const Scalar& s1, const Scalar& s2);
         template<bool errorTrack>
         inline static bool cutLength(Scalar<MultiPrecision, errorTrack>& s);
         inline static void cutZero(Scalar& s);
