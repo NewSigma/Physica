@@ -84,7 +84,7 @@ namespace Physica::Core {
             doubleCount_1 = temp - 1;
             temp *= doubleCount_1 * (s ^ doubleCount_1);
             temp = bernoulli(count) / temp;
-            flag = temp.getPower() - result.getPower() > GlobalPrecision;
+            flag = (temp.getPower() - result.getPower()) > GlobalPrecision;
             ++count;
             minus = !minus;
         }

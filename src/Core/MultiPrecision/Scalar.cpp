@@ -23,9 +23,14 @@ namespace Physica::Core {
     Scalar<MultiPrecision, false>::Scalar() noexcept
             : byte(nullptr), length(0), power(0) {}
 
-    Scalar<MultiPrecision, false>::Scalar(int length, int power) noexcept
+    Scalar<MultiPrecision, false>::Scalar(int length, int power)
             : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length) * sizeof(ScalarUnit))))
-            , length(length), power(power) {}
+            , length(length), power(power) {
+        /*
+         * Length of scalar must not equal to INT_MIN or -length makes no sence.
+         */
+        assert(length != INT_MIN);
+    }
 
     Scalar<MultiPrecision, false>::Scalar(const Scalar<MultiPrecision, false>& s)
             : byte(reinterpret_cast<ScalarUnit*>(malloc(s.getSize() * sizeof(ScalarUnit))))
@@ -464,7 +469,7 @@ namespace Physica::Core {
             power = 0;
             return;
         }
-        const long new_length = power + 1; //Declared long to avoid overflow.
+        const long new_length = power + 1L; //Declared long to avoid overflow.
         if(new_length >= length)
             return;
         /* Move and adjust the size */ {
@@ -734,6 +739,8 @@ namespace Physica::Core {
     /*!
      * Add error to this and adjust this->length as well as this->byte.
      *
+     * FixIt: temp may overflow.
+     *
      * Optimize:
      * error is always non-zero, if(!error.isZero()) is unnecessary.
      */
@@ -742,18 +749,18 @@ namespace Physica::Core {
         if(!error.isZero()) {
             int size = Scalar<MultiPrecision, false>::getSize();
             int copy = size;
-            int temp = power - size + 1 - error.power;
+            int temp = power - size + 1 - error.getPower();
             ScalarUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
                     auto error_1 = getAccuracy() + error;
                     size += temp;
                     //Use (a += error_1.byte[error_1.getSize() - 1] + 1) for more conservative error estimate.
-                    a += error_1.byte[error_1.getSize() - 1];
+                    a += error_1[error_1.getSize() - 1];
                 }
                 else
                     //Use (a += error.byte[error.getSize() - 1] + 1) for more conservative error estimate.
-                    a += error.byte[error.getSize() - 1];
+                    a += error[error.getSize() - 1];
             }
 
             if(a < copy_a) {

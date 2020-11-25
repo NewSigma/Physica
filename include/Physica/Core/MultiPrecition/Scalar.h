@@ -33,23 +33,27 @@ namespace Physica::Core {
 
     template<>
     class Scalar<MultiPrecision, false> {
+    protected:
         //Store effective digits using little endian standard.
         ScalarUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Scalar are same. (when Scalar != 0)
          *
+         * Warning: length can not equal to INT_MIN, or length will not return the correct answer.
+         *
          * Optimize: use the end position of byte instead length may improve performance.
          */
         int length;
         /*
          * Number = (x0 +- a * (2 ^ __WORDSIZE) ^ (1 - length)) * (2 ^ __WORDSIZE) ^ power
-         * We have not considered overflow of power in our codes elsewhere.
+         *
+         * FixIt: We have not considered overflow of power in our codes elsewhere.
          */
         int power;
     public:
         Scalar() noexcept;
-        Scalar(int length, int power) noexcept;
+        Scalar(int length, int power);
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(int i); //NOLINT Conversion is always available.
@@ -92,8 +96,9 @@ namespace Physica::Core {
         [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
-        [[nodiscard]] bool isInteger() const { return getSize() == power + 1; }
+        [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
         /* Setters */
+        void setPower(int i) noexcept { power = i; }
         void setByte(unsigned int index, ScalarUnit value) { Q_ASSERT(index < getSize()); byte[index] = value; }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
@@ -127,6 +132,7 @@ namespace Physica::Core {
 
     template<>
     class Scalar<MultiPrecision, true> : public Scalar<MultiPrecision, false> {
+    protected:
         //Accuracy
         ScalarUnit a;
     public:
@@ -158,7 +164,6 @@ namespace Physica::Core {
         Scalar operator>>(int bits) const;
         Scalar operator-() const;
         /* Helpers */
-        Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
@@ -174,11 +179,15 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
     private:
-        //Should only be used in add(), sub(), mul() and div().
         Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0)
                 : Scalar<MultiPrecision, false>(byte, length, power), a(a) {}
+        Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */
         friend class Scalar<MultiPrecision, false>;
+        template<ScalarType type>
+        friend Scalar<type, true> sqrt(const Scalar<type, true>& s);
+        template<ScalarType type>
+        friend Scalar<type, true> ln(const Scalar<type, true>& s);
     };
     /* Compare */
     bool absCompare(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);

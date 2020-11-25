@@ -25,6 +25,17 @@ using namespace Physica::Core;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 /*!
+ * Test if add operation supports associativity. Return true if it does no support.
+ */
+bool associativityAdd() {
+    Scalar<MultiPrecision, false> s1(1);
+    s1.setPower(GlobalPrecision);
+    Scalar<MultiPrecision, false> s2(LONG_MAX);
+    s2 += Scalar<MultiPrecision, false>(2);
+    Scalar<MultiPrecision, false> s3(LONG_MAX);
+    return s1 + s2 + s3 != s1 + (s2 + s3);
+}
+/*!
  * Test operator+(), return true if passed.
  */
 bool numericalAddTest(unsigned int loop) {
@@ -210,6 +221,7 @@ int main(int argc, char** argv) {
             && toIntegerTest<Float>(iterateCount)
             && toIntegerTest<Double>(iterateCount)
             && toIntegerTest<MultiPrecision>(iterateCount);
+    result &= associativityAdd();
     deInitPhysica();
     return !result;
 }
