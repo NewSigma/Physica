@@ -24,6 +24,7 @@
 namespace Physica::Core {
     template<class T, MatrixType type, size_t maxSize>
     class SquareMatrix : public Matrix<T, type, maxSize, maxSize> {
+        typedef Matrix<T, type, maxSize, maxSize> Base;
     public:
         enum DeterminateMethod {
             GaussMethod,

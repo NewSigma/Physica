@@ -62,26 +62,33 @@ namespace Physica::Core {
     T SquareMatrix<T, type, maxSize>::determinate(DeterminateMethod method) {
         typedef MatrixOperation<T, type, maxSize, maxSize> Operation;
 
-        const auto rank = Matrix<T, type, maxSize, maxSize>::getRow();
-        MultiScalar result(BasicConst::getInstance()._1);
-        switch(method) {
-            case GaussMethod:
-                for(size_t i = 0; i < rank; ++i) {
-                    Operation::upperEliminate(*this, i);
-                    Operation::lowerEliminate(*this, i);
-                    result *= (*this)[i][i];
+        const auto rank = Base::getRow();
+        switch(rank) {
+            case 1:
+                return (*this)[0][0];
+            case 2:
+                return (*this)[0][0] * (*this)[1][1] - (*this)[1][0] * (*this)[0][1];
+            default:
+                MultiScalar result(BasicConst::getInstance()._1);
+                switch(method) {
+                    case GaussMethod:
+                        for(size_t i = 0; i < rank; ++i) {
+                            Operation::upperEliminate(*this, i);
+                            Operation::lowerEliminate(*this, i);
+                            result *= (*this)[i][i];
+                        }
+                        break;
+                    case LUMethod: {
+                        LUDecomposition<T, type, maxSize, maxSize> lu(*this);
+                        const auto& m = lu.getMatrix();
+                        for(size_t i = 0; i < rank; ++i)
+                            result *= m(i, i);
+                    }
+                        break;
+                    default:;
                 }
-                break;
-            case LUMethod: {
-                LUDecomposition<T, type, maxSize, maxSize> lu(*this);
-                const auto& m = lu.getMatrix();
-                for(size_t i = 0; i < rank; ++i)
-                    result *= m(i, i);
-            }
-                break;
-            default:;
+                return result;
         }
-        return result;
     }
     
     template<class T, MatrixType type, size_t maxSize>
