@@ -27,6 +27,8 @@
 
 namespace Physica::Logger {
     class LoggerRuntime {
+        //The default stdout logger, should be made single instance in the future.
+        static Logger* stdoutLogger;
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static const size_t unassignedLogID = 0;
@@ -58,12 +60,19 @@ namespace Physica::Logger {
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
+        static inline void initLogger();
+        static inline Logger& getStdoutLogger() { return *stdoutLogger; }
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
 
         void logThreadMain();
     };
+
+    inline void LoggerRuntime::initLogger() {
+        if(stdoutLogger == nullptr)
+            stdoutLogger = new Logger();
+    }
 
     inline LoggerRuntime& LoggerRuntime::getInstance() {
         static LoggerRuntime runtime{};
@@ -78,6 +87,41 @@ namespace Physica::Logger {
     template<typename... Ts>
     void log(size_t logID, Ts... args);
 }
+
+#define Log(logger, severity, format, ...)                                                          \
+    do {                                                                                            \
+        using namespace Physica::Logger;                                                            \
+        LogLevel level = logger.getCurrentLevel();                                                  \
+        if(level >= LogLevel::severity) {                                                           \
+            if(false)                                                                               \
+                Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
+            static size_t logID = LoggerRuntime::unassignedLogID;                                   \
+                                                                                                    \
+            constexpr size_t argCount = getArgCount(format);                                        \
+            static constexpr std::array<ArgType, argCount> argArray                                 \
+                                                        = analyzeFormatString<argCount>(format);    \
+            if(logID == LoggerRuntime::unassignedLogID) {                                           \
+                constexpr LogInfo info{                                                             \
+                        LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
+                        format,                                                                     \
+                        __FILENAME__,                                                               \
+                        __LINE__,                                                                   \
+                        argArray.data(),                                                            \
+                        argCount};                                                                  \
+                LoggerRuntime::getInstance().registerLogger(info);                                  \
+                logID = LoggerRuntime::getInstance().getNextLogID();                                \
+            }                                                                                       \
+            Physica::Logger::log(logID, ##__VA_ARGS__);                                             \
+        }                                                                                           \
+    } while(false)
+
+#define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
+
+#define Info(logger, format, ...) Log(logger, Info, format, ##__VA_ARGS__)
+
+#define Warning(logger, format, ...) Log(logger, Warning, format, ##__VA_ARGS__)
+
+#define Fatal(logger, format, ...) Log(logger, Fatal, format, ##__VA_ARGS__)
 
 #include "LoggerRuntimeImpl.h"
 

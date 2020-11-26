@@ -24,6 +24,8 @@
 #include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Logger {
+    Logger* LoggerRuntime::stdoutLogger = nullptr;
+
     LoggerRuntime::LoggerRuntime()
             : buffer(1U << 20U)
             , logThread(&LoggerRuntime::logThreadMain, this)

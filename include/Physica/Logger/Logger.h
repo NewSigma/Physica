@@ -69,39 +69,4 @@ namespace Physica::Logger {
     inline void __attribute__ ((format (printf, 1, 2))) checkFormat(const char*, ...) {}
 }
 
-#define Log(logger, severity, format, ...)                                                          \
-    do {                                                                                            \
-        using namespace Physica::Logger;                                                            \
-        LogLevel level = logger.getCurrentLevel();                                                  \
-        if(level >= LogLevel::severity) {                                                           \
-            if(false)                                                                               \
-                Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
-            static size_t logID = LoggerRuntime::unassignedLogID;                                   \
-                                                                                                    \
-            constexpr size_t argCount = getArgCount(format);                                        \
-            static constexpr std::array<ArgType, argCount> argArray                                 \
-                                                        = analyzeFormatString<argCount>(format);    \
-            if(logID == LoggerRuntime::unassignedLogID) {                                           \
-                constexpr LogInfo info{                                                             \
-                        LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
-                        format,                                                                     \
-                        __FILENAME__,                                                               \
-                        __LINE__,                                                                   \
-                        argArray.data(),                                                            \
-                        argCount};                                                                  \
-                LoggerRuntime::getInstance().registerLogger(info);                                  \
-                logID = LoggerRuntime::getInstance().getNextLogID();                                \
-            }                                                                                       \
-            log(logID, ##__VA_ARGS__);                                                              \
-        }                                                                                           \
-    } while(false)
-
-#define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
-
-#define Info(logger, format, ...) Log(logger, Info, format, ##__VA_ARGS__)
-
-#define Warning(logger, format, ...) Log(logger, Warning, format, ##__VA_ARGS__)
-
-#define Fatal(logger, format, ...) Log(logger, Fatal, format, ##__VA_ARGS__)
-
 #endif
