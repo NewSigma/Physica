@@ -52,3 +52,21 @@ let $$n = int(\frac{m \ln 2}{\ln 10})$$
 $$m = e ^ {p \ln 2 - n \ln 10}$$  
 
 Then we have $$s = (b \times m) \times 10^{n}$$
+
+# Overflow in applyError()
+
+temp in function applyError() may overflow in some extreme conditions.
+
+1.if power = error.power, every thing is ok
+2.if power > error.power, usually power - error.power > 0, but if power is big and error.power is small enough,
+  power - error.power < 0.
+3.if power < error.power, usually power - error.power < 0, but if power is small and error.power is big enough,
+  power - error.power > 0.
+  
+In general when (power == error.power | power > error.power && power - error.power > 0) is true, every thing is ok.
+Otherwise, when
+1.(power < error.power), error is too much and no effective digits is saved.
+2.(power > error.power && power - error.power < 0), we can prove power > 0 and error.power < 0,
+  mathematically (power - error.power > INT_MAX), because size <= INT_MAX, power - error.power > size.
+  error is too small, discard it.
+

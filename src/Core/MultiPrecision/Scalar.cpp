@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Core {
     //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
@@ -27,7 +28,7 @@ namespace Physica::Core {
             : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length) * sizeof(ScalarUnit))))
             , length(length), power(power) {
         /*
-         * Length of scalar must not equal to INT_MIN or -length makes no sence.
+         * Length of scalar must not equal to INT_MIN or -length makes no sense.
          */
         assert(length != INT_MIN);
     }
@@ -532,12 +533,14 @@ namespace Physica::Core {
             const Scalar<MultiPrecision, true>& s) {
         a = s.a;
         Scalar<MultiPrecision, false>::operator=(s);
+        return *this;
     }
 
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(
             Scalar<MultiPrecision, true>&& s) noexcept {
         a = s.a;
         Scalar<MultiPrecision, false>::operator=(std::move(s));
+        return *this;
     }
 
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(const Scalar<MultiPrecision, false>& s) {
@@ -738,18 +741,14 @@ namespace Physica::Core {
     }
     /*!
      * Add error to this and adjust this->length as well as this->byte.
-     *
-     * FixIt: temp may overflow.
-     *
-     * Optimize:
-     * error is always non-zero, if(!error.isZero()) is unnecessary.
      */
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::applyError(
             const Scalar<MultiPrecision, false>& error) {
-        if(!error.isZero()) {
+        assert(error.isPositive());
+        if(power == error.power || (power > error.power && power - error.power > 0)) {
             int size = Scalar<MultiPrecision, false>::getSize();
-            int copy = size;
-            int temp = power - size + 1 - error.getPower();
+            const int copy = size;
+            const int temp = power - error.getPower() - size + 1;//Equals to (power - size + 1 - error.getPower()). Exchanged the order to avoid overflow.
             ScalarUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
@@ -770,10 +769,8 @@ namespace Physica::Core {
             }
 
             if(size < 1) {
-                qWarning("Accumulated too many errors.");
                 power += 1 - size;
-                length = length < 0 ? -1 : 1;
-                return *this;
+                goto errorOverflow;
             }
 
             if(size < copy) {
@@ -784,6 +781,15 @@ namespace Physica::Core {
             }
             length = length < 0 ? -size : size;
         }
+        else if(power < error.power) {
+            power = error.power;
+            goto errorOverflow;
+        }
+        return *this;
+    //Handle error overflow, power must be set before goto here.
+    errorOverflow:
+        Warning(LoggerRuntime::getStdoutLogger(), "Accumulated too many errors.");
+        length = length < 0 ? -1 : 1;
         return *this;
     }
     /*!
