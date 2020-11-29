@@ -20,8 +20,8 @@
 #define PHYSICA_PHYSICAMAIN_H
 
 #include <QtWidgets/QMainWindow>
-#include "EditorMain.h"
-#include "Calculator.h"
+#include "Physica/Gui/Editor/EditorMain.h"
+#include "Physica/Gui/Menu/Calculator.h"
 
 namespace Physica::Gui {
     class PhysicaMain : public QMainWindow {

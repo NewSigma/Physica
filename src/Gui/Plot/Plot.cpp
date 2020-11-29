@@ -18,7 +18,7 @@
  */
 #include <QtCharts>
 #include <Physica/Core/Math/Calculus/Differential.h>
-#include "Physica/Gui/Plot.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 

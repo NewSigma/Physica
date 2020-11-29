@@ -18,7 +18,7 @@
  */
 #include <QtGui/QGuiApplication>
 #include <QScreen>
-#include "Physica/Gui/Settings.h"
+#include "Physica/Gui/Menu/Settings.h"
 
 namespace Physica::Gui {
     Settings::Settings(PhysicaMain* parent) : parent(parent) {

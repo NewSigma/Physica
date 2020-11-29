@@ -19,7 +19,7 @@
 #include <QKeyEvent>
 #include <Physica/Core/MultiPrecition/Scalar.h>
 #include <Physica/Interpreter/ExprReader.h>
-#include "Physica/Gui/Calculator.h"
+#include "Physica/Gui/Menu/Calculator.h"
 
 using Physica::Interpreter::ExprReader;
 

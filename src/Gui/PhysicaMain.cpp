@@ -21,8 +21,8 @@
 #include "QMenuBar"
 #include "QScreen"
 #include "QKeyEvent"
-#include "Physica/Gui/Settings.h"
-#include "Physica/Gui/LongtonAnt.h"
+#include "Physica/Gui/Menu/Settings.h"
+#include "Physica/Gui/Menu/InT/LongtonAnt.h"
 #include "Physica/Gui/GlobalStyle.h"
 
 namespace Physica::Gui {

@@ -20,9 +20,9 @@
 #include <QtGui/QTextBlock>
 #include <QPaintEvent>
 #include <QScrollBar>
-#include "Physica/Gui/Plot.h"
-#include "Physica/Gui/EditorMain.h"
-#include "Physica/Gui/LineNumberArea.h"
+#include "Physica/Gui/Plot/Plot.h"
+#include "Physica/Gui/Editor/EditorMain.h"
+#include "Physica/Gui/Editor/LineNumberArea.h"
 
 namespace Physica::Gui {
     EditorMain::EditorMain(QWidget* parent) : QTextEdit(parent), defaultFont(QFont("DejaVu Sans Mono", 14)) {

@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,16 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Gui/Menu/SettingsPage.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/Element.h"
 
-namespace Physica::Gui {
-    SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
-        default_layout = new QVBoxLayout(this);
-
-        themeLabel = new QLabel("Theme", this);
-        default_layout->addWidget(themeLabel);
-
-        themeBox = new QComboBox(this);
-        default_layout->addWidget(themeBox);
+namespace Physica::Core {
+    Element::~Element() {
+        delete[] nodesIndex;
     }
 }

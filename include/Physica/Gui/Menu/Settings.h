@@ -19,7 +19,7 @@
 #ifndef PHYSICA_SETTINGS_H
 #define PHYSICA_SETTINGS_H
 
-#include "PhysicaMain.h"
+#include "Physica/Gui/PhysicaMain.h"
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
 #include "QDialog"

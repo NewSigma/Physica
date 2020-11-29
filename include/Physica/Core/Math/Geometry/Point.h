@@ -44,6 +44,7 @@ namespace Physica::Core {
     class Point<1, type, errorTrack> {
         Scalar<type, errorTrack> x;
     public:
+        Point() = default;
         explicit Point(Scalar<type, errorTrack> x);
         Point(const Point& p);
         Point(Point&& p) noexcept;
@@ -57,6 +58,7 @@ namespace Physica::Core {
     class Point<2, type, errorTrack> {
         Scalar<type, errorTrack> x, y;
     public:
+        Point() = default;
         Point(Scalar<type, errorTrack> x, Scalar<type, errorTrack> y);
         Point(const Point& p);
         Point(Point&& p) noexcept;
@@ -70,6 +72,7 @@ namespace Physica::Core {
     class Point<3, type, errorTrack> {
         Scalar<type, errorTrack> x, y, z;
     public:
+        Point() = default;
         Point(Scalar<type, errorTrack> x, Scalar<type, errorTrack> y, Scalar<type, errorTrack> z);
         Point(const Point& p);
         Point(Point&& p) noexcept;
