@@ -22,6 +22,7 @@
 #include <cstddef>
 
 namespace Physica::Utils {
+    //Idea: How about make use of overflow of integers in RingBuffer?
     class RingBuffer {
         /*!
          * Buffer of data bytes.

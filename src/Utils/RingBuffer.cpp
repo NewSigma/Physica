@@ -18,7 +18,6 @@
  */
 #include <cassert>
 #include <cstring>
-#include <chrono>
 #include <thread>
 #include "Physica/Utils/RingBuffer.h"
 
@@ -77,7 +76,6 @@ namespace Physica::Utils {
      * Number of bytes to be read and write.
      */
     void RingBuffer::writeBytes(const char* src, size_t bytes) {
-        using namespace std::chrono_literals;
         assert(bytes < size);
         size_t leftSpace = size - (bufferWriter - buffer);
         if(bytes < leftSpace) {
@@ -105,7 +103,6 @@ namespace Physica::Utils {
      * Number of bytes to be read and write.
      */
     void RingBuffer::readBytes(char* dest, size_t bytes) {
-        using namespace std::chrono_literals;
         size_t leftSpace = size - (bufferReader - buffer);
         if(bytes <= leftSpace) {
             while(bufferReader == bufferWriter)

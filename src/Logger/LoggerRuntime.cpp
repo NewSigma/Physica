@@ -90,6 +90,7 @@ namespace Physica::Logger {
                             logString << static_cast<char>(temp);
                             break;
                         case 's':
+                            //Bug: the string must be allocated statically.
                             char* str;
                             buffer.read(&str);
                             logString << str;

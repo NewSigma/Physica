@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/FDM/FDM.h"
+#include "Physica/Core/Math/Calculus/PDE/FDM/FDM.h"
 
 namespace Physica::Core {
     const int FDMBase::iterateMax = 100;
