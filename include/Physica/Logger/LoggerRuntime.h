@@ -23,12 +23,12 @@
 #include <thread>
 #include "Physica/Utils/RingBuffer.h"
 #include "LoggerType.h"
-#include "Logger.h"
+#include "AbstractLogger.h"
 
 namespace Physica::Logger {
     class LoggerRuntime {
         //The default stdout logger, should be made single instance in the future.
-        static Logger* stdoutLogger;
+        static AbstractLogger* stdoutLogger;
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static const size_t unassignedLogID = 0;
@@ -61,7 +61,7 @@ namespace Physica::Logger {
         [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
         static inline void initLogger();
-        static inline Logger& getStdoutLogger() { return *stdoutLogger; }
+        static inline AbstractLogger& getStdoutLogger() { return *stdoutLogger; }
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
@@ -71,13 +71,17 @@ namespace Physica::Logger {
 
     inline void LoggerRuntime::initLogger() {
         if(stdoutLogger == nullptr)
-            stdoutLogger = new Logger();
+            stdoutLogger = new AbstractLogger();
     }
 
     inline LoggerRuntime& LoggerRuntime::getInstance() {
         static LoggerRuntime runtime{};
         return runtime;
     }
+    /*!
+     * It is same to call LoggerRuntime::getStdoutLogger(), but this function is more convenient.
+     */
+    inline AbstractLogger& getStdoutLogger() { return LoggerRuntime::getStdoutLogger(); }
 
     template<typename T1, typename... Ts>
     inline void writeArgs(T1 head, Ts... args);

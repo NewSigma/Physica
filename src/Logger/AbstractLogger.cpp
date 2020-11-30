@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/Logger.h"
+#include "Physica/Logger/AbstractLogger.h"
 
 namespace Physica::Logger {
-    LogLevel Logger::globalLevel = LogLevel::Info;
+    LogLevel AbstractLogger::globalLevel = LogLevel::Info;
 }

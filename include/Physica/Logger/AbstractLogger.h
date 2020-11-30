@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LOGGER_H
-#define PHYSICA_LOGGER_H
+#ifndef PHYSICA_ABSTRACTLOGGER_H
+#define PHYSICA_ABSTRACTLOGGER_H
 
 #include <cstdarg>
 #include <iostream>
@@ -30,18 +30,18 @@ namespace Physica::Logger {
     /*!
      * Abstract father class for all loggers.
      */
-    class Logger {
+    class AbstractLogger {
         static LogLevel globalLevel;
     public:
         LogLevel localLevel;
     public:
-        explicit Logger(LogLevel level = LogLevel::Global) : localLevel(level) {}
-        Logger(const Logger& logger) = default;
-        Logger(Logger&& logger) noexcept = default;
-        ~Logger() = default;
+        explicit AbstractLogger(LogLevel level = LogLevel::Global) : localLevel(level) {}
+        AbstractLogger(const AbstractLogger& logger) = default;
+        AbstractLogger(AbstractLogger&& logger) noexcept = default;
+        ~AbstractLogger() = default;
         /* Operators */
-        Logger& operator=(const Logger&) = default;
-        Logger& operator=(Logger&&) noexcept = default;
+        AbstractLogger& operator=(const AbstractLogger&) = default;
+        AbstractLogger& operator=(AbstractLogger&&) noexcept = default;
         /* Operations */
         /* Getters */
         [[nodiscard]] inline LogLevel getCurrentLevel() const;
@@ -50,11 +50,11 @@ namespace Physica::Logger {
         static inline void setGlobalLevel(LogLevel level) noexcept;
     };
 
-    inline LogLevel Logger::getCurrentLevel() const {
+    inline LogLevel AbstractLogger::getCurrentLevel() const {
         return localLevel == LogLevel::Global ? globalLevel : localLevel;
     }
 
-    inline void Logger::setGlobalLevel(LogLevel level) noexcept {
+    inline void AbstractLogger::setGlobalLevel(LogLevel level) noexcept {
         globalLevel = level == LogLevel::Global ? LogLevel::Off : level;
     }
     /*!
