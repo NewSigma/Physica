@@ -23,7 +23,6 @@
 #include "QKeyEvent"
 #include "Physica/Gui/Menu/Settings.h"
 #include "Physica/Gui/Menu/InT/LongtonAnt.h"
-#include "Physica/Gui/GlobalStyle.h"
 
 namespace Physica::Gui {
     PhysicaMain::PhysicaMain() : lastCalcTime(0), calculator(nullptr) {

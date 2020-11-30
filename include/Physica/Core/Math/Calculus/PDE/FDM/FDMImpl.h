@@ -22,8 +22,8 @@
 namespace Physica::Core {
     template<class T>
     FDM<T>::FDM(size_t column, size_t row) : data(column) {
-        for(size_t i = 0; i < row; ++i)
-            data.allocate(Vector<MultiScalar>::zeroVector(row), i);
+        for(size_t i = 0; i < column; ++i)
+            data.allocate(Vector<T>::zeroVector(row), i);
     }
     /*!
      * By default, edge of the matrix is set zero.
@@ -43,11 +43,11 @@ namespace Physica::Core {
 
     template<class T>
     void FDM<T>::loop() {
-        const auto column_1 = data.column() - 1;
-        const auto row_1 = data.row() - 1;
+        const auto column_1 = data.getColumn() - 1;
+        const auto row_1 = data.getRow() - 1;
         int iterate = 0;
-        MultiScalar copy;
-        const MultiScalar limit(precision);
+        T copy;
+        const T limit(precision);
         bool keep;
         do {
             keep = false;

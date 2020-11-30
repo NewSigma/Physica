@@ -27,24 +27,33 @@
 namespace Physica::Core {
     class FDMBase {
     public:
-        static const int iterateMax;
-        static const double precision;
-    };
-
-    template<class T>
-    class FDM : public FDMBase {
-    public:
         enum BoundaryType {
             Row,
             Column
         };
-
+        /*!
+         * Only supports horizontal or vertical Dirichlet boundary conditions.
+         */
         struct Boundary {
             BoundaryType type;
-            size_t index, from, to;
+            //index of row or column
+            size_t index;
+            //index of node we start from
+            size_t from;
+            //index of node we end to
+            size_t to;
         };
+    public:
+        static const int iterateMax;
+        static const double precision;
+    };
+    /*!
+     * Solve 2D laplacian function using FDM.
+     */
+    template<class T>
+    class FDM : public FDMBase {
     private:
-        Matrix<T, Column, Dynamic, Dynamic> data;
+        Matrix<T, MatrixType::VectorColumn, Dynamic, Dynamic> data;
         QVector<Boundary> boundaries;
     public:
         FDM(size_t column, size_t row);
@@ -52,7 +61,7 @@ namespace Physica::Core {
         void addBoundary(const Boundary& boundary, const T& value);
         void loop();
         /* Getters */
-        [[nodiscard]] const Matrix<T, Column, Dynamic, Dynamic>& getData() { return data; }
+        [[nodiscard]] const Matrix<T, MatrixType::VectorColumn, Dynamic, Dynamic>& getData() { return data; }
     private:
         bool onBoundary(size_t column, size_t row);
     };
