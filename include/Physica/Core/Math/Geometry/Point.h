@@ -52,6 +52,8 @@ namespace Physica::Core {
         /* Operators */
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
+        /* Getters */
+        const Scalar<type, errorTrack>& getX() const { return x; }
     };
 
     template<ScalarType type, bool errorTrack>
@@ -66,6 +68,9 @@ namespace Physica::Core {
         /* Operators */
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
+        /* Getters */
+        const Scalar<type, errorTrack>& getX() const { return x; }
+        const Scalar<type, errorTrack>& getY() const { return y; }
     };
 
     template<ScalarType type, bool errorTrack>
@@ -80,6 +85,10 @@ namespace Physica::Core {
         /* Operators */
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
+        /* Getters */
+        const Scalar<type, errorTrack>& getX() const { return x; }
+        const Scalar<type, errorTrack>& getY() const { return y; }
+        const Scalar<type, errorTrack>& getZ() const { return z; }
     };
 
     typedef Point<1> Point1D;

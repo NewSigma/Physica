@@ -16,19 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/AbstractLogger.h"
-#include "Physica/Logger/LoggerRuntime.h"
-
-using namespace Physica::Logger;
+#include <iostream>
+#include <QtWidgets/QApplication>
+#include "Physica/Core/Math/Geometry/Point.h"
+#include "Physica/Gui/Plot/DensityPlot.h"
 
 int main(int argc, char** argv) {
-    using namespace Physica::Logger;
-    Physica::Utils::Cycler::init();
-    LoggerRuntime::getInstance();
+    using namespace Physica::Core;
+    using namespace Physica::Gui;
 
-    AbstractLogger logger{};
-    Info(logger, "Test begin.");
-    Warning(logger, "This is %c %s%c", 'a', "Logger", '.');
-
-    LoggerRuntime::getInstance().loggerShouldExit();
+    const int size = 1000;
+    const int step_size = 10;
+    const int radius = 14;
+    QApplication app(argc, argv);
+    DensityPlot plot(size, size);
+    for(size_t i = 0; i < size; i += step_size) {
+        for(size_t j = 0; j < size; j += step_size)
+            plot.appendPoint(i, j, radius, uchar((double(i) * i + double(j) * j) / 2000000.0 * 255.0));
+    }
+    plot.show();
+    return QApplication::exec();
 }

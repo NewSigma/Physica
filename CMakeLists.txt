@@ -4,6 +4,8 @@ project(Physica VERSION 0.0.1 LANGUAGES CXX CUDA)
 #include all macros
 include(cmake/Modules/PhysicaCheck.cmake)
 #############################################Settings#############################################
+option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_TESTS "Build tests" ON)
 option(RUN_CHECKS "Run Checks" OFF)
 set(UseASM 1)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -45,9 +47,15 @@ find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 include_directories(./include)
 file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
 add_subdirectory(src)
+#Enable examples
+if(${BUILD_EXAMPLES})
+    add_subdirectory(examples)
+endif()
 #Enable Tests
-enable_testing()
-add_subdirectory(test)
+if(${BUILD_TESTS})
+    enable_testing()
+    add_subdirectory(test)
+endif()
 
 set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
 add_executable(Physica Physica.cpp ${HEADERS})
