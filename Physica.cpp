@@ -31,10 +31,8 @@ int main(int argc, char** argv) {
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);
-    QApplication::connect(&app, &QApplication::aboutToQuit, []{ deInitPhysica(); });
 
     (new Physica::Gui::PhysicaMain())->show();
 
-    int exitCode = QApplication::exec();
-    return exitCode;
+    return QApplication::exec();
 }
