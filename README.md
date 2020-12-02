@@ -1,11 +1,12 @@
 # Physica
 
-Physica aims to be a computational physics engine. This project is created to offer a platform 
+Physica aims to be a computational physics engine.
 
-where students can improve their mathematics, physics and programming level.
-  
-There are a lot of work to do in the future.
+The final goal of Physica is to become a software like Matlab or Mathematica.
 
+There will be a lot of work to do in the future
+
+but it is a good platform to improve your mathematics, physics and programming ability.
 
 ## Table of Contents
 
@@ -15,12 +16,6 @@ There are a lot of work to do in the future.
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
-
-## Background
-
-The final goal of Physica is to become a software like Matlab or Mathematica. This is a hard work
-
-and we want to program to improve ourselves instead of finish the goal in the short term.
 
 ## Install
 
