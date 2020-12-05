@@ -24,8 +24,6 @@
 #include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Logger {
-    AbstractLogger* LoggerRuntime::stdoutLogger = nullptr;
-
     LoggerRuntime::LoggerRuntime()
             : buffer(1U << 20U)
             , logThread(&LoggerRuntime::logThreadMain, this)
@@ -89,12 +87,17 @@ namespace Physica::Logger {
                             buffer.read(&temp);
                             logString << static_cast<char>(temp);
                             break;
-                        case 's':
-                            //Bug: the string must be allocated statically.
-                            char* str;
-                            buffer.read(&str);
+                        case 's': {
+                            size_t strLength;
+                            buffer.read(&strLength);
+                            char* str = new char[strLength + 1];
+                            char* p = str;
+                            for(size_t i = 0; i < strLength; ++i)
+                                buffer.read(p++);
+                            str[strLength] = '\0';
                             logString << str;
                             break;
+                        }
                         case 'd':
                         case 'i':
                             int i;

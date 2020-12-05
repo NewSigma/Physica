@@ -27,8 +27,6 @@
 
 namespace Physica::Logger {
     class LoggerRuntime {
-        //The default stdout logger, should be made single instance in the future.
-        static AbstractLogger* stdoutLogger;
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static const size_t unassignedLogID = 0;
@@ -60,8 +58,7 @@ namespace Physica::Logger {
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
-        static inline void initLogger();
-        static inline AbstractLogger& getStdoutLogger() { return *stdoutLogger; }
+        static inline AbstractLogger& getStdoutLogger();
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
@@ -69,9 +66,9 @@ namespace Physica::Logger {
         void logThreadMain();
     };
 
-    inline void LoggerRuntime::initLogger() {
-        if(stdoutLogger == nullptr)
-            stdoutLogger = new AbstractLogger();
+    inline AbstractLogger& LoggerRuntime::getStdoutLogger() {
+        static AbstractLogger stdoutLogger{};
+        return stdoutLogger;
     }
 
     inline LoggerRuntime& LoggerRuntime::getInstance() {
@@ -83,13 +80,8 @@ namespace Physica::Logger {
      */
     inline AbstractLogger& getStdoutLogger() { return LoggerRuntime::getStdoutLogger(); }
 
-    template<typename T1, typename... Ts>
-    inline void writeArgs(T1 head, Ts... args);
-
-    inline void writeArgs();
-
     template<typename... Ts>
-    void log(size_t logID, Ts... args);
+    void log(const ArgType* p_args, size_t logID, Ts... args);
 }
 
 #define Log(logger, severity, format, ...)                                                          \
@@ -115,17 +107,21 @@ namespace Physica::Logger {
                 LoggerRuntime::getInstance().registerLogger(info);                                  \
                 logID = LoggerRuntime::getInstance().getNextLogID();                                \
             }                                                                                       \
-            Physica::Logger::log(logID, ##__VA_ARGS__);                                             \
+            Physica::Logger::log(argArray.begin(), logID, ##__VA_ARGS__);                           \
         }                                                                                           \
     } while(false)
 
-#define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
+#ifndef NDEBUG
+    #define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
+#else
+    #define Debug(logger, format, ...) do {} while(false)
+#endif
 
 #define Info(logger, format, ...) Log(logger, Info, format, ##__VA_ARGS__)
 
 #define Warning(logger, format, ...) Log(logger, Warning, format, ##__VA_ARGS__)
 
-#define Fatal(logger, format, ...) Log(logger, Fatal, format, ##__VA_ARGS__)
+#define Fatal(logger, format, ...) do { Log(logger, Fatal, format, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(false)
 
 #include "LoggerRuntimeImpl.h"
 

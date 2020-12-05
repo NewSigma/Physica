@@ -74,41 +74,60 @@ namespace Physica::Logger {
                     continue;
                 }
                 else {
+                    ArgType result = ArgType::Invalid;
                     switch (format[pos]) {
                         case 'c':
-                            return c;
+                            result = c;
+                            break;
                         case 's':
-                            return s;
+                            result = s;
+                            break;
                         case 'd':
                         case 'i':
-                            return d;
+                            result = d;
+                            break;
                         case 'o':
-                            return o;
+                            result = o;
+                            break;
                         case 'x':
-                            return x;
+                            result = x;
+                            break;
                         case 'X':
-                            return X;
+                            result = X;
+                            break;
                         case 'u':
-                            return u;
+                            result = u;
+                            break;
                         case 'f':
-                            return f;
+                            result = f;
+                            break;
                         case 'F':
-                            return F;
+                            result = F;
+                            break;
                         case 'a':
-                            return a;
+                            result = a;
+                            break;
                         case 'A':
-                            return A;
+                            result = A;
+                            break;
                         case 'g':
-                            return g;
+                            result = g;
+                            break;
                         case 'G':
-                            return G;
+                            result = G;
+                            break;
                         case 'p':
-                            return p;
+                            result = p;
+                            break;
                         case 'n':
                             throw std::invalid_argument("%n specifier are not support!");
                         default:
                             throw std::invalid_argument("Unrecognized format specifier after %");
                     }
+                    if(index == 0)
+                        return result;
+                    else
+                        --index;
                 }
             }
         }

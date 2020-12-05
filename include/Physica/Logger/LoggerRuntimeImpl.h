@@ -19,23 +19,54 @@
 #ifndef PHYSICA_LOGGERRUNTIMEIMPL_H
 #define PHYSICA_LOGGERRUNTIMEIMPL_H
 
+#include <cstring>
 #include "Physica/Utils/Cycler.h"
 
 namespace Physica::Logger {
     template<typename T1, typename... Ts>
-    inline void writeArgs(T1 head, Ts... args) {
+    inline
+    typename std::enable_if<!std::is_same<T1, char*>::value
+                            && !std::is_same<T1, const char*>::value>::type
+    writeArgs(const ArgType* p_args, T1 head, Ts... args) {
         LoggerRuntime::getInstance().getBuffer().write(head);
-        writeArgs(args...);
+        writeArgs(p_args + 1, args...);
     }
 
-    inline void writeArgs() { /* Do nothing */ }
+    template<typename T1, typename... Ts>
+    inline
+    typename std::enable_if<std::is_same<T1, char*>::value
+                            || std::is_same<T1, const char*>::value>::type
+    writeArgs(const ArgType* p_args, T1 head, Ts... args) {
+        Utils::RingBuffer& buffer = LoggerRuntime::getInstance().getBuffer();
+        if(*p_args == ArgType::s) {
+            size_t strLength = std::strlen(head);
+            buffer.write(strLength);
+            for(size_t i = 0; i < strLength; ++i)
+                buffer.write(head[i]);
+        }
+        else {
+            buffer.write(head);
+        }
+        writeArgs(p_args + 1, args...);
+    }
 
+    inline void writeArgs(const ArgType* p_args) { (void)p_args; } //Do nothing
+    /**
+     * \param p_args
+     * Pointer to the first element of the ArgType array.
+     *
+     * \param logID
+     * The id of the log to be logged.
+     *
+     * \param args
+     * Arg pack of this log.
+     */
     template<typename... Ts>
-    void log(size_t logID, Ts... args) {
+    void log(const ArgType* p_args, size_t logID, Ts... args) {
         size_t time = Utils::Cycler::now();
-        writeArgs(logID);
-        writeArgs(time);
-        writeArgs(args...);
+        writeArgs(p_args, logID);
+        writeArgs(p_args, time);
+        writeArgs(p_args, args...);
     }
 }
 

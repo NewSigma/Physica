@@ -16,19 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/PhysicaInit.h"
 #include "Physica/Logger/AbstractLogger.h"
 #include "Physica/Logger/LoggerRuntime.h"
 
 using namespace Physica::Logger;
 
 int main(int argc, char** argv) {
-    using namespace Physica::Logger;
-    Physica::Utils::Cycler::init();
-    LoggerRuntime::getInstance();
+    (void)argc;
+    (void)argv;
 
-    AbstractLogger logger{};
+    initPhysica();
+    auto& logger = getStdoutLogger();
+
     Info(logger, "Test begin.");
     Warning(logger, "This is %c %s%c", 'a', "Logger", '.');
 
-    LoggerRuntime::getInstance().loggerShouldExit();
+    char str[] = "This is a dynamic string.";
+    Info(logger, "%s", str);
+
+    logger.localLevel = LogLevel::Debug;
+    Debug(logger, "This is debug mode.");
+    logger.localLevel = LogLevel::Info;
+    Debug(logger, "This message should not appear.");
+    return 0;
 }
