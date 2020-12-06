@@ -16,10 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/PDE/FEM/Element.h"
+#ifndef PHYSICA_RECTANGULAR4P_H
+#define PHYSICA_RECTANGULAR4P_H
+
+#include "Element.h"
 
 namespace Physica::Core {
-    Element::~Element() {
-        delete[] nodesIndex;
-    }
+    class Rectangular4P {
+
+    };
 }
+
+#endif

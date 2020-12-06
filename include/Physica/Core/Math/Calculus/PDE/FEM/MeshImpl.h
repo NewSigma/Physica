@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,18 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_GLOBALSTYLE_H
-#define PHYSICA_GLOBALSTYLE_H
+#ifndef PHYSICA_MESHIMPL_H
+#define PHYSICA_MESHIMPL_H
 
-#include <QtWidgets/QProxyStyle>
+namespace Physica::Core {
 
-namespace Physica::Gui {
-    class GlobalStyle : public QProxyStyle
-    {
-    public:
-        GlobalStyle();
-        int styleHint(StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override;
-    };
 }
 
 #endif
