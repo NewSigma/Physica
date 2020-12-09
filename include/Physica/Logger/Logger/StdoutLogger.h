@@ -16,28 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/PhysicaInit.h"
-#include "Physica/Logger/Logger/AbstractLogger.h"
-#include "Physica/Logger/LoggerRuntime.h"
+#ifndef PHYSICA_STDOUTLOGGER_H
+#define PHYSICA_STDOUTLOGGER_H
 
-using namespace Physica::Logger;
+#include "AbstractLogger.h"
 
-int main(int argc, char** argv) {
-    (void)argc;
-    (void)argv;
-
-    initPhysica();
-
-    Info(0, "Test begin.");
-    Warning(0, "This is %c %s%c", 'a', "Logger", '.');
-
-    char str[] = "This is a dynamic string.";
-    Info(0, "%s", str);
-
-    AbstractLogger& stdoutLogger = getLogger(0);
-    stdoutLogger.localLevel = LogLevel::Debug;
-    Debug(0, "This is debug mode.");
-    stdoutLogger.localLevel = LogLevel::Info;
-    Debug(0, "This message should not appear.");
-    return 0;
+namespace Physica::Logger {
+    /**
+     * The standard output logger, will be created when LoggerRuntime is initialized.
+     */
+    class StdoutLogger : public AbstractLogger {
+    public:
+        ~StdoutLogger() override = default;
+        /* Operations */
+        void log() override;
+    };
 }
+
+#endif

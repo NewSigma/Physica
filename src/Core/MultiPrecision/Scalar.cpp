@@ -788,7 +788,7 @@ namespace Physica::Core {
         return *this;
     //Handle error overflow, power must be set before goto here.
     errorOverflow:
-        Warning(LoggerRuntime::getStdoutLogger(), "Accumulated too many errors.");
+        Warning(0, "Accumulated too many errors.");
         length = length < 0 ? -1 : 1;
         return *this;
     }

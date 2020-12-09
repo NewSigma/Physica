@@ -22,9 +22,10 @@
 #include <cstdarg>
 #include <iostream>
 #include <array>
+#include <Physica/Utils/RingBuffer.h>
 #include "Physica/Config.h"
-#include "LoggerType.h"
-#include "FormatAnalyzer.h"
+#include "Physica/Logger/LoggerType.h"
+#include "Physica/Logger/FormatAnalyzer.h"
 
 namespace Physica::Logger {
     /*!
@@ -38,11 +39,12 @@ namespace Physica::Logger {
         explicit AbstractLogger(LogLevel level = LogLevel::Global) : localLevel(level) {}
         AbstractLogger(const AbstractLogger& logger) = default;
         AbstractLogger(AbstractLogger&& logger) noexcept = default;
-        ~AbstractLogger() = default;
+        virtual ~AbstractLogger() = default;
         /* Operators */
         AbstractLogger& operator=(const AbstractLogger&) = default;
         AbstractLogger& operator=(AbstractLogger&&) noexcept = default;
         /* Operations */
+        virtual void log() = 0;
         /* Getters */
         [[nodiscard]] inline LogLevel getCurrentLevel() const;
         /* Static members */

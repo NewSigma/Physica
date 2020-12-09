@@ -21,9 +21,10 @@
 
 #include <vector>
 #include <thread>
+#include <memory>
 #include "Physica/Utils/RingBuffer.h"
 #include "LoggerType.h"
-#include "AbstractLogger.h"
+#include "Physica/Logger/Logger/AbstractLogger.h"
 
 namespace Physica::Logger {
     class LoggerRuntime {
@@ -32,15 +33,19 @@ namespace Physica::Logger {
         constexpr static const size_t unassignedLogID = 0;
     private:
         Utils::RingBuffer buffer;
-        /*!
+        /**
+         * Store all registered loggers.
+         */
+        std::vector<AbstractLogger*> loggerList;
+        /**
          * Store info of logged logs.
          */
         std::vector<LogInfo> logInfos;
-        /*!
+        /**
          * The thread used to output logs.
          */
         std::thread logThread;
-        /*!
+        /**
          * Does log thread should exit.
          */
         bool shouldExit;
@@ -52,13 +57,15 @@ namespace Physica::Logger {
         LoggerRuntime& operator=(const LoggerRuntime&) = delete;
         LoggerRuntime& operator=(LoggerRuntime&&) noexcept = delete;
         /* Operations */
-        void registerLogger(const LogInfo& info);
+        void registerLogger(std::unique_ptr<AbstractLogger> logger);
+        void registerLogInfo(const LogInfo& info);
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */
+        [[nodiscard]] AbstractLogger& getLogger(size_t index) const { return *loggerList[index]; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
+        [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
         [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
         /* Static Members */
-        static inline AbstractLogger& getStdoutLogger();
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
@@ -66,27 +73,25 @@ namespace Physica::Logger {
         void logThreadMain();
     };
 
-    inline AbstractLogger& LoggerRuntime::getStdoutLogger() {
-        static AbstractLogger stdoutLogger{};
-        return stdoutLogger;
+    inline AbstractLogger& getLogger(size_t index) {
+        return LoggerRuntime::getInstance().getLogger(index);
     }
 
     inline LoggerRuntime& LoggerRuntime::getInstance() {
         static LoggerRuntime runtime{};
         return runtime;
     }
-    /*!
-     * It is same to call LoggerRuntime::getStdoutLogger(), but this function is more convenient.
-     */
-    inline AbstractLogger& getStdoutLogger() { return LoggerRuntime::getStdoutLogger(); }
 
     template<typename... Ts>
     void log(const ArgType* p_args, size_t logID, Ts... args);
 }
 
-#define Log(logger, severity, format, ...)                                                          \
+#include "LoggerRuntimeImpl.h"
+
+#define Log(loggerID, severity, format, ...)                                                        \
     do {                                                                                            \
         using namespace Physica::Logger;                                                            \
+        AbstractLogger& logger = LoggerRuntime::getInstance().getLogger(loggerID);                  \
         LogLevel level = logger.getCurrentLevel();                                                  \
         if(level >= LogLevel::severity) {                                                           \
             if(false)                                                                               \
@@ -104,25 +109,24 @@ namespace Physica::Logger {
                         __LINE__,                                                                   \
                         argArray.data(),                                                            \
                         argCount};                                                                  \
-                LoggerRuntime::getInstance().registerLogger(info);                                  \
+                LoggerRuntime::getInstance().registerLogInfo(info);                                 \
                 logID = LoggerRuntime::getInstance().getNextLogID();                                \
             }                                                                                       \
+            writeArgs(argArray.begin(), static_cast<size_t>(loggerID));                             \
             Physica::Logger::log(argArray.begin(), logID, ##__VA_ARGS__);                           \
         }                                                                                           \
     } while(false)
 
 #ifndef NDEBUG
-    #define Debug(logger, format, ...) Log(logger, Debug, format, ##__VA_ARGS__)
+    #define Debug(loggerID, format, ...) Log(loggerID, Debug, format, ##__VA_ARGS__)
 #else
-    #define Debug(logger, format, ...) do {} while(false)
+    #define Debug(loggerID, format, ...) do {} while(false)
 #endif
 
-#define Info(logger, format, ...) Log(logger, Info, format, ##__VA_ARGS__)
+#define Info(loggerID, format, ...) Log(loggerID, Info, format, ##__VA_ARGS__)
 
-#define Warning(logger, format, ...) Log(logger, Warning, format, ##__VA_ARGS__)
+#define Warning(loggerID, format, ...) Log(loggerID, Warning, format, ##__VA_ARGS__)
 
-#define Fatal(logger, format, ...) do { Log(logger, Fatal, format, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(false)
-
-#include "LoggerRuntimeImpl.h"
+#define Fatal(loggerID, format, ...) do { Log(loggerID, Fatal, format, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(false)
 
 #endif
