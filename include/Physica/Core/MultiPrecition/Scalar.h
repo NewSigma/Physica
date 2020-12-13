@@ -24,6 +24,12 @@
 #include <ostream>
 #include "ScalarType.h"
 
+//Forward declaration
+namespace Physica::Core {
+    template<ScalarType type> class ScalarAddSubExpressionHelper;
+    template<ScalarType type, bool errorTrack> class ScalarAddSubExpression;
+}
+
 namespace Physica::Core {
     /*!
      * \Scalar is a advanced float type that supports multiple precision and error track,
@@ -67,12 +73,8 @@ namespace Physica::Core {
         Scalar& operator=(Scalar&& s) noexcept;
         explicit operator double() const;
         ScalarUnit operator[](unsigned int index) const { Q_ASSERT(index < getSize()); return byte[index]; }
-        Scalar operator+(const Scalar& s) const;
-        Scalar operator-(const Scalar& s) const;
         Scalar operator*(const Scalar& s) const;
         Scalar operator/(const Scalar& s) const;
-        Scalar<MultiPrecision> operator+(const Scalar<MultiPrecision>& s) const;
-        Scalar<MultiPrecision> operator-(const Scalar<MultiPrecision>& s) const;
         Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
         Scalar<MultiPrecision> operator/(const Scalar<MultiPrecision>& s) const;
         Scalar operator<<(int bits) const;
@@ -103,7 +105,13 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:
-        //Should only be used in add(), sub(), mul() and div(). \byte must be allocated by malloc().
+        /**
+         * Degigned for performance,
+         * this constructor should only be called by addNoError(), addWithError and etc.
+         *
+         * \param byte
+         * byte must be allocated by malloc()
+         */
         Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
         inline static Scalar<MultiPrecision, true> addWithError (const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision, false> addNoError (const Scalar& s1, const Scalar& s2);
@@ -118,6 +126,7 @@ namespace Physica::Core {
         inline static void cutZero(Scalar& s);
         /* Friends */
         friend class Scalar<MultiPrecision, true>;
+        friend class ScalarAddSubExpressionHelper<MultiPrecision>;
         template<bool errorTrack>
         friend Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
         template<ScalarType type>
@@ -152,12 +161,8 @@ namespace Physica::Core {
         Scalar& operator=(Scalar&& s) noexcept;
         Scalar& operator=(const Scalar<MultiPrecision, false>& s);
         Scalar& operator=(Scalar<MultiPrecision, false>&& s) noexcept;
-        Scalar<MultiPrecision, true> operator+(const Scalar<MultiPrecision, false>& s) const;
-        Scalar<MultiPrecision, true> operator-(const Scalar<MultiPrecision, false>& s) const;
         Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, false>& s) const;
         Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, false>& s) const;
-        Scalar<MultiPrecision, true> operator+(const Scalar<MultiPrecision, true>& s) const;
-        Scalar<MultiPrecision, true> operator-(const Scalar<MultiPrecision, true>& s) const;
         Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, true>& s) const;
         Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, true>& s) const;
         Scalar operator<<(int bits) const;
@@ -184,6 +189,7 @@ namespace Physica::Core {
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */
         friend class Scalar<MultiPrecision, false>;
+        friend class ScalarAddSubExpressionHelper<MultiPrecision>;
         template<ScalarType type>
         friend Scalar<type, true> sqrt(const Scalar<type, true>& s);
         template<ScalarType type>
@@ -206,12 +212,8 @@ namespace Physica::Core {
         Scalar(const Scalar& s) = default;
         /* Operators */
         explicit operator double() const { return f; }
-        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
-        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
-        inline Scalar<Float, true> operator+(const Scalar<Float, true>& s) const;
-        inline Scalar<Float, true> operator-(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         /* Helpers */
@@ -246,12 +248,8 @@ namespace Physica::Core {
         inline explicit Scalar(float f, float a = 0);
         inline Scalar(const Scalar& s);
         /* Operators */
-        Scalar operator+(const Scalar<Float, false>& s) const { return Scalar(f + s.f, getA()); }
-        Scalar operator-(const Scalar<Float, false>& s) const { return Scalar(f - s.f, getA()); }
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
         Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
-        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f, a + s.a); }
-        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
@@ -281,12 +279,8 @@ namespace Physica::Core {
         Scalar(const Scalar& s) = default;
         /* Operators */
         explicit operator double() const { return d; }
-        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
-        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
-        inline Scalar<Double, true> operator+(const Scalar<Double, true>& s) const;
-        inline Scalar<Double, true> operator-(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         /* Helpers */
@@ -321,12 +315,8 @@ namespace Physica::Core {
         inline explicit Scalar(double d, double a = 0);
         inline Scalar(const Scalar& s);
         /* Operators */
-        Scalar operator+(const Scalar<Double, false>& s) const { return Scalar(d + s.d, getA()); }
-        Scalar operator-(const Scalar<Double, false>& s) const { return Scalar(d - s.d, getA()); }
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
         Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
-        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d, a + s.a); }
-        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */

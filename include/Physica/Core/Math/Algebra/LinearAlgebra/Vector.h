@@ -35,7 +35,7 @@ namespace Physica::Core {
         typedef T ScalarType;
     public:
         Vector();
-        template<ExpressionType type, class T1, class T2>
+        template<VectorExpressionType type, class T1, class T2>
         Vector(const VectorExpression<type, T1, T2>& expression); //NOLINT Implicit conversions is permitted.
         explicit Vector(size_t length);
         explicit Vector(const Base& array);
@@ -47,7 +47,7 @@ namespace Physica::Core {
         /* Operators */
         Vector<T, maxLength>& operator=(const Vector<T, maxLength>& v) noexcept { Base::operator=(v); return *this; }
         Vector<T, maxLength>& operator=(Vector<T, maxLength>&& v) noexcept { Base::operator=(std::move(v)); return *this; }
-        template<ExpressionType type, class T1, class T2>
+        template<VectorExpressionType type, class T1, class T2>
         Vector<T, maxLength>& operator=(const VectorExpression<type, T1, T2>& exp);
         /* Vector Operations */
         Vector& toOpposite();
@@ -65,30 +65,30 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const Vector<T, maxLength>& v);
 
     template<class T, size_t maxLength>
-    inline VectorExpression<ExpressionType::Minus, Vector<T, maxLength>> operator-(const Vector<T, maxLength>& v);
+    inline VectorExpression<VectorExpressionType::Minus, Vector<T, maxLength>> operator-(const Vector<T, maxLength>& v);
 
     template<class T, size_t maxLength>
-    inline VectorExpression<ExpressionType::Add, Vector<T, maxLength>, Vector<T, maxLength>>
+    inline VectorExpression<VectorExpressionType::Add, Vector<T, maxLength>, Vector<T, maxLength>>
             operator+(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2);
 
     template<class T, size_t maxLength>
-    inline VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, Vector<T, maxLength>>
+    inline VectorExpression<VectorExpressionType::Sub, Vector<T, maxLength>, Vector<T, maxLength>>
             operator-(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2);
 
     template<class T, size_t maxLength>
     T operator*(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2);
 
     template<class T, size_t maxLength>
-    VectorExpression<ExpressionType::Add, Vector<T, maxLength>, T> operator+(const Vector<T, maxLength>& v, const T& s);
+    VectorExpression<VectorExpressionType::Add, Vector<T, maxLength>, T> operator+(const Vector<T, maxLength>& v, const T& s);
 
     template<class T, size_t maxLength>
-    VectorExpression<ExpressionType::Sub, Vector<T, maxLength>, T> operator-(const Vector<T, maxLength>& v, const T& s);
+    VectorExpression<VectorExpressionType::Sub, Vector<T, maxLength>, T> operator-(const Vector<T, maxLength>& v, const T& s);
 
     template<class T, size_t maxLength>
-    VectorExpression<ExpressionType::Mul, Vector<T, maxLength>, T> operator*(const Vector<T, maxLength>& v, const T& s);
+    VectorExpression<VectorExpressionType::Mul, Vector<T, maxLength>, T> operator*(const Vector<T, maxLength>& v, const T& s);
 
     template<class T, size_t maxLength>
-    VectorExpression<ExpressionType::Div, Vector<T, maxLength>, T> operator/(const Vector<T, maxLength>& v, const T& s);
+    VectorExpression<VectorExpressionType::Div, Vector<T, maxLength>, T> operator/(const Vector<T, maxLength>& v, const T& s);
     /* Inline Implements */
     template<class T, size_t maxLength>
     inline void operator+=(Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) { v1 = v1 + v2; }
@@ -108,28 +108,28 @@ namespace Physica::Core {
     template<class T, size_t maxLength>
     inline void operator/=(Vector<T, maxLength>& v, const T& n) { v = v / n; }
 
-    template<class T, size_t maxLength, ExpressionType type, class T1, class T2>
+    template<class T, size_t maxLength, VectorExpressionType type, class T1, class T2>
     void operator+=(Vector<T, maxLength>& v, VectorExpression<type, T1, T2> expression) {
         const size_t length = expression.getLength();
         for(size_t i = 0; i < length; ++i)
             v[i] += expression[i];
     }
 
-    template<class T, size_t maxLength, ExpressionType type, class T1, class T2>
+    template<class T, size_t maxLength, VectorExpressionType type, class T1, class T2>
     void operator-=(Vector<T, maxLength>& v, VectorExpression<type, T1, T2> expression) {
         const size_t length = expression.getLength();
         for(size_t i = 0; i < length; ++i)
             v[i] += expression[i];
     }
 
-    template<class T, size_t maxLength, ExpressionType type, class T1, class T2>
+    template<class T, size_t maxLength, VectorExpressionType type, class T1, class T2>
     void operator*=(Vector<T, maxLength>& v, VectorExpression<type, T1, T2> expression) {
         const size_t length = expression.getLength();
         for(size_t i = 0; i < length; ++i)
             v[i] *= expression[i];
     }
 
-    template<class T, size_t maxLength, ExpressionType type, class T1, class T2>
+    template<class T, size_t maxLength, VectorExpressionType type, class T1, class T2>
     void operator/=(Vector<T, maxLength>& v, VectorExpression<type, T1, T2> expression) {
         const size_t length = expression.getLength();
         for(size_t i = 0; i < length; ++i)

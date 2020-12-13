@@ -49,8 +49,10 @@ namespace Physica::Core::Physics {
         info.average = info.total / Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(column));
         /* Calc standardDeviation */ {
             Scalar<MultiPrecision, false> temp(0);
-            for(auto& item : data)
-                temp += square(item[0] - info.average);
+            for(auto& item : data) {
+                Scalar<MultiPrecision, false> delta = item[0] - info.average;
+                temp += square(delta);
+            }
             info.standardDeviation = sqrt(temp
                                           / Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(column - 1)));
         }

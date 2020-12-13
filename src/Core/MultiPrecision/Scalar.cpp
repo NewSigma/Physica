@@ -226,20 +226,6 @@ namespace Physica::Core {
         return extract.value;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator+(
-            const Scalar<MultiPrecision, false>& s) const {
-        auto result = addNoError(*this, s);
-        cutLength(result);
-        return result;
-    }
-
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-(
-            const Scalar<MultiPrecision, false>& s) const {
-        auto result = subNoError(*this, s);
-        cutLength(result);
-        return result;
-    }
-
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
         auto result = mulNoError(*this, s);
@@ -250,24 +236,6 @@ namespace Physica::Core {
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator/(
             const Scalar<MultiPrecision, false>& s) const {
         return divNoError(*this, s);
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator+(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = addWithError(*this, s);
-        cutLength(result);
-        if(s.getA() != 0)
-            result.applyError(s.getAccuracy());
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator-(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = subWithError(*this, s);
-        cutLength(result);
-        if(s.getA() != 0)
-            result.applyError(s.getAccuracy());
-        return result;
     }
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator*(
@@ -456,7 +424,7 @@ namespace Physica::Core {
                //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-               && (s1 - s2).isZero();
+               && Scalar<MultiPrecision, false>(s1 - s2).isZero();
     }
     /*!
      * Set this scalar to its integer approximation which is closer to 0.
@@ -555,25 +523,6 @@ namespace Physica::Core {
         return *this;
     }
 
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
-            const Scalar<MultiPrecision, false>& s) const {
-        auto result = addWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0)
-            result.applyError(getAccuracy());
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
-            const Scalar<MultiPrecision, false>& s) const {
-        Q_UNUSED(MultiPrecision)
-        auto result = subWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0)
-            result.applyError(getAccuracy());
-        return result;
-    }
-
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
         Q_UNUSED(MultiPrecision)
@@ -590,36 +539,6 @@ namespace Physica::Core {
         auto result = divWithError(*this, s);
         if(getA() != 0)
             result.applyError(getAccuracy() / s);
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = addWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0 || s.getA() != 0) {
-            if(getA() == 0)
-                result.applyError(s.getAccuracy());
-            else if(s.getA() == 0)
-                result.applyError(getAccuracy());
-            else
-                result.applyError(getAccuracy() + s.getAccuracy());
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = subWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0 || s.getA() != 0) {
-            if(getA() == 0)
-                result.applyError(s.getAccuracy());
-            else if(s.getA() == 0)
-                result.applyError(getAccuracy());
-            else
-                result.applyError(getAccuracy() + s.getAccuracy());
-        }
         return result;
     }
 
@@ -752,7 +671,7 @@ namespace Physica::Core {
             ScalarUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
-                    auto error_1 = getAccuracy() + error;
+                    Scalar<MultiPrecision, false> error_1 = getAccuracy() + error;
                     size += temp;
                     //Use (a += error_1.byte[error_1.getSize() - 1] + 1) for more conservative error estimate.
                     a += error_1[error_1.getSize() - 1];

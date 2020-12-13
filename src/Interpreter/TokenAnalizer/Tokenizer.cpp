@@ -269,7 +269,8 @@ void Tokenizer::readNum() {
         qFatal("Encountered tokenizer error.");
     if(!isExpPositive)
         exp.toOpposite();
-    num *= (BasicConst::getInstance()._10 ^ (exp + MultiScalar(power)));
+    exp += MultiScalar(power);
+    num *= (BasicConst::getInstance()._10 ^ exp);
     tokens.push_back(new TokenNum(num));
 }
 

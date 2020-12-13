@@ -379,7 +379,8 @@ namespace Physica::Core {
     //!FixIt: arctan() does not consider accuracy.
     template<>
     Scalar<MultiPrecision, true> arctan(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance()._1));
+        Scalar<MultiPrecision, true> temp = square(s) + BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, true> result = arcsin(s / sqrt(temp));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
@@ -387,7 +388,8 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arctan(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result = arcsin(s / sqrt(square(s) + BasicConst::getInstance()._1));
+        Scalar<MultiPrecision, false> temp = square(s) + BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, false> result = arcsin(s / sqrt(temp));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
@@ -503,41 +505,53 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arccosh(const Scalar<MultiPrecision, false>& s) {
-        return ln(sqrt(square(s) - BasicConst::getInstance()._1) + s);
+        Scalar<MultiPrecision, false> temp = square(s) - BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, false> temp1 = sqrt(temp) + s;
+        return ln(temp1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arccosh(const Scalar<MultiPrecision, true>& s) {
-        return ln(sqrt(square(s) - BasicConst::getInstance()._1) + s);
+        Scalar<MultiPrecision, true> temp = square(s) - BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, true> temp1 = sqrt(temp) + s;
+        return ln(temp1);
     }
 
     template<>
     Scalar<MultiPrecision, false> arcsinh(const Scalar<MultiPrecision, false>& s) {
-        return ln(sqrt(square(s) + BasicConst::getInstance()._1) + s);
+        Scalar<MultiPrecision, false> temp = square(s) + BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, false> temp1 = sqrt(temp) + s;
+        return ln(temp1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arcsinh(const Scalar<MultiPrecision, true>& s) {
-        return ln(sqrt(square(s) + BasicConst::getInstance()._1) + s);
+        Scalar<MultiPrecision, true> temp = square(s) - BasicConst::getInstance()._1;
+        Scalar<MultiPrecision, true> temp1 = sqrt(temp) + s;
+        return ln(temp1);
     }
 
     template<>
     Scalar<MultiPrecision, false> arctanh(const Scalar<MultiPrecision, false>& s) {
-        return ln((BasicConst::getInstance()._1 + s) / (BasicConst::getInstance()._1 - s)) >> 1;
+        return ln((BasicConst::getInstance()._1 + s)
+                  / Scalar<MultiPrecision, false>(BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, true> arctanh(const Scalar<MultiPrecision, true>& s) {
-        return ln((BasicConst::getInstance()._1 + s) / (BasicConst::getInstance()._1 - s)) >> 1;
+        return ln((BasicConst::getInstance()._1 + s)
+                  / Scalar<MultiPrecision, true>(BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, false> arccoth(const Scalar<MultiPrecision, false>& s) {
-        return ln((s + BasicConst::getInstance()._1) / (s - BasicConst::getInstance()._1)) >> 1;
+        return ln((s + BasicConst::getInstance()._1)
+                  / Scalar<MultiPrecision, false>(s - BasicConst::getInstance()._1)) >> 1;
     }
 
     template<>
     Scalar<MultiPrecision, true> arccoth(const Scalar<MultiPrecision, true>& s) {
-        return ln((s + BasicConst::getInstance()._1) / (s - BasicConst::getInstance()._1)) >> 1;
+        return ln((s + BasicConst::getInstance()._1)
+                  / Scalar<MultiPrecision, true>(s - BasicConst::getInstance()._1)) >> 1;
     }
 }

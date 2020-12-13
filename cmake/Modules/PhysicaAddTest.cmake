@@ -1,6 +1,6 @@
 function(physica_add_test NAME SOURCES)
-    add_executable(PhysicaTest-${NAME} ${SOURCES})
-    add_test(NAME PhysicaTest-${NAME}
-            COMMAND PhysicaTest-${NAME})
-    target_link_libraries(PhysicaTest-${NAME} PhysicaCore)
+    add_executable(Test-${NAME} ${SOURCES})
+    add_test(NAME Test-${NAME}
+            COMMAND Test-${NAME})
+    target_link_libraries(Test-${NAME} PhysicaCore)
 endfunction()

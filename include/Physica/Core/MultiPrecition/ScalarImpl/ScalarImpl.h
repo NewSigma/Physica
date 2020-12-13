@@ -20,13 +20,38 @@
 #define PHYSICA_SCALARIMPL_H
 
 #include <iomanip>
-#include "Util/Bitwise.h"
-/*!
+#include "BasicCalc.h"
+#include "ScalarAddSubExpression.h"
+/**
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
     //////////////////////////////////////////////Global//////////////////////////////////////////////
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
+        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
+    }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
+        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
+    }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator+(const Scalar<type, errorTrack1>& s, ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
+    }
+
+    template<ScalarType type, bool errorTrack1, bool errorTrack2>
+    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator-(const Scalar<type, errorTrack1>& s, ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
+    }
+
     template<ScalarType type, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
@@ -158,14 +183,6 @@ namespace Physica::Core {
 
     inline Scalar<Float, false>::Scalar(float f) : f(f) {}
 
-    inline Scalar<Float, true> Scalar<Float, false>::operator+(const Scalar<Float, true>& s) const {
-        return Scalar<Float, true>(f + s.f, s.getA());
-    }
-
-    inline Scalar<Float, true> Scalar<Float, false>::operator-(const Scalar<Float, true>& s) const {
-        return Scalar<Float, true>(f - s.f, s.getA());
-    }
-
     inline Scalar<Float, true> Scalar<Float, false>::operator*(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f * s.f, f * s.getA());
     }
@@ -225,14 +242,6 @@ namespace Physica::Core {
     inline Scalar<Double, false>::Scalar() : d(0) {}
 
     inline Scalar<Double, false>::Scalar(double d) : d(d) {}
-
-    inline Scalar<Double, true> Scalar<Double, false>::operator+(const Scalar<Double, true>& s) const {
-        return Scalar<Double, true>(d + s.d, s.getA());
-    }
-
-    inline Scalar<Double, true> Scalar<Double, false>::operator-(const Scalar<Double, true>& s) const {
-        return Scalar<Double, true>(d - s.d, s.getA());
-    }
 
     inline Scalar<Double, true> Scalar<Double, false>::operator*(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d * s.d, d * s.getA());

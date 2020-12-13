@@ -44,27 +44,27 @@ namespace Physica::Core {
         if(n == y2)
             return Scalar<type, errorTrack>(x2);
 
-        if(((n - y1).getLength() ^ (n - y2).getLength()) >= 0) // NOLINT(hicpp-signed-bitwise)
+        if((Scalar<type, false>(n - y1).getLength() ^ Scalar<type, false>(n - y2).getLength()) >= 0) // NOLINT(hicpp-signed-bitwise)
             qFatal("Root is nonexistent.");
 
         Scalar<type, false> result = (x1 + x2) >> 1;
         Scalar<type, false> y_result(static_cast<SignedScalarUnit>(1));
 
-        Scalar<type, false> error = (y1 - y2).toAbs() >> 1;
+        Scalar<type, false> error = Scalar<type, false>(y1 - y2).toAbs() >> 1;
         Scalar<type, false> x_left(x1);
         Scalar<type, false> x_right(x2);
         Scalar<type, false> y_left(y1);
 
-        bool delta_left_sign = (n - y_left).getLength() > 0;
+        bool delta_left_sign = Scalar<type, false>(n - y_left).getLength() > 0;
         bool delta_right_sign;
         do {
             y_result = func(result);
-            delta_right_sign = (n - y_result).getLength() > 0;
+            delta_right_sign = Scalar<type, false>(n - y_result).getLength() > 0;
 
             if(delta_left_sign == delta_right_sign) {
                 x_left = result;
                 y_left = y_result;
-                delta_left_sign = (n - y_left).getLength() > 0;
+                delta_left_sign = Scalar<type, false>(n - y_left).getLength() > 0;
             }
             else
                 x_right = result;
