@@ -64,8 +64,8 @@ namespace Physica::Core {
         const auto population = config.population;
         const auto crossoverRate = config.crossoverRate;
         for (int i = 0; i < population; i++) {
-            auto r = randomScalar<type, false>();
-            if (double(r) < crossoverRate) {
+            auto r = static_cast<double>(rand()) / RAND_MAX;
+            if (r < crossoverRate) {
                 unsigned int randomIndex1 = random() % population;
                 unsigned int randomIndex2 = random() % population;
                 auto& random1 = points[randomIndex1];
@@ -88,7 +88,8 @@ namespace Physica::Core {
     template<ScalarType type>
     void GeneAlgorithm<1, type>::mutation() {
         Q_UNUSED(type)
-        if(double(Physica::Core::randomScalar<MultiPrecision, false>()) < config.mutationRate) {
+        auto r = static_cast<double>(rand()) / RAND_MAX;
+        if(r < config.mutationRate) {
             unsigned int randomIndex = random() % config.population;
             points[randomIndex] =
                     range.lowerBound + randomScalar<MultiPrecision, false>() * regionLength;

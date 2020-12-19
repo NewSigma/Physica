@@ -57,7 +57,7 @@ namespace Physica::Logger {
         LoggerRuntime& operator=(const LoggerRuntime&) = delete;
         LoggerRuntime& operator=(LoggerRuntime&&) noexcept = delete;
         /* Operations */
-        void registerLogger(std::unique_ptr<AbstractLogger> logger);
+        size_t registerLogger(std::unique_ptr<AbstractLogger> logger);
         void registerLogInfo(const LogInfo& info);
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */

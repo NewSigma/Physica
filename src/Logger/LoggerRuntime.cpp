@@ -36,9 +36,14 @@ namespace Physica::Logger {
     /**
      * \param logger
      * Pointer to a logger thar is allocated on heap.
+     *
+     * \return
+     * The id of the registered logger.
      */
-    void LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger> logger) {
+    size_t LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger> logger) {
+        auto nextID = loggerList.size();
         loggerList.push_back(logger.release());
+        return nextID;
     }
 
     void LoggerRuntime::registerLogInfo(const LogInfo& info) {
