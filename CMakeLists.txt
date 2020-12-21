@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 
 project(Physica VERSION 0.0.1 LANGUAGES CXX CUDA)
 #include all macros
@@ -59,5 +59,10 @@ endif()
 
 set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
 add_executable(Physica Physica.cpp ${HEADERS})
+
+install(TARGETS Physica DESTINATION bin)
+install(FILES include/Physica/Config.h DESTINATION include/Physica)
+install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
+install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
 #############################################Options##############################################
 target_link_libraries(Physica PhysicaCore PhysicaGui Qt5::Core Qt5::Widgets)
