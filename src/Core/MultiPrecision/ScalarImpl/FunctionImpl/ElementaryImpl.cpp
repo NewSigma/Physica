@@ -200,9 +200,7 @@ namespace Physica::Core {
         Scalar<MultiPrecision, false> rank = 1;
         Scalar<MultiPrecision, true> temp(s);
         const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
-        int a = 0;
         while(true) {
-            ++a;
             temp /= rank;
             if(absCompare(relativeError, temp))
                 break;
