@@ -70,7 +70,7 @@ namespace Physica::Utils {
          * This function is slower than now().
          */
         static __inline __attribute__((always_inline))
-        uint64_t strictStart() {
+        uint64_t tic() {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "cpuid\n\t"
@@ -87,7 +87,7 @@ namespace Physica::Utils {
          * This function is slower than now().
          */
         static __inline __attribute__((always_inline))
-        uint64_t strictEnd() {
+        uint64_t toc() {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "rdtscp\n\t"
