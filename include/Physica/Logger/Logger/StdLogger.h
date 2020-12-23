@@ -16,20 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_STDOUTLOGGER_H
-#define PHYSICA_STDOUTLOGGER_H
+#ifndef PHYSICA_STDLOGGER_H
+#define PHYSICA_STDLOGGER_H
 
 #include "AbstractLogger.h"
 
 namespace Physica::Logger {
     /**
-     * The standard output logger, will be created when LoggerRuntime is initialized.
+     * The standard logger that links to stdout and stderr,
+     * will be created when LoggerRuntime is initialized.
      */
-    class StdoutLogger : public AbstractLogger {
+    class StdLogger : public AbstractLogger {
+        std::ostream& os;
     public:
-        ~StdoutLogger() override = default;
+        StdLogger() = delete;
+        ~StdLogger() override = default;
         /* Operations */
         void log() override;
+    protected:
+        //StdLogger can be created by LoggerRuntime only.
+        explicit StdLogger(std::ostream& stream);
+
+        friend class LoggerRuntime;
     };
 }
 

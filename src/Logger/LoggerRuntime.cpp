@@ -19,19 +19,23 @@
 #include <iostream>
 #include <cstring>
 #include "Physica/Logger/LoggerRuntime.h"
-#include "Physica/Logger/Logger/StdoutLogger.h"
+#include "Physica/Logger/Logger/StdLogger.h"
 
 namespace Physica::Logger {
     LoggerRuntime::LoggerRuntime()
             : buffer(1U << 20U)
             , logThread(&LoggerRuntime::logThreadMain, this)
             , shouldExit(false) {
-        registerLogger(std::unique_ptr<AbstractLogger>(new StdoutLogger()));
+        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::clog)));
+        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cout)));
+        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cerr)));
     }
 
     LoggerRuntime::~LoggerRuntime() {
         if(logThread.joinable())
             logThread.join();
+        for (auto& logger : loggerList)
+            delete logger;
     }
     /**
      * \param logger
@@ -40,7 +44,7 @@ namespace Physica::Logger {
      * \return
      * The id of the registered logger.
      */
-    size_t LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger> logger) {
+    size_t LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger>&& logger) {
         auto nextID = loggerList.size();
         loggerList.push_back(logger.release());
         return nextID;

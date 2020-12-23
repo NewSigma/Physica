@@ -19,6 +19,7 @@
 #include "Physica/PhysicaInit.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
 #include "Physica/Logger/LoggerRuntime.h"
+#include <unistd.h>
 
 using namespace Physica::Logger;
 
@@ -28,16 +29,16 @@ int main(int argc, char** argv) {
 
     initPhysica();
 
-    Info(0, "Test begin.");
-    Warning(0, "This is %c %s%c", 'a', "Logger", '.');
+    Info(STDOUT_FILENO, "Test begin.");
+    Warning(STDERR_FILENO, "This is %c %s%c", 'a', "Logger", '.');
 
     char str[] = "This is a dynamic string.";
-    Info(0, "%s", str);
+    Info(STDOUT_FILENO, "%s", str);
 
     AbstractLogger& stdoutLogger = getLogger(0);
     stdoutLogger.localLevel = LogLevel::Debug;
-    Debug(0, "This is debug mode.");
+    Debug(STDOUT_FILENO, "This is debug mode.");
     stdoutLogger.localLevel = LogLevel::Info;
-    Debug(0, "This message should not appear.");
+    Debug(STDERR_FILENO, "This message should not appear.");
     return 0;
 }

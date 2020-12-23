@@ -27,6 +27,12 @@
 #include "Physica/Logger/Logger/AbstractLogger.h"
 
 namespace Physica::Logger {
+    /**
+     * Three loggers will be created after initialized: std::clog, std::cout, std::cerr,
+     * whose ids are 0, 1 and 2.
+     *
+     * The ids are arranged to equal to the file descriptors of stdio.
+     */
     class LoggerRuntime {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
@@ -57,7 +63,7 @@ namespace Physica::Logger {
         LoggerRuntime& operator=(const LoggerRuntime&) = delete;
         LoggerRuntime& operator=(LoggerRuntime&&) noexcept = delete;
         /* Operations */
-        size_t registerLogger(std::unique_ptr<AbstractLogger> logger);
+        size_t registerLogger(std::unique_ptr<AbstractLogger>&& logger);
         void registerLogInfo(const LogInfo& info);
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */

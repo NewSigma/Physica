@@ -1,10 +1,8 @@
+include(CTest)
 include(../cmake/Modules/PhysicaAddTest.cmake)
-if(${BUILD_TESTING}) #Declared by CTest
-    message(STATUS "Configuring tests.")
-    physica_add_test(ScalarAddSubExpression Core/MultiPrecision/ScalarImpl/ScalarAddSubExpressionTest.cpp)
-    physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
-    physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
-    physica_add_test(Logger Logger/LoggerTest.cpp)
-else()
-    message(STATUS "Test disabled.")
-endif()
+
+message(STATUS "Configuring tests.")
+physica_add_test(ScalarAddSubExpression Core/MultiPrecision/ScalarImpl/ScalarAddSubExpressionTest.cpp)
+physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
+physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
+physica_add_test(Logger Logger/LoggerTest.cpp)

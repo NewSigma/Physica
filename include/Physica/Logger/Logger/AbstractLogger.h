@@ -37,12 +37,12 @@ namespace Physica::Logger {
         LogLevel localLevel;
     public:
         explicit AbstractLogger(LogLevel level = LogLevel::Global) : localLevel(level) {}
-        AbstractLogger(const AbstractLogger& logger) = default;
-        AbstractLogger(AbstractLogger&& logger) noexcept = default;
+        AbstractLogger(const AbstractLogger& logger) = delete;
+        AbstractLogger(AbstractLogger&& logger) noexcept = delete;
         virtual ~AbstractLogger() = default;
         /* Operators */
-        AbstractLogger& operator=(const AbstractLogger&) = default;
-        AbstractLogger& operator=(AbstractLogger&&) noexcept = default;
+        AbstractLogger& operator=(const AbstractLogger&) = delete;
+        AbstractLogger& operator=(AbstractLogger&&) noexcept = delete;
         /* Operations */
         virtual void log() = 0;
         /* Getters */
