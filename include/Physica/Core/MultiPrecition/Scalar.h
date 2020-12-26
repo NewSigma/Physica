@@ -48,7 +48,7 @@ namespace Physica::Core {
          *
          * Warning: length can not equal to INT_MIN, or length will not return the correct answer.
          *
-         * Optimize: use the end position of byte instead length may improve performance.
+         * Optimize: use the end position of byte instead of length may improve performance.
          */
         int length;
         /*
@@ -112,7 +112,7 @@ namespace Physica::Core {
          * \param byte
          * byte must be allocated by malloc()
          */
-        Scalar(ScalarUnit* byte, int length, int power) : byte(byte), length(length), power(power) {}
+        Scalar(ScalarUnit* byte_, int length_, int power_) : byte(byte_), length(length_), power(power_) {}
         inline static Scalar<MultiPrecision, true> addWithError (const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision, false> addNoError (const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision, true> subWithError (const Scalar& s1, const Scalar& s2);
@@ -156,6 +156,7 @@ namespace Physica::Core {
         Scalar(double d, ScalarUnit a = 0); //NOLINT Conversion is always available.
         explicit Scalar(const char* s, ScalarUnit a = 0);
         explicit Scalar(const wchar_t* s, ScalarUnit a = 0);
+        ~Scalar() = default;
         /* Operators */
         Scalar& operator=(const Scalar& s);
         Scalar& operator=(Scalar&& s) noexcept;
@@ -210,6 +211,7 @@ namespace Physica::Core {
         inline Scalar();
         inline Scalar(float f); //NOLINT Intentional implicit conversions.
         Scalar(const Scalar& s) = default;
+        ~Scalar() = default;
         /* Operators */
         explicit operator double() const { return f; }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
@@ -247,6 +249,7 @@ namespace Physica::Core {
         inline Scalar();
         inline explicit Scalar(float f, float a = 0);
         inline Scalar(const Scalar& s);
+        ~Scalar() = default;
         /* Operators */
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
         Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
@@ -277,6 +280,7 @@ namespace Physica::Core {
         inline Scalar();
         inline Scalar(double d); //NOLINT Intentional implicit conversions.
         Scalar(const Scalar& s) = default;
+        ~Scalar() = default;
         /* Operators */
         explicit operator double() const { return d; }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
@@ -314,6 +318,7 @@ namespace Physica::Core {
         inline Scalar();
         inline explicit Scalar(double d, double a = 0);
         inline Scalar(const Scalar& s);
+        ~Scalar() = default;
         /* Operators */
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
         Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
