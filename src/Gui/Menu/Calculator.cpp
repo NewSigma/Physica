@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QKeyEvent>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Interpreter/ExprReader.h>
 #include "Physica/Gui/Menu/Calculator.h"
 

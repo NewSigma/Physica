@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecition/ComplexScalar.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 
 /*!
  * This file is created to help IDE inspect template codes,

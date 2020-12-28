@@ -19,7 +19,7 @@
 #ifndef PHYSICA_COMPLEXSCALAR_H
 #define PHYSICA_COMPLEXSCALAR_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
     template<ScalarType type = MultiPrecision, bool errorTrack = true>

@@ -20,7 +20,7 @@
 #define PHYSICA_VECTOR_H
 
 #include <iosfwd>
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 #include "VectorExpression.h"

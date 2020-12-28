@@ -19,7 +19,7 @@
 #ifndef PHYSICA_POINT_H
 #define PHYSICA_POINT_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
     /*!

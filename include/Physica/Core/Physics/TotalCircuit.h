@@ -20,7 +20,7 @@
 #define PHYSICA_TOTALCIRCUIT_H
 
 #include <vector>
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/FreezingList/FreezingList.h"
 
 namespace Physica::Core {

@@ -20,7 +20,7 @@
 #define PHYSICA_SCALARADDSUBEXPRESSION_H
 
 #include <list>
-#include "Physica/Core/MultiPrecition/ScalarType.h"
+#include "Physica/Core/MultiPrecision/ScalarType.h"
 /**
  * This file contains implementation of Scalar add and sub expressions,
  * which is created to provide support for associative law of addition of float numbers.

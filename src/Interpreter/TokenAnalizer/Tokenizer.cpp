@@ -17,11 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QtCore/qlogging.h>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Interpreter/TokenWord.h"
 #include "Physica/Interpreter/TokenNum.h"
 #include "Physica/Interpreter/Tokenizer.h"
-#include "Physica/Core/MultiPrecition/Const.h"
+#include "Physica/Core/MultiPrecision/Const.h"
 
 using namespace Physica::Interpreter;
 using namespace Physica::Core;

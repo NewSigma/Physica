@@ -21,7 +21,7 @@
 
 #include <list>
 #include <iosfwd>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 using Physica::Core::MultiScalar;
 

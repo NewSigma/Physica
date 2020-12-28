@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecition/Scalar.h"
-#include "Physica/Core/MultiPrecition/ScalarImpl/FunctionImpl/BisectionMethod.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/FunctionImpl/BisectionMethod.h"
 
 namespace Physica::Core {
     template<>

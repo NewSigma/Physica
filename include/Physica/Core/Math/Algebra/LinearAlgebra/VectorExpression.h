@@ -19,7 +19,7 @@
 #ifndef PHYSICA_VECTOREXPRESSION_H
 #define PHYSICA_VECTOREXPRESSION_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 /*!

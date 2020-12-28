@@ -19,7 +19,7 @@
 #ifndef PHYSICA_FFT_H
 #define PHYSICA_FFT_H
 
-#include "Physica/Core/MultiPrecition/ComplexScalar.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 

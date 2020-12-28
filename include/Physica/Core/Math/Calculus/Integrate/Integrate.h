@@ -20,7 +20,7 @@
 #define PHYSICA_INTEGRATE_H
 
 #include <memory>
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunction.h"
 
 namespace Physica::Core {

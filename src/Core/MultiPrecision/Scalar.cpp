@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Core {
@@ -453,15 +453,6 @@ namespace Physica::Core {
         std::swap(byte, s.byte);
         std::swap(length, s.length);
         std::swap(power, s.power);
-    }
-    /*!
-     * Return true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
-     * This function provide a quick sign check compare to using isPositive() and isNegative().
-     */
-    inline bool Scalar<MultiPrecision, false>::matchSign(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
-        Q_ASSERT(!s1.isZero() && !s2.isZero());
-        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
     }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     Scalar<MultiPrecision, true>::Scalar() noexcept : Scalar<MultiPrecision, false>(), a(0) {}

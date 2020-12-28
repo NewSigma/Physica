@@ -20,7 +20,7 @@
 #define PHYSICA_SCALARIMPL_H
 
 #include <iomanip>
-#include "BasicCalc.h"
+#include "ScalarArithmetic.h"
 #include "ScalarAddSubExpression.h"
 /**
  * This file is part of implementations of \Scalar.
@@ -104,6 +104,16 @@ namespace Physica::Core {
         s2.swap(s1);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
+    /**
+     * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
+     * This function provide a quick sign check compare to using isPositive() and isNegative().
+     */
+    inline bool Scalar<MultiPrecision, false>::matchSign(
+            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+        Q_ASSERT(!s1.isZero() && !s2.isZero());
+        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
+    }
+
     inline Scalar<MultiPrecision, false>& operator++(Scalar<MultiPrecision, false>& s) {
         s += BasicConst::getInstance()._1;
         return s;
@@ -274,7 +284,7 @@ namespace Physica::Core {
     }
 }
 
-#include "BasicCalc.h"
+#include "ScalarArithmetic.h"
 #include "ElementaryFunction.h"
 #include "Operation/Pow.h"
 

@@ -2,7 +2,7 @@
  * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_BASICCALC_H
-#define PHYSICA_BASICCALC_H
+#ifndef PHYSICA_SCALARARITHMETIC_H
+#define PHYSICA_SCALARARITHMETIC_H
 
-#include "Basic/AddBasic.h"
-#include "Basic/DivBasic.h"
-#include "Util/ArraySupport.h"
+#include "Physica/Core/MultiPrecision/BasicImpl/AddBasic.h"
+#include "Physica/Core/MultiPrecision/BasicImpl/DivBasic.h"
+#include "Physica/Core/MultiPrecision/BasicImpl/Util/ArraySupport.h"
+#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
 #include "Physica/Core/Exception/DivideByZeroException.h"
-#include "Util/Bitwise.h"
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.
@@ -45,7 +45,7 @@ namespace Physica::Core {
             return Scalar<MultiPrecision, true>(s2);
         else if(s2.isZero())
             return Scalar<MultiPrecision, true>(s1);
-        else if ((s1.length ^ s2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
+        else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(s1, shallow_copy);
@@ -122,7 +122,7 @@ namespace Physica::Core {
             return Scalar(s2);
         else if(s2.isZero())
             return Scalar(s1);
-        else if ((s1.length ^ s2.length) < 0) { // NOLINT(hicpp-signed-bitwise)
+        else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
                 Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subNoError(s1, shallow_copy);
@@ -407,7 +407,7 @@ namespace Physica::Core {
                 byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<MultiPrecision, true>(byte, (s1.length ^ s2.length) < 0 ? -length : length, power); //NOLINT
+            return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length, power);
         }
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
@@ -433,7 +433,7 @@ namespace Physica::Core {
                 byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<MultiPrecision, false>(byte, (s1.length ^ s2.length) < 0 ? -length : length, power); //NOLINT
+            return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length, power);
         }
     }
 
@@ -482,7 +482,7 @@ namespace Physica::Core {
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
                 //Accuracy 1 comes from the algorithm
-                return Scalar<MultiPrecision, true>(byte, (s1.length ^ s2.length) < 0 ? -length : length //NOLINT
+                return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length
                         , s1.getPower() - s2.getPower() - 1, 1) >> (s1_shift - s2_shift);
             }
             else
@@ -536,7 +536,7 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                return Scalar(byte, (s1.length ^ s2.length) < 0 ? -length : length //NOLINT
+                return Scalar(byte, matchSign(s1, s2) ? length : -length
                         , s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
             }
             else

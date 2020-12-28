@@ -19,7 +19,7 @@
 #ifndef PHYSICA_TREEFUNCTIONDATA_H
 #define PHYSICA_TREEFUNCTIONDATA_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Function/FunctionType.h"
 
 namespace Physica::Core {

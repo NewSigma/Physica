@@ -19,7 +19,7 @@
 #ifndef PHYSICA_TOKENNUM_H
 #define PHYSICA_TOKENNUM_H
 
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 #include "Token.h"
 
 using Physica::Core::MultiScalar;

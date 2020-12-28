@@ -20,7 +20,7 @@
 #define PHYSICA_EXPERIMENTALDATAPROCESSOR_H
 
 #include <utility>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
 
 namespace Physica::Core::Physics {

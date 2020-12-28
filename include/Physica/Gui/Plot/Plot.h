@@ -21,7 +21,7 @@
 
 #include <QChartView>
 #include <QtCharts/QSplineSeries>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 using Physica::Core::MultiScalar;
 

@@ -19,7 +19,7 @@
 #ifndef PHYSICA_DIFFERENTIAL_H
 #define PHYSICA_DIFFERENTIAL_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunction.h"
 
 namespace Physica::Core {

@@ -19,7 +19,7 @@
 #ifndef PHYSICA_ELEMENTARYIMPL_H
 #define PHYSICA_ELEMENTARYIMPL_H
 
-#include "Physica/Core/MultiPrecition/ScalarImpl/ProbabilityFunction.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/ProbabilityFunction.h"
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.

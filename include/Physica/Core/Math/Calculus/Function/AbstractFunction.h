@@ -19,7 +19,7 @@
 #ifndef PHYSICA_ABSTRACTFUNCTION_H
 #define PHYSICA_ABSTRACTFUNCTION_H
 
-#include "Physica/Core/MultiPrecition/Scalar.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
 
 namespace Physica::Core {
