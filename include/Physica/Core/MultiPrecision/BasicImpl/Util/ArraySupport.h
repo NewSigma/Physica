@@ -20,10 +20,12 @@
 #define PHYSICA_ARRAYSUPPORT_H
 
 #include <cstring>
+#include <memory>
 
 namespace Physica::Core {
     // operator<<
-    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteLeftShift(const ScalarUnit* byte, unsigned int length, unsigned int shift) {
+    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteLeftShift(
+                        const ScalarUnit* __restrict byte, unsigned int length, unsigned int shift) {
         const unsigned int quotient = shift / ScalarUnitWidth;
         auto result = std::unique_ptr<ScalarUnit[]>(new ScalarUnit[length]);
         if(quotient < length) {
@@ -47,7 +49,8 @@ namespace Physica::Core {
         return result;
     }
     // operator>>
-    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteRightShift(const ScalarUnit* byte, size_t length, size_t shift) {
+    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteRightShift(
+                            const ScalarUnit* __restrict byte, size_t length, size_t shift) {
         const unsigned int quotient = shift / ScalarUnitWidth;
         auto result = std::unique_ptr<ScalarUnit[]>(new ScalarUnit[length]);
         if(quotient < length) {
@@ -72,7 +75,7 @@ namespace Physica::Core {
         return result;
     }
     // operator<<=
-    inline void byteLeftShiftEq(ScalarUnit* byte, unsigned int length, unsigned int shift) {
+    inline void byteLeftShiftEq(ScalarUnit* __restrict byte, unsigned int length, unsigned int shift) {
         const unsigned int quotient = shift / ScalarUnitWidth;
         if(quotient < length) {
             if(quotient != 0) {
@@ -94,7 +97,7 @@ namespace Physica::Core {
         }
     }
     // operator>>=
-    inline void byteRightShiftEq(ScalarUnit* byte, size_t length, size_t shift) {
+    inline void byteRightShiftEq(ScalarUnit* __restrict byte, size_t length, size_t shift) {
         const unsigned int quotient = shift / ScalarUnitWidth;
         if(quotient < length) {
             auto bufferSize = length - quotient;
