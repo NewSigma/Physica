@@ -43,7 +43,7 @@ namespace Physica::Core {
             , const ScalarUnit* __restrict arr2, size_t len) {
         ScalarUnit carry = 0, temp1, temp2;
         bool pre_carry;
-        for(int i = 0; i < len; ++i) {
+        for(size_t i = 0; i < len; ++i) {
             temp1 = arr1[i];
             temp2 = temp1 - arr2[i];
             pre_carry = temp1 < temp2;
@@ -57,7 +57,7 @@ namespace Physica::Core {
     inline bool subArrByArrEq(ScalarUnit* __restrict arr1, const ScalarUnit* __restrict arr2, size_t len) {
         ScalarUnit carry = 0, temp1, temp2;
         bool pre_carry;
-        for(int i = 0; i < len; ++i) {
+        for(size_t i = 0; i < len; ++i) {
             temp1 = arr1[i];
             temp2 = temp1 - arr2[i];
             pre_carry = temp1 < temp2;

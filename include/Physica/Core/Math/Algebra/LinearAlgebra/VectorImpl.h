@@ -60,6 +60,7 @@ namespace Physica::Core {
         const auto length = Base::getLength();
         for(size_t i = 0; i < length; ++i)
             Base::operator[](i).toOpposite();
+        return *this;
     }
 
     template<class T, size_t maxLength>

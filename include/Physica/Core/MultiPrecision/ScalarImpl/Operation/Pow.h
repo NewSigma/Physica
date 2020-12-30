@@ -26,7 +26,7 @@ namespace Physica::Core {
             const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
         Scalar<MultiPrecision, errorTrack> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
-        for(int j = 0; j < ScalarUnitWidth - lastUnitBits; ++j) {
+        for(unsigned int j = 0; j < ScalarUnitWidth - lastUnitBits; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
                 result *= a;

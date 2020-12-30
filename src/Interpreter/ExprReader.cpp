@@ -22,7 +22,7 @@
 using namespace Physica::Interpreter;
 
 ExprReader::ExprReader(const std::wstring& str) {
-    int pointer = 0;
+    size_t pointer = 0;
     std::stack<wchar_t> stack{};
     std::wstring temp;
     while(pointer != str.size()) {

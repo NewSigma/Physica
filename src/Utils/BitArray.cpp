@@ -26,12 +26,14 @@ namespace Physica::Utils {
      * bitCount is the number of bool types you need.
      * bitCount is different from BitArray::length.
      */
-    BitArray::BitArray(size_t bitCount) : bitCount(bitCount), arr(new unsigned char[getLength()]) {}
+    BitArray::BitArray(size_t bitCount_) : bitCount(bitCount_) {
+        arr = new unsigned char[getLength()];
+    }
 
     BitArray::BitArray(const BitArray& array)
-            : bitCount(array.bitCount)
-            , arr(new unsigned char[array.getLength()]) {
+            : bitCount(array.bitCount) {
         const size_t length = getLength();
+        arr = new unsigned char[length];
         for(unsigned int i = 0; i < length; ++i)
             arr[i] = array.arr[i];
     }

@@ -133,7 +133,7 @@ namespace Physica::Core {
         size_t size = wcslen(s);
         char str[size + 1];
         str[size] = '\0';
-        for(int i = 0; i < size; ++i)
+        for(size_t i = 0; i < size; ++i)
             str[i] = (char)s[i];
         Scalar temp(str);
         byte = temp.byte;

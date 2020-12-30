@@ -184,6 +184,9 @@ namespace Physica::Core {
                 return arccsch(left->solve());
             case ArcCoth:
                 return arccosh(left->solve());
+            default:
+                printf("[%s:%d|Fatal]: Not implemented.", __FILENAME__, __LINE__);
+                exit(EXIT_FAILURE);
         }
     }
 }

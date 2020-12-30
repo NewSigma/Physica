@@ -82,7 +82,7 @@ namespace Physica::Utils {
     template<class T>
     void FreezingList<T>::freeze(const Iterator& ite) {
         Node* node = ite.getNode();
-        if(node >= arr && node - arr < length) {
+        if(node >= arr && static_cast<size_t>(node - arr) < length) {
             Node* n_last = node->last;
             Node* n_next = node->next;
             start = start == node ? n_next : start;
@@ -98,7 +98,7 @@ namespace Physica::Utils {
     template<class T>
     void FreezingList<T>::restore(const Iterator& ite) {
         Node* node = ite.getNode();
-        if(node >= arr && node - arr < length) {
+        if(node >= arr && static_cast<size_t>(node - arr) < length) {
             //List is empty.
             if(start == nullptr) {
                 start = node;

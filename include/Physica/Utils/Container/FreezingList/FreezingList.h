@@ -95,7 +95,7 @@ namespace Physica::Utils {
         [[nodiscard]] size_t size() const { return length; }
         [[nodiscard]] bool empty() const { return start == nullptr; }
         /* Iterator */
-        [[nodiscard]] Iterator begin() const { Iterator(this->start); }
+        [[nodiscard]] Iterator begin() const { return Iterator(this->start); }
         [[nodiscard]] Iterator end() const { return Iterator(nullptr); }
     };
 }

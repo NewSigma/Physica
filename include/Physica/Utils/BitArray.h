@@ -30,7 +30,7 @@ namespace Physica::Utils {
         unsigned char* __restrict__ arr;
         size_t bitCount;
     public:
-        explicit BitArray(size_t bitCount);
+        explicit BitArray(size_t bitCount_);
         BitArray(const BitArray& array);
         BitArray(BitArray&& array) noexcept;
         ~BitArray();

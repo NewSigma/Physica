@@ -130,6 +130,7 @@ namespace Physica::Core {
     Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>::operator=(
             Matrix<T, MatrixType::VectorColumn, maxRow, maxColumn>&& m) noexcept {
         Utils::CStyleArray<Vector<T, maxRow>, maxColumn>::operator=(std::move(m));
+        return *this;
     }
     //!Optimize: may be inline append().
     template<class T, size_t maxRow, size_t maxColumn>
@@ -278,6 +279,7 @@ namespace Physica::Core {
     Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>::operator=(
             Matrix<T, MatrixType::VectorRow, maxRow, maxColumn>&& m) noexcept {
         Utils::CStyleArray<VectorType, Utils::Dynamic>::operator=(std::move(m));
+        return *this;
     }
     //!Optimize: may be inline append().
     template<class T, size_t maxRow, size_t maxColumn>

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include "Physica/Core/Physics/TotalCircuit.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations.h"
 
@@ -60,8 +61,6 @@ namespace Physica::Core {
             calculate();
             return;
         }
-
-        typedef FreezingList<MultiScalar>::Node Node;
         const auto end = resistances.end();
         for(auto ite = resistances.begin(); ite != end; ++ite) {
             resistances.freeze(ite);
@@ -164,7 +163,8 @@ namespace Physica::Core {
                 if(p->getPos1() == 0) {
                     auto index2 = p->getPos2() - 1;
                     auto current = reciprocal(*p->getResistance());
-                    if(index2 != size)
+                    assert(index2 >= 0);
+                    if(static_cast<size_t>(index2) != size)
                         current -= current * le.getResult(index2);
                     totalCurrent += current;
                 }

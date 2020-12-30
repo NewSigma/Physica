@@ -79,14 +79,14 @@ namespace Physica::Utils {
         assert(bytes < size);
         size_t leftSpace = size - (bufferWriter - buffer);
         if(bytes < leftSpace) {
-            while(bufferReader > bufferWriter && (bufferReader - bufferWriter) < bytes)
+            while(bufferReader > bufferWriter && static_cast<size_t>(bufferReader - bufferWriter) < bytes)
                 std::this_thread::yield();
             memcpy(bufferWriter, src, bytes);
             bufferWriter = bytes == leftSpace ? buffer : (bufferWriter + bytes);
         }
         else {
             size_t leftBytes = bytes - leftSpace;
-            while(bufferReader > bufferWriter || (bufferReader - buffer) < leftBytes)
+            while(bufferReader > bufferWriter || static_cast<size_t>(bufferReader - buffer) < leftBytes)
                 std::this_thread::yield();
             memcpy(bufferWriter, src, leftSpace);
             memcpy(buffer, src + leftSpace, leftBytes);

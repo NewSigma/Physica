@@ -72,7 +72,7 @@ namespace Physica::Core {
         Scalar& operator=(const Scalar& s);
         Scalar& operator=(Scalar&& s) noexcept;
         explicit operator double() const;
-        ScalarUnit operator[](unsigned int index) const { Q_ASSERT(index < getSize()); return byte[index]; }
+        ScalarUnit operator[](unsigned int index) const { Q_ASSERT(index < static_cast<unsigned int>(getSize())); return byte[index]; }
         Scalar operator*(const Scalar& s) const;
         Scalar operator/(const Scalar& s) const;
         Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
@@ -101,7 +101,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
         /* Setters */
         void setPower(int i) noexcept { power = i; }
-        void setByte(unsigned int index, ScalarUnit value) { Q_ASSERT(index < getSize()); byte[index] = value; }
+        void setByte(unsigned int index, ScalarUnit value) { Q_ASSERT(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:

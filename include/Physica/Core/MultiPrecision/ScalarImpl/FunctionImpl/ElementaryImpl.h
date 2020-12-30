@@ -54,9 +54,9 @@ namespace Physica::Core {
 
             ScalarUnit high, low, copy, temp;
             bool carry = false;
-            for(unsigned int i = 0; i < s_size; ++i) {
+            for(int i = 0; i < s_size; ++i) {
                 mulWordByWord(high, low, s.byte[i], s.byte[i]);
-                unsigned int double_i = i << 1U;
+                unsigned int double_i = static_cast<unsigned int>(i) << 1U;
                 /* Handle 2 * i */ {
                     copy = result[double_i];
                     temp = copy + low + carry;

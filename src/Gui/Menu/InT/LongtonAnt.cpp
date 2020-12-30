@@ -61,7 +61,7 @@ namespace Physica::Gui {
         Y = Y > c + 1 ? Y : c + 1;
     }
 
-    LongtonAnt::LongtonAnt() : QChartView(new QChart()), r(0), c(0), type(1), X(1), Y(1) {
+    LongtonAnt::LongtonAnt() : QChartView(new QChart()), r(0), c(0), X(1), Y(1), type(1) {
         setAttribute(Qt::WA_DeleteOnClose);
         resize(650,650);
 
