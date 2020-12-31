@@ -26,7 +26,6 @@
     #define PHYSICA_64BIT
 #elif PhysicaWordSize == 32;
     #define PHYSICA_32BIT
-    #define ScalarUnitWidth (32U)
 #endif
 
 /*!

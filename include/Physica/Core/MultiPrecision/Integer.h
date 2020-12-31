@@ -20,12 +20,12 @@
 #define PHYSICA_INTEGER_H
 
 #include <cmath>
-#include "ScalarType.h"
+#include "MultiPrecisionType.h"
 
 namespace Physica::Core {
     class Integer {
         //Store effective digits using little endian standard.
-        ScalarUnit* __restrict byte;
+        MPUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Integer are same. (when Integer != 0)
@@ -74,7 +74,7 @@ namespace Physica::Core {
          * \param byte
          * byte must be allocated by malloc()
          */
-        Integer(ScalarUnit* byte_, int length_) : byte(byte_), length(length_) {}
+        Integer(MPUnit* byte_, int length_) : byte(byte_), length(length_) {}
         /* Helpers */
         void cutZero();
         static inline Integer integerAddImpl(const Integer& i1, const Integer& i2);

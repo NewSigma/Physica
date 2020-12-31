@@ -44,7 +44,7 @@ namespace Physica::Core {
             auto length = 2 * s_size;
             Scalar<MultiPrecision, errorTrack> result(length, s.power * 2 + 1);
 
-            memset(result.byte, 0, length * sizeof(ScalarUnit));
+            memset(result.byte, 0, length * sizeof(MPUnit));
             for(int i = 0; i < s_size - 1; ++i)
                 result.setByte(i + s_size
                                , mulAddArrByWord(result.byte + i + i + 1, s.byte + i + 1, s_size - i - 1, s.byte[i]));
@@ -52,7 +52,7 @@ namespace Physica::Core {
             //Fix: accuracy is ignored.
             byteLeftShiftEq(result.byte, length, 1);
 
-            ScalarUnit high, low, copy, temp;
+            MPUnit high, low, copy, temp;
             bool carry = false;
             for(int i = 0; i < s_size; ++i) {
                 mulWordByWord(high, low, s.byte[i], s.byte[i]);
@@ -76,7 +76,7 @@ namespace Physica::Core {
                 --length;
                 result.length = length;
                 result.byte =
-                        reinterpret_cast<ScalarUnit*>(realloc(result.byte, length * sizeof(ScalarUnit)));
+                        reinterpret_cast<MPUnit*>(realloc(result.byte, length * sizeof(MPUnit)));
             }
             return result;
         }
@@ -137,8 +137,8 @@ namespace Physica::Core {
         //Optimize: Unnecessary copy during floor() if s is a integer itself.
         const Scalar<MultiPrecision, false> integer = floor<false>(s);
 
-        Scalar<MultiPrecision, errorTrack> result(SignedScalarUnit(1));
-        Scalar<MultiPrecision, errorTrack> temp(SignedScalarUnit(1));
+        Scalar<MultiPrecision, errorTrack> result(SignedMPUnit(1));
+        Scalar<MultiPrecision, errorTrack> temp(SignedMPUnit(1));
         while(temp < integer)
             result *= ++temp;
         return result;

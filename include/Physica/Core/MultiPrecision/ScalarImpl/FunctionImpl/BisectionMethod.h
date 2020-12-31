@@ -48,7 +48,7 @@ namespace Physica::Core {
             qFatal("Root is nonexistent.");
 
         Scalar<type, false> result = (x1 + x2) >> 1;
-        Scalar<type, false> y_result(static_cast<SignedScalarUnit>(1));
+        Scalar<type, false> y_result(static_cast<SignedMPUnit>(1));
 
         Scalar<type, false> error = Scalar<type, false>(y1 - y2).toAbs() >> 1;
         Scalar<type, false> x_left(x1);

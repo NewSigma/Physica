@@ -24,15 +24,15 @@
 
 namespace Physica::Core {
     Integer::Integer(int i)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit))))
+            : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(i >= 0 ? 1 : -1) {
         byte[0] = i >= 0 ? i : -i;
     }
 
     Integer::Integer(const Integer& toCopy)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(toCopy.getSize() * sizeof(ScalarUnit))))
+            : byte(reinterpret_cast<MPUnit*>(malloc(toCopy.getSize() * sizeof(MPUnit))))
             , length(toCopy.length) {
-        memcpy(byte, toCopy.byte, getSize() * sizeof(ScalarUnit));
+        memcpy(byte, toCopy.byte, getSize() * sizeof(MPUnit));
     }
 
     Integer::Integer(Integer&& toMove) noexcept
@@ -50,8 +50,8 @@ namespace Physica::Core {
             this->~Integer();
             length = toCopy.length;
             int size = getSize();
-            byte = reinterpret_cast<ScalarUnit*>(malloc(size * sizeof(ScalarUnit)));
-            memcpy(byte, toCopy.byte, size * sizeof(ScalarUnit));
+            byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
+            memcpy(byte, toCopy.byte, size * sizeof(MPUnit));
         }
         return *this;
     }
@@ -123,12 +123,12 @@ namespace Physica::Core {
         const int size2 = i.getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
         auto resultLength = size1 + size2;
-        auto* __restrict resultByte = reinterpret_cast<ScalarUnit*>(calloc(resultLength, sizeof(ScalarUnit)));
+        auto* __restrict resultByte = reinterpret_cast<MPUnit*>(calloc(resultLength, sizeof(MPUnit)));
         for (int j = 0; j < size1; ++j)
             resultByte[j + size2] = mulAddArrByWord(resultByte + j, i.byte, size2, byte[j]);
         if (resultByte[resultLength - 1] == 0) {
             --resultLength;
-            resultByte = reinterpret_cast<ScalarUnit*>(realloc(resultByte, resultLength * sizeof(ScalarUnit)));
+            resultByte = reinterpret_cast<MPUnit*>(realloc(resultByte, resultLength * sizeof(MPUnit)));
         }
         return Integer(resultByte, matchSign(*this, i) ? resultLength : -resultLength);
     }
@@ -145,15 +145,15 @@ namespace Physica::Core {
 
         auto arr1_len = std::max(i1_size, i2_size) + 1;
         auto i1_blank = arr1_len - i1_size;
-        auto arr1 = new ScalarUnit[arr1_len];
-        memcpy(arr1 + i1_blank, byte, i1_size * sizeof(ScalarUnit));
-        memset(arr1, 0, i1_blank * sizeof(ScalarUnit));
+        auto arr1 = new MPUnit[arr1_len];
+        memcpy(arr1 + i1_blank, byte, i1_size * sizeof(MPUnit));
+        memset(arr1, 0, i1_blank * sizeof(MPUnit));
         //Size of arr2 is arranged 1 less than arr1.
         auto arr2_len = arr1_len - 1;
         auto i2_blank = arr2_len - i2_size;
-        auto arr2 = new ScalarUnit[arr2_len];
-        memcpy(arr2 + i2_blank, i.byte, i2_size * sizeof(ScalarUnit));
-        memset(arr2, 0, i2_blank * sizeof(ScalarUnit));
+        auto arr2 = new MPUnit[arr2_len];
+        memcpy(arr2 + i2_blank, i.byte, i2_size * sizeof(MPUnit));
+        memset(arr2, 0, i2_blank * sizeof(MPUnit));
         /*
          * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
          * to meet the acquirement of the function divArrByFullArrWith1Word().
@@ -168,17 +168,17 @@ namespace Physica::Core {
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the length of result.
         int resultLength = arr2_len;
-        auto* __restrict resultByte = reinterpret_cast<ScalarUnit*>(malloc(resultLength * sizeof(ScalarUnit)));
+        auto* __restrict resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
         for(int j = resultLength - 1; j >= 0; --j) {
             resultByte[j] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
             arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[j]);
-            byteLeftShiftEq(arr1, arr1_len, ScalarUnitWidth);
+            byteLeftShiftEq(arr1, arr1_len, MPUnitWidth);
         }
         delete[] arr1;
         delete[] arr2;
         ////////////////////////////////////Out put////////////////////////////////////////
         Integer temp(resultByte, matchSign(*this, i) ? resultLength : -resultLength);
-        return temp >> ((i1_blank - i2_blank) * static_cast<int>(ScalarUnitWidth) + (i1_shift - i2_shift));
+        return temp >> ((i1_blank - i2_blank) * static_cast<int>(MPUnitWidth) + (i1_shift - i2_shift));
     }
 
     Integer Integer::operator%(const Integer& i) const {
@@ -191,30 +191,30 @@ namespace Physica::Core {
         if (bits < 0)
             return *this >> -bits;
         const int size = getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
-        ScalarUnit* __restrict resultByte;
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
+        MPUnit* __restrict resultByte;
         int resultLength = size + quotient;
         if (remainder == 0) {
-            resultByte = reinterpret_cast<ScalarUnit*>(malloc(resultLength * sizeof(ScalarUnit)));
-            memset(resultByte, 0, quotient * sizeof(ScalarUnit));
-            memcpy(resultByte + quotient, byte, resultLength * sizeof(ScalarUnit));
+            resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+            memset(resultByte, 0, quotient * sizeof(MPUnit));
+            memcpy(resultByte + quotient, byte, resultLength * sizeof(MPUnit));
             return Integer(resultByte, resultLength);
         }
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
         resultLength += carry;
-        resultByte = reinterpret_cast<ScalarUnit*>(malloc(resultLength * sizeof(ScalarUnit)));
-        memset(resultByte, 0, quotient * sizeof(ScalarUnit));
+        resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+        memset(resultByte, 0, quotient * sizeof(MPUnit));
         resultByte[quotient] = 0;
         const int size_1 = quotient + size - 1;
         for(int i = quotient; i < size_1; ++i) {
             resultByte[i] |= byte[i] << remainder;
-            resultByte[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
+            resultByte[i + 1] = byte[i] >> (MPUnitWidth - remainder);
         }
         resultByte[size_1] |= byte[size_1] << remainder;
         if(carry)
-            resultByte[size + quotient] = byte[size_1] >> (ScalarUnitWidth - remainder);
+            resultByte[size + quotient] = byte[size_1] >> (MPUnitWidth - remainder);
         return Integer(resultByte, resultLength);
     }
 
@@ -224,28 +224,28 @@ namespace Physica::Core {
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
-        ScalarUnit* __restrict resultByte;
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
+        MPUnit* __restrict resultByte;
         int resultLength = size > quotient ? size - quotient : 1;
         if (remainder == 0) {
-            resultByte = reinterpret_cast<ScalarUnit*>(malloc(resultLength * sizeof(ScalarUnit)));
-            memcpy(resultByte, byte + quotient, resultLength * sizeof(ScalarUnit));
+            resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+            memcpy(resultByte, byte + quotient, resultLength * sizeof(MPUnit));
             resultByte[0] = size > quotient ? resultByte[0] : 0;
             return Integer(resultByte, resultLength);
         }
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
+        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < MPUnitWidth;
         resultLength += carry;
-        resultByte = reinterpret_cast<ScalarUnit*>(malloc(resultLength * sizeof(ScalarUnit)));
+        resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
         if(carry)
             resultByte[size] = byte[size - 1] >> remainder;
 
         for(int i = size - 1; i > 0; --i) {
-            resultByte[i] = byte[i] << (ScalarUnitWidth - remainder);
+            resultByte[i] = byte[i] << (MPUnitWidth - remainder);
             resultByte[i] |= byte[i - 1] >> remainder;
         }
-        resultByte[0] = byte[0] << (ScalarUnitWidth - remainder);
+        resultByte[0] = byte[0] << (MPUnitWidth - remainder);
         Integer result(resultByte, resultLength);
         result.cutZero();
         return result;
@@ -306,6 +306,6 @@ namespace Physica::Core {
                 break;
             --length;
         }
-        byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
     }
 }

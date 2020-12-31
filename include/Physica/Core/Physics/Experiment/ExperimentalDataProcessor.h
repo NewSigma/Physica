@@ -27,7 +27,7 @@ namespace Physica::Core::Physics {
     /*!
      * This class handles experimental data, including identify bad data and calculate some useful values.
      *
-     * Number of data cannot be more than maximum of @typedef ScalarUnit.
+     * Number of data cannot be more than maximum of @typedef MPUnit.
      */
     class ExperimentalDataProcessor {
     public:
@@ -65,7 +65,7 @@ namespace Physica::Core::Physics {
 
     inline ExperimentalDataProcessor::ExperimentalDataProcessor(
             Matrix<Scalar<MultiPrecision, false>, MatrixType::VectorColumn, 2> m) : data(std::move(m)) {
-        Q_ASSERT(data.getColumn() < ScalarUnitMax); //Too much data is not supported.
+        Q_ASSERT(data.getColumn() < MPUnitMax); //Too much data is not supported.
         updateInfo();
     }
 }

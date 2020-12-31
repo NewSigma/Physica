@@ -47,14 +47,14 @@ namespace Physica::Core {
             return Scalar<MultiPrecision, true>(s1);
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subWithError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -78,15 +78,15 @@ namespace Physica::Core {
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
             length = length > GlobalPrecision
                      ? GlobalPrecision : length;
-            auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+            auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
             /* Init byte */ {
                 const auto copySize = bigSize > length ? length : bigSize;
                 const auto clearSize = length - copySize;
-                memset(byte, 0, clearSize * sizeof(ScalarUnit));
-                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
+                memset(byte, 0, clearSize * sizeof(MPUnit));
+                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(MPUnit));
             }
             bool carry;
-            ScalarUnit a;
+            MPUnit a;
             /* Add and carry */ {
                 //usableSmall is the part whose add result will fall in GlobalPrecision.
                 int usableSmall = small->power - (big->power - GlobalPrecision);
@@ -97,7 +97,7 @@ namespace Physica::Core {
                         , byte + length + small->power - big->power - usableSmall, usableSmall);
                 //usableSmall is also the index which we should carry to.
                 while(carry != 0 && usableSmall < length) {
-                    ScalarUnit temp = byte[usableSmall] + 1;
+                    MPUnit temp = byte[usableSmall] + 1;
                     byte[usableSmall] = temp;
                     carry = temp < carry;
                     ++usableSmall;
@@ -108,7 +108,7 @@ namespace Physica::Core {
             if(carry) {
                 ++length;
                 ++power;
-                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
@@ -124,14 +124,14 @@ namespace Physica::Core {
             return Scalar(s1);
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subNoError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -155,25 +155,25 @@ namespace Physica::Core {
             int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
             length = length > GlobalPrecision
                      ? GlobalPrecision : length;
-            auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+            auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
             /* Init byte */ {
                 const auto copySize = bigSize > length ? length : bigSize;
                 const auto clearSize = length - copySize;
-                memset(byte, 0, clearSize * sizeof(ScalarUnit));
-                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
+                memset(byte, 0, clearSize * sizeof(MPUnit));
+                memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(MPUnit));
             }
             bool carry;
             /* Add and carry */ {
                 //usableSmall is the part whose add result will fall in GlobalPrecision.
                 int usableSmall = small->power - (big->power - GlobalPrecision);
-                ScalarUnit a = usableSmall < 0;
+                MPUnit a = usableSmall < 0;
                 usableSmall = usableSmall > smallSize
                                ? smallSize : (a ? 0 : usableSmall);
                 carry = addArrWithArrEq(small->byte + smallSize - usableSmall
                         , byte + length + small->power - big->power - usableSmall, usableSmall);
                 //usableSmall is also the index which we should carry to.
                 while(carry != 0 && usableSmall < length) {
-                    ScalarUnit temp = byte[usableSmall] + 1;
+                    MPUnit temp = byte[usableSmall] + 1;
                     byte[usableSmall] = temp;
                     carry = temp < carry;
                     ++usableSmall;
@@ -184,7 +184,7 @@ namespace Physica::Core {
             if(carry) {
                 ++length;
                 ++power;
-                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
@@ -200,7 +200,7 @@ namespace Physica::Core {
             return Scalar<MultiPrecision, true>(s1);
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = addWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -226,15 +226,15 @@ namespace Physica::Core {
                 int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
                 length = length > GlobalPrecision
                          ? GlobalPrecision : length;
-                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+                auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
                 /* Init byte */ {
                     const auto copySize = bigSize > length ? length : bigSize;
                     const auto clearSize = length - copySize;
-                    memset(byte, 0, clearSize * sizeof(ScalarUnit));
-                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
+                    memset(byte, 0, clearSize * sizeof(MPUnit));
+                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(MPUnit));
                 }
                 bool carry;
-                ScalarUnit a;
+                MPUnit a;
                 /* Sub and carry */ {
                     //usableSmall is the part whose sub result will fall in GlobalPrecision.
                     int usableSmall = small->power - (big->power - GlobalPrecision);
@@ -246,7 +246,7 @@ namespace Physica::Core {
                     carry = subArrByArrEq(byte + smallEnd - usableSmall
                             , small->byte + smallSize - usableSmall, usableSmall);
                     //usableSmall is also the index which we should carry to.
-                    ScalarUnit temp1, temp2;
+                    MPUnit temp1, temp2;
                     while(carry != 0 && smallEnd < length) {
                         temp1 = byte[smallEnd];
                         temp2 = temp1 - 1;
@@ -270,7 +270,7 @@ namespace Physica::Core {
             }
         }
         else {
-            Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
+            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
                 auto result = addWithError(shallow_copy, s2);
                 result.toOpposite();
@@ -279,7 +279,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -297,7 +297,7 @@ namespace Physica::Core {
             return Scalar(s1);
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                Scalar shallow_copy(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = addNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -323,15 +323,15 @@ namespace Physica::Core {
                 int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
                 length = length > GlobalPrecision
                          ? GlobalPrecision : length;
-                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+                auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
                 /* Init byte */ {
                     const auto copySize = bigSize > length ? length : bigSize;
                     const auto clearSize = length - copySize;
-                    memset(byte, 0, clearSize * sizeof(ScalarUnit));
-                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(ScalarUnit));
+                    memset(byte, 0, clearSize * sizeof(MPUnit));
+                    memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(MPUnit));
                 }
                 bool carry;
-                ScalarUnit a;
+                MPUnit a;
                 /* Sub and carry */ {
                     //usableSmall is the part whose sub result will fall in GlobalPrecision.
                     int usableSmall = small->power - (big->power - GlobalPrecision);
@@ -342,7 +342,7 @@ namespace Physica::Core {
                     carry = subArrByArrEq(byte + smallEnd - usableSmall
                             , small->byte + smallSize - usableSmall, usableSmall);
                     //usableSmall is also the index which we should carry to.
-                    ScalarUnit temp1, temp2;
+                    MPUnit temp1, temp2;
                     while(carry != 0 && smallEnd < length) {
                         temp1 = byte[smallEnd];
                         temp2 = temp1 - 1;
@@ -366,7 +366,7 @@ namespace Physica::Core {
             }
         }
         else {
-            Scalar shallow_copy(const_cast<ScalarUnit*>(s1.byte), -s1.length, s1.power);
+            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
                 Scalar result = addNoError(shallow_copy, s2);
                 result.toOpposite();
@@ -375,7 +375,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<ScalarUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = subNoError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -396,7 +396,7 @@ namespace Physica::Core {
             const int size2 = s2.getSize();
             //Estimate the ed of result first. we will calculate it accurately later.
             auto length = size1 + size2;
-            auto byte = reinterpret_cast<ScalarUnit*>(calloc(length, sizeof(ScalarUnit)));
+            auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
             for (int i = 0; i < size1; ++i)
                 byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
             ///////////////////////////////////////Get byte, length and power//////////////////////////;
@@ -404,7 +404,7 @@ namespace Physica::Core {
             if (byte[length - 1] == 0) {
                 --length;
                 --power;
-                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
             return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length, power);
@@ -422,7 +422,7 @@ namespace Physica::Core {
             const int size2 = s2.getSize();
             //Estimate the ed of result first. we will calculate it accurately later.
             auto length = size1 + size2;
-            auto byte = reinterpret_cast<ScalarUnit*>(calloc(length, sizeof(ScalarUnit)));
+            auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
             for (int i = 0; i < size1; ++i)
                 byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
             ///////////////////////////////////////Get byte, length and power//////////////////////////;
@@ -430,7 +430,7 @@ namespace Physica::Core {
             if (byte[length - 1] == 0) {
                 --length;
                 --power;
-                byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
             }
             ////////////////////////////////////Out put////////////////////////////////////////
             return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length, power);
@@ -448,15 +448,15 @@ namespace Physica::Core {
                 //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;
                 auto s1_blank = arr1_len - s1_size;
-                auto arr1 = new ScalarUnit[arr1_len];
-                memcpy(arr1 + s1_blank, s1.byte, s1_size * sizeof(ScalarUnit));
-                memset(arr1, 0, s1_blank * sizeof(ScalarUnit));
+                auto arr1 = new MPUnit[arr1_len];
+                memcpy(arr1 + s1_blank, s1.byte, s1_size * sizeof(MPUnit));
+                memset(arr1, 0, s1_blank * sizeof(MPUnit));
                 //Size of arr2 is arranged 1 less than arr1.
                 auto arr2_len = arr1_len - 1;
                 auto s2_blank = arr2_len - s2_size;
-                auto arr2 = new ScalarUnit[arr2_len];
-                memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(ScalarUnit));
-                memset(arr2, 0, s2_blank * sizeof(ScalarUnit));
+                auto arr2 = new MPUnit[arr2_len];
+                memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(MPUnit));
+                memset(arr2, 0, s2_blank * sizeof(MPUnit));
                 /*
                  * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
                  * to meet the acquirement of the function divArrByFullArrWith1Word().
@@ -471,12 +471,12 @@ namespace Physica::Core {
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
                 int length = GlobalPrecision;
-                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+                auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
 
                 for(int i = length - 1; i >= 0; --i) {
                     byte[i] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
                     arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[i]);
-                    byteLeftShiftEq(arr1, arr1_len, ScalarUnitWidth);
+                    byteLeftShiftEq(arr1, arr1_len, MPUnitWidth);
                 }
                 delete[] arr1;
                 delete[] arr2;
@@ -489,7 +489,7 @@ namespace Physica::Core {
                 return Scalar<MultiPrecision, true>(s1);
         }
         else
-            return Scalar<MultiPrecision, true>(static_cast<SignedScalarUnit>(0));
+            return Scalar<MultiPrecision, true>(static_cast<SignedMPUnit>(0));
     }
 
     inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::divNoError(
@@ -503,15 +503,15 @@ namespace Physica::Core {
                 //Add one to arr1_length to avoid precision loss during right shift.
                 auto arr1_len = std::max(s1_size, s2_size) + 1;
                 auto s1_blank = arr1_len - s1_size;
-                auto arr1 = new ScalarUnit[arr1_len];
-                memcpy(arr1 + s1_blank, s1.byte, s1_size * sizeof(ScalarUnit));
-                memset(arr1, 0, s1_blank * sizeof(ScalarUnit));
+                auto arr1 = new MPUnit[arr1_len];
+                memcpy(arr1 + s1_blank, s1.byte, s1_size * sizeof(MPUnit));
+                memset(arr1, 0, s1_blank * sizeof(MPUnit));
                 //Size of arr2 is arranged 1 less than arr1.
                 auto arr2_len = arr1_len - 1;
                 auto s2_blank = arr2_len - s2_size;
-                auto arr2 = new ScalarUnit[arr2_len];
-                memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(ScalarUnit));
-                memset(arr2, 0, s2_blank * sizeof(ScalarUnit));
+                auto arr2 = new MPUnit[arr2_len];
+                memcpy(arr2 + s2_blank, s2.byte, s2_size * sizeof(MPUnit));
+                memset(arr2, 0, s2_blank * sizeof(MPUnit));
                 /*
                  * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
                  * to meet the acquirement of the function divArrByFullArrWith1Word().
@@ -526,12 +526,12 @@ namespace Physica::Core {
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
                 int length = GlobalPrecision;
-                auto byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+                auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
 
                 for(int i = length - 1; i >= 0; --i) {
                     byte[i] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
                     arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[i]);
-                    byteLeftShiftEq(arr1, arr1_len, ScalarUnitWidth);
+                    byteLeftShiftEq(arr1, arr1_len, MPUnitWidth);
                 }
                 delete[] arr1;
                 delete[] arr2;
@@ -543,7 +543,7 @@ namespace Physica::Core {
                 return Scalar<MultiPrecision, false>(s1);
         }
         else
-            return Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(0));
+            return Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(0));
     }
     /*!
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
@@ -557,8 +557,8 @@ namespace Physica::Core {
         if(size > GlobalPrecision) {
             result = true;
             int cutFrom = size - GlobalPrecision;
-            auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(GlobalPrecision * sizeof(ScalarUnit)));
-            memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(ScalarUnit));
+            auto new_byte = reinterpret_cast<MPUnit*>(malloc(GlobalPrecision * sizeof(MPUnit)));
+            memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(MPUnit));
             free(s.byte);
             s.byte = new_byte;
             s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
@@ -575,8 +575,8 @@ namespace Physica::Core {
         if(size > GlobalPrecision) {
             result = true;
             int cutFrom = size - GlobalPrecision;
-            auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(GlobalPrecision * sizeof(ScalarUnit)));
-            memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(ScalarUnit));
+            auto new_byte = reinterpret_cast<MPUnit*>(malloc(GlobalPrecision * sizeof(MPUnit)));
+            memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(MPUnit));
             free(s.byte);
             s.byte = new_byte;
             s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
@@ -595,7 +595,7 @@ namespace Physica::Core {
 
         if(id != size) {
             int shorten = size - id;
-            s.byte = reinterpret_cast<ScalarUnit*>(realloc(s.byte, id * sizeof(ScalarUnit)));
+            s.byte = reinterpret_cast<MPUnit*>(realloc(s.byte, id * sizeof(MPUnit)));
             s.length = s.length > 0 ? id : -id;
             auto temp = s.power;
             s.power = s.byte[id - 1] != 0 ? (temp - shorten) : 0;

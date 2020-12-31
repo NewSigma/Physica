@@ -2,7 +2,7 @@
  * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -40,7 +40,7 @@ namespace Physica::Core {
             }
         }
 
-        Scalar result = Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(1));
+        Scalar result = Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(1));
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
             result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
@@ -68,7 +68,7 @@ namespace Physica::Core {
             }
         }
 
-        Scalar result = Scalar<MultiPrecision, true>(static_cast<SignedScalarUnit>(1));
+        Scalar result = Scalar<MultiPrecision, true>(static_cast<SignedMPUnit>(1));
         //3.33 is the big approximate value of ln(10)/ln(2)
         for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
             result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
@@ -92,14 +92,14 @@ namespace Physica::Core {
     Scalar<MultiPrecision, false> ln(const Scalar<MultiPrecision, false>& s) {
         if(!s.isPositive())
             qFatal("Can not resolve the logarithm of zero or a negative value.");
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(0));
+        Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
         auto temp_1 = Scalar<MultiPrecision, false>::subNoError(s, _1)
                       / Scalar<MultiPrecision, false>::addNoError(s, _1);
         Scalar<MultiPrecision, false> copy_temp_1(temp_1);
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(1));
 
         while(true) {
             //Calculate one term of the taylor series.
@@ -124,14 +124,14 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> ln(const Scalar<MultiPrecision, true>& s) {
         if(!s.isPositive())
             qFatal("Can not resolve the logarithm of zero or a negative value.");
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(0));
+        Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
         auto temp_1 = Scalar<MultiPrecision, false>::subWithError(s, _1)
                       / Scalar<MultiPrecision, false>::addNoError(s, _1);
         Scalar<MultiPrecision, true> copy_temp_1(temp_1);
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(1));
 
         temp_1.toUnitA();
         copy_temp_1.toUnitA();
@@ -213,13 +213,13 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> cos(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(1));
         if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, false> square_n = square(s);
         Scalar<MultiPrecision, false> temp_1(square_n);
-        Scalar<MultiPrecision, false> temp_2(static_cast<SignedScalarUnit>(2));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, false> temp_2(static_cast<SignedMPUnit>(2));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(2));
         bool changeSign = true;
 
         while(true) {
@@ -247,13 +247,13 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> cos(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(1));
         if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, true> square_n = square(s);
         Scalar<MultiPrecision, true> temp_1(square_n);
-        Scalar<MultiPrecision, true> temp_2(static_cast<SignedScalarUnit>(2));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, true> temp_2(static_cast<SignedMPUnit>(2));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(2));
         bool changeSign = true;
 
         while(true) {
@@ -281,13 +281,13 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> sin(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(0));
+        Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, false> square_s = square(s);
         Scalar<MultiPrecision, false> temp_1(s);
-        Scalar<MultiPrecision, false> temp_2(static_cast<SignedScalarUnit>(1));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, false> temp_2(static_cast<SignedMPUnit>(1));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(1));
         bool changeSign = false;
 
         while(true) {
@@ -315,13 +315,13 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> sin(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(0));
+        Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._0)
             return result;
         Scalar<MultiPrecision, true> square_s = square(s);
         Scalar<MultiPrecision, true> temp_1(s);
-        Scalar<MultiPrecision, true> temp_2(static_cast<SignedScalarUnit>(1));
-        Scalar<MultiPrecision, false> rank(static_cast<SignedScalarUnit>(1));
+        Scalar<MultiPrecision, true> temp_2(static_cast<SignedMPUnit>(1));
+        Scalar<MultiPrecision, false> rank(static_cast<SignedMPUnit>(1));
         bool changeSign = false;
 
         while(true) {
@@ -447,7 +447,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> sech(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(2));
         Scalar<MultiPrecision, false> temp = exp(s);
         temp += reciprocal(temp);
         result /= temp;
@@ -456,7 +456,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> sech(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(2));
         Scalar<MultiPrecision, true> temp = exp(s);
         temp += reciprocal(temp);
         result /= temp;
@@ -465,7 +465,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> csch(const Scalar<MultiPrecision, false>& s) {
-        Scalar<MultiPrecision, false> result(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(2));
         Scalar<MultiPrecision, false> temp = exp(s);
         temp -= reciprocal(temp);
         result /= temp;
@@ -474,7 +474,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> csch(const Scalar<MultiPrecision, true>& s) {
-        Scalar<MultiPrecision, true> result(static_cast<SignedScalarUnit>(2));
+        Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(2));
         Scalar<MultiPrecision, true> temp = exp(s);
         temp -= reciprocal(temp);
         result /= temp;

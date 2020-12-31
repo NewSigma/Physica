@@ -154,7 +154,7 @@ namespace Physica::Core {
         Vector<> copyTarget(std::move(target));
         //Construct the auxiliary problem.
         target = Vector<>::zeroVector(column + 1);
-        target[column] = MultiScalar((SignedScalarUnit)-1);
+        target[column] = MultiScalar((SignedMPUnit)-1);
         for(size_t i = 0; i < row; ++i)
             data[i] << MultiScalar::getOne();
         pivot(minimumIndex, column - 1);

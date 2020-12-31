@@ -35,21 +35,21 @@ namespace Physica::Core {
         const Integer* __restrict largeInt = i1.length > i2.length ? &i1 : &i2;
         const Integer* __restrict smallInt = i1.length > i2.length ? &i2 : &i1;
         int length = largeInt->length;
-        auto* __restrict byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
-        memcpy(byte, largeInt->byte, length * sizeof(ScalarUnit));
+        auto* __restrict byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+        memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
 
         bool carry = addArrWithArrEq(smallInt->byte, byte, smallInt->length);
         //usableSmall is the index that we will add carry to.
         int carryToIndex = smallInt->length;
         while (carry != 0 && carryToIndex < length) {
-            ScalarUnit temp = byte[carryToIndex] + 1;
+            MPUnit temp = byte[carryToIndex] + 1;
             byte[carryToIndex] = temp;
             carry = temp < carry;
             ++carryToIndex;
         }
         if (carry) {
             ++length;
-            byte = reinterpret_cast<ScalarUnit*>(realloc(byte, length * sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
             byte[length - 1] = 1;
         }
         return Integer(byte, length);
@@ -67,15 +67,15 @@ namespace Physica::Core {
             std::swap(largeInt, smallInt);
         }
         int length = largeInt->length;
-        auto* __restrict byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
-        memcpy(byte, largeInt->byte, length * sizeof(ScalarUnit));
+        auto* __restrict byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+        memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
 
         bool carry = subArrByArrEq(byte, smallInt->byte, smallInt->length);
         int carryToIndex = smallInt->length;
         while(carry != 0) {
             assert(carryToIndex < length);
-            ScalarUnit temp1 = byte[carryToIndex];
-            ScalarUnit temp2 = temp1 - 1;
+            MPUnit temp1 = byte[carryToIndex];
+            MPUnit temp2 = temp1 - 1;
             byte[carryToIndex] = temp2;
             carry = temp1 < temp2;
             ++carryToIndex;

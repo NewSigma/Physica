@@ -23,10 +23,10 @@ namespace Physica::Core {
     //!Compute a ^ unit.
     template<bool errorTrack>
     inline Scalar<MultiPrecision, errorTrack> powWord(
-            const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
+            const Scalar<MultiPrecision, errorTrack>& a, MPUnit unit) {
         Scalar<MultiPrecision, errorTrack> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
-        for(unsigned int j = 0; j < ScalarUnitWidth - lastUnitBits; ++j) {
+        for(unsigned int j = 0; j < MPUnitWidth - lastUnitBits; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
                 result *= a;
@@ -37,7 +37,7 @@ namespace Physica::Core {
     template<bool errorTrack>
     //!Compute a ^ unit, the highest bit of unit must be set.
     inline Scalar<MultiPrecision, errorTrack> powFullWord(
-            const Scalar<MultiPrecision, errorTrack>& a, ScalarUnit unit) {
+            const Scalar<MultiPrecision, errorTrack>& a, MPUnit unit) {
         Scalar<MultiPrecision, errorTrack> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);

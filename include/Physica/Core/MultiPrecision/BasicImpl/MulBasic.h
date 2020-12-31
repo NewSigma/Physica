@@ -2,7 +2,7 @@
  * Copyright 2019 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -26,9 +26,9 @@ namespace Physica::Core {
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
-    inline ScalarUnit mulWordByWordHigh(ScalarUnit n1, ScalarUnit n2) {
+    inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
     #if UseASM
-        ScalarUnit result;
+        MPUnit result;
         #ifdef PHYSICA_64BIT
             asm (
                     "mulq %2\n\t"
@@ -46,9 +46,9 @@ namespace Physica::Core {
         #endif
         return result;
     #else
-        unsigned long n1_low = n1 & ScalarUnitLowerMask;
+        unsigned long n1_low = n1 & MPUnitLowerMask;
         unsigned long n1_high = n1 >> (64U / 2U);
-        unsigned long n2_low = n2 & ScalarUnitLowerMask;
+        unsigned long n2_low = n2 & MPUnitLowerMask;
         unsigned long n2_high = n2 >> (64U / 2U);
 
         auto ll = n1_low * n2_low;
@@ -67,7 +67,7 @@ namespace Physica::Core {
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
-    inline void mulWordByWord(ScalarUnit& high, ScalarUnit& low, ScalarUnit n1, ScalarUnit n2) {
+    inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
     #if UseASM
         #ifdef PHYSICA_64BIT
             asm (
@@ -83,30 +83,30 @@ namespace Physica::Core {
             );
         #endif
     #else
-        ScalarUnit n1_low = n1 & ScalarUnitLowerMask;
-        ScalarUnit n1_high = n1 >> (ScalarUnitWidth / 2U);
-        ScalarUnit n2_low = n2 & ScalarUnitLowerMask;
-        ScalarUnit n2_high = n2 >> (ScalarUnitWidth / 2U);
+        MPUnit n1_low = n1 & MPUnitLowerMask;
+        MPUnit n1_high = n1 >> (MPUnitWidth / 2U);
+        MPUnit n2_low = n2 & MPUnitLowerMask;
+        MPUnit n2_high = n2 >> (MPUnitWidth / 2U);
 
         auto ll = n1_low * n2_low;
         auto lh = n1_low * n2_high;
         auto hl = n1_high * n2_low;
         auto hh = n1_high * n2_high;
 
-        lh += ll >> (ScalarUnitWidth / 2U);
+        lh += ll >> (MPUnitWidth / 2U);
         lh += hl;
-        hh += static_cast<ScalarUnit>(lh < hl) << (ScalarUnitWidth / 2U);
-        high = hh + (lh >> (ScalarUnitWidth / 2U));
-        low = (lh << (ScalarUnitWidth / 2U)) + (ll & ScalarUnitLowerMask);
+        hh += static_cast<MPUnit>(lh < hl) << (MPUnitWidth / 2U);
+        high = hh + (lh >> (MPUnitWidth / 2U));
+        low = (lh << (MPUnitWidth / 2U)) + (ll & MPUnitLowerMask);
     #endif
     }
     /*!
      * Multiply the array @param arr with @param n. Write the result to array @param result.
      * Length of result should at least as long as arr.
      */
-    inline ScalarUnit mulArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
-            , size_t length, ScalarUnit n) {
-        ScalarUnit carry = 0, high, low;
+    inline MPUnit mulArrByWord(MPUnit* __restrict result, const MPUnit* __restrict arr
+            , size_t length, MPUnit n) {
+        MPUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low += carry;
@@ -119,9 +119,9 @@ namespace Physica::Core {
      * Multiply the array @param arr with @param n. Add the result to array @param result.
      * Length of result should at least as long as arr.
      */
-    inline ScalarUnit mulAddArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr
-            , size_t length, ScalarUnit n) {
-        ScalarUnit carry = 0, high, low;
+    inline MPUnit mulAddArrByWord(MPUnit* __restrict result, const MPUnit* __restrict arr
+            , size_t length, MPUnit n) {
+        MPUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low += carry;
@@ -135,8 +135,8 @@ namespace Physica::Core {
      * Multiply the array @param arr with @param n. Subtract the result from array @param result.
      * Length of result should at least as long as arr.
      */
-    inline ScalarUnit mulSubArrByWord(ScalarUnit* __restrict result, const ScalarUnit* __restrict arr, size_t length, ScalarUnit n) {
-        ScalarUnit carry = 0, high, low;
+    inline MPUnit mulSubArrByWord(MPUnit* __restrict result, const MPUnit* __restrict arr, size_t length, MPUnit n) {
+        MPUnit carry = 0, high, low;
         for(size_t i = 0; i < length; ++i) {
             mulWordByWord(high, low, arr[i], n);
             low = result[i] - low;

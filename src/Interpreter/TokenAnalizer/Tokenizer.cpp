@@ -143,7 +143,7 @@ void Tokenizer::readNum() {
     NumBufferState state = NumStart;
     Scalar<MultiPrecision, false> num(BasicConst::getInstance()._0);
     Scalar exp(BasicConst::getInstance()._0);
-    SignedScalarUnit power = 0;
+    SignedMPUnit power = 0;
     bool isExpPositive = true;
     while(go_on) {
         switch(state) {
@@ -186,7 +186,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance()._10;
-                        num += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        num += MultiScalar(static_cast<SignedMPUnit>(*str - '0'));
                         ++str;
                         break;
                     case '.':
@@ -204,7 +204,7 @@ void Tokenizer::readNum() {
                 switch(*str) {
                     case '0' ... '9':
                         num *= BasicConst::getInstance()._10;
-                        num += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        num += MultiScalar(static_cast<SignedMPUnit>(*str - '0'));
                         --power;
                         ++str;
                         break;
@@ -225,7 +225,7 @@ void Tokenizer::readNum() {
                         ++str;
                         break;
                     case '1' ... '9':
-                        exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        exp += MultiScalar(static_cast<SignedMPUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -245,7 +245,7 @@ void Tokenizer::readNum() {
                         break;
                     case '1' ... '9':
                         exp *= BasicConst::getInstance()._10;
-                        exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
+                        exp += MultiScalar(static_cast<SignedMPUnit>(*str - '0'));
                         state = Exp;
                         ++str;
                         break;
@@ -257,7 +257,7 @@ void Tokenizer::readNum() {
                 stoppable = true;
                 if(isdigit(*str)) {
                     exp *= BasicConst::getInstance()._10;
-                    exp += MultiScalar(static_cast<SignedScalarUnit>(*str - '0'));
+                    exp += MultiScalar(static_cast<SignedMPUnit>(*str - '0'));
                     ++str;
                 }
                 else

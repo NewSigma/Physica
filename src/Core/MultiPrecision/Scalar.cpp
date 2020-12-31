@@ -25,7 +25,7 @@ namespace Physica::Core {
             : byte(nullptr), length(0), power(0) {}
 
     Scalar<MultiPrecision, false>::Scalar(int length_, int power_)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length_) * sizeof(ScalarUnit))))
+            : byte(reinterpret_cast<MPUnit*>(malloc(abs(length_) * sizeof(MPUnit))))
             , length(length_), power(power_) {
         /*
          * Length of scalar must not equal to INT_MIN or -length will make no sense.
@@ -34,9 +34,9 @@ namespace Physica::Core {
     }
 
     Scalar<MultiPrecision, false>::Scalar(const Scalar<MultiPrecision, false>& s)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(s.getSize() * sizeof(ScalarUnit))))
+            : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
             , length(s.length), power(s.power) {
-        memcpy(byte, s.byte, getSize() * sizeof(ScalarUnit));
+        memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
     }
 
     Scalar<MultiPrecision, false>::Scalar(Scalar<MultiPrecision, false>&& s) noexcept
@@ -44,17 +44,17 @@ namespace Physica::Core {
         s.byte = nullptr;
     }
 
-    Scalar<MultiPrecision, false>::Scalar(int i) : Scalar(static_cast<SignedScalarUnit>(i)) {}
+    Scalar<MultiPrecision, false>::Scalar(int i) : Scalar(static_cast<SignedMPUnit>(i)) {}
 
-    Scalar<MultiPrecision, false>::Scalar(SignedScalarUnit unit)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit))))
+    Scalar<MultiPrecision, false>::Scalar(SignedMPUnit unit)
+            : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(unit > 0 ? 1 : -1), power(0) {
         byte[0] = unit > 0 ? unit : -unit;
     }
 
     Scalar<MultiPrecision, false>::Scalar(double d) {
         if(d == 0) {
-            byte = reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
             length = 1;
             byte[0] = power = 0;
             return;
@@ -69,54 +69,54 @@ namespace Physica::Core {
     #ifdef PHYSICA_64BIT
         if(remainder < 52) {
             length = 2;
-            byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
             //Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
             if(remainder <= 20) {
-                byte[1] += static_cast<ScalarUnit>(extract.high) >> (20 - remainder);
-                byte[0] = static_cast<ScalarUnit>(extract.high) << (44 + remainder);
-                byte[0] += static_cast<ScalarUnit>(extract.low) << (32 - (20 - remainder));
+                byte[1] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+                byte[0] = static_cast<MPUnit>(extract.high) << (44 + remainder);
+                byte[0] += static_cast<MPUnit>(extract.low) << (32 - (20 - remainder));
             }
             else {
-                byte[1] += static_cast<ScalarUnit>(extract.high) << (remainder - 20);
-                byte[1] += static_cast<ScalarUnit>(extract.low) >> (32 - (remainder - 20));
-                byte[0] = static_cast<ScalarUnit>(extract.low) << (32 + (remainder - 20));
+                byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
+                byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
+                byte[0] = static_cast<MPUnit>(extract.low) << (32 + (remainder - 20));
             }
         }
         else {
             length = 1;
-            byte = reinterpret_cast<ScalarUnit*>(malloc(sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
             //Hidden bit
             byte[0] = 1;
             byte[0] <<= 20U;
-            byte[0] += static_cast<ScalarUnit>(extract.high);
+            byte[0] += static_cast<MPUnit>(extract.high);
             byte[0] <<= 32U;
-            byte[0] += static_cast<ScalarUnit>(extract.low);
+            byte[0] += static_cast<MPUnit>(extract.low);
             byte[0] <<= remainder - 52;
         }
     #endif
     #ifdef PHYSICA_32BIT
         if(remainder < 20) {
             length = 3;
-            byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
             //Hidden bit
             byte[2] = 1;
             byte[2] <<= remainder;
-            byte[2] += static_cast<ScalarUnit>(extract.high) >> (20 - remainder);
-            byte[1] = static_cast<ScalarUnit>(extract.high) << (32 - (20 - remainder));
-            byte[1] +=  static_cast<ScalarUnit>(extract.low) >> (20 - remainder);
-            byte[0] = static_cast<ScalarUnit>(extract.low) << remainder;
+            byte[2] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+            byte[1] = static_cast<MPUnit>(extract.high) << (32 - (20 - remainder));
+            byte[1] +=  static_cast<MPUnit>(extract.low) >> (20 - remainder);
+            byte[0] = static_cast<MPUnit>(extract.low) << remainder;
         }
         else {
             length = 2;
-            byte = reinterpret_cast<ScalarUnit*>(malloc(length * sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
             //Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
-            byte[1] += static_cast<ScalarUnit>(extract.high) << (remainder - 20);
-            byte[1] += static_cast<ScalarUnit>(extract.low) >> (32 - (remainder - 20));
-            byte[0] = static_cast<ScalarUnit>(extract.low) << (remainder - 20);
+            byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
+            byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
+            byte[0] = static_cast<MPUnit>(extract.low) << (remainder - 20);
         }
     #endif
         if(extract.sign)
@@ -151,8 +151,8 @@ namespace Physica::Core {
         length = s.length;
         int size = getSize();
         this->~Scalar();
-        byte = reinterpret_cast<ScalarUnit*>(malloc(size * sizeof(ScalarUnit)));
-        memcpy(byte, s.byte, size * sizeof(ScalarUnit));
+        byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
+        memcpy(byte, s.byte, size * sizeof(MPUnit));
         power = s.power;
         return *this;
     }
@@ -175,7 +175,7 @@ namespace Physica::Core {
 
         const auto zeroCount = countLeadingZeros(byte[getSize() - 1]);
         //Using long to avoid overflow.
-        const long exp = power * __WORDSIZE + static_cast<long>(ScalarUnitWidth - zeroCount) - 1 + 1023;
+        const long exp = power * __WORDSIZE + static_cast<long>(MPUnitWidth - zeroCount) - 1 + 1023;
         if(exp >= 2047) {
             extract.high = extract.low = 0;
             extract.exp = 2047;
@@ -266,9 +266,9 @@ namespace Physica::Core {
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
             Scalar copy(*this);
             copy.power += quotient;
@@ -281,11 +281,11 @@ namespace Physica::Core {
         const int size_1 = size - 1;
         for(int i = 0; i < size_1; ++i) {
             result.byte[i] |= byte[i] << remainder;
-            result.byte[i + 1] = byte[i] >> (ScalarUnitWidth - remainder);
+            result.byte[i + 1] = byte[i] >> (MPUnitWidth - remainder);
         }
         result.byte[size_1] |= byte[size_1] << remainder;
         if(carry)
-            result.byte[size] = byte[size_1] >> (ScalarUnitWidth - remainder);
+            result.byte[size] = byte[size_1] >> (MPUnitWidth - remainder);
         return result;
     }
 
@@ -295,31 +295,31 @@ namespace Physica::Core {
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
             Scalar copy(*this);
             copy.power -= quotient;
             return copy;
         }
 
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < ScalarUnitWidth;
+        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < MPUnitWidth;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
         if(carry)
             result.byte[size] = byte[size - 1] >> remainder;
 
         for(int i = size - 1; i > 0; --i) {
-            result.byte[i] = byte[i] << (ScalarUnitWidth - remainder);
+            result.byte[i] = byte[i] << (MPUnitWidth - remainder);
             result.byte[i] |= byte[i - 1] >> remainder;
         }
-        result.byte[0] = byte[0] << (ScalarUnitWidth - remainder);
+        result.byte[0] = byte[0] << (MPUnitWidth - remainder);
         return result;
     }
 
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-() const {
         Scalar result(-length, power);
-        memcpy(result.byte, byte, getSize() * sizeof(ScalarUnit));
+        memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
         return result;
     }
     /*!
@@ -432,7 +432,7 @@ namespace Physica::Core {
      */
     void Scalar<MultiPrecision, false>::toInteger() {
         if(power < 0) {
-            byte = reinterpret_cast<ScalarUnit*>(realloc(byte, sizeof(ScalarUnit)));
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, sizeof(MPUnit)));
             byte[0] = 0;
             length = 1;
             power = 0;
@@ -442,9 +442,9 @@ namespace Physica::Core {
         if(new_length >= length)
             return;
         /* Move and adjust the size */ {
-            const auto new_size = new_length * sizeof(ScalarUnit);
+            const auto new_size = new_length * sizeof(MPUnit);
             memmove(byte, byte + length - new_length, new_size); //Optimize: possible to optimize it if there is no overlapping
-            byte = reinterpret_cast<ScalarUnit*>(realloc(byte, new_size));
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, new_size));
         }
         length = static_cast<int>(new_length); //We have proved that length > temp.
     }
@@ -457,7 +457,7 @@ namespace Physica::Core {
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     Scalar<MultiPrecision, true>::Scalar() noexcept : Scalar<MultiPrecision, false>(), a(0) {}
 
-    Scalar<MultiPrecision, true>::Scalar(int length_, int power_, ScalarUnit a_) noexcept
+    Scalar<MultiPrecision, true>::Scalar(int length_, int power_, MPUnit a_) noexcept
             : Scalar<MultiPrecision, false>(length_, power_), a(a_) {}
 
     Scalar<MultiPrecision, true>::Scalar(const Scalar<MultiPrecision, true>& s) : Scalar<MultiPrecision, false>(s) {
@@ -473,19 +473,19 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, false>&& s) noexcept
             : Scalar<MultiPrecision, false>(std::move(s)), a(0) {}
 
-    Scalar<MultiPrecision, true>::Scalar(int i, ScalarUnit a_)
+    Scalar<MultiPrecision, true>::Scalar(int i, MPUnit a_)
             : Scalar<MultiPrecision, false>(i), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(SignedScalarUnit unit, ScalarUnit a_)
+    Scalar<MultiPrecision, true>::Scalar(SignedMPUnit unit, MPUnit a_)
             : Scalar<MultiPrecision, false>(unit), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(double d, ScalarUnit a_)
+    Scalar<MultiPrecision, true>::Scalar(double d, MPUnit a_)
             : Scalar<MultiPrecision, false>(d), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(const char* s, ScalarUnit a_)
+    Scalar<MultiPrecision, true>::Scalar(const char* s, MPUnit a_)
             : Scalar<MultiPrecision, false>(s), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(const wchar_t* s, ScalarUnit a_)
+    Scalar<MultiPrecision, true>::Scalar(const wchar_t* s, MPUnit a_)
             : Scalar<MultiPrecision, false>(s), a(a_) {}
 
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(
@@ -586,9 +586,9 @@ namespace Physica::Core {
         if(bits < 0)
             return *this >> -bits;
         int size = Scalar<MultiPrecision, false>::getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
             Scalar copy(*this);
             copy.power += quotient;
@@ -599,17 +599,17 @@ namespace Physica::Core {
         const bool carry = countLeadingZeros(byte[size_1]) < remainder;
         const bool a_carry = countLeadingZeros(a) < remainder;
         Scalar result(length >= 0 ? (size + carry - a_carry) : -(size + carry - a_carry), power + quotient + carry,
-                      a_carry ? a >> (ScalarUnitWidth - remainder) : a << remainder); //Add 1 to a if a_carry is true to get more accurate estimation.
+                      a_carry ? a >> (MPUnitWidth - remainder) : a << remainder); //Add 1 to a if a_carry is true to get more accurate estimation.
         const auto byte_start = byte + a_carry;
         size -= a_carry;
         result.byte[0] = 0;
         for(int i = 0; i < size_1; ++i) {
             result.byte[i] |= byte_start[i] << remainder;
-            result.byte[i + 1] = byte_start[i] >> (ScalarUnitWidth - remainder);
+            result.byte[i + 1] = byte_start[i] >> (MPUnitWidth - remainder);
         }
         result.byte[size_1] |= byte_start[size_1] << remainder;
         if(carry)
-            result.byte[size] = byte_start[size_1] >> (ScalarUnitWidth - remainder);
+            result.byte[size] = byte_start[size_1] >> (MPUnitWidth - remainder);
         return result;
     }
 
@@ -619,9 +619,9 @@ namespace Physica::Core {
         if(bits < 0)
             return *this << -bits;
         const int size = Scalar<MultiPrecision, false>::getSize();
-        const int quotient = bits / ScalarUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * ScalarUnitWidth;
-        //If remainder = 0, we must return directly because shifting a ScalarUnit for ScalarUnitWidth bits is a undefined behavior.
+        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
+        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
             Scalar copy(*this);
             copy.power -= quotient;
@@ -629,24 +629,24 @@ namespace Physica::Core {
         }
 
         const int size_1 = size - 1;
-        const bool carry = (countLeadingZeros(byte[size_1]) + remainder) < ScalarUnitWidth;
-        const ScalarUnit accuracy = a >> remainder;
+        const bool carry = (countLeadingZeros(byte[size_1]) + remainder) < MPUnitWidth;
+        const MPUnit accuracy = a >> remainder;
         Scalar result(length >= 0 ? (size + carry) : -(size + carry)
                 , power - quotient + carry - 1, accuracy > 0 ? accuracy : 0);
         if(carry)
             result.byte[size] = byte[size_1] >> remainder;
 
         for(int i = size_1; i > 0; --i) {
-            result.byte[i] = byte[i] << (ScalarUnitWidth - remainder);
+            result.byte[i] = byte[i] << (MPUnitWidth - remainder);
             result.byte[i] |= byte[i - 1] >> remainder;
         }
-        result.byte[0] = byte[0] << (ScalarUnitWidth - remainder);
+        result.byte[0] = byte[0] << (MPUnitWidth - remainder);
         return result;
     }
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-() const {
         Scalar result(-length, power, a);
-        memcpy(result.byte, byte, Scalar<MultiPrecision, false>::getSize() * sizeof(ScalarUnit));
+        memcpy(result.byte, byte, Scalar<MultiPrecision, false>::getSize() * sizeof(MPUnit));
         return result;
     }
     /*!
@@ -659,7 +659,7 @@ namespace Physica::Core {
             int size = Scalar<MultiPrecision, false>::getSize();
             const int copy = size;
             const int temp = power - error.getPower() - size + 1;//Equals to (power - size + 1 - error.getPower()). Exchanged the order to avoid overflow.
-            ScalarUnit copy_a = a;
+            MPUnit copy_a = a;
             if(temp <= 0) {
                 if(temp < 0) {
                     Scalar<MultiPrecision, false> error_1 = getAccuracy() + error;
@@ -684,8 +684,8 @@ namespace Physica::Core {
             }
 
             if(size < copy) {
-                auto new_byte = reinterpret_cast<ScalarUnit*>(malloc(size * sizeof(ScalarUnit)));
-                memcpy(new_byte, byte + copy - size, size * sizeof(ScalarUnit));
+                auto new_byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
+                memcpy(new_byte, byte + copy - size, size * sizeof(MPUnit));
                 this->~Scalar();
                 byte = new_byte;
             }

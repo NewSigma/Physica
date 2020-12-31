@@ -20,42 +20,35 @@
 #define PHYSICA_SCALARTYPE_H
 
 #include "Physica/SystemBits.h"
-/*!
- * This header contains some types and definitions used by Scalar.
+/**
+ * This header contains some types and definitions used by package MultiPrecision.
+ * Here MP stands for MultiPrecision.
  */
-namespace Physica::Core {
-    enum ScalarType {
-        Float,
-        Double,
-        MultiPrecision
-    };
-}
-
 #ifdef PHYSICA_64BIT
-    #define ScalarUnitWidth (64U)
+    #define MPUnitWidth (64U)
 #endif
 
 #ifdef PHYSICA_32BIT
-    #define ScalarUnitWidth (32U)
+    #define MPUnitWidth (32U)
 #endif
 
 #if PhysicaWordSize == INT_WIDTH
-    typedef unsigned int ScalarUnit;
-    typedef int SignedScalarUnit;
-    #define ScalarUnitMax UINT_MAX
+    typedef unsigned int MPUnit;
+    typedef int SignedMPUnit;
+    #define MPUnitMax UINT_MAX
 #elif PhysicaWordSize == LONG_WIDTH
-    typedef unsigned long ScalarUnit;
-    typedef long SignedScalarUnit;
-    #define ScalarUnitMax ULONG_MAX
+    typedef unsigned long MPUnit;
+    typedef long SignedMPUnit;
+    #define MPUnitMax ULONG_MAX
 #elif PhysicaWordSize == LLONG_WIDTH
-    typedef unsigned long long ScalarUnit;
-    typedef long long SignedScalarUnit;
-    #define ScalarUnitMax ULLLONG_MAX
+    typedef unsigned long long MPUnit;
+    typedef long long SignedMPUnit;
+    #define MPUnitMax ULLLONG_MAX
 #else
-    #error No marching ScalarUnit.
+    #error No marching MPUnit.
 #endif
 
-#define ScalarUnitHighestBitMask ((ScalarUnit)1 << (ScalarUnitWidth - 1))
-#define ScalarUnitLowerMask (ScalarUnitMax >> (ScalarUnitWidth / 2))
+#define MPUnitHighestBitMask ((MPUnit)1 << (MPUnitWidth - 1))
+#define MPUnitLowerMask (MPUnitMax >> (MPUnitWidth / 2))
 
 #endif

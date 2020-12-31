@@ -46,7 +46,7 @@ namespace Physica::Core::Physics {
         }
         const auto column = data.getColumn();
         /* Calc average */
-        info.average = info.total / Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(column));
+        info.average = info.total / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column));
         /* Calc standardDeviation */ {
             Scalar<MultiPrecision, false> temp(0);
             for(auto& item : data) {
@@ -54,11 +54,11 @@ namespace Physica::Core::Physics {
                 temp += square(delta);
             }
             info.standardDeviation = sqrt(temp
-                                          / Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(column - 1)));
+                                          / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column - 1)));
         }
         /* Calc averageStandardDeviation */ {
             info.averageStandardDeviation =
-                    info.standardDeviation / Scalar<MultiPrecision, false>(static_cast<SignedScalarUnit>(column));
+                    info.standardDeviation / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column));
         }
     }
 }

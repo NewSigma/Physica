@@ -2,7 +2,7 @@
  * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -24,20 +24,20 @@
 
 namespace Physica::Core {
     // operator<<
-    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteLeftShift(
-                        const ScalarUnit* __restrict byte, unsigned int length, unsigned int shift) {
-        const unsigned int quotient = shift / ScalarUnitWidth;
-        auto result = std::unique_ptr<ScalarUnit[]>(new ScalarUnit[length]);
+    [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteLeftShift(
+                        const MPUnit* __restrict byte, unsigned int length, unsigned int shift) {
+        const unsigned int quotient = shift / MPUnitWidth;
+        auto result = std::unique_ptr<MPUnit[]>(new MPUnit[length]);
         if(quotient < length) {
             if(quotient != 0) {
-                memcpy(result.get() + quotient, byte, (length - quotient) * sizeof(ScalarUnit));
-                memset(result.get(), 0, quotient * sizeof(ScalarUnit));
-                shift -= quotient * ScalarUnitWidth;
+                memcpy(result.get() + quotient, byte, (length - quotient) * sizeof(MPUnit));
+                memset(result.get(), 0, quotient * sizeof(MPUnit));
+                shift -= quotient * MPUnitWidth;
             }
             if(shift != 0) {
-                ScalarUnit carry = 0, temp;
+                MPUnit carry = 0, temp;
                 for(unsigned int i = quotient; i < length - 1; ++i) {
-                    temp = result[i] >> (ScalarUnitWidth - shift);
+                    temp = result[i] >> (MPUnitWidth - shift);
                     result[i] <<= shift;
                     result[i] |= carry;
                     carry = temp;
@@ -49,21 +49,21 @@ namespace Physica::Core {
         return result;
     }
     // operator>>
-    [[nodiscard]] inline std::unique_ptr<ScalarUnit[]> byteRightShift(
-                            const ScalarUnit* __restrict byte, size_t length, size_t shift) {
-        const unsigned int quotient = shift / ScalarUnitWidth;
-        auto result = std::unique_ptr<ScalarUnit[]>(new ScalarUnit[length]);
+    [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteRightShift(
+                            const MPUnit* __restrict byte, size_t length, size_t shift) {
+        const unsigned int quotient = shift / MPUnitWidth;
+        auto result = std::unique_ptr<MPUnit[]>(new MPUnit[length]);
         if(quotient < length) {
             auto bufferSize = length - quotient;
             if(quotient != 0) {
-                memcpy(result.get(), byte + quotient, (length - quotient) * sizeof(ScalarUnit));
-                memset(result.get() + bufferSize, 0, quotient * sizeof(ScalarUnit));
-                shift -= quotient * ScalarUnitWidth;
+                memcpy(result.get(), byte + quotient, (length - quotient) * sizeof(MPUnit));
+                memset(result.get() + bufferSize, 0, quotient * sizeof(MPUnit));
+                shift -= quotient * MPUnitWidth;
             }
             if(shift != 0) {
-                ScalarUnit carry = 0, temp;
+                MPUnit carry = 0, temp;
                 for(unsigned int i = bufferSize - 1; i > 0; --i) {
-                    temp = result[i] << (ScalarUnitWidth - shift);
+                    temp = result[i] << (MPUnitWidth - shift);
                     result[i] >>= shift;
                     result[i] |= carry;
                     carry = temp;
@@ -75,18 +75,18 @@ namespace Physica::Core {
         return result;
     }
     // operator<<=
-    inline void byteLeftShiftEq(ScalarUnit* __restrict byte, unsigned int length, unsigned int shift) {
-        const unsigned int quotient = shift / ScalarUnitWidth;
+    inline void byteLeftShiftEq(MPUnit* __restrict byte, unsigned int length, unsigned int shift) {
+        const unsigned int quotient = shift / MPUnitWidth;
         if(quotient < length) {
             if(quotient != 0) {
-                memmove(byte + quotient, byte, (length - quotient) * sizeof(ScalarUnit));
-                memset(byte, 0, quotient * sizeof(ScalarUnit));
-                shift -= quotient * ScalarUnitWidth;
+                memmove(byte + quotient, byte, (length - quotient) * sizeof(MPUnit));
+                memset(byte, 0, quotient * sizeof(MPUnit));
+                shift -= quotient * MPUnitWidth;
             }
             if(shift != 0) {
-                ScalarUnit carry = 0, temp;
+                MPUnit carry = 0, temp;
                 for(unsigned int i = quotient; i < length - 1; ++i) {
-                    temp = byte[i] >> (ScalarUnitWidth - shift);
+                    temp = byte[i] >> (MPUnitWidth - shift);
                     byte[i] <<= shift;
                     byte[i] |= carry;
                     carry = temp;
@@ -97,19 +97,19 @@ namespace Physica::Core {
         }
     }
     // operator>>=
-    inline void byteRightShiftEq(ScalarUnit* __restrict byte, size_t length, size_t shift) {
-        const unsigned int quotient = shift / ScalarUnitWidth;
+    inline void byteRightShiftEq(MPUnit* __restrict byte, size_t length, size_t shift) {
+        const unsigned int quotient = shift / MPUnitWidth;
         if(quotient < length) {
             auto bufferSize = length - quotient;
             if(quotient != 0) {
-                memmove(byte, byte + quotient, bufferSize * sizeof(ScalarUnit));
-                memset(byte + bufferSize, 0, quotient * sizeof(ScalarUnit));
-                shift -= quotient * ScalarUnitWidth;
+                memmove(byte, byte + quotient, bufferSize * sizeof(MPUnit));
+                memset(byte + bufferSize, 0, quotient * sizeof(MPUnit));
+                shift -= quotient * MPUnitWidth;
             }
             if(shift != 0) {
-                ScalarUnit carry = 0, temp;
+                MPUnit carry = 0, temp;
                 for(unsigned int i = bufferSize - 1; i > 0; --i) {
-                    temp = byte[i] << (ScalarUnitWidth - shift);
+                    temp = byte[i] << (MPUnitWidth - shift);
                     byte[i] >>= shift;
                     byte[i] |= carry;
                     carry = temp;

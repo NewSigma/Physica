@@ -26,7 +26,7 @@ namespace Physica::Core {
             : ln_2(std::log(2))
             , ln_10(std::log(10))
             , ln_2_10(std::log(2) / std::log(10))
-            , plotPoints(static_cast<SignedScalarUnit>(20)) {
+            , plotPoints(static_cast<SignedMPUnit>(20)) {
         expectedRelativeError = Scalar<MultiPrecision, false>(1, 1 - GlobalPrecision);
         expectedRelativeError.setByte(0, 1);
 
@@ -52,7 +52,7 @@ namespace Physica::Core {
     MathConst::MathConst() {
         //0.31 is the big approximation of ln(2) / ln(10)
         PI = MultiScalar(calcPI(
-                static_cast<int>(static_cast<double>(ScalarUnitWidth) * GlobalPrecision * 0.31) + 1));
+                static_cast<int>(static_cast<double>(MPUnitWidth) * GlobalPrecision * 0.31) + 1));
         E = MultiScalar(exp(BasicConst::getInstance()._1));
 
         PI_2 = MultiScalar(PI >> 1);
@@ -67,8 +67,8 @@ namespace Physica::Core {
     MultiScalar MathConst::calcPI(int precision) {
         const auto& basicConst = BasicConst::getInstance();
 
-        MultiScalar a(static_cast<SignedScalarUnit>(1));
-        MultiScalar x(static_cast<SignedScalarUnit>(1));
+        MultiScalar a(static_cast<SignedMPUnit>(1));
+        MultiScalar x(static_cast<SignedMPUnit>(1));
         MultiScalar b(reciprocal(sqrt(basicConst._2)));
         MultiScalar c(reciprocal(basicConst._4));
 

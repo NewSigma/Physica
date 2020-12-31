@@ -22,15 +22,17 @@
 #include <cmath>
 #include <qglobal.h>
 #include <ostream>
-#include "ScalarType.h"
+#include "MultiPrecisionType.h"
 
-//Forward declaration
 namespace Physica::Core {
+    enum ScalarType {
+        Float,
+        Double,
+        MultiPrecision
+    };
+    //Forward declarations
     template<ScalarType type> class ScalarAddSubExpressionHelper;
     template<ScalarType type, bool errorTrack> class ScalarAddSubExpression;
-}
-
-namespace Physica::Core {
     /*!
      * \Scalar is a advanced float type that supports multiple precision and error track,
      * which is also compatible with float and double.
@@ -41,7 +43,7 @@ namespace Physica::Core {
     class Scalar<MultiPrecision, false> {
     protected:
         //Store effective digits using little endian standard.
-        ScalarUnit* __restrict byte;
+        MPUnit* __restrict byte;
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Scalar are same. (when Scalar != 0)
@@ -63,7 +65,7 @@ namespace Physica::Core {
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(int i); //NOLINT Conversion is always available.
-        Scalar(SignedScalarUnit unit); //NOLINT Conversion is always available.
+        Scalar(SignedMPUnit unit); //NOLINT Conversion is always available.
         Scalar(double d); //NOLINT Conversion is always available.
         explicit Scalar(const char* s);
         explicit Scalar(const wchar_t* s);
@@ -72,7 +74,7 @@ namespace Physica::Core {
         Scalar& operator=(const Scalar& s);
         Scalar& operator=(Scalar&& s) noexcept;
         explicit operator double() const;
-        ScalarUnit operator[](unsigned int index) const { Q_ASSERT(index < static_cast<unsigned int>(getSize())); return byte[index]; }
+        MPUnit operator[](unsigned int index) const { Q_ASSERT(index < static_cast<unsigned int>(getSize())); return byte[index]; }
         Scalar operator*(const Scalar& s) const;
         Scalar operator/(const Scalar& s) const;
         Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
@@ -86,9 +88,9 @@ namespace Physica::Core {
         void toInteger();
         void swap(Scalar& s) noexcept;
         static inline bool matchSign(const Scalar& s1, const Scalar& s2);
-        static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
-        static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
-        static inline Scalar getTwo() { return Scalar(static_cast<SignedScalarUnit>(2)); }
+        static inline Scalar getZero() { return Scalar(static_cast<SignedMPUnit>(0)); }
+        static inline Scalar getOne() { return Scalar(static_cast<SignedMPUnit>(1)); }
+        static inline Scalar getTwo() { return Scalar(static_cast<SignedMPUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarType getType() { return MultiPrecision; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
@@ -101,7 +103,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
         /* Setters */
         void setPower(int i) noexcept { power = i; }
-        void setByte(unsigned int index, ScalarUnit value) { Q_ASSERT(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
+        void setByte(unsigned int index, MPUnit value) { Q_ASSERT(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:
@@ -112,7 +114,7 @@ namespace Physica::Core {
          * \param byte
          * byte must be allocated by malloc()
          */
-        Scalar(ScalarUnit* byte_, int length_, int power_) : byte(byte_), length(length_), power(power_) {}
+        Scalar(MPUnit* byte_, int length_, int power_) : byte(byte_), length(length_), power(power_) {}
         inline static Scalar<MultiPrecision, true> addWithError (const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision, false> addNoError (const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision, true> subWithError (const Scalar& s1, const Scalar& s2);
@@ -143,19 +145,19 @@ namespace Physica::Core {
     class Scalar<MultiPrecision, true> : public Scalar<MultiPrecision, false> {
     protected:
         //Accuracy
-        ScalarUnit a;
+        MPUnit a;
     public:
         Scalar() noexcept;
-        Scalar(int length_, int power_, ScalarUnit a_ = 0) noexcept;
+        Scalar(int length_, int power_, MPUnit a_ = 0) noexcept;
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
         Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
-        Scalar(int i, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
-        Scalar(SignedScalarUnit unit, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
-        Scalar(double d, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
-        explicit Scalar(const char* s, ScalarUnit a_ = 0);
-        explicit Scalar(const wchar_t* s, ScalarUnit a_ = 0);
+        Scalar(int i, MPUnit a_ = 0); //NOLINT Conversion is always available.
+        Scalar(SignedMPUnit unit, MPUnit a_ = 0); //NOLINT Conversion is always available.
+        Scalar(double d, MPUnit a_ = 0); //NOLINT Conversion is always available.
+        explicit Scalar(const char* s, MPUnit a_ = 0);
+        explicit Scalar(const wchar_t* s, MPUnit a_ = 0);
         ~Scalar() = default;
         /* Operators */
         Scalar& operator=(const Scalar& s);
@@ -172,12 +174,12 @@ namespace Physica::Core {
         /* Helpers */
         void toInteger();
         void swap(Scalar& s) noexcept;
-        static inline Scalar getZero() { return Scalar(static_cast<SignedScalarUnit>(0)); }
-        static inline Scalar getOne() { return Scalar(static_cast<SignedScalarUnit>(1)); }
-        static inline Scalar getTwo() { return Scalar(static_cast<SignedScalarUnit>(2)); }
+        static inline Scalar getZero() { return Scalar(static_cast<SignedMPUnit>(0)); }
+        static inline Scalar getOne() { return Scalar(static_cast<SignedMPUnit>(1)); }
+        static inline Scalar getTwo() { return Scalar(static_cast<SignedMPUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
-        [[nodiscard]] ScalarUnit getA() const noexcept { return a; }
+        [[nodiscard]] MPUnit getA() const noexcept { return a; }
         [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
         [[nodiscard]] inline Scalar<MultiPrecision, false> getMaximum() const;
         [[nodiscard]] inline Scalar<MultiPrecision, false> getMinimum() const;
@@ -185,7 +187,7 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
     private:
-        Scalar(ScalarUnit* byte_, int length_, int power_, ScalarUnit a_ = 0)
+        Scalar(MPUnit* byte_, int length_, int power_, MPUnit a_ = 0)
                 : Scalar<MultiPrecision, false>(byte_, length_, power_), a(a_) {}
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */

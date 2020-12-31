@@ -2,7 +2,7 @@
  * Copyright 2020 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,9 +23,9 @@ namespace Physica::Core {
     /*!
      * \len is the length of \from. Length of \to should not less than \len. length of \result should be \len at least.
      */
-    inline ScalarUnit addArrWithArr(ScalarUnit* __restrict result
-            , const ScalarUnit* __restrict from, const ScalarUnit* __restrict to, size_t len) {
-        ScalarUnit carry = 0, from_i, temp;
+    inline MPUnit addArrWithArr(MPUnit* __restrict result
+            , const MPUnit* __restrict from, const MPUnit* __restrict to, size_t len) {
+        MPUnit carry = 0, from_i, temp;
         for(size_t i = 0; i < len; ++i) {
             from_i = from[i];
             temp = from_i + to[i];
@@ -37,8 +37,8 @@ namespace Physica::Core {
     /*!
      * \len is the length of \from. Length of \to should not less than \len.
      */
-    inline ScalarUnit addArrWithArrEq(const ScalarUnit* __restrict from, ScalarUnit* __restrict to, size_t len) {
-        ScalarUnit carry = 0, from_i, temp;
+    inline MPUnit addArrWithArrEq(const MPUnit* __restrict from, MPUnit* __restrict to, size_t len) {
+        MPUnit carry = 0, from_i, temp;
         for(size_t i = 0; i < len; ++i) {
             from_i = from[i];
             temp = from_i + to[i];

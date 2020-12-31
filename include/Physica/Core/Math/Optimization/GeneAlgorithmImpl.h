@@ -34,7 +34,7 @@ namespace Physica::Core {
         const auto& lower = range.lowerBound;
         if (mode == LinearChoose) {
             Scalar<type, false> stepLength =
-                    regionLength / MultiScalar(static_cast<SignedScalarUnit>(population));
+                    regionLength / MultiScalar(static_cast<SignedMPUnit>(population));
             Scalar<type, false> temp(lower);
             for (int i = 0; i < population; i++) {
                 points[i] = temp;
