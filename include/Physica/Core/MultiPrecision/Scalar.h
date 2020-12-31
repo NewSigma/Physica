@@ -59,7 +59,7 @@ namespace Physica::Core {
         int power;
     public:
         Scalar() noexcept;
-        Scalar(int length, int power);
+        Scalar(int length_, int power_);
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(int i); //NOLINT Conversion is always available.
@@ -146,16 +146,16 @@ namespace Physica::Core {
         ScalarUnit a;
     public:
         Scalar() noexcept;
-        Scalar(int length, int power, ScalarUnit a = 0) noexcept;
+        Scalar(int length_, int power_, ScalarUnit a_ = 0) noexcept;
         Scalar(const Scalar& s);
         Scalar(Scalar&& s) noexcept;
         Scalar(const Scalar<MultiPrecision, false>& s); //NOLINT Conversion is always available.
         Scalar(Scalar<MultiPrecision, false>&& s) noexcept; //NOLINT Conversion is always available.
-        Scalar(int i, ScalarUnit a = 0); //NOLINT Conversion is always available.
-        Scalar(SignedScalarUnit unit, ScalarUnit a = 0); //NOLINT Conversion is always available.
-        Scalar(double d, ScalarUnit a = 0); //NOLINT Conversion is always available.
-        explicit Scalar(const char* s, ScalarUnit a = 0);
-        explicit Scalar(const wchar_t* s, ScalarUnit a = 0);
+        Scalar(int i, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
+        Scalar(SignedScalarUnit unit, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
+        Scalar(double d, ScalarUnit a_ = 0); //NOLINT Conversion is always available.
+        explicit Scalar(const char* s, ScalarUnit a_ = 0);
+        explicit Scalar(const wchar_t* s, ScalarUnit a_ = 0);
         ~Scalar() = default;
         /* Operators */
         Scalar& operator=(const Scalar& s);
@@ -185,8 +185,8 @@ namespace Physica::Core {
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
     private:
-        Scalar(ScalarUnit* byte, int length, int power, ScalarUnit a = 0)
-                : Scalar<MultiPrecision, false>(byte, length, power), a(a) {}
+        Scalar(ScalarUnit* byte_, int length_, int power_, ScalarUnit a_ = 0)
+                : Scalar<MultiPrecision, false>(byte_, length_, power_), a(a_) {}
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */
         friend class Scalar<MultiPrecision, false>;
@@ -209,7 +209,7 @@ namespace Physica::Core {
         float f;
     public:
         inline Scalar();
-        inline Scalar(float f); //NOLINT Intentional implicit conversions.
+        inline Scalar(float f_); //NOLINT Intentional implicit conversions.
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
@@ -247,7 +247,7 @@ namespace Physica::Core {
         float a;
     public:
         inline Scalar();
-        inline explicit Scalar(float f, float a = 0);
+        inline explicit Scalar(float f_, float a_ = 0);
         inline Scalar(const Scalar& s);
         ~Scalar() = default;
         /* Operators */
@@ -265,7 +265,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
         /* Setters */
-        void setA(float f) { a = f; }
+        void setA(float f_) { a = f_; }
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */
@@ -278,7 +278,7 @@ namespace Physica::Core {
         double d;
     public:
         inline Scalar();
-        inline Scalar(double d); //NOLINT Intentional implicit conversions.
+        inline Scalar(double d_); //NOLINT Intentional implicit conversions.
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
@@ -316,7 +316,7 @@ namespace Physica::Core {
         double a;
     public:
         inline Scalar();
-        inline explicit Scalar(double d, double a = 0);
+        inline explicit Scalar(double d_, double a_ = 0);
         inline Scalar(const Scalar& s);
         ~Scalar() = default;
         /* Operators */
@@ -334,7 +334,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
         /* Setters */
-        void setA(double d) { a = d; }
+        void setA(double d_) { a = d_; }
         Scalar& toUnitA() noexcept { a = 1; return *this; }
         Scalar& clearA() noexcept { a = 0; return *this; }
         /* Friends */

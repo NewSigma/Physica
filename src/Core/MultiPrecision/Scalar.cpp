@@ -24,11 +24,11 @@ namespace Physica::Core {
     Scalar<MultiPrecision, false>::Scalar() noexcept
             : byte(nullptr), length(0), power(0) {}
 
-    Scalar<MultiPrecision, false>::Scalar(int length, int power)
-            : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length) * sizeof(ScalarUnit))))
-            , length(length), power(power) {
+    Scalar<MultiPrecision, false>::Scalar(int length_, int power_)
+            : byte(reinterpret_cast<ScalarUnit*>(malloc(abs(length_) * sizeof(ScalarUnit))))
+            , length(length_), power(power_) {
         /*
-         * Length of scalar must not equal to INT_MIN or -length makes no sense.
+         * Length of scalar must not equal to INT_MIN or -length will make no sense.
          */
         assert(length != INT_MIN);
     }
@@ -457,8 +457,8 @@ namespace Physica::Core {
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     Scalar<MultiPrecision, true>::Scalar() noexcept : Scalar<MultiPrecision, false>(), a(0) {}
 
-    Scalar<MultiPrecision, true>::Scalar(int length, int power, ScalarUnit a) noexcept
-            : Scalar<MultiPrecision, false>(length, power), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(int length_, int power_, ScalarUnit a_) noexcept
+            : Scalar<MultiPrecision, false>(length_, power_), a(a_) {}
 
     Scalar<MultiPrecision, true>::Scalar(const Scalar<MultiPrecision, true>& s) : Scalar<MultiPrecision, false>(s) {
         a = s.a;
@@ -473,20 +473,20 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, false>&& s) noexcept
             : Scalar<MultiPrecision, false>(std::move(s)), a(0) {}
 
-    Scalar<MultiPrecision, true>::Scalar(int i, ScalarUnit a)
-            : Scalar<MultiPrecision, false>(i), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(int i, ScalarUnit a_)
+            : Scalar<MultiPrecision, false>(i), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(SignedScalarUnit unit, ScalarUnit a)
-            : Scalar<MultiPrecision, false>(unit), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(SignedScalarUnit unit, ScalarUnit a_)
+            : Scalar<MultiPrecision, false>(unit), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(double d, ScalarUnit a)
-            : Scalar<MultiPrecision, false>(d), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(double d, ScalarUnit a_)
+            : Scalar<MultiPrecision, false>(d), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(const char* s, ScalarUnit a)
-            : Scalar<MultiPrecision, false>(s), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(const char* s, ScalarUnit a_)
+            : Scalar<MultiPrecision, false>(s), a(a_) {}
 
-    Scalar<MultiPrecision, true>::Scalar(const wchar_t* s, ScalarUnit a)
-            : Scalar<MultiPrecision, false>(s), a(a) {}
+    Scalar<MultiPrecision, true>::Scalar(const wchar_t* s, ScalarUnit a_)
+            : Scalar<MultiPrecision, false>(s), a(a_) {}
 
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(
             const Scalar<MultiPrecision, true>& s) {

@@ -191,7 +191,7 @@ namespace Physica::Core {
     ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
     inline Scalar<Float, false>::Scalar() : f(0) {}
 
-    inline Scalar<Float, false>::Scalar(float f) : f(f) {}
+    inline Scalar<Float, false>::Scalar(float f_) : f(f_) {}
 
     inline Scalar<Float, true> Scalar<Float, false>::operator*(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f * s.f, f * s.getA());
@@ -212,7 +212,7 @@ namespace Physica::Core {
     /*!
      * The abstract value of a equals to the accuracy.
      */
-    inline Scalar<Float, true>::Scalar(float f, float a) : Scalar<Float, false>(f), a(fabsf(a)) {}
+    inline Scalar<Float, true>::Scalar(float f_, float a_) : Scalar<Float, false>(f_), a(fabsf(a_)) {}
 
     inline Scalar<Float, true>::Scalar(const Scalar<Float, true>& s) : Scalar<Float, false>(s)  {
         a = s.a;
@@ -251,7 +251,7 @@ namespace Physica::Core {
     ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////
     inline Scalar<Double, false>::Scalar() : d(0) {}
 
-    inline Scalar<Double, false>::Scalar(double d) : d(d) {}
+    inline Scalar<Double, false>::Scalar(double d_) : d(d_) {}
 
     inline Scalar<Double, true> Scalar<Double, false>::operator*(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d * s.d, d * s.getA());
@@ -272,7 +272,7 @@ namespace Physica::Core {
     /*!
      * The abstract value of a equals to the accuracy.
      */
-    inline Scalar<Double, true>::Scalar(double d, double a) : Scalar<Double, false>(d), a(fabs(a)) {}
+    inline Scalar<Double, true>::Scalar(double d_, double a_) : Scalar<Double, false>(d_), a(fabs(a_)) {}
 
     inline Scalar<Double, true>::Scalar(const Scalar<Double, true>& s) : Scalar<Double, false>(s) {
         a = s.a;
