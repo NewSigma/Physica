@@ -387,54 +387,54 @@ namespace Physica::Core {
 
     inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::mulWithError(
             const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
-        if(s1 == BasicConst::getInstance()._1)
+        if (s1.isZero() || s2.isZero())
+            return 0;
+        if (s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, true>(s2);
-        else if(s2 == BasicConst::getInstance()._1)
+        if (s2 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, true>(s1);
-        else {
-            const int size1 = s1.getSize();
-            const int size2 = s2.getSize();
-            //Estimate the ed of result first. we will calculate it accurately later.
-            auto length = size1 + size2;
-            auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
-            for (int i = 0; i < size1; ++i)
-                byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
-            ///////////////////////////////////////Get byte, length and power//////////////////////////;
-            int power = s1.power + s2.power + 1;
-            if (byte[length - 1] == 0) {
-                --length;
-                --power;
-                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
-            }
-            ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length, power);
+        const int size1 = s1.getSize();
+        const int size2 = s2.getSize();
+        //Estimate the ed of result first. we will calculate it accurately later.
+        auto length = size1 + size2;
+        auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
+        for (int i = 0; i < size1; ++i)
+            byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
+        ///////////////////////////////////////Get byte, length and power//////////////////////////;
+        int power = s1.power + s2.power + 1;
+        if (byte[length - 1] == 0) {
+            --length;
+            --power;
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
         }
+        ////////////////////////////////////Out put////////////////////////////////////////
+        return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length, power);
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
     inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::mulNoError(
             const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
-        if(s1 == BasicConst::getInstance()._1)
+        if (s1.isZero() || s2.isZero())
+            return 0;
+        if (s1 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, false>(s2);
-        else if(s2 == BasicConst::getInstance()._1)
+        if (s2 == BasicConst::getInstance()._1)
             return Scalar<MultiPrecision, false>(s1);
-        else {
-            const int size1 = s1.getSize();
-            const int size2 = s2.getSize();
-            //Estimate the ed of result first. we will calculate it accurately later.
-            auto length = size1 + size2;
-            auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
-            for (int i = 0; i < size1; ++i)
-                byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
-            ///////////////////////////////////////Get byte, length and power//////////////////////////;
-            int power = s1.power + s2.power + 1;
-            if (byte[length - 1] == 0) {
-                --length;
-                --power;
-                byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
-            }
-            ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length, power);
+        const int size1 = s1.getSize();
+        const int size2 = s2.getSize();
+        //Estimate the ed of result first. we will calculate it accurately later.
+        auto length = size1 + size2;
+        auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
+        for (int i = 0; i < size1; ++i)
+            byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
+        ///////////////////////////////////////Get byte, length and power//////////////////////////;
+        int power = s1.power + s2.power + 1;
+        if (byte[length - 1] == 0) {
+            --length;
+            --power;
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
         }
+        ////////////////////////////////////Out put////////////////////////////////////////
+        return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length, power);
     }
 
     inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::divWithError(

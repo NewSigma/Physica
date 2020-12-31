@@ -19,7 +19,7 @@
 #include <random>
 #include <iostream>
 #include <Physica/PhysicaInit.h>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
 constexpr unsigned int iterateCount = 50;
@@ -174,12 +174,14 @@ constexpr const char* fromTypeToString(ScalarType type) {
             return "Double";
         case MultiPrecision:
             return "MultiPrecision";
+        default:
+            exit(EXIT_FAILURE);
     }
 }
 
 template<ScalarType type>
 inline bool isEqual(Scalar<type, false>& s, long l) {
-    return s[0] == l;
+    return s[0] == static_cast<MPUnit>(l);
 }
 
 template<>

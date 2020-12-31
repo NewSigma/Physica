@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <Physica/PhysicaInit.h>
-#include <Physica/Core/MultiPrecition/Scalar.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
 
