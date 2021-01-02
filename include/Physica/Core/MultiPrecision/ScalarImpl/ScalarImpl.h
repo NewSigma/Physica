@@ -114,12 +114,14 @@ namespace Physica::Core {
         return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
     }
 
-    inline Scalar<MultiPrecision, false>& operator++(Scalar<MultiPrecision, false>& s) {
+    template<bool errorTrack>
+    inline Scalar<MultiPrecision, errorTrack>& operator++(Scalar<MultiPrecision, errorTrack>& s) {
         s += BasicConst::getInstance()._1;
         return s;
     }
     
-    inline Scalar<MultiPrecision, false>& operator--(Scalar<MultiPrecision, false>& s) {
+    template<bool errorTrack>
+    inline Scalar<MultiPrecision, errorTrack>& operator--(Scalar<MultiPrecision, errorTrack>& s) {
         s -= BasicConst::getInstance()._1;
         return s;
     }

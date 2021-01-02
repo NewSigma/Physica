@@ -39,6 +39,10 @@ namespace Physica::Core {
         inline Rational operator*(const Rational& r) const;
         inline Rational operator/(const Rational& r) const;
         inline Rational operator-() const;
+        void operator+=(const Rational& r) { *this = *this + r; }
+        void operator-=(const Rational& r) { *this = *this - r; }
+        void operator*=(const Rational& r) { *this = *this * r; }
+        void operator/=(const Rational& r) { *this = *this / r; }
         /* Helpers */
         Rational& toOpposite() noexcept { numerator.toOpposite(); return *this; }
         Rational& toAbs() noexcept { numerator.toAbs(); return *this; }
@@ -49,5 +53,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return numerator.isNegative(); }
     };
 }
+
+#include "RationalImpl/RationalImpl.h"
 
 #endif

@@ -34,7 +34,7 @@ namespace Physica::Core {
     inline Rational Rational::operator/(const Rational& r) const {
         if (Q_UNLIKELY(r.isZero()))
             throw DivideByZeroException();
-        return return Rational(numerator * r.denominator, denominator * r.numerator)
+        return Rational(numerator * r.denominator, denominator * r.numerator);
     }
 
     inline Rational Rational::operator-() const {
