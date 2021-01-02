@@ -27,6 +27,7 @@ namespace Physica::Core {
         //Always possible integer.
         Integer denominator;
     public:
+        Rational(const Integer& i);
         Rational(const Integer& numerator_, const Integer& denominator_);
         Rational(const Rational& r);
         Rational(Rational&& r) noexcept;
@@ -48,6 +49,8 @@ namespace Physica::Core {
         Rational& toAbs() noexcept { numerator.toAbs(); return *this; }
         void swap(Rational& r) noexcept;
         /* Getters */
+        [[nodiscard]] const Integer& getNumerator() const noexcept { return numerator; }
+        [[nodiscard]] const Integer& getDenominator() const noexcept { return denominator; }
         [[nodiscard]] bool isZero() const { return numerator.isZero(); }
         [[nodiscard]] bool isPositive() const { return numerator.isPositive(); }
         [[nodiscard]] bool isNegative() const { return numerator.isNegative(); }

@@ -75,6 +75,7 @@ namespace Physica::Core {
         static inline bool matchSign(const Integer& i1, const Integer& i2);
         static bool absCompare(const Integer& i1, const Integer& i2);
         /* Getters */
+        [[nodiscard]] const MPUnit* getByte() const noexcept { return byte; }
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getSize() const noexcept { return std::abs(length); }
         [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }

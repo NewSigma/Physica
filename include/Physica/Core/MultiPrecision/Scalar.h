@@ -23,6 +23,7 @@
 #include <qglobal.h>
 #include <ostream>
 #include "MultiPrecisionType.h"
+#include "Rational.h"
 
 namespace Physica::Core {
     enum ScalarType {
@@ -67,6 +68,8 @@ namespace Physica::Core {
         Scalar(int i); //NOLINT Conversion is always available.
         Scalar(SignedMPUnit unit); //NOLINT Conversion is always available.
         Scalar(double d); //NOLINT Conversion is always available.
+        Scalar(const Integer& i);
+        Scalar(const Rational& r);
         explicit Scalar(const char* s);
         explicit Scalar(const wchar_t* s);
         ~Scalar();

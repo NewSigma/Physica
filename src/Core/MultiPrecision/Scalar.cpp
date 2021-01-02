@@ -122,6 +122,23 @@ namespace Physica::Core {
         if(extract.sign)
             length = -length;
     }
+
+    Scalar<MultiPrecision, false>::Scalar(const Integer& i)
+            : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
+            , length(i.getLength())
+            , power(i.getSize() - 1) {
+        memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
+    }
+
+    Scalar<MultiPrecision, false>::Scalar(const Rational& r) {
+        Scalar<MultiPrecision, false> numerator(r.getNumerator());
+        Scalar<MultiPrecision, false> denominator(r.getDenominator());
+        Scalar<MultiPrecision, false> result = numerator / denominator;
+        byte = result.byte;
+        result.byte = nullptr;
+        length = result.length;
+        power = result.power;
+    }
     /*!
      * Not accurate.
      */

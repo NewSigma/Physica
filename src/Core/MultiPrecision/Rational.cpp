@@ -19,6 +19,8 @@
 #include "Physica/Core/MultiPrecision/Rational.h"
 
 namespace Physica::Core {
+    Rational::Rational(const Integer& i) : numerator(i), denominator(1) {}
+    
     Rational::Rational(const Integer& numerator_, const Integer& denominator_)
                          : numerator(numerator_), denominator(denominator_) {}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef PHYSICA_INTEGERARITHMETIC_H
-#define PHYSICA_SCALARARITHMETIC_H
+#define PHYSICA_INTEGERARITHMETIC_H
 
 #include <cassert>
 #include "Physica/Core/MultiPrecision/BasicImpl/AddBasic.h"
