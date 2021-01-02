@@ -39,6 +39,10 @@ namespace Physica::Core {
         inline Rational operator*(const Rational& r) const;
         inline Rational operator/(const Rational& r) const;
         inline Rational operator-() const;
+        /* Helpers */
+        Rational& toOpposite() noexcept { numerator.toOpposite(); return *this; }
+        Rational& toAbs() noexcept { numerator.toAbs(); return *this; }
+        void swap(Rational& r) noexcept;
         /* Getters */
         [[nodiscard]] bool isZero() const { return numerator.isZero(); }
         [[nodiscard]] bool isPositive() const { return numerator.isPositive(); }

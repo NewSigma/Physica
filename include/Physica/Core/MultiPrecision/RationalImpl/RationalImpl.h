@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 namespace Physica::Core {
     inline Rational Rational::operator+(const Rational& r) const {
         return Rational(numerator * r.denominator + denominator * r.numerator, denominator * r.denominator);
@@ -37,5 +39,9 @@ namespace Physica::Core {
 
     inline Rational Rational::operator-() const {
         return Rational(-numerator, denominator);
+    }
+
+    inline void swap(Rational& r1, Rational& r2) noexcept {
+        r1.swap(r2);
     }
 }

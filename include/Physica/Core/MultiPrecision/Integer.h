@@ -57,7 +57,21 @@ namespace Physica::Core {
         bool operator==(const Integer& i) const;
         bool operator>=(const Integer& i) const { return !(*this < i); }
         bool operator<=(const Integer& i) const { return !(*this > i); }
+        void operator+=(const Integer& i) { *this = *this + i; }
+        void operator-=(const Integer& i) { *this = *this - i; }
+        void operator*=(const Integer& i) { *this = *this * i; }
+        void operator/=(const Integer& i) { *this = *this / i; }
+        void operator%=(const Integer& i) { *this = *this % i; }
+        void operator<<=(int bits) { *this = *this << bits; }
+        void operator>>=(int bits) { *this = *this >> bits; }
+        Integer& operator++();
+        Integer& operator--();
+        Integer operator++(int);
+        Integer operator--(int);
         /* Helpers */
+        Integer& toOpposite() noexcept { length = -length; return *this; }
+        Integer& toAbs() noexcept { length = getSize(); return *this; }
+        void swap(Integer& i) noexcept;
         static inline bool matchSign(const Integer& i1, const Integer& i2);
         static bool absCompare(const Integer& i1, const Integer& i2);
         /* Getters */
@@ -66,6 +80,8 @@ namespace Physica::Core {
         [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
+        [[nodiscard]] bool isOdd() const { return byte[0] & 1U; }
+        [[nodiscard]] bool isEven() const { return !(byte[0] & 1U); }
     protected:
         /**
          * Degigned for performance,

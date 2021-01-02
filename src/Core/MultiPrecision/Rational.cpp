@@ -41,4 +41,9 @@ namespace Physica::Core {
         denominator = std::move(r.denominator);
         return *this;
     }
+
+    void Rational::swap(Rational& r) noexcept {
+        numerator.swap(r.numerator);
+        denominator.swap(r.denominator);
+    }
 }

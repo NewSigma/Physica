@@ -285,6 +285,33 @@ namespace Physica::Core {
                 return false;
         return true;
     }
+
+    Integer& Integer::operator++() {
+        *this += 1;
+        return *this;
+    }
+
+    Integer& Integer::operator--() {
+        *this -= 1;
+        return *this;
+    }
+
+    Integer Integer::operator++(int) {
+        Integer temp(*this);
+        *this += 1;
+        return temp;
+    }
+
+    Integer Integer::operator--(int) {
+        Integer temp(*this);
+        *this -= 1;
+        return temp;
+    }
+
+    void Integer::swap(Integer& i) noexcept {
+        std::swap(byte, i.byte);
+        std::swap(length, i.length);
+    }
     /**
      * return true if the abstract value of i1 is larger or equal than the abstract value of i2.
      * return false if the abstract value of i1 is smaller to the abstract value of i2.

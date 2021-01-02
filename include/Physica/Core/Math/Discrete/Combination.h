@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,21 +18,11 @@
  */
 #pragma once
 
-#include "IntegerArithmetic.h"
+#include <cassert>
+#include "Physica/Core/MultiPrecision/Integer.h"
 
 namespace Physica::Core {
-    /**
-     * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
-     * This function provide a quick sign check compare to using isPositive() and isNegative().
-     */
-    inline bool Integer::matchSign(const Integer& i1, const Integer& i2) {
-        assert(!i1.isZero() && !i2.isZero());
-        return (i1.length ^ i2.length) >= 0;
-    }
+    Integer arrangement(const Integer& i1, const Integer& i2);
 
-    inline void swap(Integer& i1, Integer& i2) noexcept {
-        i1.swap(i2);
-    }
+    Integer combination(const Integer& i1, const Integer& i2);
 }
-
-#include "ElementaryFunction.h"

@@ -14,25 +14,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ * al
  */
 #pragma once
 
-#include "IntegerArithmetic.h"
-
 namespace Physica::Core {
-    /**
-     * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
-     * This function provide a quick sign check compare to using isPositive() and isNegative().
-     */
-    inline bool Integer::matchSign(const Integer& i1, const Integer& i2) {
-        assert(!i1.isZero() && !i2.isZero());
-        return (i1.length ^ i2.length) >= 0;
-    }
-
-    inline void swap(Integer& i1, Integer& i2) noexcept {
-        i1.swap(i2);
-    }
+    Integer factorial(const Integer& i);
 }
-
-#include "ElementaryFunction.h"
