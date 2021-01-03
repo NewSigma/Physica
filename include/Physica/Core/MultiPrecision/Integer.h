@@ -83,6 +83,8 @@ namespace Physica::Core {
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isOdd() const { return byte[0] & 1U; }
         [[nodiscard]] bool isEven() const { return !(byte[0] & 1U); }
+        /* Setters */
+        void setSign(bool sign) noexcept { length = sign ? length : -length; }
     protected:
         /**
          * Degigned for performance,

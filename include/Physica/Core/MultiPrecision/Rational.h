@@ -35,10 +35,10 @@ namespace Physica::Core {
         /* Operators */
         Rational& operator=(const Rational& r);
         Rational& operator=(Rational&& r) noexcept;
-        inline Rational operator+(const Rational& r) const;
-        inline Rational operator-(const Rational& r) const;
-        inline Rational operator*(const Rational& r) const;
-        inline Rational operator/(const Rational& r) const;
+        Rational operator+(const Rational& r) const;
+        Rational operator-(const Rational& r) const;
+        Rational operator*(const Rational& r) const;
+        Rational operator/(const Rational& r) const;
         inline Rational operator-() const;
         void operator+=(const Rational& r) { *this = *this + r; }
         void operator-=(const Rational& r) { *this = *this - r; }
@@ -47,6 +47,7 @@ namespace Physica::Core {
         /* Helpers */
         Rational& toOpposite() noexcept { numerator.toOpposite(); return *this; }
         Rational& toAbs() noexcept { numerator.toAbs(); return *this; }
+        void simplify();
         void swap(Rational& r) noexcept;
         /* Getters */
         [[nodiscard]] const Integer& getNumerator() const noexcept { return numerator; }

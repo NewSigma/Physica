@@ -19,24 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    inline Rational Rational::operator+(const Rational& r) const {
-        return Rational(numerator * r.denominator + denominator * r.numerator, denominator * r.denominator);
-    }
-
-    inline Rational Rational::operator-(const Rational& r) const {
-        return Rational(numerator * r.denominator - denominator * r.numerator, denominator * r.denominator);
-    }
-
-    inline Rational Rational::operator*(const Rational& r) const {
-        return Rational(numerator * r.numerator, denominator * r.denominator);
-    }
-
-    inline Rational Rational::operator/(const Rational& r) const {
-        if (Q_UNLIKELY(r.isZero()))
-            throw DivideByZeroException();
-        return Rational(numerator * r.denominator, denominator * r.numerator);
-    }
-
     inline Rational Rational::operator-() const {
         return Rational(-numerator, denominator);
     }

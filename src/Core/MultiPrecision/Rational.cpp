@@ -16,13 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include "Physica/Core/MultiPrecision/Rational.h"
+#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
     Rational::Rational(const Integer& i) : numerator(i), denominator(1) {}
     
     Rational::Rational(const Integer& numerator_, const Integer& denominator_)
-                         : numerator(numerator_), denominator(denominator_) {}
+                         : numerator(numerator_), denominator(denominator_) {
+        assert(denominator.isPositive());
+    }
 
     Rational::Rational(const Rational& r)
                          : numerator(r.numerator), denominator(r.denominator) {}
@@ -42,6 +46,51 @@ namespace Physica::Core {
         numerator = std::move(r.numerator);
         denominator = std::move(r.denominator);
         return *this;
+    }
+
+    Rational Rational::operator+(const Rational& r) const {
+        Rational result(numerator * r.denominator + denominator * r.numerator, denominator * r.denominator);
+        result.simplify();
+        return result;
+    }
+
+    Rational Rational::operator-(const Rational& r) const {
+        Rational result(numerator * r.denominator - denominator * r.numerator, denominator * r.denominator);
+        result.simplify();
+        return result;
+    }
+    /**
+     * Optimize: (a/b) * (c/d) = (ac/bd), it is not clear whether simplify between a and d
+     * (as well as between b and c) will improve the performance.
+     */
+    Rational Rational::operator*(const Rational& r) const {
+        Rational result(numerator * r.numerator, denominator * r.denominator);
+        result.simplify();
+        return result;
+    }
+    /**
+     * Optimize: refer to the Optimize above.
+     */
+    Rational Rational::operator/(const Rational& r) const {
+        if (Q_UNLIKELY(r.isZero()))
+            throw DivideByZeroException();
+        Integer numerator_ = numerator * r.denominator;
+        Integer denominator_ = denominator * r.numerator;
+        numerator_.setSign(Integer::matchSign(numerator_, denominator_));
+        denominator_.toAbs();
+        Rational result(numerator_, denominator_);
+        result.simplify();
+        return result;
+    }
+
+    void Rational::simplify() {
+        if (numerator.isZero()) {
+            denominator = 1;
+            return;
+        }
+        Integer gcd = GCD::run(numerator, denominator, GCD::Euclidean);
+        numerator /= gcd;
+        denominator /= gcd;
     }
 
     void Rational::swap(Rational& r) noexcept {
