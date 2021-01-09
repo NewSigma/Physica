@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,15 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_RECTANGULAR4P_H
-#define PHYSICA_RECTANGULAR4P_H
+#pragma once
 
 #include "Element.h"
 
 namespace Physica::Core {
-    class Rectangular4P {
-
+    template<class Scalar>
+    class Square4P : public Element<2, Scalar> {
+    public:
+        ~Square4P() = default;
+        /* Operations */
+        Scalar shapePartialS1(ShapeIndex shapeIndex, const Poing<2>& p) override final;
+        Scalar shapePartialS2(ShapeIndex shapeIndex, const Poing<2>& p) override final;
+        Matrix jacobi(const Poing<2>& p) override final;
+    protected:
+        Square4P() : Element(4) {}
     };
 }
 
-#endif
+#include "Square4PImpl.h"

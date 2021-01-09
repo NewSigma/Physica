@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,8 +26,9 @@ namespace Physica::Core {
     template<size_t dim>
     class AbstractElement {
     public:
-        static constexpr size_t dimension = 2;
+        static constexpr size_t dimension = dim;
     private:
+        //Optimize: it is known at compile time.
         size_t nodesCount;
         /*!
          * A array that stores pointers to nodes, whose length can be accessed from ElementType.
@@ -42,11 +43,11 @@ namespace Physica::Core {
         AbstractElement& operator=(const AbstractElement&) = delete;
         AbstractElement& operator=(AbstractElement&&) noexcept = delete;
     protected:
-        explicit AbstractElement(size_t nodesCount);
+        explicit AbstractElement(size_t nodesCount_);
     };
 
     template<size_t dim>
-    AbstractElement<dim>::AbstractElement(size_t nodesCount) : nodesCount(nodesCount), nodes(new Point<dim>*[nodesCount]) {}
+    AbstractElement<dim>::AbstractElement(size_t nodesCount_) : nodesCount(nodesCount_), nodes(new Point<dim>*[nodesCount]) {}
 
     template<size_t dim>
     AbstractElement<dim>::~AbstractElement() {

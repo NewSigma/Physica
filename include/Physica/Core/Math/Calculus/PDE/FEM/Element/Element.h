@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,17 +29,39 @@ namespace Physica::Core {
     template<class Scalar>
     class Element<2, Scalar> : public AbstractElement<2> {
     public:
-        //typedef Matrix<Scalar, MatrixType::ElementColumn> Matrix;
+        typedef DenseMatrix<Scalar, DenseMatrixType::ElementColumn> Matrix;
+        /**
+         * There are only 4 shape functions. This enum is designed for performance when using switch.
+         */
+        enum ShapeIndex {
+            Shape1, Shape2, Shape3, Shape4
+        }
     public:
+        explicit Element(size_t nodesCount);
         ~Element();
         /* Operations */
-        virtual Scalar determinate(const Scalar& s1, const Scalar& s2) = 0;
-        virtual Scalar shapePartialS1(size_t shapeIndex, const Scalar& s1, const Scalar& s2) = 0;
-        virtual Scalar shapePartialS2(size_t shapeIndex, const Scalar& s1, const Scalar& s2) = 0;
-        //virtual Matrix jacobi(const Scalar& s1, const Scalar& s2) = 0;
-        //virtual Matrix inverseJacobi(const Scalar& s1, const Scalar& s2) = 0;
-    protected:
-        explicit Element(size_t nodesCount);
+        //Optimize: The following functions are frequantly used. Remove the virtual if possible.
+        /**
+         * \return
+         * The determinate of jacobi matrix.
+         * \param s1
+         * Coordinate in bi-unit element.
+         * \param s2
+         * Coordinate in bi-unit element.
+         */
+        virtual Scalar determinate(const Poing<2>& p) final { return jacobi(p).inverse(); };
+        /**
+         * \return
+         * The derivative of the \param shapeIndex.th shape function with respect to \param s1 at (s1, s2).
+         */
+        virtual Scalar shapePartialS1(size_t shapeIndex, const Poing<2>& p) = 0;
+        /**
+         * \return
+         * The derivative of the \param shapeIndex.th shape function with respect to \param s2 at (s1, s2).
+         */
+        virtual Scalar shapePartialS2(size_t shapeIndex, const Poing<2>& p) = 0;
+        virtual Matrix jacobi(const Poing<2>& p) = 0;
+        virtual Matrix inverseJacobi(const Poing<2>& p) final { return jacobi(p).inverse(); }
     };
 }
 
