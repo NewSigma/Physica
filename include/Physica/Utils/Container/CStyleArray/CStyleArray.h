@@ -24,7 +24,7 @@
 #include "AbstractCStyleArray.h"
 
 namespace Physica::Utils {
-    constexpr int Dynamic = 0;
+    constexpr size_t Dynamic = 0;
     /*!
      * This class is a wrapper of of array that is allocated by malloc and whose elements is allocated by placement new.
      * This class is designed to avoid passing incorrect arguments to classes that use c-style array only.

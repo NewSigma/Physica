@@ -22,12 +22,12 @@
 #include <cstdlib>
 #include <qglobal.h>
 #include <memory>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     class MatrixChain {
-        Matrix<T, type, maxRow, maxColumn>** chain;
+        DenseMatrix<T, type, maxRow, maxColumn>** chain;
         size_t** price;
         size_t** point;
         size_t length;
@@ -35,10 +35,10 @@ namespace Physica::Core {
         explicit MatrixChain(size_t length);
         ~MatrixChain();
 
-        Matrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
-        Matrix<T, type, Utils::Dynamic, Utils::Dynamic> solve();
+        DenseMatrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
+        DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> solve();
     private:
-        Matrix<T, type, Utils::Dynamic, Utils::Dynamic> multiply(size_t from, size_t to);
+        DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> multiply(size_t from, size_t to);
     };
 }
 

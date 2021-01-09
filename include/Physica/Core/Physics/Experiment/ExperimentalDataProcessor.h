@@ -21,7 +21,7 @@
 
 #include <utility>
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 namespace Physica::Core::Physics {
     /*!
@@ -45,10 +45,10 @@ namespace Physica::Core::Physics {
          * The first row of the matrix contains the measured values.
          * The second row of the matrix contains uncertainty of the measured values.
          */
-        Matrix<Scalar<MultiPrecision, false>, MatrixType::VectorColumn, 2> data;
+        DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> data;
         ExperimentalDataInfo info;
     public:
-        inline explicit ExperimentalDataProcessor(Matrix<Scalar<MultiPrecision, false>, MatrixType::VectorColumn, 2> m);
+        inline explicit ExperimentalDataProcessor(DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> m);
         ~ExperimentalDataProcessor() = default;
         ExperimentalDataProcessor(const ExperimentalDataProcessor& processor) = default;
         ExperimentalDataProcessor(ExperimentalDataProcessor&& processor)  noexcept : data(std::move(processor.data)) {}
@@ -64,7 +64,7 @@ namespace Physica::Core::Physics {
     };
 
     inline ExperimentalDataProcessor::ExperimentalDataProcessor(
-            Matrix<Scalar<MultiPrecision, false>, MatrixType::VectorColumn, 2> m) : data(std::move(m)) {
+            DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> m) : data(std::move(m)) {
         Q_ASSERT(data.getColumn() < MPUnitMax); //Too much data is not supported.
         updateInfo();
     }

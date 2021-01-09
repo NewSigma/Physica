@@ -19,7 +19,7 @@
 #ifndef PHYSICA_LINEAREQUATIONS_H
 #define PHYSICA_LINEAREQUATIONS_H
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     /*!
@@ -38,12 +38,12 @@ namespace Physica::Core {
     /*!
      * Solve linear equations.
      */
-    template<class T = MultiScalar, MatrixType type = MatrixType::VectorColumn, size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
+    template<class T = MultiScalar, DenseMatrixType type = DenseMatrixType::VectorColumn, size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class LinearEquations : AbstractLinearEquations{
-        Matrix<T, type, maxRow, maxColumn> matrix;
+        DenseMatrix<T, type, maxRow, maxColumn> matrix;
     public:
-        explicit LinearEquations(const Matrix<T, type, maxRow, maxColumn>& m);
-        explicit LinearEquations(Matrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        explicit LinearEquations(const DenseMatrix<T, type, maxRow, maxColumn>& m);
+        explicit LinearEquations(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
         LinearEquations(const LinearEquations& l) = default;
         LinearEquations(LinearEquations&& l) noexcept;
         ~LinearEquations() = default;
@@ -53,9 +53,9 @@ namespace Physica::Core {
         /* Operations */
         void solve(LinearEquationsMethod method);
         /* Helpers */
-        [[nodiscard]] Matrix<T, type, maxRow, maxColumn>&& release() noexcept { return std::move(matrix); }
+        [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() noexcept { return std::move(matrix); }
         /* Getters */
-        [[nodiscard]] const Matrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
+        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] T& getResult(size_t index) { return matrix(index, matrix.getColumn() - 1); }
     };
 }

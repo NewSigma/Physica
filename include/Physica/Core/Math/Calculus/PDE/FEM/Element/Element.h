@@ -19,7 +19,7 @@
 #ifndef PHYSICA_ELEMENT_H
 #define PHYSICA_ELEMENT_H
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "AbstractElement.h"
 
 namespace Physica::Core {

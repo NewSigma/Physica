@@ -19,7 +19,7 @@
 #ifndef PHYSICA_LINEARPROGRAMMING_H
 #define PHYSICA_LINEARPROGRAMMING_H
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     /*!
@@ -47,7 +47,7 @@ namespace Physica::Core {
          * target[0] is the constant term, target[n] is the coefficient before the n.th variable.
          */
         Vector<> target;
-        Matrix<MultiScalar, MatrixType::VectorRow> data;
+        DenseMatrix<MultiScalar, DenseMatrixType::VectorRow> data;
         //Refactor: devide into two arrays
         size_t* order;
         LPState state;
@@ -65,7 +65,7 @@ namespace Physica::Core {
         void solve();
         /* Getters */
         [[nodiscard]] const Vector<>& getTarget() const { return target; }
-        [[nodiscard]] const Matrix<MultiScalar, MatrixType::VectorRow>& getData() const { return data; }
+        [[nodiscard]] const DenseMatrix<MultiScalar, DenseMatrixType::VectorRow>& getData() const { return data; }
         [[nodiscard]] const size_t* getOrder() const { return order; }
         [[nodiscard]] size_t getOrderLength() const { return data.getRow() + data.getColumn(); }
         [[nodiscard]] LPState getState() const { return state; }

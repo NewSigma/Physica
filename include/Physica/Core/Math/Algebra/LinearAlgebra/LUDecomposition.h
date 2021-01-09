@@ -20,16 +20,16 @@
 #define PHYSICA_LUDECOMPOSITION_H
 
 #include <cstdlib>
-#include "Matrix/Matrix.h"
+#include "Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     class LUDecomposition {
-        Matrix<T, type, maxRow, maxColumn> matrix;
+        DenseMatrix<T, type, maxRow, maxColumn> matrix;
         size_t* biasOrder;
     public:
-        explicit LUDecomposition(const Matrix<T, type, maxRow, maxColumn>& m);
-        explicit LUDecomposition(Matrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        explicit LUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m);
+        explicit LUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
         LUDecomposition(const LUDecomposition& l);
         LUDecomposition(LUDecomposition&& l) noexcept;
         ~LUDecomposition();
@@ -37,8 +37,8 @@ namespace Physica::Core {
         LUDecomposition& operator=(const LUDecomposition& l);
         LUDecomposition& operator=(LUDecomposition&& l) noexcept;
         /* Getters */
-        [[nodiscard]] Matrix<T, type, maxRow, maxColumn>&& release() { return std::move(matrix); }
-        [[nodiscard]] const Matrix<T, type, maxRow, maxColumn>& getMatrix() { return matrix; }
+        [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() { return std::move(matrix); }
+        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() { return matrix; }
         [[nodiscard]] const size_t* getOrder() { return biasOrder; }
     private:
         void decompositionColumn(size_t column);

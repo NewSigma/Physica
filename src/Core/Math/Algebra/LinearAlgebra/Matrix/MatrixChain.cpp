@@ -32,9 +32,9 @@ namespace Physica::Core {
      *
      * Reference: 算法导论 第三版 Page: 210-215
      */
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::MatrixChain(size_t length)
-            : chain(new Matrix<T, type, maxRow, maxColumn>*[length])
+            : chain(new DenseMatrix<T, type, maxRow, maxColumn>*[length])
             , length(length), price(new size_t*[length]), point(new size_t*[length - 1]) {
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
@@ -45,7 +45,7 @@ namespace Physica::Core {
         price[length_1] = new size_t[length];
     }
 
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
@@ -62,8 +62,8 @@ namespace Physica::Core {
         delete[] point;
     }
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
-    Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)
@@ -99,12 +99,12 @@ namespace Physica::Core {
         return multiply(0, length - 1);
     }
     //!Both \from and \to are included.
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
-    Matrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)
         if(from == to)
-            return Matrix<T, type, Dynamic, Dynamic>(*chain[from]);
+            return DenseMatrix<T, type, Dynamic, Dynamic>(*chain[from]);
         const auto cut_at = point[from][to];
         auto first = multiply(from, cut_at);
         auto second = multiply(cut_at + 1, to);

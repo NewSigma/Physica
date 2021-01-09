@@ -23,15 +23,15 @@
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
-    LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(const Matrix<T, type, maxRow, maxColumn>& m)
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(const DenseMatrix<T, type, maxRow, maxColumn>& m)
             : matrix(m) {}
 
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
-    LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(Matrix<T, type, maxRow, maxColumn>&& m) noexcept
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept
             : matrix(std::move(m)) {}
 
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(LinearEquations&& l) noexcept
             : matrix(std::move(l.matrix)) {
         Q_UNUSED(type)
@@ -39,7 +39,7 @@ namespace Physica::Core {
         Q_UNUSED(maxColumn)
     }
 
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>& LinearEquations<T, type, maxRow, maxColumn>::operator=(
             LinearEquations&& l) noexcept {
         Q_UNUSED(type)
@@ -60,7 +60,7 @@ namespace Physica::Core {
     * Change the bias in LU method to solve a family of equations.
     */
     //!Reference: Numerical Recipes in C++
-    template<class T, MatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
     void LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)

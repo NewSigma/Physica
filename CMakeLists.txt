@@ -33,6 +33,7 @@ ${CMAKE_CXX_FLAGS} \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
 
 set(CMAKE_CUDA_FLAGS "\
+${CMAKE_CUDA_FLAGS} \
 --gpu-architecture ${GPU_ARCHITECTURE} \
 --gpu-code ${GPU_CODE} \
 --relocatable-device-code=true")
@@ -59,6 +60,7 @@ endif()
 
 set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
 add_executable(Physica Physica.cpp ${HEADERS})
+target_compile_options(Physica PRIVATE -Wl,--rpath=${CMAKE_INSTALL_PREFIX}/lib)
 
 install(TARGETS Physica DESTINATION bin)
 install(FILES include/Physica/Config.h DESTINATION include/Physica)

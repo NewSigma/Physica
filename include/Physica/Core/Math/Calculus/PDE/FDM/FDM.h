@@ -20,7 +20,7 @@
 #define PHYSICA_FDM_H
 
 #include <QtCore/QVector>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 /*!
  * Solve the laplace equation using FDM. This is created for study and is very shabby.
  */
@@ -53,7 +53,7 @@ namespace Physica::Core {
     template<class T>
     class FDM : public FDMBase {
     private:
-        Matrix<T, MatrixType::VectorColumn, Dynamic, Dynamic> data;
+        DenseMatrix<T, DenseMatrixType::VectorColumn, Dynamic, Dynamic> data;
         QVector<Boundary> boundaries;
     public:
         FDM(size_t column, size_t row);
@@ -61,7 +61,7 @@ namespace Physica::Core {
         void addBoundary(const Boundary& boundary, const T& value);
         void loop();
         /* Getters */
-        [[nodiscard]] const Matrix<T, MatrixType::VectorColumn, Dynamic, Dynamic>& getData() { return data; }
+        [[nodiscard]] const DenseMatrix<T, DenseMatrixType::VectorColumn, Dynamic, Dynamic>& getData() { return data; }
     private:
         bool onBoundary(size_t column, size_t row);
     };

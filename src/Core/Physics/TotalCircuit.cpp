@@ -110,12 +110,12 @@ namespace Physica::Core {
          */
         const int rank = nodesCount - 2;
         if(rank) {
-            Matrix<MultiScalar, MatrixType::VectorRow> augmentedMatrix;
+            DenseMatrix<MultiScalar, DenseMatrixType::VectorRow> augmentedMatrix;
             /* Construct augmented matrix */ {
-                augmentedMatrix = Matrix<MultiScalar, MatrixType::VectorRow>(rank);
+                augmentedMatrix = DenseMatrix<MultiScalar, DenseMatrixType::VectorRow>(rank);
                 for(int i = 0; i < rank; ++i)
-                    augmentedMatrix.allocate(Matrix<MultiScalar
-                                             , MatrixType::VectorRow>::VectorType::zeroVector(rank + 1), i);
+                    augmentedMatrix.allocate(DenseMatrix<MultiScalar
+                                             , DenseMatrixType::VectorRow>::VectorType::zeroVector(rank + 1), i);
 
                 Connection* p = order;
                 const int size_1 = static_cast<int>(size) + 1;
@@ -153,7 +153,7 @@ namespace Physica::Core {
                 }
             }
             /* Solve the equations */
-            LinearEquations<MultiScalar, MatrixType::VectorRow> le(std::move(augmentedMatrix));
+            LinearEquations<MultiScalar, DenseMatrixType::VectorRow> le(std::move(augmentedMatrix));
             le.solve(AbstractLinearEquations::GaussEliminationPartial);
             /* Calculate equivalent resistance */
             Connection* p = order;
