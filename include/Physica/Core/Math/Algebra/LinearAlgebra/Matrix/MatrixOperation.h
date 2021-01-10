@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +23,7 @@ namespace Physica::Core {
     /*!
      * This class contain static methods such as pivoting and eliminate.
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     class MatrixOperation {
     public:
         static inline size_t completePivoting(DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column);
@@ -44,7 +44,7 @@ namespace Physica::Core {
     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
     */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::completePivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column) {
         const auto rank = matrix.getRow();
@@ -74,7 +74,7 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column) {
         const auto rank = matrix.getRow();
@@ -100,7 +100,7 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::impactPivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t row) {
         Q_ASSERT(row < matrix.getRow());
@@ -118,7 +118,7 @@ namespace Physica::Core {
      * Eliminate elements at column index using row reduce, which are above the row index.
      * Warning: Element at (index, index) must not be zero. Or a divide by zero exception will be thrown.
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::upperEliminate(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t index) {
         for(size_t i = 0; i < index; ++i)
@@ -128,7 +128,7 @@ namespace Physica::Core {
      * Eliminate elements at column index using row reduce, which are above the row index.
      * Warning: Element at (index, index) must not be zero. Or a divide by zero exception will be thrown.
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::lowerEliminate(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t index) {
         const auto r = matrix.getRow();
@@ -136,7 +136,7 @@ namespace Physica::Core {
             matrix.rowReduce(index, i, index);
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::impactPivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix) {
         const auto r = matrix.getRow();

@@ -52,8 +52,10 @@ namespace Physica::Core {
      */
     template<class T>
     class FDM : public FDMBase {
+    public:
+        using DataMatrix = DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, Dynamic, Dynamic>;
     private:
-        DenseMatrix<T, DenseMatrixType::VectorColumn, Dynamic, Dynamic> data;
+        DataMatrix data;
         QVector<Boundary> boundaries;
     public:
         FDM(size_t column, size_t row);
@@ -61,7 +63,7 @@ namespace Physica::Core {
         void addBoundary(const Boundary& boundary, const T& value);
         void loop();
         /* Getters */
-        [[nodiscard]] const DenseMatrix<T, DenseMatrixType::VectorColumn, Dynamic, Dynamic>& getData() { return data; }
+        [[nodiscard]] const DataMatrix& getData() { return data; }
     private:
         bool onBoundary(size_t column, size_t row);
     };

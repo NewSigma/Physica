@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,15 +23,15 @@
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(const DenseMatrix<T, type, maxRow, maxColumn>& m)
             : matrix(m) {}
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept
             : matrix(std::move(m)) {}
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(LinearEquations&& l) noexcept
             : matrix(std::move(l.matrix)) {
         Q_UNUSED(type)
@@ -39,7 +39,7 @@ namespace Physica::Core {
         Q_UNUSED(maxColumn)
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LinearEquations<T, type, maxRow, maxColumn>& LinearEquations<T, type, maxRow, maxColumn>::operator=(
             LinearEquations&& l) noexcept {
         Q_UNUSED(type)
@@ -60,7 +60,7 @@ namespace Physica::Core {
     * Change the bias in LU method to solve a family of equations.
     */
     //!Reference: Numerical Recipes in C++
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     void LinearEquations<T, type, maxRow, maxColumn>::solve(LinearEquationsMethod method) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)

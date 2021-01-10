@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -38,7 +38,8 @@ namespace Physica::Core {
     /*!
      * Solve linear equations.
      */
-    template<class T = MultiScalar, DenseMatrixType type = DenseMatrixType::VectorColumn, size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
+    template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
+            , size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class LinearEquations : AbstractLinearEquations{
         DenseMatrix<T, type, maxRow, maxColumn> matrix;
     public:

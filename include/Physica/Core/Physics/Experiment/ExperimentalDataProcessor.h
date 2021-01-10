@@ -30,6 +30,7 @@ namespace Physica::Core::Physics {
      * Number of data cannot be more than maximum of @typedef MPUnit.
      */
     class ExperimentalDataProcessor {
+        using DataMatrix = DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::Column | DenseMatrixType::Vector, 2>;
     public:
         struct ExperimentalDataInfo {
             Scalar<MultiPrecision, false> total;
@@ -45,10 +46,10 @@ namespace Physica::Core::Physics {
          * The first row of the matrix contains the measured values.
          * The second row of the matrix contains uncertainty of the measured values.
          */
-        DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> data;
+        DataMatrix data;
         ExperimentalDataInfo info;
     public:
-        inline explicit ExperimentalDataProcessor(DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> m);
+        inline explicit ExperimentalDataProcessor(DataMatrix m);
         ~ExperimentalDataProcessor() = default;
         ExperimentalDataProcessor(const ExperimentalDataProcessor& processor) = default;
         ExperimentalDataProcessor(ExperimentalDataProcessor&& processor)  noexcept : data(std::move(processor.data)) {}
@@ -63,8 +64,7 @@ namespace Physica::Core::Physics {
     private:
     };
 
-    inline ExperimentalDataProcessor::ExperimentalDataProcessor(
-            DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::VectorColumn, 2> m) : data(std::move(m)) {
+    inline ExperimentalDataProcessor::ExperimentalDataProcessor(DataMatrix m) : data(std::move(m)) {
         Q_ASSERT(data.getColumn() < MPUnitMax); //Too much data is not supported.
         updateInfo();
     }

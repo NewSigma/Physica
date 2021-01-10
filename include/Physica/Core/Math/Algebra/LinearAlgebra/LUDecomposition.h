@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +23,7 @@
 #include "Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     class LUDecomposition {
         DenseMatrix<T, type, maxRow, maxColumn> matrix;
         size_t* biasOrder;

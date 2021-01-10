@@ -104,18 +104,18 @@ namespace Physica::Core {
      * Using Kirchoff equations to calculate the equivalent resistance.
      */
     void TotalCircuit::calculate() {
+        using DataMatrix = DenseMatrix<MultiScalar, DenseMatrixType::Row | DenseMatrixType::Vector>;
         /*
          * Assume the voltage at node[0] is 0 and voltage at node[1] is 1.
          * We will have to solve a (nodesCount - 2) rank linear Equations to get the other voltages.
          */
         const int rank = nodesCount - 2;
         if(rank) {
-            DenseMatrix<MultiScalar, DenseMatrixType::VectorRow> augmentedMatrix;
+            DataMatrix augmentedMatrix;
             /* Construct augmented matrix */ {
-                augmentedMatrix = DenseMatrix<MultiScalar, DenseMatrixType::VectorRow>(rank);
+                augmentedMatrix = DataMatrix(rank);
                 for(int i = 0; i < rank; ++i)
-                    augmentedMatrix.allocate(DenseMatrix<MultiScalar
-                                             , DenseMatrixType::VectorRow>::VectorType::zeroVector(rank + 1), i);
+                    augmentedMatrix.allocate(DataMatrix::VectorType::zeroVector(rank + 1), i);
 
                 Connection* p = order;
                 const int size_1 = static_cast<int>(size) + 1;
@@ -153,7 +153,7 @@ namespace Physica::Core {
                 }
             }
             /* Solve the equations */
-            LinearEquations<MultiScalar, DenseMatrixType::VectorRow> le(std::move(augmentedMatrix));
+            LinearEquations<MultiScalar, DenseMatrixType::Row | DenseMatrixType::Vector> le(std::move(augmentedMatrix));
             le.solve(AbstractLinearEquations::GaussEliminationPartial);
             /* Calculate equivalent resistance */
             Connection* p = order;

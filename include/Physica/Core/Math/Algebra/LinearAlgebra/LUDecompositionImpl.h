@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -22,7 +22,7 @@
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m)
             : matrix(m), biasOrder(reinterpret_cast<size_t*>(malloc(m.getRow() * sizeof(size_t)))) {
         const auto rank = matrix.getRow();
@@ -34,11 +34,11 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept
             : matrix(std::move(m)), biasOrder(reinterpret_cast<size_t*>(malloc(m.getRow() * sizeof(size_t)))) {}
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(const LUDecomposition& l)
             : matrix(l.matrix), biasOrder(reinterpret_cast<size_t*>(malloc(l.matrix.getRow() * sizeof(size_t)))) {
         Q_UNUSED(type)
@@ -50,7 +50,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(LUDecomposition&& l) noexcept
             : matrix(std::move(l.matrix)), biasOrder(l.biasOrder) {
         Q_UNUSED(type)
@@ -59,7 +59,7 @@ namespace Physica::Core {
         l.biasOrder = nullptr;
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
             const LUDecomposition& l) {
         Q_UNUSED(type)
@@ -72,7 +72,7 @@ namespace Physica::Core {
         return *this;
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
             LUDecomposition&& l) noexcept {
         Q_UNUSED(type)
@@ -84,7 +84,7 @@ namespace Physica::Core {
         l.biasOrder = nullptr;
     }
 
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     LUDecomposition<T, type, maxRow, maxColumn>::~LUDecomposition() {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
@@ -98,7 +98,7 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
      */
-    template<class T, DenseMatrixType type, size_t maxRow, size_t maxColumn>
+    template<class T, int type, size_t maxRow, size_t maxColumn>
     void LUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
