@@ -20,6 +20,7 @@
 #define PHYSICA_MATRIX_H
 
 #include <memory>
+#include "MatrixBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
 
 namespace Physica::Core {
@@ -59,7 +60,7 @@ namespace Physica::Core {
     class DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>
             : private Utils::CStyleArray<T, maxRow * maxColumn> {
     public:
-        typedef Utils::CStyleArray<T, maxRow * maxColumn> Base;
+        using Base = Utils::CStyleArray<T, maxRow * maxColumn>;
     private:
         size_t row;
         size_t column;
@@ -90,7 +91,7 @@ namespace Physica::Core {
     class DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>
             : private Utils::CStyleArray<T, maxRow * maxColumn> {
     public:
-        typedef Utils::CStyleArray<T, maxRow * maxColumn> Base;
+        using Base = Utils::CStyleArray<T, maxRow * maxColumn>;
     private:
         size_t row;
         size_t column;
@@ -121,8 +122,8 @@ namespace Physica::Core {
     class DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>
             : public Utils::CStyleArray<Vector<T, maxRow>, maxColumn> {
     public:
-        typedef Vector<T, maxRow> VectorType;
-        typedef Utils::CStyleArray<VectorType, maxColumn> Base;
+        using VectorType = Vector<T, maxRow>;
+        using Base = Utils::CStyleArray<VectorType, maxColumn>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t length);
@@ -169,8 +170,8 @@ namespace Physica::Core {
     class DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>
             : public Utils::CStyleArray<Vector<T, maxColumn>, maxRow> {
     public:
-        typedef Vector<T, maxColumn> VectorType;
-        typedef Utils::CStyleArray<VectorType, maxRow> Base;
+        using VectorType = Vector<T, maxColumn>;
+        using Base = Utils::CStyleArray<VectorType, maxRow>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t length);
@@ -341,6 +342,16 @@ namespace Physica::Core {
     
     template<class T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, maxRow, maxColumn> arccoth(const DenseMatrix<T, type, maxRow, maxColumn>& m);
+
+    namespace Intenal {
+        template<class T, int type, size_t maxRow, size_t maxColumn>
+        class MatrixTrait<DenseMatrix<T, type, maxRow, maxColumn>> {
+        public:
+            using ScalarType = T;
+            constexpr static size_t MaxRowAtCompile = maxRow;
+            constexpr static size_t MaxColumnAtCompile = maxColumn;
+        };
+    }
 }
 
 #include "DenseMatrixImpl.h"
