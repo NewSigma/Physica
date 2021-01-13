@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_CSTYLEARRAY_H
-#define PHYSICA_CSTYLEARRAY_H
+#pragma once
 
 #include <cstdlib>
 #include <qglobal.h>
@@ -44,58 +43,50 @@ namespace Physica::Utils {
      * 1. Use more effective allocate strategy to avoid reallocate.
      * 2. Use the end pointer of arr instead of length may improve performance.
      */
-    template<class T, size_t capacity>
-    class CStyleArray : public AbstractCStyleArray<T> {
-        typedef AbstractCStyleArray<T> Base;
+    template<class T, size_t Length = Dynamic, size_t Capacity = Length>
+    class CStyleArray;
+
+    template<class T, size_t Length, size_t Capacity>
+    class CStyleArray<T, Length, Capacity> : public Intenal::AbstractCStyleArray<CStyleArray<T, Length, Capacity>> {
+        static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
+    private:
+        using Base = Intenal::AbstractCStyleArray<CStyleArray<T, Length, Capacity>>;
+        using Base::Iterator;
         using Base::arr;
-        using Base::length;
     public:
-        inline CStyleArray();
-        inline explicit CStyleArray(size_t length);
+        CStyleArray();
         CStyleArray(std::initializer_list<T> list);
-        inline CStyleArray(const CStyleArray& array);
-        inline CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray() = default;
+        CStyleArray(const CStyleArray& array);
+        CStyleArray(CStyleArray&& array) noexcept;
+        ~CStyleArray();
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;
-        CStyleArray& operator<<(const T& t) { append(t); return *this; }
-        CStyleArray& operator<<(T&& t) { append(std::move(t)); return *this; }
-        CStyleArray& operator<<(const CStyleArray& t) { append(t); return *this; }
-        CStyleArray& operator<<(CStyleArray&& t) { append(std::move(t)); return *this; }
         /* Helpers */
         CStyleArray<T, Dynamic> subArray(size_t from, size_t to);
-        CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, Base::getLength()); }
+        CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         CStyleArray<T, Dynamic> cut(size_t from);
-        void append(const T& t);
-        void append(T&& t);
-        void append(const CStyleArray& t);
-        void append(CStyleArray&& t);
-        inline void grow(const T& t);
-        inline void grow(T&& t);
-        void removeAt(size_t index);
-        /*
-         * Swap() is not provided, using the swap() of father class instead. That is enough.
-         */
-        //void swap(CStyleArray& array) noexcept;
+        void swap(CStyleArray& array) noexcept { Base::swap(array); }
         /* Getters */
-        [[nodiscard]] constexpr static size_t getCapacity() { return capacity; }
+        [[nodiscard]] constexpr static size_t getLength() { return Length; }
+        [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
     };
 
-    template<class T>
-    class CStyleArray<T, Dynamic> : public AbstractCStyleArray<T> {
-        typedef AbstractCStyleArray<T> Base;
+    template<class T, size_t Capacity>
+    class CStyleArray<T, Dynamic, Capacity> : public Intenal::AbstractCStyleArray<CStyleArray<T, Dynamic, Capacity>> {
+    private:
+        using Base = Intenal::AbstractCStyleArray<CStyleArray<T, Dynamic, Capacity>>;
+        using Base::Iterator;
         using Base::arr;
-        using Base::length;
 
-        size_t capacity;
+        size_t length;
     public:
-        inline CStyleArray();
-        inline explicit CStyleArray(size_t length);
+        CStyleArray();
+        explicit CStyleArray(size_t length);
         CStyleArray(std::initializer_list<T> list);
-        inline CStyleArray(const CStyleArray& array);
-        inline CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray() = default;
+        CStyleArray(const CStyleArray& array);
+        CStyleArray(CStyleArray&& array) noexcept;
+        ~CStyleArray();
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;
@@ -103,9 +94,10 @@ namespace Physica::Utils {
         bool operator!=(const CStyleArray& array) const { return !(operator==(array)); }
         CStyleArray& operator<<(const T& t) { append(t); return *this; }
         CStyleArray& operator<<(T&& t) { append(std::move(t)); return *this; }
-        CStyleArray& operator<<(const CStyleArray& t) { append(t); return *this; }
-        CStyleArray& operator<<(CStyleArray&& t) { append(std::move(t)); return *this; }
+        CStyleArray& operator<<(const CStyleArray& array) { append(array); return *this; }
+        CStyleArray& operator<<(CStyleArray&& array) { append(std::move(array)); return *this; }
         /* Helpers */
+        T cutLast();
         CStyleArray<T, Dynamic> subArray(size_t from, size_t to);
         CStyleArray<T, Dynamic> subArray(size_t from) { return subArray(from, length); }
         CStyleArray<T, Dynamic> cut(size_t from);
@@ -122,15 +114,68 @@ namespace Physica::Utils {
         void removeAt(size_t index);
         void swap(CStyleArray& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getCapacity() const { return capacity; }
+        [[nodiscard]] size_t getLength() noexcept const { return length; }
+        [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
+    protected:
+        /* Setters */
+        /**
+         * Low level api. Designed for performance.
+         * \size must larger than current length. Because we can not delete the elements we do not need if not.
+         * Elements between old length and \size have not allocated. DO NOT try to visit them.
+         */
+        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
     };
 
-    template<class T, size_t capacity>
-    inline void swap(CStyleArray<T, capacity>& array1, CStyleArray<T, capacity>& array2) noexcept {
+    template<class T>
+    class CStyleArray<T, Dynamic, Dynamic> : public Intenal::AbstractCStyleArray<CStyleArray<T, Dynamic, Dynamic>> {
+    private:
+        using Base = Intenal::AbstractCStyleArray<CStyleArray<T, Dynamic, Dynamic>>;
+        using Base::Iterator;
+        using Base::arr;
+
+        size_t length;
+        size_t capacity;
+    public:
+        CStyleArray();
+        explicit CStyleArray(size_t length);
+        CStyleArray(std::initializer_list<T> list);
+        CStyleArray(const CStyleArray& array);
+        CStyleArray(CStyleArray&& array);
+        ~CStyleArray();
+        /* Operators */
+        CStyleArray& operator=(const CStyleArray& array);
+        CStyleArray& operator=(CStyleArray&& array) noexcept;
+        CStyleArray& operator<<(const T& t) { append(t); return *this; }
+        CStyleArray& operator<<(T&& t) { append(std::move(t)); return *this; }
+        CStyleArray& operator<<(const CStyleArray& array) { append(array); return *this; }
+        CStyleArray& operator<<(CStyleArray&& array) { append(std::move(array)); return *this; }
+        /* Helpers */
+        T cutLast();
+        void append(const T& t);
+        void append(T&& t);
+        void append(const CStyleArray& t);
+        void append(CStyleArray&& t);
+        inline void grow(const T& t);
+        inline void grow(T&& t);
+        void removeAt(size_t index);
+        void swap(CStyleArray& array);
+        /* Getters */
+        [[nodiscard]] size_t getLength() noexcept const { return length; }
+        [[nodiscard]] size_t getCapacity() noexcept const { return capacity; }
+    protected:
+        /* Setters */
+        /**
+         * Low level api. Designed for performance.
+         * \size must larger than current length. Because we can not delete the elements we do not need if not.
+         * Elements between old length and \size have not allocated. DO NOT try to visit them.
+         */
+        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    inline void swap(CStyleArray<T, Length, Capacity>& array1, CStyleArray<T, Length, Capacity>& array2) noexcept {
         array1.swap(array2);
     }
 }
 
 #include "CStyleArrayImpl.h"
-
-#endif

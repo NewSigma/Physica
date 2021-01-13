@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,114 +16,130 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ABSTRACTCSTYLEARRAYIMPL_H
-#define PHYSICA_ABSTRACTCSTYLEARRAYIMPL_H
+#pragma once
 
-namespace Physica::Utils {
-    template<class T>
-    typename AbstractCStyleArray<T>::Iterator& AbstractCStyleArray<T>::Iterator::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
+namespace Physica::Utils::Intenal {
+    template<class Derived>
+    typename AbstractCStyleArray<Derived>::Iterator&
+    AbstractCStyleArray<Derived>::Iterator::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
-    template<class T>
-    typename AbstractCStyleArray<T>::Iterator& AbstractCStyleArray<T>::Iterator::operator=(Iterator&& ite) noexcept {
+    template<class Derived>
+    typename AbstractCStyleArray<Derived>::Iterator&
+    AbstractCStyleArray<Derived>::Iterator::operator=(Iterator&& ite) noexcept {
         p = ite.p;
         return *this;
     }
 
-    template<class T>
-    typename AbstractCStyleArray<T>::Iterator& AbstractCStyleArray<T>::Iterator::operator++() {
+    template<class Derived>
+    typename AbstractCStyleArray<Derived>::Iterator&
+    AbstractCStyleArray<Derived>::Iterator::operator++() {
         ++p;
         return *this;
     }
 
-    template<class T>
-    const typename AbstractCStyleArray<T>::Iterator AbstractCStyleArray<T>::Iterator::operator++(int) { //NOLINT Return type must be const.
+    template<class Derived>
+    const typename AbstractCStyleArray<Derived>::Iterator
+    AbstractCStyleArray<Derived>::Iterator::operator++(int) {
         return Iterator(p++);
     }
 
-    template<class T>
-    AbstractCStyleArray<T>::AbstractCStyleArray(std::initializer_list<T> list)
-            : arr(reinterpret_cast<T*>(malloc(list.size() * sizeof(T)))), length(list.size()) {
-        size_t i = 0;
-        const auto end = list.end();
-        for(auto ite = list.begin(); ite != end; ++ite, ++i)
-            allocate(T(*ite), i);
-    }
+    template<class Derived>
+    AbstractCStyleArray<Derived>::AbstractCStyleArray(size_t capacity)
+            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {}
 
-    template<class T>
-    AbstractCStyleArray<T>::AbstractCStyleArray(AbstractCStyleArray<T>&& array) noexcept
-            : arr(array.arr), length(array.length) {
-        array.arr = nullptr;
-        array.length = 0;
-    }
-
-    template<class T>
-    AbstractCStyleArray<T>::~AbstractCStyleArray() {
+    template<class Derived>
+    AbstractCStyleArray<Derived>::AbstractCStyleArray(const AbstractCStyleArray<Derived>& array)
+            : AbstractCStyleArray(array.getDerived().getCapacity()) {
+        const size_t length = array.getDerived().getLength();
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
+                allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, length * sizeof(T));
+    }
+
+    template<class Derived>
+    AbstractCStyleArray<Derived>::AbstractCStyleArray(AbstractCStyleArray<Derived>&& array) noexcept : arr(array.arr) {
+        array.arr = nullptr;
+    }
+
+    template<class Derived>
+    AbstractCStyleArray<Derived>::~AbstractCStyleArray() {
+        //Elements should call ~T() at subclasses.
         free(arr);
     }
 
-    template<class T>
-    AbstractCStyleArray<T>& AbstractCStyleArray<T>::operator=(AbstractCStyleArray<T>&& array) noexcept {
-        this->~AbstractCStyleArray();
-        arr = array.arr;
-        length = array.length;
-        array.arr = nullptr;
-        array.length = 0;
+    template<class Derived>
+    AbstractCStyleArray& AbstractCStyleArray<Derived>::operator=(const AbstractCStyleArray& array) {
+        if (this != &array) {
+            this->~AbstractCStyleArray();
+            arr = reinterpret_cast<T*>(malloc(array.getDerived().getCapacity() * sizeof(T)));
+            const size_t length = array.getDerived().getLength();
+            if(QTypeInfo<T>::isComplex)
+                for(size_t i = 0; i < length; ++i)
+                    allocate(array[i], i);
+            else
+                memcpy(arr, array.arr, length * sizeof(T));
+        }
         return *this;
     }
 
-    template<class T>
-    bool AbstractCStyleArray<T>::operator==(const AbstractCStyleArray& array) const {
-        if(length != array.length)
+    template<class Derived>
+    AbstractCStyleArray& AbstractCStyleArray<Derived>::operator=(AbstractCStyleArray&& array) noexcept {
+        this->~AbstractCStyleArray();
+        std::swap(arr, array.arr);
+        return *this;
+    }
+
+    template<class Derived>
+    inline T& AbstractCStyleArray<Derived>::operator[](size_t index) {
+        Q_ASSERT(index < getDerived().getLength());
+        return arr[index];
+    }
+
+    template<class Derived>
+    inline const T& AbstractCStyleArray<Derived>::operator[](size_t index) const {
+        Q_ASSERT(index < getDerived().getLength());
+        return arr[index];
+    }
+
+    template<class Derived>
+    bool AbstractCStyleArray<Derived>::operator==(const AbstractCStyleArray& array) const {
+        if (getDerived().getLength() != array.getDerived().getLength())
             return false;
-        for(size_t i = 0; i < length; ++i)
-            if(operator[](i) != array[i])
+        if (getDerived().getCapacity() != array.getDerived().getLength())
+            return false;
+        for (size_t i = 0; i < getDerived().getLength(); ++i)
+            if (operator[](i) != array[i])
                 return false;
         return true;
     }
-    /*!
+    /**
      * Low level api. Designed for performance.
-     * Simply allocate a \T at position \index.
+     * Simply allocate a T at position \param index.
      * You must ensure position \index is usable or a memory leak will occur.
      */
-    template<class T>
-    inline void AbstractCStyleArray<T>::allocate(const T& t, size_t index) {
+    template<class Derived>
+    inline void AbstractCStyleArray<Derived>::allocate(const T& t, size_t index) {
         if(QTypeInfo<T>::isComplex)
             new (arr + index) T(t);
         else
             *(arr + index) = t;
     }
 
-    template<class T>
-    inline void AbstractCStyleArray<T>::allocate(T&& t, size_t index) {
+    template<class Derived>
+    inline void AbstractCStyleArray<Derived>::allocate(T&& t, size_t index) {
         if(QTypeInfo<T>::isComplex)
             new (arr + index) T(std::move(t));
         else
             *(arr + index) = t;
     }
-    /*!
-     * Get the last element in the array and remove it from the array.
-     */
-    template<class T>
-    T AbstractCStyleArray<T>::cutLast() {
-        Q_ASSERT(length > 0);
-        --length;
-        if(QTypeInfo<T>::isComplex)
-            return T(std::move(arr[length]));
-        else
-            return arr[length];
-    }
 
-    template<class T>
-    void AbstractCStyleArray<T>::swap(AbstractCStyleArray<T> &array) {
+    template<class Derived>
+    inline void AbstractCStyleArray<Derived>::swap(AbstractCStyleArray<Derived>& array) noexcept {
         std::swap(arr, array.arr);
-        std::swap(length, array.length);
     }
 }
-
-#endif

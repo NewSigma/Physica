@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,17 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ABSTRACTCSTYLEARRAY_H
-#define PHYSICA_ABSTRACTCSTYLEARRAY_H
+#pragma once
 
 #include <cstddef>
 
-namespace Physica::Utils {
-    /*!
+namespace Physica::Utils::Intenal {
+    template<class T, size_t Length, size_t Capacity>
+    class Trait<CStyleArray<T, Length, Capacity>> {
+    public:
+        using ElementType = T;
+        constexpr static size_t ArrayLength = Length;
+        constexpr static size_t ArrayCapacity = Capacity;
+    };
+    /**
      * Public parts among specializations of CStyleArray.
      */
-    template<class T>
+    template<class Derived>
     class AbstractCStyleArray {
+        using T = Trait<Derived>::ElementType;
     public:
         class Iterator {
             T* p;
@@ -51,51 +58,34 @@ namespace Physica::Utils {
         };
     protected:
         T* __restrict arr;
-        size_t length;
     public:
         AbstractCStyleArray() = delete;
-        AbstractCStyleArray(const AbstractCStyleArray& array) = delete;
-        AbstractCStyleArray(AbstractCStyleArray&& array) noexcept;
-        ~AbstractCStyleArray();
         /* Operators */
-        AbstractCStyleArray& operator=(const AbstractCStyleArray& array) = delete;
-        AbstractCStyleArray& operator=(AbstractCStyleArray&& array) noexcept;
-        T& operator[](size_t index) { Q_ASSERT(index < length); return arr[index]; }
-        const T& operator[](size_t index) const { Q_ASSERT(index < length); return arr[index]; }
+        inline T& operator[](size_t index);
+        inline const T& operator[](size_t index) const;
         bool operator==(const AbstractCStyleArray& array) const;
         bool operator!=(const AbstractCStyleArray& array) const { return !(operator==(array)); }
         /* Iterator */
         Iterator begin() { return Iterator(arr); }
-        Iterator end() { return Iterator(arr + length); }
+        Iterator end() { return Iterator(arr + getDerived().getLength()); }
         /* Helpers */
+        Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }
+        const Derived& getDerived() noexcept const { return static_cast<Derived&>(*this); }
         inline void allocate(const T& t, size_t index);
         inline void allocate(T&& t, size_t index);
-        T cutLast();
-        void swap(AbstractCStyleArray& array);
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return length; }
-        [[nodiscard]] bool empty() const { return length == 0; }
-        /* Setters */
-        /*!
-         * Low level api. Designed for performance.
-         * \size must larger than current length. Because we can not delete the elements we do not need if not.
-         * Elements between old length and \size have not allocated. DO NOT try to visit them.
-         */
-        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
+        [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:
-        /*!
-         * @p arr should be allocated by its subclasses using malloc.
-         */
-        AbstractCStyleArray(T* __restrict arr, size_t length) : arr(arr), length(length) {}
-        AbstractCStyleArray(std::initializer_list<T> list);
+        AbstractCStyleArray(size_t capacity);
+        AbstractCStyleArray(const AbstractCStyleArray& array);
+        AbstractCStyleArray(AbstractCStyleArray&& array) noexcept;
+        ~AbstractCStyleArray();
+        /* Operators */
+        AbstractCStyleArray& operator=(const AbstractCStyleArray& array);
+        AbstractCStyleArray& operator=(AbstractCStyleArray&& array) noexcept;
+        /* Helpers */
+        inline void swap(AbstractCStyleArray& array) noexcept;
     };
-
-    template<class T>
-    inline void swap(AbstractCStyleArray<T>& a1, AbstractCStyleArray<T>& a2) {
-        a1.swap(a2);
-    }
 }
 
 #include "AbstractCStyleArrayImpl.h"
-
-#endif
