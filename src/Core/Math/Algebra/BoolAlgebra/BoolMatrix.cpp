@@ -36,7 +36,7 @@ namespace Physica::Core {
         const size_t c2 = m.getColumn();
         Q_ASSERT(c1 == m.getRow());
 
-        CStyleArray<BitArray, Dynamic> array(r1);
+        CStyleArray<BitArray> array(r1);
         for(size_t i = 0; i < r1; ++i) {
             BitArray row_i(c2);
             for(size_t j = 0; j < c2; ++j) {
@@ -59,7 +59,7 @@ namespace Physica::Core {
     BoolMatrix BoolMatrix::operator&(const BoolMatrix& m) const {
         Q_ASSERT(hasSameSize(m));
         const size_t row = getRow();
-        CStyleArray<BitArray, Dynamic> array(row);
+        CStyleArray<BitArray> array(row);
         for(size_t s = 0; s < row; ++s)
             array.allocate(arr[s] & m.arr[s], s);
         return BoolMatrix(std::move(array));

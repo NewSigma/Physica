@@ -21,19 +21,15 @@
 #include <cstddef>
 
 namespace Physica::Utils::Intenal {
-    template<class T, size_t Length, size_t Capacity>
-    class Trait<CStyleArray<T, Length, Capacity>> {
-    public:
-        using ElementType = T;
-        constexpr static size_t ArrayLength = Length;
-        constexpr static size_t ArrayCapacity = Capacity;
-    };
+    //Forward declaration
+    template<class T> class Traits;
     /**
      * Public parts among specializations of CStyleArray.
      */
     template<class Derived>
     class AbstractCStyleArray {
-        using T = Trait<Derived>::ElementType;
+    protected:
+        using T = typename Traits<Derived>::ElementType;
     public:
         class Iterator {
             T* p;
@@ -56,7 +52,7 @@ namespace Physica::Utils::Intenal {
 
             friend class AbstractCStyleArray;
         };
-    protected:
+    public:
         T* __restrict arr;
     public:
         AbstractCStyleArray() = delete;
@@ -69,14 +65,12 @@ namespace Physica::Utils::Intenal {
         Iterator begin() { return Iterator(arr); }
         Iterator end() { return Iterator(arr + getDerived().getLength()); }
         /* Helpers */
-        Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }
-        const Derived& getDerived() noexcept const { return static_cast<Derived&>(*this); }
         inline void allocate(const T& t, size_t index);
         inline void allocate(T&& t, size_t index);
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:
-        AbstractCStyleArray(size_t capacity);
+        explicit AbstractCStyleArray(size_t capacity);
         AbstractCStyleArray(const AbstractCStyleArray& array);
         AbstractCStyleArray(AbstractCStyleArray&& array) noexcept;
         ~AbstractCStyleArray();
@@ -85,6 +79,9 @@ namespace Physica::Utils::Intenal {
         AbstractCStyleArray& operator=(AbstractCStyleArray&& array) noexcept;
         /* Helpers */
         inline void swap(AbstractCStyleArray& array) noexcept;
+        /* Getters */
+        [[nodiscard]] Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }
+        [[nodiscard]] const Derived& getDerived() const noexcept { return static_cast<const Derived&>(*this); }
     };
 }
 

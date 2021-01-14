@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <cstring>
+
 namespace Physica::Utils::Intenal {
     template<class Derived>
     typename AbstractCStyleArray<Derived>::Iterator&
@@ -73,7 +75,7 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    AbstractCStyleArray& AbstractCStyleArray<Derived>::operator=(const AbstractCStyleArray& array) {
+    AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(const AbstractCStyleArray& array) {
         if (this != &array) {
             this->~AbstractCStyleArray();
             arr = reinterpret_cast<T*>(malloc(array.getDerived().getCapacity() * sizeof(T)));
@@ -88,20 +90,20 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    AbstractCStyleArray& AbstractCStyleArray<Derived>::operator=(AbstractCStyleArray&& array) noexcept {
+    AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(AbstractCStyleArray&& array) noexcept {
         this->~AbstractCStyleArray();
         std::swap(arr, array.arr);
         return *this;
     }
 
     template<class Derived>
-    inline T& AbstractCStyleArray<Derived>::operator[](size_t index) {
+    inline typename AbstractCStyleArray<Derived>::T& AbstractCStyleArray<Derived>::operator[](size_t index) {
         Q_ASSERT(index < getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    inline const T& AbstractCStyleArray<Derived>::operator[](size_t index) const {
+    inline const typename AbstractCStyleArray<Derived>::T& AbstractCStyleArray<Derived>::operator[](size_t index) const {
         Q_ASSERT(index < getDerived().getLength());
         return arr[index];
     }

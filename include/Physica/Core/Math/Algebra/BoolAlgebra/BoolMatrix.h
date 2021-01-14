@@ -30,7 +30,7 @@ namespace Physica::Core {
      * 2. Implement a column matrix.
      */
     class BoolMatrix {
-        CStyleArray<BitArray, Dynamic> arr;
+        CStyleArray<BitArray> arr;
     public:
         BoolMatrix(size_t column, size_t row);
         BoolMatrix(const BoolMatrix& m) = default;
