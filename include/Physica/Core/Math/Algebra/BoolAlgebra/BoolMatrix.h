@@ -54,7 +54,7 @@ namespace Physica::Core {
         /*!
          * Construct a BoolMatrix from its members, declared private to avoid improper uses.
          */
-        explicit BoolMatrix(CStyleArray<BitArray, Dynamic>&& arr) : arr(std::move(arr)) {}
+        explicit BoolMatrix(CStyleArray<BitArray>&& arr) : arr(std::move(arr)) {}
     };
 
     inline bool BoolMatrix::hasSameSize(const BoolMatrix& m) const {

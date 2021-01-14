@@ -26,7 +26,7 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(size_t row, size_t column)
-            : Utils::CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
+            : Base(row * column), row(row), column(column) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
     }
     /*!
@@ -41,8 +41,8 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(
-            std::initializer_list<Utils::CStyleArray<T, maxRow>> list)
-            : Utils::CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
+            std::initializer_list<Utils::CStyleArray<T, Dynamic, maxRow>> list)
+            : Base(list.begin()->getLength() * list.size())
             , row(list.begin()->getLength()), column(list.size()) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
         size_t i = 0;
@@ -57,7 +57,7 @@ namespace Physica::Core {
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(
             DenseMatrix&& m) noexcept
-            : Utils::CStyleArray<T, maxRow * maxColumn>(std::move(m)), row(m.row), column(m.column) {}
+            : Base(std::move(m)), row(m.row), column(m.column) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>&
@@ -73,7 +73,7 @@ namespace Physica::Core {
     */
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(size_t row, size_t column)
-            : Utils::CStyleArray<T, maxRow * maxColumn>(row * column), row(row), column(column) {
+            : Base(row * column), row(row), column(column) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
     }
     /*!
@@ -88,8 +88,8 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(
-            std::initializer_list<Utils::CStyleArray<T, maxColumn>> list)
-                    : Utils::CStyleArray<T, maxRow * maxColumn>(list.begin()->getLength() * list.size())
+            std::initializer_list<Utils::CStyleArray<T, Dynamic, maxColumn>> list)
+                    : Base(list.begin()->getLength() * list.size())
                     , row(list.size()), column(list.begin()->getLength()) {
         Q_ASSERT(row <= maxRow && column <= maxColumn);
         size_t i = 0;
@@ -104,7 +104,7 @@ namespace Physica::Core {
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>::DenseMatrix(
             DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>&& m) noexcept
-            : Utils::CStyleArray<T, maxRow * maxColumn>(static_cast<Base&&>(m)), row(m.row), column(m.column) {}
+            : Base(static_cast<Base&&>(m)), row(m.row), column(m.column) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>&
@@ -117,23 +117,23 @@ namespace Physica::Core {
     /////////////////////////////////////Utils::Dynamic Column Matrix//////////////////////////////////////////
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(size_t length)
-            : Utils::CStyleArray<Vector<T, maxRow>, maxColumn>(length) {}
+            : Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn>(length) {}
             
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(
             DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>&& m) noexcept
-            : Utils::CStyleArray<Vector<T, maxRow>, maxColumn>(std::move(m)) {}
+            : Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn>(std::move(m)) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(
             std::initializer_list<VectorType> list)
-            : Utils::CStyleArray<Vector<T, maxRow>, maxColumn>(list) {}
+            : Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn>(list) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>&
     DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::operator=(
             DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>&& m) noexcept {
-        Utils::CStyleArray<Vector<T, maxRow>, maxColumn>::operator=(std::move(m));
+        Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn>::operator=(std::move(m));
         return *this;
     }
     //!Optimize: may be inline append().
@@ -207,7 +207,7 @@ namespace Physica::Core {
     template<class T, size_t maxRow, size_t maxColumn>
     Vector<T, maxRow> DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::cutRow() {
         const auto c = getColumn();
-        VectorType result((Utils::CStyleArray<MultiScalar, Utils::Dynamic>(c)));
+        VectorType result(c);
         for(size_t i = 0; i < c; ++i)
             result.allocate(Base::operator[](i).cutLast(), i);
         return result;
@@ -215,7 +215,7 @@ namespace Physica::Core {
 
     template<class T, size_t maxRow, size_t maxColumn>
     Vector<T, maxRow> DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>::cutColumn() {
-        return Utils::CStyleArray<Vector<T, maxRow>, maxColumn>::cutLast();
+        return Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn>::cutLast();
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
@@ -267,22 +267,22 @@ namespace Physica::Core {
     /////////////////////////////////////VectorRow Matrix//////////////////////////////////////////
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(size_t length)
-            : Utils::CStyleArray<VectorType, Utils::Dynamic>(length) {}
+            : Utils::CStyleArray<VectorType>(length) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(std::initializer_list<VectorType> list)
-            : Utils::CStyleArray<VectorType, Utils::Dynamic>(list) {}
+            : Utils::CStyleArray<VectorType>(list) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::DenseMatrix(
             DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>&& m) noexcept
-            : Utils::CStyleArray<VectorType, Utils::Dynamic>(std::move(m)) {}
+            : Utils::CStyleArray<VectorType>(std::move(m)) {}
 
     template<class T, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>&
     DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::operator=(
             DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>&& m) noexcept {
-        Utils::CStyleArray<VectorType, Utils::Dynamic>::operator=(std::move(m));
+        Utils::CStyleArray<VectorType>::operator=(std::move(m));
         return *this;
     }
     //!Optimize: may be inline append().
@@ -361,23 +361,23 @@ namespace Physica::Core {
     template<class T, size_t maxRow, size_t maxColumn>
     Vector<T, maxColumn> DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::cutColumn() {
         const auto row = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::row();
-        VectorType result((Utils::CStyleArray<MultiScalar, Utils::Dynamic>(row)));
+        VectorType result((Utils::CStyleArray<MultiScalar>(row)));
         for(size_t i = 0; i < row; ++i)
             result.allocate((*this)[i].cutLast(), i);
         return result;
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
-    DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, Utils::Dynamic, maxColumn>
+    DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, Dynamic, maxColumn>
             DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::cutMatrixRow(size_t from) {
-        return DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, Utils::Dynamic, maxColumn>(Base::cut(from));
+        return DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, Dynamic, maxColumn>(Base::cut(from));
     }
 
     template<class T, size_t maxRow, size_t maxColumn>
-    DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, Utils::Dynamic>
+    DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, Dynamic>
             DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::cutMatrixColumn(size_t from) {
         const auto column = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>::column();
-        DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, Utils::Dynamic> result(column);
+        DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, Dynamic> result(column);
         for(size_t i = 0; i < column; ++i)
             result.allocate(VectorType((*this)[i].cut(from)), i);
         return result;

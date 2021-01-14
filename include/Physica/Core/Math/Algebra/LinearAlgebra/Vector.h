@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -26,13 +26,14 @@
 #include "VectorExpression.h"
 
 namespace Physica::Core {
-    /*!
+    using Utils::Dynamic;
+    /**
      * T must be either Scalar or ComplexScalar.
      */
     template<class T, size_t maxLength>
-    class Vector : public Utils::CStyleArray<T, maxLength> {
-        typedef Utils::CStyleArray<T, maxLength> Base;
-        typedef T ScalarType;
+    class Vector : public Utils::CStyleArray<T, Dynamic, maxLength> {
+        using Base = Utils::CStyleArray<T, Dynamic, maxLength>;
+        using ScalarType = T;
     public:
         Vector();
         template<VectorExpressionType type, class T1, class T2>

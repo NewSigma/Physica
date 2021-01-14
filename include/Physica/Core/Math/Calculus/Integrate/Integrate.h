@@ -47,7 +47,7 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     class Integrate<Dynamic, type, errorTrack> : public AbstractIntegrate<type, errorTrack> {
         typedef AbstractIntegrate<type, errorTrack> Base;
-        CStyleArray<Scalar<type, errorTrack>, Dynamic> vector;
+        CStyleArray<Scalar<type, errorTrack>> vector;
     };
 
     template<ScalarType type, bool errorTrack>

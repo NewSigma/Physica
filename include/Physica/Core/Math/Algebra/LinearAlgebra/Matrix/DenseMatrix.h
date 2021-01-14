@@ -58,16 +58,16 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Element, maxRow, maxColumn>
-            : private Utils::CStyleArray<T, maxRow * maxColumn> {
+            : private Utils::CStyleArray<T, Dynamic, maxRow * maxColumn> {
     public:
-        using Base = Utils::CStyleArray<T, maxRow * maxColumn>;
+        using Base = Utils::CStyleArray<T, Dynamic, maxRow * maxColumn>;
     private:
         size_t row;
         size_t column;
     public:
         DenseMatrix() : row(0), column(0) {}
         DenseMatrix(size_t row, size_t column);
-        DenseMatrix(std::initializer_list<Utils::CStyleArray<T, maxRow>> list);
+        DenseMatrix(std::initializer_list<Utils::CStyleArray<T, Dynamic, maxRow>> list);
         DenseMatrix(const DenseMatrix& matrix) = default;
         DenseMatrix(DenseMatrix&& matrix) noexcept;
         ~DenseMatrix() = default;
@@ -89,16 +89,16 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element, maxRow, maxColumn>
-            : private Utils::CStyleArray<T, maxRow * maxColumn> {
+            : private Utils::CStyleArray<T, Dynamic, maxRow * maxColumn> {
     public:
-        using Base = Utils::CStyleArray<T, maxRow * maxColumn>;
+        using Base = Utils::CStyleArray<T, Dynamic, maxRow * maxColumn>;
     private:
         size_t row;
         size_t column;
     public:
         DenseMatrix() : row(0), column(0) {}
         DenseMatrix(size_t row, size_t column);
-        DenseMatrix(std::initializer_list<Utils::CStyleArray<T, maxColumn>> list);
+        DenseMatrix(std::initializer_list<Utils::CStyleArray<T, Dynamic, maxColumn>> list);
         DenseMatrix(const DenseMatrix& matrix) = default;
         DenseMatrix(DenseMatrix&& matrix) noexcept;
         ~DenseMatrix() = default;
@@ -120,10 +120,10 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, maxRow, maxColumn>
-            : public Utils::CStyleArray<Vector<T, maxRow>, maxColumn> {
+            : public Utils::CStyleArray<Vector<T, maxRow>, Dynamic, maxColumn> {
     public:
         using VectorType = Vector<T, maxRow>;
-        using Base = Utils::CStyleArray<VectorType, maxColumn>;
+        using Base = Utils::CStyleArray<VectorType, Dynamic, maxColumn>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t length);
@@ -168,10 +168,10 @@ namespace Physica::Core {
      */
     template<class T, size_t maxRow, size_t maxColumn>
     class DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, maxRow, maxColumn>
-            : public Utils::CStyleArray<Vector<T, maxColumn>, maxRow> {
+            : public Utils::CStyleArray<Vector<T, maxColumn>, Dynamic, maxRow> {
     public:
         using VectorType = Vector<T, maxColumn>;
-        using Base = Utils::CStyleArray<VectorType, maxRow>;
+        using Base = Utils::CStyleArray<VectorType, Dynamic, maxRow>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t length);

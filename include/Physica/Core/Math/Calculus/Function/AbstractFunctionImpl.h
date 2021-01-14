@@ -22,8 +22,8 @@
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     AbstractFunction<type, errorTrack>::AbstractFunction(size_t variablesLength, size_t constantsLength)
-            : variables(CStyleArray<Scalar<type, errorTrack>, Dynamic>(variablesLength))
-            , constants(CStyleArray<Scalar<type, errorTrack>, Dynamic>(constantsLength)) {
+            : variables(CStyleArray<Scalar<type, errorTrack>>(variablesLength))
+            , constants(CStyleArray<Scalar<type, errorTrack>>(constantsLength)) {
         for(size_t i = 0; i < variablesLength; ++i)
             variables.allocate(Scalar<type, errorTrack>(0), i);
         for(size_t i = 0; i < constantsLength; ++i)

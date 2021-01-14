@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,9 +20,7 @@
 #define PHYSICA_VECTOREXPRESSION_H
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
-
-/*!
+/**
  * This file contains implementation of expression templates of @class Vector.
  */
 namespace Physica::Core {

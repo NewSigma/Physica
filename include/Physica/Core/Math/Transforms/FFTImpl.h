@@ -79,7 +79,7 @@ namespace Physica::Core {
     void FFT<type, errorTrack>::transformImpl(const Scalar<type, errorTrack>&& phase) {
         data *= distance;
         const auto length = data.getLength();
-        CStyleArray<ComplexScalar<type, errorTrack>, Dynamic> array(length);
+        CStyleArray<ComplexScalar<type, errorTrack>> array(length);
         //Optimize:
         //1.i and j is changeable.(dynamic programming)
         //2.Use the formula such as sin(a + b) to avoid calculate sin and cos directly.

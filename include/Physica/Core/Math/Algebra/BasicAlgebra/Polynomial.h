@@ -33,7 +33,7 @@ namespace Physica::Core {
     class Polynomial {
     public:
         //data stores the coeficients of the polynomial.
-        CStyleArray<Scalar<type, errorTrack>, Dynamic> data;
+        CStyleArray<Scalar<type, errorTrack>> data;
     public:
         Polynomial() = default;
         Polynomial(const Polynomial& p) = default;

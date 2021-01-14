@@ -30,8 +30,8 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     class AbstractFunction {
     protected:
-        mutable CStyleArray<Scalar<type, errorTrack>, Dynamic> variables;
-        mutable CStyleArray<Scalar<type, errorTrack>, Dynamic> constants;
+        mutable CStyleArray<Scalar<type, errorTrack>> variables;
+        mutable CStyleArray<Scalar<type, errorTrack>> constants;
     public:
         ~AbstractFunction() = default;
         /* Setters */
@@ -44,8 +44,8 @@ namespace Physica::Core {
         AbstractFunction& operator=(const AbstractFunction& f);
         AbstractFunction& operator=(AbstractFunction&& f) noexcept;
         /* Getters */
-        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getVariables() const { return variables; }
-        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>, Dynamic>& getConstants() const { return constants; }
+        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>>& getVariables() const { return variables; }
+        [[nodiscard]] const CStyleArray<Scalar<type, errorTrack>>& getConstants() const { return constants; }
         [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
         [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
         /* Setters */
