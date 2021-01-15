@@ -63,6 +63,7 @@ namespace Physica::Utils {
         using Base::arr;
     public:
         CStyleArray();
+        CStyleArray(size_t capacity_);
         CStyleArray(std::initializer_list<T> list);
         CStyleArray(const CStyleArray& array);
         CStyleArray(CStyleArray&& array) noexcept;
@@ -74,12 +75,15 @@ namespace Physica::Utils {
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         CStyleArray<T, Dynamic, Dynamic> cut(size_t from);
-        void allocate(const T& t, size_t index) { assert(false); } //Never call it, for the convience of implement templates.
-        void allocate(T&& t, size_t index) { assert(false); } //Never call it, for the convience of implement templates.
+        void init(const T& t, size_t index) { Base::operator[](index) = t; } //For the convience of implementing templates.
+        void init(T&& t, size_t index) { Base::operator[](index) = std::move(t); } //For the convience of implementing templates.
+        void clear() noexcept {} //For the convience of implementing templates.
         void swap(CStyleArray& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
+        /* Setters */
+        void setLength(size_t size) { assert(size == Length); } //For the convience of implementing templates.
     };
 
     template<class T, size_t Capacity>
@@ -91,7 +95,7 @@ namespace Physica::Utils {
         using Base::arr;
     public:
         CStyleArray();
-        explicit CStyleArray(size_t length);
+        CStyleArray(size_t capacity_);
         CStyleArray(std::initializer_list<T> list);
         CStyleArray(const CStyleArray& array);
         CStyleArray(CStyleArray&& array) noexcept;
@@ -124,8 +128,7 @@ namespace Physica::Utils {
         size_t capacity;
     public:
         CStyleArray();
-        explicit CStyleArray(size_t length_);
-        CStyleArray(size_t length_, size_t capacity_);
+        explicit CStyleArray(size_t capacity_);
         CStyleArray(std::initializer_list<T> list);
         CStyleArray(const CStyleArray& array);
         CStyleArray(CStyleArray&& array) noexcept;

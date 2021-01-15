@@ -28,6 +28,13 @@ namespace Physica::Utils {
         for (size_t i = 0; i < Length; ++i)
             Base::allocate(T(), i);
     }
+    /**
+     * This function is provided for the convenience to implement templates.
+     */
+    template<class T, size_t Length, size_t Capacity>
+    CStyleArray<T, Length, Capacity>::CStyleArray(size_t capacity_) : Base(Capacity) {
+        assert(capacity_ == Capacity);
+    }
 
     template<class T, size_t Length, size_t Capacity>
     CStyleArray<T, Length, Capacity>::CStyleArray(std::initializer_list<T> list) : Base(Length) {
@@ -97,20 +104,24 @@ namespace Physica::Utils {
     }
     ///////////////////////////////////////CStyleArray<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity>
-    CStyleArray<T, Dynamic, Capacity>::CStyleArray() : Base(0, Capacity) {}
-
+    CStyleArray<T, Dynamic, Capacity>::CStyleArray() : Base(Capacity) {}
+    /**
+     * This function is provided for the convenience to implement templates.
+     */
     template<class T, size_t Capacity>
-    CStyleArray<T, Dynamic, Capacity>::CStyleArray(size_t length) : Base(length, Capacity) {
-        assert(length <= Capacity);
+    CStyleArray<T, Dynamic, Capacity>::CStyleArray(size_t capacity_) : Base(Capacity) {
+        assert(capacity_ == Capacity);
     }
 
     template<class T, size_t Capacity>
-    CStyleArray<T, Dynamic, Capacity>::CStyleArray(std::initializer_list<T> list) : Base(list.size(), Capacity) {
-        static_assert(list.size() <= Capacity);
+    CStyleArray<T, Dynamic, Capacity>::CStyleArray(std::initializer_list<T> list) : Base(Capacity) {
+        const auto length = list.size();
+        static_assert(length <= Capacity);
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             Base::allocate(*ite, i);
+        Base::setLength(length);
     }
 
     template<class T, size_t Capacity>
@@ -206,24 +217,19 @@ namespace Physica::Utils {
     }
     ///////////////////////////////////////CStyleArray<T, Dynamic, Dynamic>//////////////////////////////////////////
     template<class T>
-    CStyleArray<T, Dynamic, Dynamic>::CStyleArray() : Base(0, 0), capacity(0) {}
+    CStyleArray<T, Dynamic, Dynamic>::CStyleArray() : Base(0), capacity(0) {}
 
     template<class T>
-    CStyleArray<T, Dynamic, Dynamic>::CStyleArray(size_t length_) : CStyleArray(length_, length_) {}
-
-    template<class T>
-    inline CStyleArray<T, Dynamic, Dynamic>::CStyleArray(size_t length_, size_t capacity_)
-            : Base(length_, capacity_), capacity(capacity_) {
-        assert(length_ <= capacity_);
-    }
+    CStyleArray<T, Dynamic, Dynamic>::CStyleArray(size_t capacity_) : Base(capacity_) {}
 
     template<class T>
     CStyleArray<T, Dynamic, Dynamic>::CStyleArray(std::initializer_list<T> list)
-            : Base(list.size(), list.size()), capacity(list.size()) {
+            : Base(list.size()), capacity(list.size()) {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             allocate(*ite, i);
+        Base::setLength(list.size());
     }
 
     template<class T>

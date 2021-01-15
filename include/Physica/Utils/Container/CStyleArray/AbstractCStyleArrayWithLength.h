@@ -41,6 +41,8 @@ namespace Physica::Utils::Intenal {
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Helpers */
+        void init(const T& t, size_t index) { Base::allocate(t, index); } //For the convience of implementing templates.
+        void init(T&& t, size_t index) { Base::allocate(std::move(t), index); } //For the convience of implementing templates.
         T cutLast();
         inline void grow(const T& t);
         inline void grow(T&& t);
@@ -52,9 +54,9 @@ namespace Physica::Utils::Intenal {
          * \size must larger than current length. Because we can not delete the elements we do not need if not.
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
-        void setLength(size_t size) { Q_ASSERT(length <= size); length = size; }
+        void setLength(size_t size) { Q_ASSERT(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
-        AbstractCStyleArrayWithLength(size_t length_, size_t capacity);
+        AbstractCStyleArrayWithLength(size_t capacity);
         AbstractCStyleArrayWithLength(const AbstractCStyleArrayWithLength& array);
         AbstractCStyleArrayWithLength(AbstractCStyleArrayWithLength&& array) noexcept;
         /* Operators */

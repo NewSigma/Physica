@@ -26,8 +26,10 @@ namespace Physica::Core {
             , constants(CStyleArray<Scalar<type, errorTrack>>(constantsLength)) {
         for(size_t i = 0; i < variablesLength; ++i)
             variables.allocate(Scalar<type, errorTrack>(0), i);
+        variables.setLength(variablesLength);
         for(size_t i = 0; i < constantsLength; ++i)
             constants.allocate(Scalar<type, errorTrack>(0), i);
+        constants.setLength(constantsLength);
     }
 
     template<ScalarType type, bool errorTrack>

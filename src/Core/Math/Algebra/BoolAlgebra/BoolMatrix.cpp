@@ -22,8 +22,9 @@
 namespace Physica::Core {
     BoolMatrix::BoolMatrix(size_t column, size_t row) : arr(row) {
         Q_ASSERT(column > 0 && row > 0);
-        for(size_t s = 0; s < row; ++s)
+        for (size_t s = 0; s < row; ++s)
             arr.allocate(BitArray(column), s);
+        arr.setLength(row);
     }
     /*!
      * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
@@ -51,6 +52,7 @@ namespace Physica::Core {
             }
             array.allocate(std::move(row_i), i);
         }
+        array.setLength(r1);
         return BoolMatrix(std::move(array));
     }
     /*!
@@ -62,6 +64,7 @@ namespace Physica::Core {
         CStyleArray<BitArray> array(row);
         for(size_t s = 0; s < row; ++s)
             array.allocate(arr[s] & m.arr[s], s);
+        array.setLength(row);
         return BoolMatrix(std::move(array));
     }
     /*!
@@ -73,6 +76,7 @@ namespace Physica::Core {
         CStyleArray<BitArray, Dynamic> array(row);
         for(size_t s = 0; s < row; ++s)
             array.allocate(arr[s] | m.arr[s], s);
+        array.setLength(row);
         return BoolMatrix(std::move(array));
     }
     /*!
@@ -83,6 +87,7 @@ namespace Physica::Core {
         CStyleArray<BitArray, Dynamic> array(row);
         for(size_t s = 0; s < row; ++s)
             array.allocate(~(arr[s]), s);
+        array.setLength(row);
         return BoolMatrix(std::move(array));
     }
 }

@@ -22,11 +22,8 @@
 
 namespace Physica::Utils::Intenal {
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(size_t length_, size_t capacity)
-        : Base(capacity), length(length_) {
-        for (size_t i = 0; i < length; ++i)
-            Base::allocate(T(), i);
-    }
+    AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(size_t capacity)
+        : Base(capacity), length(0) {}
 
     template<class Derived>
     AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(

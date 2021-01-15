@@ -92,6 +92,7 @@ namespace Physica::Core {
             }
             array.allocate(std::move(result_i), i);
         }
+        array.setLength(length);
         data = std::move(array);
     }
 }
