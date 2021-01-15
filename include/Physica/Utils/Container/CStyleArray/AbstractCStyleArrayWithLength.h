@@ -28,10 +28,13 @@ namespace Physica::Utils::Intenal {
         using typename Base::T;
     protected:
         using Base::arr;
+    public:
+        using Base::allocate;
+    protected:
         size_t length;
     public:
         AbstractCStyleArrayWithLength() = delete;
-        ~AbstractCStyleArrayWithLength() = default;
+        ~AbstractCStyleArrayWithLength();
         /* Operators */
         Derived& operator<<(const T& t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
@@ -42,6 +45,7 @@ namespace Physica::Utils::Intenal {
         inline void grow(const T& t);
         inline void grow(T&& t);
         void removeAt(size_t index);
+        void clear() noexcept;
         /* Setters */
         /**
          * Low level api. Designed for performance.

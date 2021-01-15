@@ -23,7 +23,10 @@
 namespace Physica::Utils::Intenal {
     template<class Derived>
     AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(size_t length_, size_t capacity)
-        : Base(capacity), length(length_) {}
+        : Base(capacity), length(length_) {
+        for (size_t i = 0; i < length; ++i)
+            Base::allocate(T(), i);
+    }
 
     template<class Derived>
     AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(
@@ -32,6 +35,13 @@ namespace Physica::Utils::Intenal {
     template<class Derived>
     AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(
         AbstractCStyleArrayWithLength&& array) noexcept : Base(std::move(array)), length(array.length) {}
+
+    template<class Derived>
+    AbstractCStyleArrayWithLength<Derived>::~AbstractCStyleArrayWithLength() {
+        if(QTypeInfo<T>::isComplex)
+            for(size_t i = 0; i < length; ++i)
+                (arr + i)->~T();
+    }
 
     template<class Derived>
     AbstractCStyleArrayWithLength<Derived>&
@@ -86,6 +96,13 @@ namespace Physica::Utils::Intenal {
             (arr + index)->~T();
         --length;
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));
+    }
+
+    template<class Derived>
+    void AbstractCStyleArrayWithLength<Derived>::clear() {
+        for (size_t i = 0; i < length; ++i)
+            (arr + i)->~T();
+        length = 0;
     }
 
     template<class Derived>

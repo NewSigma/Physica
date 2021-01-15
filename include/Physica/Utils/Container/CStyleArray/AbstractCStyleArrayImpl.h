@@ -77,7 +77,7 @@ namespace Physica::Utils::Intenal {
     template<class Derived>
     AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(const AbstractCStyleArray& array) {
         if (this != &array) {
-            this->~AbstractCStyleArray();
+            getDerived().~Derived();
             arr = reinterpret_cast<T*>(malloc(array.getDerived().getCapacity() * sizeof(T)));
             const size_t length = array.getDerived().getLength();
             if(QTypeInfo<T>::isComplex)
@@ -91,8 +91,9 @@ namespace Physica::Utils::Intenal {
 
     template<class Derived>
     AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(AbstractCStyleArray&& array) noexcept {
-        this->~AbstractCStyleArray();
-        std::swap(arr, array.arr);
+        getDerived().~Derived();
+        arr = array.arr;
+        array.arr = nullptr;
         return *this;
     }
 
@@ -123,6 +124,8 @@ namespace Physica::Utils::Intenal {
      * Low level api. Designed for performance.
      * Simply allocate a T at position \param index.
      * You must ensure position \index is usable or a memory leak will occur.
+     * 
+     * Expose this function or not depends on the subclasses.
      */
     template<class Derived>
     inline void AbstractCStyleArray<Derived>::allocate(const T& t, size_t index) {

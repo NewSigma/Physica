@@ -64,9 +64,6 @@ namespace Physica::Utils::Intenal {
         /* Iterator */
         Iterator begin() { return Iterator(arr); }
         Iterator end() { return Iterator(arr + getDerived().getLength()); }
-        /* Helpers */
-        inline void allocate(const T& t, size_t index);
-        inline void allocate(T&& t, size_t index);
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:
@@ -78,6 +75,8 @@ namespace Physica::Utils::Intenal {
         AbstractCStyleArray& operator=(const AbstractCStyleArray& array);
         AbstractCStyleArray& operator=(AbstractCStyleArray&& array) noexcept;
         /* Helpers */
+        inline void allocate(const T& t, size_t index);
+        inline void allocate(T&& t, size_t index);
         inline void swap(AbstractCStyleArray& array) noexcept;
         /* Getters */
         [[nodiscard]] Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }

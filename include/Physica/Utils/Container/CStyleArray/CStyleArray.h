@@ -92,7 +92,7 @@ namespace Physica::Utils {
         CStyleArray(std::initializer_list<T> list);
         CStyleArray(const CStyleArray& array);
         CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray();
+        ~CStyleArray() = default;
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;
@@ -126,7 +126,7 @@ namespace Physica::Utils {
         CStyleArray(std::initializer_list<T> list);
         CStyleArray(const CStyleArray& array);
         CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray();
+        ~CStyleArray() = default;
         /* Operators */
         CStyleArray& operator=(const CStyleArray& array);
         CStyleArray& operator=(CStyleArray&& array) noexcept;

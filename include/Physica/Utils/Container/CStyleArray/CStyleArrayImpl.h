@@ -98,12 +98,11 @@ namespace Physica::Utils {
     ///////////////////////////////////////CStyleArray<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity>
     CStyleArray<T, Dynamic, Capacity>::CStyleArray() : Base(0, Capacity) {}
-    /**
-     * Low level api. Designed for performance.
-     * Warning: The first \param length elements have not been allocated. DO NOT try to visit them.
-     */
+
     template<class T, size_t Capacity>
-    CStyleArray<T, Dynamic, Capacity>::CStyleArray(size_t length) : Base(length, Capacity) {}
+    CStyleArray<T, Dynamic, Capacity>::CStyleArray(size_t length) : Base(length, Capacity) {
+        assert(length <= Capacity);
+    }
 
     template<class T, size_t Capacity>
     CStyleArray<T, Dynamic, Capacity>::CStyleArray(std::initializer_list<T> list) : Base(list.size(), Capacity) {
@@ -121,13 +120,6 @@ namespace Physica::Utils {
     template<class T, size_t Capacity>
     CStyleArray<T, Dynamic, Capacity>::CStyleArray(CStyleArray<T, Dynamic, Capacity>&& array) noexcept
             : Base(std::move(array)) {}
-
-    template<class T, size_t Capacity>
-    CStyleArray<T, Dynamic, Capacity>::~CStyleArray() {
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
-    }
 
     template<class T, size_t Capacity>
     CStyleArray<T, Dynamic, Capacity>& CStyleArray<T, Dynamic, Capacity>::operator=(const CStyleArray<T, Dynamic, Capacity>& array) {
@@ -218,10 +210,7 @@ namespace Physica::Utils {
 
     template<class T>
     CStyleArray<T, Dynamic, Dynamic>::CStyleArray(size_t length_) : CStyleArray(length_, length_) {}
-    /**
-     * Low level api. Designed for performance.
-     * Warning: The first \param length elements have not been allocated. DO NOT try to visit them.
-     */
+
     template<class T>
     inline CStyleArray<T, Dynamic, Dynamic>::CStyleArray(size_t length_, size_t capacity_)
             : Base(length_, capacity_), capacity(capacity_) {
@@ -244,13 +233,6 @@ namespace Physica::Utils {
     template<class T>
     CStyleArray<T, Dynamic, Dynamic>::CStyleArray(CStyleArray<T, Dynamic, Dynamic>&& array) noexcept
             : Base(std::move(array)), capacity(array.capacity) {}
-
-    template<class T>
-    CStyleArray<T, Dynamic, Dynamic>::~CStyleArray() {
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
-    }
 
     template<class T>
     CStyleArray<T, Dynamic, Dynamic>& CStyleArray<T, Dynamic, Dynamic>::operator=(const CStyleArray<T, Dynamic, Dynamic>& array) {
