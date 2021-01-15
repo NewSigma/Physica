@@ -23,6 +23,31 @@
 namespace Physica::Utils::Intenal {
     //Forward declaration
     template<class T> class Traits;
+    template<class Derived> class AbstractCStyleArray;
+
+    template<class Pointer, class Container>
+    class Iterator;
+    
+    template<class Pointer, class Derived>
+    class Iterator<Pointer, AbstractCStyleArray<Derived>> {
+        Pointer* p;
+    public:
+        Iterator(const Iterator& ite) : p(ite.p) {}
+        Iterator(Iterator&& ite) noexcept : p(ite.p) {}
+        ~Iterator() = default;
+        /* Operators */
+        Iterator& operator=(const Iterator& ite);
+        Iterator& operator=(Iterator&& ite) noexcept;
+        bool operator==(const Iterator& ite) const noexcept { return p == ite.p; }
+        bool operator!=(const Iterator& ite) const noexcept { return p != ite.p; }
+        Iterator& operator++();
+        const Iterator operator++(int);
+        Pointer& operator*() { return *p; }
+    private:
+        explicit Iterator(Pointer* p) : p(p) {}
+
+        friend class AbstractCStyleArray<Derived>;
+    };
     /**
      * Public parts among specializations of CStyleArray.
      */
@@ -30,28 +55,8 @@ namespace Physica::Utils::Intenal {
     class AbstractCStyleArray {
     protected:
         using T = typename Traits<Derived>::ElementType;
-    public:
-        class Iterator {
-            T* p;
-        public:
-            ~Iterator() = default;
-
-            Iterator(const Iterator& ite) : p(ite.p) {}
-            Iterator(Iterator&& ite) noexcept : p(ite.p) {}
-
-            /* Operators */
-            Iterator& operator=(const Iterator& ite);
-            Iterator& operator=(Iterator&& ite) noexcept;
-            bool operator==(const Iterator& ite) const noexcept { return p == ite.p; }
-            bool operator!=(const Iterator& ite) const noexcept { return p != ite.p; }
-            Iterator& operator++();
-            const Iterator operator++(int);
-            T& operator*() { return *p; }
-        private:
-            explicit Iterator(T* p) : p(p) {}
-
-            friend class AbstractCStyleArray;
-        };
+        using Iterator_ = Iterator<T, AbstractCStyleArray<Derived>>;
+        using ConstIterator = Iterator<const T, AbstractCStyleArray<Derived>>;
     public:
         T* __restrict arr;
     public:
@@ -62,8 +67,10 @@ namespace Physica::Utils::Intenal {
         bool operator==(const AbstractCStyleArray& array) const;
         bool operator!=(const AbstractCStyleArray& array) const { return !(operator==(array)); }
         /* Iterator */
-        Iterator begin() { return Iterator(arr); }
-        Iterator end() { return Iterator(arr + getDerived().getLength()); }
+        Iterator_ begin() noexcept { return Iterator_(arr); }
+        Iterator_ end() noexcept { return Iterator_(arr + getDerived().getLength()); }
+        ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
+        ConstIterator cend() const noexcept { return ConstIterator(arr + getDerived().getLength()); }
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:

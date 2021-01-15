@@ -99,7 +99,7 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    void AbstractCStyleArrayWithLength<Derived>::clear() {
+    void AbstractCStyleArrayWithLength<Derived>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
             (arr + i)->~T();
         length = 0;

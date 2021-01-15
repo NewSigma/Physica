@@ -21,30 +21,30 @@
 #include <cstring>
 
 namespace Physica::Utils::Intenal {
-    template<class Derived>
-    typename AbstractCStyleArray<Derived>::Iterator&
-    AbstractCStyleArray<Derived>::Iterator::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
+    template<class Pointer, class Derived>
+    Iterator<Pointer, AbstractCStyleArray<Derived>>&
+    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
-    template<class Derived>
-    typename AbstractCStyleArray<Derived>::Iterator&
-    AbstractCStyleArray<Derived>::Iterator::operator=(Iterator&& ite) noexcept {
+    template<class Pointer, class Derived>
+    Iterator<Pointer, AbstractCStyleArray<Derived>>&
+    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator=(Iterator&& ite) noexcept {
         p = ite.p;
         return *this;
     }
 
-    template<class Derived>
-    typename AbstractCStyleArray<Derived>::Iterator&
-    AbstractCStyleArray<Derived>::Iterator::operator++() {
+    template<class Pointer, class Derived>
+    Iterator<Pointer, AbstractCStyleArray<Derived>>&
+    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator++() {
         ++p;
         return *this;
     }
 
-    template<class Derived>
-    const typename AbstractCStyleArray<Derived>::Iterator
-    AbstractCStyleArray<Derived>::Iterator::operator++(int) {
+    template<class Pointer, class Derived>
+    const Iterator<Pointer, AbstractCStyleArray<Derived>>
+    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator++(int) {
         return Iterator(p++);
     }
 

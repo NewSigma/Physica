@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <cstdlib>
 #include <qglobal.h>
 #include "AbstractCStyleArrayWithLength.h"
@@ -73,6 +74,8 @@ namespace Physica::Utils {
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         CStyleArray<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         CStyleArray<T, Dynamic, Dynamic> cut(size_t from);
+        void allocate(const T& t, size_t index) { assert(false); } //Never call it, for the convience of implement templates.
+        void allocate(T&& t, size_t index) { assert(false); } //Never call it, for the convience of implement templates.
         void swap(CStyleArray& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
