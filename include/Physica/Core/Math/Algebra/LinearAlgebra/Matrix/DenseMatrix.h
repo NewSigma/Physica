@@ -77,8 +77,10 @@ namespace Physica::Core {
         DenseMatrix& operator=(const DenseMatrix& m) = default;
         DenseMatrix& operator=(DenseMatrix&& m) noexcept;
         /* Iterators */
-        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
-        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
         /* Getters */
         [[nodiscard]] constexpr static int getType() { return DenseMatrixType::Column | DenseMatrixType::Element; }
         [[nodiscard]] size_t getRow() const { return row; }
@@ -108,8 +110,10 @@ namespace Physica::Core {
         DenseMatrix& operator=(const DenseMatrix& m) = default;
         DenseMatrix& operator=(DenseMatrix&& m) noexcept;
         /* Iterators */
-        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
-        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
         /* Getters */
         [[nodiscard]] constexpr static int getType() { return DenseMatrixType::Row | DenseMatrixType::Element; }
         [[nodiscard]] size_t getRow() const { return row; }
@@ -137,8 +141,10 @@ namespace Physica::Core {
         DenseMatrix& operator=(const DenseMatrix& m) = default;
         DenseMatrix& operator=(DenseMatrix&& m) noexcept;
         /* Iterators */
-        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
-        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
         /* Matrix Operations */
         void appendRow(const VectorType& v);
         void appendRow(VectorType&& v) noexcept;
@@ -185,8 +191,10 @@ namespace Physica::Core {
         DenseMatrix& operator=(const DenseMatrix& m) = default;
         DenseMatrix& operator=(DenseMatrix&& m) noexcept;
         /* Iterators */
-        typename Base::Iterator begin() { return Base::begin(); } //NOLINT virtual is not essential.
-        typename Base::Iterator end() { return Base::end(); } //NOLINT virtual is not essential.
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
         /* Matrix Operations */
         void appendRow(const VectorType& v);
         void appendRow(VectorType&& v) noexcept;

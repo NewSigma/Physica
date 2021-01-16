@@ -16,15 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_VECTOREXPRESSION_H
-#define PHYSICA_VECTOREXPRESSION_H
+#pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 /**
- * This file contains implementation of expression templates of @class Vector.
+ * This file contains implementation of expression templates of \class Vector.
+ * 
+ * Optimize: Add compile time length check, length of two vectors must be equal.
  */
 namespace Physica::Core {
-    template<class T = MultiScalar, size_t maxLength = Utils::Dynamic>
+    //Forward declaration
+    using Utils::Dynamic;
+    template<class T = MultiScalar, size_t Length = Dynamic, size_t maxLength = Length>
     class Vector;
 
     enum class VectorExpressionType {
@@ -34,8 +37,8 @@ namespace Physica::Core {
         Mul,
         Div
     };
-    /*!
-     * @class VectorExpression represents @param T1 @param type @param T2. e.g. vector + scalar, expression * expression
+    /**
+     * \class VectorExpression represents \param T1 \param type \param T2. e.g. vector + scalar, expression * expression
      */
     template<VectorExpressionType type, class T1, class T2 = T1>
     class VectorExpression {
@@ -43,13 +46,14 @@ namespace Physica::Core {
         static_assert(type > VectorExpressionType::Div, "Not implemented.");
     };
     //////////////////////////////////////Minus//////////////////////////////////////
-    template<class T, size_t maxLength>
-    class VectorExpression<VectorExpressionType::Minus, Vector<T, maxLength>> {
-        const Vector<T, maxLength>& vector;
+    template<class T, size_t Length, size_t maxLength>
+    class VectorExpression<VectorExpressionType::Minus, Vector<T, Length, maxLength>> {
+        using VectorType = Vector<T, Length, maxLength>;
+        const VectorType& vector;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v) : vector(v) {}
+        explicit VectorExpression(const VectorType& v) : vector(v) {}
 
-        const T& operator[](size_t s) const { return vector[s]; }
+        T operator[](size_t s) const { return -vector[s]; }
         [[nodiscard]] size_t getLength() const { return vector.getLength(); }
     };
 
@@ -63,34 +67,36 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class T, size_t maxLength>
-    class VectorExpression<VectorExpressionType::Add, Vector<T, maxLength>, Vector<T, maxLength>> {
-        const Vector<T, maxLength>& v1;
-        const Vector<T, maxLength>& v2;
+    template<class T, size_t Length, size_t maxLength>
+    class VectorExpression<VectorExpressionType::Add, Vector<T, Length, maxLength>, Vector<T, Length, maxLength>> {
+        using VectorType = Vector<T, Length, maxLength>;
+        const VectorType& v1;
+        const VectorType& v2;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) : v1(v1), v2(v2) {}
+        explicit VectorExpression(const VectorType& v1, const VectorType& v2) : v1(v1), v2(v2) {}
 
         decltype(auto) operator[](size_t s) const { return v1[s] + v2[s]; }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
-    template<class T, size_t maxLength, ScalarType type, bool errorTrack>
-    class VectorExpression<VectorExpressionType::Add, Vector<T, maxLength>, Scalar < type, errorTrack>> {
-        const Vector<T, maxLength>& v;
+    template<class T, size_t Length, size_t maxLength, ScalarType type, bool errorTrack>
+    class VectorExpression<VectorExpressionType::Add, Vector<T, Length, maxLength>, Scalar <type, errorTrack>> {
+        using VectorType = Vector<T, Length, maxLength>;
+        const VectorType& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
+        explicit VectorExpression(const VectorType& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
 
         decltype(auto) operator[](size_t s) const { return v[s] + scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<VectorExpressionType type, class T1, class T2, class T, size_t maxLength>
-    class VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, maxLength>> {
+    template<VectorExpressionType type, class T1, class T2, class T, size_t Length, size_t maxLength>
+    class VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>> {
         VectorExpression<type, T1, T2> exp;
-        const Vector<T, maxLength>& v;
+        const Vector<T, Length, maxLength>& v;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp, const Vector<T, maxLength>& v) : exp(exp), v(v) {}
+        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp, const Vector<T, Length, maxLength>& v) : exp(exp), v(v) {}
 
         decltype(auto) operator[](size_t s) const { return  exp[s] + v[s]; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
@@ -118,34 +124,35 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class T, size_t maxLength>
-    class VectorExpression<VectorExpressionType::Sub, Vector<T, maxLength>, Vector<T, maxLength>> {
-        const Vector<T, maxLength>& v1;
-        const Vector<T, maxLength>& v2;
+    template<class T, size_t Length, size_t maxLength>
+    class VectorExpression<VectorExpressionType::Sub, Vector<T, Length, maxLength>, Vector<T, Length, maxLength>> {
+        using VectorType = Vector<T, Length, maxLength>;
+        const VectorType& v1;
+        const VectorType& v2;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v1, const Vector<T, maxLength>& v2) : v1(v1), v2(v2) {}
+        explicit VectorExpression(const VectorType& v1, const VectorType& v2) : v1(v1), v2(v2) {}
 
         decltype(auto) operator[](size_t s) const { return v1[s] - v2[s]; }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
-    template<class T, size_t maxLength, ScalarType type, bool errorTrack>
-    class VectorExpression<VectorExpressionType::Sub, Vector<T, maxLength>, Scalar<type, errorTrack>> {
-        const Vector<T, maxLength>& v;
+    template<class T, size_t Length, size_t maxLength, ScalarType type, bool errorTrack>
+    class VectorExpression<VectorExpressionType::Sub, Vector<T, Length, maxLength>, Scalar<type, errorTrack>> {
+        const Vector<T, Length, maxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
+        explicit VectorExpression(const Vector<T, Length, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
 
         decltype(auto) operator[](size_t s) const { return v[s] - scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T, size_t maxLength, VectorExpressionType type, class T1, class T2>
-    class VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, maxLength>> {
+    template<class T, size_t Length, size_t maxLength, VectorExpressionType type, class T1, class T2>
+    class VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>> {
         VectorExpression<type, T1, T2> exp;
-        const Vector<T, maxLength>& v;
+        const Vector<T, Length, maxLength>& v;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp, const Vector<T, maxLength>& v) : exp(exp), v(v) {}
+        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp, const Vector<T, Length, maxLength>& v) : exp(exp), v(v) {}
 
         decltype(auto) operator[](size_t s) const { return exp[s] - v[s]; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
@@ -173,12 +180,12 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, size_t maxLength, ScalarType type, bool errorTrack>
-    class VectorExpression<VectorExpressionType::Mul, Vector<T, maxLength>, Scalar<type, errorTrack>> {
-        const Vector<T, maxLength>& v;
+    template<class T, size_t Length, size_t maxLength, ScalarType type, bool errorTrack>
+    class VectorExpression<VectorExpressionType::Mul, Vector<T, Length, maxLength>, Scalar<type, errorTrack>> {
+        const Vector<T, Length, maxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
+        explicit VectorExpression(const Vector<T, Length, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
 
         decltype(auto) operator[](size_t s) const { return v[s] * scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
@@ -195,12 +202,12 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, size_t maxLength, ScalarType type, bool errorTrack>
-    class VectorExpression<VectorExpressionType::Div, Vector<T, maxLength>, Scalar<type, errorTrack>> {
-        const Vector<T, maxLength>& v;
+    template<class T, size_t Length, size_t maxLength, ScalarType type, bool errorTrack>
+    class VectorExpression<VectorExpressionType::Div, Vector<T, Length, maxLength>, Scalar<type, errorTrack>> {
+        const Vector<T, Length, maxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
+        explicit VectorExpression(const Vector<T, Length, maxLength>& v, const Scalar<type, errorTrack>& scalar) : v(v), scalar(scalar) {}
 
         decltype(auto) operator[](size_t s) const { return v[s] / scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
@@ -230,10 +237,10 @@ namespace Physica::Core {
         return VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>(exp, s);
     }
 
-    template<VectorExpressionType type, class T1, class T2, class T, size_t maxLength>
-    VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, maxLength>>
-    operator+(const VectorExpression<type, T1, T2>& exp, const Vector<T, maxLength>& v) {
-        return VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, maxLength>>(exp, v);
+    template<VectorExpressionType type, class T1, class T2, class T, size_t Length, size_t maxLength>
+    VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>>
+    operator+(const VectorExpression<type, T1, T2>& exp, const Vector<T, Length, maxLength>& v) {
+        return VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>>(exp, v);
     }
 
     template<VectorExpressionType type1, class T11, class T12, VectorExpressionType type2, class T21, class T22>
@@ -248,10 +255,10 @@ namespace Physica::Core {
         return VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>(exp, s);
     }
 
-    template<VectorExpressionType type, class T1, class T2, class T, size_t maxLength>
-    VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, maxLength>>
-    operator-(const VectorExpression<type, T1, T2>& exp, const Vector<T, maxLength>& v) {
-        return VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, maxLength>>(exp, v);
+    template<VectorExpressionType type, class T1, class T2, class T, size_t Length, size_t maxLength>
+    VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>>
+    operator-(const VectorExpression<type, T1, T2>& exp, const Vector<T, Length, maxLength>& v) {
+        return VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, Length, maxLength>>(exp, v);
     }
 
     template<VectorExpressionType type1, class T11, class T12, VectorExpressionType type2, class T21, class T22>
@@ -260,5 +267,3 @@ namespace Physica::Core {
         return VectorExpression<VectorExpressionType::Sub, VectorExpression<type1, T11, T12>, VectorExpression<type2, T21, T22>>(exp1, exp2);
     }
 }
-
-#endif
