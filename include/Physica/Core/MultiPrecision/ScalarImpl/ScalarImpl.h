@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,40 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SCALARIMPL_H
-#define PHYSICA_SCALARIMPL_H
+#pragma once
 
 #include <iomanip>
 #include "ScalarArithmetic.h"
 #include "ScalarAddSubExpression.h"
 /**
  * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
+ * Do not include this header file, include \file Scalar.h instead.
  */
 namespace Physica::Core {
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
+        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
+        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator+(const Scalar<type, errorTrack1>& s, ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator+(const Scalar<type, errorTrack1>& s, Intenal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator-(const Scalar<type, errorTrack1>& s, ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator-(const Scalar<type, errorTrack1>& s, Intenal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
     }
 
     template<ScalarType type, bool errorTrack>
@@ -345,5 +344,3 @@ namespace Physica::Core {
         return exp(ln(s1) * s2);
     }
 }
-
-#endif

@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SCALARADDSUBEXPRESSION_H
-#define PHYSICA_SCALARADDSUBEXPRESSION_H
+#pragma once
 
 #include <list>
 #include "Physica/Core/MultiPrecision/MultiPrecisionType.h"
@@ -27,7 +26,10 @@
  */
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack> class Scalar;
+}
 
+
+namespace Physica::Core::Intenal {
     class AbstractScalarAddSubExpression {
     public:
         /**
@@ -85,26 +87,27 @@ namespace Physica::Core {
      */
     template<ScalarType type, bool errorTrack>
     class ScalarAddSubExpression : public ScalarAddSubExpressionHelper<type> {
+        using Base = ScalarAddSubExpressionHelper<type>;
     public:
         template<bool errorTrack1, bool errorTrack2>
         ScalarAddSubExpression(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2, bool minus)
-                : ScalarAddSubExpressionHelper<type>(s1, s2, minus) {}
+                : Base(s1, s2, minus) {}
         template<bool errorTrack1, bool errorTrack2>
         ScalarAddSubExpression(const Scalar<type, errorTrack1>& s, ScalarAddSubExpression<type, errorTrack2>&& exp, bool minus)
-                : ScalarAddSubExpressionHelper<type>(s, std::move(exp), minus) {}
+                : Base(s, std::move(exp), minus) {}
         template<bool errorTrack1, bool errorTrack2>
         ScalarAddSubExpression(ScalarAddSubExpression<type, errorTrack1>&& exp, const Scalar<type, errorTrack2>& s, bool minus)
-                : ScalarAddSubExpressionHelper<type>(std::move(exp), s, minus) {}
+                : Base(std::move(exp), s, minus) {}
         template<bool errorTrack1, bool errorTrack2>
         ScalarAddSubExpression(const ScalarAddSubExpression<type, errorTrack1>& exp1, const ScalarAddSubExpression<type, errorTrack2>& exp2, bool minus)
-                : ScalarAddSubExpressionHelper<type>(exp1, exp2, minus) {}
+                : Base(exp1, exp2, minus) {}
         /* Operators */
         Scalar<type, errorTrack> operator<<(int bits) { return operator Scalar<type, errorTrack>() << bits; }
         Scalar<type, errorTrack> operator>>(int bits) { return operator Scalar<type, errorTrack>() >> bits; }
         Scalar<type, errorTrack> operator-() { return -operator Scalar<type, errorTrack>(); }
         /* Operators */
-        operator Scalar<type, errorTrack>() const { return ScalarAddSubExpressionHelper<type>::calculate(); } //NOLINT Safe cast
-        explicit operator double() const { return double(ScalarAddSubExpressionHelper<type>::calculate()); }
+        operator Scalar<type, errorTrack>() const { return Base::calculate(); } //NOLINT Safe cast
+        explicit operator double() const { return double(Base::calculate()); }
     };
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
@@ -145,5 +148,3 @@ namespace Physica::Core {
 }
 
 #include "ScalarAddSubExpressionImpl.h"
-
-#endif

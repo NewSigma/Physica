@@ -16,21 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SCALARADDSUBEXPRESSIONIMPL_H
-#define PHYSICA_SCALARADDSUBEXPRESSIONIMPL_H
+#pragma once
 
 //Forward declaration
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
 }
 
-namespace Physica::Core {
+namespace Physica::Core::Intenal {
     template<ScalarType type>
     template<bool errorTrack1, bool errorTrack2>
     ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(
@@ -172,5 +171,3 @@ namespace Physica::Core {
         return result;
     }
 }
-
-#endif
