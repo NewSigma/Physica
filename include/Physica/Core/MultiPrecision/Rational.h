@@ -24,7 +24,7 @@
 namespace Physica::Core {
     class Rational {
         Integer numerator;
-        //Always possible integer.
+        //Always positive integer.
         Integer denominator;
     public:
         Rational(const Integer& i);

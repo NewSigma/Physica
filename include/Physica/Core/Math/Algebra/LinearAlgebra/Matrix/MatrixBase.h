@@ -20,7 +20,6 @@ namespace Physica::Core {
     namespace Intenal {
         template<class T>
         class MatrixTrait;
-
         /**
          * The \class MatrixBase provide algorithms that a matrix should support, but the data is provided
          * by \tparam MatrixImpl.

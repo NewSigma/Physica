@@ -22,7 +22,7 @@
 #include <cstddef>
 
 namespace Physica::Utils {
-    /*!
+    /**
      * Comparision:
      * This class is similar to std::vector because it is stored consistently and
      * similar to std::list because it has list nodes.
@@ -30,11 +30,11 @@ namespace Physica::Utils {
      * If we freeze the n.th node, the list behaves as if the node does not exist and the (n - 1).th node
      * will directly link to the (n + 1).th node.
      *
-     * Same to CStyleArray, only classes that have copy or move constructor can be stored in this container.
+     * Only classes that have copy or move constructor can be stored in this container.
      * This container never call the default constructor of T.
      *
      * Used in:
-     * TotalCircuit
+     * \class TotalCircuit
      */
     template<class T>
     class FreezingList {

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstddef>
+#include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Utils::Intenal {
     //Forward declaration
@@ -52,7 +53,7 @@ namespace Physica::Utils::Intenal {
      * Public parts among specializations of CStyleArray.
      */
     template<class Derived>
-    class AbstractCStyleArray {
+    class AbstractCStyleArray : public Utils::CRTPBase<Derived> {
     protected:
         using T = typename Traits<Derived>::ElementType;
         using Iterator_ = Iterator<T, AbstractCStyleArray<Derived>>;

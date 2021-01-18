@@ -25,22 +25,26 @@
 
 namespace Physica::Utils {
     constexpr size_t Dynamic = 0;
-    /*!
-     * This class is a wrapper of of array that is allocated by malloc and whose elements is allocated by placement new.
-     * This class is designed to avoid passing incorrect arguments to classes that use c-style array only.
-     * (Such as \class Matrix and \class Vector.
-     * If we pass a array allocated by new to \class Matrix or \class Vector,
-     * a memory leak or double free will happen.)
+    /**
+     * Linear storage container.
+     * This class is designed to be a dynamic or fixed array, in detail:
+     * 1.A fixed length array.(same to std::array)
+     * 2.A dynamic array but its max size is fixed.
+     * 3.A dynamic array whose length and max size are dynamic.(same to std::vector)
      *
      * Note:
      * If \T is a complex type, \T must have its copy and move constructors defined.
      *
      * Unfinished:
-     * Copy, move constructors and assign operators maybe able to accept different specializations.
+     * 1.Copy, move constructors and assign operators maybe able to accept different specializations.
+     * 2.Rename 
      *
      * Optimize:
      * 1. Use more effective allocate strategy to avoid reallocate.
      * 2. Use the end pointer of arr instead of length may improve performance.
+     * 
+     * Idea:
+     * May be extends std::array and std::vector.
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length>
     class CStyleArray;
