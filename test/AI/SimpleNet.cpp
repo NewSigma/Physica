@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     net[1][0].connect(0, 2);
     net[1][1].connect(1, 0);
     net[1][1].connect(1, 1);
-    Vector<MultiScalar> d1(CStyleArray<MultiScalar>(2));
+    Vector<MultiScalar> d1(Array<MultiScalar>(2));
     d1 << 1.0 << 1.0;
     MultiScalar n1((SignedScalarUnit)1);
     net.loadData(d1, n1);
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         net.train();
         std::cout << "Train " << i << " finished. Loss:" << double(net.predict()) << '\n';
     }
-    Vector<MultiScalar> d2(CStyleArray<MultiScalar>(2));
+    Vector<MultiScalar> d2(Array<MultiScalar>(2));
     d2 << 1.1 << 0.9;
     MultiScalar n2((SignedScalarUnit)1);
     net.loadData(d2, n2);

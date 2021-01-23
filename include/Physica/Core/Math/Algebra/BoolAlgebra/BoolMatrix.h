@@ -20,7 +20,7 @@
 #define PHYSICA_BOOLMATRIX_H
 
 #include "Physica/Utils/BitArray.h"
-#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
     using namespace Utils;
@@ -30,7 +30,7 @@ namespace Physica::Core {
      * 2. Implement a column matrix.
      */
     class BoolMatrix {
-        CStyleArray<BitArray> arr;
+        Array<BitArray> arr;
     public:
         BoolMatrix(size_t column, size_t row);
         BoolMatrix(const BoolMatrix& m) = default;
@@ -54,7 +54,7 @@ namespace Physica::Core {
         /*!
          * Construct a BoolMatrix from its members, declared private to avoid improper uses.
          */
-        explicit BoolMatrix(CStyleArray<BitArray>&& arr) : arr(std::move(arr)) {}
+        explicit BoolMatrix(Array<BitArray>&& arr) : arr(std::move(arr)) {}
     };
 
     inline bool BoolMatrix::hasSameSize(const BoolMatrix& m) const {

@@ -21,7 +21,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <qglobal.h>
-#include "AbstractCStyleArrayWithLength.h"
+#include "AbstractArrayWithLength.h"
 
 namespace Physica::Utils {
     constexpr size_t Dynamic = 0;
@@ -47,11 +47,11 @@ namespace Physica::Utils {
      * May be extends std::array and std::vector.
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length>
-    class CStyleArray;
+    class Array;
 
     namespace Intenal {
         template<class T, size_t Length, size_t Capacity>
-        class Traits<CStyleArray<T, Length, Capacity>> {
+        class Traits<Array<T, Length, Capacity>> {
         public:
             using ElementType = T;
             constexpr static size_t ArrayLength = Length;
@@ -60,29 +60,29 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity>
-    class CStyleArray : public Intenal::AbstractCStyleArray<CStyleArray<T, Length, Capacity>> {
+    class Array : public Intenal::AbstractArray<Array<T, Length, Capacity>> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
     private:
-        using Base = Intenal::AbstractCStyleArray<CStyleArray<T, Length, Capacity>>;
+        using Base = Intenal::AbstractArray<Array<T, Length, Capacity>>;
         using Base::arr;
     public:
-        CStyleArray();
-        CStyleArray(size_t capacity_);
-        CStyleArray(std::initializer_list<T> list);
-        CStyleArray(const CStyleArray& array);
-        CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray();
+        Array();
+        explicit Array(size_t length_, const T& t = T());
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
+        ~Array();
         /* Operators */
-        CStyleArray& operator=(const CStyleArray& array);
-        CStyleArray& operator=(CStyleArray&& array) noexcept;
+        Array& operator=(const Array& array);
+        Array& operator=(Array&& array) noexcept;
         /* Helpers */
-        CStyleArray<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
-        CStyleArray<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
-        CStyleArray<T, Dynamic, Dynamic> cut(size_t from);
+        Array<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
+        Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
+        Array<T, Dynamic, Dynamic> cut(size_t from);
         void init(const T& t, size_t index) { Base::operator[](index) = t; } //For the convience of implementing templates.
         void init(T&& t, size_t index) { Base::operator[](index) = std::move(t); } //For the convience of implementing templates.
         void clear() noexcept {} //For the convience of implementing templates.
-        void swap(CStyleArray& array) noexcept { Base::swap(array); }
+        void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
@@ -91,74 +91,74 @@ namespace Physica::Utils {
     };
 
     template<class T, size_t Capacity>
-    class CStyleArray<T, Dynamic, Capacity>
-        : public Intenal::AbstractCStyleArrayWithLength<CStyleArray<T, Dynamic, Capacity>> {
+    class Array<T, Dynamic, Capacity>
+        : public Intenal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>> {
     private:
-        using Base = Intenal::AbstractCStyleArrayWithLength<CStyleArray<T, Dynamic, Capacity>>;
+        using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>>;
         using Base::length;
         using Base::arr;
     public:
-        CStyleArray();
-        CStyleArray(size_t capacity_);
-        CStyleArray(std::initializer_list<T> list);
-        CStyleArray(const CStyleArray& array);
-        CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray() = default;
+        Array();
+        explicit Array(size_t length_, const T& t = T());
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
+        ~Array() = default;
         /* Operators */
-        CStyleArray& operator=(const CStyleArray& array);
-        CStyleArray& operator=(CStyleArray&& array) noexcept;
+        Array& operator=(const Array& array);
+        Array& operator=(Array&& array) noexcept;
         /* Helpers */
-        CStyleArray<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
-        CStyleArray<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, length); }
-        CStyleArray<T, Dynamic, Dynamic> cut(size_t from);
+        Array<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
+        Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, length); }
+        Array<T, Dynamic, Dynamic> cut(size_t from);
         inline void append(const T& t);
         inline void append(T&& t);
-        void append(const CStyleArray& t);
-        void append(CStyleArray&& t);
-        void swap(CStyleArray& array) noexcept;
+        void append(const Array& t);
+        void append(Array&& t);
+        void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
     };
 
     template<class T>
-    class CStyleArray<T, Dynamic, Dynamic>
-        : public Intenal::AbstractCStyleArrayWithLength<CStyleArray<T, Dynamic, Dynamic>> {
+    class Array<T, Dynamic, Dynamic>
+        : public Intenal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>> {
     private:
-        using Base = Intenal::AbstractCStyleArrayWithLength<CStyleArray<T, Dynamic, Dynamic>>;
+        using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>>;
         using Base::length;
         using Base::arr;
     protected:
         size_t capacity;
     public:
-        CStyleArray();
-        explicit CStyleArray(size_t capacity_);
-        CStyleArray(std::initializer_list<T> list);
-        CStyleArray(const CStyleArray& array);
-        CStyleArray(CStyleArray&& array) noexcept;
-        ~CStyleArray() = default;
+        Array();
+        explicit Array(size_t length_, const T& t = T());
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
+        ~Array() = default;
         /* Operators */
-        CStyleArray& operator=(const CStyleArray& array);
-        CStyleArray& operator=(CStyleArray&& array) noexcept;
+        Array& operator=(const Array& array);
+        Array& operator=(Array&& array) noexcept;
         /* Helpers */
         void append(const T& t);
         void append(T&& t);
-        void append(const CStyleArray& t);
-        void append(CStyleArray&& t);
+        void append(const Array& t);
+        void append(Array&& t);
         void resize(size_t size);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
-        void swap(CStyleArray& array) noexcept;
+        void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
     };
 
     template<class T, size_t Length, size_t Capacity>
-    inline void swap(CStyleArray<T, Length, Capacity>& array1, CStyleArray<T, Length, Capacity>& array2) noexcept {
+    inline void swap(Array<T, Length, Capacity>& array1, Array<T, Length, Capacity>& array2) noexcept {
         array1.swap(array2);
     }
 }
 
-#include "CStyleArrayImpl.h"
+#include "ArrayImpl.h"

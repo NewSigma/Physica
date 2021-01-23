@@ -18,23 +18,20 @@
  */
 #pragma once
 
-#include "AbstractCStyleArray.h"
+#include "AbstractArray.h"
 
 namespace Physica::Utils::Intenal {
     template<class Derived>
-    class AbstractCStyleArrayWithLength : public AbstractCStyleArray<Derived> {
+    class AbstractArrayWithLength : public AbstractArray<Derived> {
     private:
-        using Base = AbstractCStyleArray<Derived>;
+        using Base = AbstractArray<Derived>;
         using typename Base::T;
     protected:
         using Base::arr;
-    public:
-        using Base::allocate;
-    protected:
         size_t length;
     public:
-        AbstractCStyleArrayWithLength() = delete;
-        ~AbstractCStyleArrayWithLength();
+        AbstractArrayWithLength() = delete;
+        ~AbstractArrayWithLength();
         /* Operators */
         Derived& operator<<(const T& t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
@@ -56,15 +53,16 @@ namespace Physica::Utils::Intenal {
          */
         void setLength(size_t size) { Q_ASSERT(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
-        AbstractCStyleArrayWithLength(size_t capacity);
-        AbstractCStyleArrayWithLength(const AbstractCStyleArrayWithLength& array);
-        AbstractCStyleArrayWithLength(AbstractCStyleArrayWithLength&& array) noexcept;
+        AbstractArrayWithLength(size_t capacity);
+        AbstractArrayWithLength(size_t length_, size_t capacity);
+        AbstractArrayWithLength(const AbstractArrayWithLength& array);
+        AbstractArrayWithLength(AbstractArrayWithLength&& array) noexcept;
         /* Operators */
-        AbstractCStyleArrayWithLength& operator=(const AbstractCStyleArrayWithLength& array);
-        AbstractCStyleArrayWithLength& operator=(AbstractCStyleArrayWithLength&& array) noexcept;
+        AbstractArrayWithLength& operator=(const AbstractArrayWithLength& array);
+        AbstractArrayWithLength& operator=(AbstractArrayWithLength&& array) noexcept;
         /* Helpers */
-        void swap(AbstractCStyleArrayWithLength& array);
+        void swap(AbstractArrayWithLength& array);
     };
 }
 
-#include "AbstractCStyleArrayWithLengthImpl.h"
+#include "AbstractArrayWithLengthImpl.h"

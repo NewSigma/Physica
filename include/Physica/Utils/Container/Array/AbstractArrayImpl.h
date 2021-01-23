@@ -22,39 +22,39 @@
 
 namespace Physica::Utils::Intenal {
     template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractCStyleArray<Derived>>&
-    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
+    Iterator<Pointer, AbstractArray<Derived>>&
+    Iterator<Pointer, AbstractArray<Derived>>::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractCStyleArray<Derived>>&
-    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator=(Iterator&& ite) noexcept {
+    Iterator<Pointer, AbstractArray<Derived>>&
+    Iterator<Pointer, AbstractArray<Derived>>::operator=(Iterator&& ite) noexcept {
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractCStyleArray<Derived>>&
-    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator++() {
+    Iterator<Pointer, AbstractArray<Derived>>&
+    Iterator<Pointer, AbstractArray<Derived>>::operator++() {
         ++p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const Iterator<Pointer, AbstractCStyleArray<Derived>>
-    Iterator<Pointer, AbstractCStyleArray<Derived>>::operator++(int) {
+    const Iterator<Pointer, AbstractArray<Derived>>
+    Iterator<Pointer, AbstractArray<Derived>>::operator++(int) {
         return Iterator(p++);
     }
 
     template<class Derived>
-    AbstractCStyleArray<Derived>::AbstractCStyleArray(size_t capacity)
+    AbstractArray<Derived>::AbstractArray(size_t capacity)
             : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {}
 
     template<class Derived>
-    AbstractCStyleArray<Derived>::AbstractCStyleArray(const AbstractCStyleArray<Derived>& array)
-            : AbstractCStyleArray(array.getDerived().getCapacity()) {
+    AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
+            : AbstractArray(array.getDerived().getCapacity()) {
         const size_t length = array.getDerived().getLength();
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
@@ -64,18 +64,18 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    AbstractCStyleArray<Derived>::AbstractCStyleArray(AbstractCStyleArray<Derived>&& array) noexcept : arr(array.arr) {
+    AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept : arr(array.arr) {
         array.arr = nullptr;
     }
 
     template<class Derived>
-    AbstractCStyleArray<Derived>::~AbstractCStyleArray() {
+    AbstractArray<Derived>::~AbstractArray() {
         //Elements should call ~T() at subclasses.
         free(arr);
     }
 
     template<class Derived>
-    AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(const AbstractCStyleArray& array) {
+    AbstractArray<Derived>& AbstractArray<Derived>::operator=(const AbstractArray& array) {
         if (this != &array) {
             getDerived().~Derived();
             arr = reinterpret_cast<T*>(malloc(array.getDerived().getCapacity() * sizeof(T)));
@@ -90,7 +90,7 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    AbstractCStyleArray<Derived>& AbstractCStyleArray<Derived>::operator=(AbstractCStyleArray&& array) noexcept {
+    AbstractArray<Derived>& AbstractArray<Derived>::operator=(AbstractArray&& array) noexcept {
         getDerived().~Derived();
         arr = array.arr;
         array.arr = nullptr;
@@ -98,19 +98,19 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    inline typename AbstractCStyleArray<Derived>::T& AbstractCStyleArray<Derived>::operator[](size_t index) {
+    inline typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) {
         Q_ASSERT(index < getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    inline const typename AbstractCStyleArray<Derived>::T& AbstractCStyleArray<Derived>::operator[](size_t index) const {
+    inline const typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) const {
         Q_ASSERT(index < getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    bool AbstractCStyleArray<Derived>::operator==(const AbstractCStyleArray& array) const {
+    bool AbstractArray<Derived>::operator==(const AbstractArray& array) const {
         if (getDerived().getLength() != array.getDerived().getLength())
             return false;
         if (getDerived().getCapacity() != array.getDerived().getLength())
@@ -128,7 +128,7 @@ namespace Physica::Utils::Intenal {
      * Expose this function or not depends on the subclasses.
      */
     template<class Derived>
-    inline void AbstractCStyleArray<Derived>::allocate(const T& t, size_t index) {
+    inline void AbstractArray<Derived>::allocate(const T& t, size_t index) {
         if(QTypeInfo<T>::isComplex)
             new (arr + index) T(t);
         else
@@ -136,7 +136,7 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    inline void AbstractCStyleArray<Derived>::allocate(T&& t, size_t index) {
+    inline void AbstractArray<Derived>::allocate(T&& t, size_t index) {
         if(QTypeInfo<T>::isComplex)
             new (arr + index) T(std::move(t));
         else
@@ -144,7 +144,7 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    inline void AbstractCStyleArray<Derived>::swap(AbstractCStyleArray<Derived>& array) noexcept {
+    inline void AbstractArray<Derived>::swap(AbstractArray<Derived>& array) noexcept {
         std::swap(arr, array.arr);
     }
 }

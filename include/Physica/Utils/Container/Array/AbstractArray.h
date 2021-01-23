@@ -24,13 +24,13 @@
 namespace Physica::Utils::Intenal {
     //Forward declaration
     template<class T> class Traits;
-    template<class Derived> class AbstractCStyleArray;
+    template<class Derived> class AbstractArray;
 
     template<class Pointer, class Container>
     class Iterator;
     
     template<class Pointer, class Derived>
-    class Iterator<Pointer, AbstractCStyleArray<Derived>> {
+    class Iterator<Pointer, AbstractArray<Derived>> {
         Pointer* p;
     public:
         Iterator(const Iterator& ite) : p(ite.p) {}
@@ -47,26 +47,18 @@ namespace Physica::Utils::Intenal {
     private:
         explicit Iterator(Pointer* p) : p(p) {}
 
-        friend class AbstractCStyleArray<Derived>;
+        friend class AbstractArray<Derived>;
     };
     /**
-     * Public parts among specializations of CStyleArray.
+     * Public parts among specializations of \class Array.
      */
     template<class Derived>
-    class AbstractCStyleArray : public Utils::CRTPBase<Derived> {
-    protected:
+    class AbstractArray : public Utils::CRTPBase<Derived> {
         using T = typename Traits<Derived>::ElementType;
-        using Iterator_ = Iterator<T, AbstractCStyleArray<Derived>>;
-        using ConstIterator = Iterator<const T, AbstractCStyleArray<Derived>>;
-    public:
+        using Iterator_ = Iterator<T, AbstractArray<Derived>>;
+
         T* __restrict arr;
     public:
-        AbstractCStyleArray() = delete;
-        /* Operators */
-        inline T& operator[](size_t index);
-        inline const T& operator[](size_t index) const;
-        bool operator==(const AbstractCStyleArray& array) const;
-        bool operator!=(const AbstractCStyleArray& array) const { return !(operator==(array)); }
         /* Iterator */
         Iterator_ begin() noexcept { return Iterator_(arr); }
         Iterator_ end() noexcept { return Iterator_(arr + getDerived().getLength()); }
@@ -75,21 +67,21 @@ namespace Physica::Utils::Intenal {
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:
-        explicit AbstractCStyleArray(size_t capacity);
-        AbstractCStyleArray(const AbstractCStyleArray& array);
-        AbstractCStyleArray(AbstractCStyleArray&& array) noexcept;
-        ~AbstractCStyleArray();
+        explicit AbstractArray(size_t capacity);
+        AbstractArray(const AbstractArray& array);
+        AbstractArray(AbstractArray&& array) noexcept;
+        ~AbstractArray();
         /* Operators */
-        AbstractCStyleArray& operator=(const AbstractCStyleArray& array);
-        AbstractCStyleArray& operator=(AbstractCStyleArray&& array) noexcept;
+        AbstractArray& operator=(const AbstractArray& array);
+        AbstractArray& operator=(AbstractArray&& array) noexcept;
         /* Helpers */
         inline void allocate(const T& t, size_t index);
         inline void allocate(T&& t, size_t index);
-        inline void swap(AbstractCStyleArray& array) noexcept;
+        inline void swap(AbstractArray& array) noexcept;
         /* Getters */
         [[nodiscard]] Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }
         [[nodiscard]] const Derived& getDerived() const noexcept { return static_cast<const Derived&>(*this); }
     };
 }
 
-#include "AbstractCStyleArrayImpl.h"
+#include "AbstractArrayImpl.h"

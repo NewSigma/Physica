@@ -20,7 +20,7 @@
 
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Utils/Container/CStyleArray/CStyleArray.h"
+#include "Physica/Utils/Container/Array/Array.h"
 #include "VectorExpression.h"
 
 namespace Physica::Core {
@@ -30,9 +30,9 @@ namespace Physica::Core {
      * Default template arguments are defined in \file VectorExpression.h
      */
     template<class T, size_t Length, size_t maxLength>
-    class Vector : public Utils::CStyleArray<T, Length, maxLength> {
+    class Vector : public Utils::Array<T, Length, maxLength> {
         static_assert(Length == Dynamic || Length == maxLength, "maxLength of fixed vector must equals to its length.");
-        using Base = Utils::CStyleArray<T, Length, maxLength>;
+        using Base = Utils::Array<T, Length, maxLength>;
         using ScalarType = T;
     public:
         using Base::Base;

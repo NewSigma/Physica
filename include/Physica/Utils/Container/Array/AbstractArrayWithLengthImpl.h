@@ -22,27 +22,31 @@
 
 namespace Physica::Utils::Intenal {
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(size_t capacity)
+    AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t capacity)
         : Base(capacity), length(0) {}
 
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(
-        const AbstractCStyleArrayWithLength& array) : Base(array), length(array.length) {}
-    
-    template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>::AbstractCStyleArrayWithLength(
-        AbstractCStyleArrayWithLength&& array) noexcept : Base(std::move(array)), length(array.length) {}
+    AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t length_, size_t capacity)
+        : Base(capacity), length(length_) {}
 
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>::~AbstractCStyleArrayWithLength() {
+    AbstractArrayWithLength<Derived>::AbstractArrayWithLength(
+        const AbstractArrayWithLength& array) : Base(array), length(array.length) {}
+    
+    template<class Derived>
+    AbstractArrayWithLength<Derived>::AbstractArrayWithLength(
+        AbstractArrayWithLength&& array) noexcept : Base(std::move(array)), length(array.length) {}
+
+    template<class Derived>
+    AbstractArrayWithLength<Derived>::~AbstractArrayWithLength() {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
                 (arr + i)->~T();
     }
 
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>&
-    AbstractCStyleArrayWithLength<Derived>::operator=(const AbstractCStyleArrayWithLength& array) {
+    AbstractArrayWithLength<Derived>&
+    AbstractArrayWithLength<Derived>::operator=(const AbstractArrayWithLength& array) {
         if (this != &array) {
             length = array.length;
             Base::operator=(array);
@@ -51,8 +55,8 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    AbstractCStyleArrayWithLength<Derived>&
-    AbstractCStyleArrayWithLength<Derived>::operator=(AbstractCStyleArrayWithLength&& array) noexcept {
+    AbstractArrayWithLength<Derived>&
+    AbstractArrayWithLength<Derived>::operator=(AbstractArrayWithLength&& array) noexcept {
         length = array.length;
         Base::operator=(std::move(array));
         return *this;
@@ -61,7 +65,7 @@ namespace Physica::Utils::Intenal {
      * Get the last element in the array and remove it from the array.
      */
     template<class Derived>
-    typename AbstractCStyleArrayWithLength<Derived>::T AbstractCStyleArrayWithLength<Derived>::cutLast() {
+    typename AbstractArrayWithLength<Derived>::T AbstractArrayWithLength<Derived>::cutLast() {
         assert(length > 0);
         --length;
         if(QTypeInfo<T>::isComplex)
@@ -75,19 +79,19 @@ namespace Physica::Utils::Intenal {
      * This function can be used when you are sure the current capacity is enough.
      */
     template<class Derived>
-    inline void AbstractCStyleArrayWithLength<Derived>::grow(const T& t) {
+    inline void AbstractArrayWithLength<Derived>::grow(const T& t) {
         assert(length < Base::getDerived().getCapacity());
         Base::allocate(t, length++);
     }
 
     template<class Derived>
-    inline void AbstractCStyleArrayWithLength<Derived>::grow(T&& t) {
+    inline void AbstractArrayWithLength<Derived>::grow(T&& t) {
         assert(length < Base::getDerived().getCapacity());
         Base::allocate(std::move(t), length++);
     }
 
     template<class Derived>
-    void AbstractCStyleArrayWithLength<Derived>::removeAt(size_t index) {
+    void AbstractArrayWithLength<Derived>::removeAt(size_t index) {
         assert(index < length);
         if(QTypeInfo<T>::isComplex)
             (arr + index)->~T();
@@ -96,14 +100,14 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
-    void AbstractCStyleArrayWithLength<Derived>::clear() noexcept {
+    void AbstractArrayWithLength<Derived>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
             (arr + i)->~T();
         length = 0;
     }
 
     template<class Derived>
-    void AbstractCStyleArrayWithLength<Derived>::swap(AbstractCStyleArrayWithLength& array) {
+    void AbstractArrayWithLength<Derived>::swap(AbstractArrayWithLength& array) {
         Base::swap(array);
         std::swap(length, array.length);
     }
