@@ -38,8 +38,14 @@ namespace Physica::Utils::Intenal {
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Helpers */
-        void init(const T& t, size_t index) { Base::allocate(t, index); } //For the convience of implementing templates.
-        void init(T&& t, size_t index) { Base::allocate(std::move(t), index); } //For the convience of implementing templates.
+        /**
+         * Low level api. Designed for performance.
+         * We provide uniform for the convience of implementing templates.
+         * Developer should ensure not out of boundary, initialize the element at unused place and adjust length after init.
+         * Or a memory error will occur.
+         */
+        void init(const T& t, size_t index) { assert(index >= length); Base::allocate(t, index); }
+        void init(T&& t, size_t index) { assert(index >= length); Base::allocate(std::move(t), index); }
         T cutLast();
         inline void grow(const T& t);
         inline void grow(T&& t);

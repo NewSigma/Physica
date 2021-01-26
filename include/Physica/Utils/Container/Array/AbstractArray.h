@@ -34,11 +34,9 @@ namespace Physica::Utils::Intenal {
         Pointer* p;
     public:
         Iterator(const Iterator& ite) : p(ite.p) {}
-        Iterator(Iterator&& ite) noexcept : p(ite.p) {}
         ~Iterator() = default;
         /* Operators */
         Iterator& operator=(const Iterator& ite);
-        Iterator& operator=(Iterator&& ite) noexcept;
         bool operator==(const Iterator& ite) const noexcept { return p == ite.p; }
         bool operator!=(const Iterator& ite) const noexcept { return p != ite.p; }
         Iterator& operator++();
@@ -49,21 +47,56 @@ namespace Physica::Utils::Intenal {
 
         friend class AbstractArray<Derived>;
     };
+
+    template<class Pointer, class Container>
+    class ReverseIterator;
+    
+    template<class Pointer, class Derived>
+    class ReverseIterator<Pointer, AbstractArray<Derived>> {
+        Pointer* p;
+    public:
+        ReverseIterator(const ReverseIterator& ite) : p(ite.p) {}
+        ~ReverseIterator() = default;
+        /* Operators */
+        ReverseIterator& operator=(const ReverseIterator& ite);
+        bool operator==(const ReverseIterator& ite) const noexcept { return p == ite.p; }
+        bool operator!=(const ReverseIterator& ite) const noexcept { return p != ite.p; }
+        ReverseIterator& operator++();
+        const ReverseIterator operator++(int);
+        Pointer& operator*() { return *p; }
+    private:
+        explicit ReverseIterator(Pointer* p) : p(p) {}
+
+        friend class AbstractArray<Derived>;
+    };
     /**
      * Public parts among specializations of \class Array.
      */
     template<class Derived>
     class AbstractArray : public Utils::CRTPBase<Derived> {
+    protected:
         using T = typename Traits<Derived>::ElementType;
         using Iterator_ = Iterator<T, AbstractArray<Derived>>;
+        using ConstIterator = Iterator<const T, AbstractArray<Derived>>;
+        using ReverseIterator_ = ReverseIterator<T, AbstractArray<Derived>>;
+        using ConstReverseIterator = ReverseIterator<const T, AbstractArray<Derived>>;
 
         T* __restrict arr;
     public:
+        /* Operators */
+        T& operator[](size_t index);
+        const T& operator[](size_t index) const;
+        bool operator==(const AbstractArray& array) const;
+        bool operator!=(const AbstractArray& array) const { return !(*this == array); }
         /* Iterator */
         Iterator_ begin() noexcept { return Iterator_(arr); }
         Iterator_ end() noexcept { return Iterator_(arr + getDerived().getLength()); }
         ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
         ConstIterator cend() const noexcept { return ConstIterator(arr + getDerived().getLength()); }
+        ReverseIterator_ rbegin() const noexcept { return ReverseIterator_(arr + getDerived().getLength()); }
+        ReverseIterator_ end() const noexcept { return ReverseIterator_(arr - 1); }
+        ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + getDerived().getLength()); }
+        ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
     protected:

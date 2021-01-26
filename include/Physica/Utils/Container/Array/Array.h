@@ -145,7 +145,9 @@ namespace Physica::Utils {
         void append(T&& t);
         void append(const Array& t);
         void append(Array&& t);
+        void reserve(size_t size);
         void resize(size_t size);
+        void resize(size_t size, const T& t);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);

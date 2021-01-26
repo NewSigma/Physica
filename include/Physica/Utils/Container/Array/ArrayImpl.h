@@ -278,7 +278,7 @@ namespace Physica::Utils {
         const auto t_length = t.length;
         const auto new_length = length + t_length;
         if(new_length > capacity)
-            resize(new_length);
+            reserve(new_length);
         for(size_t i = 0; i < t_length; ++i, ++length)
             Base::allocate(t[i], length);
     }
@@ -288,7 +288,7 @@ namespace Physica::Utils {
         const auto t_length = t.length;
         const auto new_length = length + t_length;
         if(new_length > capacity)
-            resize(new_length);
+            reserve(new_length);
         memcpy(arr + length, t.arr, t_length * sizeof(T));
         length = new_length;
         t.arr = nullptr;
@@ -296,15 +296,39 @@ namespace Physica::Utils {
     }
 
     template<class T>
+    void Array<T, Dynamic, Dynamic>::reserve(size_t size) {
+        assert (size > getCapacity());
+        arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
+        capacity = size;
+    }
+
+    template<class T>
     void Array<T, Dynamic, Dynamic>::resize(size_t size) {
-        if(QTypeInfo<T>::isComplex) {
-            if(length > size) {
-                for(size_t i = size; i < length; ++i)
+        if (QTypeInfo<T>::isComplex) {
+            if (length > size) {
+                for (size_t i = size; i < length; ++i)
                     (arr + i)->~T();
                 length = size;
             }
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
+        for (; length < size; ++length)
+            init(T(), length);
+        capacity = size;
+    }
+
+    template<class T>
+    void Array<T, Dynamic, Dynamic>::resize(size_t size, const T& t) {
+        if (QTypeInfo<T>::isComplex) {
+            if (length > size) {
+                for (size_t i = size; i < length; ++i)
+                    (arr + i)->~T();
+                length = size;
+            }
+        }
+        arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
+        for (; length < size; ++length)
+            init(t, length);
         capacity = size;
     }
 

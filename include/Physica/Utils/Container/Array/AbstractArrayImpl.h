@@ -30,13 +30,6 @@ namespace Physica::Utils::Intenal {
 
     template<class Pointer, class Derived>
     Iterator<Pointer, AbstractArray<Derived>>&
-    Iterator<Pointer, AbstractArray<Derived>>::operator=(Iterator&& ite) noexcept {
-        p = ite.p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractArray<Derived>>&
     Iterator<Pointer, AbstractArray<Derived>>::operator++() {
         ++p;
         return *this;
@@ -46,6 +39,26 @@ namespace Physica::Utils::Intenal {
     const Iterator<Pointer, AbstractArray<Derived>>
     Iterator<Pointer, AbstractArray<Derived>>::operator++(int) {
         return Iterator(p++);
+    }
+
+    template<class Pointer, class Derived>
+    ReverseIterator<Pointer, AbstractArray<Derived>>&
+    ReverseIterator<Pointer, AbstractArray<Derived>>::operator=(const ReverseIterator& ite) { //NOLINT Self assign is ok.
+        p = ite.p;
+        return *this;
+    }
+
+    template<class Pointer, class Derived>
+    ReverseIterator<Pointer, AbstractArray<Derived>>&
+    ReverseIterator<Pointer, AbstractArray<Derived>>::operator++() {
+        --p;
+        return *this;
+    }
+
+    template<class Pointer, class Derived>
+    const ReverseIterator<Pointer, AbstractArray<Derived>>
+    ReverseIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
+        return ReverseIterator(p--);
     }
 
     template<class Derived>
