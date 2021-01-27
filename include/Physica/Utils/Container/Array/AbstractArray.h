@@ -99,6 +99,8 @@ namespace Physica::Utils::Intenal {
         ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */
         [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
+        [[nodiscard]] T* data() noexcept { return arr; }
+        [[nodiscard]] const T* data() const noexcept { return arr; }
     protected:
         explicit AbstractArray(size_t capacity);
         AbstractArray(const AbstractArray& array);

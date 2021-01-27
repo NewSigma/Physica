@@ -37,7 +37,7 @@ namespace Physica::Utils::Intenal {
         Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
-        /* Helpers */
+        /* Operations */
         /**
          * Low level api. Designed for performance.
          * We provide uniform for the convience of implementing templates.
@@ -51,6 +51,8 @@ namespace Physica::Utils::Intenal {
         inline void grow(T&& t);
         void removeAt(size_t index);
         void clear() noexcept;
+        void insert(const T& t, size_t index);
+        void insert(T&& t, size_t index);
         /* Setters */
         /**
          * Low level api. Designed for performance.

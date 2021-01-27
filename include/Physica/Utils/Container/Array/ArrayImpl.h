@@ -102,6 +102,23 @@ namespace Physica::Utils {
             result.allocate(std::move(Base::operator[](from)), i);
         return result;
     }
+    /**
+     * For the convience of implementing templates.
+     */
+    template<class T, size_t Length, size_t Capacity>
+    void Array<T, Length, Capacity>::init(const T& t, size_t index) {
+        Base::operator[](index) = t;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    void Array<T, Length, Capacity>::init(T&& t, size_t index) {
+        Base::operator[](index) = std::move(t);
+    }
+    /**
+     * For the convience of implementing templates.
+     */
+    template<class T, size_t Length, size_t Capacity>
+    void Array<T, Length, Capacity>::clear() noexcept { /* Nothing */ }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity>
     Array<T, Dynamic, Capacity>::Array() : Base(Capacity) {}

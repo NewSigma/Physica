@@ -107,6 +107,22 @@ namespace Physica::Utils::Intenal {
     }
 
     template<class Derived>
+    void AbstractArrayWithLength<Derived>::insert(const T& t, size_t index) {
+        assert(length < Base::getCapacity());
+        memmove(arr + index + 1, arr + index, length - index);
+        Base::init(t, index);
+        Base::setLength(length + 1);
+    }
+
+    template<class Derived>
+    void AbstractArrayWithLength<Derived>::insert(T&& t, size_t index) {
+        assert(length < Base::getCapacity());
+        memmove(arr + index + 1, arr + index, length - index);
+        Base::init(std::move(t), index);
+        Base::setLength(length + 1);
+    }
+
+    template<class Derived>
     void AbstractArrayWithLength<Derived>::swap(AbstractArrayWithLength& array) {
         Base::swap(array);
         std::swap(length, array.length);

@@ -7,7 +7,9 @@ There are three specialization of template Array, they all share a set of interf
 3. Iterator
 4. operator== operator!=
 5. init()
+    Initialize a element at given position, double init() will lead to memory leak.(Except fixed array)
 6. clear()
+    This function cooperates with init(), when we have to remove all elements and reinit them all.
 7. getLength()
 8. setLength()
 9. getCapacity()

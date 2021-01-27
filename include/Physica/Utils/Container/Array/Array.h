@@ -79,9 +79,10 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic> cut(size_t from);
-        void init(const T& t, size_t index) { Base::operator[](index) = t; } //For the convience of implementing templates.
-        void init(T&& t, size_t index) { Base::operator[](index) = std::move(t); } //For the convience of implementing templates.
-        void clear() noexcept {} //For the convience of implementing templates.
+        void init(const T& t, size_t index);
+        void init(T&& t, size_t index);
+        void clear() noexcept;
+        void insert(const T&, size_t) { assert(false); }
         void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
