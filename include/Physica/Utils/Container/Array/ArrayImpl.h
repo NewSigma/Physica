@@ -227,6 +227,13 @@ namespace Physica::Utils {
         t.arr = nullptr;
         t.length = 0;
     }
+    /**
+     * For the convenience of implementing templates.
+     */
+    template<class T, size_t Capacity>
+    void Array<T, Dynamic, Capacity>::reserve(size_t size) {
+        assert(size == Capacity);
+    }
 
     template<class T, size_t Capacity>
     void Array<T, Dynamic, Capacity>::swap(Array<T, Dynamic, Capacity>& array) noexcept {

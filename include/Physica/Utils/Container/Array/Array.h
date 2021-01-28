@@ -116,6 +116,7 @@ namespace Physica::Utils {
         inline void append(T&& t);
         void append(const Array& t);
         void append(Array&& t);
+        void reserve(size_t size);
         void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return length; }
