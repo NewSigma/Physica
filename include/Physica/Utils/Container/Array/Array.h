@@ -65,6 +65,7 @@ namespace Physica::Utils {
     private:
         using Base = Intenal::AbstractArray<Array<T, Length, Capacity>>;
         using Base::arr;
+        using Base::getDerived;
     public:
         Array();
         explicit Array(size_t length_, const T& t = T());
@@ -98,6 +99,7 @@ namespace Physica::Utils {
         using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>>;
         using Base::length;
         using Base::arr;
+        using Base::getDerived;
     public:
         Array();
         explicit Array(size_t length_, const T& t = T());
@@ -130,6 +132,7 @@ namespace Physica::Utils {
         using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>>;
         using Base::length;
         using Base::arr;
+        using Base::getDerived;
     protected:
         size_t capacity;
     public:
