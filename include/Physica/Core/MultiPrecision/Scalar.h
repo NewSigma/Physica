@@ -27,9 +27,9 @@
 
 namespace Physica::Core {
     enum ScalarType {
-        Float,
-        Double,
-        MultiPrecision
+        Float = 0,
+        Double = 1,
+        MultiPrecision = 2
     };
     //Forward declarations
     namespace Internal {
@@ -41,6 +41,22 @@ namespace Physica::Core {
      * which is also compatible with float and double.
      */
     template<ScalarType type = MultiPrecision, bool errorTrack = true> class Scalar;
+
+    namespace Internal {
+        /**
+         * This class return a type that can exactly represent the two input scalars.
+         */
+        template<class T1, class T2>
+        class ScalarOperationReturnType;
+
+        template<ScalarType type1, bool errorTrack1, ScalarType type2, bool errorTrack2>
+        class ScalarOperationReturnType<Scalar<type1, errorTrack1>, Scalar<type2, errorTrack2>> {
+            static constexpr ScalarType type = type1 > type2 ? type2 : type1;
+            static constexpr bool errorTrack = errorTrack1 || errorTrack2;
+        public:
+            using Type = Scalar<type, errorTrack>;
+        };
+    }
 
     template<>
     class Scalar<MultiPrecision, false> {

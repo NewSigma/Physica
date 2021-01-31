@@ -31,9 +31,11 @@ namespace Physica::Core {
      */
     template<class T, size_t Length, size_t maxLength>
     class Vector : public Utils::Array<T, Length, maxLength> {
+    public:
+        using ScalarType = T;
+    private:
         static_assert(Length == Dynamic || Length == maxLength, "maxLength of fixed vector must equals to its length.");
         using Base = Utils::Array<T, Length, maxLength>;
-        using ScalarType = T;
     public:
         using Base::Base;
         Vector() = default;

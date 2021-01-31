@@ -51,7 +51,9 @@ namespace Physica::Core {
     namespace Internal {
         template<class T>
         class Traits;
-
+        /**
+         * VectorType: Type of the vector calculated from the expression.
+         */
         template<VectorExpressionType type, class T, size_t Length, size_t MaxLength>
         class Traits<VectorExpression<type, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>> {
         public:
@@ -92,8 +94,11 @@ namespace Physica::Core {
          */
         template<class Derived>
         class VectorExpressionHelper : public Utils::CRTPBase<Derived> {
-            using Base = Utils::CRTPBase<Derived>;
+        public:
             using VectorType = typename Traits<Derived>::VectorType;
+            using ScalarType = typename VectorType::ScalarType;
+        private:
+            using Base = Utils::CRTPBase<Derived>;
         public:
             /* Operators */
             operator VectorType() { return calc(); }
@@ -125,17 +130,19 @@ namespace Physica::Core {
     template<VectorExpressionType type, class T1, class T2>
     class VectorExpression<VectorExpressionType::Minus, VectorExpression<type, T1, T2>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Minus, VectorExpression<type, T1, T2>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Minus, VectorExpression<type, T1, T2>>>;
         VectorExpression<type, T1, T2> exp;
     public:
         explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_) : exp(exp_) {}
 
-        decltype(auto) operator[](size_t s) { return -exp[s]; }
+        typename Base::ScalarType operator[](size_t s) { return -exp[s]; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
     template<class T, size_t Length, size_t MaxLength>
     class VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>>;
         const Vector<T, Length, MaxLength>& v1;
         const Vector<T, Length, MaxLength>& v2;
     public:
@@ -143,19 +150,20 @@ namespace Physica::Core {
             assert(v1.getLength() == v2.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return v1[s] + v2[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return v1[s] + v2[s]; }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
     template<class T, size_t Length, size_t MaxLength, ScalarType type, bool errorTrack>
     class VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>>;
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
         explicit VectorExpression(const Vector<T, Length, MaxLength>& v_, const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return v[s] + scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return v[s] + scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -165,6 +173,7 @@ namespace Physica::Core {
         static_assert(std::is_same<typename VectorExpression<type1, T11, T12>::VectorType
                                    , typename VectorExpression<type2, T21, T22>::VectorType>::value
                       , "Types of two operands of add must be same.");
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, VectorExpression<type1, T11, T12>, VectorExpression<type2, T21, T22>>>;
         VectorExpression<type1, T11, T12> exp1;
         VectorExpression<type2, T21, T22> exp2;
     public:
@@ -173,7 +182,7 @@ namespace Physica::Core {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return exp1[s] + exp2[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return exp1[s] + exp2[s]; }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
@@ -182,6 +191,7 @@ namespace Physica::Core {
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, MaxLength>>> {
         static_assert(std::is_same<typename VectorExpression<type, T1, T2>::VectorType, Vector<T, Length, MaxLength>>::value
                       , "Types of two operands of add must be same.");
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, MaxLength>>>;
         VectorExpression<type, T1, T2> exp;
         const Vector<T, Length, MaxLength>& v;
     public:
@@ -190,26 +200,28 @@ namespace Physica::Core {
             assert(exp.getLength() == v.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return  exp[s] + v[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return  exp[s] + v[s]; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<ScalarType scalarType, bool errorTrack, VectorExpressionType type, class T1, class T2>
     class VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>>;
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
         explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return exp[s] + scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return exp[s] + scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class T, size_t Length, size_t MaxLength>
     class VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>>;
         const Vector<T, Length, MaxLength>& v1;
         const Vector<T, Length, MaxLength>& v2;
     public:
@@ -217,20 +229,21 @@ namespace Physica::Core {
             assert(v1.getLength() == v2.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return v1[s] - v2[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return v1[s] - v2[s]; }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
     template<class T, size_t Length, size_t MaxLength, ScalarType type, bool errorTrack>
     class VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>>;
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
         explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return v[s] - scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return v[s] - scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -240,6 +253,7 @@ namespace Physica::Core {
         static_assert(std::is_same<typename VectorExpression<type1, T11, T12>::VectorType
                                    , typename VectorExpression<type2, T21, T22>::VectorType>::value
                       , "Types of two operands of sub must be same.");
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, VectorExpression<type1, T11, T12>, VectorExpression<type2, T21, T22>>>;
         VectorExpression<type1, T11, T12> exp1;
         VectorExpression<type2, T21, T22> exp2;
     public:
@@ -248,7 +262,7 @@ namespace Physica::Core {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return exp1[s] - exp2[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return exp1[s] - exp2[s]; }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
@@ -257,6 +271,7 @@ namespace Physica::Core {
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, Length, MaxLength>>> {
         static_assert(std::is_same<typename VectorExpression<type, T1, T2>::VectorType, Vector<T, Length, MaxLength>>::value
                       , "Types of two operands of sub must be same.");
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Vector<T, Length, MaxLength>>>;
         VectorExpression<type, T1, T2> exp;
         const Vector<T, Length, MaxLength>& v;
     public:
@@ -265,72 +280,77 @@ namespace Physica::Core {
             assert(exp.getLength() == v.getLength());
         }
 
-        decltype(auto) operator[](size_t s) const { return exp[s] - v[s]; }
+        typename Base::ScalarType operator[](size_t s) const { return exp[s] - v[s]; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     class VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>>;
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
         explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return exp[s] - scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return exp[s] - scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class T, size_t Length, size_t MaxLength, ScalarType type, bool errorTrack>
     class VectorExpression<VectorExpressionType::Mul, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Mul, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Mul, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>>;
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
         explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return v[s] * scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return v[s] * scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<ScalarType scalarType, bool errorTrack, VectorExpressionType type, class T1, class T2>
     class VectorExpression<VectorExpressionType::Mul, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Mul, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Mul, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>>;
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
         explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return exp[s] * scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return exp[s] * scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class T, size_t Length, size_t MaxLength, ScalarType type, bool errorTrack>
     class VectorExpression<VectorExpressionType::Div, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Div, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Div, Vector<T, Length, MaxLength>, Scalar<type, errorTrack>>>;
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
         explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return v[s] / scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return v[s] / scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<ScalarType scalarType, bool errorTrack, VectorExpressionType type, class T1, class T2>
     class VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>>;
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
         explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
-        decltype(auto) operator[](size_t s) const { return exp[s] / scalar; }
+        typename Base::ScalarType operator[](size_t s) const { return exp[s] / scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
