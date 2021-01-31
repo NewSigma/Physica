@@ -21,15 +21,15 @@
 //Forward declaration
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
 }
 
-namespace Physica::Core::Intenal {
+namespace Physica::Core::Internal {
     template<ScalarType type>
     template<bool errorTrack1, bool errorTrack2>
     ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(

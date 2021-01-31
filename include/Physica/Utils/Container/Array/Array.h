@@ -84,6 +84,7 @@ namespace Physica::Utils {
         void init(T&& t, size_t index);
         void clear() noexcept;
         void insert(const T&, size_t) { assert(false); }
+        void reserve(size_t size) { assert(size == Capacity); }
         void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() { return Length; }

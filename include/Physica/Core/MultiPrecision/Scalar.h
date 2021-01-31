@@ -32,7 +32,7 @@ namespace Physica::Core {
         MultiPrecision
     };
     //Forward declarations
-    namespace Intenal {
+    namespace Internal {
         template<ScalarType type> class ScalarAddSubExpressionHelper;
         template<ScalarType type, bool errorTrack> class ScalarAddSubExpression;
     }
@@ -133,7 +133,7 @@ namespace Physica::Core {
         inline static void cutZero(Scalar& s);
         /* Friends */
         friend class Scalar<MultiPrecision, true>;
-        friend class Intenal::ScalarAddSubExpressionHelper<MultiPrecision>;
+        friend class Internal::ScalarAddSubExpressionHelper<MultiPrecision>;
         template<bool errorTrack>
         friend Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
         template<ScalarType type>
@@ -197,7 +197,7 @@ namespace Physica::Core {
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */
         friend class Scalar<MultiPrecision, false>;
-        friend class Intenal::ScalarAddSubExpressionHelper<MultiPrecision>;
+        friend class Internal::ScalarAddSubExpressionHelper<MultiPrecision>;
         template<ScalarType type>
         friend Scalar<type, true> sqrt(const Scalar<type, true>& s);
         template<ScalarType type>

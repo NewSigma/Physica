@@ -28,27 +28,27 @@
 namespace Physica::Core {
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
+        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
     operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
+        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator+(const Scalar<type, errorTrack1>& s, Intenal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator+(const Scalar<type, errorTrack1>& s, Internal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
     }
 
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator-(const Scalar<type, errorTrack1>& s, Intenal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return Intenal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
+    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
+    operator-(const Scalar<type, errorTrack1>& s, Internal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
+        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
     }
 
     template<ScalarType type, bool errorTrack>

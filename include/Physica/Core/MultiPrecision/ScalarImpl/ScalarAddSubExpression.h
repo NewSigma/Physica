@@ -29,7 +29,7 @@ namespace Physica::Core {
 }
 
 
-namespace Physica::Core::Intenal {
+namespace Physica::Core::Internal {
     class AbstractScalarAddSubExpression {
     public:
         /**

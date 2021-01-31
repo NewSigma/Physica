@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
-namespace Physica::Core::Intenal {
+namespace Physica::Core::Internal {
     template<>
     Scalar<MultiPrecision, true> ScalarAddSubExpressionHelper<MultiPrecision>::calculate() const {
         Scalar<MultiPrecision, true> result(0);

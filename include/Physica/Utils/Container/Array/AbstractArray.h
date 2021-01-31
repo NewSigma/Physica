@@ -74,6 +74,7 @@ namespace Physica::Utils::Intenal {
      */
     template<class Derived>
     class AbstractArray : public Utils::CRTPBase<Derived> {
+        using Base = Utils::CRTPBase<Derived>;
     protected:
         using T = typename Traits<Derived>::ElementType;
         using Iterator_ = Iterator<T, AbstractArray<Derived>>;
