@@ -30,7 +30,7 @@ namespace Physica::Core::Physics {
      * Number of data cannot be more than maximum of @typedef MPUnit.
      */
     class ExperimentalDataProcessor {
-        using DataMatrix = DenseMatrix<Scalar<MultiPrecision, false>, DenseMatrixType::Column | DenseMatrixType::Vector, 2>;
+        using DataMatrix = DenseMatrix<Scalar<MultiPrecision, false>>;
     public:
         struct ExperimentalDataInfo {
             Scalar<MultiPrecision, false> total;

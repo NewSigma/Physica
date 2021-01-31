@@ -20,10 +20,11 @@
 #include <qglobal.h>
 
 namespace Physica::Core {
-    BoolMatrix::BoolMatrix(size_t column, size_t row) : arr(row) {
+    BoolMatrix::BoolMatrix(size_t column, size_t row) : arr() {
         Q_ASSERT(column > 0 && row > 0);
+        arr.reserve(row);
         for (size_t s = 0; s < row; ++s)
-            arr.allocate(BitArray(column), s);
+            arr.init(BitArray(column), s);
         arr.setLength(row);
     }
     /*!
@@ -37,7 +38,8 @@ namespace Physica::Core {
         const size_t c2 = m.getColumn();
         Q_ASSERT(c1 == m.getRow());
 
-        Array<BitArray> array(r1);
+        Array<BitArray> array{};
+        array.reserve(r1);
         for(size_t i = 0; i < r1; ++i) {
             BitArray row_i(c2);
             for(size_t j = 0; j < c2; ++j) {
@@ -50,7 +52,7 @@ namespace Physica::Core {
                 }
                 row_i.setBit(bit, j);
             }
-            array.allocate(std::move(row_i), i);
+            array.init(std::move(row_i), i);
         }
         array.setLength(r1);
         return BoolMatrix(std::move(array));
@@ -61,9 +63,10 @@ namespace Physica::Core {
     BoolMatrix BoolMatrix::operator&(const BoolMatrix& m) const {
         Q_ASSERT(hasSameSize(m));
         const size_t row = getRow();
-        Array<BitArray> array(row);
+        Array<BitArray> array{};
+        array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.allocate(arr[s] & m.arr[s], s);
+            array.init(arr[s] & m.arr[s], s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
@@ -73,9 +76,10 @@ namespace Physica::Core {
     BoolMatrix BoolMatrix::operator|(const BoolMatrix& m) const {
         Q_ASSERT(hasSameSize(m));
         const size_t row = getRow();
-        Array<BitArray, Dynamic> array(row);
+        Array<BitArray> array{};
+        array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.allocate(arr[s] | m.arr[s], s);
+            array.init(arr[s] | m.arr[s], s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
@@ -84,9 +88,10 @@ namespace Physica::Core {
      */
     BoolMatrix BoolMatrix::operator~() const {
         const size_t row = getRow();
-        Array<BitArray, Dynamic> array(row);
+        Array<BitArray> array{};
+        array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.allocate(~(arr[s]), s);
+            array.init(~(arr[s]), s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
