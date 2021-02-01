@@ -49,7 +49,7 @@ namespace Physica::Utils {
     template<class T, size_t Length = Dynamic, size_t Capacity = Length>
     class Array;
 
-    namespace Intenal {
+    namespace Internal {
         template<class T, size_t Length, size_t Capacity>
         class Traits<Array<T, Length, Capacity>> {
         public:
@@ -60,10 +60,10 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity>
-    class Array : public Intenal::AbstractArray<Array<T, Length, Capacity>> {
+    class Array : public Internal::AbstractArray<Array<T, Length, Capacity>> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
     private:
-        using Base = Intenal::AbstractArray<Array<T, Length, Capacity>>;
+        using Base = Internal::AbstractArray<Array<T, Length, Capacity>>;
         using Base::arr;
         using Base::getDerived;
     public:
@@ -95,9 +95,9 @@ namespace Physica::Utils {
 
     template<class T, size_t Capacity>
     class Array<T, Dynamic, Capacity>
-        : public Intenal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>> {
+        : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>> {
     private:
-        using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>>;
+        using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>>;
         using Base::length;
         using Base::arr;
         using Base::getDerived;
@@ -128,9 +128,9 @@ namespace Physica::Utils {
 
     template<class T>
     class Array<T, Dynamic, Dynamic>
-        : public Intenal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>> {
+        : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>> {
     private:
-        using Base = Intenal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>>;
+        using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>>;
         using Base::length;
         using Base::arr;
         using Base::getDerived;

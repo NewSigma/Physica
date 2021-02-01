@@ -21,7 +21,7 @@
 #include <cstddef>
 #include "Physica/Utils/Template/CRTPBase.h"
 
-namespace Physica::Utils::Intenal {
+namespace Physica::Utils::Internal {
     //Forward declaration
     template<class T> class Traits;
     template<class Derived> class AbstractArray;

@@ -20,7 +20,7 @@
 
 #include <qtypeinfo.h>
 
-namespace Physica::Utils::Intenal {
+namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t capacity)
         : Base(capacity), length(0) {}

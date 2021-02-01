@@ -20,7 +20,7 @@
 
 #include <cstring>
 
-namespace Physica::Utils::Intenal {
+namespace Physica::Utils::Internal {
     template<class Pointer, class Derived>
     Iterator<Pointer, AbstractArray<Derived>>&
     Iterator<Pointer, AbstractArray<Derived>>::operator=(const Iterator& ite) { //NOLINT Self assign is ok.

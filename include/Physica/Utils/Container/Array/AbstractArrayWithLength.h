@@ -20,7 +20,7 @@
 
 #include "AbstractArray.h"
 
-namespace Physica::Utils::Intenal {
+namespace Physica::Utils::Internal {
     template<class Derived>
     class AbstractArrayWithLength : public AbstractArray<Derived> {
     private:
