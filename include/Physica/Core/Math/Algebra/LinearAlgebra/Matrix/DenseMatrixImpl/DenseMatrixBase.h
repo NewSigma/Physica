@@ -42,11 +42,13 @@ namespace Physica::Core {
                                         , Internal::Traits<Derived>::ColumnAtCompile
                                         , Internal::Traits<Derived>::MaxRowAtCompile
                                         , Internal::Traits<Derived>::MaxColumnAtCompile>;
+        using Utils::CRTPBase<Derived>::getDerived;
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
     protected:
         using Base::Base;
     public:
         ScalarType determinate() const;
+        void rowReduce(size_t r1, size_t r2, size_t elementIndex);
     protected:
         DenseMatrixBase(size_t row, size_t column, const ScalarType& t) : Base(row, column, t) {
             assert(row == Base::getRow() && column == Base::getColumn());

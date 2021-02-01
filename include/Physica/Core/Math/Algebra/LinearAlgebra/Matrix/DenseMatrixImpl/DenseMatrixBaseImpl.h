@@ -68,6 +68,25 @@ namespace Physica::Core {
         constexpr size_t Rank = RowAtCompile > ColumnAtCompile ? RowAtCompile : ColumnAtCompile;
         return DeterminateImpl<Derived, Rank>::run(Base::getDerived());
     }
+    /**
+     * Reduce the element at one row using the other row.
+     * \param r1
+     * The index of row to be used.
+     * \param r2
+     * The index of row that the element belongs to.
+     * \param elementIndex
+     * Index of the element to be reduced.
+     */
+    template<class Derived>
+    void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, size_t elementIndex) {
+        Derived& matrix = this->getDerived();
+        assert(!matrix(r1, elementIndex).isZero());
+        const size_t column = matrix.getColumn();
+        const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
+        for (size_t i = 0; i < column; ++i)
+            matrix(r1, i) -= matrix(r2, i) * factor;
+        assert(matrix(r2, elementIndex).isZero());
+    }
     /* Operators */
     template<class Derived>
     Derived operator+(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
