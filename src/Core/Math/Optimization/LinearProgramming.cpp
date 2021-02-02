@@ -63,7 +63,7 @@ namespace Physica::Core {
             return false;
         switch(type) {
             case Equal:
-                data.appendRow(-v);
+                data.appendRow((-v).calc());
                 data.appendRow(std::move(v));
                 break;
             case LessEqual:

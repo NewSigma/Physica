@@ -109,7 +109,7 @@ namespace Physica::Core {
                 const size_t length = derived.getLength();
                 result.reserve(length);
                 for (size_t i = 0; i < length; ++i)
-                    result.init(derived[i], i);
+                    result.allocate(derived[i], i);
                 result.setLength(length);
                 return result;
             }
@@ -119,6 +119,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     class VectorExpression<VectorExpressionType::Minus, Vector<T, Length, MaxLength>>
             : public Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Minus, Vector<T, Length, MaxLength>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<VectorExpressionType::Minus, Vector<T, Length, MaxLength>>>;
         const Vector<T, Length, MaxLength>& vector;
     public:
         explicit VectorExpression(const Vector<T, Length, MaxLength>& v) : vector(v) {}
@@ -146,7 +147,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v1;
         const Vector<T, Length, MaxLength>& v2;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v1_, const Vector<T, Length, MaxLength>& v2_) : v1(v1_), v2(v2_) {
+        VectorExpression(const Vector<T, Length, MaxLength>& v1_, const Vector<T, Length, MaxLength>& v2_) : v1(v1_), v2(v2_) {
             assert(v1.getLength() == v2.getLength());
         }
 
@@ -161,7 +162,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v_, const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
+        VectorExpression(const Vector<T, Length, MaxLength>& v_, const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return v[s] + scalar; }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
@@ -177,7 +178,7 @@ namespace Physica::Core {
         VectorExpression<type1, T11, T12> exp1;
         VectorExpression<type2, T21, T22> exp2;
     public:
-        explicit VectorExpression(const VectorExpression<type1, T11, T12>& exp1_
+        VectorExpression(const VectorExpression<type1, T11, T12>& exp1_
                                 , const VectorExpression<type2, T21, T22>& exp2_) : exp1(exp1_), exp2(exp2_) {
             assert(exp1.getLength() == exp2.getLength());
         }
@@ -195,7 +196,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Vector<T, Length, MaxLength>& v;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Vector<T, Length, MaxLength>& v_) : exp(exp_), v(v_) {
             assert(exp.getLength() == v.getLength());
         }
@@ -211,7 +212,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return exp[s] + scalar; }
@@ -225,7 +226,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v1;
         const Vector<T, Length, MaxLength>& v2;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v1_, const Vector<T, Length, MaxLength>& v2_) : v1(v1_), v2(v2_) {
+        VectorExpression(const Vector<T, Length, MaxLength>& v1_, const Vector<T, Length, MaxLength>& v2_) : v1(v1_), v2(v2_) {
             assert(v1.getLength() == v2.getLength());
         }
 
@@ -240,7 +241,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
+        VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return v[s] - scalar; }
@@ -257,7 +258,7 @@ namespace Physica::Core {
         VectorExpression<type1, T11, T12> exp1;
         VectorExpression<type2, T21, T22> exp2;
     public:
-        explicit VectorExpression(const VectorExpression<type1, T11, T12>& exp1_
+        VectorExpression(const VectorExpression<type1, T11, T12>& exp1_
                                 , const VectorExpression<type2, T21, T22>& exp2_) : exp1(exp1_), exp2(exp2_) {
             assert(exp1.getLength() == exp2.getLength());
         }
@@ -275,7 +276,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Vector<T, Length, MaxLength>& v;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Vector<T, Length, MaxLength>& v_) : exp(exp_), v(v_) {
             assert(exp.getLength() == v.getLength());
         }
@@ -291,7 +292,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return exp[s] - scalar; }
@@ -305,7 +306,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
+        VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return v[s] * scalar; }
@@ -319,7 +320,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return exp[s] * scalar; }
@@ -333,7 +334,7 @@ namespace Physica::Core {
         const Vector<T, Length, MaxLength>& v;
         const Scalar<type, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const Vector<T, Length, MaxLength>& v_
+        VectorExpression(const Vector<T, Length, MaxLength>& v_
                                 , const Scalar<type, errorTrack>& scalar_) : v(v_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return v[s] / scalar; }
@@ -347,7 +348,7 @@ namespace Physica::Core {
         VectorExpression<type, T1, T2> exp;
         const Scalar<scalarType, errorTrack>& scalar;
     public:
-        explicit VectorExpression(const VectorExpression<type, T1, T2>& exp_
+        VectorExpression(const VectorExpression<type, T1, T2>& exp_
                                 , const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         typename Base::ScalarType operator[](size_t s) const { return exp[s] / scalar; }

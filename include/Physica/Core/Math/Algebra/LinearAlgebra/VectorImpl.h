@@ -36,11 +36,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<VectorExpressionType type, class T1, class T2>
     Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const VectorExpression<type, T1, T2>& exp) {
-        Base::clear();
-        const size_t length = exp.getLength();
-        for (size_t i = 0; i < length; ++i)
-            Base::init(exp[i], i);
-        Base::setLength(length);
+        Base::operator=(exp.calc());
         return *this;
     }
 
