@@ -55,6 +55,44 @@ namespace Physica::Utils {
             : Base(std::move(array)) {}
 
     template<class T, size_t Length, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>::Array(const Array<T, OtherLength, OtherCapacity>& array) : Base(Capacity) {
+        static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
+        assert(array.getLength() == Length);
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < Length; ++i)
+                Base::allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, Length * sizeof(T));
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>::Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept
+            : Base(reinterpret_cast<T*>(realloc(array.arr, Length * sizeof(T)))) {
+        static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
+        assert(array.getLength() == Length);
+        array.arr = nullptr;
+        array.setLength(0);
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>::Array(const Array<OtherT, OtherLength, OtherCapacity>& array) : Base(Capacity) {
+        assert(Length == array.getLength());
+        for (size_t i = 0; i < Length; ++i)
+            Base::allocate(T(array[i]), i);
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>::Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept {
+        assert(Length == array.getLength());
+        for (size_t i = 0; i < Length; ++i)
+            Base::allocate(T(std::move(array[i])), i);
+    }
+
+    template<class T, size_t Length, size_t Capacity>
     Array<T, Length, Capacity>::~Array() {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < Length; ++i)
@@ -64,14 +102,65 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity>
     Array<T, Length, Capacity>&
     Array<T, Length, Capacity>::operator=(const Array<T, Length, Capacity>& array) {
-        Base::operator=(array);
+        if (this != &array) {
+            if (QTypeInfo<T>::isComplex)
+                for (size_t i = 0; i < Length; ++i)
+                    this->operator[](i) = array[i];
+            else
+                memcpy(arr, array.arr, Length * sizeof(T));
+        }
         return *this;
     }
 
     template<class T, size_t Length, size_t Capacity>
     Array<T, Length, Capacity>&
     Array<T, Length, Capacity>::operator=(Array<T, Length, Capacity>&& array) noexcept {
-        Base::operator=(std::move(array));
+        this->~Array();
+        arr = array.arr;
+        array.arr = nullptr;
+        return *this;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>& Array<T, Length, Capacity>::operator=(const Array<T, OtherLength, OtherCapacity>& array) {
+        static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
+        assert(array.getLength() == Length);
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < Length; ++i)
+                this->operator[](i) = array[i];
+        else
+            memcpy(arr, array.arr, Length * sizeof(T));
+        return *this;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>& Array<T, Length, Capacity>::operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept {
+        static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
+        assert(array.getLength() == Length);
+        this->~Array();
+        arr = reinterpret_cast<T*>(realloc(array.arr, Length * sizeof(T)));
+        array.arr = nullptr;
+        array.setLength(0);
+        return *this;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>& Array<T, Length, Capacity>::operator=(const Array<OtherT, OtherLength, OtherCapacity>& array) {
+        assert(Length == array.getLength());
+        for (size_t i = 0; i < Length; ++i)
+            this->operator[](i) = array[i];
+        return *this;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Length, Capacity>& Array<T, Length, Capacity>::operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept {
+        assert(Length == array.getLength());
+        for (size_t i = 0; i < Length; ++i)
+            this->operator[](i) = std::move(array[i]);
         return *this;
     }
     /*!
@@ -102,23 +191,6 @@ namespace Physica::Utils {
             result.allocate(std::move(Base::operator[](from)), i);
         return result;
     }
-    /**
-     * For the convience of implementing templates.
-     */
-    template<class T, size_t Length, size_t Capacity>
-    void Array<T, Length, Capacity>::init(const T& t, size_t index) {
-        Base::operator[](index) = t;
-    }
-
-    template<class T, size_t Length, size_t Capacity>
-    void Array<T, Length, Capacity>::init(T&& t, size_t index) {
-        Base::operator[](index) = std::move(t);
-    }
-    /**
-     * For the convience of implementing templates.
-     */
-    template<class T, size_t Length, size_t Capacity>
-    void Array<T, Length, Capacity>::clear() noexcept { /* Nothing */ }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity>
     Array<T, Dynamic, Capacity>::Array() : Base(Capacity) {}
@@ -150,15 +222,110 @@ namespace Physica::Utils {
             : Base(std::move(array)) {}
 
     template<class T, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>::Array(const Array<T, OtherLength, OtherCapacity>& array) : Base(array.getLength(), Capacity) {
+        assert(array.getLength() <= Capacity);
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < length; ++i)
+                Base::allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, length * sizeof(T));
+    }
+
+    template<class T, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>::Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept
+            : Base(array.getLength(), reinterpret_cast<T*>(realloc(array.arr, Capacity * sizeof(T)))) {
+        assert(array.getLength() <= Capacity);
+        array.arr = nullptr;
+        array.setLength(0);
+    }
+
+    template<class T, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>::Array(const Array<OtherT, OtherLength, OtherCapacity>& array) : Base(array.getLength(), Capacity) {
+        for (size_t i = 0; i < length; ++i)
+            Base::allocate(T(array[i]), i);
+    }
+
+    template<class T, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>::Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept : Base(array.getLength(), Capacity) {
+        for (size_t i = 0; i < length; ++i)
+            Base::allocate(T(std::move(array[i])), i);
+    }
+
+    template<class T, size_t Capacity>
     Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(const Array<T, Dynamic, Capacity>& array) {
-        if(this != &array)
-            Base::operator=(array);
+        if (this != &array) {
+            Base::clear();
+            Base::setLength(array.getLength());
+            if (QTypeInfo<T>::isComplex)
+                for (size_t i = 0; i < length; ++i)
+                    this->operator[](i) = array[i];
+            else
+                memcpy(arr, array.arr, length * sizeof(T));
+        }
         return *this;
     }
 
     template<class T, size_t Capacity>
     Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(Array<T, Dynamic, Capacity>&& array) noexcept {
-        Base::operator=(std::move(array));
+        this->~Array();
+        arr = array.arr;
+        array.arr = nullptr;
+        length = array.length;
+        array.length = 0;
+        return *this;
+    }
+
+    template<class T, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(const Array<T, OtherLength, OtherCapacity>& array) {
+        assert(array.getLength() <= Capacity);
+        Base::clear();
+        Base::setLength(array.getLength());
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < length; ++i)
+                Base::allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, length * sizeof(T));
+        return *this;
+    }
+
+    template<class T, size_t Capacity>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept {
+        assert(array.getLength() <= Capacity);
+        this->~Array();
+        arr = reinterpret_cast<T*>(realloc(array.arr, Capacity * sizeof(T)));
+        Base::setLength(array.getLength());
+        array.arr = nullptr;
+        array.setLength(0);
+        return *this;
+    }
+
+    template<class T, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(const Array<OtherT, OtherLength, OtherCapacity>& array) {
+        assert(array.getLength() <= Capacity);
+        Base::clear();
+        size_t index = 0;
+        for (size_t i = 0; i < array.getLength(); ++i)
+            allocate(T(array[i]), i);
+        setLength(array.getLength());
+        return *this;
+    }
+
+    template<class T, size_t Capacity>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept {
+        assert(array.getLength() <= Capacity);
+        Base::clear();
+        size_t index = 0;
+        for (size_t i = 0; i < array.getLength(); ++i)
+            allocate(T(std::move(array[i])), i);
+        setLength(array.getLength());
         return *this;
     }
     /**
@@ -268,18 +435,109 @@ namespace Physica::Utils {
             : Base(std::move(array)), capacity(array.capacity) {}
 
     template<class T>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>::Array(const Array<T, OtherLength, OtherCapacity>& array)
+            : Base(array.getLength(), array.getCapacity()), capacity(array.getCapacity()) {
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < length; ++i)
+                Base::allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, length * sizeof(T));
+    }
+
+    template<class T>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>::Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept
+            : Base(array.getLength(), array.arr), capacity(array.getCapacity()) {
+        array.arr = nullptr;
+        array.setLength(0);
+    }
+
+    template<class T>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>::Array(const Array<OtherT, OtherLength, OtherCapacity>& array) : Base(array.getLength(), array.getLength()) {
+        for (size_t i = 0; i < array.getLength(); ++i)
+            Base::allocate(T(array[i]), i);
+    }
+
+    template<class T>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>::Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept : Base(array.getLength(), array.getLength()) {
+        for (size_t i = 0; i < array.getLength(); ++i)
+            Base::allocate(T(std::move(array[i])), i);
+    }
+
+    template<class T>
     Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(const Array<T, Dynamic, Dynamic>& array) {
-        if(this != &array) {
+        if (this != &array) {
+            this->~Array();
             capacity = array.capacity;
-            Base::operator=(array);
+            arr = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
+            length = array.length;
+            if (QTypeInfo<T>::isComplex)
+                for (size_t i = 0; i < length; ++i)
+                    this->operator[](i) = array[i];
+            else
+                memcpy(arr, array.arr, length * sizeof(T));
         }
         return *this;
     }
 
     template<class T>
     Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(Array<T, Dynamic, Dynamic>&& array) noexcept {
+        this->~Array();
+        arr = array.arr;
+        array.arr = nullptr;
+        length = array.length;
+        array.length = 0;
         capacity = array.capacity;
-        Base::operator=(std::move(array));
+        return *this;
+    }
+
+    template<class T>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(const Array<T, OtherLength, OtherCapacity>& array) {
+        Base::clear();
+        Base::setLength(array.getLength());
+        capacity = array.getCapacity();
+        arr = reinterpret_cast<T*>(realloc(arr, capacity * sizeof(T)));
+        if (QTypeInfo<T>::isComplex)
+            for (size_t i = 0; i < length; ++i)
+                Base::allocate(array[i], i);
+        else
+            memcpy(arr, array.arr, length * sizeof(T));
+        return *this;
+    }
+
+    template<class T>
+    template<size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept {
+        this->~Array();
+        length = array.getLength();
+        capacity = array.getCapacity();
+        arr = array.arr;
+        return *this;
+    }
+
+    template<class T>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(const Array<OtherT, OtherLength, OtherCapacity>& array) {
+        Base::clear();
+        setLength(array.getLength());
+        arr = reinterpret_cast<T*>(realloc(arr, length * sizeof(T)));
+        for (size_t i = 0; i < length; ++i)
+            Base::allocate(T(array[i]), i);
+        return *this;
+    }
+
+    template<class T>
+    template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+    Array<T, Dynamic, Dynamic>& Array<T, Dynamic, Dynamic>::operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept {
+        Base::clear();
+        setLength(array.getLength());
+        arr = reinterpret_cast<T*>(realloc(arr, length * sizeof(T)));
+        for (size_t i = 0; i < length; ++i)
+            Base::allocate(T(std::move(array[i])), i);
         return *this;
     }
 
@@ -337,7 +595,7 @@ namespace Physica::Utils {
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
         for (; length < size; ++length)
-            init(T(), length);
+            allocate(T(), length);
         capacity = size;
     }
 
@@ -352,7 +610,7 @@ namespace Physica::Utils {
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
         for (; length < size; ++length)
-            init(t, length);
+            allocate(t, length);
         capacity = size;
     }
 

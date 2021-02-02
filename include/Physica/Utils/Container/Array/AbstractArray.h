@@ -84,7 +84,10 @@ namespace Physica::Utils::Internal {
 
         T* __restrict arr;
     public:
+        AbstractArray() = delete;
         /* Operators */
+        AbstractArray& operator=(const AbstractArray& array) = delete;
+        AbstractArray& operator=(AbstractArray&& array) noexcept = delete;
         T& operator[](size_t index);
         const T& operator[](size_t index) const;
         bool operator==(const AbstractArray& array) const;
@@ -104,12 +107,10 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] const T* data() const noexcept { return arr; }
     protected:
         explicit AbstractArray(size_t capacity);
+        explicit AbstractArray(T* __restrict arr_);
         AbstractArray(const AbstractArray& array);
         AbstractArray(AbstractArray&& array) noexcept;
         ~AbstractArray();
-        /* Operators */
-        AbstractArray& operator=(const AbstractArray& array);
-        AbstractArray& operator=(AbstractArray&& array) noexcept;
         /* Helpers */
         inline void allocate(const T& t, size_t index);
         inline void allocate(T&& t, size_t index);

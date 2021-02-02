@@ -31,6 +31,7 @@ namespace Physica::Utils {
      * 1.A fixed length array.(same to std::array)
      * 2.A dynamic array but its max size is fixed.
      * 3.A dynamic array whose length and max size are dynamic.(same to std::vector)
+     * Arrays can be casted to each other.
      *
      * Note:
      * If \T is a complex type, \T must have its copy and move constructors defined.
@@ -72,17 +73,30 @@ namespace Physica::Utils {
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array();
         /* Operators */
         Array& operator=(const Array& array);
         Array& operator=(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         /* Helpers */
         Array<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic> cut(size_t from);
-        void init(const T& t, size_t index);
-        void init(T&& t, size_t index);
-        void clear() noexcept;
         void insert(const T&, size_t) { assert(false); }
         void reserve(size_t size) { assert(size == Capacity); }
         void swap(Array& array) noexcept { Base::swap(array); }
@@ -90,7 +104,7 @@ namespace Physica::Utils {
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
         /* Setters */
-        void setLength(size_t size) { assert(size == Length); } //For the convience of implementing templates.
+        void setLength(size_t size) { assert(size == Length); }
     };
 
     template<class T, size_t Capacity>
@@ -107,10 +121,26 @@ namespace Physica::Utils {
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array() = default;
         /* Operators */
         Array& operator=(const Array& array);
         Array& operator=(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         /* Helpers */
         Array<T, Dynamic, Dynamic> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, length); }
@@ -142,10 +172,26 @@ namespace Physica::Utils {
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array() = default;
         /* Operators */
         Array& operator=(const Array& array);
         Array& operator=(Array&& array) noexcept;
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<T, OtherLength, OtherCapacity>& array);
+        template<size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
+        Array& operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         /* Helpers */
         void append(const T& t);
         void append(T&& t);

@@ -116,7 +116,7 @@ namespace Physica::Core {
                 augmentedMatrix = DataMatrix();
                 augmentedMatrix.reserve(rank);
                 for(int i = 0; i < rank; ++i)
-                    augmentedMatrix.init(DataMatrix::VectorType::zeroVector(rank + 1), i);
+                    augmentedMatrix.allocate(DataMatrix::VectorType::zeroVector(rank + 1), i);
                 augmentedMatrix.setLength(rank);
 
                 Connection* p = order;

@@ -31,21 +31,15 @@ namespace Physica::Utils::Internal {
         size_t length;
     public:
         AbstractArrayWithLength() = delete;
-        ~AbstractArrayWithLength();
         /* Operators */
+        AbstractArrayWithLength& operator=(const AbstractArrayWithLength& array) = delete;
+        AbstractArrayWithLength& operator=(AbstractArrayWithLength&& array) noexcept = delete;
         Derived& operator<<(const T& t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
-        /**
-         * Low level api. Designed for performance.
-         * We provide uniform for the convience of implementing templates.
-         * Developer should ensure not out of boundary, initialize the element at unused place and adjust length after init.
-         * Or a memory error will occur.
-         */
-        void init(const T& t, size_t index) { assert(index >= length); Base::allocate(t, index); }
-        void init(T&& t, size_t index) { assert(index >= length); Base::allocate(std::move(t), index); }
+        using Base::allocate;
         T cutLast();
         inline void grow(const T& t);
         inline void grow(T&& t);
@@ -63,11 +57,10 @@ namespace Physica::Utils::Internal {
     protected:
         AbstractArrayWithLength(size_t capacity);
         AbstractArrayWithLength(size_t length_, size_t capacity);
+        AbstractArrayWithLength(size_t length_, T* __restrict arr_);
         AbstractArrayWithLength(const AbstractArrayWithLength& array);
         AbstractArrayWithLength(AbstractArrayWithLength&& array) noexcept;
-        /* Operators */
-        AbstractArrayWithLength& operator=(const AbstractArrayWithLength& array);
-        AbstractArrayWithLength& operator=(AbstractArrayWithLength&& array) noexcept;
+        ~AbstractArrayWithLength();
         /* Helpers */
         void swap(AbstractArrayWithLength& array);
     };

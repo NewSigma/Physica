@@ -27,7 +27,13 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t length_, size_t capacity)
-        : Base(capacity), length(length_) {}
+            : Base(capacity), length(length_) {
+        assert(length <= capacity);
+    }
+
+    template<class Derived>
+    AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t length_, T* __restrict arr_)
+            : Base(arr_), length(length_) {}
 
     template<class Derived>
     AbstractArrayWithLength<Derived>::AbstractArrayWithLength(
@@ -42,24 +48,6 @@ namespace Physica::Utils::Internal {
         if(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < length; ++i)
                 (arr + i)->~T();
-    }
-
-    template<class Derived>
-    AbstractArrayWithLength<Derived>&
-    AbstractArrayWithLength<Derived>::operator=(const AbstractArrayWithLength& array) {
-        if (this != &array) {
-            length = array.length;
-            Base::operator=(array);
-        }
-        return *this;
-    }
-
-    template<class Derived>
-    AbstractArrayWithLength<Derived>&
-    AbstractArrayWithLength<Derived>::operator=(AbstractArrayWithLength&& array) noexcept {
-        length = array.length;
-        Base::operator=(std::move(array));
-        return *this;
     }
     /**
      * Get the last element in the array and remove it from the array.
@@ -110,7 +98,7 @@ namespace Physica::Utils::Internal {
     void AbstractArrayWithLength<Derived>::insert(const T& t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
-        Base::init(t, index);
+        Base::allocate(t, index);
         Base::setLength(length + 1);
     }
 
@@ -118,7 +106,7 @@ namespace Physica::Utils::Internal {
     void AbstractArrayWithLength<Derived>::insert(T&& t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
-        Base::init(std::move(t), index);
+        Base::allocate(std::move(t), index);
         Base::setLength(length + 1);
     }
 

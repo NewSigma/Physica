@@ -68,46 +68,28 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
             : AbstractArray(array.getDerived().getCapacity()) {
-        const size_t length = array.getDerived().getLength();
         if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
+            for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 allocate(array[i], i);
         else
-            memcpy(arr, array.arr, length * sizeof(T));
+            memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(T));
     }
 
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept : arr(array.arr) {
         array.arr = nullptr;
     }
+    /**
+     * \param arr_
+     * A array allocated by malloc.
+     */
+    template<class Derived>
+    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_) {}
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
         //Elements should call ~T() at subclasses.
         free(arr);
-    }
-
-    template<class Derived>
-    AbstractArray<Derived>& AbstractArray<Derived>::operator=(const AbstractArray& array) {
-        if (this != &array) {
-            getDerived().~Derived();
-            arr = reinterpret_cast<T*>(malloc(array.getDerived().getCapacity() * sizeof(T)));
-            const size_t length = array.getDerived().getLength();
-            if(QTypeInfo<T>::isComplex)
-                for(size_t i = 0; i < length; ++i)
-                    allocate(array[i], i);
-            else
-                memcpy(arr, array.arr, length * sizeof(T));
-        }
-        return *this;
-    }
-
-    template<class Derived>
-    AbstractArray<Derived>& AbstractArray<Derived>::operator=(AbstractArray&& array) noexcept {
-        getDerived().~Derived();
-        arr = array.arr;
-        array.arr = nullptr;
-        return *this;
     }
 
     template<class Derived>
@@ -136,7 +118,7 @@ namespace Physica::Utils::Internal {
     /**
      * Low level api. Designed for performance.
      * Simply allocate a T at position \param index.
-     * You must ensure position \index is usable or a memory leak will occur.
+     * You must call setLength() to let the array know you have allocated a element.
      * 
      * Expose this function or not depends on the subclasses.
      */

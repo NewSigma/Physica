@@ -149,13 +149,7 @@ namespace Physica::Core::Internal {
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
 
-        const size_t column = getDerived().getColumn();
-        VectorType newVec{};
-        newVec.reserve(column);
-        for (size_t i = 0; i < column; ++i)
-            newVec.init(v[i], i);
-        newVec.setLength(column);
-        Base::append(std::move(newVec));
+        Base::append(v);
     }
 
     template<class Derived>
@@ -166,6 +160,7 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     void DenseMatrixStorageHelper<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>::rowSwap(size_t r1, size_t r2) {
+        using std::swap;
         Derived& matrix = getDerived();
         const size_t row = matrix.getRow();
         assert(r1 < row && r2 < row);

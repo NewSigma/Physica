@@ -24,7 +24,7 @@ namespace Physica::Core {
         Q_ASSERT(column > 0 && row > 0);
         arr.reserve(row);
         for (size_t s = 0; s < row; ++s)
-            arr.init(BitArray(column), s);
+            arr.allocate(BitArray(column), s);
         arr.setLength(row);
     }
     /*!
@@ -52,7 +52,7 @@ namespace Physica::Core {
                 }
                 row_i.setBit(bit, j);
             }
-            array.init(std::move(row_i), i);
+            array.allocate(std::move(row_i), i);
         }
         array.setLength(r1);
         return BoolMatrix(std::move(array));
@@ -66,7 +66,7 @@ namespace Physica::Core {
         Array<BitArray> array{};
         array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.init(arr[s] & m.arr[s], s);
+            array.allocate(arr[s] & m.arr[s], s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
@@ -79,7 +79,7 @@ namespace Physica::Core {
         Array<BitArray> array{};
         array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.init(arr[s] | m.arr[s], s);
+            array.allocate(arr[s] | m.arr[s], s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
@@ -91,7 +91,7 @@ namespace Physica::Core {
         Array<BitArray> array{};
         array.reserve(row);
         for(size_t s = 0; s < row; ++s)
-            array.init(~(arr[s]), s);
+            array.allocate(~(arr[s]), s);
         array.setLength(row);
         return BoolMatrix(std::move(array));
     }
