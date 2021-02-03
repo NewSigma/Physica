@@ -74,13 +74,13 @@ namespace Physica::Utils {
         Array(const Array& array);
         Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<T, OtherLength, OtherCapacity>& array);
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array();
         /* Operators */
         Array& operator=(const Array& array);
@@ -122,13 +122,13 @@ namespace Physica::Utils {
         Array(const Array& array);
         Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<T, OtherLength, OtherCapacity>& array);
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array() = default;
         /* Operators */
         Array& operator=(const Array& array);
@@ -173,13 +173,13 @@ namespace Physica::Utils {
         Array(const Array& array);
         Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<T, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<T, OtherLength, OtherCapacity>& array);
         template<size_t OtherLength, size_t OtherCapacity>
-        Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<T, OtherLength, OtherCapacity>&& array) noexcept;
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
+        explicit Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
+        explicit Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
         ~Array() = default;
         /* Operators */
         Array& operator=(const Array& array);

@@ -310,7 +310,6 @@ namespace Physica::Utils {
     Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(const Array<OtherT, OtherLength, OtherCapacity>& array) {
         assert(array.getLength() <= Capacity);
         Base::clear();
-        size_t index = 0;
         for (size_t i = 0; i < array.getLength(); ++i)
             allocate(T(array[i]), i);
         setLength(array.getLength());
@@ -322,7 +321,6 @@ namespace Physica::Utils {
     Array<T, Dynamic, Capacity>& Array<T, Dynamic, Capacity>::operator=(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept {
         assert(array.getLength() <= Capacity);
         Base::clear();
-        size_t index = 0;
         for (size_t i = 0; i < array.getLength(); ++i)
             allocate(T(std::move(array[i])), i);
         setLength(array.getLength());
@@ -411,7 +409,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic>::Array() : Base(0), capacity(0) {}
 
     template<class T>
-    Array<T, Dynamic, Dynamic>::Array(size_t length_, const T& t) : Base(length_, length_) {
+    Array<T, Dynamic, Dynamic>::Array(size_t length_, const T& t) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
             Base::allocate(t, i);
     }
@@ -455,14 +453,16 @@ namespace Physica::Utils {
 
     template<class T>
     template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-    Array<T, Dynamic, Dynamic>::Array(const Array<OtherT, OtherLength, OtherCapacity>& array) : Base(array.getLength(), array.getLength()) {
+    Array<T, Dynamic, Dynamic>::Array(const Array<OtherT, OtherLength, OtherCapacity>& array)
+            : Base(array.getLength(), array.getLength()), capacity(array.getLength()) {
         for (size_t i = 0; i < array.getLength(); ++i)
             Base::allocate(T(array[i]), i);
     }
 
     template<class T>
     template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-    Array<T, Dynamic, Dynamic>::Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept : Base(array.getLength(), array.getLength()) {
+    Array<T, Dynamic, Dynamic>::Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept
+            : Base(array.getLength(), array.getLength()), capacity(array.getLength()) {
         for (size_t i = 0; i < array.getLength(); ++i)
             Base::allocate(T(std::move(array[i])), i);
     }

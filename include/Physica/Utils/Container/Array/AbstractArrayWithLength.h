@@ -55,7 +55,7 @@ namespace Physica::Utils::Internal {
          */
         void setLength(size_t size) { Q_ASSERT(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
-        AbstractArrayWithLength(size_t capacity);
+        explicit AbstractArrayWithLength(size_t capacity);
         AbstractArrayWithLength(size_t length_, size_t capacity);
         AbstractArrayWithLength(size_t length_, T* __restrict arr_);
         AbstractArrayWithLength(const AbstractArrayWithLength& array);
