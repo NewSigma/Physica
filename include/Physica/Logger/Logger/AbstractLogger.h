@@ -44,7 +44,7 @@ namespace Physica::Logger {
         AbstractLogger& operator=(const AbstractLogger&) = delete;
         AbstractLogger& operator=(AbstractLogger&&) noexcept = delete;
         /* Operations */
-        virtual void log() = 0;
+        virtual void log(Utils::RingBuffer& buffer) = 0;
         /* Getters */
         [[nodiscard]] inline LogLevel getCurrentLevel() const;
         /* Static members */

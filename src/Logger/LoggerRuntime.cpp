@@ -18,21 +18,29 @@
  */
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
 #include "Physica/Logger/LoggerRuntime.h"
 #include "Physica/Logger/Logger/StdLogger.h"
 
 namespace Physica::Logger {
+    thread_local Utils::RingBuffer* LoggerRuntime::threadLogBuffer = nullptr;
+
     LoggerRuntime::LoggerRuntime()
-            : buffer(1U << 20U)
-            , logThread(&LoggerRuntime::logThreadMain, this)
+            : bufferList()
+            , bufferListMutex()
+            , processingBufferID(0)
             , shouldExit(false) {
         registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::clog)));
         registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cout)));
         registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cerr)));
+        //Init buffer for current thread or logThread will try to access a empty bufferList
+        getBuffer();
+
+        logThread = std::thread(&LoggerRuntime::logThreadMain, this);
     }
 
     LoggerRuntime::~LoggerRuntime() {
-        if(logThread.joinable())
+        if (logThread.joinable())
             logThread.join();
         for (auto& logger : loggerList)
             delete logger;
@@ -50,22 +58,50 @@ namespace Physica::Logger {
         return nextID;
     }
 
-    void LoggerRuntime::registerLogInfo(const LogInfo& info) {
-        logInfos.push_back(info);
+    Utils::RingBuffer& LoggerRuntime::getBuffer() {
+        if (shouldExit)
+            Fatal(STDERR_FILENO, "Try to append log to closed LoggerRuntime.");
+        if (threadLogBuffer == nullptr) {
+            threadLogBuffer = new Utils::RingBuffer(1U << 20U);
+            std::unique_lock<std::mutex> lock(bufferListMutex);
+            bufferList.push_back(threadLogBuffer);
+        }
+        return *threadLogBuffer;
     }
 
     void LoggerRuntime::logThreadMain() {
         //Format [11:49:23] [Physica:12|Info]: This is a log.
         using namespace std::chrono_literals;
-        while(!shouldExit || !buffer.isEmpty()) {
-            while(buffer.isEmpty()) {
+        
+        while (!shouldExit || (processingBufferID >= 0)) {
+            while (processingBufferID < 0) {
                 if(shouldExit)
                     return;
                 std::this_thread::sleep_for(1s);
+                getNextBufferToLog();
             }
-            size_t loggerID;
-            buffer.read(&loggerID);
-            loggerList[loggerID]->log();
+
+            Utils::RingBuffer& buffer = *bufferList[processingBufferID];
+            while (!buffer.isEmpty()) {
+                size_t loggerID;
+                buffer.read(&loggerID);
+                loggerList[loggerID]->log(buffer);
+            }
+            getNextBufferToLog();
         }
+    }
+    /**
+     * Return true if all buffers are empty.
+     */
+    int LoggerRuntime::getNextBufferToLog() noexcept {
+        const size_t size = bufferList.size();
+        int i = static_cast<int>((processingBufferID + 1) % size);
+        for (; i != processingBufferID; i = (processingBufferID + 1) % size)
+            if (!bufferList[i]->isEmpty()) {
+                processingBufferID = i;
+                return processingBufferID;
+            }
+        processingBufferID = -1;
+        return processingBufferID;
     }
 }

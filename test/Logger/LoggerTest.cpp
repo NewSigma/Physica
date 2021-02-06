@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     char str[] = "This is a dynamic string.";
     Info(STDOUT_FILENO, "%s", str);
 
-    AbstractLogger& stdoutLogger = getLogger(0);
+    AbstractLogger& stdoutLogger = getLogger(1);
     stdoutLogger.localLevel = LogLevel::Debug;
     Debug(STDOUT_FILENO, "This is debug mode.");
     stdoutLogger.localLevel = LogLevel::Info;

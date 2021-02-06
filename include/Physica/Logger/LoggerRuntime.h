@@ -19,8 +19,11 @@
 #ifndef PHYSICA_LOGGERRUNTIME_H
 #define PHYSICA_LOGGERRUNTIME_H
 
+#include <cassert>
 #include <vector>
+#include <unordered_map>
 #include <thread>
+#include <mutex>
 #include <memory>
 #include "Physica/Utils/RingBuffer.h"
 #include "LoggerType.h"
@@ -36,9 +39,16 @@ namespace Physica::Logger {
     class LoggerRuntime {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
-        constexpr static const size_t unassignedLogID = 0;
+        constexpr static size_t unassignedLogID = 0;
     private:
-        Utils::RingBuffer buffer;
+        thread_local static Utils::RingBuffer* threadLogBuffer;
+
+        std::vector<Utils::RingBuffer*> bufferList;
+        std::mutex bufferListMutex;
+        /**
+         * ID of buffer being logged.
+         */
+        int processingBufferID;
         /**
          * Store all registered loggers.
          */
@@ -64,19 +74,20 @@ namespace Physica::Logger {
         LoggerRuntime& operator=(LoggerRuntime&&) noexcept = delete;
         /* Operations */
         size_t registerLogger(std::unique_ptr<AbstractLogger>&& logger);
-        void registerLogInfo(const LogInfo& info);
+        void registerLogInfo(const LogInfo& info) { logInfos.push_back(info); }
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */
-        [[nodiscard]] AbstractLogger& getLogger(size_t index) const { return *loggerList[index]; }
+        [[nodiscard]] AbstractLogger& getLogger(size_t index) const { assert(index < loggerList.size()); return *loggerList[index]; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
-        [[nodiscard]] Utils::RingBuffer& getBuffer() noexcept { return buffer; }
+        [[nodiscard]] Utils::RingBuffer& getBuffer();
         /* Static Members */
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
 
         void logThreadMain();
+        int getNextBufferToLog() noexcept;
     };
 
     inline AbstractLogger& getLogger(size_t index) {

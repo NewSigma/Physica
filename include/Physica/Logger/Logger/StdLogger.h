@@ -26,13 +26,13 @@ namespace Physica::Logger {
      * The standard logger that links to stdout and stderr,
      * will be created when LoggerRuntime is initialized.
      */
-    class StdLogger : public AbstractLogger {
+    class StdLogger final : public AbstractLogger {
         std::ostream& os;
     public:
         StdLogger() = delete;
         ~StdLogger() override = default;
         /* Operations */
-        void log() override;
+        void log(Utils::RingBuffer& buffer) override final;
     protected:
         //StdLogger can be created by LoggerRuntime only.
         explicit StdLogger(std::ostream& stream);

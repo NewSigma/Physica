@@ -27,11 +27,10 @@
 namespace Physica::Logger {
     StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
 
-    void StdLogger::log() {
+    void StdLogger::log(Utils::RingBuffer& buffer) {
         std::stringstream logString{};
         size_t logID;
         LoggerRuntime& runtime = LoggerRuntime::getInstance();
-        Utils::RingBuffer& buffer = runtime.getBuffer();
         buffer.read(&logID);
         assert(logID > 0);
         const LogInfo& info = runtime.getLogInfo(logID - 1);
