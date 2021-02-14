@@ -58,6 +58,7 @@ namespace Physica::Utils {
         inline void read(T* t);
         /* Getters */
         [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
+        [[nodiscard]] size_t getSize() const noexcept { return size; }
     private:
         void writeBytes(const char* src, size_t bytes);
         void readBytes(char* dest, size_t bytes);

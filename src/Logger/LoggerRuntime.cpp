@@ -94,6 +94,8 @@ namespace Physica::Logger {
      * Return true if all buffers are empty.
      */
     int LoggerRuntime::getNextBufferToLog() noexcept {
+        if (processingBufferID == -1)
+            return 0;
         const size_t size = bufferList.size();
         int i = static_cast<int>((processingBufferID + 1) % size);
         for (; i != processingBufferID; i = (processingBufferID + 1) % size)

@@ -25,6 +25,7 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <cstring>
 #include "Physica/Utils/RingBuffer.h"
 #include "LoggerType.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
@@ -145,5 +146,9 @@ namespace Physica::Logger {
 #define Warning(loggerID, format, ...) Log(loggerID, Warning, format, ##__VA_ARGS__)
 
 #define Fatal(loggerID, format, ...) do { Log(loggerID, Fatal, format, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(false)
+/**
+ * Use Error instead of Fatal when a system call fails.
+ */
+#define Error(loggerID, message) Fatal(loggerID, "%s: %s", message, strerror(errno))
 
 #endif
