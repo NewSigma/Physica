@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LOGGERRUNTIME_H
-#define PHYSICA_LOGGERRUNTIME_H
+#pragma once
 
 #include <cassert>
 #include <vector>
@@ -26,7 +25,7 @@
 #include <mutex>
 #include <memory>
 #include <cstring>
-#include "Physica/Utils/RingBuffer.h"
+#include "LogBuffer.h"
 #include "LoggerType.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
 
@@ -42,9 +41,9 @@ namespace Physica::Logger {
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static size_t unassignedLogID = 0;
     private:
-        thread_local static Utils::RingBuffer* threadLogBuffer;
+        thread_local static LogBuffer* threadLogBuffer;
 
-        std::vector<Utils::RingBuffer*> bufferList;
+        std::vector<LogBuffer*> bufferList;
         std::mutex bufferListMutex;
         /**
          * ID of buffer being logged.
@@ -150,5 +149,3 @@ namespace Physica::Logger {
  * Use Error instead of Fatal when a system call fails.
  */
 #define Error(loggerID, message) Fatal(loggerID, "%s: %s", message, strerror(errno))
-
-#endif

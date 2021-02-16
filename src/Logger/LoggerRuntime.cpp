@@ -23,7 +23,7 @@
 #include "Physica/Logger/Logger/StdLogger.h"
 
 namespace Physica::Logger {
-    thread_local Utils::RingBuffer* LoggerRuntime::threadLogBuffer = nullptr;
+    thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
 
     LoggerRuntime::LoggerRuntime()
             : bufferList()
@@ -44,6 +44,8 @@ namespace Physica::Logger {
             logThread.join();
         for (auto& logger : loggerList)
             delete logger;
+        for (LogBuffer* buffer : bufferList)
+            delete buffer;
     }
     /**
      * \param logger
@@ -62,7 +64,7 @@ namespace Physica::Logger {
         if (shouldExit)
             Fatal(STDERR_FILENO, "Try to append log to closed LoggerRuntime.");
         if (threadLogBuffer == nullptr) {
-            threadLogBuffer = new Utils::RingBuffer(1U << 20U);
+            threadLogBuffer = new LogBuffer(1U << 20U);
             std::unique_lock<std::mutex> lock(bufferListMutex);
             bufferList.push_back(threadLogBuffer);
         }
@@ -96,13 +98,23 @@ namespace Physica::Logger {
     int LoggerRuntime::getNextBufferToLog() noexcept {
         if (processingBufferID == -1)
             return 0;
-        const size_t size = bufferList.size();
+        size_t size = bufferList.size();
         int i = static_cast<int>((processingBufferID + 1) % size);
-        for (; i != processingBufferID; i = (processingBufferID + 1) % size)
-            if (!bufferList[i]->isEmpty()) {
+        for (; i != processingBufferID; i = (processingBufferID + 1) % size) {
+            LogBuffer* buffer = bufferList[i];
+            if (buffer->isEmpty()) {
+                if (buffer->getShouldDelete()) {
+                    std::unique_lock<std::mutex> lock(bufferListMutex);
+                    delete buffer;
+                    bufferList.erase(bufferList.begin() + i);
+                    --size;
+                }
+            }
+            else {
                 processingBufferID = i;
                 return processingBufferID;
             }
+        }
         processingBufferID = -1;
         return processingBufferID;
     }
