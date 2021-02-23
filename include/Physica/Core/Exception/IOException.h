@@ -21,9 +21,9 @@
 #include <exception>
 
 namespace Physica::Core {
-    class NotImplementedException : public std::exception {
+    class IOException : public std::exception {
     public:
-        ~NotImplementedException() noexcept override = default;
-        [[nodiscard]] const char* what() const noexcept override { return "[Error]: Not implemented."; }
+        ~IOException() noexcept override = default;
+        [[nodiscard]] const char* what() const noexcept override { return "[Error]: Encountered IOException."; }
     };
 }
