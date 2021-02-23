@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LOGLEVEL_H
-#define PHYSICA_LOGLEVEL_H
+#pragma once
 
 #include <cstdint>
 #include <cstddef>
 #include <array>
 
 namespace Physica::Logger {
+    constexpr size_t DefaultBufferSize = 1U << 20U;
     /*!
      * ArgType indicates the conversion specifier, e.g. c in %c, s in %s.
      */
@@ -63,5 +63,3 @@ namespace Physica::Logger {
         size_t argCount;
     };
 }
-
-#endif

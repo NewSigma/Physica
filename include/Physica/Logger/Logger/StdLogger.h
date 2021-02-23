@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_STDLOGGER_H
-#define PHYSICA_STDLOGGER_H
+#pragma once
 
 #include "AbstractLogger.h"
 
@@ -40,5 +39,3 @@ namespace Physica::Logger {
         friend class LoggerRuntime;
     };
 }
-
-#endif

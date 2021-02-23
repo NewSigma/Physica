@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ABSTRACTLOGGER_H
-#define PHYSICA_ABSTRACTLOGGER_H
+#pragma once
 
 #include <cstdarg>
 #include <iostream>
@@ -70,5 +69,3 @@ namespace Physica::Logger {
      */
     inline void __attribute__ ((format (printf, 1, 2))) checkFormat(const char*, ...) {}
 }
-
-#endif

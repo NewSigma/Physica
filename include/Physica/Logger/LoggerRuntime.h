@@ -81,6 +81,8 @@ namespace Physica::Logger {
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
         [[nodiscard]] Utils::RingBuffer& getBuffer();
+        /* Setters */
+        void releaseBuffer() noexcept { threadLogBuffer->schedualDelete(); threadLogBuffer = nullptr; }
         /* Static Members */
         static inline LoggerRuntime& getInstance();
     private:

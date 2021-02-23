@@ -64,7 +64,7 @@ namespace Physica::Logger {
         if (shouldExit)
             Fatal(STDERR_FILENO, "Try to append log to closed LoggerRuntime.");
         if (threadLogBuffer == nullptr) {
-            threadLogBuffer = new LogBuffer(1U << 20U);
+            threadLogBuffer = new LogBuffer(DefaultBufferSize);
             std::unique_lock<std::mutex> lock(bufferListMutex);
             bufferList.push_back(threadLogBuffer);
         }
