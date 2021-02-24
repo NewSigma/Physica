@@ -35,11 +35,10 @@ namespace Physica::Logger {
         assert(logID > 0);
         const LogInfo& info = runtime.getLogInfo(logID - 1);
         /* Handle time */ {
-            size_t timeStart;
-            buffer.read(&timeStart);
-            time_t now = std::time(nullptr);
-            size_t timeEnd = Utils::Cycler::now();
-            now -= Utils::Cycler::toSeconds(timeEnd - timeStart);
+            const LoggerTimer& timer = runtime.getTimer();
+            uint64_t cycle;
+            buffer.read(&cycle);
+            time_t now = timer.toTime(cycle);
             auto localTime = std::localtime(&now);
             logString << '['
                       << localTime->tm_hour

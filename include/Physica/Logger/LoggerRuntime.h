@@ -28,6 +28,7 @@
 #include "LogBuffer.h"
 #include "LoggerType.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
+#include "LoggerTimer.h"
 
 namespace Physica::Logger {
     /**
@@ -43,6 +44,7 @@ namespace Physica::Logger {
     private:
         thread_local static LogBuffer* threadLogBuffer;
 
+        LoggerTimer timer;
         std::vector<LogBuffer*> bufferList;
         std::mutex bufferListMutex;
         /**
@@ -77,6 +79,7 @@ namespace Physica::Logger {
         void registerLogInfo(const LogInfo& info) { logInfos.push_back(info); }
         void loggerShouldExit() { shouldExit = true; }
         /* Getters */
+        [[nodiscard]] const LoggerTimer& getTimer() const noexcept { return timer; }
         [[nodiscard]] AbstractLogger& getLogger(size_t index) const { assert(index < loggerList.size()); return *loggerList[index]; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
@@ -115,11 +118,12 @@ namespace Physica::Logger {
         if(level >= LogLevel::severity) {                                                           \
             if(false)                                                                               \
                 Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
-            static size_t logID = LoggerRuntime::unassignedLogID;                                   \
                                                                                                     \
             constexpr size_t argCount = getArgCount(format);                                        \
             static constexpr std::array<ArgType, argCount> argArray                                 \
                                                         = analyzeFormatString<argCount>(format);    \
+            static size_t logID = LoggerRuntime::unassignedLogID;                                   \
+                                                                                                    \
             if(logID == LoggerRuntime::unassignedLogID) {                                           \
                 constexpr LogInfo info{                                                             \
                         LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \

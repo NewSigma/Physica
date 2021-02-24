@@ -26,7 +26,8 @@ namespace Physica::Logger {
     thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
 
     LoggerRuntime::LoggerRuntime()
-            : bufferList()
+            : timer()
+            , bufferList()
             , bufferListMutex()
             , processingBufferID(0)
             , shouldExit(false) {
