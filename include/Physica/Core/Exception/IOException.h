@@ -24,6 +24,6 @@ namespace Physica::Core {
     class IOException : public std::exception {
     public:
         ~IOException() noexcept override = default;
-        [[nodiscard]] const char* what() const noexcept override { return "[Error]: Encountered IOException."; }
+        const char* what() const noexcept override { return "[Error]: Encountered IOException."; }
     };
 }

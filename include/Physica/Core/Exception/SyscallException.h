@@ -18,12 +18,14 @@
  */
 #pragma once
 
+#include <errno.h>
+#include <cstring>
 #include <exception>
 
 namespace Physica::Core {
-    class NotImplementedException : public std::exception {
+    class SyscallException : public std::exception {
     public:
-        ~NotImplementedException() noexcept override = default;
-        const char* what() const noexcept override { return "[Error]: Not implemented."; }
+        ~SyscallException() noexcept override = default;
+        const char* what() const noexcept override { return strerror(errno); }
     };
 }

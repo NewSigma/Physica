@@ -25,7 +25,7 @@ namespace Physica::Core {
     class DivideByZeroException : public std::exception {
     public:
         ~DivideByZeroException() noexcept override = default;
-        [[nodiscard]] const char* what() const noexcept override { return "[Error]: Scalar is divided by zero."; }
+        const char* what() const noexcept override { return "[Error]: Scalar is divided by zero."; }
     };
 }
 
