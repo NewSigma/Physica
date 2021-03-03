@@ -30,6 +30,8 @@ ExprReader::ExprReader(const std::wstring& str) {
             bool got_sign = false;
             do {
                 if(!got_sign) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
                     switch(str[pointer]) {
                         case '-':
                             temp.push_back('-');
@@ -72,6 +74,7 @@ ExprReader::ExprReader(const std::wstring& str) {
                             break;
                         default:;
                     }
+#pragma GCC diagnostic pop
                 }
                 ++pointer;
             } while(isSign(str[pointer]));

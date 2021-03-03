@@ -62,6 +62,7 @@ namespace Physica::Logger {
                 switch(format[pos + 1]) {
                     case '%':
                         logString << '%';
+                        break;
                     case 'c':
                         char temp;
                         buffer.read(&temp);

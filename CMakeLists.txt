@@ -28,7 +28,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "\
 ${CMAKE_CXX_FLAGS} \
--Wall \
+-Wall -Wextra \
 -fPIC \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
 

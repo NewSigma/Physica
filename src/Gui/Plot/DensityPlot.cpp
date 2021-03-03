@@ -33,6 +33,7 @@ namespace Physica::Gui {
     }
 
     void DensityPlot::paintEvent(QPaintEvent *event) {
+        Q_UNUSED(event);
         QPainter painter(this);
         painter.setPen(QPen(Qt::black, 2));
         for(int i = 0; i < width(); i += 50)

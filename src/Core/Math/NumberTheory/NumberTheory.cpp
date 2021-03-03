@@ -48,6 +48,7 @@ namespace Physica::Core {
                     x = x % y;
                     swap(x, y);
                 }
+                break;
             /**
              * Implementation of decreases technique.
              * Different from euclideanAlgorithm(),
@@ -69,6 +70,7 @@ namespace Physica::Core {
                     swap(x, y);
                 }
                 x = x << shift;
+                break;
             }
             default:
                 throw NotImplementedException();

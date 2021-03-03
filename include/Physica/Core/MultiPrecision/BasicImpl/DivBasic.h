@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_DIVBASIC_H
-#define PHYSICA_DIVBASIC_H
+#pragma once
 
 #include "qglobal.h"
 #include "SubBasic.h"
@@ -157,17 +156,17 @@ namespace Physica::Core {
         if(temp[1] == 0 && (temp[0] < q_divisor_high || (temp[0] == q_divisor_high && q_divisor_low == 0)))
             --q;
 
-        auto n = new MPUnit[len + 1];
+        MPUnit* __restrict n = new MPUnit[len + 1];
         n[len] = mulArrByWord(n, divisor, len, q);
         //Judge dividend < n or not. If dividend < n, we have to do carry.
-        bool carry = false, go_on = true;
-        for(size_t i = len; go_on && i >= 0; --i) {
-            go_on = dividend[i] == n[i];
-            carry = dividend[i] < n[i];
+        bool carry = true;
+        for(size_t i = len; i <= len; --i) { //i <= len makes use of overflow
+            if (dividend[i] > n[i]) {
+                carry = false;
+                break;
+            }
         }
         delete[] n;
         return carry ? (q - 1) : q;
     }
 }
-
-#endif

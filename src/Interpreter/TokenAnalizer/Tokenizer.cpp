@@ -50,6 +50,8 @@ void Tokenizer::readToken() {
     const char ch = *str;
 
     switch(ch) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
         case '\n':
             ++line;
         case ' ':
@@ -86,6 +88,7 @@ void Tokenizer::readToken() {
                 return;
             }
         }
+#pragma GCC diagnostic pop
         case '*':
             if(readChar('='))
                 tokens.push_back(Token::operatorMulEq);

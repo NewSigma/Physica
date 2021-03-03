@@ -66,10 +66,13 @@ namespace Physica::Core {
                 data.appendRow((-v).calc());
                 data.appendRow(std::move(v));
                 break;
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
             case LessEqual:
                 v.toOpposite();
             case GreaterEqual:
                 data.appendRow(std::move(v));
+    #pragma GCC diagnostic push
         }
         return true;
     }
