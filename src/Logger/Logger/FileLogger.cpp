@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/Logger/StdLogger.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstring>
+#include "Physica/Core/Exception/IOException.h"
+#include "Physica/Logger/Logger/FileLogger.h"
 
 namespace Physica::Logger {
-    StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
+    FileLogger::FileLogger(const char* filename)
+            : fd(open(filename, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR)) {
+        if (fd == -1)
+            throw Core::IOException();
+    }
 
-    void StdLogger::log(Utils::RingBuffer& buffer) {
-        os << makeMsgString(buffer) << '\n';
+    FileLogger::~FileLogger() {
+        close(fd);
+    }
+
+    void FileLogger::log(Utils::RingBuffer& buffer) {
+        const std::string msg = makeMsgString(buffer);
+        const char* c_str = msg.c_str();
+        write(fd, c_str, strlen(c_str) + 1);
+        write(fd, "\n", 1);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Logger/Logger/StdLogger.h"
+#pragma once
+
+#include "AbstractLogger.h"
 
 namespace Physica::Logger {
-    StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
-
-    void StdLogger::log(Utils::RingBuffer& buffer) {
-        os << makeMsgString(buffer) << '\n';
-    }
+    class FileLogger final : public AbstractLogger {
+        int fd;
+    public:
+        FileLogger(const char* filename);
+        ~FileLogger() override;
+        /* Operations */
+        void log(Utils::RingBuffer& buffer) override final;
+    };
 }
