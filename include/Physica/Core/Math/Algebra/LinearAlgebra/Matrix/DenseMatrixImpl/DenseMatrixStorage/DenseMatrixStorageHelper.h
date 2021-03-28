@@ -30,10 +30,22 @@ namespace Physica::Core::Internal {
      * should expose to its child classes.
      */
     template<class T, size_t Size, size_t MaxSize>
-    class AbstractDenseMatrixStorage : public Utils::Array<T, Size, MaxSize> {
+    class AbstractDenseMatrixStorage : private Utils::Array<T, Size, MaxSize> {
         using Base = Utils::Array<T, Size, MaxSize>;
     protected:
         using Base::Base;
+    public:
+        /* Iterator */
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
+        using Base::rbegin;
+        using Base::rend;
+        using Base::crbegin;
+        using Base::crend;
+        /* Operators */
+        using Base::operator[];
     protected:
         AbstractDenseMatrixStorage() = default;
         AbstractDenseMatrixStorage(const AbstractDenseMatrixStorage&) = default;
@@ -42,6 +54,10 @@ namespace Physica::Core::Internal {
         /* Operators */
         AbstractDenseMatrixStorage& operator=(const AbstractDenseMatrixStorage&) = default;
         AbstractDenseMatrixStorage& operator=(AbstractDenseMatrixStorage&& m) noexcept = default;
+        /* Operations */
+        using Base::append;
+        /* Getters */
+        using Base::getLength;
     };
     /**
      * This layre handles specialization of operator().

@@ -98,7 +98,7 @@ namespace Physica::Utils::Internal {
         ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
         ConstIterator cend() const noexcept { return ConstIterator(arr + getDerived().getLength()); }
         ReverseIterator_ rbegin() const noexcept { return ReverseIterator_(arr + getDerived().getLength()); }
-        ReverseIterator_ end() const noexcept { return ReverseIterator_(arr - 1); }
+        ReverseIterator_ rend() const noexcept { return ReverseIterator_(arr - 1); }
         ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + getDerived().getLength()); }
         ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */

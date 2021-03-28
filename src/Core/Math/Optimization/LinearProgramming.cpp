@@ -85,7 +85,7 @@ namespace Physica::Core {
             return;
         MultiScalar copy(target[index]);
         target << std::move(copy);
-        const auto l = data.getLength();
+        const auto l = data.getRow();
         for(size_t i = 0; i < l; ++i) {
             auto& temp = data[i];
             copy = temp[index];
@@ -219,8 +219,8 @@ namespace Physica::Core {
      * Optimize: Unnecessary multiplies on column \to.
      */
     void LinearProgramming::pivot(size_t basic, size_t nonBasic) {
-        const auto dataLength = data.getLength();
-        Q_ASSERT(basic < dataLength && nonBasic < target.getLength());
+        const auto dataSize = data.getRow();
+        Q_ASSERT(basic < dataSize && nonBasic < target.getLength());
         /* Handle order */
         std::swap(order[data.getColumn() - 1 + basic], order[nonBasic]);
         /* Handle row basic */
@@ -233,7 +233,7 @@ namespace Physica::Core {
         ele = std::move(temp);
 
         MultiScalar copy;
-        for(size_t i = 0; i < dataLength; ++i) {
+        for(size_t i = 0; i < dataSize; ++i) {
             if(i == basic)
                 continue;
             copy = data(i, nonBasic);

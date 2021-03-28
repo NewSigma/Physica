@@ -60,9 +60,11 @@ namespace Physica::Core {
         using Base::operator=;
         /* Helpers */
         void swap(DenseMatrix& m) noexcept { Base::swap(m); }
+        /* Static members */
+        static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, 0); }
     };
 
-    template<class T, int type, size_t Row, size_t Column, size_t maxRow, size_t maxColumn>
-    inline void swap(DenseMatrix<T, type, Row, Column, maxRow, maxColumn>& m1
-            , DenseMatrix<T, type, Row, Column, maxRow, maxColumn>& m2) noexcept { m1.swap(m2); }
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    inline void swap(DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m1
+            , DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
 }
