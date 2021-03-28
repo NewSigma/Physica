@@ -16,35 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LUDECOMPOSITION_H
-#define PHYSICA_LUDECOMPOSITION_H
+#ifndef PHYSICA_PLUDecomposition_H
+#define PHYSICA_PLUDecomposition_H
 
 #include <cstdlib>
 #include "Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    class LUDecomposition {
+    class PLUDecomposition {
         DenseMatrix<T, type, maxRow, maxColumn> matrix;
         size_t* biasOrder;
     public:
-        explicit LUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m);
-        explicit LUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
-        LUDecomposition(const LUDecomposition& l);
-        LUDecomposition(LUDecomposition&& l) noexcept;
-        ~LUDecomposition();
+        explicit PLUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m);
+        explicit PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        PLUDecomposition(const PLUDecomposition& l);
+        PLUDecomposition(PLUDecomposition&& l) noexcept;
+        ~PLUDecomposition();
         /* Operators */
-        LUDecomposition& operator=(const LUDecomposition& l);
-        LUDecomposition& operator=(LUDecomposition&& l) noexcept;
+        PLUDecomposition& operator=(const PLUDecomposition& l);
+        PLUDecomposition& operator=(PLUDecomposition&& l) noexcept;
         /* Getters */
         [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() { return std::move(matrix); }
-        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() { return matrix; }
+        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] const size_t* getOrder() { return biasOrder; }
     private:
         void decompositionColumn(size_t column);
     };
 }
 
-#include "LUDecompositionImpl.h"
+#include "PLUDecompositionImpl.h"
 
 #endif

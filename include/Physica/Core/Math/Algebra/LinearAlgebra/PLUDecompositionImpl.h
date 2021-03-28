@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LUDECOMPOSITIONIMPL_H
-#define PHYSICA_LUDECOMPOSITIONIMPL_H
+#ifndef PHYSICA_PLUDecompositionIMPL_H
+#define PHYSICA_PLUDecompositionIMPL_H
 
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m)
+    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m)
             : matrix(m), biasOrder(reinterpret_cast<size_t*>(malloc(m.getRow() * sizeof(size_t)))) {
         const auto rank = matrix.getRow();
         for(size_t i = 0; i < rank; ++i)
@@ -35,11 +35,11 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept
+    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept
             : matrix(std::move(m)), biasOrder(reinterpret_cast<size_t*>(malloc(m.getRow() * sizeof(size_t)))) {}
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(const LUDecomposition& l)
+    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(const PLUDecomposition& l)
             : matrix(l.matrix), biasOrder(reinterpret_cast<size_t*>(malloc(l.matrix.getRow() * sizeof(size_t)))) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
@@ -51,7 +51,7 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>::LUDecomposition(LUDecomposition&& l) noexcept
+    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(PLUDecomposition&& l) noexcept
             : matrix(std::move(l.matrix)), biasOrder(l.biasOrder) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
@@ -60,8 +60,8 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
-            const LUDecomposition& l) {
+    PLUDecomposition<T, type, maxRow, maxColumn>& PLUDecomposition<T, type, maxRow, maxColumn>::operator= (
+            const PLUDecomposition& l) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)
@@ -73,19 +73,19 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>& LUDecomposition<T, type, maxRow, maxColumn>::operator= (
-            LUDecomposition&& l) noexcept {
+    PLUDecomposition<T, type, maxRow, maxColumn>& PLUDecomposition<T, type, maxRow, maxColumn>::operator= (
+            PLUDecomposition&& l) noexcept {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)
-        this->~LUDecomposition();
+        this->~PLUDecomposition();
         matrix = std::move(l.matrix);
         biasOrder = l.biasOrder;
         l.biasOrder = nullptr;
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    LUDecomposition<T, type, maxRow, maxColumn>::~LUDecomposition() {
+    PLUDecomposition<T, type, maxRow, maxColumn>::~PLUDecomposition() {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)
@@ -99,7 +99,7 @@ namespace Physica::Core {
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
+    void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
         Q_UNUSED(type)
         Q_UNUSED(maxRow)
         Q_UNUSED(maxColumn)

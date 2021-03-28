@@ -19,7 +19,7 @@
 #ifndef PHYSICA_LINEAREQUATIONSIMPL_H
 #define PHYSICA_LINEAREQUATIONSIMPL_H
 
-#include "LUDecomposition.h"
+#include "PLUDecomposition.h"
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
@@ -113,7 +113,7 @@ namespace Physica::Core {
                 matrix(0, rank) /= matrix(0, 0);
                 break;
             case LUMethod:
-                LUDecomposition lu(std::move(matrix));
+                PLUDecomposition lu(std::move(matrix));
                 matrix = lu.release();
                 for(size_t i = 0; i < rank - 1; ++i) {
                     for(size_t j = i + 1; j < rank; ++j)

@@ -19,7 +19,7 @@
 #ifndef PHYSICA_SQUAREMATRIXIMPL_H
 #define PHYSICA_SQUAREMATRIXIMPL_H
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/PLUDecomposition.h"
 #include "MatrixOperation.h"
 
 namespace Physica::Core {
@@ -79,7 +79,7 @@ namespace Physica::Core {
                         }
                         break;
                     case LUMethod: {
-                        LUDecomposition<T, type, maxSize, maxSize> lu(*this);
+                        PLUDecomposition<T, type, maxSize, maxSize> lu(*this);
                         const auto& m = lu.getMatrix();
                         for(size_t i = 0; i < rank; ++i)
                             result *= m(i, i);
