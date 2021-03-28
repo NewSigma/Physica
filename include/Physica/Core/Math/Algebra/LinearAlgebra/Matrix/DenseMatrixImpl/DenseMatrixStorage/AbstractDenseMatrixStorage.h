@@ -30,7 +30,7 @@ namespace Physica::Core::Internal {
      * should expose to its child classes.
      */
     template<class T, size_t Size, size_t MaxSize>
-    class AbstractDenseMatrixStorage : private Utils::Array<T, Size, MaxSize> {
+    class DenseMatrixStorageHelper : private Utils::Array<T, Size, MaxSize> {
         using Base = Utils::Array<T, Size, MaxSize>;
     protected:
         using Base::Base;
@@ -47,13 +47,6 @@ namespace Physica::Core::Internal {
         /* Operators */
         using Base::operator[];
     protected:
-        AbstractDenseMatrixStorage() = default;
-        AbstractDenseMatrixStorage(const AbstractDenseMatrixStorage&) = default;
-        AbstractDenseMatrixStorage(AbstractDenseMatrixStorage&&) = default;
-        ~AbstractDenseMatrixStorage() = default;
-        /* Operators */
-        AbstractDenseMatrixStorage& operator=(const AbstractDenseMatrixStorage&) = default;
-        AbstractDenseMatrixStorage& operator=(AbstractDenseMatrixStorage&& m) noexcept = default;
         /* Operations */
         using Base::append;
         /* Getters */
@@ -63,20 +56,20 @@ namespace Physica::Core::Internal {
      * This layre handles specialization of operator().
      */
     template<class Derived, int type>
-    class DenseMatrixStorageHelper;
+    class AbstractDenseMatrixStorage;
 
     template<class Derived>
-    class DenseMatrixStorageHelper<Derived, DenseMatrixType::Column | DenseMatrixType::Element>
-            : public AbstractDenseMatrixStorage<typename Traits<Derived>::ScalarType
-                                                , Traits<Derived>::SizeAtCompile
-                                                , Traits<Derived>::MaxSizeAtCompile>
+    class AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Element>
+            : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
+                                             , Traits<Derived>::SizeAtCompile
+                                             , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
         static_assert(Traits<Derived>::MatrixType == (DenseMatrixType::Column | DenseMatrixType::Element)
                       , "Invalid Derived type.");
     private:
-        using Base = AbstractDenseMatrixStorage<typename Traits<Derived>::ScalarType
-                                                , Traits<Derived>::SizeAtCompile
-                                                , Traits<Derived>::MaxSizeAtCompile>;
+        using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
+                                             , Traits<Derived>::SizeAtCompile
+                                             , Traits<Derived>::MaxSizeAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
     protected:
@@ -98,23 +91,23 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        DenseMatrixStorageHelper(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
         /* Helpers */
-        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
+        void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
 
     template<class Derived>
-    class DenseMatrixStorageHelper<Derived, DenseMatrixType::Row | DenseMatrixType::Element>
-            : public AbstractDenseMatrixStorage<typename Traits<Derived>::ScalarType
-                                                , Traits<Derived>::SizeAtCompile
-                                                , Traits<Derived>::MaxSizeAtCompile>
+    class AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Element>
+            : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
+                                             , Traits<Derived>::SizeAtCompile
+                                             , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
         static_assert(Traits<Derived>::MatrixType == (DenseMatrixType::Row | DenseMatrixType::Element)
                       , "Invalid Derived type.");
     private:
-        using Base = AbstractDenseMatrixStorage<typename Traits<Derived>::ScalarType
-                                                , Traits<Derived>::SizeAtCompile
-                                                , Traits<Derived>::MaxSizeAtCompile>;
+        using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
+                                             , Traits<Derived>::SizeAtCompile
+                                             , Traits<Derived>::MaxSizeAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
     protected:
@@ -136,25 +129,25 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        DenseMatrixStorageHelper(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
         /* Helpers */
-        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
+        void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
 
     template<class Derived>
-    class DenseMatrixStorageHelper<Derived, DenseMatrixType::Column | DenseMatrixType::Vector>
-            : public AbstractDenseMatrixStorage<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>
-                                                , Traits<Derived>::ColumnAtCompile
-                                                , Traits<Derived>::MaxColumnAtCompile>
+    class AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Vector>
+            : public DenseMatrixStorageHelper<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>
+                                             , Traits<Derived>::ColumnAtCompile
+                                             , Traits<Derived>::MaxColumnAtCompile>
             , public Utils::CRTPBase<Derived> {
         static_assert(Traits<Derived>::MatrixType == (DenseMatrixType::Column | DenseMatrixType::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
     private:
-        using Base = AbstractDenseMatrixStorage<VectorType
-                                                , Traits<Derived>::ColumnAtCompile
-                                                , Traits<Derived>::MaxColumnAtCompile>;
+        using Base = DenseMatrixStorageHelper<VectorType
+                                             , Traits<Derived>::ColumnAtCompile
+                                             , Traits<Derived>::MaxColumnAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
     protected:
@@ -176,26 +169,26 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        DenseMatrixStorageHelper(size_t row, size_t column, const T& t) : Base(column, VectorType(row, t)) {}
-        DenseMatrixStorageHelper(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(column, VectorType(row, t)) {}
+        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
         /* Helpers */
-        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
+        void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
 
     template<class Derived>
-    class DenseMatrixStorageHelper<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>
-            : public AbstractDenseMatrixStorage<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>
-                                                , Traits<Derived>::RowAtCompile
-                                                , Traits<Derived>::MaxRowAtCompile>
+    class AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>
+            : public DenseMatrixStorageHelper<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>
+                                             , Traits<Derived>::RowAtCompile
+                                             , Traits<Derived>::MaxRowAtCompile>
             , public Utils::CRTPBase<Derived> {
         static_assert(Traits<Derived>::MatrixType == (DenseMatrixType::Row | DenseMatrixType::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;
     private:
-        using Base = AbstractDenseMatrixStorage<VectorType
-                                                , Traits<Derived>::RowAtCompile
-                                                , Traits<Derived>::MaxRowAtCompile>;
+        using Base = DenseMatrixStorageHelper<VectorType
+                                             , Traits<Derived>::RowAtCompile
+                                             , Traits<Derived>::MaxRowAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
     protected:
@@ -217,11 +210,11 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        DenseMatrixStorageHelper(size_t row, size_t column, const T& t) : Base(row, VectorType(column, t)) {}
-        DenseMatrixStorageHelper(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, VectorType(column, t)) {}
+        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
         /* Helpers */
-        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
+        void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
 }
 
-#include "DenseMatrixStorageHelperImpl.h"
+#include "AbstractDenseMatrixStorageImpl.h"
