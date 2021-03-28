@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
-#include "Physica/PhysicaInit.h"
+#include "Physica/Core/PhysicaInit.h"
 #include "Physica/Gui/PhysicaMain.h"
 
 int main(int argc, char** argv) {

@@ -18,7 +18,7 @@
  */
 #include <QTime>
 #include <Physica/Logger/LoggerRuntime.h>
-#include "Physica/PhysicaInit.h"
+#include "Physica/Core/PhysicaInit.h"
 #include "Physica/Utils/Cycler.h"
 
 void initPhysica() {
