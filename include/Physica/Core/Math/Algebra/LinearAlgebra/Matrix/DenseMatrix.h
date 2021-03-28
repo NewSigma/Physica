@@ -20,6 +20,7 @@
 
 #include <memory>
 #include "DenseMatrixImpl/DenseMatrixBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
@@ -56,6 +57,8 @@ namespace Physica::Core {
         using Base = DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>>;
     public:
         using Base::Base;
+        template<class Matrix>
+        DenseMatrix(LUDecomposition<Matrix> lu);
         /* Operators */
         using Base::operator=;
         /* Helpers */
@@ -63,6 +66,15 @@ namespace Physica::Core {
         /* Static members */
         static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, 0); }
     };
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class Matrix>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<Matrix> lu)
+            : DenseMatrix(lu.getRank(), lu.getRank()) {
+        const size_t rank = lu.getRank();
+        for (size_t i = 0; i < rank; ++i)
+            lu.decompositionColumn((*this), i);
+    }
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     inline void swap(DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m1
