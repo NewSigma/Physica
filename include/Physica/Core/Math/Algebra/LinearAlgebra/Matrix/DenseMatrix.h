@@ -44,6 +44,17 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = MaxRow * MaxColumn;
         };
     }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
+        for (size_t r = 0; r < mat.getRow(); ++r) {
+            for (size_t c = 0; c < mat.getColumn(); ++c) {
+                os << mat(r, c) << ' ';
+            }
+            os << '\n';
+        }
+        return os;
+    }
     /**
      * DenseMatrix class
      * A matrix can be either fixed matrix, which have its max size defined,
@@ -61,6 +72,7 @@ namespace Physica::Core {
         DenseMatrix(LUDecomposition<Matrix> lu);
         /* Operators */
         using Base::operator=;
+        friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
         /* Helpers */
         void swap(DenseMatrix& m) noexcept { Base::swap(m); }
         /* Static members */
@@ -72,6 +84,7 @@ namespace Physica::Core {
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<Matrix> lu)
             : DenseMatrix(lu.getRank(), lu.getRank()) {
         const size_t rank = lu.getRank();
+        (*this) = lu.getMatrix();
         for (size_t i = 0; i < rank; ++i)
             lu.decompositionColumn((*this), i);
     }
