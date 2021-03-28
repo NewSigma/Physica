@@ -67,9 +67,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -91,9 +90,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { assert(Base::getLength() % getColumn() == 0); return Base::getLength() / getColumn(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -115,9 +113,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
@@ -142,18 +139,13 @@ namespace Physica::Core {
     protected:
         size_t row;
     public:
+        DenseMatrixStorage() : Base(), row(0) {}
+        DenseMatrixStorage(size_t row, size_t column) : Base(row, column), row(0) {}
+        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
     protected:
-        DenseMatrixStorage() : Base(), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
-        DenseMatrixStorage(const DenseMatrixStorage&) = default;
-        DenseMatrixStorage(DenseMatrixStorage&&) noexcept = default;
-        ~DenseMatrixStorage() = default;
-        /* Operators */
-        DenseMatrixStorage& operator=(const DenseMatrixStorage&) = default;
-        DenseMatrixStorage& operator=(DenseMatrixStorage&&) noexcept = default;
         /* Helper */
         void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -174,9 +166,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -198,9 +189,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { assert(Base::getLength() % getColumn() == 0); return Base::getLength() / getColumn(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -222,9 +212,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
@@ -249,18 +238,13 @@ namespace Physica::Core {
     protected:
         size_t row;
     public:
+        DenseMatrixStorage() : Base(), row(0) {}
+        DenseMatrixStorage(size_t row, size_t column) : Base(row, column), row(0) {}
+        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
     protected:
-        DenseMatrixStorage() : Base(), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
-        DenseMatrixStorage(const DenseMatrixStorage&) = default;
-        DenseMatrixStorage(DenseMatrixStorage&&) noexcept = default;
-        ~DenseMatrixStorage() = default;
-        /* Operators */
-        DenseMatrixStorage& operator=(const DenseMatrixStorage&) = default;
-        DenseMatrixStorage& operator=(DenseMatrixStorage&&) noexcept = default;
         /* Helper */
         void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -281,9 +265,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Vector>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -305,9 +288,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::operator[](0).getLength(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -329,9 +311,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] size_t getColumn() const noexcept {return Base::getLength(); }
@@ -353,9 +334,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Column | DenseMatrixType::Vector>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::operator[](0).getLength(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getLength(); }
@@ -377,9 +357,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Vector>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -401,9 +380,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getLength(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
@@ -425,9 +403,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Element>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] size_t getColumn() const noexcept {return Base::operator[](0).getLength(); }
@@ -449,9 +426,8 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixType::Row | DenseMatrixType::Vector>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getLength(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::operator[](0).getLength(); }

@@ -91,42 +91,40 @@ namespace Physica::Core {
     template<class Derived>
     Derived operator+(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
         Q_ASSERT(m1.getRow() == m2.getRow() && m1.getColumn() == m2.getColumn());
-        const auto length = m1.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(m1[i] + m2[i], i);
-        result.setLength(length);
+        Derived result(m1.getRow(), m1.getColumn());
+        auto ite1 = m1.cbegin();
+        auto ite2 = m2.cbegin();
+        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1, ++ite2)
+            *ite = *ite1 + *ite2;
         return result;
     }
 
     template<class Derived>
     Derived operator-(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
         Q_ASSERT(m1.getRow() == m2.getRow() && m1.getColumn() == m2.getColumn());
-        const auto length = m1.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(m1[i] - m2[i], i);
-        result.setLength(length);
+        Derived result(m1.getRow(), m1.getColumn());
+        auto ite1 = m1.cbegin();
+        auto ite2 = m2.cbegin();
+        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1, ++ite2)
+            *ite = *ite1 - *ite2;
         return result;
     }
 
     template<class Derived>
     Derived operator*(const DenseMatrixBase<Derived>& m, const MultiScalar& n) {
-        const auto length = m.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(m[i] * n, i);
-        result.setLength(length);
+        Derived result(m.getRow(), m.getColumn());
+        auto ite1 = m.cbegin();
+        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1)
+            *ite = *ite1 * n;
         return result;
     }
 
     template<class Derived>
     Derived operator-(const DenseMatrixBase<Derived>& m) {
-        const auto length = m.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(-m[i], i);
-        result.setLength(length);
+        Derived result(m.getRow(), m.getColumn());
+        auto ite1 = m.cbegin();
+        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1)
+            *ite = -(*ite1);
         return result;
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

@@ -38,7 +38,7 @@ namespace Physica::Utils {
 
     template<class T, size_t Length, size_t Capacity>
     Array<T, Length, Capacity>::Array(std::initializer_list<T> list) : Base(Length) {
-        static_assert(list.size() <= Capacity);
+        assert(list.size() <= Capacity);
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)

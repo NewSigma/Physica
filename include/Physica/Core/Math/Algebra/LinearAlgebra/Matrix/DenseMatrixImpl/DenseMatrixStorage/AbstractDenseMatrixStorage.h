@@ -31,10 +31,32 @@ namespace Physica::Core::Internal {
      */
     template<class T, size_t Size, size_t MaxSize>
     class DenseMatrixStorageHelper : private Utils::Array<T, Size, MaxSize> {
+        static_assert(Size == MaxSize, "MaxSize that larger than Size makes no sence.");
+
         using Base = Utils::Array<T, Size, MaxSize>;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
+        /* Iterator */
+        using Base::begin;
+        using Base::end;
+        using Base::cbegin;
+        using Base::cend;
+        using Base::rbegin;
+        using Base::rend;
+        using Base::crbegin;
+        using Base::crend;
+        /* Operators */
+        using Base::operator[];
+    protected:
+        /* Getters */
+        using Base::getLength;
+    };
+
+    template<class T, size_t MaxSize>
+    class DenseMatrixStorageHelper<T, Dynamic, MaxSize> : private Utils::Array<T, Dynamic, MaxSize> {
+        using Base = Utils::Array<T, Dynamic, MaxSize>;
+    public:
+        using Base::Base;
         /* Iterator */
         using Base::begin;
         using Base::end;
@@ -72,9 +94,11 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::MaxSizeAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
-    protected:
-        using Base::Base;
     public:
+        AbstractDenseMatrixStorage() = default;
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        AbstractDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
@@ -91,7 +115,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -110,9 +133,11 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::MaxSizeAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
-    protected:
-        using Base::Base;
     public:
+        AbstractDenseMatrixStorage() = default;
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        AbstractDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
@@ -129,7 +154,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -150,9 +174,11 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::MaxColumnAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
-    protected:
-        using Base::Base;
     public:
+        AbstractDenseMatrixStorage() = default;
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(column, VectorType(row)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(column, VectorType(row, t)) {}
+        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
@@ -169,8 +195,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(column, VectorType(row, t)) {}
-        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -191,9 +215,11 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::MaxRowAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
-    protected:
-        using Base::Base;
     public:
+        AbstractDenseMatrixStorage() = default;
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row, VectorType(column)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, VectorType(column, t)) {}
+        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
@@ -210,8 +236,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
     protected:
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, VectorType(column, t)) {}
-        AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(std::move(list)) {}
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };

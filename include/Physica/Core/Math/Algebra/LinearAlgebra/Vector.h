@@ -59,6 +59,9 @@ namespace Physica::Core {
         static Vector<T> zeroVector(size_t len);
         static Vector<T> randomVector(size_t len);
         static Vector simplyMultiply(const Vector& v1, const Vector& v2);
+
+        template<class Derived>
+        friend class Internal::VectorExpressionHelper;
     };
     /* Operators */
     template<class T, size_t Length, size_t MaxLength>

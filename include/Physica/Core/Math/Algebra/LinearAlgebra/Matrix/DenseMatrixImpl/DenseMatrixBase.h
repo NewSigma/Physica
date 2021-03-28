@@ -44,22 +44,11 @@ namespace Physica::Core {
                                         , Internal::Traits<Derived>::MaxColumnAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-    protected:
-        using Base::Base;
     public:
+        using Base::Base;
+        /* Operations */
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
-    protected:
-        DenseMatrixBase(size_t row, size_t column, const ScalarType& t) : Base(row, column, t) {
-            assert(row == Base::getRow() && column == Base::getColumn());
-        }
-        DenseMatrixBase(DenseMatrixBase&& m) noexcept : Base(std::move(m)), Utils::CRTPBase<Derived>() {}
-        /* Operators */
-        DenseMatrixBase& operator=(const DenseMatrixBase&) = default;
-        DenseMatrixBase& operator=(DenseMatrixBase&& m) noexcept {
-            Base::operator=(std::move(m));
-            return *this;
-        }
     };
     /* Operators */
     template<class Derived>
