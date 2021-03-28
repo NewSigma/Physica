@@ -19,7 +19,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
-#include <iostream>
 
 int main() {
     typedef DenseMatrix<double, DenseMatrixType::Row | DenseMatrixType::Vector, 3, 3, 3, 3> Matrix3x3;
@@ -27,11 +26,10 @@ int main() {
     LUDecomposition lu(mat1);
     Matrix3x3 decomp(lu);
     Matrix3x3 answer{{2, 3, 4}, {0.5, -0.5, 7}, {0.5, -1, -1}};
-    std::cout << decomp << std::endl;
     decomp -= answer;
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
-            if (mat1(i, j) > 0.001)
+            if (decomp(i, j) > 0.001)
                 return 1;
     return 0;
 }

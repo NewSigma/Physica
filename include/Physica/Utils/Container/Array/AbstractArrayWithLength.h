@@ -31,6 +31,7 @@ namespace Physica::Utils::Internal {
         size_t length;
     public:
         AbstractArrayWithLength() = delete;
+        ~AbstractArrayWithLength() = default;
         /* Operators */
         AbstractArrayWithLength& operator=(const AbstractArrayWithLength& array) = delete;
         AbstractArrayWithLength& operator=(AbstractArrayWithLength&& array) noexcept = delete;
@@ -60,7 +61,6 @@ namespace Physica::Utils::Internal {
         AbstractArrayWithLength(size_t length_, T* __restrict arr_);
         AbstractArrayWithLength(const AbstractArrayWithLength& array);
         AbstractArrayWithLength(AbstractArrayWithLength&& array) noexcept;
-        ~AbstractArrayWithLength();
         /* Helpers */
         void swap(AbstractArrayWithLength& array);
     };

@@ -81,7 +81,7 @@ namespace Physica::Utils {
         explicit Array(const Array<OtherT, OtherLength, OtherCapacity>& array);
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
         explicit Array(Array<OtherT, OtherLength, OtherCapacity>&& array) noexcept;
-        ~Array();
+        ~Array() = default;
         /* Operators */
         Array& operator=(const Array& array);
         Array& operator=(Array&& array) noexcept;

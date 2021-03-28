@@ -93,13 +93,6 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity>
-    Array<T, Length, Capacity>::~Array() {
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < Length; ++i)
-                (arr + i)->~T();
-    }
-
-    template<class T, size_t Length, size_t Capacity>
     Array<T, Length, Capacity>&
     Array<T, Length, Capacity>::operator=(const Array<T, Length, Capacity>& array) {
         if (this != &array) {

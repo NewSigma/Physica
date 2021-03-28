@@ -88,7 +88,10 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
-        //Elements should call ~T() at subclasses.
+        if(QTypeInfo<T>::isComplex)
+            if (arr != nullptr)
+                for(size_t i = 0; i < getDerived().getLength(); ++i)
+                    (arr + i)->~T();
         free(arr);
     }
 

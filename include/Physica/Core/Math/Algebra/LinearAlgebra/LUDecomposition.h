@@ -52,18 +52,18 @@ namespace Physica::Core {
         using ScalarType = typename Internal::Traits<Matrix>::ScalarType;
         const auto startAlphaIndex = column + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
-            ScalarType temp(matrix(j, column));
+            ScalarType temp(out(j, column));
             for (size_t k = 0; k < j; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
+                temp -= out(j, k) * out(k, column);
             out(j, column) = std::move(temp);
         }
 
-        const auto r = matrix.getRow();
+        const auto r = out.getRow();
         for (size_t j = startAlphaIndex; j < r; ++j) {
-            ScalarType temp(matrix(j, column));
+            ScalarType temp(out(j, column));
             for (size_t k = 0; k < column; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
-            out(j, column) = temp / matrix(column, column);
+                temp -= out(j, k) * out(k, column);
+            out(j, column) = temp / out(column, column);
         }
     }
 }

@@ -42,13 +42,6 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArrayWithLength<Derived>::AbstractArrayWithLength(
         AbstractArrayWithLength&& array) noexcept : Base(std::move(array)), length(array.length) {}
-
-    template<class Derived>
-    AbstractArrayWithLength<Derived>::~AbstractArrayWithLength() {
-        if(QTypeInfo<T>::isComplex)
-            for(size_t i = 0; i < length; ++i)
-                (arr + i)->~T();
-    }
     /**
      * Get the last element in the array and remove it from the array.
      */
