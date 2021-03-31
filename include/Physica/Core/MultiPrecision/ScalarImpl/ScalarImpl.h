@@ -26,6 +26,35 @@
  * Do not include this header file, include \file Scalar.h instead.
  */
 namespace Physica::Core {
+    namespace Internal {
+        /**
+         * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
+         * This function provide a quick sign check compare to using isPositive() and isNegative().
+         */
+        inline bool AbstractScalar<MultiPrecision>::matchSign(
+                const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
+            Q_ASSERT(!s1.isZero() && !s2.isZero());
+            return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
+        }
+        /**
+         * Cut zeros from the beginning.
+         */
+        inline void AbstractScalar<MultiPrecision>::cutZero(AbstractScalar<MultiPrecision>& s) {
+            const int size = s.getSize();
+            int id = size - 1;
+            while(s.byte[id] == 0 && id > 0)
+                --id;
+            ++id;
+
+            if(id != size) {
+                int shorten = size - id;
+                s.byte = reinterpret_cast<MPUnit*>(realloc(s.byte, id * sizeof(MPUnit)));
+                s.length = s.length > 0 ? id : -id;
+                auto temp = s.power;
+                s.power = s.byte[id - 1] != 0 ? (temp - shorten) : 0;
+            }
+        }
+    }
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<ScalarType type, bool errorTrack1, bool errorTrack2>
     Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
@@ -103,16 +132,6 @@ namespace Physica::Core {
         s2.swap(s1);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
-    /**
-     * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
-     * This function provide a quick sign check compare to using isPositive() and isNegative().
-     */
-    inline bool Scalar<MultiPrecision, false>::matchSign(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
-        Q_ASSERT(!s1.isZero() && !s2.isZero());
-        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
-    }
-
     template<bool errorTrack>
     inline Scalar<MultiPrecision, errorTrack>& operator++(Scalar<MultiPrecision, errorTrack>& s) {
         s += BasicConst::getInstance()._1;
@@ -139,15 +158,15 @@ namespace Physica::Core {
         return temp;
     }
     //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
-    inline bool operator>=(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline bool operator>=(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
         return !(s1 < s2);
     }
 
-    inline bool operator<=(const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline bool operator<=(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
         return !(s1 > s2);
     }
 
-    inline bool operator!= (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline bool operator!= (const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
         return !(s1 == s2);
     }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////

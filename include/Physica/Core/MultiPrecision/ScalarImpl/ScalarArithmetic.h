@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -30,31 +30,31 @@
  */
 //Forward declaration
 namespace Physica::Core {
-    inline bool operator!= (const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2);
+    inline bool operator!=(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2);
 }
 
-namespace Physica::Core {
+namespace Physica::Core::Internal {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
     /*!
      * WithError functions will calculate the error while NoError functions will not.
      * They have slightly difference between each other.
      */
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::addWithError (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, true> AbstractScalar<MultiPrecision>::addWithError (
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(s1.isZero())
-            return Scalar<MultiPrecision, true>(s2);
+            return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s2));
         else if(s2.isZero())
-            return Scalar<MultiPrecision, true>(s1);
+            return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subWithError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -62,8 +62,8 @@ namespace Physica::Core {
             }
         }
         else {
-            const Scalar* big;
-            const Scalar* small;
+            const AbstractScalar* big;
+            const AbstractScalar* small;
             if (s1.power > s2.power) {
                 big = &s1;
                 small = &s2;
@@ -116,22 +116,22 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::addNoError (
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, false> AbstractScalar<MultiPrecision>::addNoError (
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(s1.isZero())
-            return Scalar(s2);
+            return Scalar<MultiPrecision, false>(static_cast<const Scalar<MultiPrecision, false>&>(s2));
         else if(s2.isZero())
-            return Scalar(s1);
+            return Scalar<MultiPrecision, false>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subNoError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -139,8 +139,8 @@ namespace Physica::Core {
             }
         }
         else {
-            const Scalar* big;
-            const Scalar* small;
+            const AbstractScalar* big;
+            const AbstractScalar* small;
             if (s1.power > s2.power) {
                 big = &s1;
                 small = &s2;
@@ -192,23 +192,23 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::subWithError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, true> AbstractScalar<MultiPrecision>::subWithError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(s1.isZero())
-            return Scalar<MultiPrecision, true>(-s2);
+            return Scalar<MultiPrecision, true>(static_cast<Scalar<MultiPrecision, false>&&>(-s2));
         else if(s2.isZero())
-            return Scalar<MultiPrecision, true>(s1);
+            return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = addWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                const Scalar* big;
-                const Scalar* small;
+                const AbstractScalar* big;
+                const AbstractScalar* small;
                 bool changeSign = false;
                 if (s1.power > s2.power) {
                     big = &s1;
@@ -270,7 +270,7 @@ namespace Physica::Core {
             }
         }
         else {
-            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+            AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
                 auto result = addWithError(shallow_copy, s2);
                 result.toOpposite();
@@ -279,7 +279,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -289,23 +289,23 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::subNoError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, false> AbstractScalar<MultiPrecision>::subNoError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(s1.isZero())
-            return Scalar(-s2);
+            return Scalar<MultiPrecision, false>(static_cast<Scalar<MultiPrecision, false>&&>(-s2));
         else if(s2.isZero())
-            return Scalar(s1);
+            return Scalar<MultiPrecision, false>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = addNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
-                const Scalar* big;
-                const Scalar* small;
+                const AbstractScalar* big;
+                const AbstractScalar* small;
                 bool changeSign = false;
                 if (s1.power > s2.power) {
                     big = &s1;
@@ -360,13 +360,13 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-                Scalar result(byte, changeSign ? -length : length, big->power);
+                Scalar<MultiPrecision, false> result(byte, changeSign ? -length : length, big->power);
                 cutZero(result);
                 return result;
             }
         }
         else {
-            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+            AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
                 Scalar result = addNoError(shallow_copy, s2);
                 result.toOpposite();
@@ -375,7 +375,7 @@ namespace Physica::Core {
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                AbstractScalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = subNoError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 Q_UNUSED(shallow_copy)
@@ -385,14 +385,14 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::mulWithError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, true> AbstractScalar<MultiPrecision>::mulWithError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if (s1.isZero() || s2.isZero())
-            return 0;
+            return Scalar<MultiPrecision, true>(0);
         if (s1 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision, true>(s2);
+            return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s2));
         if (s2 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision, true>(s1);
+            return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         const int size1 = s1.getSize();
         const int size2 = s2.getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
@@ -411,14 +411,14 @@ namespace Physica::Core {
         return Scalar<MultiPrecision, true>(byte, matchSign(s1, s2) ? length : -length, power);
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::mulNoError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, false> AbstractScalar<MultiPrecision>::mulNoError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if (s1.isZero() || s2.isZero())
-            return 0;
+            return Scalar<MultiPrecision, true>(0);
         if (s1 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision, false>(s2);
+            return Scalar<MultiPrecision, false>(static_cast<const Scalar<MultiPrecision, false>&>(s2));
         if (s2 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision, false>(s1);
+            return Scalar<MultiPrecision, false>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         const int size1 = s1.getSize();
         const int size2 = s2.getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
@@ -437,8 +437,8 @@ namespace Physica::Core {
         return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length, power);
     }
 
-    inline Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::divWithError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, true> AbstractScalar<MultiPrecision>::divWithError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(Q_UNLIKELY(s2.isZero()))
             throw DivideByZeroException();
 
@@ -486,14 +486,14 @@ namespace Physica::Core {
                         , s1.getPower() - s2.getPower() - 1, 1) >> (s1_shift - s2_shift);
             }
             else
-                return Scalar<MultiPrecision, true>(s1);
+                return Scalar<MultiPrecision, true>(static_cast<const Scalar<MultiPrecision, false>&>(s1));
         }
         else
             return Scalar<MultiPrecision, true>(static_cast<SignedMPUnit>(0));
     }
 
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::divNoError(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision, false> AbstractScalar<MultiPrecision>::divNoError(
+            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
         if(Q_UNLIKELY(s2.isZero()))
             throw DivideByZeroException();
 
@@ -536,11 +536,11 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                return Scalar(byte, matchSign(s1, s2) ? length : -length
+                return Scalar<MultiPrecision, false>(byte, matchSign(s1, s2) ? length : -length
                         , s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
             }
             else
-                return Scalar<MultiPrecision, false>(s1);
+                return static_cast<const Scalar<MultiPrecision, false>&>(s1);
         }
         else
             return Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(0));
@@ -550,7 +550,7 @@ namespace Physica::Core {
      * Return true if array is cut.
      */
     template<>
-    inline bool Scalar<MultiPrecision, false>::cutLength(Scalar<MultiPrecision, true>& s) {
+    inline bool AbstractScalar<MultiPrecision>::cutLength(Scalar<MultiPrecision, true>& s) {
         bool result = false;
         int size = s.getSize();
 
@@ -568,7 +568,7 @@ namespace Physica::Core {
     }
 
     template<>
-    inline bool Scalar<MultiPrecision, false>::cutLength(Scalar<MultiPrecision, false>& s) {
+    inline bool AbstractScalar<MultiPrecision>::cutLength(Scalar<MultiPrecision, false>& s) {
         bool result = false;
         int size = s.getSize();
 
@@ -582,24 +582,6 @@ namespace Physica::Core {
             s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
         }
         return result;
-    }
-    /*!
-     * Cut zeros from the beginning.
-     */
-    inline void Scalar<MultiPrecision, false>::cutZero(Scalar<MultiPrecision, false>& s) {
-        const int size = s.getSize();
-        int id = size - 1;
-        while(s.byte[id] == 0 && id > 0)
-            --id;
-        ++id;
-
-        if(id != size) {
-            int shorten = size - id;
-            s.byte = reinterpret_cast<MPUnit*>(realloc(s.byte, id * sizeof(MPUnit)));
-            s.length = s.length > 0 ? id : -id;
-            auto temp = s.power;
-            s.power = s.byte[id - 1] != 0 ? (temp - shorten) : 0;
-        }
     }
 }
 

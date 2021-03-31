@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -66,7 +66,7 @@ namespace Physica::Core::Internal {
     class ScalarAddSubExpressionHelper : public AbstractScalarAddSubExpression {
     private:
         struct Node {
-            const Scalar<type, false>* value;
+            const AbstractScalar<type>* value;
             NodeType nodeType;
         };
     private:

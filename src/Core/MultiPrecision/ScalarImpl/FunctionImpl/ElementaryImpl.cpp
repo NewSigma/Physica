@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -196,8 +196,8 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> exp(const Scalar<MultiPrecision, true>& s) {
         if(s.isNegative())
             return reciprocal(exp(-s));
-        Scalar<MultiPrecision, true> result = 1;
-        Scalar<MultiPrecision, false> rank = 1;
+        Scalar<MultiPrecision, true> result(1);
+        Scalar<MultiPrecision, false> rank(1);
         Scalar<MultiPrecision, true> temp(s);
         const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
         while(true) {

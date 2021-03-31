@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -42,7 +42,7 @@ namespace Physica::Core {
             const auto s_size = s.getSize();
             //Estimate the length of result first. we will calculate it accurately later.
             auto length = 2 * s_size;
-            Scalar<MultiPrecision, errorTrack> result(length, s.power * 2 + 1);
+            Scalar<MultiPrecision, errorTrack> result(length, s.getPower() * 2 + 1);
 
             memset(result.byte, 0, length * sizeof(MPUnit));
             for(int i = 0; i < s_size - 1; ++i)
