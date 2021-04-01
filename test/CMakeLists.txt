@@ -7,3 +7,4 @@ physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecomposition
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 physica_add_test(Logger Logger/LoggerTest.cpp)
+physica_add_test(DirStack Utils/DirStackTest.cpp)
