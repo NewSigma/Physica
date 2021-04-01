@@ -142,6 +142,8 @@ namespace Physica::Core {
                 /* Operators */
                 AbstractScalar& operator=(const AbstractScalar& s);
                 AbstractScalar& operator=(AbstractScalar&& s) noexcept;
+                /* Helpers */
+                inline void cutZero();
                 /* Static members */
                 inline static Scalar<MultiPrecision, true> addWithError(const AbstractScalar& s1, const AbstractScalar& s2);
                 inline static Scalar<MultiPrecision, false> addNoError(const AbstractScalar& s1, const AbstractScalar& s2);
@@ -153,7 +155,6 @@ namespace Physica::Core {
                 inline static Scalar<MultiPrecision, false> divNoError(const AbstractScalar& s1, const AbstractScalar& s2);
                 template<bool errorTrack>
                 inline static bool cutLength(Scalar<MultiPrecision, errorTrack>& s);
-                inline static void cutZero(AbstractScalar& s);
                 /* Friends */
                 template<bool errorTrack>
                 friend Scalar<MultiPrecision, errorTrack> Core::square(const Scalar<MultiPrecision, errorTrack>& s);

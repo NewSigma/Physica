@@ -265,7 +265,7 @@ namespace Physica::Core::Internal {
                     goto redo;
                 }
                 Scalar<MultiPrecision, true> result(byte, changeSign ? -length : length, big->power, a);
-                cutZero(result);
+                result.cutZero();
                 return result;
             }
         }
@@ -361,7 +361,7 @@ namespace Physica::Core::Internal {
                     goto redo;
                 }
                 Scalar<MultiPrecision, false> result(byte, changeSign ? -length : length, big->power);
-                cutZero(result);
+                result.cutZero();
                 return result;
             }
         }

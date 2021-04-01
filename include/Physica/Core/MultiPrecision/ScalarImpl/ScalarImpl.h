@@ -39,19 +39,19 @@ namespace Physica::Core {
         /**
          * Cut zeros from the beginning.
          */
-        inline void AbstractScalar<MultiPrecision>::cutZero(AbstractScalar<MultiPrecision>& s) {
-            const int size = s.getSize();
+        inline void AbstractScalar<MultiPrecision>::cutZero() {
+            const int size = getSize();
             int id = size - 1;
-            while(s.byte[id] == 0 && id > 0)
+            while(byte[id] == 0 && id > 0)
                 --id;
             ++id;
 
             if(id != size) {
                 int shorten = size - id;
-                s.byte = reinterpret_cast<MPUnit*>(realloc(s.byte, id * sizeof(MPUnit)));
-                s.length = s.length > 0 ? id : -id;
-                auto temp = s.power;
-                s.power = s.byte[id - 1] != 0 ? (temp - shorten) : 0;
+                byte = reinterpret_cast<MPUnit*>(realloc(byte, id * sizeof(MPUnit)));
+                length = length > 0 ? id : -id;
+                auto temp = power;
+                power = byte[id - 1] != 0 ? (temp - shorten) : 0;
             }
         }
     }
