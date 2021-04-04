@@ -26,7 +26,7 @@
 namespace Physica::Logger {
     LogLevel AbstractLogger::globalLevel = LogLevel::Info;
 
-    std::string AbstractLogger::makeMsgString(Utils::RingBuffer& buffer) {
+    std::string AbstractLogger::makeMsgString(LogBuffer& buffer) {
         std::stringstream logString{};
         size_t logID;
         LoggerRuntime& runtime = LoggerRuntime::getInstance();
@@ -54,8 +54,11 @@ namespace Physica::Logger {
                   << '|'
                   << info.level
                   << "]: ";
-        //Handle format
-        const char* const format = info.format;
+        return logString.str() + formatToString(buffer, info.format);
+    }
+
+    std::string AbstractLogger::formatToString(LogBuffer& buffer, const char* __restrict format) {
+        std::stringstream logString{};
         size_t pos = 0;
         while(format[pos] != '\0') {
             if(format[pos] == '%') {

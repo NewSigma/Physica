@@ -21,8 +21,8 @@
 #include <cstdarg>
 #include <iostream>
 #include <array>
-#include <Physica/Utils/RingBuffer.h>
 #include "Physica/Config.h"
+#include "Physica/Logger/LogBuffer.h"
 #include "Physica/Logger/LoggerType.h"
 #include "Physica/Logger/FormatAnalyzer.h"
 
@@ -43,14 +43,15 @@ namespace Physica::Logger {
         AbstractLogger& operator=(const AbstractLogger&) = delete;
         AbstractLogger& operator=(AbstractLogger&&) noexcept = delete;
         /* Operations */
-        virtual void log(Utils::RingBuffer& buffer) = 0;
+        virtual void log(LogBuffer& buffer) = 0;
         /* Getters */
         [[nodiscard]] inline LogLevel getCurrentLevel() const;
         /* Static members */
         [[nodiscard]] static LogLevel getGlobalLevel() noexcept { return globalLevel; }
         static inline void setGlobalLevel(LogLevel level) noexcept;
     protected:
-        static std::string makeMsgString(Utils::RingBuffer& buffer);
+        static std::string makeMsgString(LogBuffer& buffer);
+        static std::string formatToString(LogBuffer& buffer, const char* __restrict format);
     };
 
     inline LogLevel AbstractLogger::getCurrentLevel() const {

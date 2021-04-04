@@ -31,7 +31,7 @@ namespace Physica::Logger {
         StdLogger() = delete;
         ~StdLogger() override = default;
         /* Operations */
-        void log(Utils::RingBuffer& buffer) override final;
+        void log(LogBuffer& buffer) override final;
     protected:
         //StdLogger can be created by LoggerRuntime only.
         explicit StdLogger(std::ostream& stream);

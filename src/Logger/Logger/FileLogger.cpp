@@ -33,7 +33,7 @@ namespace Physica::Logger {
         close(fd);
     }
 
-    void FileLogger::log(Utils::RingBuffer& buffer) {
+    void FileLogger::log(LogBuffer& buffer) {
         const std::string msg = makeMsgString(buffer);
         const char* c_str = msg.c_str();
         write(fd, c_str, strlen(c_str) + 1);

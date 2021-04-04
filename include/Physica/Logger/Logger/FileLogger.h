@@ -27,6 +27,6 @@ namespace Physica::Logger {
         FileLogger(const char* filename);
         ~FileLogger() override;
         /* Operations */
-        void log(Utils::RingBuffer& buffer) override final;
+        void log(LogBuffer& buffer) override final;
     };
 }

@@ -84,7 +84,7 @@ namespace Physica::Logger {
                 getNextBufferToLog();
             }
 
-            Utils::RingBuffer& buffer = *bufferList[processingBufferID];
+            LogBuffer& buffer = *bufferList[processingBufferID];
             while (!buffer.isEmpty()) {
                 size_t loggerID;
                 buffer.read(&loggerID);
