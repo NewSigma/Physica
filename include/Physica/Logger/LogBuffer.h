@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <string>
 #include "Physica/Utils/RingBuffer.h"
 
 namespace Physica::Logger {
@@ -29,8 +30,12 @@ namespace Physica::Logger {
         bool shouldDelete;
     public:
         LogBuffer(size_t size) : RingBuffer(size), shouldDelete(false) {}
-
+        /* Operations */
+        std::string makeMsgString();
+        std::string formatToString(const char* __restrict format);
+        size_t getMsgSize(const char* __restrict format) const;
         void schedualDelete() noexcept { shouldDelete = true; }
+        /* Getters */
         [[nodiscard]] bool getShouldDelete() const noexcept { return shouldDelete; }
     };
 }

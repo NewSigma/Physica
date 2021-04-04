@@ -56,12 +56,16 @@ namespace Physica::Utils {
 
         template<typename T>
         inline void read(T* t);
+
+        template<typename T>
+        inline void cread(T* t, size_t bias) const;
         /* Getters */
         [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
     private:
         void writeBytes(const char* src, size_t bytes);
         void readBytes(char* dest, size_t bytes);
+        void creadBytes(char* dest, size_t bytes, size_t bias) const;
     };
     /*!
      * Write T to the buffer.
@@ -88,6 +92,11 @@ namespace Physica::Utils {
     template<typename T>
     inline void RingBuffer::read(T* t) {
         readBytes(reinterpret_cast<char*>(t), sizeof(T));
+    }
+
+    template<typename T>
+    inline void RingBuffer::cread(T* t, size_t bias) const {
+        creadBytes(reinterpret_cast<char*>(t), sizeof(T), bias);
     }
 }
 

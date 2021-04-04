@@ -34,7 +34,7 @@ namespace Physica::Logger {
     }
 
     void FileLogger::log(LogBuffer& buffer) {
-        const std::string msg = makeMsgString(buffer);
+        const std::string msg = buffer.makeMsgString();
         const char* c_str = msg.c_str();
         write(fd, c_str, strlen(c_str) + 1);
         write(fd, "\n", 1);

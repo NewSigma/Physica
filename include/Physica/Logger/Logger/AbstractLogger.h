@@ -49,9 +49,6 @@ namespace Physica::Logger {
         /* Static members */
         [[nodiscard]] static LogLevel getGlobalLevel() noexcept { return globalLevel; }
         static inline void setGlobalLevel(LogLevel level) noexcept;
-    protected:
-        static std::string makeMsgString(LogBuffer& buffer);
-        static std::string formatToString(LogBuffer& buffer, const char* __restrict format);
     };
 
     inline LogLevel AbstractLogger::getCurrentLevel() const {

@@ -22,6 +22,6 @@ namespace Physica::Logger {
     StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
 
     void StdLogger::log(LogBuffer& buffer) {
-        os << makeMsgString(buffer) << '\n';
+        os << buffer.makeMsgString() << '\n';
     }
 }
