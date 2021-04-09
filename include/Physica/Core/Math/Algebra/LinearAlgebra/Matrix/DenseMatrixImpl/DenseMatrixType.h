@@ -26,13 +26,16 @@ namespace Physica::Core {
     class DenseMatrixType {
     public:
         enum {
-            //Dense Matrix
             Column = 0b00,
             Row = 0b01,
             Vector = 0b00,
             Element = 0b10
-            //Sparse Matrix
         };
+    public:
+        constexpr static bool isColumnMatrix(int type) { return !(type & Row); }
+        constexpr static bool isRowMatrix(int type) { return type & Row; }
+        constexpr static bool isVectorMatrix(int type) { return !(type & Element); }
+        constexpr static bool isElementMatrix(int type) { return type & Element; }
     private:
         DenseMatrixType();
     };

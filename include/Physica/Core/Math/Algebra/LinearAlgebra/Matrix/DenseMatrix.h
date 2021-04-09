@@ -21,6 +21,7 @@
 #include <memory>
 #include "DenseMatrixImpl/DenseMatrixBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
+#include "MatrixDecomposition/Cholesky.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
@@ -70,6 +71,8 @@ namespace Physica::Core {
         using Base::Base;
         template<class Matrix>
         DenseMatrix(LUDecomposition<Matrix> lu);
+        template<class Matrix>
+        DenseMatrix(Cholesky<Matrix> cholesky);
         /* Operators */
         using Base::operator=;
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
@@ -82,11 +85,67 @@ namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class Matrix>
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<Matrix> lu)
-            : DenseMatrix(lu.getRank(), lu.getRank()) {
-        const size_t rank = lu.getRank();
+            : DenseMatrix(lu.getOrder(), lu.getOrder()) {
+        const size_t rank = lu.getOrder();
         (*this) = lu.getMatrix();
         for (size_t i = 0; i < rank; ++i)
             lu.decompositionColumn((*this), i);
+    }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class Matrix>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Cholesky<Matrix> cholesky)
+            : DenseMatrix(cholesky.getOrder(), cholesky.getOrder()) {
+        const size_t order = cholesky.getOrder();
+        const Matrix& matrix = cholesky.getMatrix();
+        auto iterator = Base::begin();
+        auto const_iterator = matrix.cbegin();
+        /* Handle first vector */ {
+            const auto diag = sqrt(*const_iterator);
+            *iterator = diag;
+            for (size_t i = 1; i < order; ++i) {
+                ++iterator;
+                ++const_iterator;
+                *iterator = *const_iterator / diag;
+            }
+        }
+        /* Handle other vectors */ {
+            for (size_t i = 1; i < order; ++i) {
+                size_t j;
+                for (j = 0; j < i; ++j) {
+                    ++iterator;
+                    ++const_iterator;
+                    *iterator = 0;
+                }
+
+                ++iterator;
+                ++const_iterator;
+                T diag(*const_iterator);
+                /* j == i */ {
+                    for (size_t k = 0; k < i; ++k) {
+                        if constexpr (DenseMatrixType::isColumnMatrix(type))
+                            diag -= (*this)(k, i);
+                        else
+                            diag -= (*this)(i, k);
+                    }
+                    diag = sqrt(diag);
+                    *iterator = diag;
+                }
+
+                for (; j < order; ++j) {
+                    ++iterator;
+                    ++const_iterator;
+                    T temp(*const_iterator);
+                    for (size_t k = 0; k < j; ++k) {
+                        if constexpr (DenseMatrixType::isColumnMatrix(type))
+                            diag -= (*this)(k, i) * (*this)(k, j);
+                        else
+                            diag -= (*this)(i, k) * (*this)(j, k); 
+                    }
+                    *iterator = temp / diag;
+                }
+            }
+        }
     }
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

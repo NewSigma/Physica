@@ -3,6 +3,7 @@ include(../cmake/Modules/PhysicaAddTest.cmake)
 
 message(STATUS "Configuring tests.")
 physica_add_test(ScalarAddSubExpression Core/MultiPrecision/ScalarImpl/ScalarAddSubExpressionTest.cpp)
+physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)

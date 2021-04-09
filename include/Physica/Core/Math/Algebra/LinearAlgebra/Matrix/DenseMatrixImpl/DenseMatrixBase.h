@@ -49,6 +49,8 @@ namespace Physica::Core {
         /* Operations */
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
+        /* Getters */
+        [[nodiscard]] inline size_t getOrder() const noexcept;
     };
     /* Operators */
     template<class Derived>

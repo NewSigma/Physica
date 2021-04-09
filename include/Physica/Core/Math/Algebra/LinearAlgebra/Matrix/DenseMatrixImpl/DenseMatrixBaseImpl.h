@@ -87,6 +87,15 @@ namespace Physica::Core {
             matrix(r1, i) -= matrix(r2, i) * factor;
         assert(matrix(r2, elementIndex).isZero());
     }
+
+    template<class Derived>
+    inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
+        assert(Base::getRow() == Base::getColumn());
+        if constexpr (DenseMatrixType::isColumnMatrix(Internal::Traits<Derived>::MatrixType))
+            return Base::getColumn();
+        else
+            return Base::getRow();
+    }
     /* Operators */
     template<class Derived>
     Derived operator+(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
