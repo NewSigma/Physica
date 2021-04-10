@@ -124,12 +124,13 @@ namespace Physica::Core {
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
                         if constexpr (DenseMatrixType::isColumnMatrix(type))
-                            diag -= (*this)(k, i);
+                            diag -= square((*this)(k, i));
                         else
-                            diag -= (*this)(i, k);
+                            diag -= square((*this)(i, k));
                     }
                     diag = sqrt(diag);
                     *iterator = diag;
+                    ++j;
                 }
 
                 for (; j < order; ++j) {
