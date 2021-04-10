@@ -96,6 +96,17 @@ namespace Physica::Core {
                 */
                 int power;
             public:
+                AbstractScalar() noexcept;
+                AbstractScalar(int length_, int power_);
+                AbstractScalar(const AbstractScalar& s);
+                AbstractScalar(AbstractScalar<MultiPrecision>&& s) noexcept;
+                AbstractScalar(int i);
+                AbstractScalar(SignedMPUnit unit);
+                AbstractScalar(double d);
+                AbstractScalar(const Integer& i);
+                AbstractScalar(const Rational& r);
+                explicit AbstractScalar(const char* s);
+                explicit AbstractScalar(const wchar_t* s);
                 ~AbstractScalar();
                 /* Operators */
                 MPUnit operator[](unsigned int index) const { Q_ASSERT(index < static_cast<unsigned int>(getSize())); return byte[index]; }
@@ -103,8 +114,6 @@ namespace Physica::Core {
                 AbstractScalar operator-() const;
                 /* Helpers */
                 void toInteger();
-                AbstractScalar& toOpposite() noexcept { length = -length; return *this; }
-                AbstractScalar& toAbs() noexcept { length = getSize(); return *this; }
                 void swap(AbstractScalar& s) noexcept;
                 static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2);
                 /* Getters */
@@ -120,17 +129,6 @@ namespace Physica::Core {
                 void setPower(int i) noexcept { power = i; }
                 void setByte(unsigned int index, MPUnit value) { Q_ASSERT(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
             protected:
-                AbstractScalar() noexcept;
-                AbstractScalar(int length_, int power_);
-                AbstractScalar(const AbstractScalar& s);
-                AbstractScalar(AbstractScalar<MultiPrecision>&& s) noexcept;
-                AbstractScalar(int i);
-                AbstractScalar(SignedMPUnit unit);
-                AbstractScalar(double d);
-                AbstractScalar(const Integer& i);
-                AbstractScalar(const Rational& r);
-                explicit AbstractScalar(const char* s);
-                explicit AbstractScalar(const wchar_t* s);
                 /**
                  * Degigned for performance,
                  * this constructor should only be called by addNoError(), addWithError and etc.
@@ -143,6 +141,8 @@ namespace Physica::Core {
                 AbstractScalar& operator=(const AbstractScalar& s);
                 AbstractScalar& operator=(AbstractScalar&& s) noexcept;
                 /* Helpers */
+                AbstractScalar& toOpposite() noexcept { length = -length; return *this; }
+                AbstractScalar& toAbs() noexcept { length = getSize(); return *this; }
                 inline void cutZero();
                 /* Static members */
                 inline static Scalar<MultiPrecision, true> addWithError(const AbstractScalar& s1, const AbstractScalar& s2);
@@ -166,6 +166,58 @@ namespace Physica::Core {
                 friend Scalar<type, false> Core::ln(const Scalar<type, false>& s);
                 template<ScalarType type>
                 friend Scalar<type, true> Core::ln(const Scalar<type, true>& s);
+        };
+
+        template<>
+        class AbstractScalar<Float> {
+        protected:
+            float f;
+        public:
+            AbstractScalar() : f(0) {}
+            AbstractScalar(float f_) : f(f_) {}
+            AbstractScalar(const AbstractScalar& s) = default;
+            ~AbstractScalar() = default;
+            /* Operators */
+            explicit operator double() const { return f; }
+            /* Getters */
+            [[nodiscard]] constexpr static ScalarType getType() { return Float; }
+            [[nodiscard]] float getTrivial() const noexcept { return f; }
+            [[nodiscard]] bool isZero() const { return f == 0; }
+            [[nodiscard]] bool isPositive() const { return f > 0; }
+            [[nodiscard]] bool isNegative() const { return f < 0; }
+            [[nodiscard]] bool isInteger() const;
+        protected:
+            /* Helpers */
+            AbstractScalar& toOpposite() noexcept { f = -f; return *this; }
+            AbstractScalar& toAbs() noexcept { f = fabsf(f); return *this; }
+            void toInteger() { modff(f, &f); }
+            void swap(AbstractScalar& s) noexcept { std::swap(f, s.f); }
+        };
+
+        template<>
+        class AbstractScalar<Double> {
+        protected:
+            double d;
+        public:
+            AbstractScalar() : d(0) {}
+            AbstractScalar(double d_) : d(d_) {}
+            AbstractScalar(const AbstractScalar& s) = default;
+            ~AbstractScalar() = default;
+            /* Operators */
+            explicit operator double() const { return d; }
+            /* Getters */
+            [[nodiscard]] constexpr static ScalarType getType() { return Double; }
+            [[nodiscard]] double getTrivial() const noexcept { return d; }
+            [[nodiscard]] bool isZero() const { return d == 0; }
+            [[nodiscard]] bool isPositive() const { return d > 0; }
+            [[nodiscard]] bool isNegative() const { return d < 0; }
+            [[nodiscard]] bool isInteger() const;
+        protected:
+            /* Helpers */
+            AbstractScalar& toOpposite() noexcept { d = -d; return *this; }
+            AbstractScalar& toAbs() noexcept { d = fabs(d); return *this; }
+            void toInteger() { modf(d, &d); }
+            void swap(AbstractScalar& s) noexcept { std::swap(d, s.d); }
         };
     }
 
@@ -288,38 +340,32 @@ namespace Physica::Core {
     //IDEA: Comparisons between Scalar<MultiPrecision, true> may consider their accuracy.
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
-    class Scalar<Float, false> {
-    protected:
-        float f;
+    class Scalar<Float, false> final : public Internal::AbstractScalar<Float> {
+        using Base = Internal::AbstractScalar<Float>;
     public:
-        inline Scalar();
-        inline Scalar(float f_); //NOLINT Intentional implicit conversions.
+        Scalar() : Base() {}
+        Scalar(float f_) : Base(f_) {}
+        inline Scalar(const Scalar<Float, true>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
-        explicit operator double() const { return f; }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         /* Helpers */
-        Scalar& toOpposite() noexcept { f = -f; return *this; }
-        Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
+        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
+        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
-        void swap(Scalar& s) noexcept { std::swap(f, s.f); }
+        void swap(Scalar& s) noexcept { Base::swap(s); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
         static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarType getType() { return Float; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        [[nodiscard]] float getTrivial() const { return f; }
-        [[nodiscard]] bool isZero() const { return f == 0; }
-        [[nodiscard]] bool isPositive() const { return f > 0; }
-        [[nodiscard]] bool isNegative() const { return f < 0; }
-        [[nodiscard]] bool isInteger() const;
+        [[nodiscard]] constexpr static float getA() { return 0; }
         /* Setters */
-        static void setA(float b) { Q_UNUSED(b) /* Nothing, for the convenience of implement templates */ }
+        static void setA(float value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */
@@ -327,12 +373,14 @@ namespace Physica::Core {
     };
 
     template<>
-    class Scalar<Float, true> final : public Scalar<Float, false> {
+    class Scalar<Float, true> final : public Internal::AbstractScalar<Float> {
+        using Base = Internal::AbstractScalar<Float>;
         float a;
     public:
-        inline Scalar();
-        inline explicit Scalar(float f_, float a_ = 0);
-        inline Scalar(const Scalar& s);
+        Scalar() : Base(), a(0) {}
+        explicit Scalar(float f_, float a_ = 0) : Base(f_), a(fabsf(a_)) {}
+        Scalar(const Scalar<Float, false>& s) : Base(s), a(0) {}
+        Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
@@ -340,6 +388,8 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         /* Helpers */
+        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
+        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
@@ -355,14 +405,19 @@ namespace Physica::Core {
         /* Friends */
         friend class Scalar<Float, false>;
     };
+    /* Compare */
+    inline bool absCompare(const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
-    class Scalar<Double, false> {
-    protected:
-        double d;
+    class Scalar<Double, false> final : public Internal::AbstractScalar<Double> {
+        using Base = Internal::AbstractScalar<Double>;
     public:
-        inline Scalar();
-        inline Scalar(double d_); //NOLINT Intentional implicit conversions.
+        Scalar() : Base() {}
+        Scalar(double d_) : Base(d_) {}
+        Scalar(const Scalar<Double, true>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
@@ -372,23 +427,18 @@ namespace Physica::Core {
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         /* Helpers */
-        Scalar& toOpposite() noexcept { d = -d; return *this; }
-        Scalar& toAbs() noexcept { d = fabs(d); return *this; }
+        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
+        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         static inline Scalar getZero() { return Scalar(0); }
         static inline Scalar getOne() { return Scalar(1); }
         static inline Scalar getTwo() { return Scalar(2); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarType getType() { return Double; }
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        [[nodiscard]] double getTrivial() const { return d; }
-        [[nodiscard]] bool isZero() const { return d == 0; }
-        [[nodiscard]] bool isPositive() const { return d > 0; }
-        [[nodiscard]] bool isNegative() const { return d < 0; }
-        [[nodiscard]] bool isInteger() const;
+        [[nodiscard]] constexpr static double getA() { return 0; }
         /* Setters */
-        static void setA(double d) { Q_UNUSED(d) /* Nothing, for the convenience of implement templates */ }
+        static void setA(double value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */
@@ -396,12 +446,14 @@ namespace Physica::Core {
     };
 
     template<>
-    class Scalar<Double, true> final : public Scalar<Double, false> {
+    class Scalar<Double, true> final : public Internal::AbstractScalar<Double> {
+        using Base = Internal::AbstractScalar<Double>;
         double a;
     public:
-        inline Scalar();
-        inline explicit Scalar(double d_, double a_ = 0);
-        inline Scalar(const Scalar& s);
+        Scalar() : Base(), a(0) {}
+        explicit Scalar(double d_, double a_ = 0) : Base(d_), a(fabs(a_)) {}
+        inline Scalar(const Scalar<Double, false>& s);
+        Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
@@ -409,6 +461,8 @@ namespace Physica::Core {
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         /* Helpers */
+        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
+        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept;
         static inline Scalar getZero() { return Scalar(0); }
@@ -424,6 +478,11 @@ namespace Physica::Core {
         /* Friends */
         friend class Scalar<Double, false>;
     };
+    /* Compare */
+    inline bool absCompare(const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     /* Output */
     std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s);
     std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, true>& s);

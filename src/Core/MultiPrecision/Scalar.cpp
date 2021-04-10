@@ -278,6 +278,52 @@ namespace Physica::Core {
             std::swap(length, s.length);
             std::swap(power, s.power);
         }
+
+        bool AbstractScalar<Float>::isInteger() const {
+            float_extract extract{f};
+            const auto exp = extract.exp;
+            if(exp == 0U)
+                return extract.value == 0;
+
+            unsigned int zeros;
+            if(extract.low == 0U) {
+                if(extract.high == 0U)
+                    return true;
+                else
+                    zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
+            }
+            else
+                zeros = countBackZeros(extract.low);
+            /*
+            * exp + zeros - 127 >= 23
+            * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
+            * We move 127 to the right hand side to avoid underflow.
+            */
+            return exp + zeros >= 150;
+        }
+
+        bool AbstractScalar<Double>::isInteger() const {
+            double_extract extract{d};
+            const auto exp = extract.exp;
+            if(exp == 0U)
+                return extract.value == 0;
+
+            unsigned int zeros;
+            if(extract.low == 0U) {
+                if(extract.high == 0U)
+                    return true;
+                else
+                    zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
+            }
+            else
+                zeros = countBackZeros(extract.low);
+            /*
+            * exp + zeros - 1023 >= 52
+            * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.
+            * We move 1023 to the right hand side to avoid underflow.
+            */
+            return exp + zeros >= 1075;
+        }
     }
     //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
     Scalar<MultiPrecision, false>::Scalar(const Scalar<MultiPrecision, true>& s) : Base(s) {}
@@ -748,65 +794,14 @@ namespace Physica::Core {
         return result;
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
-    /*!
-     * Inspect if a float is a integer through its binary expression.
-     */
-    bool Scalar<Float, false>::isInteger() const {
-        float_extract extract{f};
-        const auto exp = extract.exp;
-        if(exp == 0U)
-            return extract.value == 0;
-
-        unsigned int zeros;
-        if(extract.low == 0U) {
-            if(extract.high == 0U)
-                return true;
-            else
-                zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
-        }
-        else
-            zeros = countBackZeros(extract.low);
-        /*
-         * exp + zeros - 127 >= 23
-         * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
-         * We move 127 to the right hand side to avoid underflow.
-         */
-        return exp + zeros >= 150;
-    }
-
     void Scalar<Float, true>::swap(Scalar<Float, true>& s) noexcept {
+        Base::swap(s);
         std::swap(a, s.a);
-        Scalar<Float, false>::swap(s);
-    }
-    /*!
-     * Inspect if a float is a integer through its binary expression.
-     */
-    bool Scalar<Double, false>::isInteger() const {
-        double_extract extract{d};
-        const auto exp = extract.exp;
-        if(exp == 0U)
-            return extract.value == 0;
-
-        unsigned int zeros;
-        if(extract.low == 0U) {
-            if(extract.high == 0U)
-                return true;
-            else
-                zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
-        }
-        else
-            zeros = countBackZeros(extract.low);
-        /*
-         * exp + zeros - 1023 >= 52
-         * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.
-         * We move 1023 to the right hand side to avoid underflow.
-         */
-        return exp + zeros >= 1075;
     }
 
     void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {
+        Base::swap(s);
         std::swap(a, s.a);
-        Scalar<Double, false>::swap(s);
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
     std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s) {

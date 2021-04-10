@@ -26,11 +26,8 @@ namespace Physica::Core {
     class Cholesky {
         const Matrix& matrix;
     public:
-        explicit Cholesky(const Matrix& matrix);
+        explicit Cholesky(const Matrix& matrix_) : matrix(matrix_) {}
         ~Cholesky() = default;
-        /* Operations */
-        //A line may be a row or a column, depending on row major or column major
-        void calculateLine(size_t lineNumber);
         /* Getters */
         [[nodiscard]] const Matrix& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] size_t getOrder() const noexcept { return matrix.getOrder(); }

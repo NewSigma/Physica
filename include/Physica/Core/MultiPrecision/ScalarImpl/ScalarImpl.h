@@ -208,10 +208,24 @@ namespace Physica::Core {
         s -= 1.0F;
         return temp;
     }
-    ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
-    inline Scalar<Float, false>::Scalar() : f(0) {}
 
-    inline Scalar<Float, false>::Scalar(float f_) : f(f_) {}
+    inline bool absCompare(const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+        return fabsf(s1.getTrivial()) >= fabsf(s2.getTrivial());
+    }
+
+    inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+        return s1.getTrivial() > s2.getTrivial();
+    }
+
+    inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+        return s1.getTrivial() < s2.getTrivial();
+    }
+
+    inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+        return s1.getTrivial() == s2.getTrivial();
+    }
+    ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
+    inline Scalar<Float, false>::Scalar(const Scalar<Float, true>& s) : Base(s) {}
 
     inline Scalar<Float, true> Scalar<Float, false>::operator*(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f * s.f, f * s.getA());
@@ -225,21 +239,11 @@ namespace Physica::Core {
      * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
      */
     inline void Scalar<Float, false>::toInteger() {
-        modff(f, &f);
+        Base::toInteger();
     }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
-    inline Scalar<Float, true>::Scalar() : Scalar<Float, false>(), a(0) {}
-    /*!
-     * The abstract value of a equals to the accuracy.
-     */
-    inline Scalar<Float, true>::Scalar(float f_, float a_) : Scalar<Float, false>(f_), a(fabsf(a_)) {}
-
-    inline Scalar<Float, true>::Scalar(const Scalar<Float, true>& s) : Scalar<Float, false>(s)  {
-        a = s.a;
-    }
-
     inline void Scalar<Float, true>::toInteger() {
-        Scalar<Float, false>::toInteger();
+        Base::toInteger();
         a = 0;
     }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
@@ -268,10 +272,24 @@ namespace Physica::Core {
         s -= 1.0;
         return temp;
     }
-    ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////
-    inline Scalar<Double, false>::Scalar() : d(0) {}
 
-    inline Scalar<Double, false>::Scalar(double d_) : d(d_) {}
+    inline bool absCompare(const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+        return fabs(s1.getTrivial()) >= fabs(s2.getTrivial());
+    }
+
+    inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+        return s1.getTrivial() > s2.getTrivial();
+    }
+
+    inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+        return s1.getTrivial() < s2.getTrivial();
+    }
+
+    inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+        return s1.getTrivial() == s2.getTrivial();
+    }
+    ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////
+    inline Scalar<Double, false>::Scalar(const Scalar<Double, true>& s) : Base(s) {}
 
     inline Scalar<Double, true> Scalar<Double, false>::operator*(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d * s.d, d * s.getA());
@@ -285,21 +303,11 @@ namespace Physica::Core {
      * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
      */
     inline void Scalar<Double, false>::toInteger() {
-        modf(d, &d);
+        Base::toInteger();
     }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////
-    inline Scalar<Double, true>::Scalar() : Scalar<Double, false>(), a(0) {}
-    /*!
-     * The abstract value of a equals to the accuracy.
-     */
-    inline Scalar<Double, true>::Scalar(double d_, double a_) : Scalar<Double, false>(d_), a(fabs(a_)) {}
-
-    inline Scalar<Double, true>::Scalar(const Scalar<Double, true>& s) : Scalar<Double, false>(s) {
-        a = s.a;
-    }
-
     inline void Scalar<Double, true>::toInteger() {
-        Scalar<Double, false>::toInteger();
+        Base::toInteger();
         a = 0;
     }
 }
