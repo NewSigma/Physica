@@ -484,12 +484,8 @@ namespace Physica::Core {
     inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     /* Output */
-    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s);
-    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, true>& s);
-    std::ostream& operator<<(std::ostream& os, const Scalar<Float, false>& s);
-    std::ostream& operator<<(std::ostream& os, const Scalar<Float, true>& s);
-    std::ostream& operator<<(std::ostream& os, const Scalar<Double, false>& s);
-    std::ostream& operator<<(std::ostream& os, const Scalar<Double, true>& s);
+    template<ScalarType type, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& s);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

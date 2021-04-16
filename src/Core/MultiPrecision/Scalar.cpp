@@ -804,6 +804,7 @@ namespace Physica::Core {
         std::swap(a, s.a);
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
+    template<>
     std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s) {
         const auto& basicConst = BasicConst::getInstance();
         const int power = s.getPower();

@@ -119,6 +119,21 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     inline void operator>>=(Scalar<type, errorTrack>& s
             , int bits) { s = s >> bits; }
+
+    template<ScalarType type>
+    inline bool operator>=(const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+        return !(s1 < s2);
+    }
+
+    template<ScalarType type>
+    inline bool operator<=(const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+        return !(s1 > s2);
+    }
+
+    template<ScalarType type>
+    inline bool operator!= (const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+        return !(s1 == s2);
+    }
     /*!
      * The following two functions handle swap(s1, s2). Use swap of Scalars whose errorTrack is false by default.
      */
@@ -158,17 +173,6 @@ namespace Physica::Core {
         return temp;
     }
     //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
-    inline bool operator>=(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
-        return !(s1 < s2);
-    }
-
-    inline bool operator<=(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
-        return !(s1 > s2);
-    }
-
-    inline bool operator!= (const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
-        return !(s1 == s2);
-    }
     ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
     inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getMaximum() const {
         return static_cast<const Scalar<MultiPrecision, false>&>(*this) + getAccuracy();

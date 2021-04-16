@@ -122,9 +122,10 @@ namespace Physica::Core {
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> factorial(const Scalar<type, errorTrack>& s) {
+        typedef decltype(s.getTrivial()) FloatType;
         const auto trivial = s.getTrivial();
-        decltype(trivial) temp = 1;
-        decltype(trivial) result;
+        FloatType temp = 1;
+        FloatType result;
         while(temp < trivial) {
             temp += 1;
             result *= temp;

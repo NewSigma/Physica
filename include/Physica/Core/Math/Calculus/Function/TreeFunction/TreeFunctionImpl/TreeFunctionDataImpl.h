@@ -26,18 +26,18 @@ namespace Physica::Core {
      */
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const Scalar<scalarType, errorTrack>* value) //NOLINT No need to initialize left, right.
-            : type(Value), value(value), placeHolder(nullptr) {}
+            : value(value), placeHolder(nullptr), type(Value) {}
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left)
-            : type(type), left(new TreeFunctionData(std::move(left))), right(nullptr) {
+            : left(new TreeFunctionData(std::move(left))), right(nullptr), type(type) {
         Q_UNUSED(scalarType)
         Q_UNUSED(errorTrack)
     }
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right)
-            : type(type), left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))) {
+            : left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))), type(type) {
         Q_UNUSED(scalarType)
         Q_UNUSED(errorTrack)
     }
@@ -61,7 +61,7 @@ namespace Physica::Core {
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(TreeFunctionData&& data) noexcept
-            : type(data.type), left(data.left), right(data.right) {
+            : left(data.left), right(data.right), type(data.type) {
         Q_UNUSED(scalarType)
         Q_UNUSED(errorTrack)
         data.left = data.right = nullptr;

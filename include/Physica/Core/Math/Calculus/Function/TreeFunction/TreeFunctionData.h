@@ -30,6 +30,8 @@ namespace Physica::Core {
     class TreeFunction;
     /*!
      * @class TreeFunctionData is the internal data type of a TreeFunction.
+     *
+     * Optimize: Enable copy, remove templates
      */
     template<ScalarType scalarType = MultiPrecision, bool errorTrack = true>
     class TreeFunctionData {
@@ -57,7 +59,7 @@ namespace Physica::Core {
         TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right);
         TreeFunctionData(TreeFunctionData&& data) noexcept;
         ~TreeFunctionData();
-
+        /* Operators */
         TreeFunctionData& operator=(TreeFunctionData&& data) noexcept;
         /* Getters */
         [[nodiscard]] FunctionType getType() const noexcept { return type; }
@@ -74,6 +76,31 @@ namespace Physica::Core {
         friend class TreeFunction<scalarType, errorTrack>;
         friend class TreeFunctionPrinter<scalarType, errorTrack>;
     };
+
+    template<ScalarType scalarType, bool errorTrack>
+    inline TreeFunctionData<scalarType, errorTrack> operator+(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
+        return TreeFunctionData<scalarType, errorTrack>(Add, std::move(data1), std::move(data2));
+    }
+
+    template<ScalarType scalarType, bool errorTrack>
+    inline TreeFunctionData<scalarType, errorTrack> operator-(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
+        return TreeFunctionData<scalarType, errorTrack>(Sub, std::move(data1), std::move(data2));
+    }
+
+    template<ScalarType scalarType, bool errorTrack>
+    inline TreeFunctionData<scalarType, errorTrack> operator*(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
+        return TreeFunctionData<scalarType, errorTrack>(Mul, std::move(data1), std::move(data2));
+    }
+
+    template<ScalarType scalarType, bool errorTrack>
+    inline TreeFunctionData<scalarType, errorTrack> operator/(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
+        return TreeFunctionData<scalarType, errorTrack>(Div, std::move(data1), std::move(data2));
+    }
+
+    template<ScalarType scalarType, bool errorTrack>
+    inline TreeFunctionData<scalarType, errorTrack> sin(TreeFunctionData<scalarType, errorTrack>&& data) {
+        return TreeFunctionData<scalarType, errorTrack>(Sin, std::move(data));
+    }
 }
 
 #include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunctionImpl/TreeFunctionDataImpl.h"
