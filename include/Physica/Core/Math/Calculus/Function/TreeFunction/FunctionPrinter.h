@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -28,7 +28,7 @@ namespace Physica::Core {
         const TreeFunction<type, errorTrack>& f;
         std::ostream& os;
     public:
-        FunctionPrinter(const TreeFunction<type, errorTrack>& f, std::ostream& os);
+        FunctionPrinter(const TreeFunction<type, errorTrack>& f_, std::ostream& os);
         void print() { printImpl(f.getTree()); }
     private:
         void printImpl(const TreeFunctionData<type, errorTrack>& functionTree);

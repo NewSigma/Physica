@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,6 +21,7 @@
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Function/FunctionType.h"
+#include "Physica/Core/Math/Calculus/Function/AbstractFunction.h"
 
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
@@ -35,6 +36,8 @@ namespace Physica::Core {
      */
     template<ScalarType scalarType = MultiPrecision, bool errorTrack = true>
     class TreeFunctionData {
+        static_assert(sizeof(long) == sizeof(void*), "This class is contructed with the assumption");
+        typedef AbstractFunction<scalarType, errorTrack> Function;
     private:
         union {
             struct {
@@ -42,12 +45,15 @@ namespace Physica::Core {
                 TreeFunctionData* right;
             };
             struct {
-                //value must be allocated by @class Function and must not be deleted by TreeFunctionData.
-                const Scalar<scalarType, errorTrack>* value{};
+                /*
+                 * Positive if index of a variable, negative if index of a constant variable
+                 * Never equals to 0, the index starts from 1 or -1
+                 */
+                long index{};
                 /*
                  * This place holder is declared to help clear the data of the first union,
                  * that is, we use 'placeHolder = nullptr' rather than 'right = nullptr' to
-                 * indicate thar we are operating the second struct instead of the first.
+                 * indicate that we are operating the second struct instead of the first.
                  */
                 void* placeHolder{};
             };
@@ -65,14 +71,14 @@ namespace Physica::Core {
         [[nodiscard]] FunctionType getType() const noexcept { return type; }
         [[nodiscard]] const TreeFunctionData* getLeft() const { return getType() == Value ? nullptr : left; }
         [[nodiscard]] const TreeFunctionData* getRight() const { return getType() == Value ? nullptr : right; }
-        [[nodiscard]] const Scalar<scalarType, errorTrack>* getValue() const { return getType() == Value ? value : nullptr; }
+        [[nodiscard]] const Scalar<scalarType, errorTrack>* getValue(const Function& func) const;
     private:
-        explicit TreeFunctionData(const Scalar<scalarType, errorTrack>* value);
+        explicit TreeFunctionData(long index_);
         TreeFunctionData(const TreeFunctionData& data);
 
         TreeFunctionData& operator=(const TreeFunctionData& data);
 
-        [[nodiscard]] Scalar<scalarType, errorTrack> solve() const;
+        [[nodiscard]] Scalar<scalarType, errorTrack> solve(const Function& func) const;
         friend class TreeFunction<scalarType, errorTrack>;
         friend class TreeFunctionPrinter<scalarType, errorTrack>;
     };

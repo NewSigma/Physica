@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -25,8 +25,8 @@ namespace Physica::Core {
      * If you want to get a node standing by a value or a variable, ask it from a \class TreeFunction.
      */
     template<ScalarType scalarType, bool errorTrack>
-    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(const Scalar<scalarType, errorTrack>* value) //NOLINT No need to initialize left, right.
-            : value(value), placeHolder(nullptr), type(Value) {}
+    TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(long index_) //NOLINT No need to initialize left, right.
+            : index(index_), placeHolder(nullptr), type(Value) {}
 
     template<ScalarType scalarType, bool errorTrack>
     TreeFunctionData<scalarType, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left)
@@ -50,7 +50,7 @@ namespace Physica::Core {
         Q_UNUSED(errorTrack)
         //Optimize: may be use operator ? and reinterpret_cast to avoid branches.
         if(data.type == Value) {
-            value = data.value;
+            index = data.index;
             placeHolder = nullptr;
         }
         else {
@@ -87,7 +87,7 @@ namespace Physica::Core {
             this->~TreeFunctionData();
             type = data.type;
             if(data.type == Value) {
-                value = data.value;
+                index = data.index;
                 placeHolder = nullptr;
             }
             else {
@@ -110,80 +110,88 @@ namespace Physica::Core {
     }
 
     template<ScalarType scalarType, bool errorTrack>
-    Scalar<scalarType, errorTrack> TreeFunctionData<scalarType, errorTrack>::solve() const {
+    const Scalar<scalarType, errorTrack>* TreeFunctionData<scalarType, errorTrack>::getValue(const Function& func) const {
+        assert(getType() == Value);
+        const long normalIndex = abs(index) - 1;
+        const Array<Scalar<scalarType, errorTrack>>& arr = index > 0 ? func.getVariables() : func.getConstants();
+        return &arr[normalIndex];
+    }
+
+    template<ScalarType scalarType, bool errorTrack>
+    Scalar<scalarType, errorTrack> TreeFunctionData<scalarType, errorTrack>::solve(const Function& func) const {
         switch(getType()) {
             case Value:
-                return Scalar<scalarType, errorTrack>(*value);
+                return *getValue(func);
             case Add:
-                return left->solve() + right->solve();
+                return left->solve(func) + right->solve(func);
             case Sub:
-                return left->solve() - right->solve();
+                return left->solve(func) - right->solve(func);
             case Mul:
-                return left->solve() * right->solve();
+                return left->solve(func) * right->solve(func);
             case Div:
-                return left->solve() / right->solve();
+                return left->solve(func) / right->solve(func);
             case Square:
-                return square(left->solve());
+                return square(left->solve(func));
             case Reciprocal:
-                return reciprocal(left->solve());
+                return reciprocal(left->solve(func));
             case Sqrt:
-                return sqrt(left->solve());
+                return sqrt(left->solve(func));
             case Factorial:
-                return factorial(left->solve());
+                return factorial(left->solve(func));
             case Ln:
-                return ln(left->solve());
+                return ln(left->solve(func));
             case Log:
-                return log(left->solve(), right->solve());
+                return log(left->solve(func), right->solve(func));
             case Exp:
-                return exp(left->solve());
+                return exp(left->solve(func));
             case Cos:
-                return cos(left->solve());
+                return cos(left->solve(func));
             case Sin:
-                return sin(left->solve());
+                return sin(left->solve(func));
             case Tan:
-                return tan(left->solve());
+                return tan(left->solve(func));
             case Sec:
-                return sec(left->solve());
+                return sec(left->solve(func));
             case Csc:
-                return csc(left->solve());
+                return csc(left->solve(func));
             case Cot:
-                return cot(left->solve());
+                return cot(left->solve(func));
             case ArcCos:
-                return arccos(left->solve());
+                return arccos(left->solve(func));
             case ArcSin:
-                return arcsin(left->solve());
+                return arcsin(left->solve(func));
             case ArcTan:
-                return arctan(left->solve());
+                return arctan(left->solve(func));
             case ArcSec:
-                return arcsec(left->solve());
+                return arcsec(left->solve(func));
             case ArcCsc:
-                return arccsc(left->solve());
+                return arccsc(left->solve(func));
             case ArcCot:
-                return arccot(left->solve());
+                return arccot(left->solve(func));
             case Cosh:
-                return cosh(left->solve());
+                return cosh(left->solve(func));
             case Sinh:
-                return sinh(left->solve());
+                return sinh(left->solve(func));
             case Tanh:
-                return tanh(left->solve());
+                return tanh(left->solve(func));
             case Sech:
-                return sech(left->solve());
+                return sech(left->solve(func));
             case Csch:
-                return csch(left->solve());
+                return csch(left->solve(func));
             case Coth:
-                return coth(left->solve());
+                return coth(left->solve(func));
             case ArcCosh:
-                return arccosh(left->solve());
+                return arccosh(left->solve(func));
             case ArcSinh:
-                return arcsinh(left->solve());
+                return arcsinh(left->solve(func));
             case ArcTanh:
-                return arctanh(left->solve());
+                return arctanh(left->solve(func));
             case ArcSech:
-                return arcsech(left->solve());
+                return arcsech(left->solve(func));
             case ArcCsch:
-                return arccsch(left->solve());
+                return arccsch(left->solve(func));
             case ArcCoth:
-                return arccosh(left->solve());
+                return arccosh(left->solve(func));
             default:
                 printf("[%s:%d|Fatal]: Not implemented.", __FILENAME__, __LINE__);
                 exit(EXIT_FAILURE);

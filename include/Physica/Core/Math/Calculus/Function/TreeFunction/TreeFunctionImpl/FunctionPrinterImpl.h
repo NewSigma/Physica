@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +21,7 @@
 
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
-    FunctionPrinter<type, errorTrack>::FunctionPrinter(const TreeFunction<type, errorTrack>& f, std::ostream& os) : f(f), os(os) {}
+    FunctionPrinter<type, errorTrack>::FunctionPrinter(const TreeFunction<type, errorTrack>& f_, std::ostream& os) : f(f_), os(os) {}
 
     template<ScalarType type, bool errorTrack>
     void FunctionPrinter<type, errorTrack>::printImpl(const TreeFunctionData<type, errorTrack>& functionTree) {
@@ -31,7 +31,7 @@ namespace Physica::Core {
                 if(pos != 0)
                     os << "x" << pos;
                 else
-                    os << double(*functionTree.getValue());
+                    os << double(*functionTree.getValue(f));
                 return;
             }
             case Add:

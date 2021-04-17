@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -34,6 +34,11 @@ namespace Physica::Core {
         mutable Array<Scalar<type, errorTrack>> constants;
     public:
         ~AbstractFunction() = default;
+        /* Getters */
+        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getVariables() const { return variables; }
+        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getConstants() const { return constants; }
+        [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
+        [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
         /* Setters */
         inline void setConstant(Scalar<type, errorTrack> s, size_t index) const;
     protected:
@@ -43,11 +48,6 @@ namespace Physica::Core {
         /* Operators */
         AbstractFunction& operator=(const AbstractFunction& f);
         AbstractFunction& operator=(AbstractFunction&& f) noexcept;
-        /* Getters */
-        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getVariables() const { return variables; }
-        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getConstants() const { return constants; }
-        [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
-        [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
         /* Setters */
         inline void setVariable(Scalar<type, errorTrack> s, size_t index) const;
     };
