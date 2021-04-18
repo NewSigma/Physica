@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
 #include <iostream>
 #include <functional>
+#include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
+#include "Physica/Core/Math/Calculus/Integrate/IntegrateSolver.h"
 
 using namespace Physica::Core;
 
@@ -31,7 +32,7 @@ int main() {
         func.setTree(std::make_shared<decltype(tree)>(std::move(tree)));
     }
     std::function<Scalar<Double, false>(Scalar<Double, false>)> a(func);
-    double d1 = a(0.5).getTrivial();
-    double d2 = func(0.5).getTrivial();
-    return (d1 != d2);
+    Integrate<1, Double, false> problem(std::make_shared<TreeFunction<Double, false>>(func), -1, 1);
+    IntegrateSolver<Rectangular, 1, Double, false> solver(0.01);
+    return abs(1 - solver.solve(problem).getTrivial()) > 0.001;
 }

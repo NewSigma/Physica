@@ -37,11 +37,11 @@ namespace Physica::Core {
         const Scalar<type, errorTrack>& to = i.getTo();
         const TreeFunction<type, errorTrack>& f = i.getFunction();
 
-        Scalar<type, errorTrack> result(BasicConst::getInstance()._0);
+        Scalar<type, errorTrack> result = 0;
 
         Scalar<type, errorTrack> start(from);
         while(start < to) {
-            result += func(start);
+            result += f(start);
             start += stepSize;
         }
         result *= stepSize;
