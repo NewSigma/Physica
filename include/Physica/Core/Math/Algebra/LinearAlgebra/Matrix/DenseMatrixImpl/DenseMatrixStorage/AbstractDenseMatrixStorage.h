@@ -102,12 +102,12 @@ namespace Physica::Core::Internal {
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getRow() * r + c);
+            return Base::operator[](getDerived().getRow() * c + r);
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getRow() * r + c);
+            return Base::operator[](getDerived().getRow() * c + r);
         }
         /* Operations */
         template<size_t Length, size_t MaxLength>
@@ -141,12 +141,12 @@ namespace Physica::Core::Internal {
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getColumn() * c + r);
+            return Base::operator[](getDerived().getColumn() * r + c);
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getColumn() * c + r);
+            return Base::operator[](getDerived().getColumn() * r + c);
         }
         /* Operations */
         template<size_t Length, size_t MaxLength>

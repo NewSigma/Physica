@@ -41,7 +41,7 @@ namespace Physica::Utils::Internal {
         bool operator!=(const Iterator& ite) const noexcept { return p != ite.p; }
         Iterator& operator++();
         const Iterator operator++(int);
-        Pointer& operator*() { return *p; }
+        Pointer& operator*() const { return *p; }
     private:
         explicit Iterator(Pointer* p) : p(p) {}
 
@@ -63,7 +63,7 @@ namespace Physica::Utils::Internal {
         bool operator!=(const ReverseIterator& ite) const noexcept { return p != ite.p; }
         ReverseIterator& operator++();
         const ReverseIterator operator++(int);
-        Pointer& operator*() { return *p; }
+        Pointer& operator*() const { return *p; }
     private:
         explicit ReverseIterator(Pointer* p) : p(p) {}
 

@@ -71,8 +71,8 @@ namespace Physica::Core {
         using Base::Base;
         template<class Matrix>
         DenseMatrix(LUDecomposition<Matrix> lu);
-        template<class Matrix>
-        DenseMatrix(Cholesky<Matrix> cholesky);
+        template<class MatrixIn>
+        DenseMatrix(Cholesky<MatrixIn> cholesky);
         /* Operators */
         using Base::operator=;
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
@@ -93,57 +93,63 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<class Matrix>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Cholesky<Matrix> cholesky)
+    template<class MatrixIn>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Cholesky<MatrixIn> cholesky)
             : DenseMatrix(cholesky.getOrder(), cholesky.getOrder()) {
+        typedef DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn> MatrixOut;
         const size_t order = cholesky.getOrder();
-        const Matrix& matrix = cholesky.getMatrix();
-        auto iterator = Base::begin();
-        auto const_iterator = matrix.cbegin();
+        const MatrixIn& matrix = cholesky.getMatrix();
+        auto matrixIte = Base::begin();
+        auto constMatrixIte = matrix.cbegin();
+        typedef decltype(matrixIte) MatrixOutIterator;
+        typedef decltype(constMatrixIte) MatrixInIterator;
+
+        auto elementIte = Cholesky<MatrixIn>::template getElementIterator<MatrixOut, MatrixOutIterator>(matrixIte);
+        auto constElementIte = Cholesky<MatrixIn>::template getConstElementIterator<MatrixIn, MatrixInIterator>(constMatrixIte);
         /* Handle first vector */ {
-            const auto diag = sqrt(*const_iterator);
-            *iterator = diag;
+            const auto diag = sqrt(*constElementIte);
+            *elementIte = diag;
             for (size_t i = 1; i < order; ++i) {
-                ++iterator;
-                ++const_iterator;
-                *iterator = *const_iterator / diag;
+                ++elementIte;
+                ++constElementIte;
+                *elementIte = *constElementIte / diag;
             }
         }
         /* Handle other vectors */ {
             for (size_t i = 1; i < order; ++i) {
+                Cholesky<MatrixIn>::template updateIterator<MatrixOut, MatrixOutIterator, decltype(elementIte)>(matrixIte, elementIte);
+                Cholesky<MatrixIn>::template updateConstIterator<MatrixIn, MatrixInIterator, decltype(constElementIte)>(constMatrixIte, constElementIte);
                 size_t j;
                 for (j = 0; j < i; ++j) {
-                    ++iterator;
-                    ++const_iterator;
-                    *iterator = 0;
+                    *elementIte = 0;
+                    ++elementIte;
+                    ++constElementIte;
                 }
 
-                ++iterator;
-                ++const_iterator;
-                T diag(*const_iterator);
+                T diag(*constElementIte);
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
                         if constexpr (DenseMatrixType::isColumnMatrix(type))
-                            diag -= square((*this)(k, i));
-                        else
                             diag -= square((*this)(i, k));
+                        else
+                            diag -= square((*this)(k, i));
                     }
                     diag = sqrt(diag);
-                    *iterator = diag;
+                    *elementIte = diag;
                     ++j;
                 }
 
                 for (; j < order; ++j) {
-                    ++iterator;
-                    ++const_iterator;
-                    T temp(*const_iterator);
+                    ++elementIte;
+                    ++constElementIte;
+                    T temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
                         if constexpr (DenseMatrixType::isColumnMatrix(type))
-                            diag -= (*this)(k, i) * (*this)(k, j);
+                            diag -= (*this)(i, k) * (*this)(j, k);
                         else
-                            diag -= (*this)(i, k) * (*this)(j, k); 
+                            diag -= (*this)(k, i) * (*this)(k, j);
                     }
-                    *iterator = temp / diag;
+                    *elementIte = temp / diag;
                 }
             }
         }

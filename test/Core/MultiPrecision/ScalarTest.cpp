@@ -33,7 +33,7 @@ bool associativityAdd() {
     Scalar<MultiPrecision, false> s2(LONG_MAX);
     s2 += Scalar<MultiPrecision, false>(2);
     Scalar<MultiPrecision, false> s3(LONG_MAX);
-    return s1 + s2 + s3 != s1 + (s2 + s3);
+    return Scalar<MultiPrecision, false>(s1 + s2 + s3) != Scalar<MultiPrecision, false>(s1 + (s2 + s3));
 }
 /*!
  * Test operator+(), return true if passed.
