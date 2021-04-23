@@ -91,7 +91,7 @@ namespace Physica::Core {
     template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
         assert(Base::getRow() == Base::getColumn());
-        if constexpr (DenseMatrixType::isColumnMatrix(Internal::Traits<Derived>::MatrixType))
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
             return Base::getColumn();
         else
             return Base::getRow();

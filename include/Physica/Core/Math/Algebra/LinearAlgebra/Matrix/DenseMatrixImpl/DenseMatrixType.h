@@ -17,6 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 namespace Physica::Core {
+    namespace Internal {
+        template<class T>
+        class Traits;
+    }
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or columns.
@@ -32,10 +36,20 @@ namespace Physica::Core {
             Element = 0b10
         };
     public:
-        constexpr static bool isColumnMatrix(int type) { return !(type & Row); }
-        constexpr static bool isRowMatrix(int type) { return type & Row; }
-        constexpr static bool isVectorMatrix(int type) { return !(type & Element); }
-        constexpr static bool isElementMatrix(int type) { return type & Element; }
+        template<class Matrix>
+        constexpr static bool isColumnMatrix() { return !(Internal::Traits<Matrix>::MatrixType & Row); }
+
+        template<class Matrix>
+        constexpr static bool isRowMatrix() { return !isColumnMatrix<Matrix>(); }
+
+        template<class Matrix>
+        constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::MatrixType & Element; }
+
+        template<class Matrix>
+        constexpr static bool isVectorMatrix() { return !isElementMatrix<Matrix>(); }
+
+        template<class Matrix1, class Matrix2>
+        constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
     private:
         DenseMatrixType();
     };

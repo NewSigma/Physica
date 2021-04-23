@@ -75,7 +75,7 @@ namespace Physica::Core {
                 T diag(*constElementIte);
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix(type))
+                        if constexpr (DenseMatrixType::isColumnMatrix<MatrixOut>())
                             diag -= square((*this)(i, k));
                         else
                             diag -= square((*this)(k, i));
@@ -90,7 +90,7 @@ namespace Physica::Core {
                     ++constElementIte;
                     T temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix(type))
+                        if constexpr (DenseMatrixType::isColumnMatrix<MatrixOut>())
                             diag -= (*this)(i, k) * (*this)(j, k);
                         else
                             diag -= (*this)(k, i) * (*this)(k, j);
@@ -105,6 +105,5 @@ namespace Physica::Core {
     template<class MatrixIn>
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(InverseMatrix<MatrixIn> inverse)
             : DenseMatrix(inverse.getOrder(), inverse.getOrder()) {
-
     }
 }
