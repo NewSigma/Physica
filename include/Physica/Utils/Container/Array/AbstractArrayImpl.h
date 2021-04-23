@@ -22,43 +22,43 @@
 
 namespace Physica::Utils::Internal {
     template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractArray<Derived>>&
-    Iterator<Pointer, AbstractArray<Derived>>::operator=(const Iterator& ite) { //NOLINT Self assign is ok.
+    ContainerIterator<Pointer, AbstractArray<Derived>>&
+    ContainerIterator<Pointer, AbstractArray<Derived>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    Iterator<Pointer, AbstractArray<Derived>>&
-    Iterator<Pointer, AbstractArray<Derived>>::operator++() {
+    ContainerIterator<Pointer, AbstractArray<Derived>>&
+    ContainerIterator<Pointer, AbstractArray<Derived>>::operator++() {
         ++p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const Iterator<Pointer, AbstractArray<Derived>>
-    Iterator<Pointer, AbstractArray<Derived>>::operator++(int) {
-        return Iterator(p++);
+    const ContainerIterator<Pointer, AbstractArray<Derived>>
+    ContainerIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
+        return ContainerIterator(p++);
     }
 
     template<class Pointer, class Derived>
-    ReverseIterator<Pointer, AbstractArray<Derived>>&
-    ReverseIterator<Pointer, AbstractArray<Derived>>::operator=(const ReverseIterator& ite) { //NOLINT Self assign is ok.
+    ReverseContainerIterator<Pointer, AbstractArray<Derived>>&
+    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator=(const ReverseContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    ReverseIterator<Pointer, AbstractArray<Derived>>&
-    ReverseIterator<Pointer, AbstractArray<Derived>>::operator++() {
+    ReverseContainerIterator<Pointer, AbstractArray<Derived>>&
+    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator++() {
         --p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const ReverseIterator<Pointer, AbstractArray<Derived>>
-    ReverseIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
-        return ReverseIterator(p--);
+    const ReverseContainerIterator<Pointer, AbstractArray<Derived>>
+    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
+        return ReverseContainerIterator(p--);
     }
 
     template<class Derived>

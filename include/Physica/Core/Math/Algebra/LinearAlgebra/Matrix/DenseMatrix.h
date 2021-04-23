@@ -22,6 +22,7 @@
 #include "DenseMatrixImpl/DenseMatrixBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
 #include "MatrixDecomposition/Cholesky.h"
+#include "InverseMatrix.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
@@ -47,15 +48,7 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
-        for (size_t r = 0; r < mat.getRow(); ++r) {
-            for (size_t c = 0; c < mat.getColumn(); ++c) {
-                os << mat(r, c) << ' ';
-            }
-            os << '\n';
-        }
-        return os;
-    }
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat);
     /**
      * DenseMatrix class
      * A matrix can be either fixed matrix, which have its max size defined,
@@ -69,10 +62,12 @@ namespace Physica::Core {
         using Base = DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>>;
     public:
         using Base::Base;
-        template<class Matrix>
-        DenseMatrix(LUDecomposition<Matrix> lu);
+        template<class MatrixIn>
+        DenseMatrix(LUDecomposition<MatrixIn> lu);
         template<class MatrixIn>
         DenseMatrix(Cholesky<MatrixIn> cholesky);
+        template<class MatrixIn>
+        DenseMatrix(InverseMatrix<MatrixIn> inverse);
         /* Operators */
         using Base::operator=;
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
@@ -83,79 +78,8 @@ namespace Physica::Core {
     };
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<class Matrix>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<Matrix> lu)
-            : DenseMatrix(lu.getOrder(), lu.getOrder()) {
-        const size_t rank = lu.getOrder();
-        (*this) = lu.getMatrix();
-        for (size_t i = 0; i < rank; ++i)
-            lu.decompositionColumn((*this), i);
-    }
-
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<class MatrixIn>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Cholesky<MatrixIn> cholesky)
-            : DenseMatrix(cholesky.getOrder(), cholesky.getOrder()) {
-        typedef DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn> MatrixOut;
-        const size_t order = cholesky.getOrder();
-        const MatrixIn& matrix = cholesky.getMatrix();
-        auto matrixIte = Base::begin();
-        auto constMatrixIte = matrix.cbegin();
-        typedef decltype(matrixIte) MatrixOutIterator;
-        typedef decltype(constMatrixIte) MatrixInIterator;
-
-        auto elementIte = Cholesky<MatrixIn>::template getElementIterator<MatrixOut, MatrixOutIterator>(matrixIte);
-        auto constElementIte = Cholesky<MatrixIn>::template getConstElementIterator<MatrixIn, MatrixInIterator>(constMatrixIte);
-        /* Handle first vector */ {
-            const auto diag = sqrt(*constElementIte);
-            *elementIte = diag;
-            for (size_t i = 1; i < order; ++i) {
-                ++elementIte;
-                ++constElementIte;
-                *elementIte = *constElementIte / diag;
-            }
-        }
-        /* Handle other vectors */ {
-            for (size_t i = 1; i < order; ++i) {
-                Cholesky<MatrixIn>::template updateIterator<MatrixOut, MatrixOutIterator, decltype(elementIte)>(matrixIte, elementIte);
-                Cholesky<MatrixIn>::template updateConstIterator<MatrixIn, MatrixInIterator, decltype(constElementIte)>(constMatrixIte, constElementIte);
-                size_t j;
-                for (j = 0; j < i; ++j) {
-                    *elementIte = 0;
-                    ++elementIte;
-                    ++constElementIte;
-                }
-
-                T diag(*constElementIte);
-                /* j == i */ {
-                    for (size_t k = 0; k < i; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix(type))
-                            diag -= square((*this)(i, k));
-                        else
-                            diag -= square((*this)(k, i));
-                    }
-                    diag = sqrt(diag);
-                    *elementIte = diag;
-                    ++j;
-                }
-
-                for (; j < order; ++j) {
-                    ++elementIte;
-                    ++constElementIte;
-                    T temp(*constElementIte);
-                    for (size_t k = 0; k < j; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix(type))
-                            diag -= (*this)(i, k) * (*this)(j, k);
-                        else
-                            diag -= (*this)(k, i) * (*this)(k, j);
-                    }
-                    *elementIte = temp / diag;
-                }
-            }
-        }
-    }
-
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     inline void swap(DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m1
             , DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
 }
+
+#include "DenseMatrixImpl/DenseMatrixImpl.h"

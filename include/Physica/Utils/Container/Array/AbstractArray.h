@@ -27,45 +27,45 @@ namespace Physica::Utils::Internal {
     template<class Derived> class AbstractArray;
 
     template<class Pointer, class Container>
-    class Iterator;
+    class ContainerIterator;
     
     template<class Pointer, class Derived>
-    class Iterator<Pointer, AbstractArray<Derived>> {
+    class ContainerIterator<Pointer, AbstractArray<Derived>> {
         Pointer* p;
     public:
-        Iterator(const Iterator& ite) : p(ite.p) {}
-        ~Iterator() = default;
+        ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
+        ~ContainerIterator() = default;
         /* Operators */
-        Iterator& operator=(const Iterator& ite);
-        bool operator==(const Iterator& ite) const noexcept { return p == ite.p; }
-        bool operator!=(const Iterator& ite) const noexcept { return p != ite.p; }
-        Iterator& operator++();
-        const Iterator operator++(int);
+        ContainerIterator& operator=(const ContainerIterator& ite);
+        bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
+        bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
+        ContainerIterator& operator++();
+        const ContainerIterator operator++(int);
         Pointer& operator*() const { return *p; }
     private:
-        explicit Iterator(Pointer* p) : p(p) {}
+        explicit ContainerIterator(Pointer* p) : p(p) {}
 
         friend class AbstractArray<Derived>;
     };
 
     template<class Pointer, class Container>
-    class ReverseIterator;
+    class ReverseContainerIterator;
     
     template<class Pointer, class Derived>
-    class ReverseIterator<Pointer, AbstractArray<Derived>> {
+    class ReverseContainerIterator<Pointer, AbstractArray<Derived>> {
         Pointer* p;
     public:
-        ReverseIterator(const ReverseIterator& ite) : p(ite.p) {}
-        ~ReverseIterator() = default;
+        ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
+        ~ReverseContainerIterator() = default;
         /* Operators */
-        ReverseIterator& operator=(const ReverseIterator& ite);
-        bool operator==(const ReverseIterator& ite) const noexcept { return p == ite.p; }
-        bool operator!=(const ReverseIterator& ite) const noexcept { return p != ite.p; }
-        ReverseIterator& operator++();
-        const ReverseIterator operator++(int);
+        ReverseContainerIterator& operator=(const ReverseContainerIterator& ite);
+        bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
+        bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
+        ReverseContainerIterator& operator++();
+        const ReverseContainerIterator operator++(int);
         Pointer& operator*() const { return *p; }
     private:
-        explicit ReverseIterator(Pointer* p) : p(p) {}
+        explicit ReverseContainerIterator(Pointer* p) : p(p) {}
 
         friend class AbstractArray<Derived>;
     };
@@ -77,12 +77,13 @@ namespace Physica::Utils::Internal {
         using Base = Utils::CRTPBase<Derived>;
     protected:
         using T = typename Traits<Derived>::ElementType;
-        using Iterator_ = Iterator<T, AbstractArray<Derived>>;
-        using ConstIterator = Iterator<const T, AbstractArray<Derived>>;
-        using ReverseIterator_ = ReverseIterator<T, AbstractArray<Derived>>;
-        using ConstReverseIterator = ReverseIterator<const T, AbstractArray<Derived>>;
 
         T* __restrict arr;
+    public:
+        using Iterator = ContainerIterator<T, AbstractArray<Derived>>;
+        using ConstIterator = ContainerIterator<const T, AbstractArray<Derived>>;
+        using ReverseIterator = ReverseContainerIterator<T, AbstractArray<Derived>>;
+        using ConstReverseIterator = ReverseContainerIterator<const T, AbstractArray<Derived>>;
     public:
         AbstractArray() = delete;
         /* Operators */
@@ -93,12 +94,12 @@ namespace Physica::Utils::Internal {
         bool operator==(const AbstractArray& array) const;
         bool operator!=(const AbstractArray& array) const { return !(*this == array); }
         /* Iterator */
-        Iterator_ begin() noexcept { return Iterator_(arr); }
-        Iterator_ end() noexcept { return Iterator_(arr + getDerived().getLength()); }
+        Iterator begin() noexcept { return Iterator(arr); }
+        Iterator end() noexcept { return Iterator(arr + getDerived().getLength()); }
         ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
         ConstIterator cend() const noexcept { return ConstIterator(arr + getDerived().getLength()); }
-        ReverseIterator_ rbegin() const noexcept { return ReverseIterator_(arr + getDerived().getLength()); }
-        ReverseIterator_ rend() const noexcept { return ReverseIterator_(arr - 1); }
+        ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + getDerived().getLength()); }
+        ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
         ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + getDerived().getLength()); }
         ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */

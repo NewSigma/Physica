@@ -75,7 +75,7 @@ namespace Physica::Core::Internal {
         using Base::getLength;
     };
     /**
-     * This layre handles specialization of operator().
+     * This layer handles specialization of operator().
      */
     template<class Derived, int type>
     class AbstractDenseMatrixStorage;
@@ -94,6 +94,14 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::MaxSizeAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
+        /**
+         * Notes about matrix iterators:
+         * A MatrixIterator points to vectors if it is a vector matrix, points to elements if it is a element matrix.
+         * A ElementIterator always points to elements.
+         */
+        //using MatrixIterator = decltype(this->begin());
+        //using ElementIterator = decltype((*this->begin()).begin());
+        //using ConstElementIterator = decltype((*this->begin()).cbegin());
     public:
         AbstractDenseMatrixStorage() = default;
         AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
@@ -114,6 +122,11 @@ namespace Physica::Core::Internal {
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
+        /* Getters */
+        //[[nodiscard]] static ElementIterator getElementIterator(MatrixIterator ite) noexcept { return (*ite).begin(); }
+        //[[nodiscard]] static ConstElementIterator getConstElementIterator(MatrixIterator ite) noexcept { return (*ite).cbegin(); }
+        //static void updateIterator(MatrixIterator& matIterator, ElementIterator& eleIterator) { ++matIterator; eleIterator = (*matIterator).begin(); }
+        //static void updateConstIterator(MatrixIterator& matIterator, ConstElementIterator& eleIterator) { ++matIterator; eleIterator = (*matIterator).cbegin(); }
     protected:
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
