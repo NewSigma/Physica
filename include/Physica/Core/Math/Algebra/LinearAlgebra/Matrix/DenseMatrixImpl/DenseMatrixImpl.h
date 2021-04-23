@@ -105,5 +105,20 @@ namespace Physica::Core {
     template<class MatrixIn>
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(InverseMatrix<MatrixIn> inverse)
             : DenseMatrix(inverse.getOrder(), inverse.getOrder()) {
+        using MatrixOut = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
+        const size_t order = inverse.getOrder();
+        if constexpr (DenseMatrixType::isSameMajor<MatrixIn, MatrixOut>()) {
+            Base::toUnitMatrix();
+        }
+        else {
+            auto temp = MatrixIn::unitMatrix(order);
+        }
+    }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::unitMatrix(size_t order) {
+        DenseMatrix result(order, order);
+        result.toUnitMatrix();
+        return result;
     }
 }

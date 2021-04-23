@@ -74,7 +74,8 @@ namespace Physica::Core {
         /* Helpers */
         void swap(DenseMatrix& m) noexcept { Base::swap(m); }
         /* Static members */
-        static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
+        [[nodiscard]] static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
+        [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
     };
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

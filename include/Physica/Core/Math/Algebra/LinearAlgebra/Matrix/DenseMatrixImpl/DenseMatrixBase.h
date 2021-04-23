@@ -49,8 +49,15 @@ namespace Physica::Core {
         /* Operations */
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
+        void rowReduce(size_t r1, size_t r2, const ScalarType& factor);
+        void columnReduce(size_t c1, size_t c2, size_t elementIndex);
+        void columnReduce(size_t c1, size_t c2, const ScalarType& factor);
+        inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
+        inline void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
         /* Getters */
         [[nodiscard]] inline size_t getOrder() const noexcept;
+        /* Setters */
+        void toUnitMatrix();
     };
     /* Operators */
     template<class Derived>

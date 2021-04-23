@@ -89,12 +89,69 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, const ScalarType& factor) {
+        Derived& matrix = this->getDerived();
+        const size_t column = matrix.getColumn();
+        for (size_t i = 0; i < column; ++i)
+            matrix(r1, i) -= matrix(r2, i) * factor;
+    }
+
+    template<class Derived>
+    void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, size_t elementIndex) {
+        Derived& matrix = this->getDerived();
+        assert(!matrix(elementIndex, c1).isZero());
+        const size_t row = matrix.getRow();
+        const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
+        for (size_t i = 0; i < row; ++i)
+            matrix(i, c1) -= matrix(i, c2) * factor;
+        assert(matrix(elementIndex, c2).isZero());
+    }
+
+    template<class Derived>
+    void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, const ScalarType& factor) {
+        Derived& matrix = this->getDerived();
+        const size_t row = matrix.getRow();
+        for (size_t i = 0; i < row; ++i)
+            matrix(i, c1) -= matrix(i, c2) * factor;
+    }
+
+    template<class Derived>
+    inline void DenseMatrixBase<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            columnReduce(v1, v2, elementIndex);
+        else
+            rowReduce(v1, v2, elementIndex);
+    }
+
+    template<class Derived>
+    inline void DenseMatrixBase<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            columnReduce(v1, v2, factor);
+        else
+            rowReduce(v1, v2, factor);
+    }
+
+    template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
         assert(Base::getRow() == Base::getColumn());
         if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
             return Base::getColumn();
         else
             return Base::getRow();
+    }
+
+    template<class Derived>
+    void DenseMatrixBase<Derived>::toUnitMatrix() {
+        auto matIterator = Base::begin();
+        auto eleIterator = Base::ebegin();
+        const size_t order = getOrder();
+        for (size_t i = 0; i < order; ++i) {
+            for (size_t j = 0; j < order; ++j) {
+                *eleIterator = i == j;
+                ++eleIterator;
+            }
+            Base::updateIterator(matIterator, eleIterator);
+        }
     }
     /* Operators */
     template<class Derived>
