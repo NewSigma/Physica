@@ -49,11 +49,9 @@ namespace Physica::Core {
         const MatrixIn& matrix = cholesky.getMatrix();
         auto matrixIte = Base::begin();
         auto constMatrixIte = matrix.cbegin();
-        typedef decltype(matrixIte) MatrixOutIterator;
-        typedef decltype(constMatrixIte) MatrixInIterator;
 
-        auto elementIte = Cholesky<MatrixIn>::template getElementIterator<MatrixOut, MatrixOutIterator>(matrixIte);
-        auto constElementIte = Cholesky<MatrixIn>::template getConstElementIterator<MatrixIn, MatrixInIterator>(constMatrixIte);
+        auto elementIte = this->ebegin(matrixIte);
+        auto constElementIte = matrix.cebegin(constMatrixIte);
         /* Handle first vector */ {
             const auto diag = sqrt(*constElementIte);
             *elementIte = diag;
@@ -65,8 +63,8 @@ namespace Physica::Core {
         }
         /* Handle other vectors */ {
             for (size_t i = 1; i < order; ++i) {
-                Cholesky<MatrixIn>::template updateIterator<MatrixOut, MatrixOutIterator, decltype(elementIte)>(matrixIte, elementIte);
-                Cholesky<MatrixIn>::template updateConstIterator<MatrixIn, MatrixInIterator, decltype(constElementIte)>(constMatrixIte, constElementIte);
+                MatrixOut::updateIterator(matrixIte, elementIte);
+                MatrixIn::updateIterator(constMatrixIte, constElementIte);
                 size_t j;
                 for (j = 0; j < i; ++j) {
                     *elementIte = 0;
