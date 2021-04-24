@@ -132,6 +132,38 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    void DenseMatrixBase<Derived>::rowMulScalar(size_t r, const ScalarType& factor) {
+        Derived& matrix = this->getDerived();
+        const size_t column = matrix.getColumn();
+        for (size_t i = 0; i < column; ++i)
+            matrix(r, i) *= factor;
+    }
+
+    template<class Derived>
+    void DenseMatrixBase<Derived>::columnMulScalar(size_t c, const ScalarType& factor) {
+        Derived& matrix = this->getDerived();
+        const size_t row = matrix.getRow();
+        for (size_t i = 0; i < row; ++i)
+            matrix(i, c) *= factor;
+    }
+
+    template<class Derived>
+    inline void DenseMatrixBase<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            columnMulScalar(v, factor);
+        else
+            rowMulScalar(v, factor);
+    }
+
+    template<class Derived>
+    inline void DenseMatrixBase<Derived>::majorSwap(size_t v1, size_t v2) {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            Base::columnSwap(v1, v2);
+        else
+            Base::rowSwap(v1, v2);
+    }
+
+    template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
         assert(Base::getRow() == Base::getColumn());
         if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
@@ -143,7 +175,7 @@ namespace Physica::Core {
     template<class Derived>
     void DenseMatrixBase<Derived>::toUnitMatrix() {
         auto matIterator = Base::begin();
-        auto eleIterator = Base::ebegin();
+        auto eleIterator = Base::ebegin(matIterator);
         const size_t order = getOrder();
         for (size_t i = 0; i < order; ++i) {
             for (size_t j = 0; j < order; ++j) {

@@ -64,9 +64,20 @@ namespace Physica::Core::Internal {
         const size_t row = matrix.getRow();
         const size_t column = matrix.getColumn();
         assert(r1 < row && r2 < row);
-        for (size_t i = 0; i < column; ++i) {
-            size_t temp = i * column;
-            swap(temp + r1, temp + r2);
+        for (size_t i = 0, temp = 0; i < column; ++i, temp += column)
+            swap(matrix[temp + r1], matrix[temp + r2]);
+    }
+
+    template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Element>::columnSwap(size_t c1, size_t c2) {
+        Derived& matrix = getDerived();
+        const size_t row = matrix.getRow();
+        const size_t column = matrix.getColumn();
+        assert(c1 < column && c2 < column);
+        const size_t offset1 = c1 * row;
+        const size_t offset2 = c2 * row;
+        for (size_t i = 0; i < row; ++i) {
+            swap(matrix[offset1 + i], matrix[offset2 + i]);
         }
     }
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
@@ -106,7 +117,17 @@ namespace Physica::Core::Internal {
         const size_t offset1 = r1 * column;
         const size_t offset2 = r2 * column;
         for (size_t i = 0; i < column; ++i)
-            swap(offset1 + i, offset2 + i);
+            swap(matrix[offset1 + i], matrix[offset2 + i]);
+    }
+
+    template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Element>::columnSwap(size_t c1, size_t c2) {
+        Derived& matrix = getDerived();
+        const size_t row = matrix.getRow();
+        const size_t column = matrix.getColumn();
+        assert(c1 < column && c2 < column);
+        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
+            swap(matrix[temp + c1], matrix[temp + c2]);
     }
     //////////////////////////////////////////////Column-Vector//////////////////////////////////////////////
     template<class Derived>
@@ -137,7 +158,15 @@ namespace Physica::Core::Internal {
         const size_t row = matrix.getRow();
         assert(r1 < row && r2 < row);
         for (auto& columnVector : matrix)
-            swap(columnVector[r1], columnVector[r2]);
+            columnVector[r1].swap(columnVector[r2]);
+    }
+
+    template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Vector>::columnSwap(size_t c1, size_t c2) {
+        Derived& matrix = getDerived();
+        [[maybe_unused]] const size_t column = matrix.getColumn();
+        assert(c1 < column && c2 < column);
+        matrix[c1].swap(matrix[c2]);
     }
     //////////////////////////////////////////////Row-Vector//////////////////////////////////////////////
     template<class Derived>
@@ -160,10 +189,18 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>::rowSwap(size_t r1, size_t r2) {
-        using std::swap;
         Derived& matrix = getDerived();
-        const size_t row = matrix.getRow();
+        [[maybe_unused]] const size_t row = matrix.getRow();
         assert(r1 < row && r2 < row);
-        swap(matrix[r1], matrix[r2]);
+        matrix[r1].swap(matrix[r2]);
+    }
+
+    template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>::columnSwap(size_t c1, size_t c2) {
+        Derived& matrix = getDerived();
+        const size_t column = matrix.getColumn();
+        assert(c1 < column && c2 < column);
+        for (auto& rowVector : matrix)
+            rowVector[c1].swap(rowVector[c2]);
     }
 }

@@ -21,15 +21,15 @@
 using namespace Physica::Core;
 
 int main() {
-    typedef DenseMatrix<double, DenseMatrixType::Column | DenseMatrixType::Vector, 3, 3, 3, 3> Matrix4x4;
+    typedef DenseMatrix<Scalar<Double, false>, DenseMatrixType::Column | DenseMatrixType::Vector, 4, 4, 4, 4> Matrix4x4;
     Matrix4x4 mat1{{1, 1, 1, 1}, {1, 1, -1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}};
     InverseMatrix inv(mat1);
     Matrix4x4 result(inv);
     Matrix4x4 answer{{0.25, 0.25, 0.25, 0.25}, {0.25, 0.25, -0.25, -0.25}, {0.25, -0.25, 0.25, -0.25}, {0.25, -0.25, -0.25, 0.25}};
     result -= answer;
-    for (const auto& vector : result)
-        for (const auto& elemant : vector)
-            if (element > 0.001)
+    for (auto& vector : result)
+        for (auto& element : vector)
+            if (!(element.getTrivial() <= 0.001))
                 return 1;
     return 0;
 }

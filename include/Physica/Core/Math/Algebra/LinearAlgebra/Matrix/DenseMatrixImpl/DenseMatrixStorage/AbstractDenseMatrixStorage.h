@@ -55,6 +55,7 @@ namespace Physica::Core::Internal {
     protected:
         /* Getters */
         using Base::getLength;
+        using Base::swap;
     };
 
     template<class T, size_t MaxSize>
@@ -83,6 +84,7 @@ namespace Physica::Core::Internal {
         using Base::append;
         /* Getters */
         using Base::getLength;
+        using Base::swap;
     };
     /**
      * This layer handles specialization of operator().
@@ -128,7 +130,13 @@ namespace Physica::Core::Internal {
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
+        void columnSwap(size_t c1, size_t r1);
         /* Getters */
+        /**
+         * The first argument is index of major direction
+         */
+        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s2, s1); }
+        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s2, s1); }
         /**
          * ebegin() stands for element begin()
          * cebegin() stands for const element begin()
@@ -184,7 +192,10 @@ namespace Physica::Core::Internal {
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
+        void columnSwap(size_t c1, size_t r1);
         /* Getters */
+        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s1, s2); }
+        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s1, s2); }
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return ite; }
@@ -235,7 +246,10 @@ namespace Physica::Core::Internal {
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
+        void columnSwap(size_t c1, size_t r1);
         /* Getters */
+        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s2, s1); }
+        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s2, s1); }
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
@@ -286,7 +300,10 @@ namespace Physica::Core::Internal {
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
+        void columnSwap(size_t c1, size_t r1);
         /* Getters */
+        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s1, s2); }
+        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s1, s2); }
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
