@@ -147,7 +147,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
     protected:
         /* Helper */
-        void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); }
+        void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); std::swap(row, storage.row); }
     };
     ////////////////////////////////////RowElement////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
@@ -246,7 +246,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
     protected:
         /* Helper */
-        void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); }
+        void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); std::swap(row, storage.row); }
     };
     ////////////////////////////////////ColumnVector////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

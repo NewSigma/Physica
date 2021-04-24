@@ -71,8 +71,6 @@ namespace Physica::Core {
         /* Operators */
         using Base::operator=;
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
-        /* Helpers */
-        void swap(DenseMatrix& m) noexcept { Base::swap(m); }
         /* Static members */
         [[nodiscard]] static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);

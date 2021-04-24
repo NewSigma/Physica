@@ -119,7 +119,7 @@ namespace Physica::Core::Internal {
             return Base::operator[](getDerived().getRow() * c + r);
         }
 
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
             return Base::operator[](getDerived().getRow() * c + r);
         }
@@ -139,8 +139,10 @@ namespace Physica::Core::Internal {
         static void updateIterator([[maybe_unused]] typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++eleIterator; }
         static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
         static void updateIterator([[maybe_unused]] typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
-    protected:
         /* Helpers */
+        /**
+         * Does not use Base::swap directly to avoid incorrect swaps
+         */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
 
@@ -189,7 +191,6 @@ namespace Physica::Core::Internal {
         static void updateIterator([[maybe_unused]] typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++eleIterator; }
         static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
         static void updateIterator([[maybe_unused]] typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
-    protected:
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -241,7 +242,6 @@ namespace Physica::Core::Internal {
         static void updateIterator(typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).begin(); }
         static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
         static void updateIterator(typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
-    protected:
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -293,7 +293,6 @@ namespace Physica::Core::Internal {
         static void updateIterator(typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).begin(); }
         static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
         static void updateIterator(typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
-    protected:
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
