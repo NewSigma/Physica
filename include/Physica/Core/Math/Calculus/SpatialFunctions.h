@@ -34,11 +34,11 @@ namespace Physica::Core {
     Scalar<type, errorTrack> lnGamma(const Scalar<type, errorTrack>& s) {
         using T = Scalar<type, false>;
         assert(s.isPositive());
-        constexpr static int count = 6;
-        constexpr static double coeffcients[count]{76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179E-2, -0.5395239384953E-5};
-        Scalar<type, errorTrack> temp = s + T(5.5);
+        constexpr static int count = 9;
+        constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
+        Scalar<type, errorTrack> temp = s + T(6.5);
         temp -= (s + T(0.5)) * ln(temp);
-        Scalar<type, errorTrack> ser(1.000000000190015);
+        Scalar<type, errorTrack> ser(1.000000000000123);
         Scalar<type, errorTrack> copy(s);
         for (int j = 0; j < count; ++j) {
             copy += T(1);

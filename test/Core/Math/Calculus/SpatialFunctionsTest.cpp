@@ -22,7 +22,15 @@
 using namespace Physica::Core;
 
 int main() {
-    Scalar<Double, false> s(13.7);
-    auto result = lnGamma(s);
-    return !((double(result) - 21.77464517303463) < 1E-15);
+    constexpr static int count = 2;
+    constexpr static double value[count]{13.7, 0.3};
+    constexpr static double result[count]{21.77464517303463, 1.09579799481807552};
+    
+    for (int i = 0; i < count; ++i) {
+        Scalar<Double, false> s(value[i]);
+        auto temp = lnGamma(s);
+        if ((fabs(double(temp) - result[i]) / result[i] >= 1E-15))
+            return 1;
+    }
+    return 0;
 }
