@@ -22,8 +22,9 @@
 
 namespace Physica::Core {
     /**
-     * The \class DenseDenseMatrixBase provide algorithms that a matrix should support, but the data is provided
-     * by \tparam Derived.
+     * The \class DenseDenseMatrixBase provide algorithms that a matrix should support.
+     * 
+     * TODO: merge DenseMatrix into DenseMatrixBase
      * 
      * \tparam Derived
      * A class that contains data structure for a matrix.

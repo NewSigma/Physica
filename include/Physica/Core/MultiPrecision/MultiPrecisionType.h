@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SCALARTYPE_H
-#define PHYSICA_SCALARTYPE_H
+#pragma once
 
 #include "Physica/SystemBits.h"
 /**
@@ -51,4 +50,17 @@
 #define MPUnitHighestBitMask ((MPUnit)1 << (MPUnitWidth - 1))
 #define MPUnitLowerMask (MPUnitMax >> (MPUnitWidth / 2))
 
-#endif
+namespace Physica::Core {
+    enum ScalarType {
+        Float = 0,
+        Double = 1,
+        MultiPrecision = 2
+    };
+
+    /**
+     * \class Scalar is a advanced float type that supports multiple precision and error track,
+     * which is also compatible with float and double.
+     */
+    template<ScalarType type = MultiPrecision, bool errorTrack = true> class Scalar;
+
+}

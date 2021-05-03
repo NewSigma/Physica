@@ -8,6 +8,7 @@ physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/InverseMatrixTest
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
 physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
+physica_add_test(SpatialFunctions Core/Math/Calculus/SpatialFunctionsTest.cpp)
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 physica_add_test(Logger Logger/LoggerTest.cpp)

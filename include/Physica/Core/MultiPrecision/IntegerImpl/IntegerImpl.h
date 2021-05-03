@@ -21,6 +21,22 @@
 #include "IntegerArithmetic.h"
 
 namespace Physica::Core {
+    template<ScalarType type, bool errorTrack>
+    Integer::Integer(const Scalar<type, errorTrack>& s) : Integer(static_cast<int>(s.getTrivial())) {}
+
+    template<bool errorTrack>
+    Integer::Integer(const Scalar<MultiPrecision, errorTrack>& s) {
+        const auto power = s.getPower();
+        if (power < 0) {
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+            byte[0] = 0;
+            length = 1;
+        }
+        length = power + 1;
+        const size_t size = length * sizeof(MPUnit);
+        byte = reinterpret_cast<MPUnit*>(malloc(size));
+        memcpy(byte, s.byte, length * sizeof(MPUnit));
+    }
     /**
      * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().

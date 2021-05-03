@@ -26,21 +26,11 @@
 #include "Rational.h"
 
 namespace Physica::Core {
-    enum ScalarType {
-        Float = 0,
-        Double = 1,
-        MultiPrecision = 2
-    };
     //Forward declarations
     namespace Internal {
         template<ScalarType type> class ScalarAddSubExpressionHelper;
         template<ScalarType type, bool errorTrack> class ScalarAddSubExpression;
     }
-    /*!
-     * \Scalar is a advanced float type that supports multiple precision and error track,
-     * which is also compatible with float and double.
-     */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true> class Scalar;
 
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
@@ -156,6 +146,7 @@ namespace Physica::Core {
                 template<bool errorTrack>
                 inline static bool cutLength(Scalar<MultiPrecision, errorTrack>& s);
                 /* Friends */
+                friend class Core::Integer;
                 template<bool errorTrack>
                 friend Scalar<MultiPrecision, errorTrack> Core::square(const Scalar<MultiPrecision, errorTrack>& s);
                 template<ScalarType type>
@@ -355,6 +346,7 @@ namespace Physica::Core {
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(f * pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(f / pow(2, i)); }
+        Scalar operator-() const noexcept { return Scalar(-f); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
@@ -391,6 +383,7 @@ namespace Physica::Core {
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         Scalar operator<<(int i) const { const float power = pow(2, i); return Scalar(f * power, a * power); }
         Scalar operator>>(int i) const { const float power = pow(2, i); return Scalar(f / power, a / power); }
+        Scalar operator-() const noexcept { return Scalar(-f, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
@@ -432,6 +425,7 @@ namespace Physica::Core {
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(d * pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(d / pow(2, i)); }
+        Scalar operator-() const noexcept { return Scalar(-d); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
@@ -468,6 +462,7 @@ namespace Physica::Core {
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         Scalar operator<<(int i) const { const double power = pow(2, i); return Scalar(d * power, a * power); }
         Scalar operator>>(int i) const { const double power = pow(2, i); return Scalar(d / power, a / power); }
+        Scalar operator-() const noexcept { return Scalar(-d, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }

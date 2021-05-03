@@ -726,7 +726,7 @@ namespace Physica::Core {
      */
     Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::applyError(
             const Scalar<MultiPrecision, false>& error) {
-        assert(error.isPositive());
+        assert(!error.isNegative());
         if(power == error.getPower() || (power > error.getPower() && power - error.getPower() > 0)) {
             int size = getSize();
             const int copy = size;
