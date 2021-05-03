@@ -24,12 +24,20 @@ using namespace Physica::Core;
 int main() {
     constexpr static int count = 2;
     constexpr static double value[count]{13.7, 0.3};
-    constexpr static double result[count]{21.77464517303463, 1.09579799481807552};
+    constexpr static float floatResult[count]{21.77465, 1.095798};
+    constexpr static double doubleResult[count]{21.77464517303463, 1.09579799481807552};
     
+    for (int i = 0; i < count; ++i) {
+        Scalar<Float, false> s(value[i]);
+        auto temp = lnGamma(s);
+        if ((fabs(float(double(temp)) - floatResult[i]) / floatResult[i] >= 1E-6F))
+            return 1;
+    }
+
     for (int i = 0; i < count; ++i) {
         Scalar<Double, false> s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(double(temp) - result[i]) / result[i] >= 1E-15))
+        if ((fabs(double(temp) - doubleResult[i]) / doubleResult[i] >= 1E-14))
             return 1;
     }
     return 0;

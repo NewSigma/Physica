@@ -25,10 +25,13 @@
 namespace Physica::Core {
     /**
      * Return the logarithm of gamma(s). s must be positive.
+     * 
+     * Implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
      *
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
+     * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> lnGamma(const Scalar<type, errorTrack>& s) {
@@ -45,6 +48,32 @@ namespace Physica::Core {
             ser += T(coeffcients[j]) / copy;
         }
         return -temp + ln(T(2.5066282746310005) * ser / s);
+    }
+    /**
+     * Return the logarithm of gamma(s). s must be positive.
+     * 
+     * Implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
+     *
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
+     * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
+     */
+    template<bool errorTrack>
+    Scalar<Float, errorTrack> lnGamma(const Scalar<Float, errorTrack>& s) {
+        using T = Scalar<Float, false>;
+        assert(s.isPositive());
+        constexpr static int count = 4;
+        constexpr static float coeffcients[count]{7.6845130, -3.284681, 0.05832037, 0.0001856071};
+        Scalar<Float, errorTrack> temp = s + T(3.5);
+        temp -= (s + T(0.5)) * ln(temp);
+        Scalar<Float, errorTrack> ser(0.9999998);
+        Scalar<Float, errorTrack> copy(s);
+        for (int j = 0; j < count; ++j) {
+            copy += T(1);
+            ser += T(coeffcients[j]) / copy;
+        }
+        return -temp + ln(T(2.506628) * ser / s);
     }
     /**
      * Return the logarithm of gamma(s). s must be positive.
