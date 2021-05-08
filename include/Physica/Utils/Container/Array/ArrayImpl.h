@@ -59,7 +59,7 @@ namespace Physica::Utils {
     Array<T, Length, Capacity>::Array(const Array<T, OtherLength, OtherCapacity>& array) : Base(Capacity) {
         static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
         assert(array.getLength() == Length);
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < Length; ++i)
                 Base::allocate(array[i], i);
         else
@@ -96,7 +96,7 @@ namespace Physica::Utils {
     Array<T, Length, Capacity>&
     Array<T, Length, Capacity>::operator=(const Array<T, Length, Capacity>& array) {
         if (this != &array) {
-            if (QTypeInfo<T>::isComplex)
+            if constexpr (QTypeInfo<T>::isComplex)
                 for (size_t i = 0; i < Length; ++i)
                     this->operator[](i) = array[i];
             else
@@ -119,7 +119,7 @@ namespace Physica::Utils {
     Array<T, Length, Capacity>& Array<T, Length, Capacity>::operator=(const Array<T, OtherLength, OtherCapacity>& array) {
         static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
         assert(array.getLength() == Length);
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < Length; ++i)
                 this->operator[](i) = array[i];
         else
@@ -164,7 +164,7 @@ namespace Physica::Utils {
         assert(from < to && to <= Length);
         const auto result_length = to - from;
         Array<T, Dynamic, Dynamic> result(result_length);
-        if(QTypeInfo<T>::isComplex)
+        if constexpr(QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < result_length; ++i, ++from)
                 new (result.arr + i) T(arr[from]);
         else
@@ -218,7 +218,7 @@ namespace Physica::Utils {
     template<size_t OtherLength, size_t OtherCapacity>
     Array<T, Dynamic, Capacity>::Array(const Array<T, OtherLength, OtherCapacity>& array) : Base(array.getLength(), Capacity) {
         assert(array.getLength() <= Capacity);
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < length; ++i)
                 Base::allocate(array[i], i);
         else
@@ -253,7 +253,7 @@ namespace Physica::Utils {
         if (this != &array) {
             Base::clear();
             Base::setLength(array.getLength());
-            if (QTypeInfo<T>::isComplex)
+            if constexpr (QTypeInfo<T>::isComplex)
                 for (size_t i = 0; i < length; ++i)
                     this->operator[](i) = array[i];
             else
@@ -278,7 +278,7 @@ namespace Physica::Utils {
         assert(array.getLength() <= Capacity);
         Base::clear();
         Base::setLength(array.getLength());
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < length; ++i)
                 Base::allocate(array[i], i);
         else
@@ -413,7 +413,7 @@ namespace Physica::Utils {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            allocate(*ite, i);
+            Base::allocate(*ite, i);
         Base::setLength(list.size());
     }
 
@@ -429,7 +429,7 @@ namespace Physica::Utils {
     template<size_t OtherLength, size_t OtherCapacity>
     Array<T, Dynamic, Dynamic>::Array(const Array<T, OtherLength, OtherCapacity>& array)
             : Base(array.getLength(), array.getCapacity()), capacity(array.getCapacity()) {
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < length; ++i)
                 Base::allocate(array[i], i);
         else
@@ -467,7 +467,7 @@ namespace Physica::Utils {
             capacity = array.capacity;
             arr = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
             length = array.length;
-            if (QTypeInfo<T>::isComplex)
+            if constexpr (QTypeInfo<T>::isComplex)
                 for (size_t i = 0; i < length; ++i)
                     this->operator[](i) = array[i];
             else
@@ -494,7 +494,7 @@ namespace Physica::Utils {
         Base::setLength(array.getLength());
         capacity = array.getCapacity();
         arr = reinterpret_cast<T*>(realloc(arr, capacity * sizeof(T)));
-        if (QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for (size_t i = 0; i < length; ++i)
                 Base::allocate(array[i], i);
         else
@@ -579,7 +579,7 @@ namespace Physica::Utils {
 
     template<class T>
     void Array<T, Dynamic, Dynamic>::resize(size_t size) {
-        if (QTypeInfo<T>::isComplex) {
+        if constexpr (QTypeInfo<T>::isComplex) {
             if (length > size) {
                 for (size_t i = size; i < length; ++i)
                     (arr + i)->~T();
@@ -594,7 +594,7 @@ namespace Physica::Utils {
 
     template<class T>
     void Array<T, Dynamic, Dynamic>::resize(size_t size, const T& t) {
-        if (QTypeInfo<T>::isComplex) {
+        if constexpr (QTypeInfo<T>::isComplex) {
             if (length > size) {
                 for (size_t i = size; i < length; ++i)
                     (arr + i)->~T();

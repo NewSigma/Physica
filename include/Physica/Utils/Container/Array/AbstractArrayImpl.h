@@ -68,7 +68,7 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
             : AbstractArray(array.getDerived().getCapacity()) {
-        if(QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 allocate(array[i], i);
         else
@@ -88,7 +88,7 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
-        if(QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             if (arr != nullptr)
                 for(size_t i = 0; i < getDerived().getLength(); ++i)
                     (arr + i)->~T();
@@ -127,7 +127,7 @@ namespace Physica::Utils::Internal {
      */
     template<class Derived>
     inline void AbstractArray<Derived>::allocate(const T& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             new (arr + index) T(t);
         else
             *(arr + index) = t;
@@ -135,7 +135,7 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     inline void AbstractArray<Derived>::allocate(T&& t, size_t index) {
-        if(QTypeInfo<T>::isComplex)
+        if constexpr (QTypeInfo<T>::isComplex)
             new (arr + index) T(std::move(t));
         else
             *(arr + index) = t;
