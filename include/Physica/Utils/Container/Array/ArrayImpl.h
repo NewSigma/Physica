@@ -588,7 +588,7 @@ namespace Physica::Utils {
         }
         arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
         for (; length < size; ++length)
-            allocate(T(), length);
+            Base::allocate(T(), length);
         capacity = size;
     }
 

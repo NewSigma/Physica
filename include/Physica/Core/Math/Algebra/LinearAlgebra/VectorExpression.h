@@ -379,6 +379,12 @@ namespace Physica::Core {
                                 , Vector<T, Length, MaxLength>>(exp, v);
     }
 
+    template<VectorExpressionType type, class T1, class T2, class T, size_t Length, size_t MaxLength>
+    inline VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Vector<T, Length, MaxLength>>
+    operator+(const Vector<T, Length, MaxLength>& v, const VectorExpression<type, T1, T2>& exp) {
+        return exp + v;
+    }
+
     template<VectorExpressionType type1, class T11, class T12, VectorExpressionType type2, class T21, class T22>
     inline VectorExpression<VectorExpressionType::Add, VectorExpression<type1, T11, T12>, VectorExpression<type2, T21, T22>>
     operator+(const VectorExpression<type1, T11, T12>& exp1, const VectorExpression<type2, T21, T22>& exp2) {
@@ -409,5 +415,13 @@ namespace Physica::Core {
         return VectorExpression<VectorExpressionType::Sub
                                 , VectorExpression<type1, T11, T12>
                                 , VectorExpression<type2, T21, T22>>(exp1, exp2);
+    }
+    //////////////////////////////////////Div//////////////////////////////////////
+    template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
+    inline VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
+    operator/(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {
+        return VectorExpression<VectorExpressionType::Div
+                                , VectorExpression<type, T1, T2>
+                                , Scalar<scalarType, errorTrack>>(exp, s);
     }
 }

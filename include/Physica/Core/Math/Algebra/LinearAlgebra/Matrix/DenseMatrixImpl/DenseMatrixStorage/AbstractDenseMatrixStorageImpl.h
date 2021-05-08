@@ -131,6 +131,14 @@ namespace Physica::Core::Internal {
     }
     //////////////////////////////////////////////Column-Vector//////////////////////////////////////////////
     template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Vector>::resize(size_t row, size_t column) {
+        Base::resize(column);
+        for (auto& vector : (*this)) {
+            vector.resize(row);
+        }
+    }
+
+    template<class Derived>
     template<size_t Length, size_t MaxLength>
     void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Column | DenseMatrixType::Vector>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
@@ -169,6 +177,14 @@ namespace Physica::Core::Internal {
         matrix[c1].swap(matrix[c2]);
     }
     //////////////////////////////////////////////Row-Vector//////////////////////////////////////////////
+    template<class Derived>
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>::resize(size_t row, size_t column) {
+        Base::resize(row);
+        for (auto& vector : (*this)) {
+            vector.resize(column);
+        }
+    }
+
     template<class Derived>
     template<size_t Length, size_t MaxLength>
     void AbstractDenseMatrixStorage<Derived, DenseMatrixType::Row | DenseMatrixType::Vector>::appendRow(

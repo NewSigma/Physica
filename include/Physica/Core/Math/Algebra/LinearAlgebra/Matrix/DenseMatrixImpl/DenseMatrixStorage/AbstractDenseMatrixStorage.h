@@ -82,6 +82,7 @@ namespace Physica::Core::Internal {
     protected:
         /* Operations */
         using Base::append;
+        using Base::resize;
         /* Getters */
         using Base::getLength;
         using Base::swap;
@@ -126,6 +127,7 @@ namespace Physica::Core::Internal {
             return Base::operator[](getDerived().getRow() * c + r);
         }
         /* Operations */
+        void resize(size_t row, size_t column) { Base::resize(row * column); }
         template<size_t Length, size_t MaxLength>
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
@@ -188,6 +190,7 @@ namespace Physica::Core::Internal {
             return Base::operator[](getDerived().getColumn() * r + c);
         }
         /* Operations */
+        void resize(size_t row, size_t column) { Base::resize(row * column); }
         template<size_t Length, size_t MaxLength>
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
@@ -242,6 +245,7 @@ namespace Physica::Core::Internal {
             return Base::operator[](c)[r];
         }
         /* Operations */
+        void resize(size_t row, size_t column);
         template<size_t Length, size_t MaxLength>
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);
@@ -296,6 +300,7 @@ namespace Physica::Core::Internal {
             return Base::operator[](r)[c];
         }
         /* Operations */
+        void resize(size_t row, size_t column);
         template<size_t Length, size_t MaxLength>
         void appendRow(const Vector<T, Length, MaxLength>& v);
         void removeColumnAt(size_t index);

@@ -85,10 +85,16 @@ namespace Physica::Core {
     VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, T> operator+(const Vector<T, Length, MaxLength>& v, const T& s);
 
     template<class T, size_t Length, size_t MaxLength>
+    inline VectorExpression<VectorExpressionType::Add, Vector<T, Length, MaxLength>, T> operator+(const T& s, const Vector<T, Length, MaxLength>& v) { return v + s; }
+
+    template<class T, size_t Length, size_t MaxLength>
     VectorExpression<VectorExpressionType::Sub, Vector<T, Length, MaxLength>, T> operator-(const Vector<T, Length, MaxLength>& v, const T& s);
 
     template<class T, size_t Length, size_t MaxLength>
     VectorExpression<VectorExpressionType::Mul, Vector<T, Length, MaxLength>, T> operator*(const Vector<T, Length, MaxLength>& v, const T& s);
+
+    template<class T, size_t Length, size_t MaxLength>
+    VectorExpression<VectorExpressionType::Mul, Vector<T, Length, MaxLength>, T> operator*(const T& s, const Vector<T, Length, MaxLength>& v) { return v * s; }
 
     template<class T, size_t Length, size_t MaxLength>
     VectorExpression<VectorExpressionType::Div, Vector<T, Length, MaxLength>, T> operator/(const Vector<T, Length, MaxLength>& v, const T& s);
