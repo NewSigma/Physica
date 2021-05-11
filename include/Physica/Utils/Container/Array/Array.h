@@ -20,7 +20,6 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <qglobal.h>
 #include "AbstractArrayWithLength.h"
 
 namespace Physica::Utils {

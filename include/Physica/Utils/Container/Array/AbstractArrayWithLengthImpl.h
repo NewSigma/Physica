@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <qtypeinfo.h>
-
 namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArrayWithLength<Derived>::AbstractArrayWithLength(size_t capacity)
@@ -49,7 +47,7 @@ namespace Physica::Utils::Internal {
     typename AbstractArrayWithLength<Derived>::T AbstractArrayWithLength<Derived>::cutLast() {
         assert(length > 0);
         --length;
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             return T(std::move(arr[length]));
         else
             return arr[length];
@@ -74,7 +72,7 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     void AbstractArrayWithLength<Derived>::removeAt(size_t index) {
         assert(index < length);
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             (arr + index)->~T();
         --length;
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(T));

@@ -19,6 +19,8 @@
 #pragma once
 
 #include <cstddef>
+#include <type_traits>
+#include <utility>
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Utils::Internal {

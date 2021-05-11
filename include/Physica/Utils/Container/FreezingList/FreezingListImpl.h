@@ -53,7 +53,7 @@ namespace Physica::Utils {
         if(copy < length) {
             ++inited;
             Node* p = arr + copy;
-            if(QTypeInfo<T>::isComplex)
+            if(!std::is_trivial<T>::value)
                 new (p) T(t);
             else
                 p->t = t;
@@ -68,7 +68,7 @@ namespace Physica::Utils {
         if(copy < length) {
             ++inited;
             Node* p = arr + copy;
-            if(QTypeInfo<T>::isComplex)
+            if(!std::is_trivial<T>::value)
                 new (p) T(std::move(t));
             else
                 p->t = t;

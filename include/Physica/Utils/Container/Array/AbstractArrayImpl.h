@@ -68,7 +68,7 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
             : AbstractArray(array.getDerived().getCapacity()) {
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 allocate(array[i], i);
         else
@@ -88,7 +88,7 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < getDerived().getLength(); ++i)
                     (arr + i)->~T();
@@ -97,13 +97,13 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     inline typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) {
-        Q_ASSERT(index < getDerived().getLength());
+        assert(index < getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
     inline const typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) const {
-        Q_ASSERT(index < getDerived().getLength());
+        assert(index < getDerived().getLength());
         return arr[index];
     }
 
@@ -127,7 +127,7 @@ namespace Physica::Utils::Internal {
      */
     template<class Derived>
     inline void AbstractArray<Derived>::allocate(const T& t, size_t index) {
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             new (arr + index) T(t);
         else
             *(arr + index) = t;
@@ -135,7 +135,7 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     inline void AbstractArray<Derived>::allocate(T&& t, size_t index) {
-        if constexpr (QTypeInfo<T>::isComplex)
+        if constexpr (!std::is_trivial<T>::value)
             new (arr + index) T(std::move(t));
         else
             *(arr + index) = t;

@@ -54,7 +54,7 @@ namespace Physica::Utils::Internal {
          * \size must larger than current length. Because we can not delete the elements we do not need if not.
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
-        void setLength(size_t size) { Q_ASSERT(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
+        void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
         explicit AbstractArrayWithLength(size_t capacity);
         AbstractArrayWithLength(size_t length_, size_t capacity);
