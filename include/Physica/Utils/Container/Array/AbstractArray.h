@@ -97,15 +97,15 @@ namespace Physica::Utils::Internal {
         bool operator!=(const AbstractArray& array) const { return !(*this == array); }
         /* Iterator */
         Iterator begin() noexcept { return Iterator(arr); }
-        Iterator end() noexcept { return Iterator(arr + getDerived().getLength()); }
+        Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
         ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
-        ConstIterator cend() const noexcept { return ConstIterator(arr + getDerived().getLength()); }
-        ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + getDerived().getLength()); }
+        ConstIterator cend() const noexcept { return ConstIterator(arr + Base::getDerived().getLength()); }
+        ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength()); }
         ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
-        ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + getDerived().getLength()); }
+        ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength()); }
         ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */
-        [[nodiscard]] bool empty() const { return getDerived().getLength() == 0; }
+        [[nodiscard]] bool empty() const { return Base::getDerived().getLength() == 0; }
         [[nodiscard]] T* data() noexcept { return arr; }
         [[nodiscard]] const T* data() const noexcept { return arr; }
     protected:
@@ -118,9 +118,6 @@ namespace Physica::Utils::Internal {
         inline void allocate(const T& t, size_t index);
         inline void allocate(T&& t, size_t index);
         inline void swap(AbstractArray& array) noexcept;
-        /* Getters */
-        [[nodiscard]] Derived& getDerived() noexcept { return static_cast<Derived&>(*this); }
-        [[nodiscard]] const Derived& getDerived() const noexcept { return static_cast<const Derived&>(*this); }
     };
 }
 

@@ -586,10 +586,10 @@ namespace Physica::Utils {
                 length = size;
             }
         }
-        arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
+        if (capacity < size)
+            reserve(size);
         for (; length < size; ++length)
             Base::allocate(T(), length);
-        capacity = size;
     }
 
     template<class T>
@@ -601,10 +601,10 @@ namespace Physica::Utils {
                 length = size;
             }
         }
-        arr = reinterpret_cast<T*>(realloc(arr, size * sizeof(T)));
+        if (capacity < size)
+            reserve(size);
         for (; length < size; ++length)
             allocate(t, length);
-        capacity = size;
     }
 
     template<class T>

@@ -90,30 +90,30 @@ namespace Physica::Utils::Internal {
     AbstractArray<Derived>::~AbstractArray() {
         if constexpr (!std::is_trivial<T>::value)
             if (arr != nullptr)
-                for(size_t i = 0; i < getDerived().getLength(); ++i)
+                for(size_t i = 0; i < Base::getDerived().getLength(); ++i)
                     (arr + i)->~T();
         free(arr);
     }
 
     template<class Derived>
     inline typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) {
-        assert(index < getDerived().getLength());
+        assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
     inline const typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) const {
-        assert(index < getDerived().getLength());
+        assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
     bool AbstractArray<Derived>::operator==(const AbstractArray& array) const {
-        if (getDerived().getLength() != array.getDerived().getLength())
+        if (Base::getDerived().getLength() != array.getDerived().getLength())
             return false;
-        if (getDerived().getCapacity() != array.getDerived().getLength())
+        if (Base::getDerived().getCapacity() != array.getDerived().getLength())
             return false;
-        for (size_t i = 0; i < getDerived().getLength(); ++i)
+        for (size_t i = 0; i < Base::getDerived().getLength(); ++i)
             if (operator[](i) != array[i])
                 return false;
         return true;

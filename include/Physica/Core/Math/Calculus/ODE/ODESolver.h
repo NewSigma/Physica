@@ -23,15 +23,24 @@
 namespace Physica::Core {
     template<class T, class TVector>
     class ODESolver {
+    private:
         TVector x;
         DenseMatrix<T> solution;
         T stepSize;
     public:
         ODESolver(const T& start, const T& end, const T& stepSize_, const TVector& initial);
         /* Operations */
+        /**
+         * \tparam Function
+         * A function object like this
+         * TVector func(const T& x, const TVector& y)
+         */
         template<class Function>
-        void solve(Function func);
+        void rungeKutta4(Function func);
+        template<class Function>
+        void verlet(Function func, const TVector& initial1);
         /* Getters */
+        const TVector& getX() const noexcept { return x; }
         const DenseMatrix<T>& getSolution() const noexcept { return solution; }
     private:
         template<class Function>
@@ -51,7 +60,7 @@ namespace Physica::Core {
 
     template<class T, class TVector>
     template<class Function>
-    void ODESolver<T, TVector>::solve(Function func) {
+    void ODESolver<T, TVector>::rungeKutta4(Function func) {
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
@@ -76,5 +85,20 @@ namespace Physica::Core {
         const TVector k3 = stepSize * func(temp, y + k2 * T(0.5));
         const TVector k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);
         return y + (k1 + k2 + k3 + k4) / T(3);
+    }
+
+    template<class T, class TVector>
+    template<class Function>
+    void ODESolver<T, TVector>::verlet(Function func, const TVector& initial1) {
+        x.append(x[0] + stepSize);
+        solution[1] = initial1;
+        const T stepSize_2 = square(stepSize);
+        const size_t column_1 = solution.getColumn() - 1;
+        for (size_t i = 1; i < column_1; ++i) {
+            const T& x_i = x[i];
+            const TVector& y_i = solution[i];
+            solution[i + 1] = -solution[i - 1] + y_i * T(2) + func(x_i, y_i) * stepSize_2;
+            x.append(x_i + stepSize);
+        }
     }
 }

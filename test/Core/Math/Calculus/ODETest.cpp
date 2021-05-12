@@ -22,32 +22,54 @@ using namespace Physica::Core;
 
 int main() {
     using T = Scalar<Double, false>;
+    using ODE = ODESolver<T, Vector<T>>;
     constexpr double stepSize = 0.0001;
-    constexpr double error = 1E-8;
+    /**
+     * x' = x
+     * x[0] = 1
+     */
     {
-        ODESolver<T, Vector<T>> solver(0, 3, stepSize, {1});
-        solver.solve([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return y; });
+        ODE solver(0, 3, stepSize, {1});
+        solver.rungeKutta4([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return y; });
+        const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        double x = 0;
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& solVector = solution[i];
-            if (fabs(solVector[0].getTrivial() - exp(x)) / solVector[0].getTrivial() > error)
+            if (fabs(solVector[0].getTrivial() - exp(x[i].getTrivial())) / solVector[0].getTrivial() > 1E-11)
                 return 1;
-            x += stepSize;
         }
     }
+    /**
+     * x'' = x
+     * x[0] = 0  x'[0] = 1
+     */
     {
-        ODESolver<T, Vector<T>> solver(0, 3, stepSize, {0, 1});
-        solver.solve([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return Vector<T>{y[1], -y[0]}; });
+        ODE solver(0, 3, stepSize, {0, 1});
+        solver.rungeKutta4([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return Vector<T>{y[1], -y[0]}; });
+        const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        double x = 0;
+        for (size_t i = 0; i < solution.getColumn(); ++i) {
+            const auto& x_i = x[i];
+            const auto& solVector = solution[i];
+            if (fabs(solVector[0].getTrivial() - sin(x_i.getTrivial())) / solVector[0].getTrivial() > 1E-10)
+                return 1;
+            if (fabs(solVector[1].getTrivial() - cos(x_i.getTrivial())) / solVector[1].getTrivial() > 1E-8)
+                return 1;
+        }
+    }
+    /**
+     * x' = x
+     * x[0] = 1
+     */
+    {
+        ODE solver(0, 3, stepSize, {1});
+        solver.verlet([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return y; }, {exp(stepSize)});
+        const auto& x = solver.getX();
+        const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& solVector = solution[i];
-            if (fabs(solVector[0].getTrivial() - sin(x)) / solVector[0].getTrivial() > error)
+            if (fabs(solVector[0].getTrivial() - exp(x[i].getTrivial())) / solVector[0].getTrivial() > 1E-9)
                 return 1;
-            if (fabs(solVector[1].getTrivial() - cos(x)) / solVector[1].getTrivial() > error)
-                return 1;
-            x += stepSize;
         }
     }
     return 0;

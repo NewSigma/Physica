@@ -31,8 +31,8 @@ namespace Physica::AI {
     DNN::DNN(int inputSize, int size, int* nodeCounts)
             : layers(std::vector<Layer*>(size))
             , inputs(Vector<MultiScalar>::randomVector(inputSize))
-            , expect(static_cast<SignedScalarUnit>(0))
-            , learnRate(static_cast<SignedScalarUnit>(0))
+            , expect(static_cast<SignedMPUnit>(0))
+            , learnRate(static_cast<SignedMPUnit>(0))
             , inputSize(inputSize) {
         for(int i = 0; i < size; ++i)
             layers[i] = new Layer(i, nodeCounts[i], this);
@@ -59,7 +59,7 @@ namespace Physica::AI {
         MultiScalar loss(expect);
         for(int j = 0; j < layers[i]->getSize(); ++j)
             loss -= (*layers[i])[j].calc();
-        loss /= MultiScalar(static_cast<SignedScalarUnit>(layers[i]->getSize()));
+        loss /= MultiScalar(static_cast<SignedMPUnit>(layers[i]->getSize()));
         for(int k = 0; k < layers[i]->getSize(); ++k)
             (*layers[i])[k].acceptedLoss = loss;
         for(; i > 1; --i)
