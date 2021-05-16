@@ -1,8 +1,8 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <QtCharts>
 #include <Physica/Core/Math/Calculus/Differential.h>
 #include "Physica/Gui/Plot/Plot.h"
 

@@ -55,6 +55,8 @@ namespace Physica::Core {
         void toUnit();
         /* Getters */
         [[nodiscard]] bool isZero() const;
+        [[nodiscard]] T max() const;
+        [[nodiscard]] T min() const;
         /* Helpers */
         static Vector<T> zeroVector(size_t len);
         static Vector<T> randomVector(size_t len);

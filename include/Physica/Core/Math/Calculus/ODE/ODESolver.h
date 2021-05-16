@@ -86,7 +86,10 @@ namespace Physica::Core {
         const TVector k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);
         return y + (k1 + k2 + k3 + k4) / T(3);
     }
-
+    /**
+     * Reference:
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013.572
+     */
     template<class T, class TVector>
     template<class Function>
     void ODESolver<T, TVector>::verlet(Function func, const TVector& initial1) {

@@ -604,7 +604,7 @@ namespace Physica::Utils {
         if (capacity < size)
             reserve(size);
         for (; length < size; ++length)
-            allocate(t, length);
+            Base::allocate(t, length);
     }
 
     template<class T>

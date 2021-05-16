@@ -79,6 +79,28 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
+    T Vector<T, Length, MaxLength>::max() const {
+        assert(Base::getLength() != 0);
+        T result((*this)[0]);
+        for (size_t i = 1; i < Base::getLength(); ++i) {
+            if ((*this)[i] > result)
+                result = (*this)[i];
+        }
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    T Vector<T, Length, MaxLength>::min() const {
+        assert(Base::getLength() != 0);
+        T result((*this)[0]);
+        for (size_t i = 1; i < Base::getLength(); ++i) {
+            if ((*this)[i] < result)
+                result = (*this)[i];
+        }
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
     Vector<T> Vector<T, Length, MaxLength>::zeroVector(size_t len) {
         Vector<T> result(len);
         for(size_t i = 0; i < len; ++i)
