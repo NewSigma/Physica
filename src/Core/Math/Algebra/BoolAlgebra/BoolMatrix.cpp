@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,12 +20,12 @@
 #include <qglobal.h>
 
 namespace Physica::Core {
-    BoolMatrix::BoolMatrix(size_t column, size_t row) : arr() {
+    BoolMatrix::BoolMatrix(size_t column, size_t row) : arr(row, BitArray(column)) {
         Q_ASSERT(column > 0 && row > 0);
-        arr.reserve(row);
-        for (size_t s = 0; s < row; ++s)
-            arr.allocate(BitArray(column), s);
-        arr.setLength(row);
+    }
+
+    BoolMatrix::BoolMatrix(size_t column, size_t row, bool initial) : arr(row, BitArray(column, initial)) {
+        Q_ASSERT(column > 0 && row > 0);
     }
     /*!
      * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
@@ -50,7 +50,7 @@ namespace Physica::Core {
                         break;
                     }
                 }
-                row_i.setBit(bit, j);
+                row_i.setBit(j, bit);
             }
             array.allocate(std::move(row_i), i);
         }

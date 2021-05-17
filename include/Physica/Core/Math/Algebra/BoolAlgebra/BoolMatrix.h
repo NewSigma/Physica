@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,6 +33,7 @@ namespace Physica::Core {
         Array<BitArray> arr;
     public:
         BoolMatrix(size_t column, size_t row);
+        BoolMatrix(size_t column, size_t row, bool initial);
         BoolMatrix(const BoolMatrix& m) = default;
         BoolMatrix(BoolMatrix&& m) noexcept : arr(std::move(m.arr)) {}
         ~BoolMatrix() = default;
@@ -50,6 +51,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getColumn() const { return arr[0].getLength(); }
         [[nodiscard]] size_t getRow() const { return arr.getLength(); }
+        /* Setters */
+        void setValue(size_t row, size_t column, bool value) { arr[row].setBit(column, value); }
     private:
         /*!
          * Construct a BoolMatrix from its members, declared private to avoid improper uses.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #include <cstdlib>
 #include <climits>
+#include <cstring>
 #include "qglobal.h"
 #include "Physica/Utils/BitArray.h"
 
@@ -28,6 +29,11 @@ namespace Physica::Utils {
      */
     BitArray::BitArray(size_t bitCount_) : bitCount(bitCount_) {
         arr = new unsigned char[getLength()];
+    }
+
+    BitArray::BitArray(size_t bitCount_, bool initial) : BitArray(bitCount_) {
+        unsigned char init = initial ? std::numeric_limits<unsigned char>::max() : std::numeric_limits<unsigned char>::min();
+        memset(arr, init, getLength());
     }
 
     BitArray::BitArray(const BitArray& array)
@@ -104,7 +110,7 @@ namespace Physica::Utils {
         return BitArray(newArr, length);
     }
 
-    void BitArray::setBit(bool b, size_t s) {
+    void BitArray::setBit(size_t s, bool b) {
         Q_ASSERT(bitCount > s);
         s += 1;
         const auto quotient = s / CHAR_BIT;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_BITARRAY_H
-#define PHYSICA_BITARRAY_H
+#pragma once
 
 #include <cstddef>
 
@@ -31,6 +30,7 @@ namespace Physica::Utils {
         size_t bitCount;
     public:
         explicit BitArray(size_t bitCount_);
+        BitArray(size_t bitCount_, bool initial);
         BitArray(const BitArray& array);
         BitArray(BitArray&& array) noexcept;
         ~BitArray();
@@ -42,7 +42,7 @@ namespace Physica::Utils {
         BitArray operator|(const BitArray& array) const;
         BitArray operator~() const;
         /* Operations */
-        void setBit(bool b, size_t s);
+        void setBit(size_t s, bool b);
         /* Getters */
         [[nodiscard]] inline size_t getLength() const;
     private:
@@ -54,5 +54,3 @@ namespace Physica::Utils {
         return (bitCount >> 3U) + (bitCount & 8U);
     }
 }
-
-#endif
