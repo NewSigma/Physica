@@ -119,6 +119,11 @@ namespace Physica::Core {
     inline Scalar<type, errorTrack> gamma(const Scalar<type, errorTrack>& s) {
         return exp(lnGamma(s));
     }
+
+    template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> beta(const Scalar<type, errorTrack>& s1, const Scalar<type, errorTrack>& s2) {
+        return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
+    }
 }
 
 #endif
