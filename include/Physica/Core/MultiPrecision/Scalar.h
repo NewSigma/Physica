@@ -161,6 +161,8 @@ namespace Physica::Core {
 
         template<>
         class AbstractScalar<Float> {
+        public:
+            using TrivialType = float;
         protected:
             float f;
         public:
@@ -169,6 +171,7 @@ namespace Physica::Core {
             AbstractScalar(const AbstractScalar& s) = default;
             ~AbstractScalar() = default;
             /* Operators */
+            explicit operator float() const { return f; }
             explicit operator double() const { return f; }
             /* Getters */
             [[nodiscard]] constexpr static ScalarType getType() { return Float; }
@@ -187,6 +190,8 @@ namespace Physica::Core {
 
         template<>
         class AbstractScalar<Double> {
+        public:
+            using TrivialType = double;
         protected:
             double d;
         public:
@@ -195,6 +200,7 @@ namespace Physica::Core {
             AbstractScalar(const AbstractScalar& s) = default;
             ~AbstractScalar() = default;
             /* Operators */
+            explicit operator float() const { return d; }
             explicit operator double() const { return d; }
             /* Getters */
             [[nodiscard]] constexpr static ScalarType getType() { return Double; }

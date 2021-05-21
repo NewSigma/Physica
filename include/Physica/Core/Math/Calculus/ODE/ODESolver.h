@@ -87,6 +87,11 @@ namespace Physica::Core {
         return y + (k1 + k2 + k3 + k4) / T(3);
     }
     /**
+     * Solve the second order ODE only
+     * 
+     * \param initial1
+     * The initial value at x(-h), where h is the stepsize.
+     * 
      * Reference:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013.572
      */

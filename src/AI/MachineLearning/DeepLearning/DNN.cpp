@@ -44,7 +44,7 @@ namespace Physica::AI {
     }
 
     void DNN::loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect) {
-        if(loadInputs.getLength() != inputSize) {
+        if(loadInputs.getLength() != static_cast<size_t>(inputSize)) {
             qWarning("Insufficient data!");
             return;
         }
@@ -53,7 +53,7 @@ namespace Physica::AI {
     }
 
     void DNN::train() const {
-        int i = 0;
+        size_t i = 0;
         for(; i < layers.size() - 1; ++i)
             layers[i]->update();
         MultiScalar loss(expect);
@@ -67,7 +67,7 @@ namespace Physica::AI {
     }
 
     MultiScalar DNN::predict() const {
-        int i = 0;
+        size_t i = 0;
         for(; i < layers.size() - 1; ++i)
             layers[i]->update();
         MultiScalar loss(expect);

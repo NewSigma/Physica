@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 
-int main() {
+void testLnGamma() {
     constexpr static int count = 2;
     constexpr static double value[count]{13.7, 0.3};
     constexpr static float floatResult[count]{21.77465, 1.095798};
@@ -30,15 +30,37 @@ int main() {
     for (int i = 0; i < count; ++i) {
         Scalar<Float, false> s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(float(double(temp)) - floatResult[i]) / floatResult[i] >= 1E-6F))
-            return 1;
+        if ((fabs(float(temp) - floatResult[i]) / floatResult[i] >= 1E-6F))
+            exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < count; ++i) {
         Scalar<Double, false> s(value[i]);
         auto temp = lnGamma(s);
         if ((fabs(double(temp) - doubleResult[i]) / doubleResult[i] >= 1E-14))
-            return 1;
+            exit(EXIT_FAILURE);
     }
+}
+
+void testGammaPQ() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static double a[count]{13.7, 0.3};
+    constexpr static double x[count]{2, 8};
+    constexpr static double result[count]{5.309424005280372E-8, 0.99997576072630326};
+
+    for (int i = 0; i < count; ++i) {
+        auto temp = gammaP(T(a[i]), T(x[i]));
+        if ((fabs(double(temp) - result[i]) >= result[i] * 1E-14))
+            exit(EXIT_FAILURE);
+        temp = gammaQ(T(a[i]), T(x[i]));
+        if ((fabs(1 - double(temp) - result[i]) >= result[i] * 1E-9))
+            exit(EXIT_FAILURE);
+    }
+}
+
+int main() {
+    testLnGamma();
+    testGammaPQ();
     return 0;
 }

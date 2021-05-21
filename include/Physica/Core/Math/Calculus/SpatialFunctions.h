@@ -124,6 +124,95 @@ namespace Physica::Core {
     inline Scalar<type, errorTrack> beta(const Scalar<type, errorTrack>& s1, const Scalar<type, errorTrack>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
+
+    namespace Internal {
+        /**
+         * Reference:
+         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.156
+         */
+        template<ScalarType type, bool errorTrack>
+        Scalar<type, errorTrack> incompGamma1(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+            using T = Scalar<type, errorTrack>;
+            assert(a.isPositive() && !x.isNegative());
+            assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
+            T ap = a;
+            T temp = reciprocal(a);
+            T sum = temp;
+            do {
+                ap += T(1);
+                temp *= x / ap;
+                sum += temp;
+            } while (fabs(temp.getTrivial()) >= fabs(sum.getTrivial()) * std::numeric_limits<typename T::TrivialType>::epsilon());
+            return sum * exp(T(-x + a * ln(x) - lnGamma(a)));
+        }
+        /**
+         * Reference:
+         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.161
+         */
+        template<ScalarType type, bool errorTrack>
+        Scalar<type, errorTrack> incompGamma2(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+            using T = Scalar<type, errorTrack>;
+            assert(a.isPositive() && !x.isNegative());
+            assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
+            constexpr typename T::TrivialType epsilon = std::numeric_limits<typename T::TrivialType>::epsilon();
+            constexpr typename T::TrivialType floatMin = std::numeric_limits<typename T::TrivialType>::min() / epsilon;
+
+            T b = x + T(1) - a;
+            T c = reciprocal(T(floatMin));
+            T d = reciprocal(b);
+            T h = d;
+            T temp;
+            size_t i = 1;
+            do {
+                T an = -T(i) * (T(i) - a); //Possible to optimize use add instead of multiply
+                ++i;
+                b += T(2);
+                d = an * d + b;
+                T copy_d(d);
+                if (copy_d.toAbs().getTrivial() < floatMin)
+                    d = T(floatMin);
+
+                c = an / c + b;
+                T copy_c(c);
+                if (copy_c.toAbs().getTrivial() < floatMin)
+                    c = T(floatMin);
+                d = reciprocal(d);
+                temp = c * d;
+                h *= temp; 
+            } while (T(temp - T(1)).toAbs().getTrivial() >= epsilon);
+            return h * exp(T(-x + a * ln(x) - lnGamma(a)));
+        }
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> gammaP(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+        assert(a.isPositive() && !x.isNegative());
+        using T = Scalar<type, errorTrack>;
+        return (x < a + T(1)) ? Internal::incompGamma1(a, x) : (T(1) - Internal::incompGamma2(a, x));
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> gammaQ(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+        assert(a.isPositive() && !x.isNegative());
+        using T = Scalar<type, errorTrack>;
+        return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> erf(const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T x2 = square(x);
+        return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> erfc(const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T x2 = square(x);
+        return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
+    }
 }
 
 #endif
