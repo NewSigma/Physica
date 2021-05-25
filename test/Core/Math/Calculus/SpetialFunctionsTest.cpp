@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Calculus/SpatialFunctions.h"
+#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 using namespace Physica::Core;
 
@@ -68,7 +68,6 @@ void testBesselJ() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = besselJn(n[i], T(x[i]));
-        std::cout << double(temp) << std::endl;
         if ((fabs(double(temp) - result[i]) >= result[i] * 1E-8))
             exit(EXIT_FAILURE);
     }
