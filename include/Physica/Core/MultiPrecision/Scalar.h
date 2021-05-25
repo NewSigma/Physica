@@ -169,6 +169,8 @@ namespace Physica::Core {
             AbstractScalar() : f(0) {}
             AbstractScalar(float f_) : f(f_) {}
             AbstractScalar(const AbstractScalar& s) = default;
+            AbstractScalar(const Integer& i) : AbstractScalar(float(double(i))) {}
+            AbstractScalar(const Rational& r) : AbstractScalar(float(double(r))) {}
             ~AbstractScalar() = default;
             /* Operators */
             explicit operator float() const { return f; }
@@ -198,6 +200,8 @@ namespace Physica::Core {
             AbstractScalar() : d(0) {}
             AbstractScalar(double d_) : d(d_) {}
             AbstractScalar(const AbstractScalar& s) = default;
+            AbstractScalar(const Integer& i) : AbstractScalar(double(i)) {}
+            AbstractScalar(const Rational& r) : AbstractScalar(double(r)) {}
             ~AbstractScalar() = default;
             /* Operators */
             explicit operator float() const { return d; }
@@ -282,6 +286,8 @@ namespace Physica::Core {
         explicit Scalar(int i, MPUnit a_ = 0);
         explicit Scalar(SignedMPUnit unit, MPUnit a_ = 0);
         explicit Scalar(double d, MPUnit a_ = 0);
+        explicit Scalar(const Integer& i, MPUnit a_ = 0) : Base(i), a(a_) {}
+        explicit Scalar(const Rational& r, MPUnit a_ = 0) : Base(r), a(a_) {}
         explicit Scalar(const char* s, MPUnit a_ = 0);
         explicit Scalar(const wchar_t* s, MPUnit a_ = 0);
         Scalar(const Scalar<MultiPrecision, false>& s, MPUnit a_ = 0);
@@ -342,6 +348,8 @@ namespace Physica::Core {
     public:
         Scalar() : Base() {}
         Scalar(float f_) : Base(f_) {}
+        Scalar(const Integer& i) : Base(i) {}
+        Scalar(const Rational& r) : Base(r) {}
         inline Scalar(const Scalar<Float, true>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
@@ -379,6 +387,8 @@ namespace Physica::Core {
     public:
         Scalar() : Base(), a(0) {}
         explicit Scalar(float f_, float a_ = 0) : Base(f_), a(fabsf(a_)) {}
+        explicit Scalar(const Integer& i, float a_ = 0) : Base(i), a(a_) {}
+        explicit Scalar(const Rational& r, float a_ = 0) : Base(r), a(a_) {}
         Scalar(const Scalar<Float, false>& s) : Base(s), a(0) {}
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
@@ -420,6 +430,8 @@ namespace Physica::Core {
     public:
         Scalar() : Base() {}
         Scalar(double d_) : Base(d_) {}
+        Scalar(const Integer& i) : Base(i) {}
+        Scalar(const Rational& r) : Base(r) {}
         Scalar(const Scalar<Double, true>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
@@ -458,6 +470,8 @@ namespace Physica::Core {
     public:
         Scalar() : Base(), a(0) {}
         explicit Scalar(double d_, double a_ = 0) : Base(d_), a(fabs(a_)) {}
+        explicit Scalar(const Integer& i, double a_ = 0) : Base(i), a(a_) {}
+        explicit Scalar(const Rational& r, double a_ = 0) : Base(r), a(a_) {}
         inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;

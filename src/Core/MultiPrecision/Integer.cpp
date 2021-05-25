@@ -21,6 +21,7 @@
 #include <cstring>
 #include "Physica/Core/MultiPrecision/Integer.h"
 #include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
+#include "Physica/Core/MultiPrecision/BasicImpl/Convert.h"
 
 namespace Physica::Core {
     Integer::Integer(int i)
@@ -259,7 +260,7 @@ namespace Physica::Core {
 
     bool Integer::operator>(const Integer& i) const {
         if (length == i.length) {
-            for (int j = getSize() - 1; j > 0; --j)
+            for (int j = getSize() - 1; j >= 0; --j)
                 if (byte[j] > i.byte[j])
                     return true;
             return false;
@@ -269,7 +270,7 @@ namespace Physica::Core {
 
     bool Integer::operator<(const Integer& i) const {
         if (length == i.length) {
-            for (int j = getSize() - 1; j > 0; --j)
+            for (int j = getSize() - 1; j >= 0; --j)
                 if (byte[j] < i.byte[j])
                     return true;
             return false;
@@ -308,6 +309,12 @@ namespace Physica::Core {
         return temp;
     }
 
+    Integer::operator double() const {
+        if (isZero())
+            return 0;
+        return Internal::convertDoubleImpl(length, length - 1, byte);
+    }
+
     void Integer::swap(Integer& i) noexcept {
         std::swap(byte, i.byte);
         std::swap(length, i.length);
@@ -328,11 +335,13 @@ namespace Physica::Core {
     }
 
     void Integer::cutZero() {
-        for (int i = length - 1; i > 0; --i) {
-            if (byte[i] != 0)
-                break;
-            --length;
+        if (!isZero()) {
+            for (int i = length - 1; i > 0; --i) {
+                if (byte[i] != 0)
+                    break;
+                --length;
+            }
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
         }
-        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
     }
 }

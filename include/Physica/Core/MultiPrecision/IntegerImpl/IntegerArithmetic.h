@@ -60,10 +60,11 @@ namespace Physica::Core {
     inline Integer Integer::integerSubImpl(const Integer& i1, const Integer& i2) {
         assert(i1.isPositive() && i2.isPositive());
         bool changeSign = i1.length <= i2.length;
-        const Integer* __restrict largeInt = i1.length > i2.length ? &i1 : &i2;
-        const Integer* __restrict smallInt = i1.length > i2.length ? &i2 : &i1;
-        if (i1.length == i2.length && !absCompare(i1, i2)) {
-            changeSign = true;
+        const bool i1_larger = !changeSign;
+        const Integer* __restrict largeInt = i1_larger ? &i1 : &i2;
+        const Integer* __restrict smallInt = i1_larger ? &i2 : &i1;
+        if (i1.length == i2.length && absCompare(i1, i2)) {
+            changeSign = false;
             std::swap(largeInt, smallInt);
         }
         int length = largeInt->length;

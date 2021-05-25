@@ -44,6 +44,7 @@ namespace Physica::Core {
         void operator-=(const Rational& r) { *this = *this - r; }
         void operator*=(const Rational& r) { *this = *this * r; }
         void operator/=(const Rational& r) { *this = *this / r; }
+        explicit operator double() const { return double(numerator) / double(denominator); }
         /* Helpers */
         Rational& toOpposite() noexcept { numerator.toOpposite(); return *this; }
         Rational& toAbs() noexcept { numerator.toAbs(); return *this; }

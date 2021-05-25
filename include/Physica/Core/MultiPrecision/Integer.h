@@ -20,6 +20,7 @@
 #define PHYSICA_INTEGER_H
 
 #include <cmath>
+#include <cassert>
 #include "MultiPrecisionType.h"
 
 namespace Physica::Core {
@@ -39,9 +40,9 @@ namespace Physica::Core {
     public:
         Integer(int i); //NOLINT Conversion is always available.
         template<ScalarType type, bool errorTrack>
-        Integer(const Scalar<type, errorTrack>& s);
+        explicit Integer(const Scalar<type, errorTrack>& s);
         template<bool errorTrack>
-        Integer(const Scalar<MultiPrecision, errorTrack>& s);
+        explicit Integer(const Scalar<MultiPrecision, errorTrack>& s);
         Integer(const Integer& toCopy);
         Integer(Integer&& toMove) noexcept;
         ~Integer();
@@ -72,6 +73,7 @@ namespace Physica::Core {
         Integer& operator--();
         Integer operator++(int);
         Integer operator--(int);
+        explicit operator double() const;
         /* Helpers */
         Integer& toOpposite() noexcept { length = -length; return *this; }
         Integer& toAbs() noexcept { length = getSize(); return *this; }
@@ -89,6 +91,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isEven() const { return !(byte[0] & 1U); }
         /* Setters */
         void setSign(bool sign) noexcept { length = sign ? length : -length; }
+        void setByte(unsigned int index, MPUnit value) { assert(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
     protected:
         /**
          * Degigned for performance,

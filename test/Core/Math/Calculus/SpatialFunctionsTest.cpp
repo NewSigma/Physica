@@ -59,8 +59,24 @@ void testGammaPQ() {
     }
 }
 
+void testBesselJ() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static int n[count]{2, 5};
+    constexpr static double x[count]{3, 3};
+    constexpr static double result[count]{0.48609126058589107691, 0.043028434877047583925};
+
+    for (int i = 0; i < count; ++i) {
+        auto temp = besselJn(n[i], T(x[i]));
+        std::cout << double(temp) << std::endl;
+        if ((fabs(double(temp) - result[i]) >= result[i] * 1E-8))
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main() {
     testLnGamma();
     testGammaPQ();
+    testBesselJ();
     return 0;
 }
