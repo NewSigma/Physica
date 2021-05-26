@@ -30,14 +30,14 @@ void testLnGamma() {
     for (int i = 0; i < count; ++i) {
         Scalar<Float, false> s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(float(temp) - floatResult[i]) / floatResult[i] >= 1E-6F))
+        if ((fabs(float(temp) - floatResult[i]) / fabs(floatResult[i]) >= 1E-6F))
             exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < count; ++i) {
         Scalar<Double, false> s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(double(temp) - doubleResult[i]) / doubleResult[i] >= 1E-14))
+        if ((fabs(double(temp) - doubleResult[i]) / fabs(doubleResult[i]) >= 1E-14))
             exit(EXIT_FAILURE);
     }
 }
@@ -51,10 +51,10 @@ void testGammaPQ() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = gammaP(T(a[i]), T(x[i]));
-        if ((fabs(double(temp) - result[i]) >= result[i] * 1E-14))
+        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-14))
             exit(EXIT_FAILURE);
         temp = gammaQ(T(a[i]), T(x[i]));
-        if ((fabs(1 - double(temp) - result[i]) >= result[i] * 1E-9))
+        if ((fabs(1 - double(temp) - result[i]) >= fabs(result[i]) * 1E-9))
             exit(EXIT_FAILURE);
     }
 }
@@ -68,7 +68,22 @@ void testBesselJ() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = besselJn(n[i], T(x[i]));
-        if ((fabs(double(temp) - result[i]) >= result[i] * 1E-8))
+        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-8))
+            exit(EXIT_FAILURE);
+    }
+}
+
+void testBesselY() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static int n[count]{2, 5};
+    constexpr static double x[count]{3, 3};
+    constexpr static double result[count]{-0.16040039348492372968, -1.9059459538286737322};
+
+    for (int i = 0; i < count; ++i) {
+        auto temp = besselYn(n[i], T(x[i]));
+        std::cout << double(temp) << std::endl;
+        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-7))
             exit(EXIT_FAILURE);
     }
 }
@@ -77,5 +92,6 @@ int main() {
     testLnGamma();
     testGammaPQ();
     testBesselJ();
+    testBesselY();
     return 0;
 }

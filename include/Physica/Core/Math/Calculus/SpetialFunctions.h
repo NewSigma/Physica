@@ -54,6 +54,15 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselJ(const Integer& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselY0(const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselY1(const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselYn(const Integer& n, const Scalar<type, errorTrack>& x);
 }
 
 #include "SpetialFunctionsImpl/Gamma.h"

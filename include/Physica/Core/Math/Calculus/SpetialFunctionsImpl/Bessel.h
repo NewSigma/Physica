@@ -28,20 +28,20 @@ namespace Physica::Core {
         T ax = x;
         ax.toAbs();
         T y, ans1, ans2;
-        const T eight = T(8);
-        if (ax < eight) {
+        if (ax < T(8)) {
             y = square(ax);
             ans1 = T(57568490574.0) + y * (T(-13362590354.0) + y * (T(651619640.7) + y * (T(-11214424.18) + y * (T(77392.33017) + y * T(-184.9052456)))));
             ans2 = T(57568490411.0) + y * (T(1029532985.0) + y * (T(9494680.718) + y * (T(59272.64853) + y * (T(267.8532712) + y))));
             return ans1 / ans2;
         }
         else {
-            const T z = eight / ax;
+            const T reciprocal_ax = reciprocal(ax);
+            const T z = reciprocal_ax << 3;
             y = square(z);
             ans1 = T(1) + y * (T(-0.1098628627E-2) + y * (T(0.2734510407E-4) + y * (T(-0.2073370639E-5) + y * T(0.2093887211E-6))));
             ans2 = T(-0.1562499995E-1) + y * (T(0.1430488765E-3) + y * (T(-0.6911147651E-5) + y * (T(0.7621095161E-6) - y * T(0.934945152E-7))));
             const T xx = ax - T(0.785398164);
-            return sqrt(T(0.636619772) / ax) * (cos(xx) * ans1 - z * sin(xx) * ans2);
+            return sqrt(T(0.636619772) * reciprocal_ax) * (cos(xx) * ans1 - z * sin(xx) * ans2);
         }
     }
     /**
@@ -55,20 +55,20 @@ namespace Physica::Core {
         T ax = x;
         ax.toAbs();
         T y, ans1, ans2;
-        const T eight = T(8);
-        if (ax < eight) {
+        if (ax < T(8)) {
             y = square(ax);
             ans1 = x * (T(72362614232.0) + y * (T(-7895059235.0) + y * (T(242396853.1) + y * (T(-2972611.439) + y * (T(15704.48260) + y * T(-30.16036606))))));
             ans2 = T(144725228442.0) + y * (T(2300535178.0) + y * (T(18583304.74) + y * (T(99447.43394) + y * (T(376.9991397) + y))));
             return ans1 / ans2;
         }
         else {
-            const T z = eight / ax;
+            const T reciprocal_ax = reciprocal(ax);
+            const T z = reciprocal_ax << 3;
             y = square(z);
             ans1 = T(1) + y * (T(0.183105E-2) + y * (T(-0.3516396496E-4) + y * (T(0.2457520174E-5) + y * T(-0.240337019E-6))));
             ans2 = T(0.04687499995) + y * (T(-0.2002690873E-3) + y * (T(0.8449199096E-5) + y * (T(-0.88228987E-6) + y * T(0.105787412E-6))));
             const T xx = ax - T(2.356194491);
-            const T result = sqrt(T(0.636619772) / ax) * (cos(xx) * ans1 - z * sin(xx) * ans2);
+            const T result = sqrt(T(0.636619772) * reciprocal_ax) * (cos(xx) * ans1 - z * sin(xx) * ans2);
             return x.isNegative() ? -result : result;
         }
     }
@@ -140,5 +140,74 @@ namespace Physica::Core {
         if (n == 1)
             return besselJ1(x);
         return besselJn(n, x);
+    }
+    /**
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.171
+     */
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselY0(const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T y, ans1, ans2;
+        if (x < T(8)) {
+            y = square(x);
+            ans1 = T(-2957821389.0) + y * (T(7062834065.0) + y * (T(-512359803.6) + y * (T(10879881.29) + y * (T(-86327.92757) + y * T(228.4622733)))));
+            ans2 = T(40076544269.0) + y * (T(745249964.8) + y * (T(7189466.438) + y * (T(47447.26470) + y * (T(226.1030244) + y))));
+            return (ans1 / ans2) + T(0.636619772) * besselJ0(x) * ln(x);
+        }
+        else {
+            const T reciprocal_x = reciprocal(x);
+            const T z = reciprocal_x << 3;
+            y = square(z);
+            ans1 = T(1) + y * (T(-0.1098628627E-2) + y * (T(0.2734510407E-4) + y * (T(-0.2073370639E-5) + y * T(0.2093887211E-6))));
+            ans2 = T(-0.1562499995E-1) + y * (T(0.1430488765E-3) + y * (T(-0.6911147651E-5) + y * (T(0.7621095161E-6) - y * T(0.934945152E-7))));
+            const T xx = x - T(0.785398164);
+            return sqrt(T(0.636619772) * reciprocal_x) * (sin(xx) * ans1 + z * cos(xx) * ans2);
+        }
+    }
+    /**
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.172
+     */
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselY1(const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T y, ans1, ans2;
+        if (x < T(8)) {
+            y = square(x);
+            ans1 = x * (T(-0.4900604943E13) + y * (T(0.1275274390E13) + y * (T(-0.5153438139E11) + y * (T(0.7349264551E9) + y * (T(-0.4237922726E7) + y * T(0.8511937935E4))))));
+            ans2 = T(0.2499580570E14) + y * (T(0.4244419664E12) + y * (T(0.3733650367E10) + y * (T(0.2245904002E8) + y * (T(0.1020426050E6) + y * (T(0.3549632885E3) + y)))));
+            return (ans1 / ans2) + T(0.636619772) * (besselJ1(x) * ln(x) - reciprocal(x));
+        }
+        else {
+            const T reciprocal_x = reciprocal(x);
+            const T z = reciprocal_x << 3;
+            y = square(z);
+            ans1 = T(1) + y * (T(-0.183105E-2) + y * (T(-0.3516396496E-4) + y * (T(-0.2457520174E-5) + y * T(0.240337019E-6))));
+            ans2 = T(-0.04687499995E-1) + y * (T(-0.2002690873E-3) + y * (T(0.8449199096E-5) + y * (T(-0.88228987E-6) - y * T(0.105787412E-6))));
+            const T xx = x - T(2.356194491);
+            return sqrt(T(0.636619772) * reciprocal_x) * (sin(xx) * ans1 + z * cos(xx) * ans2);
+        }
+    }
+    /**
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.173
+     */
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselYn(const Integer& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        assert(n > 1);
+        const T two_x = T(2) / x;
+        T bym = besselY0(x);
+        T result = besselY1(x);
+        for (Integer i = 1; i < n; ++i) {
+            const T temp = T(i) * two_x * result - bym;
+            bym = std::move(result);
+            result = std::move(temp);
+        }
+        return result;
     }
 }
