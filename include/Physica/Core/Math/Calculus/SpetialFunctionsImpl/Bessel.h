@@ -131,4 +131,14 @@ namespace Physica::Core {
             return x.isNegative() && i.isOdd() ? -result : result;
         }
     }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselJ(const Integer& n, const Scalar<type, errorTrack>& x) {
+        assert(!n.isNegative());
+        if (n == 0)
+            return besselJ0(x);
+        if (n == 1)
+            return besselJ1(x);
+        return besselJn(n, x);
+    }
 }
