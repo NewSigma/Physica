@@ -236,17 +236,16 @@ namespace Physica::Core {
             resultByte[0] = size > quotient ? resultByte[0] : 0;
             return Integer(resultByte, resultLength);
         }
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < MPUnitWidth;
-        resultLength += carry;
+        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) >= MPUnitWidth;
+        resultLength -= carry;
         resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
-        if(carry)
-            resultByte[size] = byte[size - 1] >> remainder;
+        if(!carry)
+            resultByte[size - 1] = byte[size - 1] >> remainder;
 
-        for(int i = size - 1; i > 0; --i) {
-            resultByte[i] = byte[i] << (MPUnitWidth - remainder);
-            resultByte[i] |= byte[i - 1] >> remainder;
+        for(int i = size - 2; i >= 0; --i) {
+            resultByte[i] = byte[i] >> remainder;
+            resultByte[i] |= byte[i + 1] << (MPUnitWidth - remainder);
         }
-        resultByte[0] = byte[0] << (MPUnitWidth - remainder);
         Integer result(resultByte, resultLength);
         result.cutZero();
         return result;

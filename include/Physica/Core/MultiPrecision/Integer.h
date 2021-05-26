@@ -60,6 +60,7 @@ namespace Physica::Core {
         bool operator>(const Integer& i) const;
         bool operator<(const Integer& i) const;
         bool operator==(const Integer& i) const;
+        bool operator!=(const Integer& i) const { return !(*this == i); }
         bool operator>=(const Integer& i) const { return !(*this < i); }
         bool operator<=(const Integer& i) const { return !(*this > i); }
         void operator+=(const Integer& i) { *this = *this + i; }
