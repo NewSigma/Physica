@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 using namespace Physica::Core;
@@ -82,7 +81,6 @@ void testBesselY() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = besselYn(n[i], T(x[i]));
-        std::cout << double(temp) << std::endl;
         if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-7))
             exit(EXIT_FAILURE);
     }

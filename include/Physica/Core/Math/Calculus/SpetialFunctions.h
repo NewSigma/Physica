@@ -44,6 +44,9 @@ namespace Physica::Core {
     Scalar<type, errorTrack> erfc(const Scalar<type, errorTrack>& x);
 
     template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> standardNormalDistribution(const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselJ0(const Scalar<type, errorTrack>& x);
 
     template<ScalarType type, bool errorTrack>

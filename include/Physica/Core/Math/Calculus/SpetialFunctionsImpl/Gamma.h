@@ -174,4 +174,10 @@ namespace Physica::Core {
         T x2 = square(x);
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> standardNormalDistribution(const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
+    }
 }
