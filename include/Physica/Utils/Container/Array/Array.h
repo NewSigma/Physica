@@ -100,6 +100,7 @@ namespace Physica::Utils {
         void reserve(size_t size) { assert(size == Capacity); }
         void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
+        [[nodiscard]] constexpr static size_t size() { return Length; }
         [[nodiscard]] constexpr static size_t getLength() { return Length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
         /* Setters */
@@ -151,6 +152,7 @@ namespace Physica::Utils {
         void reserve(size_t size);
         void swap(Array& array) noexcept;
         /* Getters */
+        [[nodiscard]] size_t size() const noexcept { return length; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
     };
@@ -204,6 +206,7 @@ namespace Physica::Utils {
         void decrease(size_t size);
         void swap(Array& array) noexcept;
         /* Getters */
+        [[nodiscard]] size_t size() const noexcept { return length; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
     };

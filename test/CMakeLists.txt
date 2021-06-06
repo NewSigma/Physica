@@ -6,6 +6,7 @@ physica_add_test(ScalarAddSubExpression Core/MultiPrecision/ScalarImpl/ScalarAdd
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/InverseMatrixTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
+physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)
 physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
 physica_add_test(ODE Core/Math/Calculus/ODETest.cpp)
