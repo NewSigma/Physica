@@ -28,13 +28,14 @@ using T = Scalar<Double, false>;
 using ODE = ODESolver<T, Vector<T>>;
 
 int main(int argc, char** argv) {
-    const double radius = 0.005;
-    const double rmin = 0.000001;
+    const T radius = 0.005;
+    const T rmin = 0.000001;
+    const T stepSize = rmin;
     const T sigma = 0.074;
     const T rho = 1000;
     const T g = 9.8;
     const T lambda = -0.0300034492;
-    ODE solver(-radius, -rmin, rmin, {0, 1});
+    ODE solver(-radius, -rmin, stepSize, {0, 1});
     solver.rungeKutta4([&](const T& r, const Vector<T>& v) {
             const T momentum = v[1];
             const T momentum_2_1 = momentum * momentum + T(1);
@@ -49,14 +50,18 @@ int main(int argc, char** argv) {
     const size_t length = solution.getColumn();
     Vector<T> z{};
     z.resize(length);
-    T tangent_min = abs(solution(1, 0));
 
+    T volumeHelper(0);
+    T tangent_min = abs(solution(1, 0));
     for (size_t i = 0; i < length; ++i) {
-        z[i] = solution(0, i);
-        T temp = abs(solution(1, i));
-        tangent_min = temp < tangent_min ? temp : tangent_min;
+        T temp1 = solution(0, i);
+        z[i] = temp1;
+        volumeHelper += temp1 * r[i];
+        T temp2 = abs(solution(1, i));
+        tangent_min = temp2 < tangent_min ? temp2 : tangent_min;
     }
-    std::cout << "Tangent at r = " << rmin << " is " << tangent_min << std::endl;
+    std::cout << "Volume is " << (-volumeHelper * stepSize) << " m^3" << std::endl;
+    std::cout << "Minimum tangent is " << tangent_min << std::endl;
 
     QApplication app(argc, argv);
     Plot* r_z = new Plot(r, z);
