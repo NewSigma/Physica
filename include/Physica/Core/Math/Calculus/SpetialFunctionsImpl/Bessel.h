@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
+#include "Physica/Core/Math/Calculus/Chebyshev.h"
+
 namespace Physica::Core {
     /**
      * Reference:
@@ -209,5 +213,245 @@ namespace Physica::Core {
             result = std::move(temp);
         }
         return result;
+    }
+
+    namespace Internal {
+        /**
+         * Reference:
+         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.182
+         */
+        template<ScalarType type, bool errorTrack>
+        void besselChebyshevHelper(
+                const Scalar<type, errorTrack>& x
+                , Scalar<type, errorTrack>& gamma1
+                , Scalar<type, errorTrack>& gamma2
+                , Scalar<type, errorTrack>& gamma_plus
+                , Scalar<type, errorTrack>& gamma_minus) {
+            using T = Scalar<type, errorTrack>;
+            assert(abs(x) < T(0.5));
+            const static Utils::Array<T> coeff1{-1.142022680371168, 6.5165112670737E-3, 3.087090173086E-4, -3.4706269647E-6, 6.9437664E-9, 3.67795E-11, -1.356E-13};
+            const static Utils::Array<T> coeff2{1.843740587300905, -7.68528408447867E-2, 1.2719271366546E-3, -4.9717367042E-6, -3.31261198E-8, 2.423096E-10, -1.702E-13, -1.49E-15};
+
+            const T from(-1);
+            const T to(1);
+            const T x2 = x * T(2);
+            gamma1 = chebyshev_calc_even(from, to, coeff1, x2);
+            gamma2 = chebyshev_calc_even(from, to, coeff2, x2);
+            gamma_plus = gamma2 - x * gamma1;
+            gamma_minus = gamma2 + x * gamma1;
+        }
+    }
+    /**
+     * TODO: square of integers is not implemented, using (i * i) instead
+     * 
+     * Reference:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.180
+     */
+    template<ScalarType type, bool errorTrack>
+    void besselJn_Yn_dJn_dYn(
+            const Scalar<type, errorTrack>& n
+            , const Scalar<type, errorTrack>& x
+            , Scalar<type, errorTrack>& Jn
+            , Scalar<type, errorTrack>& Yn
+            , Scalar<type, errorTrack>& dJn
+            , Scalar<type, errorTrack>& dYn) {
+        using T = Scalar<type, errorTrack>;
+        constexpr double xmin = 2;
+        constexpr double half = 0.5;
+        constexpr double pi_trivial = 3.141592653589793;
+        constexpr double epsilon_trivial = std::numeric_limits<typename T::TrivialType>::epsilon();
+        constexpr double fpmin_trivial = std::numeric_limits<typename T::TrivialType>::min() / epsilon_trivial;
+        const T pi = T(pi_trivial);
+        const T epsilon = T(epsilon_trivial);
+        const T fpmin = T(fpmin_trivial);
+        assert(!n.isNegative() && x.isPositive());
+
+        const Integer nl = x < T(xmin)
+                             ? Integer(T(n + T(half)))
+                             : Integer(T(n - x + T(xmin - half))).isPositive() ? Integer(T(n - x + T(xmin - half))) : Integer(0);
+        const T mu = n - T(nl);
+        const T square_mu = square(mu);
+
+        const T reciprocal_x = reciprocal(x);
+        const T reciprocal_x_2 = reciprocal_x * T(2);
+        const T wronskian = reciprocal_x_2 / pi;
+        T f_n = n * reciprocal_x;
+        if (f_n < fpmin)
+            f_n = fpmin;
+        bool sign = true;
+        /* Lentz method for continued fraction 1 at n */ {
+            T b = n * reciprocal_x_2;
+            T c(f_n);
+            T d(0);
+            do {
+                b += reciprocal_x_2;
+                d = b - d;
+                if (abs(d) < fpmin)
+                    d = fpmin;
+                c = b - reciprocal(c);
+                if (abs(c) < fpmin)
+                    c = fpmin;
+                d = reciprocal(d);
+                T delta = c * d;
+                f_n *= delta;
+                sign = sign ^ d.isNegative(); //If d is negative, sign = -sign
+                if (abs(T(delta - T(1))) <= epsilon)
+                    break;
+            } while(true);
+        }
+        //get f at \nu = \mu
+        const T a_Jv_1 = sign ? fpmin : -fpmin; //a is a constant, 1 is the first iteration
+        const T a_dJv_1 = f_n * a_Jv_1;
+        T a_Jv_m = a_Jv_1;
+        T a_dJv_m = a_dJv_1;
+        /* Loop from \nu = n to \nu = \mu */ {
+            T factor = n * reciprocal_x;
+            for (Integer i = nl - 1; !i.isNegative(); --i) {
+                T temp = factor * a_Jv_m + a_dJv_m;
+                factor -= reciprocal_x;
+                a_dJv_m = factor * temp - a_Jv_m;
+                a_Jv_m = std::move(temp);
+            }
+            if (a_Jv_m.isZero())
+                a_Jv_m = epsilon;
+        }
+        const T f = a_dJv_m / a_Jv_m;
+
+        T Ymu, Ymu_1, Jmu;
+        if (x < T(xmin)) { //Temme series method for continued fraction 2
+            const T x_2 = x * T(0.5);
+            const T pimu = pi * mu;
+            const T factor = abs(pimu) < epsilon ? T(1) : pimu / sin(pimu);
+            T d = -ln(x_2);
+            T e = mu * d;
+            const T factor2 = abs(e) < epsilon ? T(1) : sinh(e) / e;
+            T gamma1, gamma2, gamma_plus, gamma_minus;
+            Internal::besselChebyshevHelper(mu, gamma1, gamma2, gamma_plus, gamma_minus);
+            T ff = T(2 / pi_trivial) * factor * (gamma1 * cosh(e) + gamma2 * factor2 * d);
+            e = exp(e);
+            T p = e / (gamma_plus * pi);
+            T q = reciprocal(e * pi * gamma_minus);
+            const T pimu_2 = pimu * T(0.5);
+            const T factor3 = abs(pimu_2) < epsilon ? T(1) : sin(pimu_2) / pimu_2;
+            T r = pi * pimu_2 * square(factor3);
+            T c(1);
+            d = -square(x_2);
+            T sum = ff + r * q;
+            T sum1 = p;
+            Integer i = 1;
+            while (true) {
+                const T scalar_i = T(i);
+                ff = T(scalar_i * ff + p + q) / (square(scalar_i) - square_mu);
+                c *= d / i;
+                p /= T(scalar_i - mu);
+                q /= T(scalar_i + mu);
+                T delta = c * (ff + r * q);
+                sum += delta;
+                sum1 += T(c * p - scalar_i * delta);
+                if (abs(delta) < (T(1) + abs(sum)) * epsilon)
+                    break;
+                ++i;
+            }
+            Ymu = -sum;
+            Ymu_1 = -sum1 * reciprocal_x_2;
+            const T dYmu = mu * reciprocal_x * Ymu - Ymu_1;
+            Jmu = wronskian / (dYmu - f * Ymu);
+        }
+        else { //Lentz method for continued fraction 2
+            T a = T(0.25) - square_mu;
+            T p = reciprocal_x * T(-0.5);
+            T q(1);
+            const T br = T(2) * x;
+            T bi(2);
+            //Start from i = 1
+            T factor = a * reciprocal_x / (square(p) + square(q));
+            T cr = br + q * factor;
+            T ci = bi + p * factor;
+            T den = square(br) + square(bi);
+            T dr = br / den;
+            T di = -bi / den;
+            T dlr = cr * dr - ci * di;
+            T dli = cr * di + ci * dr;
+            T temp = p * dlr - q * dli;
+            q = p * dli + q * dlr;
+            p = temp;
+            Integer i = 1;
+            while (true) {
+                a += T(i << 1U);
+                bi += T(2);
+                dr = a * dr + br;
+                di = a * di + bi;
+                if ((abs(dr) + abs(di)) < fpmin)
+                    dr = fpmin;
+                factor = a / (square(cr) + square(ci));
+                cr = br + cr * factor;
+                ci = bi - ci * factor;
+                if ((abs(cr) + abs(ci)) < fpmin)
+                    cr = fpmin;
+                den = square(dr) + square(di);
+                dr /= den;
+                di /= -den;
+                dlr = cr * dr - ci * di;
+                dli = cr * di + ci * dr;
+                temp = p * dlr - q * dli;
+                q = p * dli + q * dlr;
+                p = temp;
+                if ((abs(T(dlr - T(1))) + abs(dli)) < epsilon)
+                    break;
+                ++i;
+            }
+            const T gamma = (p - f) / q;
+            Jmu = sqrt(wronskian / ((p - f) * gamma + q));
+            Jmu = a_Jv_m > 0 ? Jmu : -Jmu;
+            Ymu = Jmu * gamma;
+            const T dYmu = Ymu * (p + q / gamma);
+            Ymu_1 = mu * reciprocal_x * Ymu - dYmu;
+        }
+        const T factor = Jmu / a_Jv_m;
+        Jn = a_Jv_1 * factor;
+        dJn = a_dJv_1 * factor;
+        //Loop from v = \mu to v = n
+        T Yv = Ymu, Yv_1 = Ymu_1;
+        for (Integer i = 1; i <= nl; ++i) {
+            T temp = (mu + T(i)) * reciprocal_x_2 * Yv_1 - Yv;
+            Yv = Yv_1;
+            Yv_1 = std::move(temp);
+        }
+        Yn = Yv;
+        dYn = n * reciprocal_x * Yv - Yv_1;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T Jn, dJn, Yn, dYn;
+        besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
+        return Jn;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T Jn, dJn, Yn, dYn;
+        besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
+        return dJn;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T Jn, dJn, Yn, dYn;
+        besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
+        return Yn;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        T Jn, dJn, Yn, dYn;
+        besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
+        return dYn;
     }
 }

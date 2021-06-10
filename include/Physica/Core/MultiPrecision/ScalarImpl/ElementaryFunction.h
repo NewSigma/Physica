@@ -24,6 +24,9 @@
  */
 namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
+    inline Scalar<type, errorTrack> abs(const Scalar<type, errorTrack>& s);
+
+    template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
 
     template<ScalarType type, bool errorTrack>

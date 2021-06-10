@@ -26,7 +26,7 @@ namespace Physica::Core {
                 : byte(nullptr), length(0), power(0) {}
 
         AbstractScalar<MultiPrecision>::AbstractScalar(int length_, int power_)
-                : byte(reinterpret_cast<MPUnit*>(malloc(abs(length_) * sizeof(MPUnit))))
+                : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
                 , length(length_), power(power_) {
             /*
             * Length of scalar must not equal to INT_MIN or -length will make no sense.

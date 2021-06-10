@@ -112,7 +112,7 @@ namespace Physica::Core {
     template<ScalarType scalarType, bool errorTrack>
     const Scalar<scalarType, errorTrack>* TreeFunctionData<scalarType, errorTrack>::getValue(const Function& func) const {
         assert(getType() == Value);
-        const long normalIndex = abs(index) - 1;
+        const long normalIndex = std::abs(index) - 1;
         const Array<Scalar<scalarType, errorTrack>>& arr = index > 0 ? func.getVariables() : func.getConstants();
         return &arr[normalIndex];
     }
