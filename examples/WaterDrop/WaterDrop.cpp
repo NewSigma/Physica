@@ -19,6 +19,7 @@
 #include <iostream>
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
+#include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -46,9 +47,13 @@ public:
     WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_);
     /* Operations */
     void solve();
-    void setLambda(const T& lambda) { const3 = const2 * lambda; }
-    /* Getters */
+    T findLambda();
     int output();
+    /* Getters */
+    T getMinTangent();
+    T getLambda() { return const3 / const2; }
+private:
+    void setLambda(const T& lambda) { const3 = const2 * lambda; }
 };
 
 WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
@@ -83,12 +88,26 @@ int WaterDropSolver::output() {
         z[i] = temp1;
         volumeHelper += temp1 * r[i];
     }
-    std::cout << "Volume is " << (-volumeHelper * stepSize) << " m^3" << std::endl;
+    std::cout << "Volume is " << abs(volumeHelper * stepSize) << " m^3" << std::endl;
     std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
 
     Plot* r_z = new Plot(r, z);
     r_z->show();
     return QApplication::exec();
+}
+
+T WaterDropSolver::getMinTangent() {
+    const auto& solution = solver.getSolution();
+    return solution(1, solution.getColumn() - 1);
+}
+
+T WaterDropSolver::findLambda() {
+    return bisection([&](const T& lambda) { //We use bisection method by experience and without any prove
+               setLambda(lambda);
+               solve();
+               solver.reset();
+               return getMinTangent();
+           }, T(0), T(-10), T(10)); //10 is selected by experience
 }
 
 int main(int argc, char** argv) {
@@ -98,11 +117,11 @@ int main(int argc, char** argv) {
     const T sigma = 0.074;
     const T rho = 1000;
     const T g = 9.8;
-    const T lambda = -0.0300034492;
 
     QApplication app(argc, argv);
     WaterDropSolver solver({radius, sigma, rho, 1, 9.8}, rmin, stepSize);
-    solver.setLambda(lambda);
+    const T lambda = solver.findLambda();
+    std::cout << "Lambda is " << lambda << std::endl;
     solver.solve();
     return solver.output();
 }

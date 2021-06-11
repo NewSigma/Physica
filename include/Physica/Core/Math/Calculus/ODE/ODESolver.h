@@ -30,6 +30,7 @@ namespace Physica::Core {
     public:
         ODESolver(const T& start, const T& end, const T& stepSize_, const TVector& initial);
         /* Operations */
+        void reset() { x.resize(1); }
         /**
          * \tparam Function
          * A function object like this
@@ -61,6 +62,7 @@ namespace Physica::Core {
     template<class T, class TVector>
     template<class Function>
     void ODESolver<T, TVector>::rungeKutta4(Function func) {
+        assert(x.getLength() == 1);
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
@@ -98,6 +100,7 @@ namespace Physica::Core {
     template<class T, class TVector>
     template<class Function>
     void ODESolver<T, TVector>::verlet(Function func, const TVector& initial1) {
+        assert(x.getLength() == 1);
         x.append(x[0] + stepSize);
         solution[1] = initial1;
         const T stepSize_2 = square(stepSize);
