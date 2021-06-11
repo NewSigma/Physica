@@ -272,6 +272,7 @@ namespace Physica::Core {
                              ? Integer(T(n + T(half)))
                              : Integer(T(n - x + T(xmin - half))).isPositive() ? Integer(T(n - x + T(xmin - half))) : Integer(0);
         const T mu = n - T(nl);
+        assert(mu < x);
         const T square_mu = square(mu);
 
         const T reciprocal_x = reciprocal(x);

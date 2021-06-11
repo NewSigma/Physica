@@ -88,24 +88,24 @@ void testBesselY() {
 
 void testBesselJn_Yn_dJn_dYn() {
     using T = Scalar<Double, false>;
-    constexpr static int count = 3;
-    constexpr static int n[count]{2, 2, 5};
-    constexpr static double x[count]{1, 3, 3};
-    constexpr static double result_Jn[count]{0.11490348493190048047, 0.48609126058589107691, 0.043028434877047583925};
-    constexpr static double result_dJn[count]{0.21024361588113255502, 0.014998118135342407654, 0.060320125796199570454};
-    constexpr static double result_Yn[count]{-1.6506826068162543911, -0.16040039348492372968, -1.9059459538286737322};
-    constexpr static double result_dYn[count]{2.5201523923322200656, 0.43160802044841579822, 2.2598937509893167140};
+    constexpr static int count = 4;
+    constexpr static int n[count]{2, 2, 5, 4};
+    constexpr static double x[count]{1, 3, 3, 2000};
+    constexpr static double result_Jn[count]{0.11490348493190048047, 0.48609126058589107691, 0.043028434877047583925, 0.0070328187752780498324};
+    constexpr static double result_dJn[count]{0.21024361588113255502, 0.014998118135342407654, 0.060320125796199570454, -0.016398371103788126336};
+    constexpr static double result_Yn[count]{-1.6506826068162543911, -0.16040039348492372968, -1.9059459538286737322, 0.016396645173086209425};
+    constexpr static double result_dYn[count]{2.5201523923322200656, 0.43160802044841579822, 2.2598937509893167140, 0.0070287057519738781036};
 
     for (int i = 0; i < count; ++i) {
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(T(n[i]), T(x[i]), Jn, Yn, dJn, dYn);
-        if ((fabs(double(Jn) - result_Jn[i]) >= fabs(result_Jn[i]) * 1E-7))
+        if ((fabs(double(Jn) - result_Jn[i]) >= fabs(result_Jn[i]) * 1E-9))
             exit(EXIT_FAILURE);
-        if ((fabs(double(dJn) - result_dJn[i]) >= fabs(result_dJn[i]) * 1E-7))
+        if ((fabs(double(dJn) - result_dJn[i]) >= fabs(result_dJn[i]) * 1E-10))
             exit(EXIT_FAILURE);
-        if ((fabs(double(Yn) - result_Yn[i]) >= fabs(result_Yn[i]) * 1E-7))
+        if ((fabs(double(Yn) - result_Yn[i]) >= fabs(result_Yn[i]) * 1E-10))
             exit(EXIT_FAILURE);
-        if ((fabs(double(dYn) - result_dYn[i]) >= fabs(result_dYn[i]) * 1E-7))
+        if ((fabs(double(dYn) - result_dYn[i]) >= fabs(result_dYn[i]) * 1E-9))
             exit(EXIT_FAILURE);
     }
 }

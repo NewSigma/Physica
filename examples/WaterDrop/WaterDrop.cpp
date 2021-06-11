@@ -27,23 +27,49 @@ using namespace Physica::Gui;
 using T = Scalar<Double, false>;
 using ODE = ODESolver<T, Vector<T>>;
 
-int main(int argc, char** argv) {
-    const T radius = 0.005;
-    const T rmin = 0.000001;
-    const T stepSize = rmin;
-    const T sigma = 0.074;
-    const T rho = 1000;
-    const T g = 9.8;
-    const T lambda = -0.0300034492;
-    ODE solver(-radius, -rmin, stepSize, {0, 1});
+struct WaterDropArgs {
+    T radius;
+    T sigma;
+    T rho;
+    T tangent;
+    T g;
+};
+
+class WaterDropSolver {
+private:
+    ODE solver;
+    T stepSize;
+    T const1;
+    T const2;
+    T const3;
+public:
+    WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_);
+    /* Operations */
+    void solve();
+    void setLambda(const T& lambda) { const3 = const2 * lambda; }
+    /* Getters */
+    int output();
+};
+
+WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
+        : solver(-drop.radius, -rmin, stepSize_, {0, drop.tangent})
+        , stepSize(stepSize_)
+        , const1(drop.rho * drop.g / drop.sigma)
+        , const2(drop.rho / drop.sigma)
+        , const3(0) {}
+
+void WaterDropSolver::solve() {
     solver.rungeKutta4([&](const T& r, const Vector<T>& v) {
             const T momentum = v[1];
             const T momentum_2_1 = momentum * momentum + T(1);
             const T sqrt_momentum_2_1 = sqrt(momentum_2_1);
-            const T term1 = (momentum_2_1 * sqrt_momentum_2_1 * (rho * g * v[0] + lambda * rho)) / sigma;
+            const T term1 = (momentum_2_1 * sqrt_momentum_2_1 * (const1 * v[0] + const3));
             const T term2 = momentum_2_1 * momentum / r;
             return Vector<T>{momentum, term1 - term2};
         });
+}
+
+int WaterDropSolver::output() {
     const auto& r = solver.getX();
     const auto& solution = solver.getSolution();
 
@@ -52,19 +78,31 @@ int main(int argc, char** argv) {
     z.resize(length);
 
     T volumeHelper(0);
-    T tangent_min = abs(solution(1, 0));
     for (size_t i = 0; i < length; ++i) {
         T temp1 = solution(0, i);
         z[i] = temp1;
         volumeHelper += temp1 * r[i];
-        T temp2 = abs(solution(1, i));
-        tangent_min = temp2 < tangent_min ? temp2 : tangent_min;
     }
     std::cout << "Volume is " << (-volumeHelper * stepSize) << " m^3" << std::endl;
-    std::cout << "Minimum tangent is " << tangent_min << std::endl;
+    std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
 
-    QApplication app(argc, argv);
     Plot* r_z = new Plot(r, z);
     r_z->show();
     return QApplication::exec();
+}
+
+int main(int argc, char** argv) {
+    const T radius = 0.005;
+    const T rmin = 0.000001;
+    const T stepSize = rmin;
+    const T sigma = 0.074;
+    const T rho = 1000;
+    const T g = 9.8;
+    const T lambda = -0.0300034492;
+
+    QApplication app(argc, argv);
+    WaterDropSolver solver({radius, sigma, rho, 1, 9.8}, rmin, stepSize);
+    solver.setLambda(lambda);
+    solver.solve();
+    return solver.output();
 }

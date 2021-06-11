@@ -50,7 +50,7 @@ namespace Physica::Core {
         Scalar<type, false> result = (x1 + x2) >> 1;
         Scalar<type, false> y_result(static_cast<SignedMPUnit>(1));
 
-        Scalar<type, false> error = Scalar<type, false>(y1 - y2).toAbs() >> 1;
+        Scalar<type, false> error = Scalar<type, false>(x1 - x2).toAbs() >> 1;
         Scalar<type, false> x_left(x1);
         Scalar<type, false> x_right(x2);
         Scalar<type, false> y_left(y1);
