@@ -455,4 +455,77 @@ namespace Physica::Core {
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return dYn;
     }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphereBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
+            , const Scalar<type, errorTrack>& x
+            , Scalar<type, errorTrack>& jn
+            , Scalar<type, errorTrack>& yn
+            , Scalar<type, errorTrack>& djn
+            , Scalar<type, errorTrack>& dyn) {
+        using T = Scalar<type, errorTrack>;
+        assert(!n.isNegative() && x.isPositive());
+
+        const T sqrt_pi_2(1.2533141373155002512);
+        const T factor = sqrt_pi_2 / sqrt(x);
+        const T order = n + T(0.5);
+        T Jn, Yn, dJn, dYn;
+        besselJn_Yn_dJn_dYn(order, x, Jn, Yn, dJn, dYn);
+        jn = factor * Jn;
+        yn = factor * Yn;
+        djn = factor * (dJn - Jn / (x * T(2)));
+        dyn = factor * (dYn - Yn / (x * T(2)));
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphereBesselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        assert(!n.isNegative() && x.isPositive());
+
+        const T sqrt_pi_2(1.2533141373155002512);
+        const T factor = sqrt_pi_2 / sqrt(x);
+        const T order = n + T(0.5);
+        T Jn, Yn, dJn, dYn;
+        besselJn_Yn_dJn_dYn(order, x, Jn, Yn, dJn, dYn);
+        return factor * Jn;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphereBesseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        assert(!n.isNegative() && x.isPositive());
+
+        const T sqrt_pi_2(1.2533141373155002512);
+        const T factor = sqrt_pi_2 / sqrt(x);
+        const T order = n + T(0.5);
+        T Jn, Yn, dJn, dYn;
+        besselJn_Yn_dJn_dYn(order, x, Jn, Yn, dJn, dYn);
+        return factor * (dJn - Jn / (x * T(2)));
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphereBesselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        assert(!n.isNegative() && x.isPositive());
+
+        const T sqrt_pi_2(1.2533141373155002512);
+        const T factor = sqrt_pi_2 / sqrt(x);
+        const T order = n + T(0.5);
+        T Jn, Yn, dJn, dYn;
+        besselJn_Yn_dJn_dYn(order, x, Jn, Yn, dJn, dYn);
+        return factor * Yn;
+    }
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphereBesseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+        using T = Scalar<type, errorTrack>;
+        assert(!n.isNegative() && x.isPositive());
+
+        const T sqrt_pi_2(1.2533141373155002512);
+        const T factor = sqrt_pi_2 / sqrt(x);
+        const T order = n + T(0.5);
+        T Jn, Yn, dJn, dYn;
+        besselJn_Yn_dJn_dYn(order, x, Jn, Yn, dJn, dYn);
+        return factor * (dYn - Yn / (x * T(2)));
+    }
 }

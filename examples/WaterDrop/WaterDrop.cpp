@@ -99,6 +99,7 @@ int WaterDropSolver::output() {
         Plot* r_z = new Plot(r, z);
         auto& r_z_chart = *r_z->chart();
         r_z_chart.setTitle("r-z");
+        r_z_chart.legend()->hide();
         auto r_z_axes = r_z_chart.axes();
         r_z_axes[0]->setTitleText("r/m");
         r_z_axes[1]->setTitleText("z/m");
@@ -136,7 +137,7 @@ int main(int argc, char** argv) {
     const T g = 9.8;
     T radius = 0.0001;
 
-    const size_t length = 100;
+    const size_t length = 50;
     Vector<T> r_arr{};
     r_arr.resize(length);
     Vector<T> lambda_arr{};
@@ -154,6 +155,7 @@ int main(int argc, char** argv) {
     /* Plot lambda */ {
         Plot* r_lambda = new Plot(r_arr, lambda_arr);
         auto& r_lambda_chart = *r_lambda->chart();
+        r_lambda_chart.legend()->hide();
         r_lambda_chart.setTitle("r-lambda");
         auto r_lambda_axes = r_lambda_chart.axes();
         r_lambda_axes[0]->setTitleText("r/m");
@@ -163,6 +165,7 @@ int main(int argc, char** argv) {
     /* Plot volume */ {
         Plot* r_volume = new Plot(r_arr, volume_arr);
         auto& r_volume_chart = *r_volume->chart();
+        r_volume_chart.legend()->hide();
         r_volume_chart.setTitle("r-volume");
         auto r_volume_axes = r_volume_chart.axes();
         r_volume_axes[0]->setTitleText("r/m");
