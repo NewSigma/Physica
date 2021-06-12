@@ -76,7 +76,7 @@ T WaterDropSolver::solve() {
                        return Vector<T>{momentum, term1 - term2};
                    });
                return getMinTangent();
-           }, T(0), T(-10), T(10)); //10 is selected by experience
+           }, T(0), T(-1.1), T(1.1)); //1.1 is selected by experience
 }
 
 int WaterDropSolver::output() {
@@ -95,9 +95,15 @@ int WaterDropSolver::output() {
     }
     std::cout << "Volume is " << abs(volumeHelper * stepSize) << " m^3" << std::endl;
     std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
-
-    Plot* r_z = new Plot(r, z);
-    r_z->show();
+    /* Plot z */ {
+        Plot* r_z = new Plot(r, z);
+        auto& r_z_chart = *r_z->chart();
+        r_z_chart.setTitle("r-z");
+        auto r_z_axes = r_z_chart.axes();
+        r_z_axes[0]->setTitleText("r/m");
+        r_z_axes[1]->setTitleText("z/m");
+        r_z->show();
+    }
     return QApplication::exec();
 }
 
@@ -130,7 +136,7 @@ int main(int argc, char** argv) {
     const T g = 9.8;
     T radius = 0.0001;
 
-    const size_t length = 50;
+    const size_t length = 100;
     Vector<T> r_arr{};
     r_arr.resize(length);
     Vector<T> lambda_arr{};
@@ -145,10 +151,24 @@ int main(int argc, char** argv) {
         volume_arr[i] = solver.getVolume();
         radius += T(0.0001);
     }
-    Plot* r_lambda = new Plot(r_arr, lambda_arr);
-    r_lambda->show();
-    Plot* r_volume = new Plot(r_arr, volume_arr);
-    r_volume->show();
+    /* Plot lambda */ {
+        Plot* r_lambda = new Plot(r_arr, lambda_arr);
+        auto& r_lambda_chart = *r_lambda->chart();
+        r_lambda_chart.setTitle("r-lambda");
+        auto r_lambda_axes = r_lambda_chart.axes();
+        r_lambda_axes[0]->setTitleText("r/m");
+        r_lambda_axes[1]->setTitleText("lambda");
+        r_lambda->show();
+    }
+    /* Plot volume */ {
+        Plot* r_volume = new Plot(r_arr, volume_arr);
+        auto& r_volume_chart = *r_volume->chart();
+        r_volume_chart.setTitle("r-volume");
+        auto r_volume_axes = r_volume_chart.axes();
+        r_volume_axes[0]->setTitleText("r/m");
+        r_volume_axes[1]->setTitleText("volume/m^3");
+        r_volume->show();
+    }
 
     WaterDropSolver solver({radius, sigma, rho, 1, 9.8}, rmin, stepSize);
     const T lambda = solver.solve();
