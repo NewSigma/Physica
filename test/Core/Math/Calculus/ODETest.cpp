@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 
 using namespace Physica::Core;
@@ -25,8 +26,8 @@ int main() {
     using ODE = ODESolver<T, Vector<T>>;
     constexpr double stepSize = 0.0001;
     /**
-     * x' = x
-     * x[0] = 1
+     * y' = y
+     * y[0] = 1
      */
     {
         ODE solver(0, 3, stepSize, {1});
@@ -35,13 +36,14 @@ int main() {
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& solVector = solution[i];
-            if (fabs(solVector[0].getTrivial() - exp(x[i].getTrivial())) / solVector[0].getTrivial() > 1E-11)
+            const auto answer = exp(x[i].getTrivial());
+            if (fabs(solVector[0].getTrivial() - answer) > 1E-11 * fabs(answer))
                 return 1;
         }
     }
     /**
-     * x'' = x
-     * x[0] = 0  x'[0] = 1
+     * y'' + y = 0
+     * y[0] = 0  y'[0] = 1
      */
     {
         ODE solver(0, 3, stepSize, {0, 1});
@@ -51,25 +53,47 @@ int main() {
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
             const auto& solVector = solution[i];
-            if (fabs(solVector[0].getTrivial() - sin(x_i.getTrivial())) / solVector[0].getTrivial() > 1E-10)
+            const auto answer1 = sin(x_i.getTrivial());
+            if (fabs(solVector[0].getTrivial() - answer1) > 1E-10 * fabs(answer1))
                 return 1;
-            if (fabs(solVector[1].getTrivial() - cos(x_i.getTrivial())) / solVector[1].getTrivial() > 1E-8)
+            const auto answer2 = cos(x_i.getTrivial());
+            if (fabs(solVector[1].getTrivial() - answer2) > 1E-7 * fabs(answer2))
                 return 1;
         }
     }
     /**
-     * x' = x
-     * x[0] = 1
+     * y'' = y
+     * y[0] = 1
      */
     {
         ODE solver(0, 3, stepSize, {1});
-        solver.verlet([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return y; }, {exp(stepSize)});
+        solver.verlet([](T x, const T& y) -> T { (void)x; return y; }, {exp(stepSize)});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& solVector = solution[i];
-            if (fabs(solVector[0].getTrivial() - exp(x[i].getTrivial())) / solVector[0].getTrivial() > 1E-9)
+            const auto answer = exp(x[i].getTrivial());
+            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
                 return 1;
+        }
+    }
+    /**
+     * y'' + y = 0
+     * y[0] = 0  y'[0] = 1
+     */
+    {
+        ODE solver(0, 3, stepSize, {0});
+        solver.degenerate_numerov([](T x) -> T { (void)x; return -1; }, {1});
+        const auto& x = solver.getX();
+        const auto& solution = solver.getSolution();
+        for (size_t i = 0; i < solution.getColumn(); ++i) {
+            const auto& x_i = x[i];
+            const auto& solVector = solution[i];
+            const auto answer = sin(x_i.getTrivial());
+            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer)) {
+                std::cout << i << std::endl;
+                return 1;
+            }
         }
     }
     return 0;
