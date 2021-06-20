@@ -457,7 +457,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphereBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
+    Scalar<type, errorTrack> sphericalBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
             , const Scalar<type, errorTrack>& x
             , Scalar<type, errorTrack>& jn
             , Scalar<type, errorTrack>& yn
@@ -478,7 +478,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphereBesselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+    Scalar<type, errorTrack> sphericalBesselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
         using T = Scalar<type, errorTrack>;
         assert(!n.isNegative() && x.isPositive());
 
@@ -491,7 +491,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphereBesseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+    Scalar<type, errorTrack> sphericalBesseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
         using T = Scalar<type, errorTrack>;
         assert(!n.isNegative() && x.isPositive());
 
@@ -504,7 +504,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphereBesselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+    Scalar<type, errorTrack> sphericalBesselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
         using T = Scalar<type, errorTrack>;
         assert(!n.isNegative() && x.isPositive());
 
@@ -517,7 +517,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphereBesseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
+    Scalar<type, errorTrack> sphericalBesseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x) {
         using T = Scalar<type, errorTrack>;
         assert(!n.isNegative() && x.isPositive());
 

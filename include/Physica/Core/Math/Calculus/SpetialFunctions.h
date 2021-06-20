@@ -68,5 +68,6 @@ namespace Physica::Core {
     Scalar<type, errorTrack> besselYn(const Integer& n, const Scalar<type, errorTrack>& x);
 }
 
-#include "SpetialFunctionsImpl/Gamma.h"
 #include "SpetialFunctionsImpl/Bessel.h"
+#include "SpetialFunctionsImpl/Gamma.h"
+#include "SpetialFunctionsImpl/Legendre.h"

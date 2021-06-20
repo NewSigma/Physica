@@ -119,7 +119,7 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c) {
         const auto& imagine = c.getImag();
         return os << std::setprecision(10) << double(c.getReal())
-                  << (imagine.isNegative() ? " - " : "+" )<< 'i' << fabs(double(imagine)) << std::setprecision(6);
+                  << (imagine.isNegative() ? " - " : " + " ) << fabs(double(imagine)) << 'i' << std::setprecision(6);
     }
 
     template<ScalarType type, bool errorTrack>

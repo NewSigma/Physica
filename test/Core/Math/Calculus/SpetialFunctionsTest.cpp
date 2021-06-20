@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 using namespace Physica::Core;
@@ -110,11 +111,51 @@ void testBesselJn_Yn_dJn_dYn() {
     }
 }
 
+void testLegendreP() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static unsigned l[count]{5, 4};
+    constexpr static unsigned m[count]{2, 3};
+    constexpr static double theta[count]{0.37, 0.28};
+    constexpr static double answer1[count]{0.30514461613750000, 0.1078912000000};
+    constexpr static double answer2[count]{-9.880037322750000, -26.0112384000000};
+
+    for (int i = 0; i < count; ++i) {
+        auto result1 = legendreP(l[i], T(theta[i]));
+        auto result2 = legendreP(l[i], m[i], T(theta[i]));
+        if ((fabs(double(result1) - answer1[i]) >= fabs(answer1[i]) * 1E-15))
+            exit(EXIT_FAILURE);
+        if ((fabs(double(result2) - answer2[i]) >= fabs(answer2[i]) * 1E-15))
+            exit(EXIT_FAILURE);
+    }
+}
+
+void testSphericalHarmomicY() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static unsigned l[count]{5, 4};
+    constexpr static unsigned m[count]{2, 3};
+    constexpr static double theta[count]{0.37, 0.28};
+    constexpr static double phi[count]{0.05, 0.74};
+    constexpr static double result_real[count]{0.33052482360605048497, 0.015348915260127907403};
+    constexpr static double result_imag[count]{0.03316309979261445896, -0.020223918621792591451};
+
+    for (int i = 0; i < count; ++i) {
+        auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
+        if ((fabs(double(result.getReal()) - result_real[i]) >= fabs(result_real[i]) * 1E-5))
+            exit(EXIT_FAILURE);
+        if ((fabs(double(result.getImag()) - result_imag[i]) >= fabs(result_imag[i]) * 1E-5))
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main() {
     testLnGamma();
     testGammaPQ();
     testBesselJ();
     testBesselY();
     testBesselJn_Yn_dJn_dYn();
+    testLegendreP();
+    testSphericalHarmomicY();
     return 0;
 }
