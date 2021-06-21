@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 
@@ -149,6 +150,60 @@ void testSphericalHarmomicY() {
     }
 }
 
+template<class Matrix>
+void expectMatrixNear(const Matrix& mat1, const Matrix& mat2, double epsilon) {
+    assert(mat1.getRow() == mat2.getRow());
+    assert(mat1.getColumn() == mat2.getColumn());
+    for (size_t i = 0; i < mat1.getRow(); ++i) {
+        for (size_t j = 0; j < mat2.getColumn(); ++j) {
+            typename Matrix::ScalarType delta = mat1(i, j) - mat2(i, j);
+            if (!mat1(i, j).isZero() && !mat2(i, j).isZero())
+                delta /= mat2(i, j);
+            if(fabs(double(delta)) > epsilon)
+                exit(1);
+        }
+    }
+}
+/**
+ * Reference:
+ * [1] https://github.com/google/spherical-harmonics.git
+ */
+void testHamonicRotator() {
+    constexpr double epsilon = 1E-5;
+    using T = Scalar<Double, false>;
+    using Matrix = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Element>;
+    Matrix rotation(3, {0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
+    HamonicRotator rotator(rotation);
+
+    double alpha = M_PI / 4.0;
+    /* order 1 */ {
+        Matrix answer(3, {cos(alpha), 0, sin(alpha),
+                          0, 1, 0,
+                          -sin(alpha), 0, cos(alpha)});
+        expectMatrixNear(rotator.getCurrentRotation(), answer, epsilon);
+    }
+    /* order 2 */ {
+        rotator.nextHamonicRotation();
+        Matrix answer(5, {cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
+                          0, cos(alpha), 0, sin(alpha), 0,
+                          0, 0, 1, 0, 0,
+                          0, -sin(alpha), 0, cos(alpha), 0,
+                          -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
+        expectMatrixNear(rotator.getCurrentRotation(), answer, epsilon);
+    }
+    /* order 3 */ {
+        rotator.nextHamonicRotation();
+        Matrix answer(7, {cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
+                          0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
+                          0, 0, cos(alpha), 0, sin(alpha), 0, 0,
+                          0, 0, 0, 1, 0, 0, 0,
+                          0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
+                          0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
+                          -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
+        expectMatrixNear(rotator.getCurrentRotation(), answer, epsilon);
+    }
+}
+
 int main() {
     testLnGamma();
     testGammaPQ();
@@ -157,5 +212,6 @@ int main() {
     testBesselJn_Yn_dJn_dYn();
     testLegendreP();
     testSphericalHarmomicY();
+    testHamonicRotator();
     return 0;
 }

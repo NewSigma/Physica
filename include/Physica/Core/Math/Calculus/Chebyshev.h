@@ -29,7 +29,7 @@ namespace Physica::Core {
      */
     template<class T, class Function>
     void chebyshev_fit(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
-        constexpr double pi = 3.141592653589793;
+        constexpr double pi = M_PI;
         assert(from < to);
 
         const size_t n = coeff.size();
@@ -60,7 +60,7 @@ namespace Physica::Core {
      */
     template<class T, class Function>
     void chebyshev_fit_even(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
-        constexpr double pi = 3.141592653589793;
+        constexpr double pi = M_PI;
         assert(from < to);
 
         const size_t n = coeff.size();
@@ -92,7 +92,7 @@ namespace Physica::Core {
      */
     template<class T, class Function>
     void chebyshev_fit_odd(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
-        constexpr double pi = 3.141592653589793;
+        constexpr double pi = M_PI;
         assert(from < to);
 
         const size_t n = coeff.size();

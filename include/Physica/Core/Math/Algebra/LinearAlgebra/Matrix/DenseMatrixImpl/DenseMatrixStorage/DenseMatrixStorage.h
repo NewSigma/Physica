@@ -140,8 +140,9 @@ namespace Physica::Core {
         size_t row;
     public:
         DenseMatrixStorage() : Base(), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column) : Base(row, column), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
+        DenseMatrixStorage(size_t row_, size_t column) : Base(row_, column), row(row_) {}
+        DenseMatrixStorage(size_t row_, size_t column, const T& t) : Base(row_, column, t), row(row_) {}
+        DenseMatrixStorage(size_t row_, std::initializer_list<T> list) : Base(list), row(row_) { assert(list.size() % row == 0); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
@@ -239,8 +240,9 @@ namespace Physica::Core {
         size_t row;
     public:
         DenseMatrixStorage() : Base(), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column) : Base(row, column), row(0) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t), row(0) {}
+        DenseMatrixStorage(size_t row_, size_t column) : Base(row_, column), row(row_) {}
+        DenseMatrixStorage(size_t row_, size_t column, const T& t) : Base(row_, column, t), row(row_) {}
+        DenseMatrixStorage(size_t row_, std::initializer_list<T> list) : Base(list), row(row_) { assert(list.size() % row == 0); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }

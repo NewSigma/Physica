@@ -260,7 +260,7 @@ namespace Physica::Core {
         using T = Scalar<type, errorTrack>;
         constexpr double xmin = 2;
         constexpr double half = 0.5;
-        constexpr double pi_trivial = 3.141592653589793;
+        constexpr double pi_trivial = M_PI;
         constexpr double epsilon_trivial = std::numeric_limits<typename T::TrivialType>::epsilon();
         constexpr double fpmin_trivial = std::numeric_limits<typename T::TrivialType>::min() / epsilon_trivial;
         const T pi = T(pi_trivial);

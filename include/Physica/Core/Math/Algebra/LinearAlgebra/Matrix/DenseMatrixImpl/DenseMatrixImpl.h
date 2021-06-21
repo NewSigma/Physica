@@ -19,11 +19,12 @@
 namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
-        for (size_t r = 0; r < mat.getRow(); ++r) {
-            for (size_t c = 0; c < mat.getColumn(); ++c) {
-                os << mat(r, c) << ' ';
-            }
+        for (size_t c = 0; c < mat.getColumn(); ++c)
+            os << mat(0, c) << ' ';
+        for (size_t r = 1; r < mat.getRow(); ++r) {
             os << '\n';
+            for (size_t c = 0; c < mat.getColumn(); ++c)
+                os << mat(r, c) << ' ';
         }
         return os;
     }

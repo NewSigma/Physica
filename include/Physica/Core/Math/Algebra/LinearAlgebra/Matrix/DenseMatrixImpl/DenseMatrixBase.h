@@ -44,6 +44,7 @@ namespace Physica::Core {
                                         , Internal::Traits<Derived>::MaxRowAtCompile
                                         , Internal::Traits<Derived>::MaxColumnAtCompile>;
         using Utils::CRTPBase<Derived>::getDerived;
+    public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
     public:
         using Base::Base;
