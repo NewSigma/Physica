@@ -25,7 +25,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.142
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:142
      */
     template<class T, class Function>
     void chebyshev_fit(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -56,7 +56,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.143
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
      */
     template<class T, class Function>
     void chebyshev_fit_even(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -88,7 +88,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.143
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
      */
     template<class T, class Function>
     void chebyshev_fit_odd(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -119,7 +119,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.142
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:142
      */
     template<class T>
     T chebyshev_calc(const T& from, const T& to, const Utils::Array<T>& coeff, const T& x) {
@@ -137,7 +137,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.143
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
      */
     template<class T>
     T chebyshev_calc_even(const T& from, const T& to, const Utils::Array<T>& coeff, const T& x) {

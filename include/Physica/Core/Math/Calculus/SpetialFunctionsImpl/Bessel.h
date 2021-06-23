@@ -24,7 +24,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.171
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselJ0(const Scalar<type, errorTrack>& x) {
@@ -51,7 +51,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.171
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselJ1(const Scalar<type, errorTrack>& x) {
@@ -79,7 +79,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.173
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselJn(const Integer& n, const Scalar<type, errorTrack>& x) {
@@ -148,7 +148,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.171
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselY0(const Scalar<type, errorTrack>& x) {
@@ -173,7 +173,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.172
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:172
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselY1(const Scalar<type, errorTrack>& x) {
@@ -198,7 +198,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.173
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
      */
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselYn(const Integer& n, const Scalar<type, errorTrack>& x) {
@@ -219,7 +219,7 @@ namespace Physica::Core {
         /**
          * Reference:
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.182
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:182
          */
         template<ScalarType type, bool errorTrack>
         void besselChebyshevHelper(
@@ -247,7 +247,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.180
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:180
      */
     template<ScalarType type, bool errorTrack>
     void besselJn_Yn_dJn_dYn(

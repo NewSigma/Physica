@@ -76,7 +76,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.524
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:524
      */
     template<class T, class TVector>
     template<class Function>
@@ -102,7 +102,7 @@ namespace Physica::Core {
      * Value of y(h)
      * 
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013.572
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:572
      */
     template<class T, class TVector>
     template<class Function>
@@ -131,7 +131,7 @@ namespace Physica::Core {
      * Tangent value at x[0]
      * 
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013.573
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:573
      */
     template<class T, class TVector>
     template<class Function>

@@ -44,7 +44,7 @@ namespace Physica::Core {
      *
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:32
      */
     template<class Matrix>
     template<class MatrixOut>

@@ -30,7 +30,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.156
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
     template<ScalarType type, bool errorTrack>
@@ -56,7 +56,7 @@ namespace Physica::Core {
      *
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.32
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:32
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
     template<bool errorTrack>
@@ -90,7 +90,7 @@ namespace Physica::Core {
         /**
          * Reference:
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.156
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
          */
         template<ScalarType type, bool errorTrack>
         Scalar<type, errorTrack> incompGamma1(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
@@ -110,7 +110,7 @@ namespace Physica::Core {
         /**
          * Reference:
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.161
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
          */
         template<ScalarType type, bool errorTrack>
         Scalar<type, errorTrack> incompGamma2(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {

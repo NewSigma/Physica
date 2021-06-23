@@ -54,7 +54,7 @@ size_t fillPhase(const Vector<T>& x, const Vector<T>& p, int dim) {
 }
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013.3
+ * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:11-12
  */
 int main(int argc, char** argv) {
     ODE solver(0, 200, 0.01, {0.5, 0});

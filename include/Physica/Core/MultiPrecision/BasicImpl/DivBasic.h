@@ -135,7 +135,7 @@ namespace Physica::Core {
      * dividend[len] < divisor[len - 1].
      * len >= 1 to avoid invalid read.
      *
-     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.4-8
+     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:4-8
      */
     inline MPUnit divArrByFullArrWith1Word(const MPUnit* __restrict dividend
             , const MPUnit* __restrict divisor, size_t len) {

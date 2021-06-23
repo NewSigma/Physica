@@ -42,7 +42,7 @@ namespace Physica::Core {
     *
     * Reference:
     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-    * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+    * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
     */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::completePivoting(
@@ -72,7 +72,7 @@ namespace Physica::Core {
      *
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(
@@ -98,7 +98,7 @@ namespace Physica::Core {
      *
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009.35
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::impactPivoting(

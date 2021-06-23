@@ -50,7 +50,7 @@ namespace Physica::Core {
     /*!
      * Calculate a^n.
      *
-     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009.45
+     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
      */
     template<bool errorTrack1, bool errorTrack2>
     inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> powScalar(
