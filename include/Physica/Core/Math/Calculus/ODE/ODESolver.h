@@ -137,16 +137,17 @@ namespace Physica::Core {
     template<class Function>
     void ODESolver<T, TVector>::degenerate_numerov(Function func, const T& tangent) {
         assert(x.getLength() == 1);
-        x.append(x[0] + stepSize);
+        const T x0 = x[0];
+        x.append(x0 + stepSize);
         const T stepSize_2 = square(stepSize);
         const T stepSize_2_12 = stepSize_2 * T(1.0 / 12);
         /* Get y(stepSize) */ {
             const T stepSize_2_6 = stepSize_2 * T(1.0 / 6);
-            const T f_minus_step = func(-stepSize);
+            const T f_minus_step = func(x0 - stepSize);
             const T temp1 = T(1) - stepSize_2_12 * f_minus_step;
             const T temp2 = T(1) - stepSize_2_6 * f_minus_step;
-            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * func(0)) * temp1 * solution(0, 0) + T(2) * stepSize * tangent * temp2;
-            const T f_step = func(stepSize);
+            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * func(x0)) * temp1 * solution(0, 0) + T(2) * stepSize * tangent * temp2;
+            const T f_step = func(x[1]);
             const T denominator = (T(1) - stepSize_2_12 * f_step) * temp2 + (T(1) - stepSize_2_6 * f_step) * temp1;
             solution(0, 1) = numerator / denominator;
         }
