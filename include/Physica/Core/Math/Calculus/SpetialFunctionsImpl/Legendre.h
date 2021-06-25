@@ -19,7 +19,6 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -104,38 +103,6 @@ namespace Physica::Core {
         const T m_phi = T(m) * phi;
         return ComplexScalar<type, errorTrack>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
-    /**
-     * This class generates rotation matrix for spherical hamonic functions
-     * 
-     * Reference:
-     * [1] https://github.com/google/spherical-harmonics.git
-     */
-    template<class Matrix>
-    class HamonicRotator final {
-        using ScalarType = typename Matrix::ScalarType;
-    private:
-        Matrix initialMat; //Optimize: initialMat may be fixed matrix
-        Matrix hamonicRotation; //Current hamonic rotation matrix
-    public:
-        HamonicRotator(const Matrix& axisRotation);
-        HamonicRotator(const HamonicRotator&) = delete;
-        HamonicRotator(HamonicRotator&&) = delete;
-        ~HamonicRotator() = default;
-        /* Operators */
-        HamonicRotator& operator=(const HamonicRotator&) = delete;
-        HamonicRotator&& operator==(HamonicRotator&&) = delete;
-        /* Operations */
-        void nextHamonicRotation();
-        /* Getters */
-        Matrix getCurrentRotation() const { return hamonicRotation; }
-    private:
-        ScalarType getCenteredElement(size_t row, size_t column);
-        bool nearByMargin(double actual, double expected);
-        ScalarType P(int i, int a, int b, int l);
-        ScalarType U(int m, int n, int l);
-        ScalarType V(int m, int n, int l);
-        ScalarType W(int m, int n, int l);
-    };
 
     template<class Matrix>
     HamonicRotator<Matrix>::HamonicRotator(const Matrix& axisRotation) : initialMat(3, 3), hamonicRotation() {

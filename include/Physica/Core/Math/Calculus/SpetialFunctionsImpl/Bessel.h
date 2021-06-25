@@ -253,10 +253,10 @@ namespace Physica::Core {
     void besselJn_Yn_dJn_dYn(
             const Scalar<type, errorTrack>& n
             , const Scalar<type, errorTrack>& x
-            , Scalar<type, errorTrack>& Jn
-            , Scalar<type, errorTrack>& Yn
-            , Scalar<type, errorTrack>& dJn
-            , Scalar<type, errorTrack>& dYn) {
+            , Scalar<type, errorTrack>& __restrict Jn
+            , Scalar<type, errorTrack>& __restrict Yn
+            , Scalar<type, errorTrack>& __restrict dJn
+            , Scalar<type, errorTrack>& __restrict dYn) {
         using T = Scalar<type, errorTrack>;
         constexpr double xmin = 2;
         constexpr double half = 0.5;
@@ -459,10 +459,10 @@ namespace Physica::Core {
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> sphericalBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
             , const Scalar<type, errorTrack>& x
-            , Scalar<type, errorTrack>& jn
-            , Scalar<type, errorTrack>& yn
-            , Scalar<type, errorTrack>& djn
-            , Scalar<type, errorTrack>& dyn) {
+            , Scalar<type, errorTrack>& __restrict jn
+            , Scalar<type, errorTrack>& __restrict yn
+            , Scalar<type, errorTrack>& __restrict djn
+            , Scalar<type, errorTrack>& __restrict dyn) {
         using T = Scalar<type, errorTrack>;
         assert(!n.isNegative() && x.isPositive());
 

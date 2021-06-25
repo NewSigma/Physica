@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
@@ -66,6 +67,91 @@ namespace Physica::Core {
 
     template<ScalarType type, bool errorTrack>
     Scalar<type, errorTrack> besselYn(const Integer& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    void besselJn_Yn_dJn_dYn(
+            const Scalar<type, errorTrack>& n
+            , const Scalar<type, errorTrack>& x
+            , Scalar<type, errorTrack>& __restrict Jn
+            , Scalar<type, errorTrack>& __restrict Yn
+            , Scalar<type, errorTrack>& __restrict dJn
+            , Scalar<type, errorTrack>& __restrict dYn);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> besseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphericalBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
+            , const Scalar<type, errorTrack>& x
+            , Scalar<type, errorTrack>& __restrict jn
+            , Scalar<type, errorTrack>& __restrict yn
+            , Scalar<type, errorTrack>& __restrict djn
+            , Scalar<type, errorTrack>& __restrict dyn);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphericalBesselJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphericalBesseldJn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphericalBesselYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> sphericalBesseldYn(const Scalar<type, errorTrack>& n, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> legendreP(unsigned int l, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    Scalar<type, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<type, errorTrack>& x);
+
+    template<ScalarType type, bool errorTrack>
+    ComplexScalar<type, errorTrack> sphericalHarmomicY(unsigned int l,
+                                                int m,
+                                                const Scalar<type, errorTrack>& theta,
+                                                const Scalar<type, errorTrack>& phi);
+    /**
+     * This class generates rotation matrix for spherical hamonic functions
+     * 
+     * Reference:
+     * [1] https://github.com/google/spherical-harmonics.git
+     */
+    template<class Matrix>
+    class HamonicRotator final {
+        using ScalarType = typename Matrix::ScalarType;
+    private:
+        Matrix initialMat; //Optimize: initialMat may be fixed matrix
+        Matrix hamonicRotation; //Current hamonic rotation matrix
+    public:
+        HamonicRotator(const Matrix& axisRotation);
+        HamonicRotator(const HamonicRotator&) = delete;
+        HamonicRotator(HamonicRotator&&) = delete;
+        ~HamonicRotator() = default;
+        /* Operators */
+        HamonicRotator& operator=(const HamonicRotator&) = delete;
+        HamonicRotator&& operator==(HamonicRotator&&) = delete;
+        /* Operations */
+        void nextHamonicRotation();
+        /* Getters */
+        Matrix getCurrentRotation() const { return hamonicRotation; }
+    private:
+        ScalarType getCenteredElement(size_t row, size_t column);
+        bool nearByMargin(double actual, double expected);
+        ScalarType P(int i, int a, int b, int l);
+        ScalarType U(int m, int n, int l);
+        ScalarType V(int m, int n, int l);
+        ScalarType W(int m, int n, int l);
+    };
 }
 
 #include "SpetialFunctionsImpl/Bessel.h"
