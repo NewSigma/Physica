@@ -457,7 +457,7 @@ namespace Physica::Core {
     }
 
     template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sphericalBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
+    void sphericalBesselJn_Yn_dJn_dYn(const Scalar<type, errorTrack>& n
             , const Scalar<type, errorTrack>& x
             , Scalar<type, errorTrack>& __restrict jn
             , Scalar<type, errorTrack>& __restrict yn

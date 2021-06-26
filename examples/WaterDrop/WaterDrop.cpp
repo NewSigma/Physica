@@ -96,7 +96,8 @@ int WaterDropSolver::output() {
     std::cout << "Volume is " << abs(volumeHelper * stepSize) << " m^3" << std::endl;
     std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
     /* Plot z */ {
-        Plot* r_z = new Plot(r, z);
+        Plot* r_z = new Plot();
+        r_z->spline(r, z);
         auto& r_z_chart = *r_z->chart();
         r_z_chart.setTitle("r-z");
         r_z_chart.legend()->hide();
@@ -153,7 +154,8 @@ int main(int argc, char** argv) {
         radius += T(0.0001);
     }
     /* Plot lambda */ {
-        Plot* r_lambda = new Plot(r_arr, lambda_arr);
+        Plot* r_lambda = new Plot();
+        r_lambda->spline(r_arr, lambda_arr);
         auto& r_lambda_chart = *r_lambda->chart();
         r_lambda_chart.legend()->hide();
         r_lambda_chart.setTitle("r-lambda");
@@ -163,7 +165,8 @@ int main(int argc, char** argv) {
         r_lambda->show();
     }
     /* Plot volume */ {
-        Plot* r_volume = new Plot(r_arr, volume_arr);
+        Plot* r_volume = new Plot();
+        r_volume->spline(r_arr, volume_arr);
         auto& r_volume_chart = *r_volume->chart();
         r_volume_chart.legend()->hide();
         r_volume_chart.setTitle("r-volume");

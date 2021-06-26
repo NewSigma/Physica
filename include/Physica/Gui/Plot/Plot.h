@@ -21,6 +21,7 @@
 #include <QtCharts>
 #include <QChartView>
 #include <QtCharts/QSplineSeries>
+#include <QtCharts/QScatterSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Utils/Container/Array/Array.h>
 
@@ -28,26 +29,36 @@ using Physica::Core::MultiScalar;
 
 namespace Physica::Gui {
     class Plot : public QtCharts::QChartView {
-        QtCharts::QSplineSeries* series;
     public:
+        Plot(QWidget* parent = nullptr);
         Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
                 , const MultiScalar& end, QWidget* parent = nullptr);
-        template<class T, size_t Length, size_t Capacity>
-        Plot(const Utils::Array<T, Length, Capacity>& x, const Utils::Array<T, Length, Capacity>& y, QWidget* parent = nullptr);
+        /* Operations */
+        template<class Array>
+        void spline(const Array& x, const Array& y);
+        template<class Array>
+        void scatter(const Array& x, const Array& y);
     };
 
-    template<class T, size_t Length, size_t Capacity>
-    Plot::Plot(const Utils::Array<T, Length, Capacity>& x, const Utils::Array<T, Length, Capacity>& y, QWidget* parent)
-            : QtCharts::QChartView(parent), series(new QtCharts::QSplineSeries()) {
-        setAttribute(Qt::WA_DeleteOnClose);
+    template<class Array>
+    void Plot::spline(const Array& x, const Array& y) {
+        QtCharts::QSplineSeries* series = new QtCharts::QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
+        chart()->addSeries(series);
+        chart()->createDefaultAxes();
 
-        auto chart = new QChart();
-        chart->addSeries(series);
-        chart->createDefaultAxes();
+        update();
+    }
 
-        setChart(chart);
-        setRenderHint(QPainter::Antialiasing);
+    template<class Array>
+    void Plot::scatter(const Array& x, const Array& y) {
+        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries();
+        for (size_t i = 0; i < x.getLength(); ++i)
+            *series << QPointF(double(x[i]), double(y[i]));
+        chart()->addSeries(series);
+        chart()->createDefaultAxes();
+
+        update();
     }
 }

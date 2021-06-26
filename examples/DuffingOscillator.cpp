@@ -87,11 +87,14 @@ int main(int argc, char** argv) {
 
 
     QApplication app(argc, argv);
-    Plot* t_x = new Plot(t, x);
+    Plot* t_x = new Plot();
+    t_x->spline(t, x);
     t_x->show();
-    Plot* t_p = new Plot(t, p);
+    Plot* t_p = new Plot();
+    t_p->spline(t, p);
     t_p->show();
-    Plot* x_p = new Plot(x, p);
+    Plot* x_p = new Plot();
+    x_p->spline(x, p);
     x_p->show();
     return QApplication::exec();
 }
