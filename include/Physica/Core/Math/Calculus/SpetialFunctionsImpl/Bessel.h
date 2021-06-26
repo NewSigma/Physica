@@ -229,7 +229,7 @@ namespace Physica::Core {
                 , Scalar<type, errorTrack>& gamma_plus
                 , Scalar<type, errorTrack>& gamma_minus) {
             using T = Scalar<type, errorTrack>;
-            assert(abs(x) < T(0.5));
+            assert(abs(x) <= T(0.5));
             const static Utils::Array<T> coeff1{-1.142022680371168, 6.5165112670737E-3, 3.087090173086E-4, -3.4706269647E-6, 6.9437664E-9, 3.67795E-11, -1.356E-13};
             const static Utils::Array<T> coeff2{1.843740587300905, -7.68528408447867E-2, 1.2719271366546E-3, -4.9717367042E-6, -3.31261198E-8, 2.423096E-10, -1.702E-13, -1.49E-15};
 
