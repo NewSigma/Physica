@@ -90,10 +90,29 @@ int main() {
             const auto& x_i = x[i];
             const auto& solVector = solution[i];
             const auto answer = sin(x_i.getTrivial());
-            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer)) {
-                std::cout << i << std::endl;
+            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
                 return 1;
-            }
+        }
+    }
+    /**
+     * y'' = (x^2 - 3)y
+     * y[0] = 0  y'[0] = 1
+     * Comes from Check 1 in [1]
+     * 
+     * Reference:
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:20
+     */
+    {
+        ODE solver(0, 2, stepSize, {0});
+        solver.degenerate_numerov([](T x) -> T { return square(x) - T(3); }, {1});
+        const auto& x = solver.getX();
+        const auto& solution = solver.getSolution();
+        for (size_t i = 0; i < solution.getColumn(); ++i) {
+            const auto& x_i = x[i];
+            const auto& solVector = solution[i];
+            const auto answer = (x_i * exp(-square(x_i) / 2)).getTrivial();
+            if (fabs(solVector[0].getTrivial() - answer) > 1E-8 * fabs(answer))
+                return 1;
         }
     }
     return 0;

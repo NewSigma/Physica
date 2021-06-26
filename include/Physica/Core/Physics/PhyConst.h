@@ -25,6 +25,7 @@ namespace Physica::Core::Physics {
         constexpr static double planck = 6.6260755E-34;
         constexpr static double reducedPlanck = 1.05457266E-34;
         constexpr static double electroMass = 9.10938215E-31;
+        constexpr static double unitCharge = 1.602176634E-19; 
         constexpr static double protonMass = 1.6726231E-27;
         constexpr static double neutronMass = 1.6749286E-27;
     };
