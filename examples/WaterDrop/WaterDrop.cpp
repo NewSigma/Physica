@@ -36,6 +36,17 @@ struct WaterDropArgs {
     T g;
 };
 
+struct EquationEnv {
+    Vector<T>& r_arr;
+    Vector<T>& lambda_arr;
+    Vector<T>& volume_arr;
+    size_t from;
+    size_t to;
+    double rmin;
+    double solveStepSize;
+    double plotStepSize;
+};
+
 class WaterDropSolver {
 private:
     ODE solver;
@@ -124,6 +135,21 @@ T WaterDropSolver::getMinTangent() const {
     const auto& solution = solver.getSolution();
     return solution(1, solution.getColumn() - 1);
 }
+
+void parallelSolve(WaterDropArgs args, const EquationEnv& env) {
+    assert(env.from < env.to);
+    assert(env.to <= env.r_arr.getLength());
+    assert(env.r_arr.getLength() <= env.lambda_arr.getLength());
+    assert(env.r_arr.getLength() <= env.volume_arr.getLength());
+    for (size_t i = env.from; i < env.to; ++i) {
+        env.r_arr[i] = args.radius;
+        WaterDropSolver solver(args, env.rmin, env.solveStepSize);
+        const T lambda = solver.solve();
+        env.lambda_arr[i] = lambda;
+        env.volume_arr[i] = solver.getVolume();
+        args.radius += T(env.plotStepSize);
+    }
+}
 /**
  * This program calculates the surface equation of a water drop on a infinite smooth plain.
  * Specifying any two of mass, radius or contact angle should give the other value.
@@ -131,12 +157,13 @@ T WaterDropSolver::getMinTangent() const {
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
-    const T rmin = 0.000001;
-    const T stepSize = rmin;
     const T sigma = 0.074;
     const T rho = 1000;
     const T g = 9.8;
-    T radius = 0.0001;
+    const T startRadius = 0.0001;
+    const double rmin = 0.000001;
+    const double solveStepSize = rmin;
+    const double plotStepSize = 0.0001;
 
     const size_t length = 50;
     Vector<T> r_arr{};
@@ -145,13 +172,38 @@ int main(int argc, char** argv) {
     lambda_arr.resize(length);
     Vector<T> volume_arr{};
     volume_arr.resize(length);
-    for (size_t i = 0; i < length; ++i) {
-        r_arr[i] = radius;
-        WaterDropSolver solver({radius, sigma, rho, 1, 9.8}, rmin, stepSize);
-        const T lambda = solver.solve();
-        lambda_arr[i] = lambda;
-        volume_arr[i] = solver.getVolume();
-        radius += T(0.0001);
+    {
+        const unsigned int threadCount = 5;
+        const unsigned int taskPerThread = length / threadCount;
+        const unsigned int halfTaskPerThread = taskPerThread / 2U;
+        assert(length % threadCount == 0);
+        assert(taskPerThread % 2 == 0);
+        std::thread threads[5];
+        for (unsigned int i = 0; i < threadCount; ++i) {
+            threads[i] = std::thread([&, i = i]() {
+                WaterDropArgs args{startRadius, sigma, rho, 1, 9.8};
+                args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
+                parallelSolve(args, { r_arr
+                                    , lambda_arr
+                                    , volume_arr
+                                    , i * halfTaskPerThread
+                                    , (i + 1) * halfTaskPerThread
+                                    , rmin
+                                    , solveStepSize
+                                    , plotStepSize });
+                args.radius = startRadius + T((length - (i + 1) * halfTaskPerThread) * plotStepSize);
+                parallelSolve(args, { r_arr
+                                    , lambda_arr
+                                    , volume_arr
+                                    , length - (i + 1) * halfTaskPerThread
+                                    , length - i * halfTaskPerThread
+                                    , rmin
+                                    , solveStepSize
+                                    , plotStepSize });
+            });
+        }
+        for (unsigned int i = 0; i < threadCount; ++i)
+            threads[i].join();
     }
     /* Plot lambda */ {
         Plot* r_lambda = new Plot();
@@ -176,7 +228,7 @@ int main(int argc, char** argv) {
         r_volume->show();
     }
 
-    WaterDropSolver solver({radius, sigma, rho, 1, 9.8}, rmin, stepSize);
+    WaterDropSolver solver({startRadius, sigma, rho, 1, 9.8}, rmin, solveStepSize);
     const T lambda = solver.solve();
     std::cout << "Lambda is " << lambda << std::endl;
     return solver.output();
