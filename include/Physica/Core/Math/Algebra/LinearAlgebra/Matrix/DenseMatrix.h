@@ -77,6 +77,9 @@ namespace Physica::Core {
     };
 
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat);
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     inline void swap(DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m1
             , DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
 }

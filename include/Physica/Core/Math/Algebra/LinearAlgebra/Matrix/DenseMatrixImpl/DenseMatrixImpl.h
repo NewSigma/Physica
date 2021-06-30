@@ -18,18 +18,6 @@
  */
 namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
-        for (size_t c = 0; c < mat.getColumn(); ++c)
-            os << mat(0, c) << ' ';
-        for (size_t r = 1; r < mat.getRow(); ++r) {
-            os << '\n';
-            for (size_t c = 0; c < mat.getColumn(); ++c)
-                os << mat(r, c) << ' ';
-        }
-        return os;
-    }
-
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class MatrixIn>
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<MatrixIn> lu)
             : DenseMatrix(lu.getOrder(), lu.getOrder()) {
@@ -198,5 +186,36 @@ namespace Physica::Core {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
         return result;
+    }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
+        const size_t column = mat.getColumn();
+        const size_t row = mat.getRow();
+        size_t width = 0;
+        /* Get max width */ {
+            for (size_t c = 0; c < column; ++c) {
+                for (size_t r = 0; r < row; ++ r) {
+                    std::stringstream stream{};
+                    stream.copyfmt(os);
+                    stream << mat(r, c);
+                    width = std::max(width, stream.str().length());
+                }
+            }
+        }
+        /* Output */ {
+            for (size_t c = 0; c < column; ++c) {
+                os.width(width);
+                os << mat(0, c) << ' ';
+            }
+            for (size_t r = 1; r < row; ++r) {
+                os << '\n';
+                for (size_t c = 0; c < column; ++c) {
+                    os.width(width);
+                    os << mat(r, c) << ' ';
+                }
+            }
+        }
+        return os;
     }
 }
