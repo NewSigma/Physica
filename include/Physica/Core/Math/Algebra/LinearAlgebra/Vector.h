@@ -51,12 +51,13 @@ namespace Physica::Core {
         Vector& operator=(const VectorExpression<type, T1, T2>& exp);
         /* Vector Operations */
         Vector& toOpposite();
-        [[nodiscard]] T toNorm() const;
         void toUnit();
         /* Getters */
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
+        [[nodiscard]] T norm() const;
+        [[nodiscard]] T squaredNorm() const;
         /* Helpers */
         static Vector<T> zeroVector(size_t len);
         static Vector<T> randomVector(size_t len);

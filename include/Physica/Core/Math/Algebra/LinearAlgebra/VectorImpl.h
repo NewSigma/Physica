@@ -49,16 +49,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    T Vector<T, Length, MaxLength>::toNorm() const {
-        auto norm = T::getZero();
-        for(auto ite = Base::cbegin(); ite != Base::cend(); ++ite)
-            norm += square(*ite);
-        return sqrt(norm);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     void Vector<T, Length, MaxLength>::toUnit() {
-        T norm = toNorm();
+        T norm = norm();
         if (norm.isZero())
             return;
         const auto end = Base::end();
@@ -97,6 +89,19 @@ namespace Physica::Core {
             if ((*this)[i] < result)
                 result = (*this)[i];
         }
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    T Vector<T, Length, MaxLength>::norm() const {
+        return sqrt(squaredNorm());
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    T Vector<T, Length, MaxLength>::squaredNorm() const {
+        auto result = T::getZero();
+        for(auto ite = Base::cbegin(); ite != Base::cend(); ++ite)
+            result += square(*ite);
         return result;
     }
 
