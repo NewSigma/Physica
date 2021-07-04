@@ -36,7 +36,7 @@
 #define checkCudaError(x)                                                                                                       \
     do {                                                                                                                        \
         if(x) {                                                                                                                 \
-            printf("[] [Fatal] [%s:%d]: CUDA error encountered! Error code: %s\n", FILENAME(__FILE__), __LINE__, cudaGetErrorName(x));\
+            printf("[] [Fatal] [%s:%d]: CUDA error encountered! Error code: %s\n", __FILENAME__, __LINE__, cudaGetErrorName(x));\
             cudaDeviceReset();                                                                                                  \
             exit(EXIT_FAILURE);                                                                                                 \
         }                                                                                                                       \

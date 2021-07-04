@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <cmath>
-#include <Physica/Core/Utils/DebugUtil.h>
+#include <Physica/Utils/CUDA/DebugUtil.cuh>
 
 int main(int argc, char** argv) {
     std::cout << "Checking for CUDA devices.\n";

@@ -36,7 +36,8 @@ set(CMAKE_CUDA_FLAGS "\
 ${CMAKE_CUDA_FLAGS} \
 --gpu-architecture ${GPU_ARCHITECTURE} \
 --gpu-code ${GPU_CODE} \
---relocatable-device-code=true")
+--relocatable-device-code=true \
+-D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
 
 if(${RUN_CHECKS})
     add_subdirectory(config)
