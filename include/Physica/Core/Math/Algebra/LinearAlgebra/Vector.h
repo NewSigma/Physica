@@ -33,6 +33,7 @@ namespace Physica::Core {
     class Vector : public Utils::Array<T, Length, MaxLength> {
     public:
         using ScalarType = T;
+        using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
     private:
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using Base = Utils::Array<T, Length, MaxLength>;
