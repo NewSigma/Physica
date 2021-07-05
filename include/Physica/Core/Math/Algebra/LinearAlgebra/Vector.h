@@ -49,9 +49,11 @@ namespace Physica::Core {
         Vector& operator=(Vector&&) noexcept = default;
         template<VectorExpressionType type, class T1, class T2>
         Vector& operator=(const VectorExpression<type, T1, T2>& exp);
-        /* Vector Operations */
+        /* Operations */
         Vector& toOpposite();
         void toUnit();
+        template<class OtherVector>
+        T houseHolder(OtherVector& __restrict v, T& __restrict norm) const;
         /* Getters */
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;

@@ -4,6 +4,7 @@ include(../cmake/Modules/PhysicaAddTest.cmake)
 message(STATUS "Configuring tests.")
 # Math
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
+physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/HouseHolderTest.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/InverseMatrixTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
 physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)

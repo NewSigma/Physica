@@ -5,4 +5,5 @@ LinearAlgebra
    :maxdepth: 1
 
    DenseMatrix
+   HouseHolder
    Matrix

@@ -59,6 +59,22 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
+    template<class OtherVector>
+    T Vector<T, Length, MaxLength>::houseHolder(OtherVector& __restrict v, T& __restrict norm) const {
+        assert(v.getLength() == Base::getLength() - 1);
+        const T abs_first = abs((*this)[0]);
+        norm = this->norm();
+        const size_t length = v.getLength();
+        T factor = reciprocal(T(abs_first + norm));
+        if ((*this)[0].isNegative())
+            factor.toOpposite();
+
+        for (size_t i = 0; i < length; ++i)
+            v[i] = (*this)[i + 1] * factor;
+        return T(1) + abs_first / norm;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
     bool Vector<T, Length, MaxLength>::isZero() const {
         const auto length = Base::getLength();
         if(length == 0)
