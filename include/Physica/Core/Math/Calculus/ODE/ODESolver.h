@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <random>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
@@ -38,6 +39,8 @@ namespace Physica::Core {
          */
         template<class Function>
         void rungeKutta4(Function func);
+        template<class Function, class Generator>
+        void stochasticRungeKutta2(Function func, Generator& gen, T D);
         template<class Function>
         void verlet(Function func, const T& initial1);
         template<class Function>
@@ -71,6 +74,26 @@ namespace Physica::Core {
             TVector dy_dx = func(x_i, solution[i]);
             solution[i + 1] = RungeKuttaDy(i, dy_dx, func);
             x.append(x_i + stepSize);
+        }
+    }
+    /**
+     * Reference:
+     * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
+     */
+    template<class T, class TVector>
+    template<class Function, class Generator>
+    void ODESolver<T, TVector>::stochasticRungeKutta2(Function func, Generator& gen, T D) {
+        assert(x.getLength() == 1);
+        const T factor = sqrt(T(2) * D * stepSize);
+        const size_t column_1 = solution.getColumn() - 1;
+        std::normal_distribution<> d{};
+        for (size_t i = 0; i < column_1; ++i) {
+            const T& x_i = x[i];
+            const T x_i_1 = x_i + stepSize;
+            TVector term1 = func(x[i], solution[i] + factor * T(d(gen)));
+            TVector term2 = func(x_i_1, solution[i] + stepSize * func(x[i], solution[i]) + factor * T(d(gen)));
+            solution[i + 1] = solution[i] + (term1[0] + term2[0]) * stepSize / T(2) + factor * T(d(gen));
+            x.append(std::move(x_i_1));
         }
     }
     /**
