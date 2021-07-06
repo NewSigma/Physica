@@ -27,25 +27,38 @@ using namespace Physica::Gui;
 int main(int argc, char** argv) {
     using T = Scalar<Double, false>;
     using ODE = ODESolver<T, Vector<T>>;
-    constexpr double stepSize = 0.0001;
+    constexpr double stepSize = 0.01;
+    constexpr double D = 1;
+    constexpr double gamma = 1;
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
+    std::normal_distribution phi{};
 
-    ODE solver(0, 2, stepSize, {0});
-    solver.stochasticRungeKutta2([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return -y; }, gen, 1);
-    const auto& x = solver.getX();
+    ODE solver(0, 10, stepSize, {0, 0});
+    solver.stochasticRungeKutta2([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return {y[1], -T(gamma) * y[1]}; },
+                                 [&](T x, const Vector<T>& y) -> Vector<T> { (void)x; (void)y; return {0, sqrt(2 * stepSize * D) * phi(gen)}; });
+    const auto& t = solver.getX();
     const auto& solution = solver.getSolution();
 
+    Vector<T> x{};
     Vector<T> v{};
+    x.resize(solution.getColumn());
     v.resize(solution.getColumn());
     for (size_t i = 0; i < solution.getColumn(); ++i) {
-        v[i] = solution(0, i);
+        x[i] = solution(0, i);
+        v[i] = solution(1, i);
     }
 
     QApplication app(argc, argv);
     Plot* t_x = new Plot();
-    t_x->spline(x, v);
+    t_x->spline(t, x);
     t_x->show();
+    Plot* t_v = new Plot();
+    t_v->spline(t, v);
+    t_v->show();
+    Plot* x_v = new Plot();
+    x_v->scatter(x, v);
+    x_v->show();
     return QApplication::exec();
 }

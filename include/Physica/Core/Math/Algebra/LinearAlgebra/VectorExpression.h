@@ -291,6 +291,14 @@ namespace Physica::Core {
                                 , VectorExpression<type1, T11, T12>
                                 , VectorExpression<type2, T21, T22>>(exp1, exp2);
     }
+    //////////////////////////////////////Mul//////////////////////////////////////
+    template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
+    inline VectorExpression<VectorExpressionType::Mul, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
+    operator*(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {
+        return VectorExpression<VectorExpressionType::Mul
+                                , VectorExpression<type, T1, T2>
+                                , Scalar<scalarType, errorTrack>>(exp, s);
+    }
     //////////////////////////////////////Div//////////////////////////////////////
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     inline VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
