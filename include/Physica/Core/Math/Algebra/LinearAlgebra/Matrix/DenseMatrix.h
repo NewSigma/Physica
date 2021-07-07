@@ -60,8 +60,16 @@ namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>> {
         using Base = DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>>;
+
+        enum {
+            isColumnMatrix = DenseMatrixType::isColumnMatrix<DenseMatrix>()
+        };
     public:
         using Base::Base;
+        template<size_t Length, size_t MaxLength>
+        explicit DenseMatrix(const Vector<T, Length, MaxLength>& v);
+        template<size_t Length, size_t MaxLength>
+        explicit DenseMatrix(Vector<T, Length, MaxLength>&& v);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
         template<class MatrixIn>

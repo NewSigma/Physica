@@ -18,6 +18,32 @@
  */
 namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<size_t Length, size_t MaxLength>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const Vector<T, Length, MaxLength>& v)
+            : Base(isColumnMatrix ? v.getLength() : 1, isColumnMatrix ? 1 : v.getLength()) {
+        using ThisMatrix = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
+        if constexpr (DenseMatrixType::isVectorMatrix<ThisMatrix>())
+            (*this)[0] = v;
+        else {
+            for (size_t i = 0; i < v.getLength(); ++i)
+                (*this)[i] = v[i];
+        }
+    }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<size_t Length, size_t MaxLength>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Vector<T, Length, MaxLength>&& v)
+            : Base(isColumnMatrix ? v.getLength() : 1, isColumnMatrix ? 1 : v.getLength()) {
+        using ThisMatrix = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
+        if constexpr (DenseMatrixType::isVectorMatrix<ThisMatrix>())
+            (*this)[0] = std::forward(v);
+        else {
+            for (size_t i = 0; i < v.getLength(); ++i)
+                (*this)[i] = std::move(v[i]);
+        }
+    }
+
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class MatrixIn>
     DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<MatrixIn> lu)
             : DenseMatrix(lu.getOrder(), lu.getOrder()) {
