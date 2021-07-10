@@ -62,6 +62,10 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity>
     class Array : public Internal::AbstractArray<Array<T, Length, Capacity>> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
+    public:
+        using ElementType = T;
+        constexpr static size_t ArrayLength = Length;
+        constexpr static size_t ArrayCapacity = Capacity;
     private:
         using Base = Internal::AbstractArray<Array<T, Length, Capacity>>;
         using Base::arr;
@@ -110,6 +114,10 @@ namespace Physica::Utils {
     template<class T, size_t Capacity>
     class Array<T, Dynamic, Capacity>
         : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>> {
+    public:
+        using ElementType = T;
+        constexpr static size_t ArrayLength = Dynamic;
+        constexpr static size_t ArrayCapacity = Capacity;
     private:
         using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity>>;
         using Base::length;
@@ -160,6 +168,10 @@ namespace Physica::Utils {
     template<class T>
     class Array<T, Dynamic, Dynamic>
         : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>> {
+    public:
+        using ElementType = T;
+        constexpr static size_t ArrayLength = Dynamic;
+        constexpr static size_t ArrayCapacity = Dynamic;
     private:
         using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic>>;
         using Base::length;
