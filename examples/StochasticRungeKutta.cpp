@@ -75,8 +75,10 @@ int main(int argc, char** argv) {
     }
     /* x-v */ {
         Plot* plot = new Plot();
-        plot->spline(x, v);
+        plot->scatter(x, v);
         auto& chart = *plot->chart();
+        auto* series = static_cast<QScatterSeries*>(chart.series().first());
+        series->setMarkerSize(5);
         chart.legend()->hide();
         chart.setTitle("x_v");
         auto axes = chart.axes();

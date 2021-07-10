@@ -109,12 +109,11 @@ int WaterDropSolver::output() {
     /* Plot z */ {
         Plot* r_z = new Plot();
         r_z->spline(r, z);
-        auto& r_z_chart = *r_z->chart();
-        r_z_chart.setTitle("r-z");
-        r_z_chart.legend()->hide();
-        auto r_z_axes = r_z_chart.axes();
-        r_z_axes[0]->setTitleText("r/m");
-        r_z_axes[1]->setTitleText("z/m");
+        auto& chart = *r_z->chart();
+        chart.setTitle("r-z");
+        chart.legend()->hide();
+        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
+        chart.axes(Qt::Vertical).first()->setTitleText("z/m");
         r_z->show();
     }
     return QApplication::exec();
@@ -208,23 +207,21 @@ int main(int argc, char** argv) {
     /* Plot lambda */ {
         Plot* r_lambda = new Plot();
         r_lambda->spline(r_arr, lambda_arr);
-        auto& r_lambda_chart = *r_lambda->chart();
-        r_lambda_chart.legend()->hide();
-        r_lambda_chart.setTitle("r-lambda");
-        auto r_lambda_axes = r_lambda_chart.axes();
-        r_lambda_axes[0]->setTitleText("r/m");
-        r_lambda_axes[1]->setTitleText("lambda");
+        auto& chart = *r_lambda->chart();
+        chart.legend()->hide();
+        chart.setTitle("r-lambda");
+        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
+        chart.axes(Qt::Vertical).first()->setTitleText("lambda");
         r_lambda->show();
     }
     /* Plot volume */ {
         Plot* r_volume = new Plot();
         r_volume->spline(r_arr, volume_arr);
-        auto& r_volume_chart = *r_volume->chart();
-        r_volume_chart.legend()->hide();
-        r_volume_chart.setTitle("r-volume");
-        auto r_volume_axes = r_volume_chart.axes();
-        r_volume_axes[0]->setTitleText("r/m");
-        r_volume_axes[1]->setTitleText("volume/m^3");
+        auto& chart = *r_volume->chart();
+        chart.legend()->hide();
+        chart.setTitle("r-volume");
+        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
+        chart.axes(Qt::Vertical).first()->setTitleText("volume/m^3");
         r_volume->show();
     }
 

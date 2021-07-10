@@ -85,16 +85,36 @@ int main(int argc, char** argv) {
         std::cout << "Fractal dimention: " << -fit.first.getTrivial() << std::endl;
     }
 
-
     QApplication app(argc, argv);
-    Plot* t_x = new Plot();
-    t_x->spline(t, x);
-    t_x->show();
-    Plot* t_p = new Plot();
-    t_p->spline(t, p);
-    t_p->show();
-    Plot* x_p = new Plot();
-    x_p->spline(x, p);
-    x_p->show();
+    /* t-x */ {
+        Plot* t_x = new Plot();
+        t_x->spline(t, x);
+        auto& chart = *t_x->chart();
+        chart.setTitle("t-x");
+        chart.legend()->hide();
+        chart.axes(Qt::Horizontal).first()->setTitleText("t");
+        chart.axes(Qt::Vertical).first()->setTitleText("x");
+        t_x->show();
+    }
+    /* t-p */ {
+        Plot* t_p = new Plot();
+        t_p->spline(t, p);
+        auto& chart = *t_p->chart();
+        chart.setTitle("t-p");
+        chart.legend()->hide();
+        chart.axes(Qt::Horizontal).first()->setTitleText("t");
+        chart.axes(Qt::Vertical).first()->setTitleText("p");
+        t_p->show();
+    }
+    /* x-p */ {
+        Plot* x_p = new Plot();
+        x_p->spline(x, p);
+        auto& chart = *x_p->chart();
+        chart.setTitle("x-p");
+        chart.legend()->hide();
+        chart.axes(Qt::Horizontal).first()->setTitleText("x");
+        chart.axes(Qt::Vertical).first()->setTitleText("p");
+        x_p->show();
+    }
     return QApplication::exec();
 }
