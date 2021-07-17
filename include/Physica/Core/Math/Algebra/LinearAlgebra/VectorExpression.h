@@ -54,48 +54,18 @@ namespace Physica::Core {
         /**
          * VectorType: Type of the vector calculated from the expression.
          */
-        template<VectorExpressionType type, class T, size_t Length, size_t MaxLength>
-        class Traits<VectorExpression<type, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>> {
-        public:
-            using VectorType = Vector<T, Length, MaxLength>;
-        };
-
-        template<VectorExpressionType type, class T, size_t Length, size_t MaxLength, ScalarType scalarType, bool errorTrack>
-        class Traits<VectorExpression<type, Vector<T, Length, MaxLength>, Scalar<scalarType, errorTrack>>> {
-        public:
-            using VectorType = Vector<T, Length, MaxLength>;
-        };
-
-        template<VectorExpressionType type, VectorExpressionType type1, class T11, class T12
-                                            , VectorExpressionType type2, class T21, class T22>
-        class Traits<VectorExpression<type, VectorExpression<type1, T11, T12>, VectorExpression<type2, T21, T22>>> {
-            static_assert(std::is_same<typename VectorExpression<type1, T11, T12>::VectorType
-                                       , typename VectorExpression<type2, T21, T22>::VectorType>::value
+        template<VectorExpressionType type, class Exp1, class Exp2>
+        class Traits<VectorExpression<type, Exp1, Exp2>> {
+            static_assert(std::is_same<typename Exp1::VectorType, typename Exp2::VectorType>::value
                           , "Types of the two operands must be same.");
         public:
-            using VectorType = typename VectorExpression<type1, T11, T12>::VectorType;
+            using VectorType = typename Exp1::VectorType;
         };
 
-        template<VectorExpressionType type, VectorExpressionType type1, class T1, class T2, class T, size_t Length, size_t MaxLength>
-        class Traits<VectorExpression<type, VectorExpression<type1, T1, T2>, Vector<T, Length, MaxLength>>> {
-            static_assert(std::is_same<typename VectorExpression<type1, T1, T2>::VectorType, Vector<T, Length, MaxLength>>::value
-                          , "Types of the two operands must be same.");
+        template<VectorExpressionType type, class Exp, ScalarType scalarType, bool errorTrack>
+        class Traits<VectorExpression<type, Exp, Scalar<scalarType, errorTrack>>> {
         public:
-            using VectorType = Vector<T, Length, MaxLength>;
-        };
-
-        template<VectorExpressionType type, VectorExpressionType type1, class T1, class T2, class T, size_t Length, size_t MaxLength>
-        class Traits<VectorExpression<type, Vector<T, Length, MaxLength>, VectorExpression<type1, T1, T2>>> {
-            static_assert(std::is_same<typename VectorExpression<type1, T1, T2>::VectorType, Vector<T, Length, MaxLength>>::value
-                          , "Types of the two operands must be same.");
-        public:
-            using VectorType = Vector<T, Length, MaxLength>;
-        };
-
-        template<VectorExpressionType type, VectorExpressionType type1, class T1, class T2, ScalarType scalarType, bool errorTrack>
-        class Traits<VectorExpression<type, VectorExpression<type1, T1, T2>, Scalar<scalarType, errorTrack>>> {
-        public:
-            using VectorType = typename VectorExpression<type1, T1, T2>::VectorType;
+            using VectorType = typename Exp::VectorType;
         };
         /**
          * This class implements calc() for all \class VectorExpression
@@ -223,6 +193,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
+    template<class VectorType>
+    inline VectorExpression<VectorExpressionType::Minus, VectorBlock<VectorType>>
+    operator-(const VectorBlock<VectorType>& block) {
+        return VectorExpression<VectorExpressionType::Minus, VectorBlock<VectorType>>(block);
+    }
+
     template<VectorExpressionType type, class T1, class T2>
     inline VectorExpression<VectorExpressionType::Minus, VectorExpression<type, T1, T2>>
     operator-(const VectorExpression<type, T1, T2>& exp) {
@@ -230,6 +206,12 @@ namespace Physica::Core {
                                 , VectorExpression<type, T1, T2>>(exp);
     }
     //////////////////////////////////////Add//////////////////////////////////////
+    template<class VectorType, class T>
+    inline VectorExpression<VectorExpressionType::Add, VectorBlock<VectorType>, T>
+    operator+(const VectorBlock<VectorType>& block, T t) {
+        return VectorExpression<VectorExpressionType::Add, VectorBlock<VectorType>, T>(block, t);
+    }
+
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     inline VectorExpression<VectorExpressionType::Add, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
     operator+(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {
@@ -260,6 +242,12 @@ namespace Physica::Core {
                                 , VectorExpression<type2, T21, T22>>(exp1, exp2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
+    template<class VectorType, class T>
+    inline VectorExpression<VectorExpressionType::Sub, VectorBlock<VectorType>, T>
+    operator-(const VectorBlock<VectorType>& block, T t) {
+        return VectorExpression<VectorExpressionType::Sub, VectorBlock<VectorType>, T>(block, t);
+    }
+
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     inline VectorExpression<VectorExpressionType::Sub, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
     operator-(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {
@@ -292,6 +280,12 @@ namespace Physica::Core {
                                 , VectorExpression<type2, T21, T22>>(exp1, exp2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
+    template<class VectorType, ScalarType scalarType, bool errorTrack>
+    inline VectorExpression<VectorExpressionType::Mul, VectorBlock<VectorType>, Scalar<scalarType, errorTrack>>
+    operator*(const VectorBlock<VectorType>& block, const Scalar<scalarType, errorTrack>& s) {
+        return VectorExpression<VectorExpressionType::Mul, VectorBlock<VectorType>, Scalar<scalarType, errorTrack>>(block, s);
+    }
+
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     inline VectorExpression<VectorExpressionType::Mul, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
     operator*(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {
@@ -300,6 +294,12 @@ namespace Physica::Core {
                                 , Scalar<scalarType, errorTrack>>(exp, s);
     }
     //////////////////////////////////////Div//////////////////////////////////////
+    template<class VectorType, ScalarType scalarType, bool errorTrack>
+    inline VectorExpression<VectorExpressionType::Div, VectorBlock<VectorType>, Scalar<scalarType, errorTrack>>
+    operator/(const VectorBlock<VectorType>& block, const Scalar<scalarType, errorTrack>& s) {
+        return VectorExpression<VectorExpressionType::Div, VectorBlock<VectorType>, Scalar<scalarType, errorTrack>>(block, s);
+    }
+
     template<VectorExpressionType type, class T1, class T2, ScalarType scalarType, bool errorTrack>
     inline VectorExpression<VectorExpressionType::Div, VectorExpression<type, T1, T2>, Scalar<scalarType, errorTrack>>
     operator/(const VectorExpression<type, T1, T2>& exp, const Scalar<scalarType, errorTrack>& s) {

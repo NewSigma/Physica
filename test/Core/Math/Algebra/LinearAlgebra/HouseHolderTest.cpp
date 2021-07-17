@@ -26,15 +26,10 @@ int main() {
     const Vector<T> x{2, 3, 4, 5};
 
     const size_t rank = x.getLength();
-    Vector<T> temp(rank - 1);
-    T norm;
-    const T tau = x.houseHolder(temp, norm);
-    const T beta = x[0].isNegative() ? norm : -norm;
-
     Vector<T> v(rank);
+    const T tau = x.houseHolder(v);
+    const T beta = x[0].isNegative() ? v[0] : -v[0];
     v[0] = 1;
-    for (size_t i = 1; i < rank; ++i)
-        v[i] = temp[i - 1];
 
     Vector<T> result = x - tau * (v * x) * v;
     if (abs(T(result[0] - beta) / beta) > T(1E-15))

@@ -16,7 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 namespace Physica::Core {
+    /**
+     * Reference a part of the given vector
+     */
+    template<class T>
+    class VectorBlock;
+
+    namespace Internal {
+        template<class T>
+        class Traits;
+
+        template<class T>
+        class Traits<VectorBlock<T>> {
+            using ScalarType = typename T::ScalarType;
+            using VectorType = T;
+        };
+    }
+
     template<class T>
     class VectorBlock {
     public:
@@ -29,12 +48,14 @@ namespace Physica::Core {
     public:
         VectorBlock(T& vec_, size_t from_, size_t to_);
         VectorBlock(T& vec_, size_t from_);
-        VectorBlock(const VectorBlock&) = delete;
+        VectorBlock(const VectorBlock& block);
         VectorBlock(VectorBlock&&) noexcept = delete;
         ~VectorBlock() = default;
         /* Operators */
         VectorBlock& operator=(const VectorBlock&) = delete;
         VectorBlock& operator=(VectorBlock&&) noexcept = delete;
+        template<class VectorExpression>
+        VectorBlock& operator=(const VectorExpression& exp);
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Getters */
@@ -48,5 +69,18 @@ namespace Physica::Core {
     }
 
     template<class T>
-    VectorBlock<T>::VectorBlock(T& vec_, size_t from_) : VectorBlock(vec_, from_) {}
+    VectorBlock<T>::VectorBlock(T& vec_, size_t from_) : VectorBlock(vec_, from_, vec_.getLength()) {}
+
+    template<class T>
+    template<class VectorExpression>
+    VectorBlock<T>& VectorBlock<T>::operator=(const VectorExpression& exp) {
+        assert(getLength() == exp.getLength());
+        const size_t length = getLength();
+        for (size_t i = 0; i < length; ++i)
+            this->operator[](i) = exp[i];
+        return *this;
+    }
+
+    template<class T>
+    VectorBlock<T>::VectorBlock(const VectorBlock& block) : vec(block.vec), from(block.from), to(block.to) {}
 }

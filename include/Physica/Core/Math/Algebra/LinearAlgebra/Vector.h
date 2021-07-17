@@ -21,6 +21,7 @@
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
+#include "VectorBlock.h"
 #include "VectorExpression.h"
 
 namespace Physica::Core {
@@ -54,7 +55,7 @@ namespace Physica::Core {
         Vector& toOpposite();
         void toUnit();
         template<class OtherVector>
-        T houseHolder(OtherVector& __restrict v, T& __restrict norm) const;
+        T houseHolder(OtherVector& __restrict v) const;
         /* Getters */
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;
