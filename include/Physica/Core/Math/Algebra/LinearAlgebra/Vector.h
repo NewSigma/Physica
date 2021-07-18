@@ -23,8 +23,11 @@
 #include "Physica/Utils/Container/Array/Array.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
+#include "Matrix/DenseMatrixImpl/DenseMatrixType.h"
 
 namespace Physica::Core {
+    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    class DenseMatrix;
     /**
      * T must be either Scalar or ComplexScalar.
      * 
@@ -38,6 +41,8 @@ namespace Physica::Core {
     private:
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using Base = Utils::Array<T, Length, MaxLength>;
+        using ColMatrix = DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, Length, 1, MaxLength, 1>;
+        using RowMatrix = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, 1, Length, 1, MaxLength>;
     public:
         using Base::Base;
         Vector() = default;
@@ -54,8 +59,10 @@ namespace Physica::Core {
         /* Operations */
         Vector& toOpposite();
         void toUnit();
-        template<class OtherVector>
-        T houseHolder(OtherVector& __restrict v) const;
+        ColMatrix copyToColMatrix() const;
+        ColMatrix moveToColMatrix();
+        RowMatrix copyToRowMatrix() const;
+        RowMatrix moveToRowMatrix();
         /* Getters */
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;

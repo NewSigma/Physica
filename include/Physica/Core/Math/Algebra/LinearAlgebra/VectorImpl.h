@@ -57,26 +57,33 @@ namespace Physica::Core {
         for (auto ite = Base::begin(); ite != end; ++ite)
             (*ite) /= norm;
     }
-    /**
-     * The first element of v will be the norm of this vector.
-     * The other parts of v will be essential part of HouseHolder vector.
-     * 
-     * \return The factor to construct the houseHolder matrix
-     */
-    template<class T, size_t Length, size_t MaxLength>
-    template<class OtherVector>
-    T Vector<T, Length, MaxLength>::houseHolder(OtherVector& __restrict v) const {
-        assert(v.getLength() == Base::getLength());
-        const T abs_first = abs((*this)[0]);
-        v[0] = this->norm();
-        T factor = reciprocal(T(abs_first + v[0]));
-        if ((*this)[0].isNegative())
-            factor.toOpposite();
 
-        VectorBlock block_this(*this, 1);
-        VectorBlock block_v(v, 1);
-        block_v = block_this * factor;
-        return T(1) + abs_first / v[0];
+    template<class T, size_t Length, size_t MaxLength>
+    typename Vector<T, Length, MaxLength>::ColMatrix Vector<T, Length, MaxLength>::copyToColMatrix() const {
+        ColMatrix mat(this->getLength(), 1);
+        mat[0] = *this;
+        return mat;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    typename Vector<T, Length, MaxLength>::ColMatrix Vector<T, Length, MaxLength>::moveToColMatrix() {
+        ColMatrix mat(this->getLength(), 1);
+        mat[0] = std::move(*this);
+        return mat;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    typename Vector<T, Length, MaxLength>::RowMatrix Vector<T, Length, MaxLength>::copyToRowMatrix() const {
+        RowMatrix mat(1, this->getLength());
+        mat[0] = std::move(*this);
+        return mat;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    typename Vector<T, Length, MaxLength>::RowMatrix Vector<T, Length, MaxLength>::moveToRowMatrix() {
+        RowMatrix mat(1, this->getLength());
+        mat[0] = std::move(*this);
+        return mat;
     }
 
     template<class T, size_t Length, size_t MaxLength>

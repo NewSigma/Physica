@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,16 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/HouseHolder.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 
 int main() {
-    using T = Scalar<Double, false>;
-    const Vector<T> x{2, 3, 4, 5};
-
-    const size_t rank = x.getLength();
-    Vector<T> v(rank);
-    const T norm = houseHolder(x, v);
-    const T tau = v[0];
-    const T beta = x[0].isNegative() ? norm : -norm;
-    v[0] = 1;
-
-    Vector<T> result = x - tau * (v * x) * v;
-    if (abs(T(result[0] - beta) / beta) > T(1E-15))
-        return 1;
-    for (size_t i = 1; i < rank; ++i)
-        if (abs(result[i]) > T(1E-15))
-            return 1;
+    using T = Scalar<Float, false>;
+    Vector<T> v{1, 2, 3, 4};
+    auto col = v.copyToColMatrix();
+    auto row = v.moveToRowMatrix();
+    std::cout << col << std::endl;
+    std::cout << row << std::endl;
     return 0;
 }

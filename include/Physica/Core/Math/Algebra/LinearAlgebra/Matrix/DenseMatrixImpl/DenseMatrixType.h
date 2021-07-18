@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 namespace Physica::Core {
     namespace Internal {
         template<class T>

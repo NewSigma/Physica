@@ -7,6 +7,7 @@ physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposi
 physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/HouseHolderTest.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/InverseMatrixTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
+physica_add_test(Vector Core/Math/Algebra/LinearAlgebra/VectorTest.cpp)
 physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)
 physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
