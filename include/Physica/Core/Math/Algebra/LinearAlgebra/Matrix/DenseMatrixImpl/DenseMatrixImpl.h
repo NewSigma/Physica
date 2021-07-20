@@ -16,30 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<size_t Length, size_t MaxLength>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const Vector<T, Length, MaxLength>& v)
-            : Base(isColumnMatrix ? v.getLength() : 1, isColumnMatrix ? 1 : v.getLength()) {
-        using ThisMatrix = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
-        if constexpr (DenseMatrixType::isVectorMatrix<ThisMatrix>())
-            (*this)[0] = v;
-        else {
-            for (size_t i = 0; i < v.getLength(); ++i)
-                (*this)[i] = v[i];
+    template<Utils::ExpressionType expType, class T1, class T2>
+    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp)
+            : DenseMatrix(exp.getRow(), exp.getColumn()) {
+        if constexpr (isColumnMatrix) {
+            for (size_t c = 0; c < Base::getColumn(); ++c)
+                for (size_t r = 0; r < Base::getRow(); ++r)
+                    this->operator()(r, c) = T(exp(r, c));
         }
-    }
-
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<size_t Length, size_t MaxLength>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(Vector<T, Length, MaxLength>&& v)
-            : Base(isColumnMatrix ? v.getLength() : 1, isColumnMatrix ? 1 : v.getLength()) {
-        using ThisMatrix = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
-        if constexpr (DenseMatrixType::isVectorMatrix<ThisMatrix>())
-            (*this)[0] = std::forward(v);
         else {
-            for (size_t i = 0; i < v.getLength(); ++i)
-                (*this)[i] = std::move(v[i]);
+            for (size_t r = 0; r < Base::getRow(); ++r)
+                for (size_t c = 0; c < Base::getColumn(); ++c)
+                    this->operator()(r, c) = T(exp(r, c));
         }
     }
 

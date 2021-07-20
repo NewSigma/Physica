@@ -48,6 +48,19 @@ namespace Physica::Core {
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
     public:
         using Base::Base;
+        /* Operators */
+        template<class OtherDerived>
+        inline void operator+=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this + m; }
+        template<Core::ScalarType scalarType, bool errorTrack>
+        inline void operator+=(const Scalar<scalarType, errorTrack>& s) { getDerived() = *this + s; }
+        template<class OtherDerived>
+        inline void operator-=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this - m; }
+        template<Core::ScalarType scalarType, bool errorTrack>
+        inline void operator-=(const Scalar<scalarType, errorTrack>& s) { getDerived() = *this - s; }
+        template<class OtherDerived>
+        inline void operator*=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this * m; }
+        template<Core::ScalarType scalarType, bool errorTrack>
+        inline void operator*=(const Scalar<scalarType, errorTrack>& s) { getDerived() = *this * s; }
         /* Operations */
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
@@ -65,33 +78,6 @@ namespace Physica::Core {
         /* Setters */
         void toUnitMatrix();
     };
-    /* Operators */
-    template<class Derived>
-    Derived operator+(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2);
-
-    template<class Derived>
-    Derived operator-(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2);
-
-    template<class Derived>
-    Derived operator*(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2);
-
-    template<class Derived>
-    Derived operator*(const DenseMatrixBase<Derived>& m, const MultiScalar& n);
-
-    template<class Derived>
-    Derived operator-(const DenseMatrixBase<Derived>& m);
-    /* Inline Implementations */
-    template<class Derived>
-    inline void operator+=(DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) { m1 = m1 + m2; }
-
-    template<class Derived>
-    inline void operator-=(DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) { m1 = m1 - m2; }
-
-    template<class Derived>
-    inline void operator*=(DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) { m1 = m1 * m2; }
-
-    template<class Derived>
-    inline void operator*=(DenseMatrixBase<Derived>& m, const MultiScalar& n) { m = m * n; }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
     Derived reciprocal(const DenseMatrixBase<Derived>& m);

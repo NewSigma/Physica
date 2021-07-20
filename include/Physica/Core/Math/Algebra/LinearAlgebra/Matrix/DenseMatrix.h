@@ -20,6 +20,7 @@
 
 #include <memory>
 #include "DenseMatrixImpl/DenseMatrixBase.h"
+#include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
 #include "MatrixDecomposition/Cholesky.h"
 #include "InverseMatrix.h"
@@ -66,10 +67,8 @@ namespace Physica::Core {
         };
     public:
         using Base::Base;
-        template<size_t Length, size_t MaxLength>
-        explicit DenseMatrix(const Vector<T, Length, MaxLength>& v);
-        template<size_t Length, size_t MaxLength>
-        explicit DenseMatrix(Vector<T, Length, MaxLength>&& v);
+        template<Utils::ExpressionType expType, class T1, class T2>
+        DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
         template<class MatrixIn>
@@ -78,6 +77,8 @@ namespace Physica::Core {
         DenseMatrix(InverseMatrix<MatrixIn> inverse);
         /* Operators */
         using Base::operator=;
+        template<Utils::ExpressionType expType, class T1, class T2>
+        DenseMatrix& operator=(DenseMatrixExpression<expType, T1, T2> exp) { *this = std::move(DenseMatrix(exp)); return *this; }
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
         /* Static members */
         [[nodiscard]] static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }

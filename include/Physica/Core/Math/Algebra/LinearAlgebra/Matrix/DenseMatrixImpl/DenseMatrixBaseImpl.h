@@ -185,46 +185,6 @@ namespace Physica::Core {
             Base::updateIterator(matIterator, eleIterator);
         }
     }
-    /* Operators */
-    template<class Derived>
-    Derived operator+(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
-        Q_ASSERT(m1.getRow() == m2.getRow() && m1.getColumn() == m2.getColumn());
-        Derived result(m1.getRow(), m1.getColumn());
-        auto ite1 = m1.cbegin();
-        auto ite2 = m2.cbegin();
-        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1, ++ite2)
-            *ite = *ite1 + *ite2;
-        return result;
-    }
-
-    template<class Derived>
-    Derived operator-(const DenseMatrixBase<Derived>& m1, const DenseMatrixBase<Derived>& m2) {
-        Q_ASSERT(m1.getRow() == m2.getRow() && m1.getColumn() == m2.getColumn());
-        Derived result(m1.getRow(), m1.getColumn());
-        auto ite1 = m1.cbegin();
-        auto ite2 = m2.cbegin();
-        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1, ++ite2)
-            *ite = *ite1 - *ite2;
-        return result;
-    }
-
-    template<class Derived>
-    Derived operator*(const DenseMatrixBase<Derived>& m, const MultiScalar& n) {
-        Derived result(m.getRow(), m.getColumn());
-        auto ite1 = m.cbegin();
-        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1)
-            *ite = *ite1 * n;
-        return result;
-    }
-
-    template<class Derived>
-    Derived operator-(const DenseMatrixBase<Derived>& m) {
-        Derived result(m.getRow(), m.getColumn());
-        auto ite1 = m.cbegin();
-        for(auto ite = result.begin(); ite != result.end(); ++ite, ++ite1)
-            *ite = -(*ite1);
-        return result;
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
     Derived reciprocal(const DenseMatrixBase<Derived>& m) {
