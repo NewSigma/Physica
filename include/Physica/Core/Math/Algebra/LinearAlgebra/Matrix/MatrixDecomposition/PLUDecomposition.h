@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_PLUDecomposition_H
-#define PHYSICA_PLUDecomposition_H
+#pragma once
 
 #include <cstdlib>
-#include "Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
@@ -46,5 +45,3 @@ namespace Physica::Core {
 }
 
 #include "PLUDecompositionImpl.h"
-
-#endif

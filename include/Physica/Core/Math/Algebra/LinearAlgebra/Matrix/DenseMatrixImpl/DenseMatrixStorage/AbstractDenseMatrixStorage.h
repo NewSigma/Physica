@@ -21,7 +21,7 @@
 #include <cassert>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixType.h"
 #include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core::Internal {
     template<class T> class Traits;

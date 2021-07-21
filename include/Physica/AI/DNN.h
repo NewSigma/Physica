@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_DNN_H
-#define PHYSICA_DNN_H
+#pragma once
 
 #include <vector>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 using Physica::Core::MultiScalar;
 using Physica::Core::Vector;
@@ -57,5 +56,3 @@ namespace Physica::AI {
         friend class Node;
     };
 }
-
-#endif

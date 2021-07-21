@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LINEAREQUATIONSIMPL_H
-#define PHYSICA_LINEAREQUATIONSIMPL_H
+#pragma once
 
-#include "PLUDecomposition.h"
+#include "Matrix/MatrixDecomposition/PLUDecomposition.h"
 #include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
@@ -129,5 +128,3 @@ namespace Physica::Core {
         }
     }
 }
-
-#endif

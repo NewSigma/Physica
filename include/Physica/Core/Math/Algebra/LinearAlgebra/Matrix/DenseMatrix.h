@@ -21,8 +21,8 @@
 #include <memory>
 #include "DenseMatrixImpl/DenseMatrixBase.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LUDecomposition.h"
 #include "MatrixDecomposition/Cholesky.h"
+#include "MatrixDecomposition/LUDecomposition.h"
 #include "InverseMatrix.h"
 
 namespace Physica::Core {

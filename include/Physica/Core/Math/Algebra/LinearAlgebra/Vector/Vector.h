@@ -23,7 +23,7 @@
 #include "Physica/Utils/Container/Array/Array.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
-#include "Matrix/DenseMatrixImpl/DenseMatrixType.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixType.h"
 
 namespace Physica::Core {
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

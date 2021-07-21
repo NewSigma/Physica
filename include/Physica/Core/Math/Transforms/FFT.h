@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_FFT_H
-#define PHYSICA_FFT_H
+#pragma once
 
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
@@ -47,5 +46,3 @@ namespace Physica::Core {
 }
 
 #include "FFTImpl.h"
-
-#endif
