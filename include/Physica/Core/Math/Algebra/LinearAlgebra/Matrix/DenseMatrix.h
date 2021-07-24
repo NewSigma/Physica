@@ -21,6 +21,7 @@
 #include <memory>
 #include "DenseMatrixImpl/DenseMatrixBase.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
+#include "DenseMatrixImpl/MatrixProduct.h"
 #include "MatrixDecomposition/Cholesky.h"
 #include "MatrixDecomposition/LUDecomposition.h"
 #include "InverseMatrix.h"
@@ -69,6 +70,8 @@ namespace Physica::Core {
         using Base::Base;
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
+        template<class T1, class T2>
+        DenseMatrix(MatrixProduct<T1, T2> pro);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
         template<class MatrixIn>

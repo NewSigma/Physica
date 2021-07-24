@@ -164,12 +164,74 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename DenseMatrixBase<Derived>::ScalarType& DenseMatrixBase<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
+        size_t r, c;
+        if constexpr(DenseMatrixType::isColumnMatrix<Derived>()) {
+            c = major;
+            r = minor;
+        }
+        else {
+            r = major;
+            c = minor;
+        }
+        assert(r < getDerived().getRow() && c < getDerived().getColumn());
+        return Base::operator()(r, c);
+    }
+
+    template<class Derived>
+    const typename DenseMatrixBase<Derived>::ScalarType& DenseMatrixBase<Derived>::getElementFromMajorMinor(size_t major, size_t minor) const {
+        size_t r, c;
+        if constexpr(DenseMatrixType::isColumnMatrix<Derived>()) {
+            c = major;
+            r = minor;
+        }
+        else {
+            r = major;
+            c = minor;
+        }
+        assert(r < getDerived().getRow() && c < getDerived().getColumn());
+        return Base::operator()(r, c);
+    }
+
+    template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
         assert(Base::getRow() == Base::getColumn());
         if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
             return Base::getColumn();
         else
             return Base::getRow();
+    }
+
+    template<class Derived>
+    inline size_t DenseMatrixBase<Derived>::getMaxMajor() const noexcept {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            return Base::getColumn();
+        else
+            return Base::getRow();
+    }
+
+    template<class Derived>
+    inline size_t DenseMatrixBase<Derived>::getMaxMinor() const noexcept {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            return Base::getRow();
+        else
+            return Base::getColumn();
+    }
+
+    template<class Derived>
+    inline size_t DenseMatrixBase<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) const noexcept {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            return minor;
+        else
+            return major;
+    }
+
+    template<class Derived>
+    inline size_t DenseMatrixBase<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) const noexcept {
+        if constexpr (DenseMatrixType::isColumnMatrix<Derived>())
+            return major;
+        else
+            return minor;
     }
 
     template<class Derived>

@@ -23,11 +23,19 @@ using namespace Physica::Core;
 int main() {
     DenseMatrix<Scalar<Double, false>, DenseMatrixType::Column | DenseMatrixType::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
     DenseMatrix<Scalar<Float, false>, DenseMatrixType::Column | DenseMatrixType::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
-    DenseMatrix<Scalar<Double, false>, DenseMatrixType::Row | DenseMatrixType::Vector, 3, 3> mat3;
-    mat3 = -(mat1 + mat2);
-    for (auto ite = mat3.cbegin(); ite != mat3.cend(); ++ite)
-        for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
-            if (*ite1 != Scalar<Double, false>(-2))
-                return 1;
+    {
+        DenseMatrix<Scalar<Double, false>, DenseMatrixType::Row | DenseMatrixType::Vector, 3, 3> mat = -(mat1 + mat2);
+        for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
+            for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
+                if (*ite1 != Scalar<Double, false>(-2))
+                    return 1;
+    }
+    {
+        DenseMatrix<Scalar<Double, false>, DenseMatrixType::Row | DenseMatrixType::Vector, 3, 3> mat = mat1 * mat2;
+        for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
+            for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
+                if (*ite1 != Scalar<Double, false>(3))
+                    return 1;
+    }
     return 0;
 }

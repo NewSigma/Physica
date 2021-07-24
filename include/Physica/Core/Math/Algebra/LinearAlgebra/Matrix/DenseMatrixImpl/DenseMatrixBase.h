@@ -74,9 +74,16 @@ namespace Physica::Core {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
         /* Getters */
+        [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline size_t getOrder() const noexcept;
+        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
+        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         /* Setters */
         void toUnitMatrix();
+        /* Static members */
+        [[nodiscard]] inline size_t rowFromMajorMinor(size_t major, size_t minor) const noexcept;
+        [[nodiscard]] inline size_t columnFromMajorMinor(size_t major, size_t minor) const noexcept;
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
