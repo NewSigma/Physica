@@ -33,10 +33,10 @@ namespace Physica::Core {
         for(size_t i = 0; i < variablesLength; ++i)
             result.setVariable(f.getVariable(i), i);
         //Generate some constant values.
-        result.setConstant(MultiScalar::getZero(), 0);
-        result.setConstant(MultiScalar::getOne(), 1);
-        result.setConstant(MultiScalar::getTwo(), 2);
-        result.setConstant(-MultiScalar::getOne(), 3);
+        result.setConstant(MultiScalar::Zero(), 0);
+        result.setConstant(MultiScalar::One(), 1);
+        result.setConstant(MultiScalar::Two(), 2);
+        result.setConstant(-MultiScalar::One(), 3);
         for(size_t i = 3; i < constantsLength; ++i)
             result.setConstant(f.getConstant(i), i);
         return result;

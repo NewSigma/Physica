@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_POLYNOMIAL_H
-#define PHYSICA_POLYNOMIAL_H
+#pragma once
 
 #include "Physica/Core/MultiPrecition/Scalar.h"
 #include "Physica/Core/Utils/Container/Array/Array.h"
@@ -29,11 +28,11 @@ namespace Physica::Core {
      * A polynomial is:
      * y(x) = a0 + a1 x + a2 x ^ 2 + ... + an x ^ n
      */
-    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
+    template<class ScalarType>
     class Polynomial {
     public:
         //data stores the coeficients of the polynomial.
-        Array<Scalar<option, errorTrack>> data;
+        Array<ScalarType> data;
     public:
         Polynomial() = default;
         Polynomial(const Polynomial& p) = default;
@@ -42,18 +41,18 @@ namespace Physica::Core {
         /* Operators */
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { data = std::move(p.data); return *this; }
-        Scalar<option, errorTrack> operator()(const Scalar<option, errorTrack>& s) const;
+        ScalarType operator()(const ScalarType& s) const;
     };
 
     /*!
      * Returns the value of this polynomial when x = s.
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> Polynomial<type, errorTrack>::operator()(const Scalar<option, errorTrack>& s) const {
+    template<class ScalarType>
+    ScalarType Polynomial<ScalarType>::operator()(const ScalarType& s) const {
         if(data.empty())
-            return Scalar<option, errorTrack>::getZero();
-        Scalar<option, errorTrack> result(data[0]);
-        Scalar<option, errorTrack> temp(s);
+            return ScalarType::Zero();
+        ScalarType result(data[0]);
+        ScalarType temp(s);
         const auto length = data.getLength();
         for(size_t i = 1; i < length; ++i) {
             result += temp * data[i];
@@ -62,5 +61,3 @@ namespace Physica::Core {
         return result;
     }
 }
-
-#endif

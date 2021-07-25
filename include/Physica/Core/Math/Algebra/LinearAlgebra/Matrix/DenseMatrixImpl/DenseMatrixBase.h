@@ -51,16 +51,16 @@ namespace Physica::Core {
         /* Operators */
         template<class OtherDerived>
         inline void operator+=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this + m; }
-        template<Core::ScalarOption option, bool errorTrack>
-        inline void operator+=(const Scalar<option, errorTrack>& s) { getDerived() = *this + s; }
+        template<class AnyScalar>
+        inline void operator+=(const ScalarBase<AnyScalar>& s) { getDerived() = *this + s.getDerived(); }
         template<class OtherDerived>
         inline void operator-=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this - m; }
-        template<Core::ScalarOption option, bool errorTrack>
-        inline void operator-=(const Scalar<option, errorTrack>& s) { getDerived() = *this - s; }
+        template<class AnyScalar>
+        inline void operator-=(const ScalarBase<AnyScalar>& s) { getDerived() = *this - s.getDerived(); }
         template<class OtherDerived>
         inline void operator*=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this * m; }
-        template<Core::ScalarOption option, bool errorTrack>
-        inline void operator*=(const Scalar<option, errorTrack>& s) { getDerived() = *this * s; }
+        template<class AnyScalar>
+        inline void operator*=(const ScalarBase<AnyScalar>& s) { getDerived() = *this * s.getDerived(); }
         /* Operations */
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);

@@ -155,7 +155,7 @@ namespace Physica::Core {
             le.solve(AbstractLinearEquations::GaussEliminationPartial);
             /* Calculate equivalent resistance */
             Connection* p = order;
-            MultiScalar totalCurrent = MultiScalar::getZero();
+            MultiScalar totalCurrent = MultiScalar::Zero();
             while(p != orderCurrent) {
                 //Calculate the current flow out of node 0.(Not node[0])
                 if(p->getPos1() == 0) {
@@ -177,7 +177,7 @@ namespace Physica::Core {
         }
         else {
             Connection* p = order;
-            MultiScalar totalCurrent = MultiScalar::getZero();
+            MultiScalar totalCurrent = MultiScalar::Zero();
             while(p != orderCurrent) {
                 auto current = reciprocal(*p->getResistance());
                 totalCurrent += current;

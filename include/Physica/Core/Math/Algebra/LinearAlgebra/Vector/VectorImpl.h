@@ -127,7 +127,7 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     T Vector<T, Length, MaxLength>::squaredNorm() const {
-        auto result = T::getZero();
+        auto result = T::Zero();
         for(auto ite = Base::cbegin(); ite != Base::cend(); ++ite)
             result += square(*ite);
         return result;
@@ -137,7 +137,7 @@ namespace Physica::Core {
     Vector<T> Vector<T, Length, MaxLength>::zeroVector(size_t len) {
         Vector<T> result(len);
         for(size_t i = 0; i < len; ++i)
-            result.allocate(T::getZero(), i);
+            result.allocate(T::Zero(), i);
         result.setLength(len);
         return result;
     }
@@ -197,7 +197,7 @@ namespace Physica::Core {
     T operator*(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2) {
         const auto len = v1.getLength();
         assert(len == v2.getLength());
-        auto result = T::getZero();
+        auto result = T::Zero();
         for(size_t i = 0; i < len; ++i)
             result += v1[i] * v2[i];
         return result;

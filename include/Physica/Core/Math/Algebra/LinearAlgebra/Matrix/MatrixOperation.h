@@ -50,7 +50,7 @@ namespace Physica::Core {
         const auto rank = matrix.getRow();
         Q_ASSERT(column < rank);
         size_t main_row_index = 0, main_column_index = 0;
-        const T zero = T::getZero();
+        const T zero = T::Zero();
         const T* main = &zero;
         for(size_t i = column; i < rank; ++i) {
             for(size_t j = column; j < rank; ++j) {

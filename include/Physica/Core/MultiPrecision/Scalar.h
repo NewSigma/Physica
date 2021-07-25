@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SCALAR_H
-#define PHYSICA_SCALAR_H
+#pragma once
 
 #include <cmath>
 #include <qglobal.h>
 #include <ostream>
 #include "MultiPrecisionType.h"
 #include "Rational.h"
+#include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
     //Forward declarations
@@ -48,16 +48,24 @@ namespace Physica::Core {
     Scalar<option, true> ln(const Scalar<option, true>& s);
 
     namespace Internal {
+        template<class T>
+        class Traits;
+
+        template<ScalarOption option_, bool errorTrack_>
+        class Traits<Scalar<option_, errorTrack_>> {
+        public:
+            static constexpr ScalarOption option = option_;
+            static constexpr bool errorTrack = errorTrack_;
+        };
         /**
          * This class return a type that can exactly represent the two input scalars.
          */
-        template<class T1, class T2>
-        class ScalarOperationReturnType;
-
-        template<ScalarOption option1, bool errorTrack1, ScalarOption option2, bool errorTrack2>
-        class ScalarOperationReturnType<Scalar<option1, errorTrack1>, Scalar<option2, errorTrack2>> {
-            static constexpr ScalarOption option = option1 > option2 ? option2 : option1;
-            static constexpr bool errorTrack = errorTrack1 || errorTrack2;
+        template<class Derived, class OtherDerived>
+        class BinaryScalarReturnType {
+            static constexpr ScalarOption option = Traits<Derived>::option > Traits<OtherDerived>::option
+                                                                            ? Traits<OtherDerived>::option
+                                                                            : Traits<Derived>::option;
+            static constexpr bool errorTrack = Traits<Derived>::errorTrack || Traits<OtherDerived>::errorTrack;
         public:
             using Type = Scalar<option, errorTrack>;
         };
@@ -225,7 +233,7 @@ namespace Physica::Core {
      * Empty class that make other template declarations easier.
      */
     template<class Derived>
-    class ScalarBase {};
+    class ScalarBase : public Utils::CRTPBase<Derived> {};
 
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
@@ -260,9 +268,9 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        static inline Scalar getZero() { return Scalar(static_cast<SignedMPUnit>(0)); }
-        static inline Scalar getOne() { return Scalar(static_cast<SignedMPUnit>(1)); }
-        static inline Scalar getTwo() { return Scalar(static_cast<SignedMPUnit>(2)); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(static_cast<SignedMPUnit>(0)); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(static_cast<SignedMPUnit>(1)); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(static_cast<SignedMPUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         /* Setters */
@@ -315,9 +323,9 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void toInteger();
         void swap(Scalar& s) noexcept;
-        static inline Scalar getZero() { return Scalar(static_cast<SignedMPUnit>(0)); }
-        static inline Scalar getOne() { return Scalar(static_cast<SignedMPUnit>(1)); }
-        static inline Scalar getTwo() { return Scalar(static_cast<SignedMPUnit>(2)); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(static_cast<SignedMPUnit>(0)); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(static_cast<SignedMPUnit>(1)); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(static_cast<SignedMPUnit>(2)); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] MPUnit getA() const noexcept { return a; }
@@ -372,9 +380,9 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept { Base::swap(s); }
-        static inline Scalar getZero() { return Scalar(0); }
-        static inline Scalar getOne() { return Scalar(1); }
-        static inline Scalar getTwo() { return Scalar(2); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] constexpr static float getA() { return 0; }
@@ -411,9 +419,9 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept;
-        static inline Scalar getZero() { return Scalar(0); }
-        static inline Scalar getOne() { return Scalar(1); }
-        static inline Scalar getTwo() { return Scalar(2); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] float getA() const noexcept { return a; }
@@ -456,9 +464,9 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
-        static inline Scalar getZero() { return Scalar(0); }
-        static inline Scalar getOne() { return Scalar(1); }
-        static inline Scalar getTwo() { return Scalar(2); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] constexpr static double getA() { return 0; }
@@ -495,9 +503,9 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         inline void toInteger();
         void swap(Scalar& s) noexcept;
-        static inline Scalar getZero() { return Scalar(0); }
-        static inline Scalar getOne() { return Scalar(1); }
-        static inline Scalar getTwo() { return Scalar(2); }
+        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
+        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
+        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
         /* Getters */
         [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
         [[nodiscard]] double getA() const noexcept { return a; }
@@ -524,5 +532,3 @@ namespace Physica::Core {
 
 #include "Const.h"
 #include "ScalarImpl/ScalarImpl.h"
-
-#endif

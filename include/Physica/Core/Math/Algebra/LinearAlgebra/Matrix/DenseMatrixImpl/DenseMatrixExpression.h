@@ -44,29 +44,29 @@ namespace Physica::Core {
     template<class T1, class T2>
     class DenseMatrixExpression<Utils::ExpressionType::Add, T1, T2> {
     public:
-        using ScalarType = typename T1::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
     private:
         const T1& exp1;
         const T2& exp2;
     public:
         DenseMatrixExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp1(row, col) + ScalarType(exp2(row, col)); }
+        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp1(row, col)) + ScalarType(exp2(row, col)); }
         [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, ScalarOption option, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Add, T, Scalar<option, errorTrack>> {
+    template<class T, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Add, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) + ScalarType(scalar); }
+        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) + ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
@@ -74,57 +74,57 @@ namespace Physica::Core {
     template<class T1, class T2>
     class DenseMatrixExpression<Utils::ExpressionType::Sub, T1, T2> {
     public:
-        using ScalarType = typename T1::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
     private:
         const T1& exp1;
         const T2& exp2;
     public:
         DenseMatrixExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp1(row, col) - ScalarType(exp2(row, col)); }
+        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp1(row, col)) - ScalarType(exp2(row, col)); }
         [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, ScalarOption option, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Sub, T, Scalar<option, errorTrack>> {
+    template<class T, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Sub, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) - ScalarType(scalar); }
+        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) - ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, ScalarOption option, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Mul, T, Scalar<option, errorTrack>> {
+    template<class T, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Mul, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) * ScalarType(scalar); }
+        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) * ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, ScalarOption option, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Div, T, Scalar<option, errorTrack>> {
+    template<class T, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Div, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) / ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
