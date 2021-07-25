@@ -31,11 +31,11 @@ namespace Physica::Core {
      * @class TreeFunction is described using a tree, which has more usages than @class VectorFunction
      * but slower than @class VectorFunction.
      */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
-    class TreeFunction : public AbstractFunction<type, errorTrack> {
-        typedef AbstractFunction<type, errorTrack> Base;
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
+    class TreeFunction : public AbstractFunction<option, errorTrack> {
+        typedef AbstractFunction<option, errorTrack> Base;
 
-        std::shared_ptr<TreeFunctionData<type, errorTrack>> tree;
+        std::shared_ptr<TreeFunctionData<option, errorTrack>> tree;
     public:
         TreeFunction(size_t variablesLength, size_t constantsLength);
         TreeFunction(const TreeFunction& func);
@@ -44,34 +44,34 @@ namespace Physica::Core {
         /* Operators */
         TreeFunction& operator=(const TreeFunction& func);
         TreeFunction& operator=(TreeFunction&& func) noexcept;
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1) const;
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2) const;
-        [[nodiscard]] Scalar<type, errorTrack> operator()(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3) const;
+        [[nodiscard]] Scalar<option, errorTrack> operator()(Scalar<option, errorTrack> s1) const;
+        [[nodiscard]] Scalar<option, errorTrack> operator()(Scalar<option, errorTrack> s1, Scalar<option, errorTrack> s2) const;
+        [[nodiscard]] Scalar<option, errorTrack> operator()(Scalar<option, errorTrack> s1, Scalar<option, errorTrack> s2, Scalar<option, errorTrack> s3) const;
         /* Operations */
-        [[nodiscard]] Scalar<type, errorTrack> solve() const { Q_ASSERT(tree.get()); return tree->solve(*this); };
+        [[nodiscard]] Scalar<option, errorTrack> solve() const { Q_ASSERT(tree.get()); return tree->solve(*this); };
         /* Getters */
         void printTree(std::ostream& os);
-        [[nodiscard]] const TreeFunctionData<type, errorTrack>& getTree() const { return *tree; }
-        [[nodiscard]] inline TreeFunctionData<type, errorTrack> getVariableNode(long index) const;
-        [[nodiscard]] inline TreeFunctionData<type, errorTrack> getConstantNode(long index) const;
+        [[nodiscard]] const TreeFunction<option, errorTrack>& getTree() const { return *tree; }
+        [[nodiscard]] inline TreeFunctionData<option, errorTrack> getVariableNode(long index) const;
+        [[nodiscard]] inline TreeFunctionData<option, errorTrack> getConstantNode(long index) const;
         /* Setters */
-        void setTree(std::shared_ptr<TreeFunctionData<type, errorTrack>> p) noexcept { tree = std::move(p); }
+        void setTree(std::shared_ptr<TreeFunctionData<option, errorTrack>> p) noexcept { tree = std::move(p); }
     };
 
-    template<ScalarType type, bool errorTrack>
-    inline TreeFunctionData<type, errorTrack> TreeFunction<type, errorTrack>::getVariableNode(long index) const {
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> TreeFunction<option, errorTrack>::getVariableNode(long index) const {
         assert(0 <= index && static_cast<size_t>(index) < Base::variables.getLength());
-        return TreeFunctionData<type, errorTrack>(index + 1);
+        return TreeFunctionData<option, errorTrack>(index + 1);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline TreeFunctionData<type, errorTrack> TreeFunction<type, errorTrack>::getConstantNode(long index) const {
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> TreeFunction<option, errorTrack>::getConstantNode(long index) const {
         assert(0 <= index && static_cast<size_t>(index) < Base::constants.getLength());
-        return TreeFunctionData<type, errorTrack>(-index - 1);
+        return TreeFunctionData<option, errorTrack>(-index - 1);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline std::ostream& operator<<(std::ostream& os, const TreeFunction<type, errorTrack>& f) {
+    template<ScalarOption option, bool errorTrack>
+    inline std::ostream& operator<<(std::ostream& os, const TreeFunction<option, errorTrack>& f) {
         FunctionPrinter(f, os).print();
         return os;
     }

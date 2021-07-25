@@ -23,101 +23,101 @@
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> abs(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> reciprocal(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sqrt(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sqrt(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> factorial(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> factorial(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> ln(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> ln(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Scalar<type, errorTrack1 | errorTrack2> log(const Scalar<type, errorTrack1>& s, const Scalar<type, errorTrack2>& a);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Scalar<option, errorTrack1 || errorTrack2> log(const Scalar<option, errorTrack1>& s, const Scalar<option, errorTrack2>& a);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> exp(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> exp(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> cos(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> cos(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sin(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sin(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> tan(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> tan(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sec(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sec(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> csc(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> csc(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> cot(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> cot(const Scalar<option, errorTrack>& s);
     //!Domain of definition: [0, Pi]
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccos(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccos(const Scalar<option, errorTrack>& s);
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsin(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsin(const Scalar<option, errorTrack>& s);
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arctan(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arctan(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsec(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsec(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccsc(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccsc(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccot(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccot(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> cosh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> cosh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sinh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sinh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> tanh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> tanh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sech(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sech(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> csch(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> csch(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> coth(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> coth(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccosh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccosh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsinh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsinh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arctanh(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arctanh(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsech(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsech(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccsch(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccsch(const Scalar<option, errorTrack>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccoth(const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccoth(const Scalar<option, errorTrack>& s);
 }
 
 #include "FunctionImpl/ElementaryImpl.h"

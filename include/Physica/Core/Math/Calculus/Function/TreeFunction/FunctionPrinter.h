@@ -23,15 +23,15 @@
 #include "TreeFunction.h"
 
 namespace Physica::Core {
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class FunctionPrinter {
-        const TreeFunction<type, errorTrack>& f;
+        const TreeFunctionData<option, errorTrack>& f;
         std::ostream& os;
     public:
-        FunctionPrinter(const TreeFunction<type, errorTrack>& f_, std::ostream& os);
+        FunctionPrinter(const TreeFunctionData<option, errorTrack>& f_, std::ostream& os);
         void print() { printImpl(f.getTree()); }
     private:
-        void printImpl(const TreeFunctionData<type, errorTrack>& functionTree);
+        void printImpl(const TreeFunctionData<option, errorTrack>& functionTree);
     };
 }
 

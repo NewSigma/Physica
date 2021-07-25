@@ -146,7 +146,7 @@ namespace Physica::Core {
     Vector<T> Vector<T, Length, MaxLength>::randomVector(size_t len) {
         Vector<T> result(len);
         for (size_t i = 0; i < len; ++i)
-            result.allocate(randomScalar<T::getType(), T::getErrorTrack()>(), i);
+            result.allocate(randomScalar<T::getOption(), T::getErrorTrack()>(), i);
         result.setLength(len);
         return result;
     }

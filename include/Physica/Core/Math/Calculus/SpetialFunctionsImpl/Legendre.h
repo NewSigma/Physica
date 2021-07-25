@@ -22,8 +22,8 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<ScalarType type, bool errorTrack>
-        Scalar<type, errorTrack> factorial(unsigned int x) {
+        template<ScalarOption option, bool errorTrack>
+        Scalar<option, errorTrack> factorial(unsigned int x) {
             constexpr static int size = 16;
             static const double cache[size] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368000};
             if (x < size)
@@ -40,9 +40,9 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> legendreP(unsigned int l, const Scalar<type, errorTrack>& x) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> legendreP(unsigned int l, const Scalar<option, errorTrack>& x) {
+        using T = Scalar<option, errorTrack>;
         assert(abs(x) <= T(1));
         T legendre_n(1);
         if (l == 0)
@@ -61,9 +61,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:189
      */
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<type, errorTrack>& x) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<option, errorTrack>& x) {
+        using T = Scalar<option, errorTrack>;
         assert(m <= l && abs(x) <= T(1));
         //Get P^m_m
         T legendre_m_n(1);
@@ -87,21 +87,21 @@ namespace Physica::Core {
         return legendre_m_n_1;
     }
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> sphericalHarmomicY(unsigned int l,
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> sphericalHarmomicY(unsigned int l,
                                                 int m,
-                                                const Scalar<type, errorTrack>& theta,
-                                                const Scalar<type, errorTrack>& phi) {
+                                                const Scalar<option, errorTrack>& theta,
+                                                const Scalar<option, errorTrack>& phi) {
         constexpr static double pi_4 = M_PI * 4;
-        using T = Scalar<type, errorTrack>;
+        using T = Scalar<option, errorTrack>;
         const unsigned int abs_m = std::abs(m);
         assert(l >= abs_m);
-        const T factorial1 = Internal::factorial<type, errorTrack>(l - abs_m);
-        const T factorial2 = Internal::factorial<type, errorTrack>(l + abs_m);
+        const T factorial1 = Internal::factorial<option, errorTrack>(l - abs_m);
+        const T factorial2 = Internal::factorial<option, errorTrack>(l + abs_m);
         const T factor = sqrt((T(2 * l + 1) * factorial1) / (T(pi_4) * factorial2));
         const T result_module = factor * legendreP(l, abs_m, cos(theta));
         const T m_phi = T(m) * phi;
-        return ComplexScalar<type, errorTrack>(result_module * cos(m_phi), result_module * sin(m_phi));
+        return ComplexScalar<option, errorTrack>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
 
     template<class Matrix>

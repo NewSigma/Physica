@@ -22,13 +22,13 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class ComplexScalar {
-        Scalar<type, errorTrack> real;
-        Scalar<type, errorTrack> imag;
+        Scalar<option, errorTrack> real;
+        Scalar<option, errorTrack> imag;
     public:
         ComplexScalar() = default;
-        ComplexScalar(Scalar<type, errorTrack> s1, Scalar<type, errorTrack> s2);
+        ComplexScalar(Scalar<option, errorTrack> s1, Scalar<option, errorTrack> s2);
         ComplexScalar(const ComplexScalar& c) = default;
         ComplexScalar(ComplexScalar&& c) noexcept;
         /* Operators */
@@ -36,12 +36,12 @@ namespace Physica::Core {
         ComplexScalar& operator=(ComplexScalar&& c) noexcept;
         void operator<<=(int i) { real <<= i; imag<<= i; }
         void operator>>=(int i) { real >>= i; imag>>= i; }
-        bool operator==(const ComplexScalar<type, errorTrack>& c);
-        bool operator!=(const ComplexScalar<type, errorTrack>& c) { return !(operator==(c)); }
-        bool operator>(const ComplexScalar<type, errorTrack>& c);
-        bool operator>=(const ComplexScalar<type, errorTrack>& c) { return !(operator<(c)); }
-        bool operator<(const ComplexScalar<type, errorTrack>& c);
-        bool operator<=(const ComplexScalar<type, errorTrack>& c) { return !(operator>(c)); }
+        bool operator==(const ComplexScalar<option, errorTrack>& c);
+        bool operator!=(const ComplexScalar<option, errorTrack>& c) { return !(operator==(c)); }
+        bool operator>(const ComplexScalar<option, errorTrack>& c);
+        bool operator>=(const ComplexScalar<option, errorTrack>& c) { return !(operator<(c)); }
+        bool operator<(const ComplexScalar<option, errorTrack>& c);
+        bool operator<=(const ComplexScalar<option, errorTrack>& c) { return !(operator>(c)); }
         /* Helpers */
         void swap(ComplexScalar& c) noexcept;
         static inline ComplexScalar getZero();
@@ -49,96 +49,96 @@ namespace Physica::Core {
         static inline ComplexScalar getTwo();
         static inline ComplexScalar getRandom();
         /* Getters */
-        [[nodiscard]] const Scalar<type, errorTrack>& getReal() const { return real; }
-        [[nodiscard]] const Scalar<type, errorTrack>& getImag() const { return imag; }
+        [[nodiscard]] const Scalar<option, errorTrack>& getReal() const { return real; }
+        [[nodiscard]] const Scalar<option, errorTrack>& getImag() const { return imag; }
         [[nodiscard]] bool isZero() { return real.isZero() && imag.isZero(); }
         /* Setters */
-        void setReal(const Scalar<type, errorTrack>& s) { real = s; }
-        void setImag(const Scalar<type, errorTrack>& s) { imag = s; }
-        void setReal(Scalar<type, errorTrack>&& s) { real = std::move(s); }
-        void setImag(Scalar<type, errorTrack>&& s) { imag = std::move(s); }
+        void setReal(const Scalar<option, errorTrack>& s) { real = s; }
+        void setImag(const Scalar<option, errorTrack>& s) { imag = s; }
+        void setReal(Scalar<option, errorTrack>&& s) { real = std::move(s); }
+        void setImag(Scalar<option, errorTrack>&& s) { imag = std::move(s); }
     };
-    template<ScalarType type, bool errorTrack>
-    [[nodiscard]] inline Scalar<type, errorTrack> norm(const ComplexScalar<type, errorTrack>& c);
+    template<ScalarOption option, bool errorTrack>
+    [[nodiscard]] inline Scalar<option, errorTrack> norm(const ComplexScalar<option, errorTrack>& c);
 
-    template<ScalarType type, bool errorTrack>
-    [[nodiscard]] Scalar<type, errorTrack> arg(const ComplexScalar<type, errorTrack>& c);
+    template<ScalarOption option, bool errorTrack>
+    [[nodiscard]] Scalar<option, errorTrack> arg(const ComplexScalar<option, errorTrack>& c);
 
-    template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const ComplexScalar<type, errorTrack>& c);
+    template<ScalarOption option, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const ComplexScalar<option, errorTrack>& c);
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator+(
-            const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator+(
+            const ComplexScalar<option, errorTrack>& c1, const ComplexScalar<option, errorTrack>& c2);
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator-(
-            const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator-(
+            const ComplexScalar<option, errorTrack>& c1, const ComplexScalar<option, errorTrack>& c2);
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator*(
-            const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator*(
+            const ComplexScalar<option, errorTrack>& c1, const ComplexScalar<option, errorTrack>& c2);
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator/(
-            const ComplexScalar<type, errorTrack>& c1, const ComplexScalar<type, errorTrack>& c2);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator/(
+            const ComplexScalar<option, errorTrack>& c1, const ComplexScalar<option, errorTrack>& c2);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator+(
-            const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator+(
+            const ComplexScalar<option, errorTrack1>& c, const Scalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator-(
-            const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator-(
+            const ComplexScalar<option, errorTrack1>& c, const Scalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator*(
-            const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator*(
+            const ComplexScalar<option, errorTrack1>& c, const Scalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator/(
-            const ComplexScalar<type, errorTrack1>& c, const Scalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator/(
+            const ComplexScalar<option, errorTrack1>& c, const Scalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator+(
-            const Scalar<type, errorTrack1>& c, const ComplexScalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator+(
+            const Scalar<option, errorTrack1>& c, const ComplexScalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator-(
-            const Scalar<type, errorTrack1>& c, const ComplexScalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator-(
+            const Scalar<option, errorTrack1>& c, const ComplexScalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator*(
-            const Scalar<type, errorTrack1>& c, const ComplexScalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator*(
+            const Scalar<option, errorTrack1>& c, const ComplexScalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    ComplexScalar<type, errorTrack1 | errorTrack2> operator/(
-            const Scalar<type, errorTrack1>& c, const ComplexScalar<type, errorTrack2>& s);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    ComplexScalar<option, errorTrack1 || errorTrack2> operator/(
+            const Scalar<option, errorTrack1>& c, const ComplexScalar<option, errorTrack2>& s);
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator<<(const ComplexScalar<type, errorTrack>& c, int i) {
-        return ComplexScalar<type, errorTrack>(c.getReal() << i, c.getImag() << i);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator<<(const ComplexScalar<option, errorTrack>& c, int i) {
+        return ComplexScalar<option, errorTrack>(c.getReal() << i, c.getImag() << i);
     }
 
-    template<ScalarType type, bool errorTrack>
-    ComplexScalar<type, errorTrack> operator>>(const ComplexScalar<type, errorTrack>& c, int i) {
-        return ComplexScalar<type, errorTrack>(c.getReal() >> i, c.getImag() >> i);
+    template<ScalarOption option, bool errorTrack>
+    ComplexScalar<option, errorTrack> operator>>(const ComplexScalar<option, errorTrack>& c, int i) {
+        return ComplexScalar<option, errorTrack>(c.getReal() >> i, c.getImag() >> i);
     }
 
-    template<ScalarType type, bool errorTrack>
-    void swap(ComplexScalar<type, errorTrack>& c1, ComplexScalar<type, errorTrack>& c2) noexcept { c1.swap(c2); }
+    template<ScalarOption option, bool errorTrack>
+    void swap(ComplexScalar<option, errorTrack>& c1, ComplexScalar<option, errorTrack>& c2) noexcept { c1.swap(c2); }
 
-    template<ScalarType type, bool errorTrack, class T>
-    void operator+=(ComplexScalar<type, errorTrack>& c, const T& t) { c = c + t; }
+    template<ScalarOption option, bool errorTrack, class T>
+    void operator+=(ComplexScalar<option, errorTrack>& c, const T& t) { c = c + t; }
 
-    template<ScalarType type, bool errorTrack, class T>
-    void operator-=(ComplexScalar<type, errorTrack>& c, const T& t) { c = c - t; }
+    template<ScalarOption option, bool errorTrack, class T>
+    void operator-=(ComplexScalar<option, errorTrack>& c, const T& t) { c = c - t; }
 
-    template<ScalarType type, bool errorTrack, class T>
-    void operator*=(ComplexScalar<type, errorTrack>& c, const T& t) { c = c * t; }
+    template<ScalarOption option, bool errorTrack, class T>
+    void operator*=(ComplexScalar<option, errorTrack>& c, const T& t) { c = c * t; }
 
-    template<ScalarType type, bool errorTrack, class T>
-    void operator/=(ComplexScalar<type, errorTrack>& c, const T& t) { c = c / t; }
+    template<ScalarOption option, bool errorTrack, class T>
+    void operator/=(ComplexScalar<option, errorTrack>& c, const T& t) { c = c / t; }
 }
 
 #include "ComplexScalarImpl/ComplexScalarImpl.h"

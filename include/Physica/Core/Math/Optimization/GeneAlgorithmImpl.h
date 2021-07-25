@@ -20,9 +20,9 @@
 #define PHYSICA_GENEALGORITHMIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type>
-    GeneAlgorithm<1, type>::GeneAlgorithm(
-            const VectorFunction<type, false> &func,
+    template<ScalarOption option>
+    GeneAlgorithm<1, option>::GeneAlgorithm(
+            const VectorFunction<option, false> &func,
             const Range &range,
             const AlgorithmConfig& config)
             : AbstractGeneAlgorithm(config)
@@ -33,9 +33,9 @@ namespace Physica::Core {
         const auto mode = config.mode;
         const auto& lower = range.lowerBound;
         if (mode == LinearChoose) {
-            Scalar<type, false> stepLength =
+            Scalar<option, false> stepLength =
                     regionLength / MultiScalar(static_cast<SignedMPUnit>(population));
-            Scalar<type, false> temp(lower);
+            Scalar<option, false> temp(lower);
             for (int i = 0; i < population; i++) {
                 points[i] = temp;
                 temp += stepLength;
@@ -47,9 +47,9 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type>
-    Point<2, type> GeneAlgorithm<1, type>::solve() const {
-        Q_UNUSED(type)
+    template<ScalarOption option>
+    Point<2, option> GeneAlgorithm<1, option>::solve() const {
+        Q_UNUSED(option)
         unsigned int generation = 0;
         while (generation < config.maxGeneration) {
             crossover();
@@ -59,8 +59,8 @@ namespace Physica::Core {
         return points;
     }
 
-    template<ScalarType type>
-    void GeneAlgorithm<1, type>::crossover() {
+    template<ScalarOption option>
+    void GeneAlgorithm<1, option>::crossover() {
         const auto population = config.population;
         const auto crossoverRate = config.crossoverRate;
         for (int i = 0; i < population; i++) {
@@ -71,7 +71,7 @@ namespace Physica::Core {
                 auto& random1 = points[randomIndex1];
                 auto& random2 = points[randomIndex2];
 
-                r = randomScalar<type, false>();
+                r = randomScalar<option, false>();
                 //Whether random2 > random1 or not is not important.
                 auto child = random1 + (random2 - random1) * r;
                 auto child_y = func(child);
@@ -85,9 +85,9 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type>
-    void GeneAlgorithm<1, type>::mutation() {
-        Q_UNUSED(type)
+    template<ScalarOption option>
+    void GeneAlgorithm<1, option>::mutation() {
+        Q_UNUSED(option)
         auto r = static_cast<double>(rand()) / RAND_MAX;
         if(r < config.mutationRate) {
             unsigned int randomIndex = random() % config.population;

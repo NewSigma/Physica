@@ -56,94 +56,94 @@ namespace Physica::Core {
         }
     }
     //////////////////////////////////////////////Global//////////////////////////////////////////////
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, false);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator+(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2) {
+        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s1, s2, false);
     }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2) {
-        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s1, s2, true);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator-(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2) {
+        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s1, s2, true);
     }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator+(const Scalar<type, errorTrack1>& s, Internal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), false);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator+(const Scalar<option, errorTrack1>& s, Internal::ScalarAddSubExpression<option, errorTrack2>&& exp) {
+        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s, std::move(exp), false);
     }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator-(const Scalar<type, errorTrack1>& s, Internal::ScalarAddSubExpression<type, errorTrack2>&& exp) {
-        return Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>(s, std::move(exp), true);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator-(const Scalar<option, errorTrack1>& s, Internal::ScalarAddSubExpression<option, errorTrack2>&& exp) {
+        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s, std::move(exp), true);
     }
 
-    template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
                   << double(s)
                   << std::setprecision(6); //6 is the default precision.
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> operator+(const Scalar<type, errorTrack>& s) {
-        return Scalar<type, errorTrack>(s);
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> operator+(const Scalar<option, errorTrack>& s) {
+        return Scalar<option, errorTrack>(s);
     }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator+=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 + s2; }
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    inline void operator+=(Scalar<option, errorTrack1>& s1
+            , const Scalar<option, errorTrack2>& s2) { s1 = s1 + s2; }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator-=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 - s2; }
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    inline void operator-=(Scalar<option, errorTrack1>& s1
+            , const Scalar<option, errorTrack2>& s2) { s1 = s1 - s2; }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator*=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 * s2; }
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    inline void operator*=(Scalar<option, errorTrack1>& s1
+            , const Scalar<option, errorTrack2>& s2) { s1 = s1 * s2; }
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    inline void operator/=(Scalar<type, errorTrack1>& s1
-            , const Scalar<type, errorTrack2>& s2) { s1 = s1 / s2; }
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    inline void operator/=(Scalar<option, errorTrack1>& s1
+            , const Scalar<option, errorTrack2>& s2) { s1 = s1 / s2; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator^=(Scalar<type, errorTrack>& s1
-            , const Scalar<type, errorTrack>& s2) { s1 = s1 ^ s2; }
+    template<ScalarOption option, bool errorTrack>
+    inline void operator^=(Scalar<option, errorTrack>& s1
+            , const Scalar<option, errorTrack>& s2) { s1 = s1 ^ s2; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator<<=(Scalar<type, errorTrack>& s
+    template<ScalarOption option, bool errorTrack>
+    inline void operator<<=(Scalar<option, errorTrack>& s
             , int bits) { s = s << bits; }
 
-    template<ScalarType type, bool errorTrack>
-    inline void operator>>=(Scalar<type, errorTrack>& s
+    template<ScalarOption option, bool errorTrack>
+    inline void operator>>=(Scalar<option, errorTrack>& s
             , int bits) { s = s >> bits; }
 
-    template<ScalarType type>
-    inline bool operator>=(const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+    template<ScalarOption option>
+    inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 < s2);
     }
 
-    template<ScalarType type>
-    inline bool operator<=(const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+    template<ScalarOption option>
+    inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 > s2);
     }
 
-    template<ScalarType type>
-    inline bool operator!= (const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2) {
+    template<ScalarOption option>
+    inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 == s2);
     }
     /*!
      * The following two functions handle swap(s1, s2). Use swap of Scalars whose errorTrack is false by default.
      */
-    template<ScalarType type, bool errorTrack>
-    inline void swap(Scalar<type, false>& s1, Scalar<type, errorTrack>& s2) noexcept {
+    template<ScalarOption option, bool errorTrack>
+    inline void swap(Scalar<option, false>& s1, Scalar<option, errorTrack>& s2) noexcept {
         s1.swap(s2);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void swap(Scalar<type, true>& s1, Scalar<type, errorTrack>& s2) noexcept {
+    template<ScalarOption option, bool errorTrack>
+    inline void swap(Scalar<option, true>& s1, Scalar<option, errorTrack>& s2) noexcept {
         s2.swap(s1);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
@@ -325,32 +325,32 @@ namespace Physica::Core {
 #include "Operation/Pow.h"
 
 namespace Physica::Core {
-    template<ScalarType type>
-    inline Scalar<type, false> operator^(
-            const Scalar<type, false>& s1, const Scalar<type, false>& s2) {
-        return Scalar<type, false>(std::pow(s1.getTrivial(), s2.getTrivial()));
+    template<ScalarOption option>
+    inline Scalar<option, false> operator^(
+            const Scalar<option, false>& s1, const Scalar<option, false>& s2) {
+        return Scalar<option, false>(std::pow(s1.getTrivial(), s2.getTrivial()));
     }
 
-    template<ScalarType type>
-    inline Scalar<type, true> operator^(
-            const Scalar<type, true>& s1, const Scalar<type, false>& s2) {
+    template<ScalarOption option>
+    inline Scalar<option, true> operator^(
+            const Scalar<option, true>& s1, const Scalar<option, false>& s2) {
         const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<type, true>(result, std::pow(s1.getTrivial(), s2.getTrivial() + s2.getA()) - result);
+        return Scalar<option, true>(result, std::pow(s1.getTrivial(), s2.getTrivial() + s2.getA()) - result);
     }
 
-    template<ScalarType type>
-    inline Scalar<type, true> operator^(
-            const Scalar<type, false>& s1, const Scalar<type, true>& s2) {
+    template<ScalarOption option>
+    inline Scalar<option, true> operator^(
+            const Scalar<option, false>& s1, const Scalar<option, true>& s2) {
         const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<type, true>(result
+        return Scalar<option, true>(result
                 , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA()), s2.getTrivial()) - result);
     }
 
-    template<ScalarType type>
-    inline Scalar<type, true> operator^(
-            const Scalar<type, true>& s1, const Scalar<type, true>& s2) {
+    template<ScalarOption option>
+    inline Scalar<option, true> operator^(
+            const Scalar<option, true>& s1, const Scalar<option, true>& s2) {
         const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<type, true>(result
+        return Scalar<option, true>(result
                 , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA())
                         , s2.getTrivial() + s2.getA()) - result);
     }

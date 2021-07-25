@@ -33,16 +33,16 @@ namespace Physica::Core {
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> lnGamma(const Scalar<type, errorTrack>& s) {
-        using T = Scalar<type, false>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> lnGamma(const Scalar<option, errorTrack>& s) {
+        using T = Scalar<option, false>;
         assert(s.isPositive());
         constexpr static int count = 9;
         constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
-        Scalar<type, errorTrack> temp = s + T(6.5);
+        Scalar<option, errorTrack> temp = s + T(6.5);
         temp -= (s + T(0.5)) * ln(temp);
-        Scalar<type, errorTrack> ser(1.000000000000123);
-        Scalar<type, errorTrack> copy(s);
+        Scalar<option, errorTrack> ser(1.000000000000123);
+        Scalar<option, errorTrack> copy(s);
         for (int j = 0; j < count; ++j) {
             copy += T(1);
             ser += T(coeffcients[j]) / copy;
@@ -76,13 +76,13 @@ namespace Physica::Core {
         return -temp + T(0.91893853320467274178) + ln(ser / s);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> gamma(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> gamma(const Scalar<option, errorTrack>& s) {
         return exp(lnGamma(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> beta(const Scalar<type, errorTrack>& s1, const Scalar<type, errorTrack>& s2) {
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> beta(const Scalar<option, errorTrack>& s1, const Scalar<option, errorTrack>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
@@ -92,9 +92,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
          */
-        template<ScalarType type, bool errorTrack>
-        Scalar<type, errorTrack> incompGamma1(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
-            using T = Scalar<type, errorTrack>;
+        template<ScalarOption option, bool errorTrack>
+        Scalar<option, errorTrack> incompGamma1(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
+            using T = Scalar<option, errorTrack>;
             assert(a.isPositive() && !x.isNegative());
             assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
             T ap = a;
@@ -112,9 +112,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
          */
-        template<ScalarType type, bool errorTrack>
-        Scalar<type, errorTrack> incompGamma2(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
-            using T = Scalar<type, errorTrack>;
+        template<ScalarOption option, bool errorTrack>
+        Scalar<option, errorTrack> incompGamma2(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
+            using T = Scalar<option, errorTrack>;
             assert(a.isPositive() && !x.isNegative());
             assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
             constexpr typename T::TrivialType epsilon = std::numeric_limits<typename T::TrivialType>::epsilon();
@@ -147,37 +147,37 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> gammaP(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> gammaP(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<type, errorTrack>;
+        using T = Scalar<option, errorTrack>;
         return (x < a + T(1)) ? Internal::incompGamma1(a, x) : (T(1) - Internal::incompGamma2(a, x));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> gammaQ(const Scalar<type, errorTrack>& a, const Scalar<type, errorTrack>& x) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> gammaQ(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<type, errorTrack>;
+        using T = Scalar<option, errorTrack>;
         return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> erf(const Scalar<type, errorTrack>& x) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> erf(const Scalar<option, errorTrack>& x) {
+        using T = Scalar<option, errorTrack>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> erfc(const Scalar<type, errorTrack>& x) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> erfc(const Scalar<option, errorTrack>& x) {
+        using T = Scalar<option, errorTrack>;
         T x2 = square(x);
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> standardNormalDistribution(const Scalar<type, errorTrack>& x) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> standardNormalDistribution(const Scalar<option, errorTrack>& x) {
+        using T = Scalar<option, errorTrack>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }
 }

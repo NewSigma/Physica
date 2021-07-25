@@ -20,16 +20,16 @@
 #define PHYSICA_VECTORFUNCTIONIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    VectorFunction<type, errorTrack>::Accessor::Accessor(VectorFunction <type, errorTrack> &vectorFunc, const TreeFunction <type, errorTrack> &treeFunc)
+    template<ScalarOption option, bool errorTrack>
+    VectorFunction<option, errorTrack>::Accessor::Accessor(VectorFunction<option, errorTrack>& vectorFunc, const TreeFunction<option, errorTrack>& treeFunc)
             : typeVector(vectorFunc.typeVector), valueVector(vectorFunc.valueVector), treeFunc(treeFunc) {
         access(&treeFunc.getTree());
     }
     /*!
      * access() visits a child tree of @class TreeFunction.
      */
-    template<ScalarType type, bool errorTrack>
-    void VectorFunction<type, errorTrack>::Accessor::access(TreeFunctionData<type, errorTrack>* data) {
+    template<ScalarOption option, bool errorTrack>
+    void VectorFunction<option, errorTrack>::Accessor::access(TreeFunctionData<option, errorTrack>* data) {
         FunctionType funcType = data->getType();
         typeVector.push_back(funcType);
         if(funcType == Value) {
@@ -49,40 +49,40 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type, bool errorTrack>
-    VectorFunction<type, errorTrack>::VectorFunction(const TreeFunction<type, errorTrack>& treeFunc) : Base(treeFunc) {
+    template<ScalarOption option, bool errorTrack>
+    VectorFunction<option, errorTrack>::VectorFunction(const TreeFunctionData<option, errorTrack>& treeFunc) : Base(treeFunc) {
         Accessor(*this, treeFunc);
     }
 
-    template<ScalarType type, bool errorTrack>
-    VectorFunction<type, errorTrack>::VectorFunction(const VectorFunction& f)
-            : AbstractFunction<type, errorTrack>(f)
+    template<ScalarOption option, bool errorTrack>
+    VectorFunction<option, errorTrack>::VectorFunction(const VectorFunction& f)
+            : AbstractFunction<option, errorTrack>(f)
             , typeVector(f.typeVector)
             , valueVector(f.valueVector)
             , valueIte(f.valueIte) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    VectorFunction<type, errorTrack>::VectorFunction(VectorFunction&& f) noexcept
-            : AbstractFunction<type, errorTrack>(f)
+    template<ScalarOption option, bool errorTrack>
+    VectorFunction<option, errorTrack>::VectorFunction(VectorFunction&& f) noexcept
+            : AbstractFunction<option, errorTrack>(f)
             , typeVector(std::move(f.typeVector))
             , valueVector(std::move(f.valueVector))
             , valueIte(f.valueIte) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> VectorFunction<type, errorTrack>::operator()(const Scalar<type, errorTrack>& s) const {
-        AbstractFunction<type, errorTrack>::setVariable(s, 0);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> VectorFunction<option, errorTrack>::operator()(const Scalar<option, errorTrack>& s) const {
+        AbstractFunction<option, errorTrack>::setVariable(s, 0);
         return solve();
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> VectorFunction<type, errorTrack>::solveImpl(
-            typename VectorFunction<type, errorTrack>::FunctionTypeVector::const_iterator& typeIte) const {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> VectorFunction<option, errorTrack>::solveImpl(
+            typename VectorFunction<option, errorTrack>::FunctionTypeVector::const_iterator& typeIte) const {
         switch(*typeIte++) {
             case Value:
                 return *valueIte++;

@@ -56,15 +56,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, ScalarType scalarType, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Add, T, Scalar<scalarType, errorTrack>> {
+    template<class T, ScalarOption option, bool errorTrack>
+    class DenseMatrixExpression<Utils::ExpressionType::Add, T, Scalar<option, errorTrack>> {
     public:
         using ScalarType = typename T::ScalarType;
     private:
         const T& exp;
-        const Scalar<scalarType, errorTrack>& scalar;
+        const Scalar<option, errorTrack>& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) + ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
@@ -86,45 +86,45 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, ScalarType scalarType, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Sub, T, Scalar<scalarType, errorTrack>> {
+    template<class T, ScalarOption option, bool errorTrack>
+    class DenseMatrixExpression<Utils::ExpressionType::Sub, T, Scalar<option, errorTrack>> {
     public:
         using ScalarType = typename T::ScalarType;
     private:
         const T& exp;
-        const Scalar<scalarType, errorTrack>& scalar;
+        const Scalar<option, errorTrack>& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) - ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, ScalarType scalarType, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Mul, T, Scalar<scalarType, errorTrack>> {
+    template<class T, ScalarOption option, bool errorTrack>
+    class DenseMatrixExpression<Utils::ExpressionType::Mul, T, Scalar<option, errorTrack>> {
     public:
         using ScalarType = typename T::ScalarType;
     private:
         const T& exp;
-        const Scalar<scalarType, errorTrack>& scalar;
+        const Scalar<option, errorTrack>& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) * ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, ScalarType scalarType, bool errorTrack>
-    class DenseMatrixExpression<Utils::ExpressionType::Div, T, Scalar<scalarType, errorTrack>> {
+    template<class T, ScalarOption option, bool errorTrack>
+    class DenseMatrixExpression<Utils::ExpressionType::Div, T, Scalar<option, errorTrack>> {
     public:
         using ScalarType = typename T::ScalarType;
     private:
         const T& exp;
-        const Scalar<scalarType, errorTrack>& scalar;
+        const Scalar<option, errorTrack>& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const Scalar<scalarType, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        DenseMatrixExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) / ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }

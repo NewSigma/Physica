@@ -26,29 +26,29 @@ namespace Physica::Core {
      *
      * Optimize: Initialize the tree in the constructor to avoid exceptions.
      */
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>::TreeFunction(size_t variablesLength, size_t constantsLength)
+    template<ScalarOption option, bool errorTrack>
+    TreeFunction<option, errorTrack>::TreeFunction(size_t variablesLength, size_t constantsLength)
             : Base(variablesLength, constantsLength) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>::TreeFunction(const TreeFunction& func)
+    template<ScalarOption option, bool errorTrack>
+    TreeFunction<option, errorTrack>::TreeFunction(const TreeFunction& func)
             : Base(func), tree(func.tree) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>::TreeFunction(TreeFunction&& func) noexcept
+    template<ScalarOption option, bool errorTrack>
+    TreeFunction<option, errorTrack>::TreeFunction(TreeFunction&& func) noexcept
             : Base(std::move(func)), tree(std::move(func.tree)) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>& TreeFunction<type, errorTrack>::operator=(const TreeFunction<type, errorTrack>& func) {
+    template<ScalarOption option, bool errorTrack>
+    TreeFunction<option, errorTrack>& TreeFunction<option, errorTrack>::operator=(const TreeFunction<option, errorTrack>& func) {
         if(this != &func) {
             Base::operator=(func);
             tree = func.tree;
@@ -56,39 +56,39 @@ namespace Physica::Core {
         return *this;
     }
 
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack>& TreeFunction<type, errorTrack>::operator=(TreeFunction<type, errorTrack>&& func) noexcept {
+    template<ScalarOption option, bool errorTrack>
+    TreeFunction<option, errorTrack>& TreeFunction<option, errorTrack>::operator=(TreeFunction<option, errorTrack>&& func) noexcept {
         Base::operator=(std::move(tree));
         tree = std::move(func.tree);
         return *this;
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1) const {
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> TreeFunction<option, errorTrack>::operator()(Scalar<option, errorTrack> s1) const {
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s1), 0);
         return solve();
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1
-            , Scalar<type, errorTrack> s2) const {
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s2), 1);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> TreeFunction<option, errorTrack>::operator()(Scalar<option, errorTrack> s1
+            , Scalar<option, errorTrack> s2) const {
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s1), 0);
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s2), 1);
         return solve();
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> TreeFunction<type, errorTrack>::operator()(Scalar<type, errorTrack> s1
-            , Scalar<type, errorTrack> s2, Scalar<type, errorTrack> s3) const {
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s1), 0);
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s2), 1);
-        AbstractFunction<type, errorTrack>::setVariable(std::move(s3), 2);
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> TreeFunction<option, errorTrack>::operator()(Scalar<option, errorTrack> s1
+            , Scalar<option, errorTrack> s2, Scalar<option, errorTrack> s3) const {
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s1), 0);
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s2), 1);
+        AbstractFunction<option, errorTrack>::setVariable(std::move(s3), 2);
         return solve();
     }
 
-    template<ScalarType type, bool errorTrack>
-    void TreeFunction<type, errorTrack>::printTree(std::ostream& os) {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    void TreeFunction<option, errorTrack>::printTree(std::ostream& os) {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         TreeFunctionPrinter printer(*this, os);
         printer.print();

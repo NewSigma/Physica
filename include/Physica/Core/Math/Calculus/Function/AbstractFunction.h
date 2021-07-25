@@ -27,20 +27,20 @@ namespace Physica::Core {
     /*!
      * @class AbstractFunction contains common parts between @class TreeFunction and @class VectorFunction.
      */
-    template<ScalarType type, bool errorTrack>
+    template<ScalarOption option, bool errorTrack>
     class AbstractFunction {
     protected:
-        mutable Array<Scalar<type, errorTrack>> variables;
-        mutable Array<Scalar<type, errorTrack>> constants;
+        mutable Array<Scalar<option, errorTrack>> variables;
+        mutable Array<Scalar<option, errorTrack>> constants;
     public:
         ~AbstractFunction() = default;
         /* Getters */
-        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getVariables() const { return variables; }
-        [[nodiscard]] const Array<Scalar<type, errorTrack>>& getConstants() const { return constants; }
-        [[nodiscard]] size_t getVariablePos(Scalar<type, errorTrack>* s) const;
-        [[nodiscard]] size_t getConstantPos(Scalar<type, errorTrack>* s) const;
+        [[nodiscard]] const Array<Scalar<option, errorTrack>>& getVariables() const { return variables; }
+        [[nodiscard]] const Array<Scalar<option, errorTrack>>& getConstants() const { return constants; }
+        [[nodiscard]] size_t getVariablePos(Scalar<option, errorTrack>* s) const;
+        [[nodiscard]] size_t getConstantPos(Scalar<option, errorTrack>* s) const;
         /* Setters */
-        inline void setConstant(Scalar<type, errorTrack> s, size_t index) const;
+        inline void setConstant(Scalar<option, errorTrack> s, size_t index) const;
     protected:
         AbstractFunction(size_t variablesLength, size_t constantsLength);
         AbstractFunction(const AbstractFunction& f);
@@ -49,14 +49,14 @@ namespace Physica::Core {
         AbstractFunction& operator=(const AbstractFunction& f);
         AbstractFunction& operator=(AbstractFunction&& f) noexcept;
         /* Setters */
-        inline void setVariable(Scalar<type, errorTrack> s, size_t index) const;
+        inline void setVariable(Scalar<option, errorTrack> s, size_t index) const;
     };
     /*!
      * Get the position of s in \variable, starts from 1.
      * return 0 if non-existent.
      */
-    template<ScalarType type, bool errorTrack>
-    size_t AbstractFunction<type, errorTrack>::getVariablePos(Scalar<type, errorTrack>* s) const {
+    template<ScalarOption option, bool errorTrack>
+    size_t AbstractFunction<option, errorTrack>::getVariablePos(Scalar<option, errorTrack>* s) const {
         const size_t distance = s - &variables[0];
         return distance < variables.getLength() ? distance + 1 : 0;
     }
@@ -64,19 +64,19 @@ namespace Physica::Core {
      * Get the position of s in \constant, starts from 1.
      * return 0 if non-existent.
      */
-    template<ScalarType type, bool errorTrack>
-    size_t AbstractFunction<type, errorTrack>::getConstantPos(Scalar<type, errorTrack>* s) const {
+    template<ScalarOption option, bool errorTrack>
+    size_t AbstractFunction<option, errorTrack>::getConstantPos(Scalar<option, errorTrack>* s) const {
         const size_t distance = s - &constants[0];
         return distance < variables.getLength() ? distance + 1 : 0;
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void AbstractFunction<type, errorTrack>::setVariable(Scalar<type, errorTrack> s, size_t index) const {
+    template<ScalarOption option, bool errorTrack>
+    inline void AbstractFunction<option, errorTrack>::setVariable(Scalar<option, errorTrack> s, size_t index) const {
         variables[index] = std::move(s);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void AbstractFunction<type, errorTrack>::setConstant(Scalar<type, errorTrack> s, size_t index) const {
+    template<ScalarOption option, bool errorTrack>
+    inline void AbstractFunction<option, errorTrack>::setConstant(Scalar<option, errorTrack> s, size_t index) const {
         constants[index] = std::move(s);
     }
 }

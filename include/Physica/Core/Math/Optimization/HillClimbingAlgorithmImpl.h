@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,41 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_HILLCLIMBINGALGORITHMIMPL_H
-#define PHYSICA_HILLCLIMBINGALGORITHMIMPL_H
+#pragma once
 
 namespace Physica::Core {
-    template<ScalarType type>
-    HillClimbingAlgorithm<1, type>::HillClimbingAlgorithm(const VectorFunction<type, false>& func
-            , const Scalar<type, false> initial, const Scalar<type, false> minStep)
+    template<ScalarOption option>
+    HillClimbingAlgorithm<1, option>::HillClimbingAlgorithm(const VectorFunction<option, false>& func
+            , const Scalar<option, false> initial, const Scalar<option, false> minStep)
             : func(func), x_initial(initial), minStep(minStep) {
         state = minStep.isZero() ? Unavailable : Ready;
     }
 
-    template<ScalarType type>
-    HillClimbingAlgorithm<1, type>::HillClimbingAlgorithm(const HillClimbingAlgorithm<1, type>& alg)
+    template<ScalarOption option>
+    HillClimbingAlgorithm<1, option>::HillClimbingAlgorithm(const HillClimbingAlgorithm<1, option>& alg)
             : func(alg.func), x_initial(alg.x_initial), minStep(alg.minStep), state(alg.state) {}
 
-    template<ScalarType type>
-    HillClimbingAlgorithm<1, type>::HillClimbingAlgorithm(HillClimbingAlgorithm<1, type>& alg)
+    template<ScalarOption option>
+    HillClimbingAlgorithm<1, option>::HillClimbingAlgorithm(HillClimbingAlgorithm<1, option>& alg)
             : func(std::move(alg.func))
             , x_initial(std::move(alg.x_initial))
             , minStep(std::move(alg.minStep))
             , state(alg.state) {}
 
-    template<ScalarType type>
-    Point<2, type, false> HillClimbingAlgorithm<1, type>::solve() const {
+    template<ScalarOption option>
+    Point<2, option, false> HillClimbingAlgorithm<1, option>::solve() const {
         if(state != Ready)
             return func(x_initial);
 
-        const Scalar<type, false> y_initial = func(x_initial);
-        Scalar<type, false> x_last(x_initial);
-        Scalar<type, false> y_last(y_initial);
-        Scalar<type, false> x = x_initial + minStep;
-        Scalar<type, false> y = func(x_last);
-        Scalar<type, false> x_result{};
-        Scalar<type, false> y_result{};
-        Scalar<type, false> stepSize(minStep);
+        const Scalar<option, false> y_initial = func(x_initial);
+        Scalar<option, false> x_last(x_initial);
+        Scalar<option, false> y_last(y_initial);
+        Scalar<option, false> x = x_initial + minStep;
+        Scalar<option, false> y = func(x_last);
+        Scalar<option, false> x_result{};
+        Scalar<option, false> y_result{};
+        Scalar<option, false> stepSize(minStep);
         /*
          * We use changeable stepSize, if y > y_last, stepMultiple += 1, otherwise stepMultiple -= 1.
          * The current step size is minStep * (stepMultiple + 1).
@@ -80,8 +79,6 @@ namespace Physica::Core {
             x = x_last + stepSize;
             y = func(x);
         }
-        return Point<2, type, false>(x_result, y_result);
+        return Point<2, option, false>(x_result, y_result);
     }
 }
-
-#endif

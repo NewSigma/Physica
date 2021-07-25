@@ -52,28 +52,28 @@ namespace Physica::Core {
         explicit AbstractGeneAlgorithm(const AlgorithmConfig& c);
     };
     
-    template<size_t dim, ScalarType type>
+    template<size_t dim, ScalarOption option>
     class GeneAlgorithm : public AbstractGeneAlgorithm {
         static_assert(dim > 0, "dim must be positive.");
     };
     
-    template<ScalarType type>
-    class GeneAlgorithm<1, type> : public AbstractGeneAlgorithm {
+    template<ScalarOption option>
+    class GeneAlgorithm<1, option> : public AbstractGeneAlgorithm {
     public:
         struct Range {
-            Scalar<type, false> lowerBound;
-            Scalar<type, false> upperBound;
+            Scalar<option, false> lowerBound;
+            Scalar<option, false> upperBound;
         };
     private:
-        VectorFunction<type, false> func;
+        VectorFunction<option, false> func;
         Range range;
-        Scalar<type, false> regionLength;
-        std::vector<Scalar<type, false>> points;
+        Scalar<option, false> regionLength;
+        std::vector<Scalar<option, false>> points;
     public:
-        GeneAlgorithm(const VectorFunction<type, false>& func, const Range& range, const AlgorithmConfig& config);
+        GeneAlgorithm(const VectorFunction<option, false>& func, const Range& range, const AlgorithmConfig& config);
         ~GeneAlgorithm() = default;
 
-        Point<2, type> solve() const;
+        Point<2, option> solve() const;
     private:
         void crossover();
         void mutation();

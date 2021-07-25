@@ -29,66 +29,66 @@ namespace Physica::Core {
      * 2.Sampling distance does not have to be equal.
      * 3.A lot of other features.
      */
-    template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic> data
-            , Scalar<type, false> distance) : data(std::move(data)), distance(std::move(distance)) {}
+    template<ScalarOption option, bool errorTrack>
+    FFT<option, errorTrack>::FFT(Vector<ComplexScalar<option, errorTrack>, Dynamic> data
+            , Scalar<option, false> distance) : data(std::move(data)), distance(std::move(distance)) {}
 
-    template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(const FFT& fft) : data(fft.data) {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    FFT<option, errorTrack>::FFT(const FFT& fft) : data(fft.data) {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>::FFT(FFT&& fft) noexcept : data(std::move(fft.data)) {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    FFT<option, errorTrack>::FFT(FFT&& fft) noexcept : data(std::move(fft.data)) {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>& FFT<type, errorTrack>::operator=(const FFT& fft) {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    FFT<option, errorTrack>& FFT<option, errorTrack>::operator=(const FFT& fft) {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         data = fft.data;
         return *this;
     }
 
-    template<ScalarType type, bool errorTrack>
-    FFT<type, errorTrack>& FFT<type, errorTrack>::operator=(FFT&& fft) noexcept {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    FFT<option, errorTrack>& FFT<option, errorTrack>::operator=(FFT&& fft) noexcept {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         data = std::move(fft.data);
         return *this;
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void FFT<type, errorTrack>::transform() {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    inline void FFT<option, errorTrack>::transform() {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         transformImpl((MathConst::getInstance() / data.getLength()) << 1);
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline void FFT<type, errorTrack>::invTransform() {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    inline void FFT<option, errorTrack>::invTransform() {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         transformImpl(-(MathConst::getInstance() / data.getLength()) << 1);
     }
 
-    template<ScalarType type, bool errorTrack>
-    void FFT<type, errorTrack>::transformImpl(const Scalar<type, errorTrack>&& phase) {
+    template<ScalarOption option, bool errorTrack>
+    void FFT<option, errorTrack>::transformImpl(const Scalar<option, errorTrack>&& phase) {
         data *= distance;
         const auto length = data.getLength();
-        Array<ComplexScalar<type, errorTrack>> array(length);
+        Array<ComplexScalar<option, errorTrack>> array(length);
         //Optimize:
         //1.i and j is changeable.(dynamic programming)
         //2.Use the formula such as sin(a + b) to avoid calculate sin and cos directly.
         for(size_t i = 0; i < length; ++i) {
             const auto phase1 = phase * i;
-            auto result_i = ComplexScalar<type, errorTrack>::getZero();
+            auto result_i = ComplexScalar<option, errorTrack>::getZero();
             for(size_t j = 0; j < length; ++j) {
                 const auto phase2 = phase1 * j;
-                result_i += ComplexScalar<type, errorTrack>(cos(phase2), sin(phase2)) * data[j];
+                result_i += ComplexScalar<option, errorTrack>(cos(phase2), sin(phase2)) * data[j];
             }
             array.allocate(std::move(result_i), i);
         }

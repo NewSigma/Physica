@@ -29,22 +29,22 @@ namespace Physica::Core {
      * @class VectorFunction is described using vector, which has a good utilization on cache so it is
      * faster than @class TreeFunction.
      */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
-    class VectorFunction : public AbstractFunction<type, errorTrack> {
-        typedef AbstractFunction<type, errorTrack> Base;
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
+    class VectorFunction : public AbstractFunction<option, errorTrack> {
+        typedef AbstractFunction<option, errorTrack> Base;
         typedef std::vector<FunctionType> FunctionTypeVector;
-        typedef std::vector<Scalar<type, errorTrack>*> ValueVector;
+        typedef std::vector<Scalar<option, errorTrack>*> ValueVector;
         /*!
          * @class Accessor will read data and turn @class TreeFunctionData into vectors in @class VectorFunction.
          */
         class Accessor {
             FunctionTypeVector& typeVector;
             ValueVector& valueVector;
-            const TreeFunction<type, errorTrack>& treeFunc;
+            const TreeFunctionData<option, errorTrack>& treeFunc;
         public:
-            explicit Accessor(VectorFunction& vectorFunc, const TreeFunction<type, errorTrack>& treeFunc);
+            explicit Accessor(VectorFunction& vectorFunc, const TreeFunction<option, errorTrack>& treeFunc);
         private:
-            void access(TreeFunctionData<type, errorTrack>* data);
+            void access(TreeFunctionData<option, errorTrack>* data);
         };
         /*!
          * \typeVector stores @enum FunctionType in the order that we access a @class TreeFunctionData using DFS.
@@ -76,16 +76,16 @@ namespace Physica::Core {
          */
         typename ValueVector::const_iterator valueIte;
     public:
-        explicit VectorFunction(const TreeFunction<type, errorTrack>& treeFunc);
+        explicit VectorFunction(const TreeFunctionData<option, errorTrack>& treeFunc);
         VectorFunction(const VectorFunction& f);
         VectorFunction(VectorFunction&& f) noexcept;
         ~VectorFunction() = default;
         /* Operators */
-        Scalar<type, errorTrack> operator()(const Scalar<type, errorTrack>& s) const;
+        Scalar<option, errorTrack> operator()(const Scalar<option, errorTrack>& s) const;
         /* Operations */
-        Scalar<type, errorTrack> solve() const { valueIte = valueVector.cbegin(); return solveImpl(typeVector.cbegin()); }
+        Scalar<option, errorTrack> solve() const { valueIte = valueVector.cbegin(); return solveImpl(typeVector.cbegin()); }
     private:
-        Scalar<type, errorTrack> solveImpl(FunctionTypeVector::const_iterator& typeIte) const;
+        Scalar<option, errorTrack> solveImpl(FunctionTypeVector::const_iterator& typeIte) const;
         /* Friends */
         friend class Accessor;
     };

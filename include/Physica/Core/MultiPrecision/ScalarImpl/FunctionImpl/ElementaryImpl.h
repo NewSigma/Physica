@@ -25,15 +25,15 @@
  * Do not include this header file, include Scalar.h instead.
  */
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> abs(const Scalar<type, errorTrack>& s) {
-        using T = Scalar<type, errorTrack>;
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s) {
+        using T = Scalar<option, errorTrack>;
         T temp(s);
         return T(std::move(temp.toAbs()));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> square(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s) {
         return s * s;
     }
     /*!
@@ -89,9 +89,9 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> reciprocal(const Scalar<type, errorTrack>& s) {
-        return Scalar<type, false>(1) / s;
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s) {
+        return Scalar<option, false>(1) / s;
     }
 
     template<bool errorTrack>
@@ -99,13 +99,13 @@ namespace Physica::Core {
         return BasicConst::getInstance()._1 / s;
     }
 
-    template<ScalarType type>
-    Scalar<type, false> sqrt(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::sqrt(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> sqrt(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::sqrt(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> sqrt(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> sqrt(const Scalar<option, true>& s) {
         const auto trivial = s.getTrivial();
         auto error = trivial - s.getA();
         if(error < 0)
@@ -113,7 +113,7 @@ namespace Physica::Core {
         const auto result = std::sqrt(trivial);
         error = std::sqrt(error) - result;
         error = error < 0 ? -error : error;
-        return Scalar<type, true>(result, error);
+        return Scalar<option, true>(result, error);
     }
 
     template<>
@@ -127,8 +127,8 @@ namespace Physica::Core {
      *
      * Fix: Easily overflow.
      */
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> factorial(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> factorial(const Scalar<option, errorTrack>& s) {
         typedef decltype(s.getTrivial()) FloatType;
         const auto trivial = s.getTrivial();
         FloatType temp = 1;
@@ -137,7 +137,7 @@ namespace Physica::Core {
             temp += 1;
             result *= temp;
         }
-        return Scalar<type, errorTrack>(result);
+        return Scalar<option, errorTrack>(result);
     }
 
     template<bool errorTrack>
@@ -152,19 +152,19 @@ namespace Physica::Core {
         return result;
     }
 
-    template<ScalarType type>
-    Scalar<type, false> ln(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::log(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> ln(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::log(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> ln(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> ln(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto result = std::log(trivial);
         auto temp = trivial - a;
         auto error = temp < 0 ? result : result - std::log(temp);
-        return Scalar<type, true>(result, error);
+        return Scalar<option, true>(result, error);
     }
 
     template<>
@@ -173,22 +173,22 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> ln(const Scalar<MultiPrecision, true>& s);
     //!Return log_a n
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Scalar<type, errorTrack1 | errorTrack2> log(
-            const Scalar<type, errorTrack1>& s, const Scalar<type, errorTrack2>& a) {
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Scalar<option, errorTrack1 || errorTrack2> log(
+            const Scalar<option, errorTrack1>& s, const Scalar<option, errorTrack2>& a) {
         return ln(s) / ln(a);
     }
 
-    template<ScalarType type>
-    Scalar<type, false> exp(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::exp(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> exp(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::exp(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> exp(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> exp(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto result = std::exp(trivial);
-        return Scalar<type, true>(result, std::exp(trivial + s.getA()) - result);
+        return Scalar<option, true>(result, std::exp(trivial + s.getA()) - result);
     }
 
     template<>
@@ -197,16 +197,16 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> exp(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> cos(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::cos(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> cos(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::cos(s.getTrivial()));
     }
     //!Accuracy is not accurate.
-    template<ScalarType type>
-    Scalar<type, true> cos(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> cos(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto result = std::cos(trivial);
-        return Scalar<type, true>(result, std::cos(trivial + s.getA()) - result);
+        return Scalar<option, true>(result, std::cos(trivial + s.getA()) - result);
     }
 
     template<>
@@ -215,16 +215,16 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> cos(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> sin(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::sin(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> sin(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::sin(s.getTrivial()));
     }
     //!Accuracy is not accurate.
-    template<ScalarType type>
-    Scalar<type, true> sin(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> sin(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto result = std::sin(trivial);
-        return Scalar<type, true>(result, std::sin(trivial + s.getA()) - result);
+        return Scalar<option, true>(result, std::sin(trivial + s.getA()) - result);
     }
 
     template<>
@@ -233,34 +233,34 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> sin(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> tan(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> tan(const Scalar<option, errorTrack>& s) {
         return sin(s) / cos(s);
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> sec(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> sec(const Scalar<option, errorTrack>& s) {
         return reciprocal(cos(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> csc(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> csc(const Scalar<option, errorTrack>& s) {
         return reciprocal(sin(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> cot(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> cot(const Scalar<option, errorTrack>& s) {
         return cos(s) / sin(s);
     }
 
-    template<ScalarType type>
-    Scalar<type, false> arccos(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::acos(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arccos(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::acos(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> arccos(const Scalar<type, true>& s) {
-        return Scalar<type, false>(std::acos(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, true> arccos(const Scalar<option, true>& s) {
+        return Scalar<option, false>(std::acos(s.getTrivial()));
     }
     //!FixIt: arccos() does not consider accuracy.
     template<>
@@ -269,14 +269,14 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arccos(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> arcsin(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::asin(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arcsin(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::asin(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> arcsin(const Scalar<type, true>& s) {
-        return Scalar<type, false>(std::asin(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, true> arcsin(const Scalar<option, true>& s) {
+        return Scalar<option, false>(std::asin(s.getTrivial()));
     }
     //!FixIt: arcsin() does not consider accuracy.
     template<>
@@ -285,14 +285,14 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arcsin(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> arctan(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::atan(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arctan(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::atan(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> arctan(const Scalar<type, true>& s) {
-        return Scalar<type, false>(std::atan(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, true> arctan(const Scalar<option, true>& s) {
+        return Scalar<option, false>(std::atan(s.getTrivial()));
     }
     //!FixIt: arctan() does not consider accuracy.
     template<>
@@ -301,33 +301,33 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, false> arctan(const Scalar<MultiPrecision, false>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsec(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsec(const Scalar<option, errorTrack>& s) {
         return arccos(reciprocal(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccsc(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccsc(const Scalar<option, errorTrack>& s) {
         return arcsin(reciprocal(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccot(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccot(const Scalar<option, errorTrack>& s) {
         return arctan(reciprocal(s));
     }
 
-    template<ScalarType type>
-    Scalar<type, false> cosh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::cosh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> cosh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::cosh(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> cosh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> cosh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > 0 ? trivial + a : trivial - a;
         error = std::cosh(error);
-        return Scalar<type, true>(std::cosh(trivial), error);
+        return Scalar<option, true>(std::cosh(trivial), error);
     }
 
     template<>
@@ -336,18 +336,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> cosh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> sinh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::sinh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> sinh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::sinh(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> sinh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> sinh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > 0 ? trivial + a : trivial - a;
         error = std::sinh(error);
-        return Scalar<type, true>(std::sinh(trivial), error);
+        return Scalar<option, true>(std::sinh(trivial), error);
     }
 
     template<>
@@ -356,18 +356,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> sinh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> tanh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::tanh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> tanh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::tanh(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> tanh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> tanh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial < 0 ? trivial + a : trivial - a;
         error = std::sinh(error);
-        return Scalar<type, true>(std::sinh(trivial), error);
+        return Scalar<option, true>(std::sinh(trivial), error);
     }
 
     template<>
@@ -376,18 +376,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> tanh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> sech(const Scalar<type, false>& s) {
-        return Scalar<type, false>(1 / std::cosh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> sech(const Scalar<option, false>& s) {
+        return Scalar<option, false>(1 / std::cosh(s.getTrivial()));
     }
 
-    template<ScalarType type>
-    Scalar<type, true> sech(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> sech(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial < 0 ? trivial + a : trivial - a;
         error = 1 / std::cosh(error);
-        return Scalar<type, true>(1 / std::cosh(trivial), error);
+        return Scalar<option, true>(1 / std::cosh(trivial), error);
     }
 
     template<>
@@ -396,18 +396,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> sech(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> csch(const Scalar<type, false>& s) {
-        return Scalar<type, false>(1 / std::sinh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> csch(const Scalar<option, false>& s) {
+        return Scalar<option, false>(1 / std::sinh(s.getTrivial()));
     }
     //!FixIt: Accuracy is not accurate if trivial <= a.
-    template<ScalarType type>
-    Scalar<type, true> csch(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> csch(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial < 0 ? trivial + a : trivial - a;
         error = 1 / std::sinh(error);
-        return Scalar<type, true>(1 / std::sinh(trivial), error);
+        return Scalar<option, true>(1 / std::sinh(trivial), error);
     }
 
     template<>
@@ -416,18 +416,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> csch(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> coth(const Scalar<type, false>& s) {
-        return Scalar<type, false>(1 / std::tanh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> coth(const Scalar<option, false>& s) {
+        return Scalar<option, false>(1 / std::tanh(s.getTrivial()));
     }
     //!FixIt: Accuracy is not accurate if trivial <= a.
-    template<ScalarType type>
-    Scalar<type, true> coth(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> coth(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial < 0 ? trivial + a : trivial - a;
         error = 1 / std::tanh(error);
-        return Scalar<type, true>(1 / std::tanh(trivial), error);
+        return Scalar<option, true>(1 / std::tanh(trivial), error);
     }
 
     template<>
@@ -436,18 +436,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> coth(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> arccosh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::acosh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arccosh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::acosh(s.getTrivial()));
     }
     //!Accuracy is not accurate when trivial <= a.
-    template<ScalarType type>
-    Scalar<type, true> arccosh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> arccosh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > a ? trivial - a : trivial + a;
         error = acosh(error);
-        return Scalar<type, true>(std::acosh(trivial), error);
+        return Scalar<option, true>(std::acosh(trivial), error);
     }
 
     template<>
@@ -456,18 +456,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arccosh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> arcsinh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::asinh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arcsinh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::asinh(s.getTrivial()));
     }
     //!Accuracy is not accurate when trivial <= a.
-    template<ScalarType type>
-    Scalar<type, true> arcsinh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> arcsinh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > 0 ? trivial - a : trivial + a;
         error = asinh(error);
-        return Scalar<type, true>(std::asinh(trivial), error);
+        return Scalar<option, true>(std::asinh(trivial), error);
     }
 
     template<>
@@ -476,18 +476,18 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arcsinh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> arctanh(const Scalar<type, false>& s) {
-        return Scalar<type, false>(std::atanh(s.getTrivial()));
+    template<ScalarOption option>
+    Scalar<option, false> arctanh(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::atanh(s.getTrivial()));
     }
     //!Accuracy is not accurate when trivial + a > 1 or trivial - a < -1.
-    template<ScalarType type>
-    Scalar<type, true> arctanh(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> arctanh(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > 0 ? trivial + a : trivial - a;
         error = atanh(error);
-        return Scalar<type, true>(std::atanh(trivial), error);
+        return Scalar<option, true>(std::atanh(trivial), error);
     }
 
     template<>
@@ -496,29 +496,29 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arctanh(const Scalar<MultiPrecision, true>& s);
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arcsech(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arcsech(const Scalar<option, errorTrack>& s) {
         return arccosh(reciprocal(s));
     }
 
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> arccsch(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> arccsch(const Scalar<option, errorTrack>& s) {
         return arcsinh(reciprocal(s));
     }
 
-    template<ScalarType type>
-    Scalar<type, false> arccoth(const Scalar<type, false>& s) {
+    template<ScalarOption option>
+    Scalar<option, false> arccoth(const Scalar<option, false>& s) {
         auto trivial = s.getTrivial();
-        return Scalar<type, false>(std::log((trivial + 1) / (trivial - 1)) / 2);
+        return Scalar<option, false>(std::log((trivial + 1) / (trivial - 1)) / 2);
     }
     //!Accuracy is not accurate when |trivial| < a.
-    template<ScalarType type>
-    Scalar<type, true> arccoth(const Scalar<type, true>& s) {
+    template<ScalarOption option>
+    Scalar<option, true> arccoth(const Scalar<option, true>& s) {
         auto trivial = s.getTrivial();
         auto a = s.getA();
         auto error = trivial > 0 ? trivial - a : trivial + a;
         error = std::log((error + 1) / (error - 1)) / 2;
-        return Scalar<type, false>(std::log((trivial + 1) / (trivial - 1)) / 2, error);
+        return Scalar<option, false>(std::log((trivial + 1) / (trivial - 1)) / 2, error);
     }
 
     template<>

@@ -25,13 +25,13 @@ namespace Physica::Core {
     /*!
      * By default, point do not need high precision, so @param type is set to @enum ScalarType::Float.
      */
-    template<size_t dim, ScalarType type = Float, bool errorTrack = false>
+    template<size_t dim, ScalarOption option = Float, bool errorTrack = false>
     class Point {
-        Scalar<type, errorTrack>* arr;
+        Scalar<option, errorTrack>* arr;
     public:
         static constexpr size_t length = dim;
 
-        Point() : arr(new Scalar<type, errorTrack>[dim]) {}
+        Point() : arr(new Scalar<option, errorTrack>[dim]) {}
         Point(const Point& p);
         Point(Point&& p) noexcept : arr(p.arr) { p.arr = nullptr; }
         ~Point() { delete[] arr; }
@@ -40,12 +40,12 @@ namespace Physica::Core {
         Point& operator=(Point&& p) noexcept { this->~Point(); arr = p.arr; p.arr = nullptr; }
     };
 
-    template<ScalarType type, bool errorTrack>
-    class Point<1, type, errorTrack> {
-        Scalar<type, errorTrack> x;
+    template<ScalarOption option, bool errorTrack>
+    class Point<1, option, errorTrack> {
+        Scalar<option, errorTrack> x;
     public:
         Point() = default;
-        explicit Point(Scalar<type, errorTrack> x);
+        explicit Point(Scalar<option, errorTrack> x);
         Point(const Point& p);
         Point(Point&& p) noexcept;
         ~Point() = default;
@@ -53,15 +53,15 @@ namespace Physica::Core {
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
         /* Getters */
-        const Scalar<type, errorTrack>& getX() const { return x; }
+        const Scalar<option, errorTrack>& getX() const { return x; }
     };
 
-    template<ScalarType type, bool errorTrack>
-    class Point<2, type, errorTrack> {
-        Scalar<type, errorTrack> x, y;
+    template<ScalarOption option, bool errorTrack>
+    class Point<2, option, errorTrack> {
+        Scalar<option, errorTrack> x, y;
     public:
         Point() = default;
-        Point(Scalar<type, errorTrack> x, Scalar<type, errorTrack> y);
+        Point(Scalar<option, errorTrack> x, Scalar<option, errorTrack> y);
         Point(const Point& p);
         Point(Point&& p) noexcept;
         ~Point() = default;
@@ -69,16 +69,16 @@ namespace Physica::Core {
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
         /* Getters */
-        const Scalar<type, errorTrack>& getX() const { return x; }
-        const Scalar<type, errorTrack>& getY() const { return y; }
+        const Scalar<option, errorTrack>& getX() const { return x; }
+        const Scalar<option, errorTrack>& getY() const { return y; }
     };
 
-    template<ScalarType type, bool errorTrack>
-    class Point<3, type, errorTrack> {
-        Scalar<type, errorTrack> x, y, z;
+    template<ScalarOption option, bool errorTrack>
+    class Point<3, option, errorTrack> {
+        Scalar<option, errorTrack> x, y, z;
     public:
         Point() = default;
-        Point(Scalar<type, errorTrack> x, Scalar<type, errorTrack> y, Scalar<type, errorTrack> z);
+        Point(Scalar<option, errorTrack> x, Scalar<option, errorTrack> y, Scalar<option, errorTrack> z);
         Point(const Point& p);
         Point(Point&& p) noexcept;
         ~Point() = default;
@@ -86,9 +86,9 @@ namespace Physica::Core {
         Point& operator=(const Point& p);
         Point& operator=(Point&& p) noexcept;
         /* Getters */
-        const Scalar<type, errorTrack>& getX() const { return x; }
-        const Scalar<type, errorTrack>& getY() const { return y; }
-        const Scalar<type, errorTrack>& getZ() const { return z; }
+        const Scalar<option, errorTrack>& getX() const { return x; }
+        const Scalar<option, errorTrack>& getY() const { return y; }
+        const Scalar<option, errorTrack>& getZ() const { return z; }
     };
 
     typedef Point<1> Point1D;

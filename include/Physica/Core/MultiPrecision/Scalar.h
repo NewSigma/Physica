@@ -28,24 +28,24 @@
 namespace Physica::Core {
     //Forward declarations
     namespace Internal {
-        template<ScalarType type> class ScalarAddSubExpressionHelper;
-        template<ScalarType type, bool errorTrack> class ScalarAddSubExpression;
+        template<ScalarOption option> class ScalarAddSubExpressionHelper;
+        template<ScalarOption option, bool errorTrack> class ScalarAddSubExpression;
     }
 
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> sqrt(const Scalar<type, false>& s);
+    template<ScalarOption option>
+    Scalar<option, false> sqrt(const Scalar<option, false>& s);
 
-    template<ScalarType type>
-    Scalar<type, true> sqrt(const Scalar<type, true>& s);
+    template<ScalarOption option>
+    Scalar<option, true> sqrt(const Scalar<option, true>& s);
 
-    template<ScalarType type>
-    Scalar<type, false> ln(const Scalar<type, false>& s);
+    template<ScalarOption option>
+    Scalar<option, false> ln(const Scalar<option, false>& s);
 
-    template<ScalarType type>
-    Scalar<type, true> ln(const Scalar<type, true>& s);
+    template<ScalarOption option>
+    Scalar<option, true> ln(const Scalar<option, true>& s);
 
     namespace Internal {
         /**
@@ -54,15 +54,15 @@ namespace Physica::Core {
         template<class T1, class T2>
         class ScalarOperationReturnType;
 
-        template<ScalarType type1, bool errorTrack1, ScalarType type2, bool errorTrack2>
-        class ScalarOperationReturnType<Scalar<type1, errorTrack1>, Scalar<type2, errorTrack2>> {
-            static constexpr ScalarType type = type1 > type2 ? type2 : type1;
+        template<ScalarOption option1, bool errorTrack1, ScalarOption option2, bool errorTrack2>
+        class ScalarOperationReturnType<Scalar<option1, errorTrack1>, Scalar<option2, errorTrack2>> {
+            static constexpr ScalarOption option = option1 > option2 ? option2 : option1;
             static constexpr bool errorTrack = errorTrack1 || errorTrack2;
         public:
-            using Type = Scalar<type, errorTrack>;
+            using Type = Scalar<option, errorTrack>;
         };
 
-        template<ScalarType type>
+        template<ScalarOption option>
         class AbstractScalar;
 
         template<>
@@ -107,7 +107,7 @@ namespace Physica::Core {
                 void swap(AbstractScalar& s) noexcept;
                 static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2);
                 /* Getters */
-                [[nodiscard]] constexpr static ScalarType getType() { return MultiPrecision; }
+                [[nodiscard]] constexpr static ScalarOption getOption() { return MultiPrecision; }
                 [[nodiscard]] int getLength() const noexcept { return length; }
                 [[nodiscard]] int getPower() const noexcept { return power; }
                 [[nodiscard]] int getSize() const noexcept { return abs(length); }
@@ -149,14 +149,14 @@ namespace Physica::Core {
                 friend class Core::Integer;
                 template<bool errorTrack>
                 friend Scalar<MultiPrecision, errorTrack> Core::square(const Scalar<MultiPrecision, errorTrack>& s);
-                template<ScalarType type>
-                friend Scalar<type, false> Core::sqrt(const Scalar<type, false>& s);
-                template<ScalarType type>
-                friend Scalar<type, true> Core::sqrt(const Scalar<type, true>& s);
-                template<ScalarType type>
-                friend Scalar<type, false> Core::ln(const Scalar<type, false>& s);
-                template<ScalarType type>
-                friend Scalar<type, true> Core::ln(const Scalar<type, true>& s);
+                template<ScalarOption option>
+                friend Scalar<option, false> Core::sqrt(const Scalar<option, false>& s);
+                template<ScalarOption option>
+                friend Scalar<option, true> Core::sqrt(const Scalar<option, true>& s);
+                template<ScalarOption option>
+                friend Scalar<option, false> Core::ln(const Scalar<option, false>& s);
+                template<ScalarOption option>
+                friend Scalar<option, true> Core::ln(const Scalar<option, true>& s);
         };
 
         template<>
@@ -176,7 +176,7 @@ namespace Physica::Core {
             explicit operator float() const { return f; }
             explicit operator double() const { return f; }
             /* Getters */
-            [[nodiscard]] constexpr static ScalarType getType() { return Float; }
+            [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
             [[nodiscard]] float getTrivial() const noexcept { return f; }
             [[nodiscard]] bool isZero() const { return f == 0; }
             [[nodiscard]] bool isPositive() const { return f > 0; }
@@ -207,7 +207,7 @@ namespace Physica::Core {
             explicit operator float() const { return d; }
             explicit operator double() const { return d; }
             /* Getters */
-            [[nodiscard]] constexpr static ScalarType getType() { return Double; }
+            [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
             [[nodiscard]] double getTrivial() const noexcept { return d; }
             [[nodiscard]] bool isZero() const { return d == 0; }
             [[nodiscard]] bool isPositive() const { return d > 0; }
@@ -335,10 +335,10 @@ namespace Physica::Core {
         friend class Internal::AbstractScalar<MultiPrecision>;
         friend class Internal::ScalarAddSubExpressionHelper<MultiPrecision>;
         friend class Scalar<MultiPrecision, false>;
-        template<ScalarType type>
-        friend Scalar<type, true> sqrt(const Scalar<type, true>& s);
-        template<ScalarType type>
-        friend Scalar<type, true> ln(const Scalar<type, true>& s);
+        template<ScalarOption option>
+        friend Scalar<option, true> sqrt(const Scalar<option, true>& s);
+        template<ScalarOption option>
+        friend Scalar<option, true> ln(const Scalar<option, true>& s);
     };
     /* Compare */
     bool absCompare(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2);
@@ -514,8 +514,8 @@ namespace Physica::Core {
     inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     /* Output */
-    template<ScalarType type, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<type, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

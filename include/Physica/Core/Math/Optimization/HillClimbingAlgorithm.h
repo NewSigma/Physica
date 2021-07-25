@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_HILLCLIMBINGALGORITHM_H
-#define PHYSICA_HILLCLIMBINGALGORITHM_H
+#pragma once
 
 #include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
 #include "Physica/Core/Math/Geometry/Point.h"
@@ -27,13 +26,13 @@ namespace Physica::Core {
      * @class HillClimbingAlgorithm tries to get the maximum of a function.
      * If you want the minimum of a function f(x), simply calculate the maximum of -f(x).
      */
-    template<size_t dim, ScalarType type>
+    template<size_t dim, ScalarOption option>
     class HillClimbingAlgorithm {
         static_assert(dim > 0, "dim must be at least 1.");
     };
 
-    template<ScalarType type>
-    class HillClimbingAlgorithm<1, type> {
+    template<ScalarOption option>
+    class HillClimbingAlgorithm<1, option> {
     public:
         enum State {
             Unavailable,
@@ -41,32 +40,30 @@ namespace Physica::Core {
             OverFlow
         };
     private:
-        const VectorFunction<type, false> func;
-        Scalar<type, false> x_initial;
+        const VectorFunction<option, false> func;
+        Scalar<option, false> x_initial;
         /*!
          * \minStep is the minimum step size that depends the precision of our result.
          * Set a positive value to search from the positive axe of x,
          * or a negative value to search from negative value.
          */
-        Scalar<type, false> minStep;
+        Scalar<option, false> minStep;
         State state;
     public:
-        HillClimbingAlgorithm(const VectorFunction<type, false>& func
-                              , const Scalar<type, false> initial
-                              , const Scalar<type, false> minStep);
+        HillClimbingAlgorithm(const VectorFunction<option, false>& func
+                              , const Scalar<option, false> initial
+                              , const Scalar<option, false> minStep);
         HillClimbingAlgorithm(const HillClimbingAlgorithm& alg);
         HillClimbingAlgorithm(HillClimbingAlgorithm& alg);
         ~HillClimbingAlgorithm() = default;
         /* Operations */
-        Point<2, type, false> solve() const;
+        Point<2, option, false> solve() const;
         /* Getters */
-        [[nodiscard]] Scalar<type, false> getMinStep() const { return minStep; }
+        [[nodiscard]] Scalar<option, false> getMinStep() const { return minStep; }
         [[nodiscard]] State getState() const { return state; }
         /* Setters */
-        void setMinStep(const Scalar<type, false>& s) { minStep = s; }
+        void setMinStep(const Scalar<option, false>& s) { minStep = s; }
     };
 }
 
 #include "HillClimbingAlgorithmImpl.h"
-
-#endif

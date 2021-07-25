@@ -20,20 +20,20 @@
 
 //Forward declaration
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator+(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator+(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2);
 
-    template<ScalarType type, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<type, errorTrack1 || errorTrack2>
-    operator-(const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2);
+    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
+    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
+    operator-(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2);
 }
 
 namespace Physica::Core::Internal {
-    template<ScalarType type>
+    template<ScalarOption option>
     template<bool errorTrack1, bool errorTrack2>
-    ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(
-            const Scalar<type, errorTrack1>& s1, const Scalar<type, errorTrack2>& s2, bool minus) {
+    ScalarAddSubExpressionHelper<option>::ScalarAddSubExpressionHelper(
+            const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2, bool minus) {
         constexpr NodeType nodeType1 = errorTrack1 ? PositiveWithError : PositiveWithoutError;
         constexpr NodeType nodeType2helper1 = errorTrack2 ? NegativeWithError : NegativeWithoutError;
         constexpr NodeType nodeType2helper2 = errorTrack2 ? PositiveWithError : PositiveWithoutError;
@@ -42,10 +42,10 @@ namespace Physica::Core::Internal {
         terms.push_back(Node{&s2, nodeType2});
     }
 
-    template<ScalarType type>
+    template<ScalarOption option>
     template<bool errorTrack>
-    ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(
-            const Scalar<type, errorTrack>& s, ScalarAddSubExpressionHelper<type>&& exp, bool minus)
+    ScalarAddSubExpressionHelper<option>::ScalarAddSubExpressionHelper(
+            const Scalar<option, errorTrack>& s, ScalarAddSubExpressionHelper<option>&& exp, bool minus)
             : terms(std::move(exp.terms)) {
         constexpr NodeType typeToInsert = errorTrack ? PositiveWithError : PositiveWithoutError;
         auto ite = terms.begin();
@@ -80,10 +80,10 @@ namespace Physica::Core::Internal {
         }
     }
 
-    template<ScalarType type>
+    template<ScalarOption option>
     template<bool errorTrack>
-    ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(
-            ScalarAddSubExpressionHelper<type>&& exp, const Scalar<type, errorTrack>& s, bool minus)
+    ScalarAddSubExpressionHelper<option>::ScalarAddSubExpressionHelper(
+            ScalarAddSubExpressionHelper<option>&& exp, const Scalar<option, errorTrack>& s, bool minus)
             : terms(std::move(exp.terms)) {
         constexpr NodeType typeToInsertHelper1 = errorTrack ? PositiveWithError : PositiveWithoutError;
         constexpr NodeType typeToInsertHelper2 = errorTrack ? NegativeWithError : NegativeWithoutError;
@@ -100,9 +100,9 @@ namespace Physica::Core::Internal {
         terms.insert(ite, Node{&s, typeToInsert});
     }
 
-    template<ScalarType type>
-    ScalarAddSubExpressionHelper<type>::ScalarAddSubExpressionHelper(
-            const ScalarAddSubExpressionHelper<type>& exp1, const ScalarAddSubExpressionHelper<type>& exp2, bool minus) {
+    template<ScalarOption option>
+    ScalarAddSubExpressionHelper<option>::ScalarAddSubExpressionHelper(
+            const ScalarAddSubExpressionHelper<option>& exp1, const ScalarAddSubExpressionHelper<option>& exp2, bool minus) {
         auto ite1 = exp1.terms.begin();
         auto ite2 = exp2.terms.begin();
         for (; ite1 != exp1.terms.end() && ite2 != exp2.terms.end(); ++ite1, ++ite2) {
@@ -126,43 +126,43 @@ namespace Physica::Core::Internal {
     template<>
     Scalar<MultiPrecision, true> ScalarAddSubExpressionHelper<MultiPrecision>::calculate() const;
 
-    template<ScalarType type>
-    Scalar<type, true> ScalarAddSubExpressionHelper<type>::calculate() const {
-        Scalar<type, true> result(0);
+    template<ScalarOption option>
+    Scalar<option, true> ScalarAddSubExpressionHelper<option>::calculate() const {
+        Scalar<option, true> result(0);
         bool withError = false; //Whether we have encountered a with-error scalar or not.
         for(auto node : terms) {
             const auto& value = *node.value;
             switch (node.nodeType) {
                 case PositiveWithoutError:
                     if (withError)
-                        result = Scalar<type, true>(result.getTrivial() + value.getTrivial(), result.getA());
+                        result = Scalar<option, true>(result.getTrivial() + value.getTrivial(), result.getA());
                     else
-                        result = Scalar<type, true>(result.getTrivial() + value.getTrivial());
+                        result = Scalar<option, true>(result.getTrivial() + value.getTrivial());
                     break;
                 case PositiveWithError: {
-                    const auto& temp = static_cast<const Scalar<type, true>&>(value);
+                    const auto& temp = static_cast<const Scalar<option, true>&>(value);
                     if (withError)
-                        result = Scalar<type, true>(result.getTrivial() + value.getTrivial()
+                        result = Scalar<option, true>(result.getTrivial() + value.getTrivial()
                                 , result.getA() + temp.getA());
                     else
-                        result = Scalar<type, true>(result.getTrivial() + value.getTrivial()
+                        result = Scalar<option, true>(result.getTrivial() + value.getTrivial()
                                 , temp.getA());
                     withError = true;
                 }
                     break;
                 case NegativeWithoutError:
                     if (withError)
-                        result = Scalar<type, true>(result.getTrivial() - value.getTrivial(), result.getA());
+                        result = Scalar<option, true>(result.getTrivial() - value.getTrivial(), result.getA());
                     else
-                        result = Scalar<type, true>(result.getTrivial() - value.getTrivial());
+                        result = Scalar<option, true>(result.getTrivial() - value.getTrivial());
                     break;
                 case NegativeWithError:
-                    const auto& temp = static_cast<const Scalar<type, true>&>(value);
+                    const auto& temp = static_cast<const Scalar<option, true>&>(value);
                     if (withError)
-                        result = Scalar<type, true>(result.getTrivial() - value.getTrivial()
+                        result = Scalar<option, true>(result.getTrivial() - value.getTrivial()
                                 , result.getA() + temp.getA());
                     else
-                        result = Scalar<type, true>(result.getTrivial() - value.getTrivial()
+                        result = Scalar<option, true>(result.getTrivial() - value.getTrivial()
                                 , temp.getA());
                     withError = true;
                     break;

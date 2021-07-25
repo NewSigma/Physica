@@ -39,8 +39,8 @@ namespace Physica::Core {
         int length;
     public:
         Integer(int i); //NOLINT Conversion is always available.
-        template<ScalarType type, bool errorTrack>
-        explicit Integer(const Scalar<type, errorTrack>& s);
+        template<ScalarOption option, bool errorTrack>
+        explicit Integer(const Scalar<option, errorTrack>& s);
         template<bool errorTrack>
         explicit Integer(const Scalar<MultiPrecision, errorTrack>& s);
         Integer(const Integer& toCopy);

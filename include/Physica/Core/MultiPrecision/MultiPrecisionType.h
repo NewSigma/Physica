@@ -51,7 +51,7 @@
 #define MPUnitLowerMask (MPUnitMax >> (MPUnitWidth / 2))
 
 namespace Physica::Core {
-    enum ScalarType {
+    enum ScalarOption {
         Float = 0,
         Double = 1,
         MultiPrecision = 2
@@ -61,6 +61,6 @@ namespace Physica::Core {
      * \class Scalar is a advanced float type that supports multiple precision and error track,
      * which is also compatible with float and double.
      */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true> class Scalar;
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true> class Scalar;
 
 }

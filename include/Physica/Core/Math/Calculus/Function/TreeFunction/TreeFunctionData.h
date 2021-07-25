@@ -24,20 +24,20 @@
 #include "Physica/Core/Math/Calculus/Function/AbstractFunction.h"
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
+    template<ScalarOption option, bool errorTrack>
     class TreeFunctionPrinter;
 
-    template<ScalarType type, bool errorTrack>
+    template<ScalarOption option, bool errorTrack>
     class TreeFunction;
     /*!
      * @class TreeFunctionData is the internal data type of a TreeFunction.
      *
      * Optimize: Enable copy, remove templates
      */
-    template<ScalarType scalarType = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class TreeFunctionData {
         static_assert(sizeof(long) == sizeof(void*), "This class is contructed with the assumption");
-        typedef AbstractFunction<scalarType, errorTrack> Function;
+        typedef AbstractFunction<option, errorTrack> Function;
     private:
         union {
             struct {
@@ -71,41 +71,41 @@ namespace Physica::Core {
         [[nodiscard]] FunctionType getType() const noexcept { return type; }
         [[nodiscard]] const TreeFunctionData* getLeft() const { return getType() == Value ? nullptr : left; }
         [[nodiscard]] const TreeFunctionData* getRight() const { return getType() == Value ? nullptr : right; }
-        [[nodiscard]] const Scalar<scalarType, errorTrack>* getValue(const Function& func) const;
+        [[nodiscard]] const Scalar<option, errorTrack>* getValue(const Function& func) const;
     private:
         explicit TreeFunctionData(long index_);
         TreeFunctionData(const TreeFunctionData& data);
 
         TreeFunctionData& operator=(const TreeFunctionData& data);
 
-        [[nodiscard]] Scalar<scalarType, errorTrack> solve(const Function& func) const;
-        friend class TreeFunction<scalarType, errorTrack>;
-        friend class TreeFunctionPrinter<scalarType, errorTrack>;
+        [[nodiscard]] Scalar<option, errorTrack> solve(const Function& func) const;
+        friend class TreeFunction<option, errorTrack>;
+        friend class TreeFunctionPrinter<option, errorTrack>;
     };
 
-    template<ScalarType scalarType, bool errorTrack>
-    inline TreeFunctionData<scalarType, errorTrack> operator+(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
-        return TreeFunctionData<scalarType, errorTrack>(Add, std::move(data1), std::move(data2));
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> operator+(TreeFunctionData<option, errorTrack>&& data1, TreeFunctionData<option, errorTrack>&& data2) {
+        return TreeFunctionData<option, errorTrack>(Add, std::move(data1), std::move(data2));
     }
 
-    template<ScalarType scalarType, bool errorTrack>
-    inline TreeFunctionData<scalarType, errorTrack> operator-(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
-        return TreeFunctionData<scalarType, errorTrack>(Sub, std::move(data1), std::move(data2));
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> operator-(TreeFunctionData<option, errorTrack>&& data1, TreeFunctionData<option, errorTrack>&& data2) {
+        return TreeFunctionData<option, errorTrack>(Sub, std::move(data1), std::move(data2));
     }
 
-    template<ScalarType scalarType, bool errorTrack>
-    inline TreeFunctionData<scalarType, errorTrack> operator*(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
-        return TreeFunctionData<scalarType, errorTrack>(Mul, std::move(data1), std::move(data2));
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> operator*(TreeFunctionData<option, errorTrack>&& data1, TreeFunctionData<option, errorTrack>&& data2) {
+        return TreeFunctionData<option, errorTrack>(Mul, std::move(data1), std::move(data2));
     }
 
-    template<ScalarType scalarType, bool errorTrack>
-    inline TreeFunctionData<scalarType, errorTrack> operator/(TreeFunctionData<scalarType, errorTrack>&& data1, TreeFunctionData<scalarType, errorTrack>&& data2) {
-        return TreeFunctionData<scalarType, errorTrack>(Div, std::move(data1), std::move(data2));
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> operator/(TreeFunctionData<option, errorTrack>&& data1, TreeFunctionData<option, errorTrack>&& data2) {
+        return TreeFunctionData<option, errorTrack>(Div, std::move(data1), std::move(data2));
     }
 
-    template<ScalarType scalarType, bool errorTrack>
-    inline TreeFunctionData<scalarType, errorTrack> sin(TreeFunctionData<scalarType, errorTrack>&& data) {
-        return TreeFunctionData<scalarType, errorTrack>(Sin, std::move(data));
+    template<ScalarOption option, bool errorTrack>
+    inline TreeFunctionData<option, errorTrack> sin(TreeFunctionData<option, errorTrack>&& data) {
+        return TreeFunctionData<option, errorTrack>(Sin, std::move(data));
     }
 }
 

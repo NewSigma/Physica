@@ -20,35 +20,35 @@
 #define PHYSICA_ABSTRACTFUNCTIONIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    AbstractFunction<type, errorTrack>::AbstractFunction(size_t variablesLength, size_t constantsLength)
-            : variables(Array<Scalar<type, errorTrack>>(variablesLength))
-            , constants(Array<Scalar<type, errorTrack>>(constantsLength)) {
+    template<ScalarOption option, bool errorTrack>
+    AbstractFunction<option, errorTrack>::AbstractFunction(size_t variablesLength, size_t constantsLength)
+            : variables(Array<Scalar<option, errorTrack>>(variablesLength))
+            , constants(Array<Scalar<option, errorTrack>>(constantsLength)) {
         for(size_t i = 0; i < variablesLength; ++i)
-            variables.allocate(Scalar<type, errorTrack>(0), i);
+            variables.allocate(Scalar<option, errorTrack>(0), i);
         variables.setLength(variablesLength);
         for(size_t i = 0; i < constantsLength; ++i)
-            constants.allocate(Scalar<type, errorTrack>(0), i);
+            constants.allocate(Scalar<option, errorTrack>(0), i);
         constants.setLength(constantsLength);
     }
 
-    template<ScalarType type, bool errorTrack>
-    AbstractFunction<type, errorTrack>::AbstractFunction(const AbstractFunction& f)
+    template<ScalarOption option, bool errorTrack>
+    AbstractFunction<option, errorTrack>::AbstractFunction(const AbstractFunction& f)
             : variables(f.variables), constants(f.constants) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
 
-    template<ScalarType type, bool errorTrack>
-    AbstractFunction<type, errorTrack>::AbstractFunction(AbstractFunction&& f) noexcept
+    template<ScalarOption option, bool errorTrack>
+    AbstractFunction<option, errorTrack>::AbstractFunction(AbstractFunction&& f) noexcept
             : variables(std::move(f.variables)), constants(std::move(f.constants)) {
-        Q_UNUSED(type)
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
     }
     /* Operators */
-    template<ScalarType type, bool errorTrack>
-    AbstractFunction<type, errorTrack>& AbstractFunction<type, errorTrack>::operator=(const AbstractFunction& f) {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    AbstractFunction<option, errorTrack>& AbstractFunction<option, errorTrack>::operator=(const AbstractFunction& f) {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         if(this != &f) {
             variables = f.variables;
@@ -56,9 +56,9 @@ namespace Physica::Core {
         }
         return *this;
     }
-    template<ScalarType type, bool errorTrack>
-    AbstractFunction<type, errorTrack>& AbstractFunction<type, errorTrack>::operator=(AbstractFunction&& f) noexcept {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    AbstractFunction<option, errorTrack>& AbstractFunction<option, errorTrack>::operator=(AbstractFunction&& f) noexcept {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         variables = std::move(f.variables);
         constants = std::move(f.constants);

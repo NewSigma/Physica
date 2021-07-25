@@ -30,8 +30,8 @@
  */
 //Forward declaration
 namespace Physica::Core {
-    template<ScalarType type>
-    inline bool operator!=(const Internal::AbstractScalar<type>& s1, const Internal::AbstractScalar<type>& s2);
+    template<ScalarOption option>
+    inline bool operator!=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
 }
 
 namespace Physica::Core::Internal {

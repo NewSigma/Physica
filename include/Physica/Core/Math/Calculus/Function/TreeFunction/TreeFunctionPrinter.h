@@ -24,7 +24,7 @@
 #include "TreeFunctionData.h"
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
+    template<ScalarOption option, bool errorTrack>
     class TreeFunction;
 
     namespace {
@@ -38,16 +38,16 @@ namespace Physica::Core {
         };
     }
 
-    template<ScalarType type, bool errorTrack>
+    template<ScalarOption option, bool errorTrack>
     class TreeFunctionPrinter : private TreeFunctionPrinterPrivate {
         std::list<const char*> list;
-        const TreeFunction<type, errorTrack>& f;
+        const TreeFunctionData<option, errorTrack>& f;
         std::ostream& os;
     public:
-        TreeFunctionPrinter(const TreeFunction<type, errorTrack>& f, std::ostream& os);
+        TreeFunctionPrinter(const TreeFunctionData<option, errorTrack>& f, std::ostream& os);
         void print() { printImpl(f.getTree(), false); } //true or false leads to the same result.
     private:
-        void printImpl(const TreeFunctionData<type, errorTrack>& functionTree, bool isLeft);
+        void printImpl(const TreeFunctionData<option, errorTrack>& functionTree, bool isLeft);
         void printList();
     };
 }

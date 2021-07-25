@@ -21,8 +21,8 @@
 #include "IntegerArithmetic.h"
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    Integer::Integer(const Scalar<type, errorTrack>& s) : Integer(static_cast<int>(s.getTrivial())) {}
+    template<ScalarOption option, bool errorTrack>
+    Integer::Integer(const Scalar<option, errorTrack>& s) : Integer(static_cast<int>(s.getTrivial())) {}
 
     template<bool errorTrack>
     Integer::Integer(const Scalar<MultiPrecision, errorTrack>& s) {

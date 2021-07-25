@@ -26,16 +26,16 @@ namespace Physica::Core {
     /*!
      * \class FunctionDerivative returns partial derivative of TreeFunction \f of variable \index.
      */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class FunctionDerivative {
-        const TreeFunction<type, errorTrack>& f;
+        const TreeFunctionData<option, errorTrack>& f;
         size_t index;
     public:
-        explicit FunctionDerivative(const TreeFunction<type, errorTrack>& f, size_t index);
+        explicit FunctionDerivative(const TreeFunctionData<option, errorTrack>& f, size_t index);
 
-        [[nodiscard]] TreeFunction<type, errorTrack> derivative() const;
+        [[nodiscard]] TreeFunctionData<option, errorTrack> derivative() const;
     private:
-        [[nodiscard]] TreeFunctionData<type, errorTrack> derivativeTree(const TreeFunctionData<type, errorTrack>& tree) const;
+        [[nodiscard]] TreeFunctionData<option, errorTrack> derivativeTree(const TreeFunctionData<option, errorTrack>& tree) const;
     };
 }
 

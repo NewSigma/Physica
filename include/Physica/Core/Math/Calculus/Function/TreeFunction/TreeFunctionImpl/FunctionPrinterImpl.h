@@ -20,11 +20,11 @@
 #define PHYSICA_FUNCTIONPRINTERIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    FunctionPrinter<type, errorTrack>::FunctionPrinter(const TreeFunction<type, errorTrack>& f_, std::ostream& os) : f(f_), os(os) {}
+    template<ScalarOption option, bool errorTrack>
+    FunctionPrinter<option, errorTrack>::FunctionPrinter(const TreeFunctionData<option, errorTrack>& f_, std::ostream& os) : f(f_), os(os) {}
 
-    template<ScalarType type, bool errorTrack>
-    void FunctionPrinter<type, errorTrack>::printImpl(const TreeFunctionData<type, errorTrack>& functionTree) {
+    template<ScalarOption option, bool errorTrack>
+    void FunctionPrinter<option, errorTrack>::printImpl(const TreeFunctionData<option, errorTrack>& functionTree) {
         switch(functionTree.getType()) {
             case Value: {
                 auto pos = f.getVariablePos(functionTree);

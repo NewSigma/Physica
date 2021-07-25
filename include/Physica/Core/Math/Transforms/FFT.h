@@ -23,25 +23,25 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class FFT {
     protected:
-        Vector<ComplexScalar<type, errorTrack>, Dynamic> data;
-        Scalar<type, false> distance;
+        Vector<ComplexScalar<option, errorTrack>, Dynamic> data;
+        Scalar<option, false> distance;
     public:
-        FFT(Vector<ComplexScalar<type, errorTrack>, Dynamic> data, Scalar<type, false> distance);
+        FFT(Vector<ComplexScalar<option, errorTrack>, Dynamic> data, Scalar<option, false> distance);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT() = default;
         /* Operators */
         FFT& operator=(const FFT& fft);
         FFT& operator=(FFT&& fft) noexcept;
-        ComplexScalar<type, errorTrack> operator()(size_t i) { return data[i]; }
+        ComplexScalar<option, errorTrack> operator()(size_t i) { return data[i]; }
         /* Transforms */
         inline void transform();
         inline void invTransform();
     private:
-        void transformImpl(const Scalar<type, errorTrack>&& phase);
+        void transformImpl(const Scalar<option, errorTrack>&& phase);
     };
 }
 

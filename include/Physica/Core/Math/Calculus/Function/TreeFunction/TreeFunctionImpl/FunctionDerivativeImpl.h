@@ -20,13 +20,13 @@
 #define PHYSICA_FUNCTIONDERIVATIVEIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    FunctionDerivative<type, errorTrack>::FunctionDerivative(const TreeFunction<type, errorTrack>& f, size_t index) : f(f), index(index) {}
+    template<ScalarOption option, bool errorTrack>
+    FunctionDerivative<option, errorTrack>::FunctionDerivative(const TreeFunctionData<option, errorTrack>& f, size_t index) : f(f), index(index) {}
     /*!
      * Return the partial derivative of the given function.
      */
-    template<ScalarType type, bool errorTrack>
-    TreeFunction<type, errorTrack> FunctionDerivative<type, errorTrack>::derivative() const {
+    template<ScalarOption option, bool errorTrack>
+    TreeFunctionData<option, errorTrack> FunctionDerivative<option, errorTrack>::derivative() const {
         const auto variablesLength = f.getVariablesLength();
         const auto constantsLength = f.getConstantsLength() + 4;
         TreeFunction result(derivativeTree(f.getTree()), variablesLength, constantsLength);
@@ -50,8 +50,8 @@ namespace Physica::Core {
      * Optimize:
      * Derivative of value may return 0 or 1. Make use of them.
      */
-    template<ScalarType type, bool errorTrack>
-    TreeFunctionData<type, errorTrack> FunctionDerivative<type, errorTrack>::derivativeTree(const TreeFunctionData<type, errorTrack>& tree) const {
+    template<ScalarOption option, bool errorTrack>
+    TreeFunctionData<option, errorTrack> FunctionDerivative<option, errorTrack>::derivativeTree(const TreeFunctionData<option, errorTrack>& tree) const {
         const FunctionType functionType = tree.getType();
         switch(functionType) {
             case Value:

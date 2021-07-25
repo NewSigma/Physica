@@ -20,11 +20,11 @@
 #define PHYSICA_TREEFUNCTIONDATAPRINTERIMPL_H
 
 namespace Physica::Core {
-    template<ScalarType type, bool errorTrack>
-    TreeFunctionPrinter<type, errorTrack>::TreeFunctionPrinter(const TreeFunction<type, errorTrack>& f, std::ostream& os) : f(f), os(os) {}
+    template<ScalarOption option, bool errorTrack>
+    TreeFunctionPrinter<option, errorTrack>::TreeFunctionPrinter(const TreeFunctionData<option, errorTrack>& f, std::ostream& os) : f(f), os(os) {}
 
-    template<ScalarType type, bool errorTrack>
-    void TreeFunctionPrinter<type, errorTrack>::printImpl(const TreeFunctionData<type, errorTrack>& functionTree, bool isLeft) {
+    template<ScalarOption option, bool errorTrack>
+    void TreeFunctionPrinter<option, errorTrack>::printImpl(const TreeFunctionData<option, errorTrack>& functionTree, bool isLeft) {
         if(functionTree.getType() == Value) {
             auto pos = f.getVariablePos(functionTree);
             if(pos != 0) {
@@ -175,9 +175,9 @@ namespace Physica::Core {
         list.pop_back();
     }
 
-    template<ScalarType type, bool errorTrack>
-    void TreeFunctionPrinter<type, errorTrack>::printList() {
-        Q_UNUSED(type)
+    template<ScalarOption option, bool errorTrack>
+    void TreeFunctionPrinter<option, errorTrack>::printList() {
+        Q_UNUSED(option)
         Q_UNUSED(errorTrack)
         for(const char* str : list)
             os << str;

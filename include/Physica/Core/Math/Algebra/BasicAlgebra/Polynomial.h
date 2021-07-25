@@ -29,11 +29,11 @@ namespace Physica::Core {
      * A polynomial is:
      * y(x) = a0 + a1 x + a2 x ^ 2 + ... + an x ^ n
      */
-    template<ScalarType type = MultiPrecision, bool errorTrack = true>
+    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
     class Polynomial {
     public:
         //data stores the coeficients of the polynomial.
-        Array<Scalar<type, errorTrack>> data;
+        Array<Scalar<option, errorTrack>> data;
     public:
         Polynomial() = default;
         Polynomial(const Polynomial& p) = default;
@@ -42,18 +42,18 @@ namespace Physica::Core {
         /* Operators */
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { data = std::move(p.data); return *this; }
-        Scalar<type, errorTrack> operator()(const Scalar<type, errorTrack>& s) const;
+        Scalar<option, errorTrack> operator()(const Scalar<option, errorTrack>& s) const;
     };
 
     /*!
      * Returns the value of this polynomial when x = s.
      */
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> Polynomial<type, errorTrack>::operator()(const Scalar<type, errorTrack>& s) const {
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> Polynomial<type, errorTrack>::operator()(const Scalar<option, errorTrack>& s) const {
         if(data.empty())
-            return Scalar<type, errorTrack>::getZero();
-        Scalar<type, errorTrack> result(data[0]);
-        Scalar<type, errorTrack> temp(s);
+            return Scalar<option, errorTrack>::getZero();
+        Scalar<option, errorTrack> result(data[0]);
+        Scalar<option, errorTrack> temp(s);
         const auto length = data.getLength();
         for(size_t i = 1; i < length; ++i) {
             result += temp * data[i];

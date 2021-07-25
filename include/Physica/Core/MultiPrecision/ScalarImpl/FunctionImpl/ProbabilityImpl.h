@@ -24,18 +24,18 @@
  */
 namespace Physica::Core {
     //!Return a real number between 0 and 1.
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> randomScalar() {
-        return Scalar<type, errorTrack>(static_cast<double>(random()) / RAND_MAX);
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> randomScalar() {
+        return Scalar<option, errorTrack>(static_cast<double>(random()) / RAND_MAX);
     }
     //!Return a real number lowerBound and upperBound.
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> randomScalar(
-            const Scalar<type, errorTrack>& lowerBound,
-            const Scalar<type, errorTrack>& upperBound) {
-        auto castUpper = static_cast<Scalar<type, false>>(upperBound);
-        auto castLower = static_cast<Scalar<type, false>>(lowerBound);
-        auto s = randomScalar<type, errorTrack>();
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> randomScalar(
+            const Scalar<option, errorTrack>& lowerBound,
+            const Scalar<option, errorTrack>& upperBound) {
+        auto castUpper = static_cast<Scalar<option, false>>(upperBound);
+        auto castLower = static_cast<Scalar<option, false>>(lowerBound);
+        auto s = randomScalar<option, errorTrack>();
         return s * (castUpper - castLower) + castLower;
     }
 
@@ -57,13 +57,13 @@ namespace Physica::Core {
      * Specialization for float and double.
      * Fix: May overflow.
      */
-    template<ScalarType type, bool errorTrack>
-    Scalar<type, errorTrack> floor(const Scalar<type, errorTrack>& s) {
-        return Scalar<type, errorTrack>(static_cast<size_t>(s.getTrivial()));
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> floor(const Scalar<option, errorTrack>& s) {
+        return Scalar<option, errorTrack>(static_cast<size_t>(s.getTrivial()));
     }
 
-    template<ScalarType type, bool errorTrack>
-    inline Scalar<type, errorTrack> ceil(const Scalar<type, errorTrack>& s) {
+    template<ScalarOption option, bool errorTrack>
+    inline Scalar<option, errorTrack> ceil(const Scalar<option, errorTrack>& s) {
         return ++floor(s);
     }
 }
