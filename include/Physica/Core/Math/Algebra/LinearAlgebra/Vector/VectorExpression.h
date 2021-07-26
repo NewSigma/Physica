@@ -30,7 +30,7 @@
 namespace Physica::Core {
     //Forward declaration
     using Utils::Dynamic;
-    template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length>
+    template<class T, size_t Length, size_t MaxLength>
     class Vector;
     /**
      * \class VectorExpression represents \param T1 \param type \param T2. e.g. vector + scalar, expression * expression

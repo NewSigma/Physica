@@ -18,14 +18,20 @@
  */
 #pragma once
 
-namespace Physica::Utils {
-    /**
-     * This class helps implemant CRTP.
-     */
+#include "Physica/Utils/Template/CRTPBase.h"
+
+namespace Physica::Core {
+    namespace Internal {
+        template<class T> class Traits;
+    }
+
     template<class Derived>
-    class CRTPBase {
+    class VectorBase : public Utils::CRTPBase<Derived> {
+        using Base = Utils::CRTPBase<Derived>;
     public:
-        [[nodiscard]] Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
-        [[nodiscard]] const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
+        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+    public:
+        /* Getters */
+        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };
 }

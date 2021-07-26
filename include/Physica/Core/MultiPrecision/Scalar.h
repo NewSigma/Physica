@@ -60,12 +60,12 @@ namespace Physica::Core {
         /**
          * This class return a type that can exactly represent the two input scalars.
          */
-        template<class Derived, class OtherDerived>
-        class BinaryScalarReturnType {
-            static constexpr ScalarOption option = Traits<Derived>::option > Traits<OtherDerived>::option
-                                                                            ? Traits<OtherDerived>::option
-                                                                            : Traits<Derived>::option;
-            static constexpr bool errorTrack = Traits<Derived>::errorTrack || Traits<OtherDerived>::errorTrack;
+        template<class AnyScalar1, class AnyScalar2>
+        class BinaryScalarOpReturnType {
+            static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
+                                                                            ? Traits<AnyScalar2>::option
+                                                                            : Traits<AnyScalar1>::option;
+            static constexpr bool errorTrack = Traits<AnyScalar1>::errorTrack || Traits<AnyScalar2>::errorTrack;
         public:
             using Type = Scalar<option, errorTrack>;
         };

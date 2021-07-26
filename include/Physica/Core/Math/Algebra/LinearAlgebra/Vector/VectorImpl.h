@@ -26,24 +26,24 @@
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<Utils::ExpressionType type, class T1, class T2>
-    Vector<T, Length, MaxLength>::Vector(const VectorExpression<type, T1, T2>& expression) : Base(expression.getLength()) {
+    Vector<T, Length, MaxLength>::Vector(const VectorExpression<type, T1, T2>& expression) : Storage(expression.getLength()) {
         const size_t length = expression.getLength();
         for (size_t i = 0; i < length; ++i)
-            Base::init(expression[i], i);
-        Base::setLength(length);
+            Storage::init(expression[i], i);
+        Storage::setLength(length);
     }
 
     template<class T, size_t Length, size_t MaxLength>
     template<Utils::ExpressionType type, class T1, class T2>
     Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const VectorExpression<type, T1, T2>& exp) {
-        Base::operator=(exp.calc());
+        Storage::operator=(exp.calc());
         return *this;
     }
 
     template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::toOpposite() {
-        const auto end = Base::end();
-        for (auto ite = Base::begin(); ite != end; ++ite)
+        const auto end = Storage::end();
+        for (auto ite = Storage::begin(); ite != end; ++ite)
             (*ite).toOpposite();
         return *this;
     }
@@ -53,9 +53,16 @@ namespace Physica::Core {
         T norm = norm();
         if (norm.isZero())
             return;
-        const auto end = Base::end();
-        for (auto ite = Base::begin(); ite != end; ++ite)
+        const auto end = Storage::end();
+        for (auto ite = Storage::begin(); ite != end; ++ite)
             (*ite) /= norm;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class OtherVector>
+    inline CrossProduct<Vector<T, Length, MaxLength>, OtherVector>
+    Vector<T, Length, MaxLength>::crossProduct(const VectorBase<OtherVector>& v) const noexcept {
+        return CrossProduct(*this, v);
     }
 
     template<class T, size_t Length, size_t MaxLength>
@@ -88,7 +95,7 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     bool Vector<T, Length, MaxLength>::isZero() const {
-        const auto length = Base::getLength();
+        const auto length = Storage::getLength();
         if(length == 0)
             return false;
         for(size_t i = 0; i < length; ++i) {
@@ -100,9 +107,9 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     T Vector<T, Length, MaxLength>::max() const {
-        assert(Base::getLength() != 0);
+        assert(Storage::getLength() != 0);
         T result((*this)[0]);
-        for (size_t i = 1; i < Base::getLength(); ++i) {
+        for (size_t i = 1; i < Storage::getLength(); ++i) {
             if ((*this)[i] > result)
                 result = (*this)[i];
         }
@@ -111,9 +118,9 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     T Vector<T, Length, MaxLength>::min() const {
-        assert(Base::getLength() != 0);
+        assert(Storage::getLength() != 0);
         T result((*this)[0]);
-        for (size_t i = 1; i < Base::getLength(); ++i) {
+        for (size_t i = 1; i < Storage::getLength(); ++i) {
             if ((*this)[i] < result)
                 result = (*this)[i];
         }
@@ -128,7 +135,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     T Vector<T, Length, MaxLength>::squaredNorm() const {
         auto result = T::Zero();
-        for(auto ite = Base::cbegin(); ite != Base::cend(); ++ite)
+        for(auto ite = Storage::cbegin(); ite != Storage::cend(); ++ite)
             result += square(*ite);
         return result;
     }

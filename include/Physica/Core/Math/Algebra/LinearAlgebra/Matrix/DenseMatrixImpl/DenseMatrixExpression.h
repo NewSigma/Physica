@@ -44,7 +44,7 @@ namespace Physica::Core {
     template<class T1, class T2>
     class DenseMatrixExpression<Utils::ExpressionType::Add, T1, T2> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
     private:
         const T1& exp1;
         const T2& exp2;
@@ -59,7 +59,7 @@ namespace Physica::Core {
     template<class T, class AnyScalar>
     class DenseMatrixExpression<Utils::ExpressionType::Add, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
         const AnyScalar& scalar;
@@ -74,7 +74,7 @@ namespace Physica::Core {
     template<class T1, class T2>
     class DenseMatrixExpression<Utils::ExpressionType::Sub, T1, T2> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
     private:
         const T1& exp1;
         const T2& exp2;
@@ -89,7 +89,7 @@ namespace Physica::Core {
     template<class T, class AnyScalar>
     class DenseMatrixExpression<Utils::ExpressionType::Sub, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
         const AnyScalar& scalar;
@@ -104,7 +104,7 @@ namespace Physica::Core {
     template<class T, class AnyScalar>
     class DenseMatrixExpression<Utils::ExpressionType::Mul, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
         const AnyScalar& scalar;
@@ -119,7 +119,7 @@ namespace Physica::Core {
     template<class T, class AnyScalar>
     class DenseMatrixExpression<Utils::ExpressionType::Div, T, ScalarBase<AnyScalar>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
     private:
         const T& exp;
         const AnyScalar& scalar;

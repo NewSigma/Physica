@@ -23,28 +23,40 @@
 #include "Physica/Utils/Container/Array/Array.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
+#include "VectorBase.h"
+#include "CrossProduct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixType.h"
 
 namespace Physica::Core {
+    template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length>
+    class Vector;
+
+    namespace Internal {
+        template<class T, size_t Length, size_t MaxLength>
+        class Traits<Vector<T, Length, MaxLength>> {
+        public:
+            using ScalarType = T;
+            constexpr static size_t SizeAtCompile = Length;
+            constexpr static size_t MaxSizeAtCompile = MaxLength;
+        };
+    }
+
     template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class DenseMatrix;
     /**
      * T must be either Scalar or ComplexScalar.
-     * 
-     * Default template arguments are defined in \file VectorExpression.h
      */
     template<class T, size_t Length, size_t MaxLength>
-    class Vector : public Utils::Array<T, Length, MaxLength> {
-    public:
-        using ScalarType = T;
-        using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
-    private:
+    class Vector : public VectorBase<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
-        using Base = Utils::Array<T, Length, MaxLength>;
+        using Storage = Utils::Array<T, Length, MaxLength>;
+    public:
+        using Base = VectorBase<Vector<T, Length, MaxLength>>;
         using ColMatrix = DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, Length, 1, MaxLength, 1>;
         using RowMatrix = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, 1, Length, 1, MaxLength>;
+        using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
     public:
-        using Base::Base;
+        using Storage::Storage;
         Vector() = default;
         template<Utils::ExpressionType type, class T1, class T2>
         Vector(const VectorExpression<type, T1, T2>& expression); //NOLINT Implicit conversions is permitted.
@@ -59,11 +71,14 @@ namespace Physica::Core {
         /* Operations */
         Vector& toOpposite();
         void toUnit();
+        template<class OtherVector>
+        [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const VectorBase<OtherVector>& v) const noexcept;
         ColMatrix copyToColMatrix() const;
         ColMatrix moveToColMatrix();
         RowMatrix copyToRowMatrix() const;
         RowMatrix moveToRowMatrix();
         /* Getters */
+        using Storage::getLength;
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
