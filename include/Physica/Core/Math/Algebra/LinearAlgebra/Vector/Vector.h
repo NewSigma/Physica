@@ -21,9 +21,9 @@
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
+#include "VectorBase.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
-#include "VectorBase.h"
 #include "CrossProduct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixType.h"
 
@@ -97,37 +97,8 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const Vector<T, Length, MaxLength>& v);
 
     template<class T, size_t Length, size_t MaxLength>
-    inline VectorExpression<Utils::ExpressionType::Minus, Vector<T, Length, MaxLength>> operator-(const Vector<T, Length, MaxLength>& v);
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline VectorExpression<Utils::ExpressionType::Add, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>
-            operator+(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2);
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline VectorExpression<Utils::ExpressionType::Sub, Vector<T, Length, MaxLength>, Vector<T, Length, MaxLength>>
-            operator-(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2);
-
-    template<class T, size_t Length, size_t MaxLength>
     T operator*(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2);
 
-    template<class T, size_t Length, size_t MaxLength>
-    VectorExpression<Utils::ExpressionType::Add, Vector<T, Length, MaxLength>, T> operator+(const Vector<T, Length, MaxLength>& v, const T& s);
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline VectorExpression<Utils::ExpressionType::Add, Vector<T, Length, MaxLength>, T> operator+(const T& s, const Vector<T, Length, MaxLength>& v) { return v + s; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    VectorExpression<Utils::ExpressionType::Sub, Vector<T, Length, MaxLength>, T> operator-(const Vector<T, Length, MaxLength>& v, const T& s);
-
-    template<class T, size_t Length, size_t MaxLength>
-    VectorExpression<Utils::ExpressionType::Mul, Vector<T, Length, MaxLength>, T> operator*(const Vector<T, Length, MaxLength>& v, const T& s);
-
-    template<class T, size_t Length, size_t MaxLength>
-    VectorExpression<Utils::ExpressionType::Mul, Vector<T, Length, MaxLength>, T> operator*(const T& s, const Vector<T, Length, MaxLength>& v) { return v * s; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    VectorExpression<Utils::ExpressionType::Div, Vector<T, Length, MaxLength>, T> operator/(const Vector<T, Length, MaxLength>& v, const T& s);
-    
     template<class T, size_t Length, size_t MaxLength, Utils::ExpressionType type, class T1, class T2>
     void operator+=(Vector<T, Length, MaxLength>& v1, const VectorExpression<type, T1, T2>& exp);
 
