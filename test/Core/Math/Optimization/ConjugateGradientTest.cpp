@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Math;
