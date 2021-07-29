@@ -19,9 +19,9 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<Utils::ExpressionType expType, class T1, class T2>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp)
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp)
             : DenseMatrix(exp.getRow(), exp.getColumn()) {
         for (size_t i = 0; i < Base::getMaxMajor(); i++) {
             for (size_t j = 0; j < Base::getMaxMinor(); ++j) {
@@ -30,16 +30,16 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class OtherMatrix>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrixBase<OtherMatrix>& mat)
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrixBase<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
         mat.assignTo(*this);
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class T1, class T2>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(MatrixProduct<T1, T2> pro) : DenseMatrix(pro.getRow(), pro.getColumn()) {
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(MatrixProduct<T1, T2> pro) : DenseMatrix(pro.getRow(), pro.getColumn()) {
         for (size_t i = 0; i < Base::getMaxMajor(); i++) {
             for (size_t j = 0; j < Base::getMaxMinor(); ++j) {
                 Base::getElementFromMajorMinor(i, j) = pro(Base::rowFromMajorMinor(i, j), Base::columnFromMajorMinor(i, j));
@@ -47,9 +47,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class MatrixIn>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<MatrixIn> lu)
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<MatrixIn> lu)
             : DenseMatrix(lu.getOrder(), lu.getOrder()) {
         const size_t rank = lu.getOrder();
         (*this) = lu.getMatrix();
@@ -57,15 +57,15 @@ namespace Physica::Core {
             lu.decompositionColumn((*this), i);
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class MatrixIn>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::DenseMatrix(InverseMatrix<MatrixIn> inverse)
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(InverseMatrix<MatrixIn> inverse)
             : DenseMatrix(inverse.getOrder(), inverse.getOrder()) {
-        using MatrixOut = DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>;
+        using MatrixOut = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>;
         MatrixIn matrixIn(inverse.getMatrix());
         const size_t order = inverse.getOrder();
         const size_t order_1 = order - 1;
-        if constexpr (DenseMatrixType::isSameMajor<MatrixIn, MatrixOut>()) {
+        if constexpr (DenseMatrixOption::isSameMajor<MatrixIn, MatrixOut>()) {
             Base::toUnitMatrix();
             for (size_t i = 0; i < order_1; ++i) {
                 size_t k = i;
@@ -148,15 +148,15 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>::unitMatrix(size_t order) {
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat) {
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat) {
         const size_t column = mat.getColumn();
         const size_t row = mat.getRow();
         size_t width = 0;

@@ -22,7 +22,7 @@
 #include "Matrix.h"
 
 namespace Physica::Core {
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     class SquareMatrix : public DenseMatrix<T, type, maxSize, maxSize> {
         typedef DenseMatrix<T, type, maxSize, maxSize> Base;
     public:

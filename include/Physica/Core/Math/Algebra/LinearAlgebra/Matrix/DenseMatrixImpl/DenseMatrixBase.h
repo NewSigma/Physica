@@ -31,14 +31,14 @@ namespace Physica::Core {
      */
     template<class Derived>
     class DenseMatrixBase : public DenseMatrixStorage<typename Internal::Traits<Derived>::ScalarType
-                                                      , Internal::Traits<Derived>::MatrixType
+                                                      , Internal::Traits<Derived>::MatrixOption
                                                       , Internal::Traits<Derived>::RowAtCompile
                                                       , Internal::Traits<Derived>::ColumnAtCompile
                                                       , Internal::Traits<Derived>::MaxRowAtCompile
                                                       , Internal::Traits<Derived>::MaxColumnAtCompile>
                             , public Utils::CRTPBase<Derived> {
         using Base = DenseMatrixStorage<typename Internal::Traits<Derived>::ScalarType
-                                        , Internal::Traits<Derived>::MatrixType
+                                        , Internal::Traits<Derived>::MatrixOption
                                         , Internal::Traits<Derived>::RowAtCompile
                                         , Internal::Traits<Derived>::ColumnAtCompile
                                         , Internal::Traits<Derived>::MaxRowAtCompile

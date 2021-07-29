@@ -29,26 +29,26 @@ namespace Physica::Core {
      * the latter calculation. If the column of a SquareMatrix more than its row,
      * the values of unnecessary columns will may also be changed.
      */
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix() : DenseMatrix<T, type, maxSize, maxSize>() {
         Q_UNUSED(type)
         Q_UNUSED(maxSize)
     }
 
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix(size_t length) : DenseMatrix<T, type, maxSize, maxSize>(length) {
         Q_UNUSED(type)
         Q_UNUSED(maxSize)
     }
 
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix(SquareMatrix&& matrix) noexcept
             : DenseMatrix<T, type, maxSize, maxSize>(std::move(matrix)) {
         Q_UNUSED(type)
         Q_UNUSED(maxSize)
     }
 
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>& SquareMatrix<T, type, maxSize>::operator=(
             SquareMatrix<T, type, maxSize>&& m) noexcept {
         DenseMatrix<T, type, maxSize, maxSize>::operator=(std::move(m));
@@ -58,7 +58,7 @@ namespace Physica::Core {
      *
      * Reference: MultiScalar Recipes in C++
      */
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     T SquareMatrix<T, type, maxSize>::determinate(DeterminateMethod method) {
         typedef MatrixOperation<T, type, maxSize, maxSize> Operation;
 
@@ -91,7 +91,7 @@ namespace Physica::Core {
         }
     }
     
-    template<class T, DenseMatrixType type, size_t maxSize>
+    template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize> SquareMatrix<T, type, maxSize>::getUnitMatrix(size_t length) {
         Q_UNUSED(type)
         SquareMatrix result(length);

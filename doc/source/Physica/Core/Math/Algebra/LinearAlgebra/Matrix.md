@@ -13,7 +13,7 @@ MatrixBase is a template and MatrixImpl is passed as template param so that the 
 Each matrix should have a class Traits that declares the following public members:
 
 ScalarType
-int MatrixType
+int MatrixOption
 size_t RowAtCompile
 size_t ColumnAtCompile
 size_t MaxRowAtCompile

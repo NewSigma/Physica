@@ -38,7 +38,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class Cholesky : public DenseMatrixBase<Cholesky<MatrixType>> {
-        using Base = DenseMatrixBase<MatrixType>;
+        using Base = DenseMatrixBase<Cholesky<MatrixType>>;
         const MatrixType& matrix;
     public:
         explicit Cholesky(const MatrixType& matrix_);
@@ -92,7 +92,7 @@ namespace Physica::Core {
                 ScalarType diag(*constElementIte);
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix<ResultType>())
+                        if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
                             diag -= square((*this)(i, k));
                         else
                             diag -= square((*this)(k, i));
@@ -107,7 +107,7 @@ namespace Physica::Core {
                     ++constElementIte;
                     ScalarType temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
-                        if constexpr (DenseMatrixType::isColumnMatrix<ResultType>())
+                        if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
                             diag -= (*this)(i, k) * (*this)(j, k);
                         else
                             diag -= (*this)(k, i) * (*this)(k, j);

@@ -22,7 +22,7 @@ using namespace Physica::Core;
 
 int main() {
     {
-        typedef DenseMatrix<Scalar<Double, false>, DenseMatrixType::Column | DenseMatrixType::Element, 3, 3, 3, 3> Matrix3x3;
+        typedef DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Element, 3, 3, 3, 3> Matrix3x3;
         Matrix3x3 mat{5, -2, 0, -2, 3, -1, 0, -1, 1};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
@@ -34,7 +34,7 @@ int main() {
                     return 1;
     }
     {
-        typedef DenseMatrix<Scalar<Double, false>, DenseMatrixType::Column | DenseMatrixType::Vector, 3, 3, 3, 3> Matrix3x3;
+        typedef DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3, 3, 3> Matrix3x3;
         Matrix3x3 mat{{5, -2, 0}, {-2, 3, -1}, {0, -1, 1}};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);

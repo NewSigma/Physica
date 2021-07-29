@@ -27,7 +27,7 @@
 #include "InverseMatrix.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
+    template<class T = MultiScalar, int option = DenseMatrixOption::Column | DenseMatrixOption::Vector
             , size_t Row = Dynamic, size_t Column = Dynamic, size_t MaxRow = Row, size_t MaxColumn = Column>
     class DenseMatrix;
 
@@ -35,11 +35,11 @@ namespace Physica::Core {
         template<class T>
         class Traits;
 
-        template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-        class Traits<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>> {
+        template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+        class Traits<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>> {
         public:
             using ScalarType = T;
-            constexpr static int MatrixType = type;
+            constexpr static int MatrixOption = option;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
@@ -49,23 +49,28 @@ namespace Physica::Core {
         };
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat);
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat);
     /**
      * DenseMatrix class
      * A matrix can be either fixed matrix, which have its max size defined,
      * or dynamic matrix, whose size is dynamically changed.
      * 
-     * \tparam type
-     * type is combinations of \enum DenseMatrixType
+     * \tparam option
+     * option is combinations of \enum DenseMatrixOption
      */
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>> {
-        using Base = DenseMatrixBase<DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>>;
-
-        enum {
-            isColumnMatrix = DenseMatrixType::isColumnMatrix<DenseMatrix>()
-        };
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>> {
+        using Base = DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
+    public:
+        constexpr static int MatrixOption = option;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = MaxRow;
+        constexpr static size_t MaxColumnAtCompile = MaxColumn;
+        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t MaxSizeAtCompile = MaxRow * MaxColumn;
+        constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<DenseMatrix>();
     public:
         using Base::Base;
         template<Utils::ExpressionType expType, class T1, class T2>
@@ -88,12 +93,12 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
     };
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& mat);
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat);
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    inline void swap(DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m1
-            , DenseMatrix<T, type, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    inline void swap(DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m1
+            , DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
 }
 
 #include "DenseMatrixImpl/DenseMatrixImpl.h"

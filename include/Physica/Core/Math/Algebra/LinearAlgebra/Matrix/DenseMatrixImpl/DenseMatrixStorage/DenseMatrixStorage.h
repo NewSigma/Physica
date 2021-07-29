@@ -41,7 +41,7 @@ namespace Physica::Core {
         class Traits<DenseMatrixStorage<T, type, Row, Column, MaxRow, MaxColumn>> {
         public:
             using ScalarType = T;
-            constexpr static int MatrixType = type;
+            constexpr static int MatrixOption = type;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
@@ -52,21 +52,21 @@ namespace Physica::Core {
     }
     ////////////////////////////////////ColumnElement////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Element, Row, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Element, Row, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -75,21 +75,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Element, Dynamic, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Element, Dynamic, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -98,21 +98,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Row, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Element, Row, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Element, Row, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -121,21 +121,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Element, Dynamic, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Element, Dynamic, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Element>;
     protected:
         size_t row;
     public:
@@ -152,21 +152,21 @@ namespace Physica::Core {
     };
     ////////////////////////////////////RowElement////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Element, Row, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Element, Row, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -175,21 +175,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Element, Dynamic, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -198,21 +198,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Row, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Element, Row, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Element, Row, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element>;
     public:
         using Base::Base;
         /* Getters */
@@ -221,21 +221,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Element, Dynamic, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Element
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Element
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Element>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Element>;
     protected:
         size_t row;
     public:
@@ -252,21 +252,21 @@ namespace Physica::Core {
     };
     ////////////////////////////////////ColumnVector////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Vector, Row, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Row, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -275,21 +275,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Vector, Dynamic, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Dynamic, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -298,21 +298,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Row, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Vector, Row, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Row, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -321,21 +321,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Column | DenseMatrixType::Vector, Dynamic, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Dynamic, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Column | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Column | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Column | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -344,21 +344,21 @@ namespace Physica::Core {
     };
     ////////////////////////////////////RowVector////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Vector, Row, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, Row, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -367,21 +367,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Vector, Dynamic, Column, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, Dynamic, Column, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Column
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -390,21 +390,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Row, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Vector, Row, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, Row, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Row
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */
@@ -413,21 +413,21 @@ namespace Physica::Core {
     };
 
     template<class T, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixStorage<T, DenseMatrixType::Row | DenseMatrixType::Vector, Dynamic, Dynamic, MaxRow, MaxColumn>
+    class DenseMatrixStorage<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, Dynamic, Dynamic, MaxRow, MaxColumn>
             : public Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector> {
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector> {
         using Base = Internal::AbstractDenseMatrixStorage<DenseMatrixStorage<T
-                                                                           , DenseMatrixType::Row | DenseMatrixType::Vector
+                                                                           , DenseMatrixOption::Row | DenseMatrixOption::Vector
                                                                            , Dynamic
                                                                            , Dynamic
                                                                            , MaxRow
                                                                            , MaxColumn>
-                                                         , DenseMatrixType::Row | DenseMatrixType::Vector>;
+                                                         , DenseMatrixOption::Row | DenseMatrixOption::Vector>;
     public:
         using Base::Base;
         /* Getters */

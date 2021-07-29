@@ -29,7 +29,7 @@ namespace Physica::Core {
     template<class Scalar>
     class Element<2, Scalar> : public AbstractElement<2> {
     public:
-        typedef DenseMatrix<Scalar, DenseMatrixType::ElementColumn> Matrix;
+        typedef DenseMatrix<Scalar, DenseMatrixOption::ElementColumn> Matrix;
         /**
          * There are only 4 shape functions. This enum is designed for performance when using switch.
          */

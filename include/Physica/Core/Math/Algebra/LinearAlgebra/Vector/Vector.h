@@ -25,7 +25,7 @@
 #include "VectorBlock.h"
 #include "VectorExpression.h"
 #include "CrossProduct.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixType.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length>
@@ -52,8 +52,8 @@ namespace Physica::Core {
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
         using Base = VectorBase<Vector<T, Length, MaxLength>>;
-        using ColMatrix = DenseMatrix<T, DenseMatrixType::Column | DenseMatrixType::Vector, Length, 1, MaxLength, 1>;
-        using RowMatrix = DenseMatrix<T, DenseMatrixType::Row | DenseMatrixType::Vector, 1, Length, 1, MaxLength>;
+        using ColMatrix = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Length, 1, MaxLength, 1>;
+        using RowMatrix = DenseMatrix<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, Length, 1, MaxLength>;
         using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
     public:
         using Storage::Storage;

@@ -38,7 +38,7 @@ namespace Physica::Core {
     /*!
      * Solve linear equations.
      */
-    template<class T = MultiScalar, int type = DenseMatrixType::Column | DenseMatrixType::Vector
+    template<class T = MultiScalar, int type = DenseMatrixOption::Column | DenseMatrixOption::Vector
             , size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class LinearEquations : AbstractLinearEquations{
         DenseMatrix<T, type, maxRow, maxColumn> matrix;
