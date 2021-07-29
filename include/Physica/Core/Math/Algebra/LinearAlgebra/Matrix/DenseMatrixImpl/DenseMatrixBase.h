@@ -62,6 +62,8 @@ namespace Physica::Core {
         template<class AnyScalar>
         inline void operator*=(const ScalarBase<AnyScalar>& s) { getDerived() = *this * s.getDerived(); }
         /* Operations */
+        template<class OtherDerived>
+        void assignTo(DenseMatrixBase<OtherDerived>& mat) const;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);

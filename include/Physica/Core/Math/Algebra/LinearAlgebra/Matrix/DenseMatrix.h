@@ -70,12 +70,12 @@ namespace Physica::Core {
         using Base::Base;
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
+        template<class OtherMatrix>
+        DenseMatrix(const DenseMatrixBase<OtherMatrix>& mat);
         template<class T1, class T2>
         DenseMatrix(MatrixProduct<T1, T2> pro);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
-        template<class MatrixIn>
-        DenseMatrix(Cholesky<MatrixIn> cholesky);
         template<class MatrixIn>
         DenseMatrix(InverseMatrix<MatrixIn> inverse);
         /* Operators */

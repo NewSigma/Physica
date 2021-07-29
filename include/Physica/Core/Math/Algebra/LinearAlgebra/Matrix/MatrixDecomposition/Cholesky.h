@@ -17,14 +17,104 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 namespace Physica::Core {
-    template<class Matrix>
-    class Cholesky {
-        const Matrix& matrix;
+    template<class MatrixType> class Cholesky;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<class MatrixType>
+        class Traits<Cholesky<MatrixType>> {
+        public:
+            using ScalarType = typename MatrixType::ScalarType;
+            constexpr static int MatrixOption = MatrixType::MatrixOption;
+            constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
+            constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+            constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
+            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
+            constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
+        };
+    }
+
+    template<class MatrixType>
+    class Cholesky : public DenseMatrixBase<Cholesky<MatrixType>> {
+        using Base = DenseMatrixBase<MatrixType>;
+        const MatrixType& matrix;
     public:
-        explicit Cholesky(const Matrix& matrix_) : matrix(matrix_) {}
+        explicit Cholesky(const MatrixType& matrix_);
         ~Cholesky() = default;
+        /* Operations */
+        template<class OtherMatrix>
+        void assignTo(DenseMatrixBase<OtherMatrix>& mat) const;
         /* Getters */
-        [[nodiscard]] const Matrix& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] size_t getOrder() const noexcept { return matrix.getOrder(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getOrder(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getOrder(); }
     };
+
+    template<class MatrixType>
+    Cholesky<MatrixType>::Cholesky(const MatrixType& matrix_) : matrix(matrix_) {
+        assert(matrix.getRow() == matrix.getColumn());
+    }
+    /**
+     * Implemented the square method
+     */
+    template<class MatrixType>
+    template<class OtherMatrix>
+    void Cholesky<MatrixType>::assignTo(DenseMatrixBase<OtherMatrix>& mat) const {
+        using ResultType = OtherMatrix;
+        using ScalarType = typename ResultType::ScalarType;
+        const size_t order = Base::getOrder();
+        auto matrixIte = mat.begin();
+        auto constMatrixIte = matrix.cbegin();
+
+        auto elementIte = mat.ebegin(matrixIte);
+        auto constElementIte = matrix.cebegin(constMatrixIte);
+        /* Handle first vector */ {
+            const auto diag = sqrt(*constElementIte);
+            *elementIte = diag;
+            for (size_t i = 1; i < order; ++i) {
+                ++elementIte;
+                ++constElementIte;
+                *elementIte = *constElementIte / diag;
+            }
+        }
+        /* Handle other vectors */ {
+            for (size_t i = 1; i < order; ++i) {
+                ResultType::updateIterator(matrixIte, elementIte);
+                MatrixType::updateIterator(constMatrixIte, constElementIte);
+                size_t j;
+                for (j = 0; j < i; ++j) {
+                    *elementIte = 0;
+                    ++elementIte;
+                    ++constElementIte;
+                }
+
+                ScalarType diag(*constElementIte);
+                /* j == i */ {
+                    for (size_t k = 0; k < i; ++k) {
+                        if constexpr (DenseMatrixType::isColumnMatrix<ResultType>())
+                            diag -= square((*this)(i, k));
+                        else
+                            diag -= square((*this)(k, i));
+                    }
+                    diag = sqrt(diag);
+                    *elementIte = diag;
+                    ++j;
+                }
+
+                for (; j < order; ++j) {
+                    ++elementIte;
+                    ++constElementIte;
+                    ScalarType temp(*constElementIte);
+                    for (size_t k = 0; k < j; ++k) {
+                        if constexpr (DenseMatrixType::isColumnMatrix<ResultType>())
+                            diag -= (*this)(i, k) * (*this)(j, k);
+                        else
+                            diag -= (*this)(k, i) * (*this)(k, j);
+                    }
+                    *elementIte = temp / diag;
+                }
+            }
+        }
+    }
 }

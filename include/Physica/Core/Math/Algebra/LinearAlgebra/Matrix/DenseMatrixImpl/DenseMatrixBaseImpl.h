@@ -59,6 +59,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class OtherDerived>
+    void DenseMatrixBase<Derived>::assignTo(DenseMatrixBase<OtherDerived>& mat) const {
+        assert(Base::getRow() == mat.getRow() && Base::getColumn() == mat.getColumn());
+        getDerived().assignTo(mat);
+    }
+
+    template<class Derived>
     typename DenseMatrixBase<Derived>::ScalarType DenseMatrixBase<Derived>::determinate() const {
         assert(Base::getDerived().getRow() == Base::getDerived().getColumn());
         using namespace Internal;
