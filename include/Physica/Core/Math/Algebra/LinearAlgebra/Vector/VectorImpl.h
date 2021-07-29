@@ -25,12 +25,25 @@
  */
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
+    template<class Derived>
+    Vector<T, Length, MaxLength>::Vector(const VectorBase<Derived>& v) : Storage(v.getLength()) {
+        v.assignTo(*this);
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
     template<Utils::ExpressionType type, class T1, class T2>
     Vector<T, Length, MaxLength>::Vector(const VectorExpression<type, T1, T2>& expression) : Storage(expression.getLength()) {
         const size_t length = expression.getLength();
         for (size_t i = 0; i < length; ++i)
             Storage::init(expression[i], i);
         Storage::setLength(length);
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class Derived>
+    Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const VectorBase<Derived>& v) {
+        Base::resize(v.getLength());
+        v.assignTo(*this);
     }
 
     template<class T, size_t Length, size_t MaxLength>

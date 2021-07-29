@@ -91,8 +91,8 @@ namespace Physica::Utils::Internal {
         /* Operators */
         AbstractArray& operator=(const AbstractArray& array) = delete;
         AbstractArray& operator=(AbstractArray&& array) noexcept = delete;
-        T& operator[](size_t index);
-        const T& operator[](size_t index) const;
+        [[nodiscard]] T& operator[](size_t index);
+        [[nodiscard]] const T& operator[](size_t index) const;
         bool operator==(const AbstractArray& array) const;
         bool operator!=(const AbstractArray& array) const { return !(*this == array); }
         /* Iterator */

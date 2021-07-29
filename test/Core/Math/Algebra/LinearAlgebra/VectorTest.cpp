@@ -27,11 +27,11 @@ int main() {
     Vector<T> v{1, 2, 3, 4};
     auto col = v.copyToColMatrix();
     auto row = v.moveToRowMatrix();
-    std::cout << col << std::endl;
-    std::cout << row << std::endl;
+
     Vector<Scalar<Double, false>> v1{3.845971,0.000000,0.000000};
     Vector<Scalar<Double, false>> v2{-0.007733,3.835502,0.000000};
-    if (fabs(v1.crossProduct(v2).compute().norm().getTrivial() / 2 - 7.375614) / 7.375614 > 10E-8)
+    Vector<Scalar<Double, false>> v3(v1.crossProduct(v2));
+    if (fabs(v3.norm().getTrivial() / 2 - 7.375614) / 7.375614 > 10E-8)
         return 1;
     return 0;
 }

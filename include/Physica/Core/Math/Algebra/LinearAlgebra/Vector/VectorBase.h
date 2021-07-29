@@ -24,13 +24,20 @@ namespace Physica::Core {
     namespace Internal {
         template<class T> class Traits;
     }
-
+    /**
+     * \class VectorBase is the parent class of a collection of classes that can be assigned to a vector.
+     */
     template<class Derived>
     class VectorBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
     public:
+        template<class OtherDerived>
+        void assignTo(VectorBase<OtherDerived>& v) const {
+            assert(v.getLength() == getLength());
+            Base::getDerived().assignTo(v);
+        }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };

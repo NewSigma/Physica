@@ -58,6 +58,8 @@ namespace Physica::Core {
     public:
         using Storage::Storage;
         Vector() = default;
+        template<class Derived>
+        Vector(const VectorBase<Derived>& v);
         template<Utils::ExpressionType type, class T1, class T2>
         Vector(const VectorExpression<type, T1, T2>& expression); //NOLINT Implicit conversions is permitted.
         Vector(const Vector&) = default;
@@ -66,6 +68,8 @@ namespace Physica::Core {
         /* Operators */
         Vector& operator=(const Vector&) = default;
         Vector& operator=(Vector&&) noexcept = default;
+        template<class Derived>
+        Vector& operator=(const VectorBase<Derived>& v);
         template<Utils::ExpressionType type, class T1, class T2>
         Vector& operator=(const VectorExpression<type, T1, T2>& exp);
         /* Operations */
