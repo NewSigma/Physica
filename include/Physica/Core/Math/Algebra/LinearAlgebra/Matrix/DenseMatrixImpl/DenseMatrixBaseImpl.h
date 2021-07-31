@@ -61,8 +61,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void DenseMatrixBase<Derived>::assignTo(DenseMatrixBase<OtherDerived>& mat) const {
-        assert(Base::getRow() == mat.getRow() && Base::getColumn() == mat.getColumn());
-        getDerived().assignTo(mat);
+        assert(getRow() == mat.getRow() && getColumn() == mat.getColumn());
+        Base::getDerived().assignTo(mat);
     }
 
     template<class Derived>
@@ -86,7 +86,7 @@ namespace Physica::Core {
      */
     template<class Derived>
     void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, size_t elementIndex) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         assert(!matrix(r1, elementIndex).isZero());
         const size_t column = matrix.getColumn();
         const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
@@ -97,7 +97,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, const ScalarType& factor) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         const size_t column = matrix.getColumn();
         for (size_t i = 0; i < column; ++i)
             matrix(r1, i) -= matrix(r2, i) * factor;
@@ -105,7 +105,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, size_t elementIndex) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         assert(!matrix(elementIndex, c1).isZero());
         const size_t row = matrix.getRow();
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
@@ -116,7 +116,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, const ScalarType& factor) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         const size_t row = matrix.getRow();
         for (size_t i = 0; i < row; ++i)
             matrix(i, c1) -= matrix(i, c2) * factor;
@@ -140,7 +140,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::rowMulScalar(size_t r, const ScalarType& factor) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         const size_t column = matrix.getColumn();
         for (size_t i = 0; i < column; ++i)
             matrix(r, i) *= factor;
@@ -148,7 +148,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::columnMulScalar(size_t c, const ScalarType& factor) {
-        Derived& matrix = this->getDerived();
+        Derived& matrix = Base::getDerived();
         const size_t row = matrix.getRow();
         for (size_t i = 0; i < row; ++i)
             matrix(i, c) *= factor;
@@ -165,9 +165,9 @@ namespace Physica::Core {
     template<class Derived>
     inline void DenseMatrixBase<Derived>::majorSwap(size_t v1, size_t v2) {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            Base::columnSwap(v1, v2);
+            Base::getDerived().columnSwap(v1, v2);
         else
-            Base::rowSwap(v1, v2);
+            Base::getDerived().rowSwap(v1, v2);
     }
 
     template<class Derived>
@@ -181,8 +181,8 @@ namespace Physica::Core {
             r = major;
             c = minor;
         }
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator()(r, c);
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return Base::getDerived()(r, c);
     }
 
     template<class Derived>
@@ -196,37 +196,37 @@ namespace Physica::Core {
             r = major;
             c = minor;
         }
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator()(r, c);
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return Base::getDerived()(r, c);
     }
 
     template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
-        assert(Base::getRow() == Base::getColumn());
+        assert(getRow() == getColumn());
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return Base::getColumn();
+            return getColumn();
         else
-            return Base::getRow();
+            return getRow();
     }
 
     template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getMaxMajor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return Base::getColumn();
+            return getColumn();
         else
-            return Base::getRow();
+            return getRow();
     }
 
     template<class Derived>
     inline size_t DenseMatrixBase<Derived>::getMaxMinor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return Base::getRow();
+            return getRow();
         else
-            return Base::getColumn();
+            return getColumn();
     }
 
     template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) const noexcept {
+    inline size_t DenseMatrixBase<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
             return minor;
         else
@@ -234,7 +234,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) const noexcept {
+    inline size_t DenseMatrixBase<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
             return major;
         else
@@ -243,15 +243,15 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixBase<Derived>::toUnitMatrix() {
-        auto matIterator = Base::begin();
-        auto eleIterator = Base::ebegin(matIterator);
+        auto matIterator = Base::getDerived().begin();
+        auto eleIterator = Base::getDerived().ebegin(matIterator);
         const size_t order = getOrder();
         for (size_t i = 0; i < order; ++i) {
             for (size_t j = 0; j < order; ++j) {
                 *eleIterator = i == j;
                 ++eleIterator;
             }
-            Base::updateIterator(matIterator, eleIterator);
+            Derived::updateIterator(matIterator, eleIterator);
         }
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

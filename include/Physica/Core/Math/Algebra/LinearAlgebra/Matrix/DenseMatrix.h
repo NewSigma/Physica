@@ -60,20 +60,15 @@ namespace Physica::Core {
      * option is combinations of \enum DenseMatrixOption
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>> {
+    class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>,
+                        public DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn> {
         using Base = DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
+        using Storage = DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>;
     public:
-        using ScalarType = T;
-        constexpr static int MatrixOption = option;
-        constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t MaxRowAtCompile = MaxRow;
-        constexpr static size_t MaxColumnAtCompile = MaxColumn;
-        constexpr static size_t SizeAtCompile = Row * Column;
-        constexpr static size_t MaxSizeAtCompile = MaxRow * MaxColumn;
         constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<DenseMatrix>();
+        constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<DenseMatrix>();
     public:
-        using Base::Base;
+        using Storage::Storage;
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
         template<class OtherMatrix>
@@ -88,7 +83,22 @@ namespace Physica::Core {
         using Base::operator=;
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix& operator=(DenseMatrixExpression<expType, T1, T2> exp) { *this = std::move(DenseMatrix(exp)); return *this; }
+        template<class MatrixType>
+        inline void operator+=(const DenseMatrixBase<MatrixType>& m) { *this = *this + m.getDerived(); }
+        template<class ScalarType>
+        inline void operator+=(const ScalarBase<ScalarType>& s) { *this = *this + s.Base::getDerived(); }
+        template<class MatrixType>
+        inline void operator-=(const DenseMatrixBase<MatrixType>& m) { *this = *this - m.getDerived(); }
+        template<class ScalarType>
+        inline void operator-=(const ScalarBase<ScalarType>& s) { *this = *this - s.Base::getDerived(); }
+        template<class MatrixType>
+        inline void operator*=(const DenseMatrixBase<MatrixType>& m) { *this = *this * m.getDerived(); }
+        template<class ScalarType>
+        inline void operator*=(const ScalarBase<ScalarType>& s) { *this = *this * s.Base::getDerived(); }
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
+        /* Getters */
+        using Storage::getRow;
+        using Storage::getColumn;
         /* Static members */
         [[nodiscard]] static DenseMatrix zeroMatrix(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);

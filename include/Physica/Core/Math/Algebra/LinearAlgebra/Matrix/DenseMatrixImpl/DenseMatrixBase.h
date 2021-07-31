@@ -30,37 +30,18 @@ namespace Physica::Core {
      * A class that contains data structure for a matrix.
      */
     template<class Derived>
-    class DenseMatrixBase : public DenseMatrixStorage<typename Internal::Traits<Derived>::ScalarType
-                                                      , Internal::Traits<Derived>::MatrixOption
-                                                      , Internal::Traits<Derived>::RowAtCompile
-                                                      , Internal::Traits<Derived>::ColumnAtCompile
-                                                      , Internal::Traits<Derived>::MaxRowAtCompile
-                                                      , Internal::Traits<Derived>::MaxColumnAtCompile>
-                            , public Utils::CRTPBase<Derived> {
-        using Base = DenseMatrixStorage<typename Internal::Traits<Derived>::ScalarType
-                                        , Internal::Traits<Derived>::MatrixOption
-                                        , Internal::Traits<Derived>::RowAtCompile
-                                        , Internal::Traits<Derived>::ColumnAtCompile
-                                        , Internal::Traits<Derived>::MaxRowAtCompile
-                                        , Internal::Traits<Derived>::MaxColumnAtCompile>;
-        using Utils::CRTPBase<Derived>::getDerived;
+    class DenseMatrixBase : public Utils::CRTPBase<Derived> {
+        using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption;
+        constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = Internal::Traits<Derived>::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
     public:
-        using Base::Base;
-        /* Operators */
-        template<class OtherDerived>
-        inline void operator+=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this + m; }
-        template<class AnyScalar>
-        inline void operator+=(const ScalarBase<AnyScalar>& s) { getDerived() = *this + s.getDerived(); }
-        template<class OtherDerived>
-        inline void operator-=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this - m; }
-        template<class AnyScalar>
-        inline void operator-=(const ScalarBase<AnyScalar>& s) { getDerived() = *this - s.getDerived(); }
-        template<class OtherDerived>
-        inline void operator*=(const DenseMatrixBase<OtherDerived>& m) { getDerived() = *this * m; }
-        template<class AnyScalar>
-        inline void operator*=(const ScalarBase<AnyScalar>& s) { getDerived() = *this * s.getDerived(); }
         /* Operations */
         template<class OtherDerived>
         void assignTo(DenseMatrixBase<OtherDerived>& mat) const;
@@ -76,6 +57,8 @@ namespace Physica::Core {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
         /* Getters */
+        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline size_t getOrder() const noexcept;
@@ -84,8 +67,8 @@ namespace Physica::Core {
         /* Setters */
         void toUnitMatrix();
         /* Static members */
-        [[nodiscard]] inline size_t rowFromMajorMinor(size_t major, size_t minor) const noexcept;
-        [[nodiscard]] inline size_t columnFromMajorMinor(size_t major, size_t minor) const noexcept;
+        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>

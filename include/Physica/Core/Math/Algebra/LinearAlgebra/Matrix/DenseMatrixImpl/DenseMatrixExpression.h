@@ -133,9 +133,9 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
-    inline DenseMatrixExpression<Utils::ExpressionType::Minus, DenseMatrixBase<Derived>>
+    inline DenseMatrixExpression<Utils::ExpressionType::Minus, Derived>
     operator-(const DenseMatrixBase<Derived>& mat) {
-        return DenseMatrixExpression<Utils::ExpressionType::Minus, DenseMatrixBase<Derived>>(mat);
+        return DenseMatrixExpression<Utils::ExpressionType::Minus, Derived>(mat.getDerived());
     }
 
     template<Utils::ExpressionType type, class T1, class T2>
@@ -145,9 +145,9 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Add, DenseMatrixBase<Derived>, Exp>
+    inline DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>
     operator+(const DenseMatrixBase<Derived>& mat, const Exp& exp) {
-        return DenseMatrixExpression<Utils::ExpressionType::Add, DenseMatrixBase<Derived>, Exp>(mat, exp);
+        return DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>(mat.getDerived(), exp);
     }
 
     template<Utils::ExpressionType type, class T1, class T2, class Exp>
@@ -157,9 +157,9 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class Derived, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Sub, DenseMatrixBase<Derived>, Exp>
+    inline DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>
     operator-(const DenseMatrixBase<Derived>& mat, const Exp& exp) {
-        return DenseMatrixExpression<Utils::ExpressionType::Sub, DenseMatrixBase<Derived>, Exp>(mat, exp);
+        return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>(mat.getDerived(), exp);
     }
 
     template<Utils::ExpressionType type, class T1, class T2, class Exp>

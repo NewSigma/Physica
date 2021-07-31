@@ -64,10 +64,11 @@ namespace Physica::Core {
         using ResultType = OtherMatrix;
         using ScalarType = typename ResultType::ScalarType;
         const size_t order = matrix.getOrder();
-        auto matrixIte = mat.begin();
+        auto& toMat = mat.getDerived();
+        auto matrixIte = toMat.begin();
         auto constMatrixIte = matrix.cbegin();
 
-        auto elementIte = mat.ebegin(matrixIte);
+        auto elementIte = toMat.ebegin(matrixIte);
         auto constElementIte = matrix.cebegin(constMatrixIte);
         /* Handle first vector */ {
             const auto diag = sqrt(*constElementIte);
@@ -93,9 +94,9 @@ namespace Physica::Core {
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= square(mat(i, k));
+                            diag -= square(toMat(i, k));
                         else
-                            diag -= square(mat(k, i));
+                            diag -= square(toMat(k, i));
                     }
                     diag = sqrt(diag);
                     *elementIte = diag;
@@ -108,9 +109,9 @@ namespace Physica::Core {
                     ScalarType temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= mat(i, k) * mat(j, k);
+                            diag -= toMat(i, k) * toMat(j, k);
                         else
-                            diag -= mat(k, i) * mat(k, j);
+                            diag -= toMat(k, i) * toMat(k, j);
                     }
                     *elementIte = temp / diag;
                 }

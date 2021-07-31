@@ -19,14 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T1, class T2>
+    template<class MatrixType1, class MatrixType2>
     class MatrixProduct {
-        using ScalarType = typename T1::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
+                                                                       typename MatrixType2::ScalarType>::Type;
 
-        const T1& mat1;
-        const T2& mat2;
+        const MatrixType1& mat1;
+        const MatrixType2& mat2;
     public:
-        MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {}
+        MatrixProduct(const DenseMatrixBase<MatrixType1>& mat1_, const DenseMatrixBase<MatrixType2>& mat2_)
+                : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t column) const;
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
@@ -34,17 +36,17 @@ namespace Physica::Core {
     };
 
     template<class Derived, class OtherDerived>
-    inline MatrixProduct<DenseMatrixBase<Derived>, DenseMatrixBase<OtherDerived>>
+    inline MatrixProduct<Derived, OtherDerived>
     operator*(const DenseMatrixBase<Derived>& mat1, const DenseMatrixBase<OtherDerived>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
-        return MatrixProduct<DenseMatrixBase<Derived>, DenseMatrixBase<OtherDerived>>(mat1, mat2);
+        return MatrixProduct(mat1, mat2);
     }
 
     template<class T1, class T2>
     typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::operator()(size_t row, size_t column) const {
         ScalarType result = 0;
         for (size_t i = 0; i < mat1.getColumn(); ++i)
-            result += mat1(row, i) * mat2(i, column);
+            result += ScalarType(mat1(row, i) * mat2(i, column));
         return result;
     }
 }
