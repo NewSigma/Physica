@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
@@ -26,6 +27,7 @@ int main() {
         Matrix3x3 mat{5, -2, 0, -2, 3, -1, 0, -1, 1};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
+        std::cout << decomp << std::endl;
         Matrix3x3 answer{sqrt(5), -2 / sqrt(5), 0, 0, sqrt(11.0 / 5), -sqrt(5.0 / 11), 0, 0, sqrt(6.0 / 11)};
         decomp -= answer;
         for (int i = 0; i < 3; ++i)

@@ -63,6 +63,7 @@ namespace Physica::Core {
     class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>> {
         using Base = DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
     public:
+        using ScalarType = T;
         constexpr static int MatrixOption = option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;

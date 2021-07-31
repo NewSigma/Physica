@@ -63,7 +63,7 @@ namespace Physica::Core {
     void Cholesky<MatrixType>::assignTo(DenseMatrixBase<OtherMatrix>& mat) const {
         using ResultType = OtherMatrix;
         using ScalarType = typename ResultType::ScalarType;
-        const size_t order = Base::getOrder();
+        const size_t order = matrix.getOrder();
         auto matrixIte = mat.begin();
         auto constMatrixIte = matrix.cbegin();
 
@@ -93,9 +93,9 @@ namespace Physica::Core {
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= square((*this)(i, k));
+                            diag -= square(mat(i, k));
                         else
-                            diag -= square((*this)(k, i));
+                            diag -= square(mat(k, i));
                     }
                     diag = sqrt(diag);
                     *elementIte = diag;
@@ -108,9 +108,9 @@ namespace Physica::Core {
                     ScalarType temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= (*this)(i, k) * (*this)(j, k);
+                            diag -= mat(i, k) * mat(j, k);
                         else
-                            diag -= (*this)(k, i) * (*this)(k, j);
+                            diag -= mat(k, i) * mat(k, j);
                     }
                     *elementIte = temp / diag;
                 }
