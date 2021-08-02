@@ -35,7 +35,7 @@ namespace Physica::Core {
     }
 
     template<class AnyVector1, class AnyVector2>
-    class CrossProduct : public VectorBase<CrossProduct<AnyVector1, AnyVector2>> {
+    class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {
         static_assert((Internal::Traits<AnyVector1>::SizeAtCompile == 3 || Internal::Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
                       (Internal::Traits<AnyVector2>::SizeAtCompile == 3 || Internal::Traits<AnyVector2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
@@ -44,7 +44,7 @@ namespace Physica::Core {
         const AnyVector1& v1;
         const AnyVector2& v2;
     public:
-        CrossProduct(const VectorBase<AnyVector1>& v1_, const VectorBase<AnyVector2>& v2_)
+        CrossProduct(const RValueVector<AnyVector1>& v1_, const RValueVector<AnyVector2>& v2_)
                 : v1(v1_.getDerived()), v2(v2_.getDerived()) {
             assert(v1.getLength() == 3);
             assert(v2.getLength() == 3);
@@ -59,11 +59,10 @@ namespace Physica::Core {
         }
 
         template<class OtherDerived>
-        void assignTo(VectorBase<OtherDerived>& v) const {
-            OtherDerived& dest = v.getDerived();
-            dest[0] = v1[1] * v2[2] - v1[2] * v2[1];
-            dest[1] = v1[2] * v2[0] - v1[0] * v2[2];
-            dest[2] = v1[0] * v2[1] - v1[1] * v2[0];
+        void assignTo(LValueVector<OtherDerived>& v) const {
+            v[0] = v1[1] * v2[2] - v1[2] * v2[1];
+            v[1] = v1[2] * v2[0] - v1[0] * v2[2];
+            v[2] = v1[0] * v2[1] - v1[1] * v2[0];
         }
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }

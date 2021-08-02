@@ -18,27 +18,21 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include "RValueVector.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
     /**
-     * \class VectorBase is the parent class of a collection of classes that can be assigned to a vector.
+     * \class LValueVector is base class of vectors that can be assigned to \class LValueVector
+     * and other vectors can be assigned to this class.
+     * In other words, you can take the address of elements in the vector.
      */
     template<class Derived>
-    class VectorBase : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class LValueVector : public RValueVector<Derived> {
+        using Base = RValueVector<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using typename Base::ScalarType;
     public:
-        template<class OtherDerived>
-        void assignTo(VectorBase<OtherDerived>& v) const {
-            assert(v.getLength() == getLength());
-            Base::getDerived().assignTo(v);
-        }
-        /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
+        [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
     };
 }

@@ -21,7 +21,7 @@
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
-#include "VectorBase.h"
+#include "LValueVector.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
 #include "CrossProduct.h"
@@ -47,11 +47,11 @@ namespace Physica::Core {
      * T must be either Scalar or ComplexScalar.
      */
     template<class T, size_t Length, size_t MaxLength>
-    class Vector : public VectorBase<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
+    class Vector : public LValueVector<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
-        using Base = VectorBase<Vector<T, Length, MaxLength>>;
+        using Base = LValueVector<Vector<T, Length, MaxLength>>;
         using ColMatrix = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Length, 1, MaxLength, 1>;
         using RowMatrix = DenseMatrix<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, Length, 1, MaxLength>;
         using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
@@ -59,7 +59,7 @@ namespace Physica::Core {
         using Storage::Storage;
         Vector() = default;
         template<class Derived>
-        Vector(const VectorBase<Derived>& v);
+        Vector(const RValueVector<Derived>& v);
         template<Utils::ExpressionType type, class T1, class T2>
         Vector(const VectorExpression<type, T1, T2>& expression); //NOLINT Implicit conversions is permitted.
         Vector(const Vector&) = default;
@@ -69,14 +69,15 @@ namespace Physica::Core {
         Vector& operator=(const Vector&) = default;
         Vector& operator=(Vector&&) noexcept = default;
         template<class Derived>
-        Vector& operator=(const VectorBase<Derived>& v);
+        Vector& operator=(const RValueVector<Derived>& v);
         template<Utils::ExpressionType type, class T1, class T2>
         Vector& operator=(const VectorExpression<type, T1, T2>& exp);
+        using Storage::operator[];
         /* Operations */
         Vector& toOpposite();
         void toUnit();
         template<class OtherVector>
-        [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const VectorBase<OtherVector>& v) const noexcept;
+        [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const RValueVector<OtherVector>& v) const noexcept;
         ColMatrix copyToColMatrix() const;
         ColMatrix moveToColMatrix();
         RowMatrix copyToRowMatrix() const;

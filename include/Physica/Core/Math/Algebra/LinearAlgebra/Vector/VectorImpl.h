@@ -26,7 +26,7 @@
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
-    Vector<T, Length, MaxLength>::Vector(const VectorBase<Derived>& v) : Storage(v.getLength()) {
+    Vector<T, Length, MaxLength>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
         v.assignTo(*this);
     }
 
@@ -41,7 +41,7 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
-    Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const VectorBase<Derived>& v) {
+    Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const RValueVector<Derived>& v) {
         Base::resize(v.getLength());
         v.assignTo(*this);
     }
@@ -74,7 +74,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<class OtherVector>
     inline CrossProduct<Vector<T, Length, MaxLength>, OtherVector>
-    Vector<T, Length, MaxLength>::crossProduct(const VectorBase<OtherVector>& v) const noexcept {
+    Vector<T, Length, MaxLength>::crossProduct(const RValueVector<OtherVector>& v) const noexcept {
         return CrossProduct(*this, v);
     }
 

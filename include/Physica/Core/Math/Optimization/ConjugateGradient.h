@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     template<class ScalarType> class ScalarBase;
-    template<class VectorType> class VectorBase;
+    template<class VectorType> class RValueVector;
 }
 
 namespace Physica::Core::Math {
@@ -36,7 +36,7 @@ namespace Physica::Core::Math {
         ScalarType minimal;
     public:
         ConjugateGradient(Function func_,
-                          const VectorBase<VectorType>& x_,
+                          const RValueVector<VectorType>& x_,
                           const ScalarBase<ScalarType>& epsilon_,
                           const ScalarBase<ScalarType>& minStepSize_);
         ~ConjugateGradient() = default;
@@ -49,7 +49,7 @@ namespace Physica::Core::Math {
 
     template<class ScalarType, class Function, class VectorType>
     ConjugateGradient<ScalarType, Function, VectorType>::ConjugateGradient(Function func_,
-                                                                           const VectorBase<VectorType>& x_,
+                                                                           const RValueVector<VectorType>& x_,
                                                                            const ScalarBase<ScalarType>& epsilon_,
                                                                            const ScalarBase<ScalarType>& minStepSize_)
             : func(func_), x(x_.getDerived()), epsilon(epsilon_.getDerived()), minStepSize(minStepSize_.getDerived()) {
