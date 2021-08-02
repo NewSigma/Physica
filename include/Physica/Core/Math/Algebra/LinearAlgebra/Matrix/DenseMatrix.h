@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include "DenseMatrixImpl/DenseMatrixBase.h"
+#include "LValueMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "DenseMatrixImpl/MatrixProduct.h"
 #include "MatrixDecomposition/Cholesky.h"
@@ -60,9 +60,9 @@ namespace Physica::Core {
      * option is combinations of \enum DenseMatrixOption
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix : public DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>,
+    class DenseMatrix : public LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>,
                         public DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn> {
-        using Base = DenseMatrixBase<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
+        using Base = LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
         using Storage = DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>;
     public:
         constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<DenseMatrix>();
@@ -72,7 +72,7 @@ namespace Physica::Core {
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
         template<class OtherMatrix>
-        DenseMatrix(const DenseMatrixBase<OtherMatrix>& mat);
+        DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
         template<class T1, class T2>
         DenseMatrix(MatrixProduct<T1, T2> pro);
         template<class MatrixIn>
@@ -81,18 +81,19 @@ namespace Physica::Core {
         DenseMatrix(InverseMatrix<MatrixIn> inverse);
         /* Operators */
         using Base::operator=;
+        using Storage::operator();
         template<Utils::ExpressionType expType, class T1, class T2>
         DenseMatrix& operator=(DenseMatrixExpression<expType, T1, T2> exp) { *this = std::move(DenseMatrix(exp)); return *this; }
         template<class MatrixType>
-        inline void operator+=(const DenseMatrixBase<MatrixType>& m) { *this = *this + m.getDerived(); }
+        inline void operator+=(const RValueMatrix<MatrixType>& m) { *this = *this + m.getDerived(); }
         template<class ScalarType>
         inline void operator+=(const ScalarBase<ScalarType>& s) { *this = *this + s.Base::getDerived(); }
         template<class MatrixType>
-        inline void operator-=(const DenseMatrixBase<MatrixType>& m) { *this = *this - m.getDerived(); }
+        inline void operator-=(const RValueMatrix<MatrixType>& m) { *this = *this - m.getDerived(); }
         template<class ScalarType>
         inline void operator-=(const ScalarBase<ScalarType>& s) { *this = *this - s.Base::getDerived(); }
         template<class MatrixType>
-        inline void operator*=(const DenseMatrixBase<MatrixType>& m) { *this = *this * m.getDerived(); }
+        inline void operator*=(const RValueMatrix<MatrixType>& m) { *this = *this * m.getDerived(); }
         template<class ScalarType>
         inline void operator*=(const ScalarBase<ScalarType>& s) { *this = *this * s.Base::getDerived(); }
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);

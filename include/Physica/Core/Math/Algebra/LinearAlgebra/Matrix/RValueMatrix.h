@@ -18,19 +18,18 @@
  */
 #pragma once
 
-#include "DenseMatrixStorage/DenseMatrixStorage.h"
+#include "DenseMatrixImpl/DenseMatrixStorage/DenseMatrixStorage.h"
 
 namespace Physica::Core {
+    template<class Derived> class LValueMatrix;
     /**
-     * The \class DenseDenseMatrixBase provide algorithms that a matrix should support.
-     * 
-     * TODO: merge DenseMatrix into DenseMatrixBase
+     * The \class DenseRValueMatrix provide algorithms that a matrix should support.
      * 
      * \tparam Derived
      * A class that contains data structure for a matrix.
      */
     template<class Derived>
-    class DenseMatrixBase : public Utils::CRTPBase<Derived> {
+    class RValueMatrix : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
@@ -44,24 +43,10 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        void assignTo(DenseMatrixBase<OtherDerived>& mat) const;
-        ScalarType determinate() const;
-        void rowReduce(size_t r1, size_t r2, size_t elementIndex);
-        void rowReduce(size_t r1, size_t r2, const ScalarType& factor);
-        void columnReduce(size_t c1, size_t c2, size_t elementIndex);
-        void columnReduce(size_t c1, size_t c2, const ScalarType& factor);
-        inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
-        inline void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
-        void rowMulScalar(size_t r, const ScalarType& factor);
-        void columnMulScalar(size_t c, const ScalarType& factor);
-        inline void majorMulScalar(size_t v, const ScalarType& factor);
-        inline void majorSwap(size_t v1, size_t v2);
+        void assignTo(LValueMatrix<OtherDerived>& mat) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] inline size_t getOrder() const noexcept;
         [[nodiscard]] inline size_t getMaxMajor() const noexcept;
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         /* Setters */
@@ -72,97 +57,97 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
-    Derived reciprocal(const DenseMatrixBase<Derived>& m);
+    Derived reciprocal(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived sqrt(const DenseMatrixBase<Derived>& m);
+    Derived sqrt(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived factorial(const DenseMatrixBase<Derived>& m);
+    Derived factorial(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived ln(const DenseMatrixBase<Derived>& m);
+    Derived ln(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived log(const DenseMatrixBase<Derived>& m, const MultiScalar& a);
+    Derived log(const RValueMatrix<Derived>& m, const MultiScalar& a);
     
     template<class Derived>
-    Derived exp(const DenseMatrixBase<Derived>& m);
+    Derived exp(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived pow(const DenseMatrixBase<Derived>& m, const MultiScalar& a);
+    Derived pow(const RValueMatrix<Derived>& m, const MultiScalar& a);
     
     template<class Derived>
-    Derived cos(const DenseMatrixBase<Derived>& m);
+    Derived cos(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived sin(const DenseMatrixBase<Derived>& m);
+    Derived sin(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived tan(const DenseMatrixBase<Derived>& m);
+    Derived tan(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived sec(const DenseMatrixBase<Derived>& m);
+    Derived sec(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived csc(const DenseMatrixBase<Derived>& m);
+    Derived csc(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived cot(const DenseMatrixBase<Derived>& m);
+    Derived cot(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccos(const DenseMatrixBase<Derived>& m);
+    Derived arccos(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arcsin(const DenseMatrixBase<Derived>& m);
+    Derived arcsin(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arctan(const DenseMatrixBase<Derived>& m);
+    Derived arctan(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arcsec(const DenseMatrixBase<Derived>& m);
+    Derived arcsec(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccsc(const DenseMatrixBase<Derived>& m);
+    Derived arccsc(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccot(const DenseMatrixBase<Derived>& m);
+    Derived arccot(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived cosh(const DenseMatrixBase<Derived>& m);
+    Derived cosh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived sinh(const DenseMatrixBase<Derived>& m);
+    Derived sinh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived tanh(const DenseMatrixBase<Derived>& m);
+    Derived tanh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived sech(const DenseMatrixBase<Derived>& m);
+    Derived sech(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived csch(const DenseMatrixBase<Derived>& m);
+    Derived csch(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived coth(const DenseMatrixBase<Derived>& m);
+    Derived coth(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccosh(const DenseMatrixBase<Derived>& m);
+    Derived arccosh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arcsinh(const DenseMatrixBase<Derived>& m);
+    Derived arcsinh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arctanh(const DenseMatrixBase<Derived>& m);
+    Derived arctanh(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arcsech(const DenseMatrixBase<Derived>& m);
+    Derived arcsech(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccsch(const DenseMatrixBase<Derived>& m);
+    Derived arccsch(const RValueMatrix<Derived>& m);
     
     template<class Derived>
-    Derived arccoth(const DenseMatrixBase<Derived>& m);
+    Derived arccoth(const RValueMatrix<Derived>& m);
 }
 
-#include "DenseMatrixBaseImpl.h"
+#include "RValueMatrixImpl.h"

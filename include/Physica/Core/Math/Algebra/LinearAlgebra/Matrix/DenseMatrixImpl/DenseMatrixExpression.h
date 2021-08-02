@@ -134,7 +134,7 @@ namespace Physica::Core {
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
     inline DenseMatrixExpression<Utils::ExpressionType::Minus, Derived>
-    operator-(const DenseMatrixBase<Derived>& mat) {
+    operator-(const RValueMatrix<Derived>& mat) {
         return DenseMatrixExpression<Utils::ExpressionType::Minus, Derived>(mat.getDerived());
     }
 
@@ -146,7 +146,7 @@ namespace Physica::Core {
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class Exp>
     inline DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>
-    operator+(const DenseMatrixBase<Derived>& mat, const Exp& exp) {
+    operator+(const RValueMatrix<Derived>& mat, const Exp& exp) {
         return DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>(mat.getDerived(), exp);
     }
 
@@ -158,7 +158,7 @@ namespace Physica::Core {
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class Derived, class Exp>
     inline DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>
-    operator-(const DenseMatrixBase<Derived>& mat, const Exp& exp) {
+    operator-(const RValueMatrix<Derived>& mat, const Exp& exp) {
         return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>(mat.getDerived(), exp);
     }
 

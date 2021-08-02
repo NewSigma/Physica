@@ -37,18 +37,18 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    class Cholesky : public DenseMatrixBase<Cholesky<MatrixType>> {
-        using Base = DenseMatrixBase<Cholesky<MatrixType>>;
+    class Cholesky : public RValueMatrix<Cholesky<MatrixType>> {
+        using Base = RValueMatrix<Cholesky<MatrixType>>;
         const MatrixType& matrix;
     public:
         explicit Cholesky(const MatrixType& matrix_);
         ~Cholesky() = default;
         /* Operations */
         template<class OtherMatrix>
-        void assignTo(DenseMatrixBase<OtherMatrix>& mat) const;
+        void assignTo(LValueMatrix<OtherMatrix>& mat) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getOrder(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getOrder(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getRow(); }
     };
 
     template<class MatrixType>
@@ -60,15 +60,14 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     template<class OtherMatrix>
-    void Cholesky<MatrixType>::assignTo(DenseMatrixBase<OtherMatrix>& mat) const {
+    void Cholesky<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& mat) const {
         using ResultType = OtherMatrix;
         using ScalarType = typename ResultType::ScalarType;
-        const size_t order = matrix.getOrder();
-        auto& toMat = mat.getDerived();
-        auto matrixIte = toMat.begin();
+        const size_t order = matrix.getRow();
+        auto matrixIte = mat.getDerived().begin();
         auto constMatrixIte = matrix.cbegin();
 
-        auto elementIte = toMat.ebegin(matrixIte);
+        auto elementIte = mat.getDerived().ebegin(matrixIte);
         auto constElementIte = matrix.cebegin(constMatrixIte);
         /* Handle first vector */ {
             const auto diag = sqrt(*constElementIte);
@@ -94,9 +93,9 @@ namespace Physica::Core {
                 /* j == i */ {
                     for (size_t k = 0; k < i; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= square(toMat(i, k));
+                            diag -= square(mat(i, k));
                         else
-                            diag -= square(toMat(k, i));
+                            diag -= square(mat(k, i));
                     }
                     diag = sqrt(diag);
                     *elementIte = diag;
@@ -109,9 +108,9 @@ namespace Physica::Core {
                     ScalarType temp(*constElementIte);
                     for (size_t k = 0; k < j; ++k) {
                         if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= toMat(i, k) * toMat(j, k);
+                            diag -= mat(i, k) * mat(j, k);
                         else
-                            diag -= toMat(k, i) * toMat(k, j);
+                            diag -= mat(k, i) * mat(k, j);
                     }
                     *elementIte = temp / diag;
                 }

@@ -32,7 +32,7 @@ namespace Physica::Core {
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class OtherMatrix>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrixBase<OtherMatrix>& mat)
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
         mat.assignTo(*this);
     }
@@ -50,8 +50,8 @@ namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class MatrixIn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(LUDecomposition<MatrixIn> lu)
-            : DenseMatrix(lu.getOrder(), lu.getOrder()) {
-        const size_t rank = lu.getOrder();
+            : DenseMatrix(lu.getRow(), lu.getRow()) {
+        const size_t rank = lu.getRow();
         (*this) = lu.getMatrix();
         for (size_t i = 0; i < rank; ++i)
             lu.decompositionColumn((*this), i);

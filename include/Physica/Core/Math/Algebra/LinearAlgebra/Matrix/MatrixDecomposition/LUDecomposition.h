@@ -36,8 +36,9 @@ namespace Physica::Core {
         template<class MatrixOut>
         void decompositionColumn(MatrixOut& out, size_t column);
         /* Getters */
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getRow(); }
         [[nodiscard]] const Matrix& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] size_t getOrder() const noexcept { return matrix.getOrder(); }
     };
     /*!
      * Apply LU Decomposition on a column of Matrix \from, save the result to Matrix \to.

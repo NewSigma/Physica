@@ -27,7 +27,7 @@ namespace Physica::Core {
         const MatrixType1& mat1;
         const MatrixType2& mat2;
     public:
-        MatrixProduct(const DenseMatrixBase<MatrixType1>& mat1_, const DenseMatrixBase<MatrixType2>& mat2_)
+        MatrixProduct(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
 
         [[nodiscard]] ScalarType operator()(size_t row, size_t column) const;
@@ -37,7 +37,7 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     inline MatrixProduct<Derived, OtherDerived>
-    operator*(const DenseMatrixBase<Derived>& mat1, const DenseMatrixBase<OtherDerived>& mat2) {
+    operator*(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }

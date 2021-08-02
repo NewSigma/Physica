@@ -21,231 +21,51 @@
 #include <cassert>
 
 namespace Physica::Core {
-    namespace Internal {
-        /**
-         * \tparam rank
-         * The rank of matrix.
-         */
-        template<class Derived, size_t rank>
-        class DeterminateImpl {
-            static typename Derived::ScalarType run(const Derived& m) {
-                //TODO
-                assert(false);
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 1> {
-            static inline typename Derived::ScalarType run(const Derived& m) {
-                return m(0, 0);
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 2> {
-            static inline typename Derived::ScalarType run(const Derived& m) {
-                return m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 3> {
-            static inline typename Derived::ScalarType run(const Derived& m) {
-            return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1))
-                    + m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2))
-                    + m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
-            }
-        };
-    }
-
     template<class Derived>
     template<class OtherDerived>
-    void DenseMatrixBase<Derived>::assignTo(DenseMatrixBase<OtherDerived>& mat) const {
+    void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& mat) const {
         assert(getRow() == mat.getRow() && getColumn() == mat.getColumn());
         Base::getDerived().assignTo(mat);
     }
 
     template<class Derived>
-    typename DenseMatrixBase<Derived>::ScalarType DenseMatrixBase<Derived>::determinate() const {
-        assert(Base::getDerived().getRow() == Base::getDerived().getColumn());
-        using namespace Internal;
-        constexpr size_t RowAtCompile = Traits<Derived>::RowAtCompile;
-        constexpr size_t ColumnAtCompile = Traits<Derived>::ColumnAtCompile;
-        //Row equals column at runtime from the assert, but RowAtCompile and ColumnAtCompile may not equal. Ether of them could be dynamic.
-        constexpr size_t Rank = RowAtCompile > ColumnAtCompile ? RowAtCompile : ColumnAtCompile;
-        return DeterminateImpl<Derived, Rank>::run(Base::getDerived());
-    }
-    /**
-     * Reduce the element at one row using the other row.
-     * \param r1
-     * The index of row to be used.
-     * \param r2
-     * The index of row that the element belongs to.
-     * \param elementIndex
-     * Index of the element to be reduced.
-     */
-    template<class Derived>
-    void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, size_t elementIndex) {
-        Derived& matrix = Base::getDerived();
-        assert(!matrix(r1, elementIndex).isZero());
-        const size_t column = matrix.getColumn();
-        const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
-        for (size_t i = 0; i < column; ++i)
-            matrix(r1, i) -= matrix(r2, i) * factor;
-        assert(matrix(r2, elementIndex).isZero());
-    }
-
-    template<class Derived>
-    void DenseMatrixBase<Derived>::rowReduce(size_t r1, size_t r2, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t column = matrix.getColumn();
-        for (size_t i = 0; i < column; ++i)
-            matrix(r1, i) -= matrix(r2, i) * factor;
-    }
-
-    template<class Derived>
-    void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, size_t elementIndex) {
-        Derived& matrix = Base::getDerived();
-        assert(!matrix(elementIndex, c1).isZero());
-        const size_t row = matrix.getRow();
-        const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
-        for (size_t i = 0; i < row; ++i)
-            matrix(i, c1) -= matrix(i, c2) * factor;
-        assert(matrix(elementIndex, c2).isZero());
-    }
-
-    template<class Derived>
-    void DenseMatrixBase<Derived>::columnReduce(size_t c1, size_t c2, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t row = matrix.getRow();
-        for (size_t i = 0; i < row; ++i)
-            matrix(i, c1) -= matrix(i, c2) * factor;
-    }
-
-    template<class Derived>
-    inline void DenseMatrixBase<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
+    inline size_t RValueMatrix<Derived>::getMaxMajor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            columnReduce(v1, v2, elementIndex);
+            return getColumn();
         else
-            rowReduce(v1, v2, elementIndex);
+            return getRow();
     }
 
     template<class Derived>
-    inline void DenseMatrixBase<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
+    inline size_t RValueMatrix<Derived>::getMaxMinor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            columnReduce(v1, v2, factor);
+            return getRow();
         else
-            rowReduce(v1, v2, factor);
+            return getColumn();
     }
 
     template<class Derived>
-    void DenseMatrixBase<Derived>::rowMulScalar(size_t r, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t column = matrix.getColumn();
-        for (size_t i = 0; i < column; ++i)
-            matrix(r, i) *= factor;
-    }
-
-    template<class Derived>
-    void DenseMatrixBase<Derived>::columnMulScalar(size_t c, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t row = matrix.getRow();
-        for (size_t i = 0; i < row; ++i)
-            matrix(i, c) *= factor;
-    }
-
-    template<class Derived>
-    inline void DenseMatrixBase<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
+    inline size_t RValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            columnMulScalar(v, factor);
+            return minor;
         else
-            rowMulScalar(v, factor);
+            return major;
     }
 
     template<class Derived>
-    inline void DenseMatrixBase<Derived>::majorSwap(size_t v1, size_t v2) {
+    inline size_t RValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            Base::getDerived().columnSwap(v1, v2);
+            return major;
         else
-            Base::getDerived().rowSwap(v1, v2);
+            return minor;
     }
 
     template<class Derived>
-    typename DenseMatrixBase<Derived>::ScalarType& DenseMatrixBase<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
-        size_t r, c;
-        if constexpr(DenseMatrixOption::isColumnMatrix<Derived>()) {
-            c = major;
-            r = minor;
-        }
-        else {
-            r = major;
-            c = minor;
-        }
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return Base::getDerived()(r, c);
-    }
-
-    template<class Derived>
-    const typename DenseMatrixBase<Derived>::ScalarType& DenseMatrixBase<Derived>::getElementFromMajorMinor(size_t major, size_t minor) const {
-        size_t r, c;
-        if constexpr(DenseMatrixOption::isColumnMatrix<Derived>()) {
-            c = major;
-            r = minor;
-        }
-        else {
-            r = major;
-            c = minor;
-        }
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return Base::getDerived()(r, c);
-    }
-
-    template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::getOrder() const noexcept {
+    void RValueMatrix<Derived>::toUnitMatrix() {
         assert(getRow() == getColumn());
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return getColumn();
-        else
-            return getRow();
-    }
-
-    template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::getMaxMajor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return getColumn();
-        else
-            return getRow();
-    }
-
-    template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::getMaxMinor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return getRow();
-        else
-            return getColumn();
-    }
-
-    template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return minor;
-        else
-            return major;
-    }
-
-    template<class Derived>
-    inline size_t DenseMatrixBase<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return major;
-        else
-            return minor;
-    }
-
-    template<class Derived>
-    void DenseMatrixBase<Derived>::toUnitMatrix() {
         auto matIterator = Base::getDerived().begin();
         auto eleIterator = Base::getDerived().ebegin(matIterator);
-        const size_t order = getOrder();
+        const size_t order = getRow();
         for (size_t i = 0; i < order; ++i) {
             for (size_t j = 0; j < order; ++j) {
                 *eleIterator = i == j;
@@ -256,7 +76,7 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
-    Derived reciprocal(const DenseMatrixBase<Derived>& m) {
+    Derived reciprocal(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -266,7 +86,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    Derived sqrt(const DenseMatrixBase<Derived>& m) {
+    Derived sqrt(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -276,7 +96,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    Derived factorial(const DenseMatrixBase<Derived>& m) {
+    Derived factorial(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -286,7 +106,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived ln(const DenseMatrixBase<Derived>& m) {
+    Derived ln(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -296,7 +116,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived log(const DenseMatrixBase<Derived>& m, const MultiScalar& a) {
+    Derived log(const RValueMatrix<Derived>& m, const MultiScalar& a) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -306,7 +126,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived exp(const DenseMatrixBase<Derived>& m) {
+    Derived exp(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -316,7 +136,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived pow(const DenseMatrixBase<Derived>& m, const MultiScalar& a) {
+    Derived pow(const RValueMatrix<Derived>& m, const MultiScalar& a) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -326,7 +146,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived cos(const DenseMatrixBase<Derived>& m) {
+    Derived cos(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -336,7 +156,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived sin(const DenseMatrixBase<Derived>& m) {
+    Derived sin(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -346,7 +166,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived tan(const DenseMatrixBase<Derived>& m) {
+    Derived tan(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -356,7 +176,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived sec(const DenseMatrixBase<Derived>& m) {
+    Derived sec(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -366,7 +186,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived csc(const DenseMatrixBase<Derived>& m) {
+    Derived csc(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -376,7 +196,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived cot(const DenseMatrixBase<Derived>& m) {
+    Derived cot(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -386,7 +206,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccos(const DenseMatrixBase<Derived>& m) {
+    Derived arccos(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -396,7 +216,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arcsin(const DenseMatrixBase<Derived>& m) {
+    Derived arcsin(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -406,7 +226,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arctan(const DenseMatrixBase<Derived>& m) {
+    Derived arctan(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -416,7 +236,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arcsec(const DenseMatrixBase<Derived>& m) {
+    Derived arcsec(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -426,7 +246,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccsc(const DenseMatrixBase<Derived>& m) {
+    Derived arccsc(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -436,7 +256,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccot(const DenseMatrixBase<Derived>& m) {
+    Derived arccot(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -446,7 +266,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived cosh(const DenseMatrixBase<Derived>& m) {
+    Derived cosh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -456,7 +276,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived sinh(const DenseMatrixBase<Derived>& m) {
+    Derived sinh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -466,7 +286,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived tanh(const DenseMatrixBase<Derived>& m) {
+    Derived tanh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -476,7 +296,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived sech(const DenseMatrixBase<Derived>& m) {
+    Derived sech(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -486,7 +306,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived csch(const DenseMatrixBase<Derived>& m) {
+    Derived csch(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -496,7 +316,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived coth(const DenseMatrixBase<Derived>& m) {
+    Derived coth(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -506,7 +326,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccosh(const DenseMatrixBase<Derived>& m) {
+    Derived arccosh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -516,7 +336,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arcsinh(const DenseMatrixBase<Derived>& m) {
+    Derived arcsinh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -526,7 +346,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arctanh(const DenseMatrixBase<Derived>& m) {
+    Derived arctanh(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -536,7 +356,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arcsech(const DenseMatrixBase<Derived>& m) {
+    Derived arcsech(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -546,7 +366,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccsch(const DenseMatrixBase<Derived>& m) {
+    Derived arccsch(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
@@ -556,7 +376,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived arccoth(const DenseMatrixBase<Derived>& m) {
+    Derived arccoth(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();
         for(size_t i = 0; i < length; ++i)
