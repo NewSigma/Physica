@@ -32,8 +32,8 @@ int main() {
                 const T& y = v[1];
                 const T& z = v[2];
                 return x * x + y * y + z * z - x * y - x * z - y * z;
-            }, Vector<T>{-1, -2, -5}, T(1E-5), T(0.01));
-        if (fabs(cg.compute().getTrivial()) > 1E-5)
+            }, Vector<T>{-1, -2, -5}, T(1E-14), T(0.00001));
+        if (fabs(cg.compute().getTrivial()) > 1E-14)
             return 1;
     }
     {
@@ -45,8 +45,8 @@ int main() {
                 const T term2 = y + z;
                 const T term3 = x + z;
                 return (reciprocal(term1 * term1) + reciprocal(term2 * term2) + reciprocal(term3 * term3)) * T(x * y + x * z + y * z);
-            }, Vector<T>{1, 3, 2}, T(1E-5), T(0.01));
-        if (fabs(cg.compute().getTrivial() - 2.25) > 1E-5)
+            }, Vector<T>{1, 3, 2}, T(1E-14), T(0.0001));
+        if (fabs(cg.compute().getTrivial() - 2.25) / 2.25 > 1E-14)
             return 1;
     }
     return 0;

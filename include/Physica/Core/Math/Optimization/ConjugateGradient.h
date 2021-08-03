@@ -42,6 +42,8 @@ namespace Physica::Core::Math {
         ~ConjugateGradient() = default;
         /* Operations */
         ScalarType compute();
+        /* Getters */
+        [[nodiscard]] const VectorType& getX() const noexcept { return x; }
     private:
         [[nodiscard]] VectorType gradient();
         [[nodiscard]] ScalarType climbHill(const VectorType& direction);
@@ -68,7 +70,7 @@ namespace Physica::Core::Math {
             x += factor * search_direction;
 
             ScalarType y_new = func(std::cref(x));
-            const ScalarType delta = abs(ScalarType(y_temp - y_new));
+            const ScalarType delta = abs(ScalarType((y_temp - y_new) / y_temp));
             y_temp = std::move(y_new);
 
             if (delta < epsilon)
@@ -77,19 +79,13 @@ namespace Physica::Core::Math {
             VectorType gradient_new = gradient();
             if (i == length) {
                 i = 0;
-                search_direction = -gradient_new;
-                continue;
-            }
-
-            const ScalarType norm = search_direction.norm();
-            const ScalarType alpha = gradient_new.squaredNorm() / gradient_temp.squaredNorm();
-            search_direction = norm * alpha * search_direction - gradient_new;
-            gradient_temp = std::move(gradient_new);
-
-            if (!(gradient_temp * search_direction).isNegative()) {
-                i = 0;
+                gradient_temp = std::move(gradient_new);
                 search_direction = -gradient_temp;
-                continue;
+            }
+            else {
+                const ScalarType alpha = gradient_new.squaredNorm() / gradient_temp.squaredNorm();
+                search_direction = alpha * search_direction - gradient_new;
+                gradient_temp = std::move(gradient_new);
             }
         }
         return y_temp;
@@ -113,15 +109,18 @@ namespace Physica::Core::Math {
     template<class ScalarType, class Function, class VectorType>
     ScalarType ConjugateGradient<ScalarType, Function, VectorType>::climbHill(const VectorType& direction) {
         ScalarType y0 = func(std::cref(x));
-        ScalarType y;
-        ScalarType result = minStepSize;
-        bool stop;
+        ScalarType step = minStepSize;
+        ScalarType result = 0;
         do {
-            y = func(x + result * direction);
-            stop = y > y0;
-            result += minStepSize;
-            y0 = std::move(y);
-        } while(!stop);
+            ScalarType test = result + step;
+            ScalarType y = func(x + test * direction);
+            bool smaller = y < y0;
+            if (smaller) {
+                result = std::move(test);
+                y0 = std::move(y);
+            }
+            step *= ScalarType(!smaller ? 0.25 : 2.0);
+        } while(step > minStepSize);
         return result;
     }
 }
