@@ -57,6 +57,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) {
+        return RowVector(*this, r, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    typename LValueMatrix<Derived>::ColVector LValueMatrix<Derived>::col(size_t c) {
+        return ColVector(*this, c, 0, Base::getRow());
+    }
+
+    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::determinate() const {
         assert(Base::getDerived().getRow() == Base::getDerived().getColumn());
         using namespace Internal;

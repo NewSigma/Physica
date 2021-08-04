@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.h"
+#include "MatrixBlock.h"
 
 namespace Physica::Core {
     /**
@@ -31,11 +32,15 @@ namespace Physica::Core {
         using Base = RValueMatrix<Derived>;
     public:
         using typename Base::ScalarType;
+        using RowVector = MatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = MatrixBlock<Derived, Dynamic, 1>;
     public:
         /* Operators */
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
         /* Operations */
+        [[nodiscard]] RowVector row(size_t r);
+        [[nodiscard]] ColVector col(size_t c);
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);
