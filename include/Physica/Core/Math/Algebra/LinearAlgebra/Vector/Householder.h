@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
+
 namespace Physica::Core {
     /**
      * The first element of \param target will be the factor to construct houseHolder matrix.
@@ -25,12 +28,13 @@ namespace Physica::Core {
      * 
      * \return The norm of \param source
      */
-    template<class Vector, class OtherVector>
-    typename Vector::ScalarType houseHolder(const Vector& source, OtherVector& target) {
-        using ScalarType = typename Vector::ScalarType;
+    template<class AnyVector, class OtherVector>
+    typename AnyVector::ScalarType householder(const LValueVector<AnyVector>& __restrict source,
+                                               LValueVector<OtherVector>& __restrict target) {
+        using ScalarType = typename AnyVector::ScalarType;
         assert(source.getLength() == target.getLength());
         const ScalarType abs_first = abs(source[0]);
-        const ScalarType norm = source.norm();
+        const ScalarType norm = source.getDerived().norm();
         ScalarType factor = reciprocal(ScalarType(abs_first + norm));
         if (source[0].isNegative())
             factor.toOpposite();
@@ -40,19 +44,24 @@ namespace Physica::Core {
         return norm;
     }
 
-    template<class Matrix, class Vector>
-    void applyHouseHolder(const Vector& houseHolder, Matrix& mat) {
-        Vector copy = houseHolder;
-        copy[0] = 1;
-        const auto mat1 = (houseHolder[0] * copy).moveToColMatrix();
+    template<class AnyVector, class OtherVector>
+    typename AnyVector::ScalarType householderInPlace(LValueVector<AnyVector>& v) {
+        return householder(v, v);
+    }
+
+    template<class MatrixType, class VectorType>
+    void applyHouseholder(const LValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
+        VectorType copy = householder;
+        copy.tail(1) *= copy[0];
+        const auto mat1 = copy.copyToColMatrix();
         mat -= mat1 * (copy.moveToRowMatrix() * mat);
     }
 
-    template<class Matrix, class Vector>
-    void applyHouseHolder(Matrix& mat, const Vector& houseHolder) {
-        Vector copy = houseHolder;
-        copy[0] = 1;
-        const auto mat1 = (houseHolder[0] * copy).moveToRowMatrix();
+    template<class MatrixType, class VectorType>
+    void applyHouseholder(LValueMatrix<MatrixType>& mat, const LValueVector<VectorType>& householder) {
+        VectorType copy = householder;
+        copy.tail(1) *= copy[0];
+        const auto mat1 = copy.copyToColMatrix();
         mat -= (mat * copy.moveToColMatrix()) * mat1;
     }
 }

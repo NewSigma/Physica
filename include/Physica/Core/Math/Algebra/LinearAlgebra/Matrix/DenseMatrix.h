@@ -77,8 +77,6 @@ namespace Physica::Core {
         DenseMatrix(MatrixProduct<T1, T2> pro);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
-        template<class MatrixIn>
-        DenseMatrix(InverseMatrix<MatrixIn> inverse);
         /* Operators */
         using Base::operator=;
         using Storage::operator();

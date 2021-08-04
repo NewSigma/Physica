@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/HouseHolder.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 using namespace Physica::Core;
 
@@ -28,7 +28,7 @@ int main() {
 
     const size_t rank = x.getLength();
     Vector<T> v(rank);
-    const T norm = houseHolder(x, v);
+    const T norm = householder(x, v);
     const T tau = v[0];
     const T beta = x[0].isNegative() ? norm : -norm;
     v[0] = 1;
