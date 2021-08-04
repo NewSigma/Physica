@@ -25,62 +25,65 @@ namespace Physica::Core {
     template<class T>
     class VectorBlock;
 
+    template<class Derived>
+    class LValueVector;
+
     namespace Internal {
         template<class T>
         class Traits;
 
-        template<class T>
-        class Traits<VectorBlock<T>> {
-            using ScalarType = typename T::ScalarType;
-            using VectorType = T;
+        template<class VectorType>
+        class Traits<VectorBlock<VectorType>> {
+        public:
+            using ScalarType = typename VectorType::ScalarType;
         };
     }
 
-    template<class T>
-    class VectorBlock {
+    template<class VectorType>
+    class VectorBlock : public LValueVector<VectorBlock<VectorType>> {
     public:
-        using ScalarType = typename T::ScalarType;
-        using VectorType = T;
+        using ScalarType = typename VectorType::ScalarType;
     private:
-        T& vec;
+        VectorType& vec;
         size_t from;
         size_t to;
     public:
-        VectorBlock(T& vec_, size_t from_, size_t to_);
-        VectorBlock(T& vec_, size_t from_);
+        VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_);
+        VectorBlock(LValueVector<VectorType>& vec_, size_t from_);
         VectorBlock(const VectorBlock& block);
         VectorBlock(VectorBlock&&) noexcept = delete;
         ~VectorBlock() = default;
         /* Operators */
         VectorBlock& operator=(const VectorBlock&) = delete;
         VectorBlock& operator=(VectorBlock&&) noexcept = delete;
-        template<class VectorExpression>
-        VectorBlock& operator=(const VectorExpression& exp);
+        template<class OtherVector>
+        VectorBlock& operator=(const RValueVector<OtherVector>& v);
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return to - from; }
     };
 
-    template<class T>
-    VectorBlock<T>::VectorBlock(T& vec_, size_t from_, size_t to_) : vec(vec_), from(from_), to(to_) {
+    template<class VectorType>
+    VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_)
+            : vec(vec_.getDerived()), from(from_), to(to_) {
         assert(from_ < to_);
         assert(to_ <= vec.getLength());
     }
 
-    template<class T>
-    VectorBlock<T>::VectorBlock(T& vec_, size_t from_) : VectorBlock(vec_, from_, vec_.getLength()) {}
+    template<class VectorType>
+    VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_) : VectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<class T>
-    template<class VectorExpression>
-    VectorBlock<T>& VectorBlock<T>::operator=(const VectorExpression& exp) {
-        assert(getLength() == exp.getLength());
+    template<class VectorType>
+    template<class OtherVector>
+    VectorBlock<VectorType>& VectorBlock<VectorType>::operator=(const RValueVector<OtherVector>& v) {
+        assert(getLength() == v.getLength());
         const size_t length = getLength();
         for (size_t i = 0; i < length; ++i)
-            this->operator[](i) = exp[i];
+            this->operator[](i) = v.calc(i);
         return *this;
     }
 
-    template<class T>
-    VectorBlock<T>::VectorBlock(const VectorBlock& block) : vec(block.vec), from(block.from), to(block.to) {}
+    template<class VectorType>
+    VectorBlock<VectorType>::VectorBlock(const VectorBlock& block) : vec(block.vec), from(block.from), to(block.to) {}
 }

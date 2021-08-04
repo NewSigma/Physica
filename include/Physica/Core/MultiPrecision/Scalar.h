@@ -237,7 +237,9 @@ namespace Physica::Core {
 
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
+    public:
         using Base = Internal::AbstractScalar<MultiPrecision>;
+        using ScalarType = Scalar<MultiPrecision, false>;
     public:
         Scalar() : Base() {}
         Scalar(int length_, int power_) : Base(length_, power_) {}
@@ -287,10 +289,12 @@ namespace Physica::Core {
 
     template<>
     class Scalar<MultiPrecision, true> final : public ScalarBase<Scalar<MultiPrecision, true>>, public Internal::AbstractScalar<MultiPrecision> {
-        using Base = Internal::AbstractScalar<MultiPrecision>;
     protected:
         //Accuracy
         MPUnit a;
+    public:
+        using Base = Internal::AbstractScalar<MultiPrecision>;
+        using ScalarType = Scalar<MultiPrecision, true>;
     public:
         Scalar() noexcept;
         Scalar(int length_, int power_, MPUnit a_ = 0) noexcept;
@@ -357,7 +361,9 @@ namespace Physica::Core {
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
     class Scalar<Float, false> final : public ScalarBase<Scalar<Float, false>>, public Internal::AbstractScalar<Float> {
+    public:
         using Base = Internal::AbstractScalar<Float>;
+        using ScalarType = Scalar<Float, false>;
     public:
         Scalar() : Base() {}
         Scalar(float f_) : Base(f_) {}
@@ -396,8 +402,10 @@ namespace Physica::Core {
 
     template<>
     class Scalar<Float, true> final : public ScalarBase<Scalar<Float, true>>, public Internal::AbstractScalar<Float> {
-        using Base = Internal::AbstractScalar<Float>;
         float a;
+    public:
+        using Base = Internal::AbstractScalar<Float>;
+        using ScalarType = Scalar<Float, true>;
     public:
         Scalar() : Base(), a(0) {}
         explicit Scalar(float f_, float a_ = 0) : Base(f_), a(fabsf(a_)) {}
@@ -440,7 +448,9 @@ namespace Physica::Core {
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double, false> final : public ScalarBase<Scalar<Double, false>>, public Internal::AbstractScalar<Double> {
+    public:
         using Base = Internal::AbstractScalar<Double>;
+        using ScalarType = Scalar<Double, false>;
     public:
         Scalar() : Base() {}
         Scalar(double d_) : Base(d_) {}
@@ -480,8 +490,10 @@ namespace Physica::Core {
 
     template<>
     class Scalar<Double, true> final : public ScalarBase<Scalar<Double, true>>, public Internal::AbstractScalar<Double> {
-        using Base = Internal::AbstractScalar<Double>;
         double a;
+    public:
+        using Base = Internal::AbstractScalar<Double>;
+        using ScalarType = Scalar<Double, true>;
     public:
         Scalar() : Base(), a(0) {}
         explicit Scalar(double d_, double a_ = 0) : Base(d_), a(fabs(a_)) {}

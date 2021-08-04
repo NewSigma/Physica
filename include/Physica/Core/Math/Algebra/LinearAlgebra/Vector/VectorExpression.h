@@ -46,139 +46,129 @@ namespace Physica::Core {
          */
         template<Utils::ExpressionType type, class Exp1, class Exp2>
         class Traits<VectorExpression<type, Exp1, Exp2>> {
-            static_assert(std::is_same<typename Exp1::VectorType, typename Exp2::VectorType>::value
-                          , "Types of the two operands must be same.");
         public:
-            using VectorType = typename Exp1::VectorType;
-        };
-
-        template<Utils::ExpressionType type, class Exp, ScalarOption option, bool errorTrack>
-        class Traits<VectorExpression<type, Exp, Scalar<option, errorTrack>>> {
-        public:
-            using VectorType = typename Exp::VectorType;
+            using ScalarType = typename BinaryScalarOpReturnType<typename Exp1::ScalarType, typename Exp2::ScalarType>::Type;
         };
         /**
-         * This class implements calc() for all \class VectorExpression
+         * This class implements assignTo() for all \class VectorExpression
          */
         template<class Derived>
-        class VectorExpressionHelper : public Utils::CRTPBase<Derived> {
+        class VectorExpressionHelper : public RValueVector<Derived> {
         public:
-            using VectorType = typename Traits<Derived>::VectorType;
-            using ScalarType = typename VectorType::ScalarType;
+            using ScalarType = typename Traits<Derived>::ScalarType;
         private:
-            using Base = Utils::CRTPBase<Derived>;
+            using Base = RValueVector<Derived>;
         public:
-            /* Operators */
-            operator VectorType() { return calc(); }
-            /* Getters */
-            [[nodiscard]] VectorType calc() const {
-                VectorType result{};
-                const Derived& derived = Base::getDerived();
-                const size_t length = derived.getLength();
-                result.reserve(length);
-                for (size_t i = 0; i < length; ++i)
-                    result.allocate(derived[i], i);
-                result.setLength(length);
-                return result;
+            template<class OtherDerived>
+            void assignTo(LValueVector<OtherDerived>& v) const {
+                assert(v.getLength() == getLength());
+                for (size_t i = 0; i < getLength(); ++i)
+                    v[i] = calc(i);
             }
+
+            [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+            /* Getters */
+            [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         };
     }
     //////////////////////////////////////Minus//////////////////////////////////////
-    template<class T>
-    class VectorExpression<Utils::ExpressionType::Minus, T>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, T>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, T>>;
-        const T& exp;
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Minus, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, VectorType>>;
+        const VectorType& exp;
     public:
-        explicit VectorExpression(const T& exp_) : exp(exp_) {}
+        explicit VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
 
-        typename Base::ScalarType operator[](size_t s) const { return -exp[s]; }
+        typename Base::ScalarType calc(size_t s) const { return -exp.calc(s); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class T1, class T2>
-    class VectorExpression<Utils::ExpressionType::Add, T1, T2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, T1, T2>> {
-        static_assert(std::is_same<typename T1::VectorType, typename T2::VectorType>::value
-                      , "Types of two operands of add must be same.");
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, T1, T2>>;
-        const T1& exp1;
-        const T2& exp2;
+    template<class VectorType1, class VectorType2>
+    class VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>>;
+        const VectorType1& exp1;
+        const VectorType2& exp2;
     public:
-        VectorExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {
+        VectorExpression(const RValueVector<VectorType1>& exp1_, const RValueVector<VectorType2>& exp2_)
+                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        typename Base::ScalarType operator[](size_t s) const { return exp1[s] + exp2[s]; }
+        typename Base::ScalarType calc(size_t s) const { return exp1.calc(s) + exp2.calc(s); }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
-    template<class T, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Add, T, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, T, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, T, Scalar<option, errorTrack>>>;
-        const T& exp;
+    template<class VectorType, ScalarOption option, bool errorTrack>
+    class VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>>;
+        const VectorType& exp;
         const Scalar<option, errorTrack>& scalar;
     public:
-        VectorExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_) {}
 
-        typename Base::ScalarType operator[](size_t s) const { return exp[s] + scalar; }
+        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) + scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class T1, class T2>
-    class VectorExpression<Utils::ExpressionType::Sub, T1, T2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, T1, T2>> {
-        static_assert(std::is_same<typename T1::VectorType, typename T2::VectorType>::value
-                      , "Types of two operands of sub must be same.");
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, T1, T2>>;
-        T1 exp1;
-        T2 exp2;
+    template<class VectorType1, class VectorType2>
+    class VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>;
+        const VectorType1& exp1;
+        const VectorType2& exp2;
     public:
-        VectorExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {
+        VectorExpression(const RValueVector<VectorType1>& exp1_, const RValueVector<VectorType2>& exp2_)
+                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        typename Base::ScalarType operator[](size_t s) const { return exp1[s] - exp2[s]; }
+        typename Base::ScalarType calc(size_t s) const { return exp1.calc(s) - exp2.calc(s); }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
-    template<class T, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Sub, T, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, T, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, T, Scalar<option, errorTrack>>>;
-        T exp;
+    template<class VectorType, ScalarOption option, bool errorTrack>
+    class VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>>;
+        const VectorType& exp;
         const Scalar<option, errorTrack>& scalar;
     public:
-        VectorExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_) {}
 
-        typename Base::ScalarType operator[](size_t s) const { return exp[s] - scalar; }
+        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) - scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Mul, T, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, T, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, T, Scalar<option, errorTrack>>>;
-        T exp;
-        const Scalar<option, errorTrack>& scalar;
+    template<class VectorType, class ScalarType>
+    class VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType>>;
+        const VectorType& exp;
+        const ScalarType& scalar;
     public:
-        VectorExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        VectorExpression(const RValueVector<VectorType>& exp_, const ScalarBase<ScalarType>& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_.getDerived()) {}
 
-        typename Base::ScalarType operator[](size_t s) const { return exp[s] * scalar; }
+        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) * scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Div, T, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, T, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, T, Scalar<option, errorTrack>>>;
-        T exp;
-        const Scalar<option, errorTrack>& scalar;
+    template<class VectorType, class ScalarType>
+    class VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType>>;
+        const VectorType& exp;
+        const ScalarType& scalar;
     public:
-        VectorExpression(const T& exp_, const Scalar<option, errorTrack>& scalar_) : exp(exp_), scalar(scalar_) {}
+        VectorExpression(const RValueVector<VectorType>& exp_, const ScalarBase<ScalarType>& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_.getDerived()) {}
 
-        typename Base::ScalarType operator[](size_t s) const { return exp[s] / scalar; }
+        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) / scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////

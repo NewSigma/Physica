@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RValueVector.h"
+#include "VectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -34,5 +35,21 @@ namespace Physica::Core {
     public:
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived()[index]; }
+        VectorBlock<Derived> tail(size_t from) { return VectorBlock<Derived>(Base::getDerived(), from); }
+        const VectorBlock<Derived> tail(size_t from) const { return VectorBlock<Derived>(const_cast<Derived&>(Base::getDerived()), from); }
     };
+
+    template<class Derived, class OtherDerived>
+    void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
+        for (size_t i = 0; i < v1.getLength(); ++i)
+            v1[i] = v1[i] + v2.calc(i);
+    }
+
+    template<class Derived, class OtherDerived>
+    void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
+        for (size_t i = 0; i < v1.getLength(); ++i)
+            v1[i] = v1[i] - v2.calc(i);
+    }
 }

@@ -35,9 +35,7 @@ namespace Physica::Core {
         if (source[0].isNegative())
             factor.toOpposite();
 
-        VectorBlock block_source(source, 1);
-        VectorBlock block_target(target, 1);
-        block_target = block_source * factor;
+        target.tail(1) = source.tail(1) * factor;
         target[0] = ScalarType(1) + abs_first / norm;
         return norm;
     }

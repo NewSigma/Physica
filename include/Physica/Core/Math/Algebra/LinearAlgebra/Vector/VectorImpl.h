@@ -31,25 +31,10 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    template<Utils::ExpressionType type, class T1, class T2>
-    Vector<T, Length, MaxLength>::Vector(const VectorExpression<type, T1, T2>& expression) : Storage(expression.getLength()) {
-        const size_t length = expression.getLength();
-        for (size_t i = 0; i < length; ++i)
-            Storage::init(expression[i], i);
-        Storage::setLength(length);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
     Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const RValueVector<Derived>& v) {
-        Base::resize(v.getLength());
+        Storage::resize(v.getLength());
         v.assignTo(*this);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    template<Utils::ExpressionType type, class T1, class T2>
-    Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const VectorExpression<type, T1, T2>& exp) {
-        Storage::operator=(exp.calc());
         return *this;
     }
 
@@ -204,18 +189,6 @@ namespace Physica::Core {
         for(size_t i = 0; i < len; ++i)
             result += v1[i] * v2[i];
         return result;
-    }
-
-    template<class T, size_t Length, size_t MaxLength, Utils::ExpressionType type, class T1, class T2>
-    void operator+=(Vector<T, Length, MaxLength>& v1, const VectorExpression<type, T1, T2>& exp) {
-        for (size_t i = 0; i < exp.getLength(); ++i)
-            v1[i] = v1[i] + exp[i];
-    }
-
-    template<class T, size_t Length, size_t MaxLength, Utils::ExpressionType type, class T1, class T2>
-    void operator-=(Vector<T, Length, MaxLength>& v1, const VectorExpression<type, T1, T2>& exp) {
-        for (size_t i = 0; i < exp.getLength(); ++i)
-            v1[i] = v1[i] - exp[i];
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.

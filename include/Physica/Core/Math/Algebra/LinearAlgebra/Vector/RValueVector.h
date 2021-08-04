@@ -42,6 +42,8 @@ namespace Physica::Core {
             assert(v.getLength() == getLength());
             Base::getDerived().assignTo(v);
         }
+
+        [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };

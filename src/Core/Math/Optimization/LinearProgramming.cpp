@@ -63,7 +63,7 @@ namespace Physica::Core {
             return false;
         switch(type) {
             case Equal:
-                data.appendRow((-v).calc());
+                data.appendRow(Vector<>(-v));
                 data.appendRow(std::move(v));
                 break;
     #pragma GCC diagnostic push
