@@ -16,11 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 using namespace Physica::Core;
+
+template<class ScalarType>
+bool near(const ScalarType& s1, const ScalarType& s2, double precision) {
+    assert(precision > 0);
+    return s2.isZero() ? (abs(s1) < ScalarType(precision)) : (abs((s1 - s2) / s2) < ScalarType(precision));
+}
 
 int main() {
     using T = Scalar<Double, false>;
@@ -29,15 +35,38 @@ int main() {
     const size_t rank = x.getLength();
     Vector<T> v(rank);
     const T norm = householder(x, v);
-    const T tau = v[0];
-    const T beta = x[0].isNegative() ? norm : -norm;
-    v[0] = 1;
+    {
+        Vector<T> copy = v;
+        const T tau = copy[0];
+        const T beta = x[0].isNegative() ? norm : -norm;
+        copy[0] = 1;
 
-    Vector<T> result = x - tau * (v * x) * v;
-    if (abs(T(result[0] - beta) / beta) > T(1E-15))
-        return 1;
-    for (size_t i = 1; i < rank; ++i)
-        if (abs(result[i]) > T(1E-15))
+        Vector<T> result = x - tau * (copy * x) * copy;
+        if (abs(T(result[0] - beta) / beta) > T(1E-15))
             return 1;
+        for (size_t i = 1; i < rank; ++i)
+            if (abs(result[i]) > T(1E-15))
+                return 1;
+    }
+
+    {
+        using MatrixType = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 4>;
+        const MatrixType m{x, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
+        const MatrixType l_answer{{-7.34849, 0, 0, 0}, {-13.0639, 0.203133, -0.729156, -1.66145}, {-20.6846, 0.473976, -1.70137, -3.87671}, {-28.3052, 0.74482, -2.67357, -6.09197}};
+        MatrixType l_result = m;
+        applyHouseholder(v, l_result);
+        for (int i = 0; i < 4; ++i)
+            for (int j = 0; j < 4; ++j)
+                if (!near(l_result(i, j), l_answer(i, j), 1E-5))
+                    return 1;
+
+        const MatrixType r_answer{{-16.3299, -18.2351, -20.1402, -22.0454}, {-0.882225, -0.814514, -0.746803, -0.679092}, {1.15703, 0.913982, 0.67093, 0.427878}, {3.19629, 2.64248, 2.08866, 1.53485}};
+        MatrixType r_result = m;
+        applyHouseholder(r_result, v);
+        for (int i = 0; i < 4; ++i)
+            for (int j = 0; j < 4; ++j)
+                if (!near(r_result(i, j), r_answer(i, j), 1E-5))
+                    return 1;
+    }
     return 0;
 }

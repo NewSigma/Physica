@@ -51,19 +51,21 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(const LValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
-        Vector<typename MatrixType::ScalarType> copy = householder;
-        auto tail = copy.tail(1);
-        tail *= copy[0];
-        const auto mat1 = copy.copyToColMatrix();
+        using ScalarType = typename MatrixType::ScalarType;
+        Vector<ScalarType> copy = householder;
+        ScalarType temp = ScalarType::One();
+        std::swap(temp, copy[0]);
+        const auto mat1 = (copy * temp).copyToColMatrix();
         mat -= mat1 * (copy.copyToRowMatrix() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(LValueMatrix<MatrixType>& mat, const LValueVector<VectorType>& householder) {
-        Vector<typename MatrixType::ScalarType> copy = householder;
-        auto tail = copy.tail(1);
-        tail *= copy[0];
-        const auto mat1 = copy.copyToRowMatrix();
+        using ScalarType = typename MatrixType::ScalarType;
+        Vector<ScalarType> copy = householder;
+        ScalarType temp = ScalarType::One();
+        std::swap(temp, copy[0]);
+        const auto mat1 = (copy * temp).copyToRowMatrix();
         mat -= (mat * copy.copyToColMatrix()).compute() * mat1;
     }
 }
