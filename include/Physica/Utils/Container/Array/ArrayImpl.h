@@ -184,6 +184,13 @@ namespace Physica::Utils {
             result.allocate(std::move(Base::operator[](from)), i);
         return result;
     }
+
+    template<class T, size_t Length, size_t Capacity>
+    void Array<T, Length, Capacity>::resize(size_t size, const T& t) {
+        assert(size == getLength());
+        for (size_t i = 0; i < size; ++i)
+            (*this)[i] = t;
+    }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity>
     Array<T, Dynamic, Capacity>::Array() : Base(Capacity) {}

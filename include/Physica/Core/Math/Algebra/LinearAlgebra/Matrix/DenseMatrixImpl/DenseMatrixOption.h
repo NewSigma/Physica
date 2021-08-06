@@ -45,6 +45,9 @@ namespace Physica::Core {
         constexpr static bool isRowMatrix() { return !isColumnMatrix<Matrix>(); }
 
         template<class Matrix>
+        constexpr static int getMajor() { return isColumnMatrix<Matrix>() ? Column : Row; }
+
+        template<class Matrix>
         constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::MatrixOption & Element; }
 
         template<class Matrix>

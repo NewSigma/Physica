@@ -23,41 +23,9 @@
 namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
-    void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& mat) const {
-        assert(getRow() == mat.getRow() && getColumn() == mat.getColumn());
-        Base::getDerived().assignTo(mat);
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::getMaxMajor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return getColumn();
-        else
-            return getRow();
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::getMaxMinor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return getRow();
-        else
-            return getColumn();
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return minor;
-        else
-            return major;
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            return major;
-        else
-            return minor;
+    void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
+        assert(getRow() == target.getRow() && getColumn() == target.getColumn());
+        Base::getDerived().assignTo(target);
     }
 
     template<class Derived>

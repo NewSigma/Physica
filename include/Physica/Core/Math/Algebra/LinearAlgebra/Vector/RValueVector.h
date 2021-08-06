@@ -19,11 +19,14 @@
 #pragma once
 
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
     namespace Internal {
         template<class T> class Traits;
     }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn> class DenseMatrix;
 
     template<class Derived> class LValueVector;
     /**
@@ -36,7 +39,12 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        using ColMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
+        using RowMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile>;
     public:
+        /* Operations */
         template<class OtherDerived>
         void assignTo(LValueVector<OtherDerived>& v) const {
             assert(v.getLength() == getLength());
@@ -44,7 +52,23 @@ namespace Physica::Core {
         }
 
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        ColMatrix copyToColMatrix() const;
+        RowMatrix copyToRowMatrix() const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };
+
+    template<class Derived>
+    typename RValueVector<Derived>::ColMatrix RValueVector<Derived>::copyToColMatrix() const {
+        ColMatrix mat(getLength(), 1);
+        mat[0] = *this;
+        return mat;
+    }
+
+    template<class Derived>
+    typename RValueVector<Derived>::RowMatrix RValueVector<Derived>::copyToRowMatrix() const {
+        RowMatrix mat(1, getLength());
+        mat[0] = *this;
+        return mat;
+    }
 }

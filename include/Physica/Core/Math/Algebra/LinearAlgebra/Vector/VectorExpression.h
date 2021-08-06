@@ -41,13 +41,23 @@ namespace Physica::Core {
     namespace Internal {
         template<class T>
         class Traits;
-        /**
-         * VectorType: Type of the vector calculated from the expression.
-         */
+
         template<Utils::ExpressionType type, class Exp1, class Exp2>
         class Traits<VectorExpression<type, Exp1, Exp2>> {
+            static_assert(Exp1::SizeAtCompile == Exp2::SizeAtCompile, "[Possible optimization]: Binary operation between vectors should have same size at compile");
+            static_assert(Exp1::MaxSizeAtCompile == Exp2::MaxSizeAtCompile, "[Possible optimization]: Binary operation between vectors should have same max size at compile");
         public:
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp1::ScalarType, typename Exp2::ScalarType>::Type;
+            constexpr static size_t SizeAtCompile = Exp1::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile;
+        };
+
+        template<Utils::ExpressionType type, class Exp, ScalarOption option, bool errorTrack>
+        class Traits<VectorExpression<type, Exp, Scalar<option, errorTrack>>> {
+        public:
+            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, Scalar<option, errorTrack>>::Type;
+            constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
         };
         /**
          * This class implements assignTo() for all \class VectorExpression

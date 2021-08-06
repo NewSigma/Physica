@@ -57,13 +57,72 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) {
-        return RowVector(*this, r, 0, Base::getColumn());
+    template<class OtherMatrix>
+    Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
+        Base::getDerived().resize(m.getRow(), m.getColumn());
+        m.assignTo(*this);
+        return Base::getDerived();
+    }
+    
+    template<class Derived>
+    template<ScalarOption option, bool errorTrack>
+    Derived& LValueMatrix<Derived>::operator=(const Scalar<option, errorTrack>& s) {
+        for (size_t i = 0; i < Base::getMaxMajor(); ++i)
+            for (size_t j = 0; j < Base::getMaxMinor(); ++j)
+                getElementFromMajorMinor(i, j) = s;
+        return Base::getDerived();
     }
 
     template<class Derived>
-    typename LValueMatrix<Derived>::ColVector LValueMatrix<Derived>::col(size_t c) {
-        return ColVector(*this, c, 0, Base::getRow());
+    inline typename LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) {
+        return RowVector(Base::getDerived(), r, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline const typename LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) const {
+        return RowVector(Base::getConstCastDerived(), r, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline typename LValueMatrix<Derived>::ColVector LValueMatrix<Derived>::col(size_t c) {
+        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
+    }
+
+    template<class Derived>
+    inline const typename LValueMatrix<Derived>::ColVector LValueMatrix<Derived>::col(size_t c) const {
+        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived> LValueMatrix<Derived>::rightCols(size_t from) {
+        return MatrixBlock<Derived>(Base::getDerived(), 0, Base::getRow(), from, Base::getColumn() - from);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived> LValueMatrix<Derived>::rightCols(size_t from) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getColumn() - from);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived>
+    LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) {
+        return MatrixBlock<Derived>(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getColumn() - fromCol);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived>
+    LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getColumn() - fromCol);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived> LValueMatrix<Derived>::bottomRightCorner(size_t from) {
+        return MatrixBlock<Derived>(Base::getDerived(), from, Base::getRow() - from, from, Base::getColumn() - from);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived> LValueMatrix<Derived>::bottomRightCorner(size_t from) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getColumn() - from);
     }
 
     template<class Derived>
@@ -170,6 +229,36 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class OtherDerived>
+    void LValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
+        using TargetType = LValueMatrix<OtherDerived>;
+        const size_t max_i = target.getMaxMajor();
+        const size_t mat_j = target.getMaxMinor();
+        for (size_t i = 0; i < max_i; ++i) {
+            for (size_t j = 0; j < mat_j; ++j) {
+                target.getElementFromMajorMinor(i, j) = (*this)(TargetType::rowFromMajorMinor(i, j),
+                                                                TargetType::columnFromMajorMinor(i, j));
+            }
+        }
+    }
+
+    template<class Derived>
+    inline size_t LValueMatrix<Derived>::getMaxMajor() const noexcept {
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+            return Base::getColumn();
+        else
+            return Base::getRow();
+    }
+
+    template<class Derived>
+    inline size_t LValueMatrix<Derived>::getMaxMinor() const noexcept {
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+            return Base::getRow();
+        else
+            return Base::getColumn();
+    }
+
+    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
         size_t r, c;
         if constexpr(DenseMatrixOption::isColumnMatrix<Derived>()) {
@@ -197,5 +286,21 @@ namespace Physica::Core {
         }
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
         return Base::getDerived()(r, c);
+    }
+
+    template<class Derived>
+    inline size_t LValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+            return minor;
+        else
+            return major;
+    }
+
+    template<class Derived>
+    inline size_t LValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+            return major;
+        else
+            return minor;
     }
 }

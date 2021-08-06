@@ -69,31 +69,13 @@ namespace Physica::Core {
         constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<DenseMatrix>();
     public:
         using Storage::Storage;
-        template<Utils::ExpressionType expType, class T1, class T2>
-        DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp);
         template<class OtherMatrix>
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
-        template<class T1, class T2>
-        DenseMatrix(MatrixProduct<T1, T2> pro);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
         /* Operators */
         using Base::operator=;
         using Storage::operator();
-        template<Utils::ExpressionType expType, class T1, class T2>
-        DenseMatrix& operator=(DenseMatrixExpression<expType, T1, T2> exp) { *this = std::move(DenseMatrix(exp)); return *this; }
-        template<class MatrixType>
-        inline void operator+=(const RValueMatrix<MatrixType>& m) { *this = *this + m.getDerived(); }
-        template<class ScalarType>
-        inline void operator+=(const ScalarBase<ScalarType>& s) { *this = *this + s.Base::getDerived(); }
-        template<class MatrixType>
-        inline void operator-=(const RValueMatrix<MatrixType>& m) { *this = *this - m.getDerived(); }
-        template<class ScalarType>
-        inline void operator-=(const ScalarBase<ScalarType>& s) { *this = *this - s.Base::getDerived(); }
-        template<class MatrixType>
-        inline void operator*=(const RValueMatrix<MatrixType>& m) { *this = *this * m.getDerived(); }
-        template<class ScalarType>
-        inline void operator*=(const ScalarBase<ScalarType>& s) { *this = *this * s.Base::getDerived(); }
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
         /* Getters */
         using Storage::getRow;

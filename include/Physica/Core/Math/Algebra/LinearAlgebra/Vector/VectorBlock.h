@@ -19,6 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
+    using Utils::Dynamic;
     /**
      * Reference a part of the given vector
      */
@@ -36,12 +37,15 @@ namespace Physica::Core {
         class Traits<VectorBlock<VectorType>> {
         public:
             using ScalarType = typename VectorType::ScalarType;
+            constexpr static size_t SizeAtCompile = Dynamic;
+            constexpr static size_t MaxSizeAtCompile = Dynamic;
         };
     }
 
     template<class VectorType>
     class VectorBlock : public LValueVector<VectorBlock<VectorType>> {
     public:
+        using Base = LValueVector<VectorBlock<VectorType>>;
         using ScalarType = typename VectorType::ScalarType;
     private:
         VectorType& vec;
@@ -50,16 +54,17 @@ namespace Physica::Core {
     public:
         VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_);
         VectorBlock(LValueVector<VectorType>& vec_, size_t from_);
-        VectorBlock(const VectorBlock& block);
+        VectorBlock(const VectorBlock& block) = default;
         VectorBlock(VectorBlock&&) noexcept = delete;
         ~VectorBlock() = default;
         /* Operators */
-        VectorBlock& operator=(const VectorBlock&) = delete;
-        VectorBlock& operator=(VectorBlock&&) noexcept = delete;
-        template<class OtherVector>
-        VectorBlock& operator=(const RValueVector<OtherVector>& v);
+        using Base::operator=;
+        VectorBlock& operator=(const VectorBlock& v) { Base::operator=(v); return *this; }
+        VectorBlock& operator=(VectorBlock&& v) noexcept { Base::operator=(v); return *this; }
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
+        /* Operations */
+        void resize(size_t length) const { assert(length == Base::getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return to - from; }
     };
@@ -67,23 +72,10 @@ namespace Physica::Core {
     template<class VectorType>
     VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_)
             : vec(vec_.getDerived()), from(from_), to(to_) {
-        assert(from_ < to_);
-        assert(to_ <= vec.getLength());
+        assert(from_ < to);
+        assert(to <= vec.getLength());
     }
 
     template<class VectorType>
     VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_) : VectorBlock(vec_, from_, vec_.getLength()) {}
-
-    template<class VectorType>
-    template<class OtherVector>
-    VectorBlock<VectorType>& VectorBlock<VectorType>::operator=(const RValueVector<OtherVector>& v) {
-        assert(getLength() == v.getLength());
-        const size_t length = getLength();
-        for (size_t i = 0; i < length; ++i)
-            this->operator[](i) = v.calc(i);
-        return *this;
-    }
-
-    template<class VectorType>
-    VectorBlock<VectorType>::VectorBlock(const VectorBlock& block) : vec(block.vec), from(block.from), to(block.to) {}
 }

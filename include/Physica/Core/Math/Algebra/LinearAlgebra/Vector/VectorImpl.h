@@ -31,14 +31,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    template<class Derived>
-    Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::operator=(const RValueVector<Derived>& v) {
-        Storage::resize(v.getLength());
-        v.assignTo(*this);
-        return *this;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength>& Vector<T, Length, MaxLength>::toOpposite() {
         const auto end = Storage::end();
         for (auto ite = Storage::begin(); ite != end; ++ite)
@@ -64,22 +56,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    typename Vector<T, Length, MaxLength>::ColMatrix Vector<T, Length, MaxLength>::copyToColMatrix() const {
-        ColMatrix mat(this->getLength(), 1);
-        mat[0] = *this;
-        return mat;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     typename Vector<T, Length, MaxLength>::ColMatrix Vector<T, Length, MaxLength>::moveToColMatrix() {
         ColMatrix mat(this->getLength(), 1);
-        mat[0] = std::move(*this);
-        return mat;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    typename Vector<T, Length, MaxLength>::RowMatrix Vector<T, Length, MaxLength>::copyToRowMatrix() const {
-        RowMatrix mat(1, this->getLength());
         mat[0] = std::move(*this);
         return mat;
     }
@@ -122,19 +100,6 @@ namespace Physica::Core {
             if ((*this)[i] < result)
                 result = (*this)[i];
         }
-        return result;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    T Vector<T, Length, MaxLength>::norm() const {
-        return sqrt(squaredNorm());
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    T Vector<T, Length, MaxLength>::squaredNorm() const {
-        auto result = T::Zero();
-        for(auto ite = Storage::cbegin(); ite != Storage::cend(); ++ite)
-            result += square(*ite);
         return result;
     }
 

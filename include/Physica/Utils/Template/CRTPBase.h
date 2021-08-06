@@ -27,5 +27,7 @@ namespace Physica::Utils {
     public:
         [[nodiscard]] Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
         [[nodiscard]] const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
+        [[nodiscard]] const Derived& getConstDerived() const noexcept { return *static_cast<Derived*>(this); }
+        [[nodiscard]] Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
     };
 }

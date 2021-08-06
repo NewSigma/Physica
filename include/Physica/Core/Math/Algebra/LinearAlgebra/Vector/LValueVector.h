@@ -33,13 +33,61 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
     public:
+        /* Operators */
+        template<class OtherVector>
+        Derived& operator=(const RValueVector<OtherVector>& v);
+        template<ScalarOption option, bool errorTrack>
+        Derived& operator=(const Scalar<option, errorTrack>& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived()[index]; }
+        template<class OtherDerived>
+        void assignTo(LValueVector<OtherDerived>& v) const;
+        [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
+        VectorBlock<Derived> head(size_t to) { return VectorBlock<Derived>(Base::getDerived(), 0, to); }
+        const VectorBlock<Derived> head(size_t to) const { return VectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
         VectorBlock<Derived> tail(size_t from) { return VectorBlock<Derived>(Base::getDerived(), from); }
-        const VectorBlock<Derived> tail(size_t from) const { return VectorBlock<Derived>(const_cast<Derived&>(Base::getDerived()), from); }
+        const VectorBlock<Derived> tail(size_t from) const { return VectorBlock<Derived>(Base::getConstCastDerived(), from); }
+        /* Getters */
+        [[nodiscard]] ScalarType norm() const;
+        [[nodiscard]] ScalarType squaredNorm() const;
     };
+
+    template<class Derived>
+    template<class OtherVector>
+    Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v) {
+        Base::getDerived().resize(v.getLength());
+        v.assignTo(*this);
+        return Base::getDerived();
+    }
+
+    template<class Derived>
+    template<ScalarOption option, bool errorTrack>
+    Derived& LValueVector<Derived>::operator=(const Scalar<option, errorTrack>& s) {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = s;
+        return Base::getDerived();
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    void LValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            v[i] = (*this)[i];
+    }
+
+    template<class Derived>
+    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::norm() const {
+        return sqrt(squaredNorm());
+    }
+
+    template<class Derived>
+    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::squaredNorm() const {
+        auto result = ScalarType::Zero();
+        for(size_t i = 0; i < Base::getLength(); ++i)
+            result += square((*this)[i]);
+        return result;
+    }
 
     template<class Derived, class OtherDerived>
     void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
@@ -52,4 +100,16 @@ namespace Physica::Core {
         for (size_t i = 0; i < v1.getLength(); ++i)
             v1[i] = v1[i] - v2.calc(i);
     }
+
+    template<class VectorType, class ScalarType>
+    inline void operator+=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v + n; }
+
+    template<class VectorType, class ScalarType>
+    inline void operator-=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v - n; }
+
+    template<class VectorType, class ScalarType>
+    inline void operator*=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v * n; }
+
+    template<class VectorType, class ScalarType>
+    inline void operator/=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v / n; }
 }

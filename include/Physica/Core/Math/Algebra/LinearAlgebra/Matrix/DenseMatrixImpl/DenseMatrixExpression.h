@@ -26,107 +26,172 @@ namespace Physica::Core {
      */
     template<Utils::ExpressionType type, class T1, class T2 = T1>
     class DenseMatrixExpression;
-    //////////////////////////////////////Minus//////////////////////////////////////
-    template<class T>
-    class DenseMatrixExpression<Utils::ExpressionType::Minus, T> {
-    public:
-        using ScalarType = typename T::ScalarType;
-    private:
-        const T& exp;
-    public:
-        DenseMatrixExpression(const T& exp_) : exp(exp_) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return -exp(row, col); }
+    namespace Internal {
+        template<Utils::ExpressionType type, class T1, class T2>
+        struct Traits<DenseMatrixExpression<type, T1, T2>> {
+            using ScalarType = typename BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            constexpr static size_t RowAtCompile = T1::RowAtCompile;
+            constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+            constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
+            constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
+            constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
+        };
+
+        template<class Derived>
+        class DenseMatrixExpressionBase : public RValueMatrix<Derived> {
+        public:
+            using Base = RValueMatrix<Derived>;
+            using typename Base::ScalarType;
+        public:
+            template<class OtherDerived>
+            void assignTo(LValueMatrix<OtherDerived>& m) const {
+                assert(getRow() == m.getRow() && getColumn() == m.getColumn());
+                for (size_t i = 0; i < m.getMaxMajor(); ++i) {
+                    for (size_t j = 0; j < m.getMaxMinor(); ++j) {
+                        const size_t r = LValueMatrix<OtherDerived>::rowFromMajorMinor(i, j);
+                        const size_t c = LValueMatrix<OtherDerived>::columnFromMajorMinor(i, j);
+                        m(r, c) = calc(r, c);
+                    }
+                }       
+            }
+
+            [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+            /* Getters */
+            [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+            [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+        };
+    }
+    //////////////////////////////////////Minus//////////////////////////////////////
+    template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Minus, MatrixType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Minus, MatrixType>> {
+    public:
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Minus, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& exp;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_) : exp(exp_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return -exp.calc(row, col); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class T1, class T2>
-    class DenseMatrixExpression<Utils::ExpressionType::Add, T1, T2> {
+    template<class MatrixType1, class MatrixType2>
+    class DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType1, MatrixType2>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType1, MatrixType2>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType1, MatrixType2>>;
+        using typename Base::ScalarType;
     private:
-        const T1& exp1;
-        const T2& exp2;
+        const MatrixType1& exp1;
+        const MatrixType2& exp2;
     public:
-        DenseMatrixExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType1>& exp1_, const RValueMatrix<MatrixType2>& exp2_)
+                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp1(row, col)) + ScalarType(exp2(row, col)); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
+        }
         [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Add, T, ScalarBase<AnyScalar>> {
+    template<class MatrixType, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>;
+        using typename Base::ScalarType;
     private:
-        const T& exp;
+        const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) + ScalarType(scalar); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
+        }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Minus//////////////////////////////////////
-    template<class T1, class T2>
-    class DenseMatrixExpression<Utils::ExpressionType::Sub, T1, T2> {
+    template<class MatrixType1, class MatrixType2>
+    class DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType1, MatrixType2>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType1, MatrixType2>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType1, MatrixType2>>;
+        using typename Base::ScalarType;
     private:
-        const T1& exp1;
-        const T2& exp2;
+        const MatrixType1& exp1;
+        const MatrixType2& exp2;
     public:
-        DenseMatrixExpression(const T1& exp1_, const T2& exp2_) : exp1(exp1_), exp2(exp2_) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType1>& exp1_, const RValueMatrix<MatrixType2>& exp2_)
+                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp1(row, col)) - ScalarType(exp2(row, col)); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            return ScalarType(exp1.calc(row, col)) - ScalarType(exp2.calc(row, col));
+        }
         [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
     };
 
-    template<class T, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Sub, T, ScalarBase<AnyScalar>> {
+    template<class MatrixType, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>>;
+        using typename Base::ScalarType;
     private:
-        const T& exp;
+        const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) - ScalarType(scalar); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) - ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Mul, T, ScalarBase<AnyScalar>> {
+    template<class MatrixType, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>;
+        using typename Base::ScalarType;
     private:
-        const T& exp;
+        const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return ScalarType(exp(row, col)) * ScalarType(scalar); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
+        }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Div, T, ScalarBase<AnyScalar>> {
+    template<class MatrixType, class AnyScalar>
+    class DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, AnyScalar>::Type;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>>;
+        using typename Base::ScalarType;
     private:
-        const T& exp;
+        const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const T& exp_, const ScalarBase<AnyScalar>& base) : exp(exp_), scalar(base.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType operator()(size_t row, size_t col) const { return exp(row, col) / ScalarType(scalar); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp.calc(row, col) / ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
     };

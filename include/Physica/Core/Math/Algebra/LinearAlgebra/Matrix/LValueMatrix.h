@@ -34,13 +34,26 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using RowVector = MatrixBlock<Derived, 1, Dynamic>;
         using ColVector = MatrixBlock<Derived, Dynamic, 1>;
+        constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption; //It is declared here because MatrixOption makes no sence to a RValueMatrix
     public:
         /* Operators */
+        template<class OtherMatrix>
+        Derived& operator=(const RValueMatrix<OtherMatrix>& m);
+        template<ScalarOption option, bool errorTrack>
+        Derived& operator=(const Scalar<option, errorTrack>& s);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
         /* Operations */
-        [[nodiscard]] RowVector row(size_t r);
-        [[nodiscard]] ColVector col(size_t c);
+        [[nodiscard]] inline RowVector row(size_t r);
+        [[nodiscard]] inline const RowVector row(size_t r) const;
+        [[nodiscard]] inline ColVector col(size_t c);
+        [[nodiscard]] inline const ColVector col(size_t c) const;
+        [[nodiscard]] inline MatrixBlock<Derived> rightCols(size_t from);
+        [[nodiscard]] inline const MatrixBlock<Derived> rightCols(size_t from) const;
+        [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);
+        [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
+        [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t from);
+        [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t from) const;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);
@@ -52,10 +65,32 @@ namespace Physica::Core {
         void columnMulScalar(size_t c, const ScalarType& factor);
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
+
+        template<class OtherDerived>
+        void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
+        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
+        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
+        /* Static members */
+        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
+
+    template<class Derived, class OtherDerived>
+    inline void operator+=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1.getDerived() + m2.getDerived(); }
+    template<class MatrixType, ScalarOption option, bool errorTrack>
+    inline void operator+=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m.getDerived() + s; }
+    template<class Derived, class OtherDerived>
+    inline void operator-=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1.getDerived() - m2.getDerived(); }
+    template<class MatrixType, ScalarOption option, bool errorTrack>
+    inline void operator-=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m.getDerived() - s; }
+    template<class Derived, class OtherDerived>
+    inline void operator*=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1.getDerived() * m2.getDerived(); }
+    template<class MatrixType, ScalarOption option, bool errorTrack>
+    inline void operator*=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m.getDerived() * s; }
 }
 
 #include "LValueMatrixImpl.h"

@@ -53,6 +53,8 @@ namespace Physica::Core::Internal {
         /* Operators */
         using Base::operator[];
     protected:
+        /* Operations */
+        using Base::resize;
         /* Getters */
         using Base::getLength;
         using Base::swap;

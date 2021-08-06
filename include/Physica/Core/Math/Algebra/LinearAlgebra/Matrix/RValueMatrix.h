@@ -33,7 +33,6 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption;
         constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
         constexpr static size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
@@ -43,17 +42,13 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& mat) const;
+        void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
-        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
+        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
         /* Setters */
         void toUnitMatrix();
-        /* Static members */
-        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>

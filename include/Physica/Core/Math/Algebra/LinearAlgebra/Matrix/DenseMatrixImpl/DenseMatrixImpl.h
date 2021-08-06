@@ -20,31 +20,10 @@
 
 namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<Utils::ExpressionType expType, class T1, class T2>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrixExpression<expType, T1, T2> exp)
-            : DenseMatrix(exp.getRow(), exp.getColumn()) {
-        for (size_t i = 0; i < Base::getMaxMajor(); i++) {
-            for (size_t j = 0; j < Base::getMaxMinor(); ++j) {
-                Base::getElementFromMajorMinor(i, j) = exp(Base::rowFromMajorMinor(i, j), Base::columnFromMajorMinor(i, j));
-            }
-        }
-    }
-
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class OtherMatrix>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
         mat.assignTo(*this);
-    }
-
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    template<class T1, class T2>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(MatrixProduct<T1, T2> pro) : DenseMatrix(pro.getRow(), pro.getColumn()) {
-        for (size_t i = 0; i < Base::getMaxMajor(); i++) {
-            for (size_t j = 0; j < Base::getMaxMinor(); ++j) {
-                Base::getElementFromMajorMinor(i, j) = pro(Base::rowFromMajorMinor(i, j), Base::columnFromMajorMinor(i, j));
-            }
-        }
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

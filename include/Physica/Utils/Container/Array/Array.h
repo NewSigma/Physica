@@ -102,6 +102,8 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
         void reserve(size_t size) { assert(size == Capacity); }
+        void resize(size_t size) { assert(size == Length); }
+        void resize(size_t size, const T& t);
         void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Length; }

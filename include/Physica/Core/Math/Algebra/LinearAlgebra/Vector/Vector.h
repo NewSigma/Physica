@@ -52,9 +52,8 @@ namespace Physica::Core {
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
         using Base = LValueVector<Vector<T, Length, MaxLength>>;
-        using ColMatrix = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Length, 1, MaxLength, 1>;
-        using RowMatrix = DenseMatrix<T, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, Length, 1, MaxLength>;
-        using VectorType = Vector<T, Length, MaxLength>; //Redeclare self for the implementation of VectorExpression
+        using typename Base::ColMatrix;
+        using typename Base::RowMatrix;
     public:
         using Storage::Storage;
         Vector() = default;
@@ -66,30 +65,24 @@ namespace Physica::Core {
         /* Operators */
         Vector& operator=(const Vector&) = default;
         Vector& operator=(Vector&&) noexcept = default;
-        template<class Derived>
-        Vector& operator=(const RValueVector<Derived>& v);
         using Storage::operator[];
         /* Operations */
         Vector& toOpposite();
         void toUnit();
         template<class OtherVector>
         [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const RValueVector<OtherVector>& v) const noexcept;
-        ColMatrix copyToColMatrix() const;
         ColMatrix moveToColMatrix();
-        RowMatrix copyToRowMatrix() const;
         RowMatrix moveToRowMatrix();
         /* Getters */
         using Storage::getLength;
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
-        [[nodiscard]] T norm() const;
-        [[nodiscard]] T squaredNorm() const;
         /* Helpers */
         static Vector<T> zeroVector(size_t len);
         static Vector<T> randomVector(size_t len);
         static Vector simplyMultiply(const Vector& v1, const Vector& v2);
-
+    private:
         template<class Derived>
         friend class Internal::VectorExpressionHelper;
     };
@@ -99,24 +92,6 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     T operator*(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2);
-    /* Inline Implements */
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator+=(Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2) { v1 = v1 + v2; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator-=(Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2) { v1 = v1 - v2; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator+=(Vector<T, Length, MaxLength>& v, const T& n) { v = v + n; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator-=(Vector<T, Length, MaxLength>& v, const T& n) { v = v - n; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator*=(Vector<T, Length, MaxLength>& v, const T& n) { v = v * n; }
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void operator/=(Vector<T, Length, MaxLength>& v, const T& n) { v = v / n; }
 }
 
 #include "VectorImpl.h"
