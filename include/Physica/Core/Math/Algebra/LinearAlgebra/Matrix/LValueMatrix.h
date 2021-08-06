@@ -29,8 +29,8 @@ namespace Physica::Core {
      */
     template<class Derived>
     class LValueMatrix : public RValueMatrix<Derived> {
-        using Base = RValueMatrix<Derived>;
     public:
+        using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
         using RowVector = MatrixBlock<Derived, 1, Dynamic>;
         using ColVector = MatrixBlock<Derived, Dynamic, 1>;

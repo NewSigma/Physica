@@ -115,8 +115,8 @@ namespace Physica::Core {
         ~MatrixBlock() = default;
         /* Operators */
         using Base::operator=;
-        MatrixBlock& operator=(const MatrixBlock& m) { Base::operator=(m); return *this; }
-        MatrixBlock& operator=(MatrixBlock&& m) noexcept { Base::operator=(m); return *this; }
+        MatrixBlock& operator=(const MatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
+        MatrixBlock& operator=(MatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */

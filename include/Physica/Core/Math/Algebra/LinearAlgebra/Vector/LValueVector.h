@@ -29,8 +29,8 @@ namespace Physica::Core {
      */
     template<class Derived>
     class LValueVector : public RValueVector<Derived> {
-        using Base = RValueVector<Derived>;
     public:
+        using Base = RValueVector<Derived>;
         using typename Base::ScalarType;
     public:
         /* Operators */

@@ -34,9 +34,10 @@ namespace Physica::Core {
         using ScalarType = typename AnyVector::ScalarType;
         assert(source.getLength() == target.getLength());
         const ScalarType abs_first = abs(source[0]);
+        const bool minus = source[0].isNegative();
         const ScalarType norm = source.getDerived().norm();
         ScalarType factor = reciprocal(ScalarType(abs_first + norm));
-        if (source[0].isNegative())
+        if (minus)
             factor.toOpposite();
 
         target.tail(1) = source.tail(1) * factor;

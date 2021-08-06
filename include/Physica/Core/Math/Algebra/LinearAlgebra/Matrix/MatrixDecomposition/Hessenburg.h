@@ -53,15 +53,15 @@ namespace Physica::Core {
         constexpr static size_t householderLength = Base::RowAtCompile == Dynamic ? Dynamic : (Base::RowAtCompile - 1);
         using VectorType = Vector<typename Base::ScalarType, householderLength, householderLength>;
         const size_t order = getRow();
-        target.rightCols(1) = source.rightCols(1);
+        target.rightCols(0) = source.rightCols(0);
         VectorType householderVector = VectorType(order - 1);
         for (size_t i = 0; i < order - 2; ++i) {
-            auto from_col = source.col(i);
             auto to_col = target.col(i);
+            auto eliminate = to_col.tail(i + 1);
             auto temp = householderVector.head(order - i - 1);
-            to_col.head(i + 1) = from_col.head(i + 1);
-            to_col[0] = householder(from_col.tail(i + 1), temp);
-            to_col.tail(1) = Base::ScalarType::Zero();
+            const auto norm = householder(eliminate, temp);
+            eliminate[0] = eliminate[0] < 0 ? norm : -norm;
+            eliminate.tail(1) = Base::ScalarType::Zero();
 
             auto target_right = target.rightCols(i + 1);
             applyHouseholder(target_right, temp);

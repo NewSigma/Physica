@@ -59,8 +59,8 @@ namespace Physica::Core {
         ~VectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        VectorBlock& operator=(const VectorBlock& v) { Base::operator=(v); return *this; }
-        VectorBlock& operator=(VectorBlock&& v) noexcept { Base::operator=(v); return *this; }
+        VectorBlock& operator=(const VectorBlock& v) { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
+        VectorBlock& operator=(VectorBlock&& v) noexcept { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Operations */
