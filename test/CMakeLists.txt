@@ -2,6 +2,7 @@ include(CTest)
 include(../cmake/Modules/PhysicaAddTest.cmake)
 
 message(STATUS "Configuring tests.")
+include_directories(./)
 # Math
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
