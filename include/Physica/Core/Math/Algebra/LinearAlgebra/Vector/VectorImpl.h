@@ -40,7 +40,7 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     void Vector<T, Length, MaxLength>::toUnit() {
-        T norm = norm();
+        T norm = Base::norm();
         if (norm.isZero())
             return;
         const auto end = Storage::end();
