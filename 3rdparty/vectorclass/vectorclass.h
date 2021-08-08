@@ -33,6 +33,8 @@
 #define MAX_VECTOR_SIZE 512
 #endif
 
+#define VCL_NAMESPACE SIMD
+
 // Determine instruction set, and define platform-dependent functions
 #include "instrset.h"        // Select supported instruction set
 
