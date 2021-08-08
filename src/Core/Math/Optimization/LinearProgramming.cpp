@@ -156,7 +156,7 @@ namespace Physica::Core {
         //Save the old target.
         Vector<> copyTarget(std::move(target));
         //Construct the auxiliary problem.
-        target = Vector<>::zeroVector(column + 1);
+        target = Vector<>::Zeros(column + 1);
         target[column] = MultiScalar((SignedMPUnit)-1);
         for(size_t i = 0; i < row; ++i)
             data[i] << MultiScalar::One();
@@ -188,7 +188,7 @@ namespace Physica::Core {
         memmove(order + tempTermOrder, order + tempTermOrder + 1
                 , (orderLength - tempTermOrder - 1) * sizeof(size_t));
         //Restore the original target.
-        target = Vector<>::zeroVector(column);
+        target = Vector<>::Zeros(column);
         target[0] = copyTarget[0];
         for(size_t i = 1; i < column; ++i) {
             //Is variable i basic?

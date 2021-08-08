@@ -79,7 +79,7 @@ namespace Physica::Core {
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
         /* Helpers */
-        static Vector<T> zeroVector(size_t len);
+        static Vector<T> Zeros(size_t len);
         static Vector<T> randomVector(size_t len);
         static Vector simplyMultiply(const Vector& v1, const Vector& v2);
     private:

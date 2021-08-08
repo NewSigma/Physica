@@ -104,7 +104,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T> Vector<T, Length, MaxLength>::zeroVector(size_t len) {
+    Vector<T> Vector<T, Length, MaxLength>::Zeros(size_t len) {
         Vector<T> result(len);
         for(size_t i = 0; i < len; ++i)
             result.allocate(T::Zero(), i);
