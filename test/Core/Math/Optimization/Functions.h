@@ -16,23 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Functions.h"
-#include "Physica/Core/Math/Optimization/ConjugateGradient.h"
+#pragma once
 
-using namespace Physica::Core::Math;
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
-using T = Scalar<Double, false>;
+using namespace Physica::Core;
 
-int main() {
-    {
-        ConjugateGradient cg(func1<T>, Vector<T>{-1, -2, -5}, T(1E-14), T(0.00001));
-        if (fabs(cg.compute().getTrivial()) > 1E-14)
-            return 1;
-    }
-    {
-        ConjugateGradient cg(func2<T>, Vector<T>{1, 3, 2}, T(1E-14), T(0.0001));
-        if (fabs(cg.compute().getTrivial() - 2.25) / 2.25 > 1E-14)
-            return 1;
-    }
-    return 0;
+template<class T>
+T func1(const Vector<T>& v) {
+    const T& x = v[0];
+    const T& y = v[1];
+    const T& z = v[2];
+    return x * x + y * y + z * z - x * y - x * z - y * z;
+}
+
+template<class T>
+T func2(const Vector<T>& v) {
+    const T& x = v[0];
+    const T& y = v[1];
+    const T& z = v[2];
+    const T term1 = x + y;
+    const T term2 = y + z;
+    const T term3 = x + z;
+    return (reciprocal(term1 * term1) + reciprocal(term2 * term2) + reciprocal(term3 * term3)) * T(x * y + x * z + y * z);
 }
