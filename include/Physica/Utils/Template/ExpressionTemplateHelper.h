@@ -27,6 +27,8 @@ namespace Physica::Utils {
         Add,
         Sub,
         Mul,
-        Div
+        Div,
+        Reciprocal,
+        Sqrt
     };
 }

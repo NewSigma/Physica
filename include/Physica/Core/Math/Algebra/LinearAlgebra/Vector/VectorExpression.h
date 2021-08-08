@@ -181,6 +181,33 @@ namespace Physica::Core {
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) / scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
+    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>>;
+        const VectorType& exp;
+    public:
+        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return reciprocal(exp.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
+
+
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Sqrt, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>>;
+        const VectorType& exp;
+    public:
+        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return sqrt(exp.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
+
+
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
@@ -229,5 +256,15 @@ namespace Physica::Core {
     template<class VectorType, class ScalarType>
     VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType> operator/(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
         return VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType>(v.getDerived(), s);
+    }
+    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+    template<class VectorType>
+    VectorExpression<Utils::ExpressionType::Reciprocal, VectorType> reciprocal(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>(v);
+    }
+
+    template<class VectorType>
+    VectorExpression<Utils::ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Sqrt, VectorType>(v);
     }
 }

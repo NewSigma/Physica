@@ -127,8 +127,7 @@ namespace Physica::Core {
         assert(len == v2.getLength());
         Vector<T, Length, MaxLength> result(len);
         for (size_t i = 0; i < len; ++i)
-            result.init(v1[i] * v2[i], i);
-        result.setLength(len);
+            result[i] = v1[i] * v2[i];
         return result;
     }
 
@@ -157,22 +156,6 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> reciprocal(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(reciprocal(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> sqrt(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(sqrt(*ite), i);
-    }
-
     template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> factorial(const Vector<T, Length, MaxLength>& v) {
         Vector<T, Length, MaxLength> result(v.getLength());

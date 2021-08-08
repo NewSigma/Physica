@@ -75,7 +75,7 @@ namespace Physica::Core {
         VectorType v = VectorType::Zeros(params.getLength());
         ScalarType beta1 = args[1];
         size_t count = 0;
-        ScalarType value;
+        ScalarType value = func(std::cref(params));
         bool stop = false;
         do {
             VectorType g = gradient(func);
@@ -112,7 +112,6 @@ namespace Physica::Core {
     template<class ScalarType, class VectorType>
     bool Adam<ScalarType, VectorType>::meetRelativeCriteria(const ScalarType& s1, const ScalarType& s2) {
         const ScalarType abs_s1 = abs(s1);
-        const ScalarType abs_s2 = abs(s2);
         if (abs_s1 < ScalarType::One())
             return abs(ScalarType(s1 - s2)) < args[5];
         else
