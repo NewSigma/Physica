@@ -44,6 +44,7 @@ if(${RUN_CHECKS})
 endif()
 ##############################################Libs################################################
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+include_directories(3rdparty)
 
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 #############################################Project##############################################
