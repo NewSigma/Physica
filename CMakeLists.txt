@@ -6,11 +6,14 @@ include(cmake/Modules/PhysicaCheck.cmake)
 #############################################Settings#############################################
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
-option(RUN_CHECKS "Run Checks" OFF)
+option(RUN_CHECKS "Run Checks" ON)
+option(PHYSICA_PROFILE "Build with profiling support" OFF)
 set(UseASM 1)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
-#Platform related
+# Policies
+cmake_policy(SET CMP0074 NEW)
+# Platform related
 set(GPU_ARCHITECTURE compute_75)
 set(GPU_CODE sm_75)
 
@@ -43,10 +46,15 @@ if(${RUN_CHECKS})
     add_subdirectory(config)
 endif()
 ##############################################Libs################################################
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+if(${PHYSICA_PROFILE})
+    include_directories(${GPerfTools_INCLUDE_DIR})
+    find_package(GPerfTools REQUIRED)
+endif()
 #############################################Project##############################################
 include_directories(./include)
 file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
@@ -62,6 +70,7 @@ endif()
 
 set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
 add_executable(Physica Physica.cpp ${HEADERS})
+target_link_libraries(Physica ${GPerfTools_LIBRARY})
 target_compile_options(Physica PRIVATE -Wl,--rpath=${CMAKE_INSTALL_PREFIX}/lib)
 
 install(TARGETS Physica DESTINATION bin)
