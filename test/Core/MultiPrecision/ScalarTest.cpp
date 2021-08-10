@@ -39,7 +39,7 @@ bool associativityAdd() {
  * Test operator+(), return true if passed.
  */
 bool numericalAddTest(unsigned int loop) {
-    double d;
+    double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
@@ -70,7 +70,7 @@ bool numericalAddTest(unsigned int loop) {
  * Test operator-(), return true if passed.
  */
 bool numericalSubTest(unsigned int loop) {
-    double d;
+    double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
@@ -101,7 +101,7 @@ bool numericalSubTest(unsigned int loop) {
  * Test operator*(), return true if passed.
  */
 bool numericalMulTest(unsigned int loop) {
-    double d;
+    double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
@@ -132,7 +132,7 @@ bool numericalMulTest(unsigned int loop) {
  * Test operator/(), return true if passed.
  */
 bool numericalDivTest(unsigned int loop) {
-    double d;
+    double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();

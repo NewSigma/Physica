@@ -189,7 +189,7 @@ namespace Physica::Core::Internal {
     template<size_t Length, size_t MaxLength>
     void AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Row | DenseMatrixOption::Vector>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
+        [[maybe_unused]] constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
         static_assert(Traits<Derived>::RowAtCompile == Dynamic);
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
@@ -198,8 +198,8 @@ namespace Physica::Core::Internal {
     }
 
     template<class Derived>
-    void AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Row | DenseMatrixOption::Vector>::removeColumnAt(size_t index) {
-        Derived& matrix = getDerived();
+    void AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Row | DenseMatrixOption::Vector>::removeColumnAt([[maybe_unused]] size_t index) {
+        [[maybe_unused]] Derived& matrix = getDerived();
         assert(index < matrix.getColumn());
     }
 

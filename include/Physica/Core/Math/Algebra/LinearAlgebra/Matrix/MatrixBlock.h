@@ -120,7 +120,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */
-        void resize(size_t row, size_t col) { assert(row == rowCount && col == colCount); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getColumn() const noexcept { return colCount; }

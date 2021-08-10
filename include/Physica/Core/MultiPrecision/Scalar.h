@@ -393,7 +393,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] constexpr static float getA() { return 0; }
         /* Setters */
-        static void setA(float value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
+        static void setA([[maybe_unused]] float value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */
@@ -481,7 +481,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
         [[nodiscard]] constexpr static double getA() { return 0; }
         /* Setters */
-        static void setA(double value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
+        static void setA([[maybe_unused]] double value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Friends */

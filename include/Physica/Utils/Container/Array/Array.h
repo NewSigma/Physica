@@ -101,8 +101,8 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
-        void reserve(size_t size) { assert(size == Capacity); }
-        void resize(size_t size) { assert(size == Length); }
+        void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
+        void resize([[maybe_unused]] size_t size) { assert(size == Length); }
         void resize(size_t size, const T& t);
         void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */

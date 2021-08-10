@@ -59,7 +59,7 @@ namespace Physica::Core {
             //Fix: accuracy is ignored.
             byteLeftShiftEq(result.byte, length, 1);
 
-            MPUnit high, low, copy, temp;
+            MPUnit high{}, low, copy, temp;
             bool carry = false;
             for(int i = 0; i < s_size; ++i) {
                 mulWordByWord(high, low, s.byte[i], s.byte[i]);
@@ -132,7 +132,7 @@ namespace Physica::Core {
         typedef decltype(s.getTrivial()) FloatType;
         const auto trivial = s.getTrivial();
         FloatType temp = 1;
-        FloatType result;
+        FloatType result = 0;
         while(temp < trivial) {
             temp += 1;
             result *= temp;

@@ -64,7 +64,7 @@ namespace Physica::Core {
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Operations */
-        void resize(size_t length) const { assert(length == Base::getLength()); }
+        void resize([[maybe_unused]] size_t length) const { assert(length == Base::getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return to - from; }
     };
