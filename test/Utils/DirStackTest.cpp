@@ -31,7 +31,7 @@ namespace Physica::Utils {
 
 int main() {
     DirStack stack("/home/user/Program");
-    auto& dirs = Test::getDirs(stack);
+    [[maybe_unused]] auto& dirs = Test::getDirs(stack);
     assert(dirs.size() == 3);
     assert(strcmp(dirs[0], "home") == 0);
     assert(strcmp(dirs[1], "user") == 0);

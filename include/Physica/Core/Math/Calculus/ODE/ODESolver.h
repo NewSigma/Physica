@@ -183,7 +183,7 @@ namespace Physica::Core {
         T w_i = solution(0, 1) * (T(1) - stepSize_2_12 * func(x[1]));
         T x_i = x[1];
         for (size_t i = 1; i < column_1; ++i) {
-            const T w_i_plus1 = T(2) * w_i - w_i_minus1 + stepSize_2 * func(x_i) * solution(0, i);
+            const T w_i_plus1 = T(2) * w_i + stepSize_2 * func(x_i) * solution(0, i) - w_i_minus1;
             w_i_minus1 = w_i;
             w_i = w_i_plus1;
             

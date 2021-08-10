@@ -288,6 +288,20 @@ namespace Physica::Core {
         return *this;
     }
 
+    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator+(
+            const Scalar<MultiPrecision, false>& s) const {
+        auto result = addNoError(*this, s);
+        cutLength(result);
+        return result;
+    }
+
+    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-(
+            const Scalar<MultiPrecision, false>& s) const {
+        auto result = subNoError(*this, s);
+        cutLength(result);
+        return result;
+    }
+
     Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
         auto result = mulNoError(*this, s);
@@ -552,6 +566,36 @@ namespace Physica::Core {
         auto result = divWithError(*this, s);
         if(getA() != 0)
             result.applyError(getAccuracy() / s);
+        return result;
+    }
+
+    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
+            const Scalar<MultiPrecision, true>& s) const {
+        auto result = addWithError(*this, s);
+        cutLength(result);
+        if(getA() != 0 || s.getA() != 0) {
+            if(getA() == 0)
+                result.applyError(s.getAccuracy());
+            else if(s.getA() == 0)
+                result.applyError(getAccuracy());
+            else
+                result.applyError(getAccuracy() + s.getAccuracy());
+        }
+        return result;
+    }
+
+    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
+            const Scalar<MultiPrecision, true>& s) const {
+        auto result = subWithError(*this, s);
+        cutLength(result);
+        if(getA() != 0 || s.getA() != 0) {
+            if(getA() == 0)
+                result.applyError(s.getAccuracy());
+            else if(s.getA() == 0)
+                result.applyError(getAccuracy());
+            else
+                result.applyError(getAccuracy() + s.getAccuracy());
+        }
         return result;
     }
 

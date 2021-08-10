@@ -27,11 +27,6 @@
 
 namespace Physica::Core {
     //Forward declarations
-    namespace Internal {
-        template<ScalarOption option> class ScalarAddSubExpressionHelper;
-        template<ScalarOption option, bool errorTrack> class ScalarAddSubExpression;
-    }
-
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
 
@@ -260,6 +255,8 @@ namespace Physica::Core {
         Scalar& operator=(Scalar&& s) noexcept = default;
         Scalar& operator=(const Scalar<MultiPrecision, true>& s);
         Scalar& operator=(Scalar<MultiPrecision, true>&& s) noexcept;
+        Scalar operator+(const Scalar& s) const;
+        Scalar operator-(const Scalar& s) const;
         Scalar operator*(const Scalar& s) const;
         Scalar operator/(const Scalar& s) const;
         Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
@@ -282,7 +279,6 @@ namespace Physica::Core {
         Scalar(MPUnit* byte_, int length_, int power_) : AbstractScalar(byte_, length_, power_) {}
         /* Friends */
         friend class Internal::AbstractScalar<MultiPrecision>;
-        friend class Internal::ScalarAddSubExpressionHelper<MultiPrecision>;
         friend class Scalar<MultiPrecision, true>;
     };
     static_assert(sizeof(Scalar<MultiPrecision, false>) == sizeof(Internal::AbstractScalar<MultiPrecision>), "Algorithms are based on this assumption.");
@@ -315,6 +311,8 @@ namespace Physica::Core {
         Scalar& operator=(Scalar&& s) noexcept = default;
         Scalar& operator=(const Scalar<MultiPrecision, false>& s);
         Scalar& operator=(Scalar<MultiPrecision, false>&& s) noexcept;
+        Scalar operator+(const Scalar& s) const;
+        Scalar operator-(const Scalar& s) const;
         Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, false>& s) const;
         Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, false>& s) const;
         Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, true>& s) const;
@@ -345,7 +343,6 @@ namespace Physica::Core {
         Scalar& applyError(const Scalar<MultiPrecision, false>& error);
         /* Friends */
         friend class Internal::AbstractScalar<MultiPrecision>;
-        friend class Internal::ScalarAddSubExpressionHelper<MultiPrecision>;
         friend class Scalar<MultiPrecision, false>;
         template<ScalarOption option>
         friend Scalar<option, true> sqrt(const Scalar<option, true>& s);
@@ -374,6 +371,8 @@ namespace Physica::Core {
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
+        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
+        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
@@ -417,6 +416,8 @@ namespace Physica::Core {
         /* Operators */
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
         Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
+        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f, a + s.a); }
+        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
         Scalar operator<<(int i) const { const float power = pow(2, i); return Scalar(f * power, a * power); }
@@ -462,6 +463,8 @@ namespace Physica::Core {
         ~Scalar() = default;
         /* Operators */
         explicit operator double() const { return d; }
+        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
+        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
@@ -505,6 +508,8 @@ namespace Physica::Core {
         /* Operators */
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
         Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
+        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d, a + s.a); }
+        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
         Scalar operator<<(int i) const { const double power = pow(2, i); return Scalar(d * power, a * power); }

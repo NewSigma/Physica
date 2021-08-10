@@ -4,7 +4,6 @@ MultiPrecision
 .. toctree::
    :maxdepth: 1
 
-   ScalarImpl/ScalarAddSubExpression
    Scalar
 
 

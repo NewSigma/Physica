@@ -20,7 +20,6 @@
 
 #include <iomanip>
 #include "ScalarArithmetic.h"
-#include "ScalarAddSubExpression.h"
 /**
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include \file Scalar.h instead.
@@ -56,30 +55,6 @@ namespace Physica::Core {
         }
     }
     //////////////////////////////////////////////Global//////////////////////////////////////////////
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
-    operator+(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2) {
-        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s1, s2, false);
-    }
-
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
-    operator-(const Scalar<option, errorTrack1>& s1, const Scalar<option, errorTrack2>& s2) {
-        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s1, s2, true);
-    }
-
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
-    operator+(const Scalar<option, errorTrack1>& s, Internal::ScalarAddSubExpression<option, errorTrack2>&& exp) {
-        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s, std::move(exp), false);
-    }
-
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>
-    operator-(const Scalar<option, errorTrack1>& s, Internal::ScalarAddSubExpression<option, errorTrack2>&& exp) {
-        return Internal::ScalarAddSubExpression<option, errorTrack1 || errorTrack2>(s, std::move(exp), true);
-    }
-
     template<ScalarOption option, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
