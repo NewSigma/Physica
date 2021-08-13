@@ -547,5 +547,13 @@ namespace Physica::Core {
     [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
+namespace std {
+    template<bool errorTrack>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float, errorTrack>> : public numeric_limits<float> {};
+
+    template<bool errorTrack>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double, errorTrack>> : public numeric_limits<double> {};
+}
+
 #include "Const.h"
 #include "ScalarImpl/ScalarImpl.h"

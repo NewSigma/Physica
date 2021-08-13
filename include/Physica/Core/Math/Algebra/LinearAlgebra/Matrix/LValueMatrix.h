@@ -22,6 +22,10 @@
 #include "MatrixBlock.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class Derived>
+        class Traits<LValueMatrix<Derived>> : public Traits<Derived> {};
+    }
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
@@ -48,6 +52,12 @@ namespace Physica::Core {
         [[nodiscard]] inline const RowVector row(size_t r) const;
         [[nodiscard]] inline ColVector col(size_t c);
         [[nodiscard]] inline const ColVector col(size_t c) const;
+        [[nodiscard]] inline MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] inline const MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] inline MatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const MatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline MatrixBlock<Derived> bottomRows(size_t from);
+        [[nodiscard]] inline const MatrixBlock<Derived> bottomRows(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> rightCols(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> rightCols(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);

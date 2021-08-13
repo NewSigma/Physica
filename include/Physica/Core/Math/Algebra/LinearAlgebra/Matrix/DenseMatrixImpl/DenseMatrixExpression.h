@@ -209,28 +209,16 @@ namespace Physica::Core {
         return DenseMatrixExpression<Utils::ExpressionType::Minus, DenseMatrixExpression<type, T1, T2>>(exp);
     }
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class Derived, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>
-    operator+(const RValueMatrix<Derived>& mat, const Exp& exp) {
-        return DenseMatrixExpression<Utils::ExpressionType::Add, Derived, Exp>(mat.getDerived(), exp);
-    }
-
-    template<Utils::ExpressionType type, class T1, class T2, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Add, DenseMatrixExpression<type, T1, T2>, Exp>
-    operator+(const DenseMatrixExpression<type, T1, T2>& exp1, const Exp& exp2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Add, DenseMatrixExpression<type, T1, T2>, Exp>(exp1, exp2);
+    template<class Derived, class OtherDerived>
+    inline DenseMatrixExpression<Utils::ExpressionType::Add, Derived, OtherDerived>
+    operator+(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
+        return DenseMatrixExpression<Utils::ExpressionType::Add, Derived, OtherDerived>(mat1.getDerived(), mat2.getDerived());
     }
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class Derived, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>
-    operator-(const RValueMatrix<Derived>& mat, const Exp& exp) {
-        return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, Exp>(mat.getDerived(), exp);
-    }
-
-    template<Utils::ExpressionType type, class T1, class T2, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Sub, DenseMatrixExpression<type, T1, T2>, Exp>
-    operator-(const DenseMatrixExpression<type, T1, T2>& exp1, const Exp& exp2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Sub, DenseMatrixExpression<type, T1, T2>, Exp>(exp1, exp2);
+    template<class Derived, class OtherDerived>
+    inline DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>
+    operator-(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
+        return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>(mat1.getDerived(), mat2.getDerived());
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<Utils::ExpressionType type, class T1, class T2, class Exp>

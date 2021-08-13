@@ -48,6 +48,8 @@ namespace Physica::Core {
         const VectorBlock<Derived> head(size_t to) const { return VectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
         VectorBlock<Derived> tail(size_t from) { return VectorBlock<Derived>(Base::getDerived(), from); }
         const VectorBlock<Derived> tail(size_t from) const { return VectorBlock<Derived>(Base::getConstCastDerived(), from); }
+        VectorBlock<Derived> segment(size_t from, size_t to) { return VectorBlock<Derived>(Base::getDerived(), from, to); }
+        const VectorBlock<Derived> segment(size_t from, size_t to) const { return VectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
         /* Getters */
         [[nodiscard]] ScalarType norm() const;
         [[nodiscard]] ScalarType squaredNorm() const;

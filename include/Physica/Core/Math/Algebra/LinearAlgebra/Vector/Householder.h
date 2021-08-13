@@ -27,6 +27,10 @@ namespace Physica::Core {
      * The other parts of \param target will be essential HouseHolder vector.
      * 
      * \return The norm of \param source
+     * 
+     * References:
+     * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
+     * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class AnyVector, class OtherVector>
     typename AnyVector::ScalarType householder(const LValueVector<AnyVector>& __restrict source,

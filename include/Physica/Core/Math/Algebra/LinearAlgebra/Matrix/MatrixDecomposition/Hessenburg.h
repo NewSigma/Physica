@@ -32,7 +32,11 @@ namespace Physica::Core {
             using Base::MatrixOption;
         };
     }
-
+    /**
+     * References:
+     * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
+     * [2] Eigen https://eigen.tuxfamily.org/
+     */
     template<class MatrixType>
     class Hessenburg : public RValueMatrix<Hessenburg<MatrixType>> {
         using Base = RValueMatrix<Hessenburg<MatrixType>>;
@@ -60,7 +64,7 @@ namespace Physica::Core {
             auto eliminate = to_col.tail(i + 1);
             auto temp = householderVector.head(order - i - 1);
             const auto norm = householder(eliminate, temp);
-            eliminate[0] = eliminate[0] < 0 ? norm : -norm;
+            eliminate[0] = eliminate[0].isNegative() ? norm : -norm;
             eliminate.tail(1) = Base::ScalarType::Zero();
 
             auto target_right = target.rightCols(i + 1);

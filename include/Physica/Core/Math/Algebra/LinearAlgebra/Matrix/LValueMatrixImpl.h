@@ -94,6 +94,36 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline MatrixBlock<Derived> LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) {
+        return MatrixBlock<Derived>(Base::getDerived(), fromRow, rowCount, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived> LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
+        return MatrixBlock<Derived>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived> LValueMatrix<Derived>::bottomRows(size_t from) {
+        return MatrixBlock<Derived>(Base::getDerived(), from, Base::getRow() - from, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived> LValueMatrix<Derived>::bottomRows(size_t from) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getColumn());
+    }
+
+    template<class Derived>
     inline MatrixBlock<Derived> LValueMatrix<Derived>::rightCols(size_t from) {
         return MatrixBlock<Derived>(Base::getDerived(), 0, Base::getRow(), from, Base::getColumn() - from);
     }
