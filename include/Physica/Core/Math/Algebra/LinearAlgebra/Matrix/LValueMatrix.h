@@ -56,6 +56,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
         [[nodiscard]] inline MatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
         [[nodiscard]] inline const MatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline MatrixBlock<Derived> topRows(size_t from);
+        [[nodiscard]] inline const MatrixBlock<Derived> topRows(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> bottomRows(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> bottomRows(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> rightCols(size_t from);
@@ -64,6 +66,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
         [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t from) const;
+        [[nodiscard]] inline MatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const MatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);

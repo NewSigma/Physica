@@ -50,7 +50,10 @@ namespace Physica::Core {
         size_t fromCol;
         size_t colCount;
     public:
-        MatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {}
+        MatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
+            assert(row < mat.getRow());
+            assert(fromCol + colCount <= mat.getRow());
+        }
         MatrixBlock(const MatrixBlock&) = default;
         MatrixBlock(MatrixBlock&&) noexcept = delete;
         ~MatrixBlock() = default;
@@ -79,7 +82,10 @@ namespace Physica::Core {
         size_t rowCount;
         size_t col;
     public:
-        MatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {}
+        MatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {
+            assert(fromRow + rowCount <= mat.getRow());
+            assert(col < mat.getColumn());
+        }
         MatrixBlock(const MatrixBlock&) = default;
         MatrixBlock(MatrixBlock&&) noexcept = delete;
         ~MatrixBlock() = default;

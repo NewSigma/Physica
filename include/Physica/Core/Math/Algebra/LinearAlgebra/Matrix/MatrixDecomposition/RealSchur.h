@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Hessenburg.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
 namespace Physica::Core {
     template<class MatrixType> class RealSchur;
@@ -52,7 +53,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { return source.getColumn(); }
     private:
         template<class AnyMatrix>
-        static void updateActiveWindow(LValueMatrix<AnyMatrix>& __restrict mat, size_t& __restrict lower, size_t& __restrict upper);
+        static size_t activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper);
+        template<class AnyMatrix>
+        static void splitOffTwoRows(LValueMatrix<AnyMatrix>& __restrict mat, size_t index);
         template<class AnyMatrix>
         static void francisQR(LValueMatrix<AnyMatrix>& mat);
         template<class AnyMatrix>
@@ -64,34 +67,68 @@ namespace Physica::Core {
     void RealSchur<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         target = Hessenburg(source);
         const size_t order = target.getRow();
-        //Upper and lower index for active window
-        size_t lower_index = 0;
-        size_t upper_index = order - 1;
-        do {
-            updateActiveWindow(target, lower_index, upper_index);
-            francisQR(target);
-        } while(lower_index != upper_index);
+        size_t upper = order - 1;
+        size_t iter = 0;
+        while (upper >= 1) {
+            const size_t lower = activeWindowLower(target, upper);
+            if (lower == upper) {
+                upper -= 1;
+                iter = 0;
+            }
+            else if (lower + 1 == upper) {
+                splitOffTwoRows(target, lower);
+                upper -= 2;
+                iter = 0;
+            }
+            else {
+                const size_t sub_order = upper - lower + 1;
+                auto subBlock = target.block(lower, sub_order, lower, sub_order);
+                francisQR(subBlock);
+                ++iter;
+            }
+        }
     }
     /**
-     * We are processing columns whose index is greater or equal to \param lower and less than \param upper
+     * We should process columns whose index is less or equal than \param upper
+     * 
+     * \returns We should process columns whose index is greater or equal to the return index
      */
     template<class MatrixType>
     template<class AnyMatrix>
-    void RealSchur<MatrixType>::updateActiveWindow(LValueMatrix<AnyMatrix>& __restrict mat, size_t& __restrict lower, size_t& __restrict upper) {
-        for (size_t lower_1 = lower + 1; lower < upper; ++lower_1, ++lower) {
+    size_t RealSchur<MatrixType>::activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper) {
+        size_t lower = upper;
+        size_t lower_1 = upper - 1;
+        for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
             ScalarType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
             temp = std::max(temp * std::numeric_limits<ScalarType>::epsilon(), ScalarType(std::numeric_limits<ScalarType>::min()));
-            if (abs(mat(lower_1, lower)) >= temp)
+            if (abs(mat(lower, lower_1)) < temp) {
+                mat(lower, lower_1) = ScalarType::Zero();
                 break;
-            mat(lower_1, lower) = ScalarType::Zero();
+            }
         }
-
-        for (size_t upper_1 = upper - 1; upper > lower; --upper_1, --upper) {
-            ScalarType temp = abs(mat(upper_1, upper_1)) + abs(mat(upper, upper));
-            temp = std::max(temp * std::numeric_limits<ScalarType>::epsilon(), ScalarType(std::numeric_limits<ScalarType>::min()));
-            if (abs(mat(upper, upper_1)) >= temp)
-                break;
-            mat(upper, upper_1) = ScalarType::Zero();
+        return lower;
+    }
+    /**
+     * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
+     */
+    template<class MatrixType>
+    template<class AnyMatrix>
+    void RealSchur<MatrixType>::splitOffTwoRows(LValueMatrix<AnyMatrix>& __restrict mat, size_t index) {
+        const size_t index_1 = index + 1;
+        const ScalarType p = ScalarType(0.5) * (mat(index, index) - mat(index_1, index_1));
+        const ScalarType q = square(p) + mat(index, index_1) * mat(index_1, index);
+        if (!q.isNegative()) {
+            const ScalarType z = sqrt(q);
+            Vector<ScalarType, 2> target;
+            target[0] = p + (p.isPositive() ? z : -z); //Select the root that ensure numerical stable
+            target[1] = mat(index_1, index);
+            auto givensVector = givens(target, 0, 1);
+            auto block1 = mat.rightCols(index);
+            applyGivens(givensVector, block1, index, index_1);
+            auto block2 = mat.topRows(index_1 + 1);
+            givensVector[1].toOpposite();
+            applyGivens(block2, givensVector, index, index_1);
+            mat(index_1, index) = ScalarType::Zero();
         }
     }
 
@@ -106,19 +143,24 @@ namespace Physica::Core {
         Vector<ScalarType, 3> col_1_M{};
         col_1_M[0] = square(mat(0, 0)) + mat(0, 1) * mat(1, 0) - s * mat(0, 0) + t;
         col_1_M[1] = mat(1, 0) * (mat(0, 0) + mat(1, 1) - s);
-        col_1_M[2] = mat(1, 0) * mat(2, 1);
 
         Vector<ScalarType, householderSize> householderVector{};
-        if (order != 2)
+        if (order != 2) {
+            col_1_M[2] = mat(1, 0) * mat(2, 1);
             householder(col_1_M, householderVector);
-        else
-            householder(col_1_M.head(2), householderVector);
-        auto rows = mat.rows(0, 3);
-        applyHouseholder(householderVector, rows);
-        auto cols = mat.cols(0, 3);
-        applyHouseholder(cols, householderVector);
+            auto rows = mat.rows(0, 3);
+            applyHouseholder(householderVector, rows);
+            auto cols = mat.cols(0, 3);
+            applyHouseholder(cols, householderVector);
 
-        specialHessenburg(mat);
+            specialHessenburg(mat);
+        }
+        else {
+            auto householderVector2D = householderVector.head(2);
+            householder(col_1_M.head(2), householderVector2D);
+            applyHouseholder(householderVector2D, mat);
+            applyHouseholder(mat, householderVector2D);
+        }
     }
     /**
      * A special designed Hessenburg decomposition for francis QR algorithm
@@ -126,20 +168,19 @@ namespace Physica::Core {
     template<class MatrixType>
     template<class AnyMatrix>
     void RealSchur<MatrixType>::specialHessenburg(LValueMatrix<AnyMatrix>& mat) {
+        assert(mat.getRow() > 2);
         Vector<ScalarType, 3> householderVector3D{};
         const size_t order = mat.getRow();
-        if (order > 2) {
-            for (size_t i = 0; i < order - 3; ++i) {
-                auto block = mat.rows(i + 1, 3);
-                auto target_col = block.col(i);
-                const auto norm = householder(target_col, householderVector3D);
-                target_col[0] = target_col[0].isNegative() ? norm : -norm;
-                target_col.tail(1) = ScalarType::Zero();
-                auto rightCols = block.rightCols(i + 1);
-                applyHouseholder(householderVector3D, rightCols);
-                auto cols = mat.cols(i + 1, 3);
-                applyHouseholder(cols, householderVector3D);
-            }
+        for (size_t i = 0; i < order - 3; ++i) {
+            auto block = mat.rows(i + 1, 3);
+            auto target_col = block.col(i);
+            const auto norm = householder(target_col, householderVector3D);
+            target_col[0] = target_col[0].isNegative() ? norm : -norm;
+            target_col.tail(1) = ScalarType::Zero();
+            auto rightCols = block.rightCols(i + 1);
+            applyHouseholder(householderVector3D, rightCols);
+            auto cols = mat.cols(i + 1, 3);
+            applyHouseholder(cols, householderVector3D);
         }
         auto householderVector2D = householderVector3D.head(2);
         auto block = mat.bottomRows(order - 2);

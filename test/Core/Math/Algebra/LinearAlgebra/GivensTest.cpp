@@ -16,20 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "TestHelper.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchur.h"
 
 using namespace Physica::Core;
+using T = Scalar<Double, false>;
 
 int main() {
-    using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
-    const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
-    const MatrixType answer{{1, 0, 0}, {7.111887749987, 2, 0}, {815.8705908737, -55.02363128693, 3}};
-    MatrixType result = RealSchur(mat);
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-            if (!floatNear(result(i, j), answer(i, j), 1E-5))
-                return 1;
+    Vector<T, 2> v{2, 1};
+    auto givens_vector = givens(v, 0, 1);
+    auto v_mat = v.copyToColMatrix();
+    applyGivens(givens_vector, v_mat, 0, 1);
+    if (abs(v_mat(1, 0)) > T(1E-15))
+        return 1;
     return 0;
 }
