@@ -176,6 +176,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    InverseMatrix<Derived> LValueMatrix<Derived>::inverse() const noexcept {
+        return InverseMatrix<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
+    Transpose<Derived> LValueMatrix<Derived>::transpose() const noexcept {
+        return Transpose<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::determinate() const {
         assert(Base::getDerived().getRow() == Base::getDerived().getColumn());
         using namespace Internal;

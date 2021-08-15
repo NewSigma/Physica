@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 namespace Physica::Core {
     template<class MatrixType> class Cholesky;
 
@@ -35,7 +37,9 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
         };
     }
-
+    /**
+     * Decomposite a symmetrical, positive matrix A into LL^T, return lower triangular matrix L
+     */
     template<class MatrixType>
     class Cholesky : public RValueMatrix<Cholesky<MatrixType>> {
         using Base = RValueMatrix<Cholesky<MatrixType>>;
