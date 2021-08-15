@@ -65,7 +65,8 @@ namespace Physica::Core {
     template<class MatrixType>
     template<class OtherMatrix>
     void RealSchur<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        target = Hessenburg(source);
+        Hessenburg hess(source);
+        target = hess.getMatrixH();
         const size_t order = target.getRow();
         size_t upper = order - 1;
         size_t iter = 0;

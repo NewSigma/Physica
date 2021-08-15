@@ -29,7 +29,8 @@ int main() {
                             {-16.5269, 33.8276, -6.75721, 0},
                             {-1.36458, 0.591256, -0.827586, 0},
                             {0, 0, 0, 0}};
-    MatrixType result = Hessenburg(mat);
+    Hessenburg hess(mat);
+    MatrixType result = hess.getMatrixH();
     for (int i = 0; i < 4; ++i)
         for (int j = 0; j < 4; ++j)
             if (!floatNear(result(i, j), answer(i, j), 1E-5))

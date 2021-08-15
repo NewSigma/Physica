@@ -53,6 +53,9 @@ namespace Physica::Core {
         template<class Matrix>
         constexpr static bool isVectorMatrix() { return !isElementMatrix<Matrix>(); }
 
+        template<class Matrix>
+        constexpr static int getStorage() { return isElementMatrix<Matrix>() ? Element : Vector; }
+
         template<class Matrix1, class Matrix2>
         constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
     private:
