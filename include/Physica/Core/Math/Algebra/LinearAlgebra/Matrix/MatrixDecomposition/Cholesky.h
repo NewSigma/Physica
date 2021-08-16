@@ -38,85 +38,65 @@ namespace Physica::Core {
         };
     }
     /**
-     * Decomposite a symmetrical, positive matrix A into LL^T, return lower triangular matrix L
+     * Decomposite a symmetrical, positive matrix A into LL^T.
+     * If target matrix is a column matrix, return lower triangular matrix L, if row matrix, return upper triangular matrix L^T
      */
     template<class MatrixType>
     class Cholesky : public RValueMatrix<Cholesky<MatrixType>> {
         using Base = RValueMatrix<Cholesky<MatrixType>>;
-        const MatrixType& matrix;
+        const MatrixType& source;
     public:
-        explicit Cholesky(const MatrixType& matrix_);
+        explicit Cholesky(const MatrixType& source_);
         ~Cholesky() = default;
         /* Operations */
         template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& mat) const;
+        void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return source.getRow(); }
     };
 
     template<class MatrixType>
-    Cholesky<MatrixType>::Cholesky(const MatrixType& matrix_) : matrix(matrix_) {
-        assert(matrix.getRow() == matrix.getColumn());
+    Cholesky<MatrixType>::Cholesky(const MatrixType& source_) : source(source_) {
+        assert(source.getRow() == source.getColumn());
     }
     /**
      * Implemented the square method
      */
     template<class MatrixType>
     template<class OtherMatrix>
-    void Cholesky<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& mat) const {
+    void Cholesky<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         using ResultType = OtherMatrix;
         using ScalarType = typename ResultType::ScalarType;
-        const size_t order = matrix.getRow();
-        auto matrixIte = mat.getDerived().begin();
-        auto constMatrixIte = matrix.cbegin();
-
-        auto elementIte = mat.getDerived().ebegin(matrixIte);
-        auto constElementIte = matrix.cebegin(constMatrixIte);
+        const size_t order = source.getRow();
         /* Handle first vector */ {
-            const auto diag = sqrt(*constElementIte);
-            *elementIte = diag;
-            for (size_t i = 1; i < order; ++i) {
-                ++elementIte;
-                ++constElementIte;
-                *elementIte = *constElementIte / diag;
-            }
+            const auto diag = sqrt(source(0, 0));
+            target(0, 0) = diag;
+            const ScalarType inv_diag = reciprocal(diag);
+            for (size_t minor = 1; minor < order; ++minor)
+                target.getElementFromMajorMinor(0, minor) = source.getElementFromMajorMinor(0, minor) * inv_diag;
         }
         /* Handle other vectors */ {
-            for (size_t i = 1; i < order; ++i) {
-                ResultType::updateIterator(matrixIte, elementIte);
-                MatrixType::updateIterator(constMatrixIte, constElementIte);
-                size_t j;
-                for (j = 0; j < i; ++j) {
-                    *elementIte = 0;
-                    ++elementIte;
-                    ++constElementIte;
-                }
+            for (size_t major = 1; major < order; ++major) {
+                size_t minor = 0;
+                for (; minor < major; ++minor)
+                    target.getElementFromMajorMinor(major, minor) = ScalarType::Zero();
 
-                ScalarType diag(*constElementIte);
-                /* j == i */ {
-                    for (size_t k = 0; k < i; ++k) {
-                        if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= square(mat(i, k));
-                        else
-                            diag -= square(mat(k, i));
-                    }
+                ScalarType diag = source(major, major);
+                /* major == minor */ {
+                    for (size_t k = 0; k < major; ++k)
+                        diag -= square(target.getElementFromMajorMinor(k, major));
                     diag = sqrt(diag);
-                    *elementIte = diag;
-                    ++j;
+                    target(major, major) = diag;
+                    ++minor;
                 }
+                const ScalarType inv_diag = reciprocal(diag);
 
-                for (; j < order; ++j) {
-                    ++elementIte;
-                    ++constElementIte;
-                    ScalarType temp(*constElementIte);
-                    for (size_t k = 0; k < j; ++k) {
-                        if constexpr (DenseMatrixOption::isColumnMatrix<ResultType>())
-                            diag -= mat(i, k) * mat(j, k);
-                        else
-                            diag -= mat(k, i) * mat(k, j);
-                    }
-                    *elementIte = temp / diag;
+                for (; minor < order; ++minor) {
+                    ScalarType temp = source.getElementFromMajorMinor(major, minor);
+                    for (size_t k = 0; k < major; ++k)
+                        temp -= target.getElementFromMajorMinor(k, major) * target.getElementFromMajorMinor(k, minor);
+                    target.getElementFromMajorMinor(major, minor) = temp * inv_diag;
                 }
             }
         }
