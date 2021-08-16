@@ -70,7 +70,7 @@ namespace Physica::Core {
         const size_t order = target.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
-        while (upper >= 1) {
+        while (1 <= upper && upper < order) {
             const size_t lower = activeWindowLower(target, upper);
             if (lower == upper) {
                 upper -= 1;
@@ -97,6 +97,7 @@ namespace Physica::Core {
     template<class MatrixType>
     template<class AnyMatrix>
     size_t RealSchur<MatrixType>::activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper) {
+        assert(upper < mat.getRow());
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow

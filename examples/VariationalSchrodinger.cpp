@@ -24,7 +24,7 @@
 
 using namespace Physica::Core;
 
-constexpr size_t baseSetCount = 5;
+constexpr size_t baseSetCount = 8;
 
 using ScalarType = Scalar<Double, false>;
 using MatrixType = DenseMatrix<ScalarType,
@@ -40,7 +40,7 @@ MatrixType getHamiltonMatrix() {
             const ScalarType pro = ScalarType(i * j);
             const ScalarType numerator = ScalarType::One() - sum - ScalarType::Two() * pro;
             const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType::One()) * (sum - ScalarType::One());
-            result(i, j) = ScalarType(-8) * numerator * denominator;
+            result(i, j) = ScalarType(-8) * numerator / denominator;
         }
     }
     return result;
@@ -68,7 +68,7 @@ int main() {
     MatrixType cholesky = Cholesky(overlap);
     MatrixType inv_cholesky = cholesky.inverse();
     MatrixType hamilton = getHamiltonMatrix();
-    MatrixType hamilton_mod = (inv_cholesky.transpose() * hamilton).compute() * inv_cholesky;
+    MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
     MatrixType schur = RealSchur(hamilton_mod);
     for (size_t i = 0; i < baseSetCount; ++i)
         std::cout << schur(i, i) << '\n';
