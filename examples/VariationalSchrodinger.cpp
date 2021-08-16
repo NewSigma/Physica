@@ -23,54 +23,117 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchur.h"
 
 using namespace Physica::Core;
-
-constexpr size_t baseSetCount = 8;
-
 using ScalarType = Scalar<Double, false>;
-using MatrixType = DenseMatrix<ScalarType,
-                               DenseMatrixOption::Column | DenseMatrixOption::Vector,
-                               baseSetCount,
-                               baseSetCount>;
 
-MatrixType getHamiltonMatrix() {
-    MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
-    for (size_t i = 0; i < baseSetCount; ++i) {
-        for (size_t j = i % 2; j < baseSetCount; j += 2) {
-            const ScalarType sum = ScalarType(i + j);
-            const ScalarType pro = ScalarType(i * j);
-            const ScalarType numerator = ScalarType::One() - sum - ScalarType::Two() * pro;
-            const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType::One()) * (sum - ScalarType::One());
-            result(i, j) = ScalarType(-8) * numerator / denominator;
+class InfiniteDeepWell {
+    constexpr static size_t baseSetCount = 8;
+    using MatrixType = DenseMatrix<ScalarType,
+                                DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                baseSetCount,
+                                baseSetCount>;
+public:
+    void execute() {
+        MatrixType overlap = getOverlapMatrix();
+        //Workaround for generalised eigenvalue problem
+        MatrixType cholesky = Cholesky(overlap);
+        MatrixType inv_cholesky = cholesky.inverse();
+        MatrixType hamilton = getHamiltonMatrix();
+        MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
+        MatrixType schur = RealSchur(hamilton_mod);
+        std::cout << "\tNumerical\tAnalytical\n";
+        std::array<double, baseSetCount> energy{};
+        for (size_t i = 0; i < baseSetCount; ++i)
+            energy[i] = schur(i, i).getTrivial();
+        std::sort(energy.begin(), energy.end());
+
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            const double temp = (i + 1) * M_PI;
+            std::cout << '\t' << energy[i] << "\t\t" << (temp * temp * 0.25) << '\n';
         }
     }
-    return result;
-}
-
-MatrixType getOverlapMatrix() {
-    MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
-    for (size_t i = 0; i < baseSetCount; ++i) {
-        for (size_t j = i % 2; j < baseSetCount; j += 2) {
-            const ScalarType sum = ScalarType(i + j);
-            const ScalarType term1 = ScalarType::Two() * (reciprocal(sum + ScalarType::One()) + reciprocal(sum + ScalarType(5)));
-            const ScalarType term2 = ScalarType(4) * reciprocal(sum + ScalarType(3));
-            result(i, j) = term1 - term2;
+private:
+    MatrixType getHamiltonMatrix() {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = i % 2; j < baseSetCount; j += 2) {
+                const ScalarType sum = ScalarType(i + j);
+                const ScalarType pro = ScalarType(i * j);
+                const ScalarType numerator = ScalarType::One() - sum - ScalarType::Two() * pro;
+                const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType::One()) * (sum - ScalarType::One());
+                result(i, j) = ScalarType(-8) * numerator / denominator;
+            }
         }
+        return result;
     }
-    return result;
-}
+
+    MatrixType getOverlapMatrix() {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = i % 2; j < baseSetCount; j += 2) {
+                const ScalarType sum = ScalarType(i + j);
+                const ScalarType term1 = ScalarType::Two() * (reciprocal(sum + ScalarType::One()) + reciprocal(sum + ScalarType(5)));
+                const ScalarType term2 = ScalarType(4) * reciprocal(sum + ScalarType(3));
+                result(i, j) = term1 - term2;
+            }
+        }
+        return result;
+    }
+};
+
+class HedrogenAtom {
+    constexpr static size_t baseSetCount = 4;
+    constexpr static double baseSetCoeff[baseSetCount]{13.00773, 1.962079, 0.444529, 0.1219492};
+    using MatrixType = DenseMatrix<ScalarType,
+                                DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                baseSetCount,
+                                baseSetCount>;
+public:
+    void execute() {
+        MatrixType overlap = getOverlapMatrix();
+        //Workaround for generalised eigenvalue problem
+        MatrixType cholesky = Cholesky(overlap);
+        MatrixType inv_cholesky = cholesky.inverse();
+        MatrixType hamilton = getHamiltonMatrix();
+        MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
+        MatrixType schur = RealSchur(hamilton_mod);
+        for (size_t i = 0; i < baseSetCount; ++i)
+            std::cout << '\t' << schur(i, i) << '\n';
+    }
+private:
+    MatrixType getHamiltonMatrix() {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = 0; j < baseSetCount; ++j) {
+                const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
+                const ScalarType pro = ScalarType(baseSetCoeff[i] * baseSetCoeff[j]);
+                const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
+                const ScalarType coulomb = ScalarType(-2) * ScalarType(M_PI) / sum;
+                result(i, j) = kinetic + coulomb;
+            }
+        }
+        return result;
+    }
+
+    MatrixType getOverlapMatrix() {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = 0; j < baseSetCount; ++j) {
+                const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
+                const ScalarType temp = ScalarType(M_PI) / sum;
+                result(i, j) = temp * sqrt(temp);
+            }
+        }
+        return result;
+    }
+};
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-34
+ * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-37
  */
 int main() {
-    MatrixType overlap = getOverlapMatrix();
-    //Workaround for generalised eigenvalue problem
-    MatrixType cholesky = Cholesky(overlap);
-    MatrixType inv_cholesky = cholesky.inverse();
-    MatrixType hamilton = getHamiltonMatrix();
-    MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-    MatrixType schur = RealSchur(hamilton_mod);
-    for (size_t i = 0; i < baseSetCount; ++i)
-        std::cout << schur(i, i) << '\n';
+    std::cout << "Example 1:\n";
+    InfiniteDeepWell().execute();
+    std::cout << "Example 2:\n";
+    HedrogenAtom().execute();
     return 0;
 }
