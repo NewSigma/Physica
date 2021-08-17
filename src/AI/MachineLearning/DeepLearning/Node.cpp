@@ -25,7 +25,7 @@ using namespace Physica::Core;
 namespace Physica::AI {
     Node::Node(int id, Layer* parent)
             : vector(Vector<MultiScalar>::randomVector(parent->getNet()->getInputSize()))
-            , bias(randomScalar<MultiPrecision, false>())
+            , bias(randomScalar<Scalar<MultiPrecision, false>>())
             , acceptedLoss(static_cast<SignedMPUnit>(0))
             , activeFunc(nullptr), parentLayer(parent), id(id) {}
 

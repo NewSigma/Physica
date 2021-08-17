@@ -115,11 +115,11 @@ namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<option, errorTrack>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sphericalHarmomicY(unsigned int l,
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sphericalHarmomicY(unsigned int l,
                                                 int m,
-                                                const Scalar<option, errorTrack>& theta,
-                                                const Scalar<option, errorTrack>& phi);
+                                                const ScalarBase<ScalarType>& theta,
+                                                const ScalarBase<ScalarType>& phi);
     /**
      * This class generates rotation matrix for spherical hamonic functions
      * 

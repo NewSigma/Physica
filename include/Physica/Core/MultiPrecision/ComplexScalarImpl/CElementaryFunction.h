@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,67 +16,59 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_CELEMENTARYFUNCTION_H
-#define PHYSICA_CELEMENTARYFUNCTION_H
-/*!
- * This file is part of implementations of \ComplexScalar.
- * Do not include this header file, include ComplexScalar.h instead.
- *
- * A number functions have not been implemented.
- */
+#pragma once
+
 namespace Physica::Core {
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> square(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> square(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    inline ComplexScalar<option, errorTrack> reciprocal(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    inline ComplexScalar<ScalarType> reciprocal(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sqrt(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sqrt(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> ln(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> ln(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> exp(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> exp(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> cos(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> cos(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sin(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sin(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> tan(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> tan(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sec(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sec(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> csc(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> csc(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> cot(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> cot(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> cosh(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> cosh(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sinh(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sinh(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> tanh(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> tanh(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> sech(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> sech(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> csch(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> csch(const ComplexScalar<ScalarType>& c);
 
-    template<ScalarOption option, bool errorTrack>
-    ComplexScalar<option, errorTrack> coth(const ComplexScalar<option, errorTrack>& c);
+    template<class ScalarType>
+    ComplexScalar<ScalarType> coth(const ComplexScalar<ScalarType>& c);
 }
 
 #include "FunctionImpl/CElementaryImpl.h"
-
-#endif

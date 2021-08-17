@@ -43,7 +43,7 @@ namespace Physica::Core {
         }
         else {
             for (int i = 0; i < population; i++)
-                points[i] = lower + randomScalar<MultiPrecision, false>() * regionLength;
+                points[i] = lower + randomScalar<Scalar<MultiPrecision, false>>() * regionLength;
         }
     }
 
@@ -92,7 +92,7 @@ namespace Physica::Core {
         if(r < config.mutationRate) {
             unsigned int randomIndex = random() % config.population;
             points[randomIndex] =
-                    range.lowerBound + randomScalar<MultiPrecision, false>() * regionLength;
+                    range.lowerBound + randomScalar<Scalar<MultiPrecision, false>>() * regionLength;
         }
     }
 }

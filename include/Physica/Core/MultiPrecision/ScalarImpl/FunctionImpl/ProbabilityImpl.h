@@ -16,17 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_PROBABILITYIMPL_H
-#define PHYSICA_PROBABILITYIMPL_H
-/*!
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
- */
+#pragma once
+
 namespace Physica::Core {
     //!Return a real number between 0 and 1.
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> randomScalar() {
-        return Scalar<option, errorTrack>(static_cast<double>(random()) / RAND_MAX);
+    template<class ScalarType>
+    inline ScalarType randomScalar() {
+        return ScalarType(static_cast<double>(random()) / RAND_MAX);
     }
     //!Return a real number lowerBound and upperBound.
     template<ScalarOption option, bool errorTrack>
@@ -35,7 +31,7 @@ namespace Physica::Core {
             const Scalar<option, errorTrack>& upperBound) {
         auto castUpper = static_cast<Scalar<option, false>>(upperBound);
         auto castLower = static_cast<Scalar<option, false>>(lowerBound);
-        auto s = randomScalar<option, errorTrack>();
+        auto s = randomScalar<Scalar<option, errorTrack>>();
         return s * (castUpper - castLower) + castLower;
     }
 
@@ -67,5 +63,3 @@ namespace Physica::Core {
         return ++floor(s);
     }
 }
-
-#endif
