@@ -49,7 +49,7 @@ namespace Physica::Core {
         return norm;
     }
 
-    template<class AnyVector, class OtherVector>
+    template<class AnyVector>
     typename AnyVector::ScalarType householderInPlace(LValueVector<AnyVector>& v) {
         return householder(v, v);
     }

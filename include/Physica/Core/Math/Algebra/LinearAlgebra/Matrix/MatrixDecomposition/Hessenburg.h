@@ -33,17 +33,26 @@ namespace Physica::Core {
         };
     }
     /**
+     * Decomposite matrix A like A = QHQ^T
+     * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class MatrixType>
     class Hessenburg {
+        static_assert(MatrixType::RowAtCompile > 2 || MatrixType::RowAtCompile == Dynamic,
+                      "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         using ScalarType = typename MatrixType::ScalarType;
         using MatrixH = HessenburgMatrixH<MatrixType>;
         using WorkingMatrix = typename MatrixType::ColMatrix;
-        const MatrixType& source;
+
+        constexpr static size_t normVectorLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 2);
+        using HouseholderNorm = Vector<ScalarType, normVectorLength, normVectorLength>;
+    private:
         WorkingMatrix working;
+        HouseholderNorm normVector;
+        const MatrixType& source;
     public:
         Hessenburg(const LValueMatrix<MatrixType>& source_);
         /* Getters */
@@ -55,26 +64,22 @@ namespace Physica::Core {
 
     template<class MatrixType>
     Hessenburg<MatrixType>::Hessenburg(const LValueMatrix<MatrixType>& source_)
-            : source(source_.getDerived())
-            , working(source_.getRow(), source_.getRow()) {
+            : working(source_.getRow(), source_.getRow())
+            , source(source_.getDerived()) {
         assert(source.getRow() == source.getColumn());
         compute();
     }
 
     template<class MatrixType>
     void Hessenburg<MatrixType>::compute() {
-        constexpr static size_t householderLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 1);
-        using VectorType = Vector<ScalarType, householderLength, householderLength>;
         const size_t order = source.getRow();
         working = source;
-        VectorType householderVector = VectorType(order - 1);
         for (size_t i = 0; i < order - 2; ++i) {
             auto to_col = working.col(i);
-            auto eliminate = to_col.tail(i + 1);
-            auto temp = householderVector.head(order - i - 1);
-            const auto norm = householder(eliminate, temp);
-            eliminate[0] = eliminate[0].isNegative() ? norm : -norm;
-            eliminate.tail(1) = ScalarType::Zero();
+            auto temp = to_col.tail(i + 1);
+            const bool changeSign = temp[0].isPositive();
+            const ScalarType norm = householderInPlace(temp);
+            normVector[i] = changeSign ? -norm : norm;
 
             auto target_right = working.rightCols(i + 1);
             applyHouseholder(target_right, temp);
@@ -106,8 +111,9 @@ namespace Physica::Core {
         for (; i < order - 2; ++i) {
             auto fromCol = hess.working.col(i);
             auto toCol = target.col(i);
-            auto copy = toCol.head(i + 2);
-            copy = fromCol.head(i + 2);
+            auto copy = toCol.head(i + 1);
+            copy = fromCol.head(i + 1);
+            toCol[i + 1] = hess.normVector[i];
             auto zero = toCol.tail(i + 2);
             zero = ScalarType::Zero();
         }
