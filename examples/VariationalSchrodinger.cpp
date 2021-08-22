@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchur.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
@@ -39,11 +39,12 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        MatrixType schur = RealSchur(hamilton_mod);
+        EigenSolver solver(hamilton_mod);
+        auto eigenvalues = solver.getEigenvalues();
         std::cout << "\tNumerical\tAnalytical\n";
         std::array<double, baseSetCount> energy{};
         for (size_t i = 0; i < baseSetCount; ++i)
-            energy[i] = schur(i, i).getTrivial();
+            energy[i] = double(eigenvalues[i].getReal());
         std::sort(energy.begin(), energy.end());
 
         for (size_t i = 0; i < baseSetCount; ++i) {
@@ -95,9 +96,10 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        MatrixType schur = RealSchur(hamilton_mod);
+        EigenSolver solver(hamilton_mod);
+        auto eigenvalues = solver.getEigenvalues();
         for (size_t i = 0; i < baseSetCount; ++i)
-            std::cout << '\t' << schur(i, i) << '\n';
+            std::cout << '\t' << eigenvalues[i] << '\n';
     }
 private:
     MatrixType getHamiltonMatrix() {

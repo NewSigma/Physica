@@ -36,6 +36,7 @@ namespace Physica::Core {
         /* Operators */
         ComplexScalar& operator=(const ComplexScalar& c);
         ComplexScalar& operator=(ComplexScalar&& c) noexcept;
+        ComplexScalar& operator=(const ScalarBase<ScalarType>& s);
         void operator<<=(int i) { real <<= i; imag<<= i; }
         void operator>>=(int i) { real >>= i; imag>>= i; }
         bool operator==(const ComplexScalar<ScalarType>& c);

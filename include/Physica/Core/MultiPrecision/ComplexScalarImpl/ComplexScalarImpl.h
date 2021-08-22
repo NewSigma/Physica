@@ -43,6 +43,13 @@ namespace Physica::Core {
         return *this;
     }
 
+    template<class AnyScalar>
+    ComplexScalar<AnyScalar>& ComplexScalar<AnyScalar>::operator=(const ScalarBase<ScalarType>& s) {
+        real = s.getDerived();
+        imag = ScalarType::Zero();
+        return *this;
+    }
+
     template<class ScalarType>
     bool ComplexScalar<ScalarType>::operator==(const ComplexScalar<ScalarType>& c) {
         return real == c.real && imag == c.imag;
