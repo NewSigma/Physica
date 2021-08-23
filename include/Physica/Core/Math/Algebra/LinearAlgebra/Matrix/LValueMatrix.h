@@ -94,6 +94,8 @@ namespace Physica::Core {
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
+        /* Setters */
+        void toUnitMatrix();
         /* Static members */
         [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;

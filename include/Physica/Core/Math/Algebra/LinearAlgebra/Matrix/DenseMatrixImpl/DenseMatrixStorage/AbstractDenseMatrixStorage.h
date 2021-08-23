@@ -148,9 +148,6 @@ namespace Physica::Core::Internal {
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return ite; }
-        static void updateIterator([[maybe_unused]] typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++eleIterator; }
-        static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
-        static void updateIterator([[maybe_unused]] typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
         /* Helpers */
         /**
          * Does not use Base::swap directly to avoid incorrect swaps
@@ -204,9 +201,6 @@ namespace Physica::Core::Internal {
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return ite; }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return ite; }
-        static void updateIterator([[maybe_unused]] typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++eleIterator; }
-        static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
-        static void updateIterator([[maybe_unused]] typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++eleIterator; }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -259,9 +253,6 @@ namespace Physica::Core::Internal {
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
-        static void updateIterator(typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).begin(); }
-        static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
-        static void updateIterator(typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -314,9 +305,6 @@ namespace Physica::Core::Internal {
         [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
         [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
-        static void updateIterator(typename Base::Iterator& iterator, ElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).begin(); }
-        static void updateIterator(typename Base::Iterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
-        static void updateIterator(typename Base::ConstIterator& iterator, ConstElementIterator& eleIterator) { ++iterator; eleIterator = (*iterator).cbegin(); }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };

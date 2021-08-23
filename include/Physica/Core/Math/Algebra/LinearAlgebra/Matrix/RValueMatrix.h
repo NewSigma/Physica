@@ -47,8 +47,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
-        /* Setters */
-        void toUnitMatrix();
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>

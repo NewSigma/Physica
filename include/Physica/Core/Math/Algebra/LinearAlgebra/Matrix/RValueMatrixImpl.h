@@ -27,21 +27,6 @@ namespace Physica::Core {
         assert(getRow() == target.getRow() && getColumn() == target.getColumn());
         Base::getDerived().assignTo(target);
     }
-
-    template<class Derived>
-    void RValueMatrix<Derived>::toUnitMatrix() {
-        assert(getRow() == getColumn());
-        auto matIterator = Base::getDerived().begin();
-        auto eleIterator = Base::getDerived().ebegin(matIterator);
-        const size_t order = getRow();
-        for (size_t i = 0; i < order; ++i) {
-            for (size_t j = 0; j < order; ++j) {
-                *eleIterator = i == j;
-                ++eleIterator;
-            }
-            Derived::updateIterator(matIterator, eleIterator);
-        }
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
     Derived reciprocal(const RValueMatrix<Derived>& m) {

@@ -349,6 +349,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::toUnitMatrix() {
+        assert(Base::getRow() == Base::getColumn());
+        const size_t order = Base::getRow();
+        for (size_t i = 0; i < order; ++i)
+            for (size_t j = 0; j < order; ++j)
+                getElementFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
+    }
+
+    template<class Derived>
     inline size_t LValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
             return minor;
