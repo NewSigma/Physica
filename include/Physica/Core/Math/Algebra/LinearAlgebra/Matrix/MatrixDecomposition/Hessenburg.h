@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RValueMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 
 namespace Physica::Core {
     template<class MatrixType> class HessenburgMatrixH;
@@ -57,6 +57,7 @@ namespace Physica::Core {
         Hessenburg(const LValueMatrix<MatrixType>& source_);
         /* Getters */
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
+        [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
     private:
         void compute();
         friend class HessenburgMatrixH<MatrixType>;
@@ -68,6 +69,14 @@ namespace Physica::Core {
             , source(source_.getDerived()) {
         assert(source.getRow() == source.getColumn());
         compute();
+    }
+
+    template<class MatrixType>
+    HouseholderSequence<typename Hessenburg<MatrixType>::WorkingMatrix> Hessenburg<MatrixType>::getMatrixQ() const noexcept {
+        HouseholderSequence result(working);
+        result.setSize(working.getRow() - 1);
+        result.setShift(1);
+        return result;
     }
 
     template<class MatrixType>
