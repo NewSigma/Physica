@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ABSTRACTFUNCTIONIMPL_H
-#define PHYSICA_ABSTRACTFUNCTIONIMPL_H
+#pragma once
 
 namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
@@ -25,11 +24,9 @@ namespace Physica::Core {
             : variables(Array<Scalar<option, errorTrack>>(variablesLength))
             , constants(Array<Scalar<option, errorTrack>>(constantsLength)) {
         for(size_t i = 0; i < variablesLength; ++i)
-            variables.allocate(Scalar<option, errorTrack>(0), i);
-        variables.setLength(variablesLength);
+            variables[i] = Scalar<option, errorTrack>(0);
         for(size_t i = 0; i < constantsLength; ++i)
-            constants.allocate(Scalar<option, errorTrack>(0), i);
-        constants.setLength(constantsLength);
+            constants[i] = Scalar<option, errorTrack>(0);
     }
 
     template<ScalarOption option, bool errorTrack>
@@ -65,5 +62,3 @@ namespace Physica::Core {
         return *this;
     }
 }
-
-#endif

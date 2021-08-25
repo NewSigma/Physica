@@ -26,14 +26,14 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     Array<T, Length, Capacity, Allocator>::Array() : Base(Capacity) {
         for (size_t i = 0; i < Length; ++i)
-            Base::allocate(T(), i);
+            alloc.construct(arr + i);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     Array<T, Length, Capacity, Allocator>::Array(size_t length_, const T& t) : Base(length_) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
-            Base::allocate(t, i);
+            alloc.construct(arr + i, t);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -42,9 +42,9 @@ namespace Physica::Utils {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            Base::allocate(*ite, i);
+            alloc.construct(arr + i, *ite);
         for (; i < Length; ++i)
-            Base::allocate(T(), i);
+            alloc.construct(arr + i);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -61,7 +61,7 @@ namespace Physica::Utils {
         assert(array.getLength() == Length);
         if constexpr (!std::is_trivial<T>::value)
             for (size_t i = 0; i < Length; ++i)
-                Base::allocate(array[i], i);
+                alloc.allocate(arr + i, array[i]);
         else
             memcpy(arr, array.arr, Length * sizeof(T));
     }
@@ -69,7 +69,7 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     template<size_t OtherLength, size_t OtherCapacity>
     Array<T, Length, Capacity, Allocator>::Array(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept
-            : Base(allocator.reallocate(array.arr, Length)) {
+            : Base(alloc.reallocate(array.arr, Length)) {
         static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
         assert(array.getLength() == Length);
         array.arr = nullptr;
@@ -81,7 +81,7 @@ namespace Physica::Utils {
     Array<T, Length, Capacity, Allocator>::Array(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array) : Base(Capacity) {
         assert(Length == array.getLength());
         for (size_t i = 0; i < Length; ++i)
-            Base::allocate(T(array[i]), i);
+            alloc.construct(arr + i, array[i]);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -89,7 +89,7 @@ namespace Physica::Utils {
     Array<T, Length, Capacity, Allocator>::Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept {
         assert(Length == array.getLength());
         for (size_t i = 0; i < Length; ++i)
-            Base::allocate(T(std::move(array[i])), i);
+            alloc.construct(arr + i, std::move(array[i]));
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -133,7 +133,7 @@ namespace Physica::Utils {
         static_assert(OtherLength == Dynamic, "OtherLength must equal to Length or be Dynamic.");
         assert(array.getLength() == Length);
         this->~Array();
-        arr = allocator.reallocate(array.arr, Length);
+        arr = alloc.reallocate(array.arr, Length);
         array.arr = nullptr;
         array.setLength(0);
         return *this;
@@ -199,7 +199,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, const T& t) : Base(length_, Capacity) {
         assert(length_ < Capacity);
         for (size_t i = 0; i < length_; ++i)
-            Base::allocate(t, i);
+            alloc.construct(arr + i, t);
     }
 
     template<class T, size_t Capacity, class Allocator>
@@ -209,7 +209,7 @@ namespace Physica::Utils {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            Base::allocate(*ite, i);
+            alloc.construct(arr + i, *ite);
         Base::setLength(length);
     }
 
@@ -227,7 +227,7 @@ namespace Physica::Utils {
         assert(array.getLength() <= Capacity);
         if constexpr (!std::is_trivial<T>::value)
             for (size_t i = 0; i < length; ++i)
-                Base::allocate(array[i], i);
+                alloc.construct(arr + i, array[i]);
         else
             memcpy(arr, array.arr, length * sizeof(T));
     }
@@ -235,7 +235,7 @@ namespace Physica::Utils {
     template<class T, size_t Capacity, class Allocator>
     template<size_t OtherLength, size_t OtherCapacity>
     Array<T, Dynamic, Capacity, Allocator>::Array(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept
-            : Base(array.getLength(), allocator.reallocate(array.arr, Capacity)) {
+            : Base(array.getLength(), alloc.reallocate(array.arr, Capacity)) {
         assert(array.getLength() <= Capacity);
         array.arr = nullptr;
         array.setLength(0);
@@ -245,14 +245,14 @@ namespace Physica::Utils {
     template<class OtherT, size_t OtherLength, size_t OtherCapacity>
     Array<T, Dynamic, Capacity, Allocator>::Array(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array) : Base(array.getLength(), Capacity) {
         for (size_t i = 0; i < length; ++i)
-            Base::allocate(T(array[i]), i);
+            alloc.construct(arr + i, array[i]);
     }
 
     template<class T, size_t Capacity, class Allocator>
     template<class OtherT, size_t OtherLength, size_t OtherCapacity>
     Array<T, Dynamic, Capacity, Allocator>::Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept : Base(array.getLength(), Capacity) {
         for (size_t i = 0; i < length; ++i)
-            Base::allocate(T(std::move(array[i])), i);
+            alloc.construct(arr + i, std::move(array[i]));
     }
 
     template<class T, size_t Capacity, class Allocator>
@@ -290,7 +290,7 @@ namespace Physica::Utils {
         Base::setLength(array.getLength());
         if constexpr (!std::is_trivial<T>::value)
             for (size_t i = 0; i < length; ++i)
-                Base::allocate(array[i], i);
+                alloc.construct(arr + i, array[i]);
         else
             memcpy(arr, array.arr, length * sizeof(T));
         return *this;
@@ -302,7 +302,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Capacity, Allocator>::operator=(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept {
         assert(array.getLength() <= Capacity);
         this->~Array();
-        arr = allocator.reallocate(array.arr, Capacity);
+        arr = alloc.reallocate(array.arr, Capacity);
         Base::setLength(array.getLength());
         array.arr = nullptr;
         array.setLength(0);
@@ -316,7 +316,7 @@ namespace Physica::Utils {
         assert(array.getLength() <= Capacity);
         Base::clear();
         for (size_t i = 0; i < array.getLength(); ++i)
-            allocate(T(array[i]), i);
+            alloc.construct(arr + i, array[i]);
         setLength(array.getLength());
         return *this;
     }
@@ -328,7 +328,7 @@ namespace Physica::Utils {
         assert(array.getLength() <= Capacity);
         Base::clear();
         for (size_t i = 0; i < array.getLength(); ++i)
-            allocate(T(std::move(array[i])), i);
+            alloc.construct(arr + i, std::move(array[i]));
         setLength(array.getLength());
         return *this;
     }
@@ -383,7 +383,7 @@ namespace Physica::Utils {
         const auto new_length = length + t_length;
         t_length = new_length > Capacity ? Capacity - length : t_length;
         for(size_t i = 0; i < t_length; ++i, ++length)
-            Base::allocate(t[i], length);
+            alloc.construct(arr + length, t[i]);
     }
 
     template<class T, size_t Capacity, class Allocator>
@@ -417,7 +417,7 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, const T& t) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
-            Base::allocate(t, i);
+            alloc.construct(arr + i, t);
     }
 
     template<class T, class Allocator>
@@ -426,7 +426,7 @@ namespace Physica::Utils {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            Base::allocate(*ite, i);
+            alloc.construct(arr + i, *ite);
         Base::setLength(list.size());
     }
 
@@ -444,7 +444,7 @@ namespace Physica::Utils {
             : Base(array.getLength(), array.getCapacity()), capacity(array.getCapacity()) {
         if constexpr (!std::is_trivial<T>::value)
             for (size_t i = 0; i < length; ++i)
-                Base::allocate(array[i], i);
+                alloc.construct(arr + i, array[i]);
         else
             memcpy(arr, array.arr, length * sizeof(T));
     }
@@ -462,7 +462,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator>::Array(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array)
             : Base(array.getLength(), array.getLength()), capacity(array.getLength()) {
         for (size_t i = 0; i < array.getLength(); ++i)
-            Base::allocate(T(array[i]), i);
+            alloc.construct(arr + i, array[i]);
     }
 
     template<class T, class Allocator>
@@ -470,7 +470,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator>::Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept
             : Base(array.getLength(), array.getLength()), capacity(array.getLength()) {
         for (size_t i = 0; i < array.getLength(); ++i)
-            Base::allocate(T(std::move(array[i])), i);
+            alloc.construct(arr + i, std::move(array[i]));
     }
 
     template<class T, class Allocator>
@@ -509,10 +509,10 @@ namespace Physica::Utils {
         Base::clear();
         Base::setLength(array.getLength());
         capacity = array.getCapacity();
-        arr = allocator.reallocate(arr, capacity);
+        arr = alloc.reallocate(arr, capacity);
         if constexpr (!std::is_trivial<T>::value)
             for (size_t i = 0; i < length; ++i)
-                Base::allocate(array[i], i);
+                alloc.construct(arr + i, array[i]);
         else
             memcpy(arr, array.arr, length * sizeof(T));
         return *this;
@@ -535,9 +535,9 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator>::operator=(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array) {
         Base::clear();
         setLength(array.getLength());
-        arr = allocator.reallocate(arr, length);
+        arr = alloc.reallocate(arr, length);
         for (size_t i = 0; i < length; ++i)
-            Base::allocate(T(array[i]), i);
+            alloc.construct(arr + i, array[i]);
         return *this;
     }
 
@@ -547,9 +547,9 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator>::operator=(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept {
         Base::clear();
         setLength(array.getLength());
-        arr = allocator.reallocate(arr, length);
+        arr = alloc.reallocate(arr, length);
         for (size_t i = 0; i < length; ++i)
-            Base::allocate(T(std::move(array[i])), i);
+            alloc.construct(arr + i, std::move(array[i]));
         return *this;
     }
 
@@ -574,7 +574,7 @@ namespace Physica::Utils {
         if(new_length > capacity)
             reserve(new_length);
         for(size_t i = 0; i < t_length; ++i, ++length)
-            Base::allocate(t[i], length);
+            alloc.construct(arr + length, t[i]);
     }
 
     template<class T, class Allocator>
@@ -592,7 +592,7 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::reserve(size_t size) {
         assert (size > getCapacity());
-        arr = allocator.reallocate(arr, size);
+        arr = alloc.reallocate(arr, size);
         capacity = size;
     }
 
@@ -608,7 +608,7 @@ namespace Physica::Utils {
         if (capacity < size)
             reserve(size);
         for (; length < size; ++length)
-            Base::allocate(T(), length);
+            alloc.construct(arr + length);
     }
 
     template<class T, class Allocator>
@@ -623,12 +623,12 @@ namespace Physica::Utils {
         if (capacity < size)
             reserve(size);
         for (; length < size; ++length)
-            Base::allocate(t, length);
+            alloc.construct(arr + length, t);
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::squeeze() {
-        arr = allocator.reallocate(arr, length);
+        arr = alloc.reallocate(arr, length);
         capacity = length;
     }
     /*!
@@ -638,7 +638,7 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::increase(size_t size) {
         assert(size >= capacity);
-        arr = allocator.reallocate(arr, size);
+        arr = alloc.reallocate(arr, size);
         capacity = size;
     }
     /*!
@@ -652,7 +652,7 @@ namespace Physica::Utils {
             for(size_t i = size; i < length; ++i)
                 (arr + i)->~T();
         }
-        arr = allocator.reallocate(arr, size);
+        arr = alloc.reallocate(arr, size);
         length = capacity = size;
     }
 

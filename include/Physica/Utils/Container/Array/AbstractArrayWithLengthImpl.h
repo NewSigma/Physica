@@ -60,13 +60,13 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     inline void AbstractArrayWithLength<Derived>::grow(const T& t) {
         assert(length < Base::getDerived().getCapacity());
-        Base::allocate(t, length++);
+        alloc.construct(arr + length++, t);
     }
 
     template<class Derived>
     inline void AbstractArrayWithLength<Derived>::grow(T&& t) {
         assert(length < Base::getDerived().getCapacity());
-        Base::allocate(std::move(t), length++);
+        alloc.construct(arr + length++, std::move(t));
     }
 
     template<class Derived>
@@ -89,7 +89,7 @@ namespace Physica::Utils::Internal {
     void AbstractArrayWithLength<Derived>::insert(const T& t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
-        Base::allocate(t, index);
+        alloc.construct(arr + index, t);
         Base::setLength(length + 1);
     }
 
@@ -97,7 +97,7 @@ namespace Physica::Utils::Internal {
     void AbstractArrayWithLength<Derived>::insert(T&& t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
-        Base::allocate(std::move(t), index);
+        alloc.construct(arr + index, std::move(t));
         Base::setLength(length + 1);
     }
 

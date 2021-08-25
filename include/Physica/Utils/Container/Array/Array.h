@@ -71,7 +71,7 @@ namespace Physica::Utils {
     private:
         using Base = Internal::AbstractArray<Array<T, Length, Capacity, Allocator>>;
         using Base::arr;
-        using Base::allocator;
+        using Base::alloc;
         using Base::getDerived;
     public:
         Array();
@@ -127,7 +127,7 @@ namespace Physica::Utils {
         using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity, Allocator>>;
         using Base::length;
         using Base::arr;
-        using Base::allocator;
+        using Base::alloc;
         using Base::getDerived;
     public:
         Array();
@@ -182,7 +182,7 @@ namespace Physica::Utils {
         using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic, Allocator>>;
         using Base::length;
         using Base::arr;
-        using Base::allocator;
+        using Base::alloc;
         using Base::getDerived;
     protected:
         size_t capacity;

@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <utility>
+#include <memory>
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Utils::Internal {
@@ -79,10 +80,11 @@ namespace Physica::Utils::Internal {
         using Base = Utils::CRTPBase<Derived>;
     protected:
         using T = typename Traits<Derived>::ElementType;
-        using Allocator = typename Traits<Derived>::AllocatorType;
+        using allocator_type = typename Traits<Derived>::AllocatorType;
+        using AllocatorTraits = std::allocator_traits<allocator_type>;
 
         T* __restrict arr;
-        Allocator allocator;
+        allocator_type alloc;
     public:
         using Iterator = ContainerIterator<T, AbstractArray<Derived>>;
         using ConstIterator = ContainerIterator<const T, AbstractArray<Derived>>;
@@ -110,6 +112,7 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] bool empty() const { return Base::getDerived().getLength() == 0; }
         [[nodiscard]] T* data() noexcept { return arr; }
         [[nodiscard]] const T* data() const noexcept { return arr; }
+        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
     protected:
         explicit AbstractArray(size_t capacity);
         explicit AbstractArray(T* __restrict arr_);
@@ -117,8 +120,6 @@ namespace Physica::Utils::Internal {
         AbstractArray(AbstractArray&& array) noexcept;
         ~AbstractArray();
         /* Helpers */
-        inline void allocate(const T& t, size_t index);
-        inline void allocate(T&& t, size_t index);
         inline void swap(AbstractArray& array) noexcept;
     };
 }

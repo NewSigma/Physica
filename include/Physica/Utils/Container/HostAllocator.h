@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <new>
+#include <memory>
 
 namespace Physica::Utils {
     /**
@@ -44,12 +45,15 @@ namespace Physica::Utils {
         HostAllocator& operator=(HostAllocator&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] static T* allocate(size_t n);
-        static void deallocate(T* p, size_t n);
+        static void deallocate(T* p, size_t n) noexcept;
         [[nodiscard]] static T* reallocate(T* p, size_t n);
+        template<class... Args>
+        void construct(T* p, Args&&... args);
+        void destroy(T* p);
     };
 
     template<class T>
-    T* HostAllocator<T>::allocate(size_t n) {
+    [[nodiscard]] T* HostAllocator<T>::allocate(size_t n) {
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
         if (!p)
             throw std::bad_alloc();
@@ -57,12 +61,76 @@ namespace Physica::Utils {
     }
 
     template<class T>
-    void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) {
+    void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
         free(p);
     }
 
     template<class T>
-    T* HostAllocator<T>::reallocate(T* p, size_t n) {
+    [[nodiscard]] T* HostAllocator<T>::reallocate(T* p, size_t n) {
         return reinterpret_cast<T*>(realloc(p, n * sizeof(T)));
     }
+
+    template<class T>
+    template<class... Args>
+    void HostAllocator<T>::construct(T* p, Args&&... args) {
+        ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+    }
+
+    template<class T>
+    void HostAllocator<T>::destroy(T* p) {
+        p->~T();
+    }
+}
+
+namespace std {
+    template<class T>
+    struct allocator_traits<Physica::Utils::HostAllocator<T>> {
+    public:
+        using allocator_type = Physica::Utils::HostAllocator<T>;
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using void_pointer = void*;
+        using const_void_pointer = const void*;
+        using size_type = typename allocator_type::size_type;
+        using difference_type = typename allocator_type::difference_type;
+        using propagate_on_container_copy_assignment = std::false_type;
+        using propagate_on_container_move_assignment = std::false_type;
+        using propagate_on_container_swap = std::false_type;
+        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        template<class U>
+        using rebind_alloc = Physica::Utils::HostAllocator<U>;
+        template<class U>
+        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
+    public:
+        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
+            return a.allocate(n);
+        }
+
+        static void deallocate(allocator_type& a, pointer p, size_type n) {
+            a.deallocate(p, n);
+        }
+
+        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
+            return a.reallocate(p, n);
+        }
+
+        template<class... Args>
+        static void construct(allocator_type& a, T* p, Args&&... args) {
+            a.construct(p, std::forward<Args>(args)...);
+        }
+
+        static void destroy(allocator_type& a, T* p) {
+            a.destroy(p);
+        }
+
+        static constexpr size_type max_size(const allocator_type& a) noexcept {
+            return std::numeric_limits<size_type>::max() / sizeof(value_type);
+        }
+
+        static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+            allocator_type result = a;
+            return result;
+        }
+    };
 }

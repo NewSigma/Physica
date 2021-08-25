@@ -63,8 +63,8 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(size_t capacity)
-            : allocator() {
-        arr = allocator.allocate(capacity);
+            : alloc() {
+        arr = alloc.allocate(capacity);
     }
 
     template<class Derived>
@@ -72,7 +72,7 @@ namespace Physica::Utils::Internal {
             : AbstractArray(array.getDerived().getCapacity()) {
         if constexpr (!std::is_trivial<T>::value)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
-                allocate(array[i], i);
+                AllocatorTraits::construct(alloc, arr + i, array[i]);
         else
             memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(T));
     }
@@ -80,15 +80,12 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept
             : arr(array.arr)
-            , allocator() {
+            , alloc() {
         array.arr = nullptr;
     }
-    /**
-     * \param arr_
-     * A array allocated by malloc.
-     */
+
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_), allocator() {}
+    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_), alloc() {}
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
@@ -97,7 +94,7 @@ namespace Physica::Utils::Internal {
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
                     (arr + i)->~T();
-        allocator.deallocate(arr, length);
+        alloc.deallocate(arr, length);
     }
 
     template<class Derived>
@@ -122,28 +119,6 @@ namespace Physica::Utils::Internal {
             if (operator[](i) != array[i])
                 return false;
         return true;
-    }
-    /**
-     * Low level api. Designed for performance.
-     * Simply allocate a T at position \param index.
-     * You must call setLength() to let the array know you have allocated a element.
-     * 
-     * Expose this function or not depends on the subclasses.
-     */
-    template<class Derived>
-    inline void AbstractArray<Derived>::allocate(const T& t, size_t index) {
-        if constexpr (!std::is_trivial<T>::value)
-            new (arr + index) T(t);
-        else
-            *(arr + index) = t;
-    }
-
-    template<class Derived>
-    inline void AbstractArray<Derived>::allocate(T&& t, size_t index) {
-        if constexpr (!std::is_trivial<T>::value)
-            new (arr + index) T(std::move(t));
-        else
-            *(arr + index) = t;
     }
 
     template<class Derived>

@@ -107,16 +107,17 @@ namespace Physica::Core {
     Vector<T> Vector<T, Length, MaxLength>::Zeros(size_t len) {
         Vector<T> result(len);
         for(size_t i = 0; i < len; ++i)
-            result.allocate(T::Zero(), i);
+            result[i] = T::Zero();
         result.setLength(len);
         return result;
     }
 
     template<class T, size_t Length, size_t MaxLength>
     Vector<T> Vector<T, Length, MaxLength>::randomVector(size_t len) {
-        Vector<T> result(len);
+        Vector<T> result{};
+        result.reserve(len);
         for (size_t i = 0; i < len; ++i)
-            result.allocate(randomScalar<T>(), i);
+            result.get_allocator().construct(result.data() + i, randomScalar<T>());
         result.setLength(len);
         return result;
     }

@@ -40,7 +40,7 @@ namespace Physica::Utils::Internal {
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
-        using Base::allocate;
+        using Base::alloc;
         T cutLast();
         inline void grow(const T& t);
         inline void grow(T&& t);
