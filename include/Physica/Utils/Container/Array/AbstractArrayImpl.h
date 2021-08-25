@@ -63,7 +63,9 @@ namespace Physica::Utils::Internal {
 
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(size_t capacity)
-            : arr(reinterpret_cast<T*>(malloc(capacity * sizeof(T)))) {}
+            : allocator() {
+        arr = allocator.allocate(capacity);
+    }
 
     template<class Derived>
     AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
@@ -76,7 +78,9 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept : arr(array.arr) {
+    AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept
+            : arr(array.arr)
+            , allocator() {
         array.arr = nullptr;
     }
     /**
@@ -84,15 +88,16 @@ namespace Physica::Utils::Internal {
      * A array allocated by malloc.
      */
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_) {}
+    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_), allocator() {}
 
     template<class Derived>
     AbstractArray<Derived>::~AbstractArray() {
+        const size_t length = Base::getDerived().getLength();
         if constexpr (!std::is_trivial<T>::value)
             if (arr != nullptr)
-                for(size_t i = 0; i < Base::getDerived().getLength(); ++i)
+                for(size_t i = 0; i < length; ++i)
                     (arr + i)->~T();
-        free(arr);
+        allocator.deallocate(arr, length);
     }
 
     template<class Derived>

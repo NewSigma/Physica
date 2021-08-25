@@ -79,8 +79,10 @@ namespace Physica::Utils::Internal {
         using Base = Utils::CRTPBase<Derived>;
     protected:
         using T = typename Traits<Derived>::ElementType;
+        using Allocator = typename Traits<Derived>::AllocatorType;
 
         T* __restrict arr;
+        Allocator allocator;
     public:
         using Iterator = ContainerIterator<T, AbstractArray<Derived>>;
         using ConstIterator = ContainerIterator<const T, AbstractArray<Derived>>;
