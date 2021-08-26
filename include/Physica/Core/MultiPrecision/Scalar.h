@@ -27,6 +27,8 @@
 
 namespace Physica::Core {
     //Forward declarations
+    template<class AnyScalar> class ComplexScalar;
+
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
 
@@ -51,6 +53,7 @@ namespace Physica::Core {
         public:
             static constexpr ScalarOption option = option_;
             static constexpr bool errorTrack = errorTrack_;
+            static constexpr bool complex = false;
         };
         /**
          * This class return a type that can exactly represent the two input scalars.
@@ -61,8 +64,10 @@ namespace Physica::Core {
                                                                             ? Traits<AnyScalar2>::option
                                                                             : Traits<AnyScalar1>::option;
             static constexpr bool errorTrack = Traits<AnyScalar1>::errorTrack || Traits<AnyScalar2>::errorTrack;
+            static constexpr bool complex = Traits<AnyScalar1>::complex || Traits<AnyScalar2>::complex;
         public:
-            using Type = Scalar<option, errorTrack>;
+            using Type = typename std::conditional<complex, ComplexScalar<Scalar<option, errorTrack>>
+                                                          , Scalar<option, errorTrack>>::type;
         };
 
         template<ScalarOption option>
@@ -228,7 +233,12 @@ namespace Physica::Core {
      * Empty class that make other template declarations easier.
      */
     template<class Derived>
-    class ScalarBase : public Utils::CRTPBase<Derived> {};
+    class ScalarBase : public Utils::CRTPBase<Derived> {
+    public:
+        static constexpr ScalarOption option = Internal::Traits<Derived>::option;
+        static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;;
+        static constexpr bool complex = Internal::Traits<Derived>::complex;;
+    };
 
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {

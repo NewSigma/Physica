@@ -21,10 +21,25 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
+    template<class AnyScalar> class ComplexScalar;
+
+    namespace Internal {
+        template<class ScalarType>
+        class Traits<ComplexScalar<ScalarType>> {
+        public:
+            static constexpr ScalarOption option = Traits<ScalarType>::option;
+            static constexpr bool errorTrack = Traits<ScalarType>::errorTrack;
+            static constexpr bool complex = true;
+        };
+    }
+
     template<class AnyScalar>
     class ComplexScalar {
     public:
         using ScalarType = AnyScalar;
+        static constexpr ScalarOption option = Internal::Traits<ComplexScalar>::option;
+        static constexpr bool errorTrack = Internal::Traits<ComplexScalar>::errorTrack;
+        static constexpr bool complex = true;
     private:
         ScalarType real;
         ScalarType imag;
