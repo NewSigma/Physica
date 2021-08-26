@@ -40,7 +40,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     typename EigenSolver<MatrixType>::EigenvalueVector EigenSolver<MatrixType>::getEigenvalues() const {
-        MatrixType schur = RealSchur(source);
+        MatrixType schur = RealSchur(source).getMatrixT();
         const size_t order = source.getRow();
         EigenvalueVector result = EigenvalueVector(order);
         for (size_t i = 0; i < order;) {

@@ -22,35 +22,23 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class RealSchur;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<RealSchur<MatrixType>> : public Traits<MatrixType> {
-        private:
-            using Base = Traits<MatrixType>;
-            using Base::MatrixOption;
-        };
-    }
     /**
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class MatrixType>
-    class RealSchur : public RValueMatrix<RealSchur<MatrixType>> {
-        using Base = RValueMatrix<RealSchur<MatrixType>>;
-        using typename Base::ScalarType;
+    class RealSchur {
+        using ScalarType = typename MatrixType::ScalarType;
+        using MatrixT = typename MatrixType::ColMatrix;
         constexpr static size_t matItePerCol = 40; //Reference to Eigen
+    private:
+        MatrixT matrixT;
         const MatrixType& source;
     public:
-        RealSchur(const LValueMatrix<MatrixType>& source_) : source(source_.getDerived()) { assert(source.getRow() == source.getColumn()); }
-        /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        RealSchur(const LValueMatrix<MatrixType>& source_);
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return source.getColumn(); }
+        [[nodiscard]] const MatrixT& getMatrixT() { return matrixT; }
     private:
         template<class AnyMatrix>
         static size_t activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper);
@@ -63,27 +51,29 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    template<class OtherMatrix>
-    void RealSchur<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+    RealSchur<MatrixType>::RealSchur(const LValueMatrix<MatrixType>& source_)
+            : matrixT(source_.getRow(), source.getColumn())
+            , source(source_.getDerived()) {
+        assert(source.getRow() == source.getColumn());
         Hessenburg hess(source);
-        target = hess.getMatrixH();
-        const size_t order = target.getRow();
+        matrixT = hess.getMatrixH();
+        const size_t order = matrixT.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
         while (1 <= upper && upper < order) {
-            const size_t lower = activeWindowLower(target, upper);
+            const size_t lower = activeWindowLower(matrixT, upper);
             if (lower == upper) {
                 upper -= 1;
                 iter = 0;
             }
             else if (lower + 1 == upper) {
-                splitOffTwoRows(target, lower);
+                splitOffTwoRows(matrixT, lower);
                 upper -= 2;
                 iter = 0;
             }
             else {
                 const size_t sub_order = upper - lower + 1;
-                auto subBlock = target.block(lower, sub_order, lower, sub_order);
+                auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
                 francisQR(subBlock);
                 ++iter;
             }

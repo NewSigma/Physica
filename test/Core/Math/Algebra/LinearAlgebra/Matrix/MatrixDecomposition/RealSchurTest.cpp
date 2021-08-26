@@ -26,7 +26,7 @@ int main() {
     using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
     const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
     const MatrixType answer{{1, 0, 0}, {7.111887749987, 2, 0}, {815.8705908737, -55.02363128693, 3}};
-    MatrixType result = RealSchur(mat);
+    MatrixType result = RealSchur(mat).getMatrixT();
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             if (!floatNear(result(i, j), answer(i, j), 1E-5))
