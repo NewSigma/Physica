@@ -86,9 +86,9 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 2; ++i) {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
-            const bool changeSign = temp[0].isPositive();
+            const bool changeSign = temp[0].isNegative();
             const ScalarType norm = householderInPlace(temp);
-            normVector[i] = changeSign ? -norm : norm;
+            normVector[i] = changeSign ? norm : -norm;
 
             auto target_right = working.rightCols(i + 1);
             applyHouseholder(target_right, temp);

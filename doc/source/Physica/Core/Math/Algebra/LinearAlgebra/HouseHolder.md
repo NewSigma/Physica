@@ -8,6 +8,10 @@ $$ (I - \tau \vec{v} \vec{v}^T) \vec{x} = -\beta \hat{e}_1 $$
 
 where $\vec{v}^T = [1, \vec{a}]^T$
 
+Here $sgn(x): \R \rightarrow \R$ is defined as:
+
+$$sgn(x) = \left \{ \begin{matrix} 1 \quad (x \geq 0) \\ -1 \quad (x < 0) \end{matrix} \right.$$
+
 ## Prove:
 
 $$ (I - \tau \vec{v} \vec{v}^T) \vec{x} = -\beta \hat{e}_1 $$
