@@ -198,28 +198,6 @@ namespace Physica::Core {
             memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
             return result;
         }
-        /**
-         * Set this scalar to its integer approximation which is closer to 0.
-         * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
-         */
-        void AbstractScalar<MultiPrecision>::toInteger() {
-            if(power < 0) {
-                byte = reinterpret_cast<MPUnit*>(realloc(byte, sizeof(MPUnit)));
-                byte[0] = 0;
-                length = 1;
-                power = 0;
-                return;
-            }
-            const long new_length = power + 1L; //Declared long to avoid overflow.
-            if(new_length >= length)
-                return;
-            /* Move and adjust the size */ {
-                const auto new_size = new_length * sizeof(MPUnit);
-                memmove(byte, byte + length - new_length, new_size); //Optimize: possible to optimize it if there is no overlapping
-                byte = reinterpret_cast<MPUnit*>(realloc(byte, new_size));
-            }
-            length = static_cast<int>(new_length); //We have proved that length > temp.
-        }
 
         void AbstractScalar<MultiPrecision>::swap(AbstractScalar<MultiPrecision>& s) noexcept {
             std::swap(byte, s.byte);
@@ -765,13 +743,6 @@ namespace Physica::Core {
         Warning(0, "Accumulated too many errors.");
         length = length < 0 ? -1 : 1;
         return *this;
-    }
-    /*!
-     * Change this scalar to a integer and set its accuracy to 0. See also Scalar<MultiPrecision, false>::toInteger().
-     */
-    void Scalar<MultiPrecision, true>::toInteger() {
-        toInteger();
-        a = 0;
     }
 
     void Scalar<MultiPrecision, true>::swap(

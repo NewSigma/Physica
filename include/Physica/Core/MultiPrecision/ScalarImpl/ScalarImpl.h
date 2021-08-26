@@ -215,18 +215,7 @@ namespace Physica::Core {
     inline Scalar<Float, true> Scalar<Float, false>::operator/(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f / s.f, fabsf((s.f * s.getA()) / (s.f * (s.f - s.getA()))));
     }
-    /*!
-     * Set this scalar to its integer approximation which is closer to 0.
-     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
-     */
-    inline void Scalar<Float, false>::toInteger() {
-        Base::toInteger();
-    }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
-    inline void Scalar<Float, true>::toInteger() {
-        Base::toInteger();
-        a = 0;
-    }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
     inline Scalar<Double, errorTrack>& operator++(Scalar<Double, errorTrack>& s) {
@@ -281,18 +270,7 @@ namespace Physica::Core {
     inline Scalar<Double, true> Scalar<Double, false>::operator/(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d / s.d, fabs((s.d * s.getA()) / (s.d * (s.d - s.getA()))));
     }
-    /*!
-     * Set this scalar to its integer approximation which is closer to 0.
-     * e.g. 5.6 -> 5, -4.8 -> -4, 0 -> 0.
-     */
-    inline void Scalar<Double, false>::toInteger() {
-        Base::toInteger();
-    }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////
-    inline void Scalar<Double, true>::toInteger() {
-        Base::toInteger();
-        a = 0;
-    }
 }
 
 #include "ScalarArithmetic.h"

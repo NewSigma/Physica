@@ -25,17 +25,6 @@ using namespace Physica::Core;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 /*!
- * Test if add operation supports associativity. Return true if it does no support.
- */
-bool associativityAdd() {
-    Scalar<MultiPrecision, false> s1(1);
-    s1.setPower(GlobalPrecision);
-    Scalar<MultiPrecision, false> s2(LONG_MAX);
-    s2 += Scalar<MultiPrecision, false>(2);
-    Scalar<MultiPrecision, false> s3(LONG_MAX);
-    return Scalar<MultiPrecision, false>(s1 + s2 + s3) != Scalar<MultiPrecision, false>(s1 + (s2 + s3));
-}
-/*!
  * Test operator+(), return true if passed.
  */
 bool numericalAddTest(unsigned int loop) {
@@ -163,54 +152,6 @@ bool numericalDivTest(unsigned int loop) {
     }
     return true;
 }
-/*!
- * Get the type name of the scalar from its type.
- */
-constexpr const char* fromOptionToString(ScalarOption option) {
-    switch(option) {
-        case Float:
-            return "Float";
-        case Double:
-            return "Double";
-        case MultiPrecision:
-            return "MultiPrecision";
-        default:
-            exit(EXIT_FAILURE);
-    }
-}
-
-template<ScalarOption option>
-inline bool isEqual(Scalar<option, false>& s, long l) {
-    return s[0] == static_cast<MPUnit>(l);
-}
-
-template<>
-inline bool isEqual<Float>(Scalar<Float, false>& s, long l) {
-    return static_cast<long>(s.getTrivial()) == l;
-}
-
-template<>
-inline bool isEqual<Double>(Scalar<Double, false>& s, long l) {
-    return static_cast<long>(s.getTrivial()) == l;
-}
-/*!
- * Tests function toInteger(), return true if passed.
- */
-template<ScalarOption option>
-bool toIntegerTest(unsigned int loop) {
-    const double max_2 = std::default_random_engine::max() >> 1U;
-    for(unsigned int i = 0; i < loop; ++i) {
-        //100000 is a arbitrary big number.
-        const double temp = (engine() >> 1U) / max_2 * 100000;
-        Scalar<option, false> s(temp);
-        s.toInteger();
-        if(!isEqual(s, static_cast<long>(temp))) {
-            std::cout << "toIntegerTest<" << fromOptionToString(option) << "> failed: Casting " << temp << " to " << double(s);
-            return false;
-        }
-    }
-    return true;
-}
 
 int main(int argc, char** argv) {
     Q_UNUSED(argc)
@@ -219,11 +160,7 @@ int main(int argc, char** argv) {
     bool result = numericalAddTest(iterateCount)
             && numericalSubTest(iterateCount)
             && numericalMulTest(iterateCount)
-            && numericalDivTest(iterateCount)
-            && toIntegerTest<Float>(iterateCount)
-            && toIntegerTest<Double>(iterateCount)
-            && toIntegerTest<MultiPrecision>(iterateCount);
-    result &= associativityAdd();
+            && numericalDivTest(iterateCount);
     deInitPhysica();
     return !result;
 }

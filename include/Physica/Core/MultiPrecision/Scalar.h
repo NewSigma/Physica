@@ -106,7 +106,6 @@ namespace Physica::Core {
                 explicit operator double() const;
                 AbstractScalar operator-() const;
                 /* Helpers */
-                void toInteger();
                 void swap(AbstractScalar& s) noexcept;
                 static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2);
                 /* Getters */
@@ -189,7 +188,6 @@ namespace Physica::Core {
             /* Helpers */
             AbstractScalar& toOpposite() noexcept { f = -f; return *this; }
             AbstractScalar& toAbs() noexcept { f = fabsf(f); return *this; }
-            void toInteger() { modff(f, &f); }
             void swap(AbstractScalar& s) noexcept { std::swap(f, s.f); }
         };
 
@@ -220,7 +218,6 @@ namespace Physica::Core {
             /* Helpers */
             AbstractScalar& toOpposite() noexcept { d = -d; return *this; }
             AbstractScalar& toAbs() noexcept { d = fabs(d); return *this; }
-            void toInteger() { modf(d, &d); }
             void swap(AbstractScalar& s) noexcept { std::swap(d, s.d); }
         };
     }
@@ -323,7 +320,6 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        void toInteger();
         void swap(Scalar& s) noexcept;
         [[nodiscard]] static inline Scalar Zero() { return Scalar(static_cast<SignedMPUnit>(0)); }
         [[nodiscard]] static inline Scalar One() { return Scalar(static_cast<SignedMPUnit>(1)); }
@@ -383,7 +379,6 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        inline void toInteger();
         void swap(Scalar& s) noexcept { Base::swap(s); }
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -426,7 +421,6 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        inline void toInteger();
         void swap(Scalar& s) noexcept;
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -475,7 +469,6 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        inline void toInteger();
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -518,7 +511,6 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        inline void toInteger();
         void swap(Scalar& s) noexcept;
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
