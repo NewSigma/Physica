@@ -23,21 +23,35 @@
 
 using namespace Physica::Core;
 
+template<class MatrixType>
+bool hessTest(const MatrixType& source, const MatrixType& answer, double tolerance1, double tolerance2) {
+    Hessenburg hess(source);
+    MatrixType H = hess.getMatrixH();
+    if (!matrixNear(H, answer, tolerance1))
+        return false;
+    MatrixType Q = hess.getMatrixQ();
+    MatrixType A = (Q * H).compute() * Q.transpose();
+    if (!matrixNear(A, source, tolerance2))
+        return false;
+    return true;
+}
+
 int main() {
     {
         using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 4>;
         const MatrixType mat{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
-        const MatrixType H_answer{{1, -5.38516, 0, 0},
+        const MatrixType answer{{1, -5.38516, 0, 0},
                                 {-16.5269, 33.8276, -6.75721, 0},
                                 {-1.36458, 0.591256, -0.827586, 0},
                                 {0, 0, 0, 0}};
-        Hessenburg hess(mat);
-        MatrixType H = hess.getMatrixH();
-        if (!matrixNear(H, H_answer, 1E-5))
+        if (!hessTest(mat, answer, 1E-5, 1E-15))
             return 1;
-        MatrixType Q = hess.getMatrixQ();
-        MatrixType A = (Q * H).compute() * Q.transpose();
-        if (!matrixNear(A, mat, 1E-15))
+    }
+    {
+        using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
+        const MatrixType answer{{-149., -537.678, 0.}, {42.2037, 152.551, 0.0728473}, {-156.317, -554.927, 2.44885}};
+        if (!hessTest(mat, answer, 1E-5, 1E-15))
             return 1;
     }
     {
@@ -58,11 +72,8 @@ int main() {
                                 {7.73537E-17, -5.07573E-15, -1.41081E-15, 2.65133E-15, 70.8353, 297.412, 51.6424, 0},
                                 {-7.67151E-17, 5.03383E-15, -3.80293E-15, 7.07156E-15, 1.05757E-14, 51.6424, 52.6065, 21.9094},
                                 {2.83378E-17, -1.85945E-15, -1.80824E-16, 1.41259E-15, -7.22757E-15, 2.84217E-14, 21.9094, 84.6774}}};
-        Hessenburg hess(mat);
-        MatrixType result = hess.getMatrixH();
-        if (!matrixNear(result, answer, 1E-5))
+        if (!hessTest(mat, answer, 1E-5, 1E-13))
             return 1;
-
     }
     return 0;
 }

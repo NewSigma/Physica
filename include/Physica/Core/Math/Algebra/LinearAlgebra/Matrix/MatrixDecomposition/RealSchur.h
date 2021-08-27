@@ -30,33 +30,37 @@ namespace Physica::Core {
     template<class MatrixType>
     class RealSchur {
         using ScalarType = typename MatrixType::ScalarType;
-        using MatrixT = typename MatrixType::ColMatrix;
+        using WorkingMatrix = typename MatrixType::ColMatrix;
         constexpr static size_t matItePerCol = 40; //Reference to Eigen
     private:
-        MatrixT matrixT;
+        WorkingMatrix matrixT;
+        WorkingMatrix matrixU;
         const MatrixType& source;
+        bool computeMatrixU;
     public:
-        RealSchur(const LValueMatrix<MatrixType>& source_);
+        RealSchur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
         /* Getters */
-        [[nodiscard]] const MatrixT& getMatrixT() { return matrixT; }
+        [[nodiscard]] const WorkingMatrix& getMatrixT() const noexcept { return matrixT; }
+        [[nodiscard]] const WorkingMatrix& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
     private:
         template<class AnyMatrix>
         static size_t activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper);
-        template<class AnyMatrix>
-        static void splitOffTwoRows(LValueMatrix<AnyMatrix>& __restrict mat, size_t index);
-        template<class AnyMatrix>
-        static void francisQR(LValueMatrix<AnyMatrix>& mat);
-        template<class AnyMatrix>
-        static void specialHessenburg(LValueMatrix<AnyMatrix>& mat);
+        void splitOffTwoRows(size_t index);
+        void francisQR(size_t lower, size_t sub_order);
+        void specialHessenburg(size_t lower, size_t sub_order);
     };
 
     template<class MatrixType>
-    RealSchur<MatrixType>::RealSchur(const LValueMatrix<MatrixType>& source_)
-            : matrixT(source_.getRow(), source.getColumn())
-            , source(source_.getDerived()) {
+    RealSchur<MatrixType>::RealSchur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_)
+            : matrixT(source_.getRow(), source_.getColumn())
+            , matrixU()
+            , source(source_.getDerived())
+            , computeMatrixU(computeMatrixU_) {
         assert(source.getRow() == source.getColumn());
         Hessenburg hess(source);
         matrixT = hess.getMatrixH();
+        if (computeMatrixU)
+            matrixU = WorkingMatrix::unitMatrix(source.getRow());
         const size_t order = matrixT.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
@@ -67,16 +71,20 @@ namespace Physica::Core {
                 iter = 0;
             }
             else if (lower + 1 == upper) {
-                splitOffTwoRows(matrixT, lower);
+                splitOffTwoRows(lower);
                 upper -= 2;
                 iter = 0;
             }
             else {
                 const size_t sub_order = upper - lower + 1;
-                auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
-                francisQR(subBlock);
+                francisQR(lower, sub_order);
                 ++iter;
             }
+        }
+
+        if (computeMatrixU) {
+            WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
+            matrixU = std::move(temp);
         }
     }
     /**
@@ -104,85 +112,123 @@ namespace Physica::Core {
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
      */
     template<class MatrixType>
-    template<class AnyMatrix>
-    void RealSchur<MatrixType>::splitOffTwoRows(LValueMatrix<AnyMatrix>& __restrict mat, size_t index) {
+    void RealSchur<MatrixType>::splitOffTwoRows(size_t index) {
         const size_t index_1 = index + 1;
-        const ScalarType p = ScalarType(0.5) * (mat(index, index) - mat(index_1, index_1));
-        const ScalarType q = square(p) + mat(index, index_1) * mat(index_1, index);
+        const ScalarType p = ScalarType(0.5) * (matrixT(index, index) - matrixT(index_1, index_1));
+        const ScalarType q = square(p) + matrixT(index, index_1) * matrixT(index_1, index);
         if (!q.isNegative()) {
             const ScalarType z = sqrt(q);
             Vector<ScalarType, 2> target;
             target[0] = p + (p.isPositive() ? z : -z); //Select the root that ensure numerical stable
-            target[1] = mat(index_1, index);
+            target[1] = matrixT(index_1, index);
             auto givensVector = givens(target, 0, 1);
-            auto block1 = mat.rightCols(index);
+            auto block1 = matrixT.rightCols(index);
             applyGivens(givensVector, block1, index, index_1);
-            auto block2 = mat.topRows(index_1 + 1);
+            auto block2 = matrixT.topRows(index_1 + 1);
             givensVector[1].toOpposite();
             applyGivens(block2, givensVector, index, index_1);
-            mat(index_1, index) = ScalarType::Zero();
+            matrixT(index_1, index) = ScalarType::Zero();
+            if (computeMatrixU)
+                applyGivens(matrixU, givensVector, index, index_1);
         }
     }
 
     template<class MatrixType>
-    template<class AnyMatrix>
-    void RealSchur<MatrixType>::francisQR(LValueMatrix<AnyMatrix>& mat) {
-        constexpr size_t householderSize = AnyMatrix::RowAtCompile == 2 ? 2 : 3;
-        const size_t order = mat.getRow();
-        const ScalarType s = mat(order - 1, order - 1) + mat(order - 2, order - 2);
-        const ScalarType t = mat(order - 1, order - 1) * mat(order - 2, order - 2)
-                           - mat(order - 1, order - 2) * mat(order - 2, order - 1);
+    void RealSchur<MatrixType>::francisQR(size_t lower, size_t sub_order) {
+        auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
+        const ScalarType s = subBlock(sub_order - 1, sub_order - 1) + subBlock(sub_order - 2, sub_order - 2);
+        const ScalarType t = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2)
+                           - subBlock(sub_order - 1, sub_order - 2) * subBlock(sub_order - 2, sub_order - 1);
         Vector<ScalarType, 3> col_1_M{};
-        col_1_M[0] = square(mat(0, 0)) + mat(0, 1) * mat(1, 0) - s * mat(0, 0) + t;
-        col_1_M[1] = mat(1, 0) * (mat(0, 0) + mat(1, 1) - s);
+        col_1_M[0] = square(subBlock(0, 0)) + subBlock(0, 1) * subBlock(1, 0) - s * subBlock(0, 0) + t;
+        col_1_M[1] = subBlock(1, 0) * (subBlock(0, 0) + subBlock(1, 1) - s);
 
-        Vector<ScalarType, householderSize> householderVector{};
-        if (order != 2) {
-            col_1_M[2] = mat(1, 0) * mat(2, 1);
+        if (sub_order != 2) {
+            Vector<ScalarType, 3> householderVector{};
+            col_1_M[2] = subBlock(1, 0) * subBlock(2, 1);
             householder(col_1_M, householderVector);
-            auto rows = mat.rows(0, 3);
-            applyHouseholder(householderVector, rows);
-            auto cols = mat.cols(0, 3);
-            applyHouseholder(cols, householderVector);
-
-            specialHessenburg(mat);
+            {
+                auto block = matrixT.rightCols(lower);
+                auto rows = block.rows(lower, 3);
+                applyHouseholder(householderVector, rows);
+            }
+            {
+                auto block = matrixT.topRows(lower + sub_order);
+                auto cols = block.cols(lower, 3);
+                applyHouseholder(cols, householderVector);
+            }
+            if (computeMatrixU) {
+                auto cols = matrixU.rows(lower, 3);
+                applyHouseholder(cols, householderVector);
+            }
+            specialHessenburg(lower, sub_order);
         }
         else {
-            auto householderVector2D = householderVector.head(2);
-            householder(col_1_M.head(2), householderVector2D);
-            applyHouseholder(householderVector2D, mat);
-            applyHouseholder(mat, householderVector2D);
+            Vector<ScalarType, 2> householderVector{};
+            householder(col_1_M.head(2), householderVector);
+            {
+                auto block = matrixT.rightCols(lower);
+                auto rows = block.rows(lower, 2);
+                applyHouseholder(householderVector, rows);
+            }
+            {
+                auto block = matrixT.topRows(lower + 2);
+                auto cols = block.cols(lower, 2);
+                applyHouseholder(cols, householderVector);
+            }
+            if (computeMatrixU) {
+                auto cols = matrixU.cols(lower, 2);
+                applyHouseholder(cols, householderVector);
+            }
         }
     }
     /**
      * A special designed Hessenburg decomposition for francis QR algorithm
      */
     template<class MatrixType>
-    template<class AnyMatrix>
-    void RealSchur<MatrixType>::specialHessenburg(LValueMatrix<AnyMatrix>& mat) {
-        assert(mat.getRow() > 2);
+    void RealSchur<MatrixType>::specialHessenburg(size_t lower, size_t sub_order) {
+        assert(sub_order > 2);
         Vector<ScalarType, 3> householderVector3D{};
-        const size_t order = mat.getRow();
-        for (size_t i = 0; i < order - 3; ++i) {
-            auto block = mat.rows(i + 1, 3);
-            auto target_col = block.col(i);
+        for (size_t i = 0; i < sub_order - 3; ++i) {
+            auto block = matrixT.rows(lower + i + 1, 3);
+            auto target_col = block.col(lower + i);
             const auto norm = householder(target_col, householderVector3D);
             target_col[0] = target_col[0].isNegative() ? norm : -norm;
             target_col.tail(1) = ScalarType::Zero();
-            auto rightCols = block.rightCols(i + 1);
-            applyHouseholder(householderVector3D, rightCols);
-            auto cols = mat.cols(i + 1, 3);
-            applyHouseholder(cols, householderVector3D);
+            {
+                auto rightCols = matrixT.rightCols(lower + i + 1);
+                auto rows = rightCols.rows(lower + i + 1, 3);
+                applyHouseholder(householderVector3D, rows);
+            }
+            {
+                auto topRows = matrixT.topRows(lower + sub_order);
+                auto cols = topRows.cols(lower + i + 1, 3);
+                applyHouseholder(cols, householderVector3D);
+            }
+            if (computeMatrixU) {
+                auto cols = matrixU.cols(lower + i + 1, 3);
+                applyHouseholder(cols, householderVector3D);
+            }
         }
         auto householderVector2D = householderVector3D.head(2);
-        auto block = mat.bottomRows(order - 2);
-        auto target_col = block.col(order - 3);
+        auto block = matrixT.rows(lower + sub_order - 2, 2);
+        auto target_col = block.col(lower + sub_order - 3);
         const auto norm = householder(target_col, householderVector2D);
         target_col[0] = target_col[0].isNegative() ? norm : -norm;
         target_col[1] = ScalarType::Zero();
-        auto rightCols = block.rightCols(order - 2);
-        applyHouseholder(householderVector2D, rightCols);
-        auto cols = mat.rightCols(order - 2);
-        applyHouseholder(cols, householderVector2D);
+        {
+            auto rightCols = matrixT.rightCols(lower + sub_order - 2);
+            auto rows = rightCols.rows(lower + sub_order - 2, 2);
+            applyHouseholder(householderVector2D, rows);
+        }
+        {
+            auto topRows = matrixT.topRows(lower + sub_order);
+            auto cols = topRows.cols(lower + sub_order - 2, 2);
+            applyHouseholder(cols, householderVector2D);
+        }
+        if (computeMatrixU) {
+            auto cols = matrixU.cols(lower + sub_order - 2, 2);
+            applyHouseholder(cols, householderVector2D);
+        }
     }
 }
