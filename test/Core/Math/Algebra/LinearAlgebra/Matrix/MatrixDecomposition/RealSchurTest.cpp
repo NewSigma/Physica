@@ -23,16 +23,48 @@
 
 using namespace Physica::Core;
 
+template<class MatrixType>
+bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
+    if (m.getRow() != m.getColumn())
+        return false;
+    for (size_t i = 0; i < m.getRow() - 1; ++i) {
+        if (m(i + 1, i).isZero()) {
+            auto col = m.col(i);
+            if (!col.tail(i + 1).isZero())
+                return false;
+        }
+        else if(i < m.getRow() - 2) {
+            auto col1 = m.col(i);
+            auto col2 = m.col(i + 1);
+            if (!col1.tail(i + 2).isZero() || !col2.tail(i + 2).isZero())
+                return false;
+            ++i;
+        }
+    }
+    return true;
+}
+
+template<class MatrixType>
+bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
+    RealSchur schur(mat, true);
+    if (!isUpperQuasiTriangle(schur.getMatrixT()))
+        return false;
+    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+    if (!matrixNear(A, mat, precision))
+        return false;
+    return true;
+}
+
 int main() {
     {
         using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
-        const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
-        const MatrixType answer{{1, 0, 0}, {7.111887749987, 2, 0}, {815.8705908737, -55.02363128693, 3}};
-        RealSchur schur(mat, true);
-        if (!matrixNear(schur.getMatrixT(), answer, 1E-11))
+        const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
+        if (!realSchurTest(mat1, 1E-15))
             return 1;
-        MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
-        if (!matrixNear(A, mat, 1E-15))
+        const MatrixType mat2{{-0.590316, -2.19514, -2.37463},
+                              {-1.25006, -0.297493, 1.40349},
+                              {0.517063, -0.956614, -0.920775}};
+        if (!realSchurTest(mat2, 1E-14))
             return 1;
     }
     return 0;

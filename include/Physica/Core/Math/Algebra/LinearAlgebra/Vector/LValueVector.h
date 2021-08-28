@@ -53,6 +53,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType norm() const;
         [[nodiscard]] ScalarType squaredNorm() const;
+        [[nodiscard]] bool isZero() const;
     };
 
     template<class Derived>
@@ -89,6 +90,14 @@ namespace Physica::Core {
         for(size_t i = 0; i < Base::getLength(); ++i)
             result += square((*this)[i]);
         return result;
+    }
+
+    template<class Derived>
+    bool LValueVector<Derived>::isZero() const {
+        for(size_t i = 0; i < Base::getLength(); ++i)
+            if (!(*this)[i].isZero())
+                return false;
+        return true;
     }
 
     template<class VectorType1, class VectorType2>
