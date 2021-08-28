@@ -145,16 +145,6 @@ namespace Physica::Core {
         os << ')';
         return os;
     }
-
-    template<class T, size_t Length, size_t MaxLength>
-    T operator*(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2) {
-        const auto len = v1.getLength();
-        assert(len == v2.getLength());
-        auto result = T::Zero();
-        for(size_t i = 0; i < len; ++i)
-            result += v1[i] * v2[i];
-        return result;
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
     template<class T, size_t Length, size_t MaxLength>

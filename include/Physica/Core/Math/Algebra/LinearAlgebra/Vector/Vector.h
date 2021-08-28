@@ -89,9 +89,6 @@ namespace Physica::Core {
     /* Operators */
     template<class T, size_t Length, size_t MaxLength>
     std::ostream& operator<<(std::ostream& os, const Vector<T, Length, MaxLength>& v);
-
-    template<class T, size_t Length, size_t MaxLength>
-    T operator*(const Vector<T, Length, MaxLength>& v1, const Vector<T, Length, MaxLength>& v2);
 }
 
 #include "VectorImpl.h"

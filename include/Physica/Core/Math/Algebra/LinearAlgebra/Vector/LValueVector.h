@@ -91,6 +91,18 @@ namespace Physica::Core {
         return result;
     }
 
+    template<class VectorType1, class VectorType2>
+    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
+    operator*(const LValueVector<VectorType1>& v1, const LValueVector<VectorType2>& v2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+        const auto len = v1.getLength();
+        assert(len == v2.getLength());
+        auto result = ResultType::Zero();
+        for(size_t i = 0; i < len; ++i)
+            result += v1[i] * v2[i];
+        return result;
+    }
+
     template<class Derived, class OtherDerived>
     void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
         for (size_t i = 0; i < v1.getLength(); ++i)

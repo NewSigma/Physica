@@ -145,6 +145,30 @@ namespace Physica::Core {
 
     template<class Derived>
     inline MatrixBlock<Derived>
+    LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) {
+        return MatrixBlock<Derived>(Base::getDerived(), 0, toRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived>
+    LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), 0, toRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived>
+    LValueMatrix<Derived>::topLeftCorner(size_t to) {
+        return MatrixBlock<Derived>(Base::getDerived(), 0, to, 0, to);
+    }
+
+    template<class Derived>
+    inline const MatrixBlock<Derived>
+    LValueMatrix<Derived>::topLeftCorner(size_t to) const {
+        return MatrixBlock<Derived>(Base::getConstCastDerived(), 0, to, 0, to);
+    }
+
+    template<class Derived>
+    inline MatrixBlock<Derived>
     LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) {
         return MatrixBlock<Derived>(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getColumn() - fromCol);
     }
