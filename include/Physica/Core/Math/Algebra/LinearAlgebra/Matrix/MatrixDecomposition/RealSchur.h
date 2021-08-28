@@ -40,6 +40,8 @@ namespace Physica::Core {
     public:
         RealSchur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
         /* Getters */
+        [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
+        [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
         [[nodiscard]] const WorkingMatrix& getMatrixT() const noexcept { return matrixT; }
         [[nodiscard]] const WorkingMatrix& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
     private:

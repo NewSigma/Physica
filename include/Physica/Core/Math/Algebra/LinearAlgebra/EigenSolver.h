@@ -30,28 +30,37 @@ namespace Physica::Core {
     template<class MatrixType>
     class EigenSolver {
         using ScalarType = typename MatrixType::ScalarType;
+    private:
+        using EigenvectorStorage = DenseMatrix<ScalarType,
+                                               DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                               MatrixType::RowAtCompile,
+                                               MatrixType::RowAtCompile>;
+    public:
         using EigenvalueVector = Vector<ComplexScalar<ScalarType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<ScalarType>,
+        using EigenvectorMatrix = DenseMatrix<ScalarType,
                                               DenseMatrixOption::Column | DenseMatrixOption::Vector,
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
+    private:
         const MatrixType& source;
         EigenvalueVector eigenvalues;
+        EigenvectorStorage eigenvectorStorage;
     public:
         EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors);
         /* Operations */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const;
+        [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept;
     };
 
     template<class MatrixType>
     EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors)
             : source(source_.getDerived())
-            , eigenvalues(source_.getRow()) {
+            , eigenvalues(source_.getRow())
+            , eigenvectorStorage() {
         assert(source.getRow() == source.getColumn());
-        const auto schur = RealSchur(source, computeEigenvectors);
+        auto schur = RealSchur(source, computeEigenvectors);
 
-        const auto& matrixT = schur.getMatrixT();
+        auto& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
         for (size_t i = 0; i < order;) {
             if (i == order - 1 || matrixT(i + 1, i).isZero()) {
@@ -77,5 +86,121 @@ namespace Physica::Core {
                 i += 2;
             }
         }
+
+        if (computeEigenvectors) {
+            for (size_t i = order - 1; i < order; --i) {
+                auto block = matrixT.topLeftCorner(i + 1, i + 1);
+                if (eigenvalues[i].getImag().isZero()) {
+                    matrixT(i, i) = ScalarType::One();
+                    auto col = block.col(i);
+                    for (size_t j = i - 1; j < i; --j) {
+                        if (eigenvalues[j].getImag().isZero()) {
+                            auto row = matrixT.row(j);
+                            col[j] = col.tail(j + 1) * row.tail(j + 1) / (eigenvalues[j].getReal() - eigenvalues[i].getReal());
+                        }
+                        else {
+                            auto row1 = matrixT.row(j - 1);
+                            auto row2 = matrixT.row(j);
+                            auto tail = col.tail(j + 1);
+                            ScalarType dot1 = tail * row1.tail(j + 1);
+                            ScalarType dot2 = tail * row2.tail(j + 1);
+                            ScalarType inv_determinate = reciprocal(square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()));
+                            col[j - 1] = (dot1 * block(j, j) - dot2 * block(j - 1, j)) * inv_determinate;
+                            col[j] = (dot2 * block(j - 1, j - 1) - dot1 * block(j, j - 1)) * inv_determinate;
+                            --j;
+                        }
+                    }
+                }
+                else {
+                    //Referenced from eigen, ensure numerical stable
+                    auto col1 = block.col(i - 1);
+                    auto col2 = block.col(i);
+                    if (abs(matrixT(i, i - 1)) > abs(matrixT(i - 1, i))) {
+                        auto temp = reciprocal(matrixT(i, i - 1));
+                        col1[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
+                        col2[i - 1] = eigenvalues[i].getImag() * temp;
+                    }
+                    else {
+                        ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(ScalarType::Zero(), -matrixT(i - 1, i)) /
+                                                      ComplexScalar<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
+                        col1[i - 1] = c.getImag();
+                        col2[i - 1] = c.getReal();
+                    }
+
+                    for (size_t j = i - 2; j < i; --j) {
+                        if (eigenvalues[j].getImag().isZero()) {
+                            auto row = block.row(j);
+                            auto tail = row.tail(j + 1);
+                            const ScalarType dot1 = tail * col1.tail(j + 1);
+                            const ScalarType dot2 = tail * col2.tail(j + 1);
+                            const ScalarType a = block(j, j) - eigenvalues[i].getReal();
+                            const ScalarType b = -eigenvalues[i].getImag();
+                            const ScalarType inv_denominator = reciprocal(square(a) + square(b));
+                            col1[j] = (a * dot1 + b * dot2) * inv_denominator;
+                            col2[j] = (a * dot2 - b * dot1) * inv_denominator;
+                        }
+                        else {
+                            auto row1 = block.row(j - 1);
+                            auto tail1 = row1.tail(j + 1);
+                            const ScalarType dot11 = tail1 * col1.tail(j + 1);
+                            const ScalarType dot12 = tail1 * col2.tail(j + 1);
+                            auto row2 = block.row(j);
+                            auto tail2 = row2.tail(j + 1);
+                            const ScalarType dot21 = tail2 * col1.tail(j + 1);
+                            const ScalarType dot22 = tail2 * col2.tail(j + 1);
+
+                            ScalarType x = matrixT(j - 1, j);
+                            ScalarType y = matrixT(j, j - 1);
+                            ScalarType vr = square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()) - square(eigenvalues[i].getImag());
+                            ScalarType vi = ScalarType::Two() * (eigenvalues[i].getReal() - eigenvalues[j].getReal()) * eigenvalues[i].getImag();
+                            const ScalarType w = matrixT(j - 1, j - 1) - eigenvalues[i].getReal();
+                            const ScalarType lastw = matrixT(j, j) - eigenvalues[i].getReal();
+
+                            ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(x * dot12 - lastw * dot22 - eigenvalues[i].getImag() * dot21,
+                                                                                    x * dot11 - lastw * dot21 - eigenvalues[i].getImag() * dot22)
+                                                          / ComplexScalar(vr,vi);
+                            matrixT(j - 1, i - 1) = c.getImag();
+                            matrixT(j - 1, i) = c.getReal();
+                            if (abs(x) > (abs(lastw) + abs(eigenvalues[i].getImag()))) {
+                                matrixT(j, i - 1) = (-dot22 - w * matrixT(j - 1, i - 1) - eigenvalues[i].getImag() * matrixT(j - 1, i)) / x;
+                                matrixT(j, i) = (-dot21 - w * matrixT(j - 1, i) + eigenvalues[i].getImag() * matrixT(j - 1, i - 1)) / x;
+                            }
+                            else {
+                                c = ComplexScalar(-dot12 - y * matrixT(j - 1, i - 1), -dot11 - y * matrixT(j - 1, i)) / ComplexScalar(lastw, -eigenvalues[i].getImag());
+                                matrixT(j, i - 1) = c.getImag();
+                                matrixT(j, i) = c.getReal();
+                            }
+                            --j;
+                        }
+                    }
+                    --i;
+                }
+            }
+            eigenvectorStorage = schur.getMatrixQ() * matrixT;
+        }
+    }
+
+    template<class MatrixType>
+    typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const noexcept {
+        const size_t order = eigenvalues.getLength();
+        EigenvectorMatrix result = EigenvectorMatrix(order, order);
+        for (size_t i = 0; i < order; ++i) {
+            if (eigenvalues[i].getImag().isZero()) {
+                auto toCol = result.col(i);
+                toCol = eigenvectorStorage.col(i);
+            }
+            else {
+                auto toCol1 = result.col(i);
+                auto toCol2 = result.col(i + 1);
+                auto fromCol1 = eigenvectorStorage.col(i);
+                auto fromCol2 = eigenvectorStorage.col(i + 1);
+                for (size_t i = 0; i < order; ++i) {
+                    toCol1[i] = ComplexScalar<ScalarType>(fromCol1[i], fromCol2[i]);
+                    toCol2[i] = ComplexScalar<ScalarType>(fromCol1[i], -fromCol2[i]);
+                }
+                ++i;
+            }
+        }
+        return result;
     }
 }

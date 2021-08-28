@@ -38,7 +38,7 @@ $$\left[ \begin{matrix} T_{i - 1\ i - 1} & T_{i - 1\ i} \\ T_{i\ i - 1} & T_{i\ 
 
 Let's use clammer's rule to solve it. The determinate of the coefficient matrix $C$ is
 
-$$det(C) = \left| \begin{matrix} T_{i - 1\ i - 1} & T_{i - 1\ i} \\ T_{i\ i - 1} & T_{i\ i} \end{matrix} \right| = (Re(\lambda_C)) - \lambda)^2 + Im(\lambda_C)^3$$
+$$det(C) = \left| \begin{matrix} T_{i - 1\ i - 1} & T_{i - 1\ i} \\ T_{i\ i - 1} & T_{i\ i} \end{matrix} \right| = (Re(\lambda_C)) - \lambda)^2 + Im(\lambda_C)^2$$
 
 where $\lambda_C$ is one of eigenvalues of $C$.
 

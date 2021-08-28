@@ -10,6 +10,7 @@ physica_add_test(RealSchur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecompos
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)
 physica_add_test(MatrixProduct Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct.cpp)
+physica_add_test(EigenSolver Core/Math/Algebra/LinearAlgebra/EigenSolver.cpp)
 physica_add_test(Givens Core/Math/Algebra/LinearAlgebra/GivensTest.cpp)
 physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/HouseHolderTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
