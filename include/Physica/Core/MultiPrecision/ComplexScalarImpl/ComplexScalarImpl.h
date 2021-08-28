@@ -24,6 +24,15 @@ namespace Physica::Core {
             : real(real_.getDerived()), imag(imag_.getDerived()) {}
 
     template<class ScalarType>
+    ComplexScalar<ScalarType>::ComplexScalar(std::initializer_list<ScalarType> list) {
+        assert(list.size() == 2);
+        auto ite = list.begin();
+        real = *ite;
+        ++ite;
+        imag = *ite;
+    }
+
+    template<class ScalarType>
     ComplexScalar<ScalarType>::ComplexScalar(ComplexScalar&& c) noexcept
             : real(std::move(c.real)), imag(std::move(c.imag)) {}
 

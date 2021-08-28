@@ -65,6 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
         /* Operations */
         void resize(size_t row, size_t col) { assert(row == 1 && col == colCount); }
+        void resize(size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getColumn() const noexcept { return colCount; }
@@ -97,6 +98,7 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < rowCount); return mat(fromRow + index, col); }
         /* Operations */
         void resize(size_t row, size_t col) { assert(row == rowCount && col == 1); }
+        void resize(size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }

@@ -31,6 +31,7 @@ namespace Physica::Core {
     public:
         ComplexScalar() = default;
         ComplexScalar(const ScalarBase<ScalarType>& real_, const ScalarBase<ScalarType>& imag_);
+        ComplexScalar(std::initializer_list<ScalarType> list);
         ComplexScalar(const ComplexScalar& c) = default;
         ComplexScalar(ComplexScalar&& c) noexcept;
         /* Operators */

@@ -37,7 +37,7 @@ namespace Physica::Core {
                                                MatrixType::RowAtCompile>;
     public:
         using EigenvalueVector = Vector<ComplexScalar<ScalarType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using EigenvectorMatrix = DenseMatrix<ScalarType,
+        using EigenvectorMatrix = DenseMatrix<ComplexScalar<ScalarType>,
                                               DenseMatrixOption::Column | DenseMatrixOption::Vector,
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
@@ -49,7 +49,7 @@ namespace Physica::Core {
         EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors);
         /* Operations */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept;
+        [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
     };
 
     template<class MatrixType>
@@ -82,7 +82,7 @@ namespace Physica::Core {
                 }
                 const ScalarType real = p + matrixT(i + 1, i + 1);
                 eigenvalues[i] = ComplexScalar<ScalarType>(real, z);
-                eigenvalues[i] = ComplexScalar<ScalarType>(real, -z);
+                eigenvalues[i + 1] = ComplexScalar<ScalarType>(real, -z);
                 i += 2;
             }
         }
@@ -176,12 +176,12 @@ namespace Physica::Core {
                     --i;
                 }
             }
-            eigenvectorStorage = schur.getMatrixQ() * matrixT;
+            eigenvectorStorage = schur.getMatrixU() * matrixT;
         }
     }
 
     template<class MatrixType>
-    typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const noexcept {
+    typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const {
         const size_t order = eigenvalues.getLength();
         EigenvectorMatrix result = EigenvectorMatrix(order, order);
         for (size_t i = 0; i < order; ++i) {
@@ -194,7 +194,7 @@ namespace Physica::Core {
                 auto toCol2 = result.col(i + 1);
                 auto fromCol1 = eigenvectorStorage.col(i);
                 auto fromCol2 = eigenvectorStorage.col(i + 1);
-                for (size_t i = 0; i < order; ++i) {
+                for (size_t j = 0; j <= i; ++j) {
                     toCol1[i] = ComplexScalar<ScalarType>(fromCol1[i], fromCol2[i]);
                     toCol2[i] = ComplexScalar<ScalarType>(fromCol1[i], -fromCol2[i]);
                 }
