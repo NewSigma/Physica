@@ -39,8 +39,8 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver solver(hamilton_mod);
-        auto eigenvalues = solver.getEigenvalues();
+        EigenSolver solver(hamilton_mod, false);
+        const auto& eigenvalues = solver.getEigenvalues();
         std::cout << "\tNumerical\tAnalytical\n";
         std::array<double, baseSetCount> energy{};
         for (size_t i = 0; i < baseSetCount; ++i)
@@ -96,8 +96,8 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver solver(hamilton_mod);
-        auto eigenvalues = solver.getEigenvalues();
+        EigenSolver solver(hamilton_mod, false);
+        const auto& eigenvalues = solver.getEigenvalues();
         for (size_t i = 0; i < baseSetCount; ++i)
             std::cout << '\t' << eigenvalues[i] << '\n';
     }

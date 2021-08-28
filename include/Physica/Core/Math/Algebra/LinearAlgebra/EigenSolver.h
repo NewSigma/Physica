@@ -31,29 +31,39 @@ namespace Physica::Core {
     class EigenSolver {
         using ScalarType = typename MatrixType::ScalarType;
         using EigenvalueVector = Vector<ComplexScalar<ScalarType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
+        using EigenvectorMatrix = DenseMatrix<ComplexScalar<ScalarType>,
+                                              DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                              MatrixType::RowAtCompile,
+                                              MatrixType::RowAtCompile>;
         const MatrixType& source;
+        EigenvalueVector eigenvalues;
     public:
-        EigenSolver(const LValueMatrix<MatrixType>& source_) : source(source_.getDerived()) {}
+        EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors);
         /* Operations */
-        [[nodiscard]] EigenvalueVector getEigenvalues() const;
+        [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
+        [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const;
     };
 
     template<class MatrixType>
-    typename EigenSolver<MatrixType>::EigenvalueVector EigenSolver<MatrixType>::getEigenvalues() const {
-        MatrixType schur = RealSchur(source).getMatrixT();
+    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors)
+            : source(source_.getDerived())
+            , eigenvalues(source_.getRow()) {
+        assert(source.getRow() == source.getColumn());
+        const auto schur = RealSchur(source, computeEigenvectors);
+
+        const auto& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
-        EigenvalueVector result = EigenvalueVector(order);
         for (size_t i = 0; i < order;) {
-            if (i == order - 1 || schur(i + 1, i).isZero()) {
-                result[i] = schur(i, i);
+            if (i == order - 1 || matrixT(i + 1, i).isZero()) {
+                eigenvalues[i] = matrixT(i, i);
                 i += 1;
             }
             else {
-                const ScalarType p = ScalarType(0.5) * (schur(i, i) - schur(i + 1, i + 1));
+                const ScalarType p = ScalarType(0.5) * (matrixT(i, i) - matrixT(i + 1, i + 1));
                 ScalarType z;
                 /* Referenced from eigen, to avoid overflow */ {
-                    ScalarType t0 = schur(i + 1, i);
-                    ScalarType t1 = schur(i, i + 1);
+                    ScalarType t0 = matrixT(i + 1, i);
+                    ScalarType t1 = matrixT(i, i + 1);
                     const ScalarType max = std::max(abs(p), std::max(abs(t0), abs(t1)));
                     const ScalarType inv_max = reciprocal(max);
                     t0 *= inv_max;
@@ -61,12 +71,11 @@ namespace Physica::Core {
                     ScalarType p0 = p * inv_max;
                     z = max * sqrt(abs(square(p0) + t0 * t1));
                 }
-                const ScalarType real = p + schur(i + 1, i + 1);
-                result[i] = ComplexScalar<ScalarType>(real, z);
-                result[i] = ComplexScalar<ScalarType>(real, -z);
+                const ScalarType real = p + matrixT(i + 1, i + 1);
+                eigenvalues[i] = ComplexScalar<ScalarType>(real, z);
+                eigenvalues[i] = ComplexScalar<ScalarType>(real, -z);
                 i += 2;
             }
         }
-        return result;
     }
 }
