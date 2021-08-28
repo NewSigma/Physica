@@ -52,7 +52,7 @@ int main() {
         applyHouseholder(v, l_result);
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
-                if (!floatNear(l_result(i, j), l_answer(i, j), 1E-5))
+                if (!scalarNear(l_result(i, j), l_answer(i, j), 1E-5))
                     return 1;
 
         const MatrixType r_answer{{-16.3299, -18.2351, -20.1402, -22.0454}, {-0.882225, -0.814514, -0.746803, -0.679092}, {1.15703, 0.913982, 0.67093, 0.427878}, {3.19629, 2.64248, 2.08866, 1.53485}};
@@ -60,7 +60,7 @@ int main() {
         applyHouseholder(r_result, v);
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
-                if (!floatNear(r_result(i, j), r_answer(i, j), 1E-5))
+                if (!scalarNear(r_result(i, j), r_answer(i, j), 1E-5))
                     return 1;
     }
     return 0;

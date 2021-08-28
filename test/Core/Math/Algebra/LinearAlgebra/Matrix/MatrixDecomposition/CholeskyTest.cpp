@@ -65,7 +65,7 @@ int main() {
         const Matrix5x5 result = Cholesky(mat);
         for (int i = 0; i < 5; ++i)
             for (int j = 0; j < 5; ++j)
-                if (!floatNear(result(i, j), answer(j, i), 1E-5))
+                if (!scalarNear(result(i, j), answer(j, i), 1E-5))
                     return 1;
     }
     return 0;

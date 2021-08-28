@@ -17,12 +17,24 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
+#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
 
+using namespace Physica::Core;
+
 template<class ScalarType>
-bool floatNear(const ScalarType& s1, const ScalarType& s2, double precision) {
+bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarType>& scalar2, double precision) {
     assert(precision > 0);
+    const auto& s1 = scalar1.getDerived();
+    const auto& s2 = scalar2.getDerived();
     return s2.isZero() ? (abs(s1) < ScalarType(precision)) : (abs((s1 - s2) / s2) < ScalarType(precision));
+}
+
+template<class ScalarType>
+bool scalarNear(const ComplexScalar<ScalarType>& s1, const ComplexScalar<ScalarType>& s2, double precision) {
+    assert(precision > 0);
+    return scalarNear(s1.getReal(), s2.getReal(), precision) && scalarNear(s1.getImag(), s2.getImag(), precision);
 }
 
 template<class MatrixType, class MatrixType2>
@@ -33,7 +45,7 @@ bool matrixNear(const Physica::Core::LValueMatrix<MatrixType>& m1,
     assert(m1.getColumn() == m2.getColumn());
     for (size_t i = 0; i < m1.getColumn(); ++i)
         for (size_t j = 0; j < m1.getRow(); ++j)
-            if (!floatNear(m1(j, i), m2(j, i), precision))
+            if (!scalarNear(m1(j, i), m2(j, i), precision))
                 return false;
     return true;
 }
