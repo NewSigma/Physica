@@ -159,10 +159,10 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
+    class DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, AnyScalar>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, AnyScalar>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, AnyScalar>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -221,15 +221,21 @@ namespace Physica::Core {
         return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>(mat1.getDerived(), mat2.getDerived());
     }
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<Utils::ExpressionType type, class T1, class T2, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Mul, DenseMatrixExpression<type, T1, T2>, Exp>
-    operator*(const DenseMatrixExpression<type, T1, T2>& exp1, const Exp& exp2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Mul, DenseMatrixExpression<type, T1, T2>, Exp>(exp1, exp2);
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarType>
+    operator*(const ScalarBase<ScalarType>& s, const RValueMatrix<MatrixType>& m) {
+        return DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarType>(m, s);
+    }
+
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarType>
+    operator*(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) {
+        return DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType, ScalarType>(m, s);
     }
     //////////////////////////////////////Div//////////////////////////////////////
-    template<Utils::ExpressionType type, class T1, class T2, class Exp>
-    inline DenseMatrixExpression<Utils::ExpressionType::Div, DenseMatrixExpression<type, T1, T2>, Exp>
-    operator/(const DenseMatrixExpression<type, T1, T2>& exp1, const Exp& exp2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Div, DenseMatrixExpression<type, T1, T2>, Exp>(exp1, exp2);
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarType>
+    operator/(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) {
+        return DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarType>(m, s);
     }
 }

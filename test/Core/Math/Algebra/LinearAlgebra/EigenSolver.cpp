@@ -24,41 +24,26 @@
 
 using namespace Physica::Core;
 
-template<class ScalarType, class VectorType>
-bool valueIn(const ComplexScalar<ScalarType>& c, const LValueVector<VectorType>& v, double precision) {
+template<class VectorType>
+bool vectorNearZero(const LValueVector<VectorType>& v, double precision) {
+    using ScalarType = typename VectorType::ScalarType;
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (scalarNear(c, v[i], precision))
-            return true;
-    return false;
-}
-
-template<class VectorType, class MatrixType>
-bool vectorIn(const LValueVector<VectorType>& v, const LValueMatrix<MatrixType>& m, double precision) {
-    for (size_t i = 0; i < m.getColumn(); ++i) {
-        const auto col = m.col(i);
-        for (size_t j = 0; j < m.getRow(); ++j) {
-            if (!scalarNear(v[i], col[i], precision))
-                goto not_equal;
-        }
-        return true;
-    not_equal:;
-    }
-    return false;
+        if (!scalarNear(v[i], ScalarType::Zero(), precision))
+            return false;
+    return true;
 }
 
 template<class MatrixType>
-bool eigenTest(const MatrixType& mat,
-        const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalue_answer,
-        const typename EigenSolver<MatrixType>::EigenvectorMatrix& eigenvector_answer,
-        double precision) {
+bool eigenTest(const MatrixType& mat, double precision) {
     EigenSolver solver = EigenSolver(mat, true);
-    for (size_t i = 0; i < mat.getRow(); ++i)
-        if (!valueIn(solver.getEigenvalues()[i], eigenvalue_answer, precision))
-            return false;
+    using ComplexMatrix = typename EigenSolver<MatrixType>::EigenvectorMatrix;
+    const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
-    for (size_t i = 0; i < mat.getRow(); ++i)
-        if (!vectorIn(eigenvectors[i], eigenvector_answer, precision))
+    for (size_t i = 0; i < order; ++i) {
+        auto result = (ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i)).compute();
+        if (!vectorNearZero(result[0], precision))
             return false;
+    }
     return true;
 }
 
@@ -68,11 +53,7 @@ int main() {
         const MatrixType mat{{-0.590316, -2.19514, -2.37463},
                             {-1.25006, -0.297493, 1.40349},
                             {0.517063, -0.956614, -0.920775}};
-        typename EigenSolver<MatrixType>::EigenvalueVector eigenvalues{{-2.13323, 0}, {0.162325, 1.21888}, {0.162325, -1.21888}};
-        typename EigenSolver<MatrixType>::EigenvectorMatrix eigenvectors = {{{-0.573583, 0}, {-0.792956, 0}, {-0.205485, 0}},
-                                                                            {{-0.225315, -0.221919}, {0.266379, 0.353311}, {0.839165, 0}},
-                                                                            {{-0.225315, 0.221919}, {0.266379, -0.353311}, {0.839165, 0}}};
-        if (!eigenTest(mat, eigenvalues, eigenvectors, 1E-4))
+        if (!eigenTest(mat, 1E-4))
             return 1;
     }
     return 0;

@@ -27,6 +27,8 @@
 
 namespace Physica::Core {
     //Forward declarations
+    template<class AnyScalar> class ComplexScalar;
+
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
 
@@ -51,6 +53,7 @@ namespace Physica::Core {
         public:
             static constexpr ScalarOption option = option_;
             static constexpr bool errorTrack = errorTrack_;
+            static constexpr bool isComplex = false;
         };
         /**
          * This class return a type that can exactly represent the two input scalars.
@@ -61,8 +64,9 @@ namespace Physica::Core {
                                                                             ? Traits<AnyScalar2>::option
                                                                             : Traits<AnyScalar1>::option;
             static constexpr bool errorTrack = Traits<AnyScalar1>::errorTrack || Traits<AnyScalar2>::errorTrack;
+            static constexpr bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
         public:
-            using Type = Scalar<option, errorTrack>;
+            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option, errorTrack>>, Scalar<option, errorTrack>>::type;
         };
 
         template<ScalarOption option>
