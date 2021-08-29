@@ -158,7 +158,7 @@ namespace Physica::Core {
         const auto ac = real_1 * real_2;
         const auto bd = imagine_1 * imagine_2;
         return ComplexScalar<AnyScalar>(ac - bd
-                , (real_1 + real_2) * (imagine_1 + imagine_2) - ac - bd);
+                , (real_1 + imagine_1) * (real_2 + imagine_2) - ac - bd);
     }
 
     template<class AnyScalar>
