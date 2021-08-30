@@ -121,6 +121,16 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> sqrt(const Scalar<MultiPrecision, true>& s);
+
+    template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> pow(const Scalar<option, errorTrack>& s, const Scalar<option, errorTrack>& n) {
+        return Scalar<option, errorTrack>(std::pow(s.getTrivial(), n.getTrivial()));
+    }
+
+    template<bool errorTrack>
+    Scalar<MultiPrecision, errorTrack> pow(const Scalar<MultiPrecision, errorTrack>& s, const Scalar<MultiPrecision, errorTrack>& n) {
+        return exp(n * ln(s));
+    }
     /*!
      * Ignoring error. If s is a float number, use floor() first.
      * \s must be positive, or 1 will be returned.

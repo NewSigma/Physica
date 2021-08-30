@@ -36,6 +36,9 @@ namespace Physica::Core {
     Scalar<option, errorTrack> sqrt(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
+    Scalar<option, errorTrack> pow(const Scalar<option, errorTrack>& s, const Scalar<option, errorTrack>& n);
+
+    template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> factorial(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>

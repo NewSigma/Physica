@@ -35,15 +35,15 @@ namespace Physica::Gui {
                 , const MultiScalar& end, QWidget* parent = nullptr);
         /* Operations */
         template<class Array>
-        void spline(const Array& x, const Array& y);
+        QtCharts::QSplineSeries& spline(const Array& x, const Array& y);
         template<class Array>
-        void scatter(const Array& x, const Array& y);
+        QtCharts::QScatterSeries& scatter(const Array& x, const Array& y);
         template<class Array>
-        void hist(const Array& data, size_t binCount, bool dencity = false);
+        QtCharts::QAreaSeries& hist(const Array& data, size_t binCount, bool dencity = false);
     };
 
     template<class Array>
-    void Plot::spline(const Array& x, const Array& y) {
+    QtCharts::QSplineSeries& Plot::spline(const Array& x, const Array& y) {
         QtCharts::QSplineSeries* series = new QtCharts::QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
@@ -51,10 +51,11 @@ namespace Physica::Gui {
         chart()->createDefaultAxes();
 
         update();
+        return *series;
     }
 
     template<class Array>
-    void Plot::scatter(const Array& x, const Array& y) {
+    QtCharts::QScatterSeries& Plot::scatter(const Array& x, const Array& y) {
         QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
@@ -62,10 +63,11 @@ namespace Physica::Gui {
         chart()->createDefaultAxes();
 
         update();
+        return *series;
     }
 
     template<class Array>
-    void Plot::hist(const Array& data, size_t binCount, bool dencity) {
+    QtCharts::QAreaSeries& Plot::hist(const Array& data, size_t binCount, bool dencity) {
         using T = typename Array::ElementType;
         
         double binWidth, min;
@@ -121,5 +123,6 @@ namespace Physica::Gui {
         chart()->createDefaultAxes();
 
         update();
+        return series;
     }
 }

@@ -17,12 +17,16 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
+using namespace Physica::Gui;
+using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 
 class InfiniteDeepWell {
@@ -32,14 +36,14 @@ class InfiniteDeepWell {
                                 baseSetCount,
                                 baseSetCount>;
 public:
-    void execute() {
+    int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver solver(hamilton_mod, false);
+        EigenSolver solver(hamilton_mod, true);
         const auto& eigenvalues = solver.getEigenvalues();
         std::cout << "\tNumerical\tAnalytical\n";
         std::array<double, baseSetCount> energy{};
@@ -51,6 +55,22 @@ public:
             const double temp = (i + 1) * M_PI;
             std::cout << '\t' << energy[i] << "\t\t" << (temp * temp * 0.25) << '\n';
         }
+
+        QApplication app(argc, argv);
+        Plot* numerical = new Plot();
+        numerical->chart()->setTitle("Numerical solution");
+        numerical->chart()->legend()->setAlignment(Qt::AlignRight);
+        for (size_t i = 0; i < 8; ++i)
+            plotWave(*numerical, solver, i);
+        numerical->show();
+
+        Plot* analytical = new Plot();
+        analytical->chart()->setTitle("Analytical solution");
+        analytical->chart()->legend()->setAlignment(Qt::AlignRight);
+        for (size_t i = 0; i < 8; ++i)
+            plotReferenceWave(*analytical, i);
+        analytical->show();
+        return QApplication::exec();
     }
 private:
     MatrixType getHamiltonMatrix() {
@@ -79,6 +99,56 @@ private:
         }
         return result;
     }
+
+    ScalarType baseFunction(const ScalarType& s, size_t n) {
+        return pow(s, ScalarType(n)) * (square(s) - ScalarType::One());
+    }
+
+    template<class MatrixType>
+    void plotWave(Plot& plot, const EigenSolver<MatrixType>& solver, size_t n) {
+        constexpr size_t sampleCount = 100;
+        Array<ScalarType, sampleCount> x{};
+        Array<ScalarType, sampleCount> y{};
+        const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
+        ScalarType temp_x = -ScalarType::One();
+        for (size_t i = 0; i < sampleCount; ++i) {
+            x[i] = temp_x;
+            ScalarType temp_y = ScalarType::Zero();
+            for (size_t j = 0; j < baseSetCount; ++j)
+                temp_y += solver.getEigenvectors().col(n)[j].getReal() * baseFunction(temp_x, j);
+            y[i] = temp_y;
+            temp_x += step;
+        }
+        QString name = QString("E = %1").arg(solver.getEigenvalues()[n].getReal().getTrivial());
+        auto& spline = plot.spline(x, y);
+        spline.setName(name);
+    }
+
+    void plotReferenceWave(Plot& plot, size_t n) {
+        constexpr size_t sampleCount = 100;
+        Array<ScalarType, sampleCount> x{};
+        Array<ScalarType, sampleCount> y{};
+        const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
+        ScalarType temp = -ScalarType::One();
+        const ScalarType factor = square(ScalarType(n * M_PI * 0.25));
+        if (n % 2U == 0) {
+            for (size_t i = 0; i < sampleCount; ++i) {
+                x[i] = temp;
+                y[i] = cos(temp * factor);
+                temp += step;
+            }
+        }
+        else {
+            for (size_t i = 0; i < sampleCount; ++i) {
+                x[i] = temp;
+                y[i] = sin(temp * factor);
+                temp += step;
+            }
+        }
+        auto& spline = plot.spline(x, y);
+        QString name = QString("N = %1").arg(n);
+        spline.setName(name);
+    }
 };
 
 class HedrogenAtom {
@@ -89,17 +159,27 @@ class HedrogenAtom {
                                 baseSetCount,
                                 baseSetCount>;
 public:
-    void execute() {
+    int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver solver(hamilton_mod, false);
+        EigenSolver solver(hamilton_mod, true);
         const auto& eigenvalues = solver.getEigenvalues();
-        for (size_t i = 0; i < baseSetCount; ++i)
+        size_t groundStateIndex = 0;
+        for (size_t i = 0; i < baseSetCount; ++i) {
             std::cout << '\t' << eigenvalues[i] << '\n';
+            if (eigenvalues[i].getReal() < eigenvalues[groundStateIndex].getReal())
+                groundStateIndex = i;
+        }
+        QApplication app(argc, argv);
+        Plot* plot = new Plot();
+        plotWave(*plot, solver.getEigenvectors().col(groundStateIndex));
+        plotReferenceWave(*plot);
+        plot->show();
+        return QApplication::exec();
     }
 private:
     MatrixType getHamiltonMatrix() {
@@ -127,15 +207,54 @@ private:
         }
         return result;
     }
+
+    ScalarType baseFunction(const ScalarType& s, size_t n) {
+        return exp(ScalarType(-baseSetCoeff[n]) * square(s));
+    }
+
+    template<class VectorType>
+    void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
+        constexpr size_t sampleCount = 100;
+        Array<ScalarType, sampleCount> x{};
+        Array<ScalarType, sampleCount> y{};
+        const ScalarType step = ScalarType::One() / ScalarType(sampleCount);
+        ScalarType temp_x = ScalarType::Zero();
+        for (size_t i = 0; i < sampleCount; ++i) {
+            x[i] = temp_x;
+            ScalarType temp_y = ScalarType::Zero();
+            for (size_t j = 0; j < baseSetCount; ++j)
+                temp_y += coeff[j].getReal() * baseFunction(temp_x, j);
+            y[i] = temp_y;
+            temp_x += step;
+        }
+        auto& spline = plot.spline(x, y);
+        spline.setName("Numerical");
+    }
+
+    void plotReferenceWave(Plot& plot) {
+        constexpr size_t sampleCount = 100;
+        Array<ScalarType, sampleCount> x{};
+        Array<ScalarType, sampleCount> y{};
+        const ScalarType step = ScalarType::One() / ScalarType(sampleCount);
+        ScalarType temp = ScalarType::Zero();
+        for (size_t i = 0; i < sampleCount; ++i) {
+            x[i] = temp;
+            y[i] = ScalarType::Two() * exp(-temp);
+            temp += step;
+        }
+        auto& spline = plot.spline(x, y);
+        spline.setName("Analytical");
+    }
 };
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-37
  */
-int main() {
+int main(int argc, char** argv) {
+    int exit_code = 0;
     std::cout << "Example 1:\n";
-    InfiniteDeepWell().execute();
+    exit_code |= InfiniteDeepWell().execute(argc, argv);
     std::cout << "Example 2:\n";
-    HedrogenAtom().execute();
-    return 0;
+    exit_code |= HedrogenAtom().execute(argc, argv);
+    return exit_code;
 }
