@@ -246,6 +246,74 @@ private:
         spline.setName("Analytical");
     }
 };
+
+class HeliumAtom {
+    constexpr static size_t baseSetCount = 4;
+    constexpr static double baseSetCoeff[baseSetCount]{0.298073, 1.242567, 5.782948, 38.474970};
+public:
+    using MatrixType = DenseMatrix<ScalarType,
+                                DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                baseSetCount,
+                                baseSetCount>;
+    using VectorType = typename MatrixType::VectorType;
+public:
+    void execute(VectorType& trial_solution, const ScalarType& criteria) {
+        MatrixType overlap = getOverlapMatrix();
+        //Workaround for generalised eigenvalue problem
+        MatrixType cholesky = Cholesky(overlap);
+        MatrixType inv_cholesky = cholesky.inverse();
+        auto real_eigenvalues = VectorType{};
+        bool stop = false;
+        do {
+            MatrixType hamilton = getHamiltonMatrix(trial_solution);
+            MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
+            EigenSolver solver(hamilton_mod);
+            auto eigenvalues = solver.getEigenvalues();
+            for (size_t i = 0; i < baseSetCount; ++i)
+                real_eigenvalues[i] = eigenvalues[i].getReal();
+            stop = VectorType(real_eigenvalues - trial_solution).norm() < criteria;
+            trial_solution = real_eigenvalues;
+        } while(!stop);
+        for (size_t i = 0; i < baseSetCount; ++i)
+            std::cout << '\t' << real_eigenvalues[i] << '\n';
+    }
+private:
+    MatrixType getHamiltonMatrix(const VectorType& trial_solution) {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = 0; j < baseSetCount; ++j) {
+                const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
+                const ScalarType pro = ScalarType(baseSetCoeff[i] * baseSetCoeff[j]);
+                const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
+                const ScalarType coulomb1 = ScalarType(-4) * ScalarType(M_PI) / sum;
+                ScalarType coulomb2 = ScalarType::Zero();
+                for (size_t m = 0; m < baseSetCount; ++m) {
+                    for (size_t n = 0; n < baseSetCount; ++n) {
+                        const ScalarType sum1 = ScalarType(baseSetCoeff[m] + baseSetCoeff[n]);
+                        const ScalarType demoninator = sum * sum1 * sqrt(sum + sum1);
+                        const ScalarType numerator = ScalarType::Two() * sqrt(ScalarType(M_PI)) * square(ScalarType(M_PI));
+                        const ScalarType Q = numerator / demoninator;
+                        coulomb2 += Q * trial_solution[m] * trial_solution[n];
+                    }
+                }
+                result(i, j) = kinetic + coulomb1 + coulomb2;
+            }
+        }
+        return result;
+    }
+
+    MatrixType getOverlapMatrix() {
+        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = 0; j < baseSetCount; ++j) {
+                const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
+                const ScalarType temp = ScalarType(M_PI) / sum;
+                result(i, j) = temp * sqrt(temp);
+            }
+        }
+        return result;
+    }
+};
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-37
@@ -256,5 +324,8 @@ int main(int argc, char** argv) {
     exit_code |= InfiniteDeepWell().execute(argc, argv);
     std::cout << "Example 2:\n";
     exit_code |= HedrogenAtom().execute(argc, argv);
-    return exit_code;
+    HedrogenAtom().execute();
+    typename HeliumAtom::VectorType solution{1, 1, 1, 1};
+    HeliumAtom().execute(solution, 1E-3);
+    return 0;
 }

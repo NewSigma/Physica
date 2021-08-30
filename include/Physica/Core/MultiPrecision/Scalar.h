@@ -229,7 +229,12 @@ namespace Physica::Core {
      * Empty class that make other template declarations easier.
      */
     template<class Derived>
-    class ScalarBase : public Utils::CRTPBase<Derived> {};
+    class ScalarBase : public Utils::CRTPBase<Derived> {
+    public:
+        static constexpr ScalarOption option = Internal::Traits<Derived>::option;
+        static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;;
+        static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;;
+    };
 
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
