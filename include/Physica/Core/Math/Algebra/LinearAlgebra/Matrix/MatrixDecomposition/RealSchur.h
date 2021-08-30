@@ -160,7 +160,7 @@ namespace Physica::Core {
                 applyHouseholder(cols, householderVector);
             }
             if (computeMatrixU) {
-                auto cols = matrixU.rows(lower, 3);
+                auto cols = matrixU.cols(lower, 3);
                 applyHouseholder(cols, householderVector);
             }
             specialHessenburg(lower, sub_order);

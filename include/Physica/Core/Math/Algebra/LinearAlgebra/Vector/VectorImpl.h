@@ -131,20 +131,6 @@ namespace Physica::Core {
             result[i] = v1[i] * v2[i];
         return result;
     }
-
-    template<class T, size_t Length, size_t MaxLength>
-    std::ostream& operator<<(std::ostream& os, const Vector<T, Length, MaxLength>& v) {
-        os << '(';
-        size_t length = v.getLength();
-        if (length) {
-            --length;
-            for (size_t i = 0; i < length; ++i)
-                os << v[i] << ", ";
-            os << v[length];
-        }
-        os << ')';
-        return os;
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
     template<class T, size_t Length, size_t MaxLength>

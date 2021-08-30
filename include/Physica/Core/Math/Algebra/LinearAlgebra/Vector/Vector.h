@@ -86,9 +86,6 @@ namespace Physica::Core {
         template<class Derived>
         friend class Internal::VectorExpressionHelper;
     };
-    /* Operators */
-    template<class T, size_t Length, size_t MaxLength>
-    std::ostream& operator<<(std::ostream& os, const Vector<T, Length, MaxLength>& v);
 }
 
 #include "VectorImpl.h"

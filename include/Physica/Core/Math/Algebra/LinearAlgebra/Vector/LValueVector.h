@@ -135,4 +135,18 @@ namespace Physica::Core {
 
     template<class VectorType, class ScalarType>
     inline void operator/=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v / n; }
+
+    template<class VectorType>
+    std::ostream& operator<<(std::ostream& os, const LValueVector<VectorType>& v) {
+        os << '(';
+        size_t length = v.getLength();
+        if (length) {
+            --length;
+            for (size_t i = 0; i < length; ++i)
+                os << v[i] << ", ";
+            os << v[length];
+        }
+        os << ')';
+        return os;
+    }
 }

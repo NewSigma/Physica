@@ -110,7 +110,6 @@ namespace Physica::Core {
         ColVector(ColVector&&) noexcept = delete;
         ~ColVector() = default;
         /* Operators */
-        using Base::operator=;
         ColVector& operator=(const ColVector& m) { Base::operator=(m); return *this; }
         ColVector& operator=(ColVector&& m) noexcept { Base::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < rowCount); return mat(fromRow + index, col); }
@@ -134,12 +133,13 @@ namespace Physica::Core {
         MatrixBlock(MatrixBlock&&) noexcept = delete;
         ~MatrixBlock() = default;
         /* Operators */
-        using VectorBase::operator=;
         MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
         MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
         /* Operations */
+        using Base::assignTo;
+        using VectorBase::assignTo;
         void resize(size_t row, size_t col) { assert(row == 1 && col == getColumn()); }
         /* Getters */
         using Base::calc;
@@ -161,12 +161,14 @@ namespace Physica::Core {
         MatrixBlock(MatrixBlock&&) noexcept = delete;
         ~MatrixBlock() = default;
         /* Operators */
-        using VectorBase::operator=;
+        using Base::operator=;
         MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
         MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
         /* Operations */
+        using Base::assignTo;
+        using VectorBase::assignTo;
         void resize(size_t row, size_t col) { assert(row == getRow() && col == 1); }
         /* Getters */
         using Base::calc;

@@ -57,7 +57,7 @@ Now the equation becomes to
 
 $$(T_{11} - \lambda I)w + w' u_1 + u_2 = 0$$
 
-Complex eigenvalues corresponds to complex eigenvectors, so we have to divide the equation into two parts for the convenience of implementation.
+Complex eigenvalues corresponds to complex eigenvectors, so we have to divide the equation into two parts for the convenience of implementation. Note that $w''$ is a real number, so it is necessary to initialize vector $r$ on the right hand side of vector $c$ and the matrix becomes to a upper triangular matrix.
 
 Let
 
@@ -103,19 +103,19 @@ $$(A_{i - 1 i - 1}, A_{i - 1, i}, ..., A_{i - 1 n}, u_1, u_2) \cdot (c_{i - 1}, 
 
 Let
 
-$$\xi = -(A_{i, i + 1}, ..., A_{i, n}, u_1, u_2) \cdot (r_{i + 1}, ..., r_n, Re(w'), 1)$$
+$$\xi_1 = -(A_{i, i + 1}, ..., A_{i, n}, u_1, u_2) \cdot (r_{i + 1}, ..., r_n, Re(w'), 1)$$
 
-$$\eta = -(A_{i, i + 1}, ..., A_{i, n}, u_1, u_2) \cdot (c_{i + 1}, ..., c_n, Im(w'), 0)$$
+$$\xi_2 = -(A_{i, i + 1}, ..., A_{i, n}, u_1, u_2) \cdot (c_{i + 1}, ..., c_n, Im(w'), 0)$$
 
-$$\delta = -(A_{i - 1, i + 1}, ..., A_{i - 1, n}, u_1, u_2) \cdot (r_{i + 1}, ..., r_n, Re(w'), 1)$$
+$$\xi_3 = -(A_{i - 1, i + 1}, ..., A_{i - 1, n}, u_1, u_2) \cdot (r_{i + 1}, ..., r_n, Re(w'), 1)$$
 
-$$\mu = -(A_{i - 1, i + 1}, ..., A_{i - 1, n}, u_1, u_2) \cdot (c_{i + 1}, ..., c_n, Im(w'), 0)$$
+$$\xi_4 = -(A_{i - 1, i + 1}, ..., A_{i - 1, n}, u_1, u_2) \cdot (c_{i + 1}, ..., c_n, Im(w'), 0)$$
 
 The equation can be written as
 
-$$\left[ \begin{matrix} A_{i i - 1} & 0 & A_{ii} & -B_{ii} \\ 0 & A_{i i - 1} & B_{ii} & A_{ii} \\ A_{i - 1 i - 1} & -B_{i - 1 i - 1} & A_{i - 1 i} & 0 \\ B_{i - 1 i - 1} & A_{i - 1 i - 1} & 0 & A_{i - 1 i} \end{matrix} \right] \left[ \begin{matrix} r_{i - 1} \\ c_{i - 1} \\ r_i \\ c_i \end{matrix} \right] = \left[ \begin{matrix} \xi \\ \eta \\ \delta \\ \mu \end{matrix} \right]$$
+$$\left[ \begin{matrix} A_{i i - 1} & 0 & A_{ii} & -B_{ii} \\ 0 & A_{i i - 1} & B_{ii} & A_{ii} \\ A_{i - 1 i - 1} & -B_{i - 1 i - 1} & A_{i - 1 i} & 0 \\ B_{i - 1 i - 1} & A_{i - 1 i - 1} & 0 & A_{i - 1 i} \end{matrix} \right] \left[ \begin{matrix} r_{i - 1} \\ c_{i - 1} \\ r_i \\ c_i \end{matrix} \right] = \left[ \begin{matrix} \xi_1 \\ \xi_2 \\ \xi_3 \\ \xi_4 \end{matrix} \right]$$
 
-Solution of this equation is complex, refer to [2] for numerical algorithm.
+Solution of this equation is complex, refer to [2] for a neat numerical algorithm.
 
 ## References:
 [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.

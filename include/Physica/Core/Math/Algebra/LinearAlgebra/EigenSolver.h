@@ -91,12 +91,12 @@ namespace Physica::Core {
             for (size_t i = order - 1; i < order; --i) {
                 auto block = matrixT.topLeftCorner(i + 1, i + 1);
                 if (eigenvalues[i].getImag().isZero()) {
-                    matrixT(i, i) = ScalarType::One();
                     auto col = block.col(i);
+                    col[i] = ScalarType::One();
                     for (size_t j = i - 1; j < i; --j) {
                         if (eigenvalues[j].getImag().isZero()) {
-                            auto row = matrixT.row(j);
-                            col[j] = col.tail(j + 1) * row.tail(j + 1) / (eigenvalues[j].getReal() - eigenvalues[i].getReal());
+                            auto row = block.row(j);
+                            col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i].getReal() - eigenvalues[j].getReal());
                         }
                         else {
                             auto row1 = matrixT.row(j - 1);
@@ -112,29 +112,32 @@ namespace Physica::Core {
                     }
                 }
                 else {
-                    //Referenced from eigen, ensure numerical stable
+                    assert(eigenvalues[i].getImag().isNegative());
                     auto col1 = block.col(i - 1);
                     auto col2 = block.col(i);
+                    //Referenced from eigen, to ensure numerical stable
                     if (abs(matrixT(i, i - 1)) > abs(matrixT(i - 1, i))) {
                         auto temp = reciprocal(matrixT(i, i - 1));
-                        col1[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
-                        col2[i - 1] = eigenvalues[i].getImag() * temp;
+                        col1[i - 1] = eigenvalues[i].getImag() * temp;
+                        col2[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
                     }
                     else {
                         ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(ScalarType::Zero(), -matrixT(i - 1, i)) /
                                                       ComplexScalar<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
-                        col1[i - 1] = c.getImag();
-                        col2[i - 1] = c.getReal();
+                        col1[i - 1] = c.getReal();
+                        col2[i - 1] = c.getImag();
                     }
+                    col1[i] = ScalarType::Zero();
+                    col2[i] = ScalarType::One();
 
                     for (size_t j = i - 2; j < i; --j) {
                         if (eigenvalues[j].getImag().isZero()) {
                             auto row = block.row(j);
                             auto tail = row.tail(j + 1);
-                            const ScalarType dot1 = tail * col1.tail(j + 1);
-                            const ScalarType dot2 = tail * col2.tail(j + 1);
+                            const ScalarType dot1 = -(tail * col1.tail(j + 1));
+                            const ScalarType dot2 = -(tail * col2.tail(j + 1));
                             const ScalarType a = block(j, j) - eigenvalues[i].getReal();
-                            const ScalarType b = -eigenvalues[i].getImag();
+                            const ScalarType b = eigenvalues[i].getImag();
                             const ScalarType inv_denominator = reciprocal(square(a) + square(b));
                             col1[j] = (a * dot1 + b * dot2) * inv_denominator;
                             col2[j] = (a * dot2 - b * dot1) * inv_denominator;
@@ -149,26 +152,27 @@ namespace Physica::Core {
                             const ScalarType dot21 = tail2 * col1.tail(j + 1);
                             const ScalarType dot22 = tail2 * col2.tail(j + 1);
 
-                            ScalarType x = matrixT(j - 1, j);
-                            ScalarType y = matrixT(j, j - 1);
-                            ScalarType vr = square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()) - square(eigenvalues[i].getImag());
-                            ScalarType vi = ScalarType::Two() * (eigenvalues[i].getReal() - eigenvalues[j].getReal()) * eigenvalues[i].getImag();
-                            const ScalarType w = matrixT(j - 1, j - 1) - eigenvalues[i].getReal();
-                            const ScalarType lastw = matrixT(j, j) - eigenvalues[i].getReal();
+                            const ScalarType x = matrixT(j - 1, j);
+                            const ScalarType y = matrixT(j, j - 1);
+                            const ScalarType vr = square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()) - square(eigenvalues[i].getImag());
+                            const ScalarType vi = ScalarType::Two() * (eigenvalues[j].getReal() - eigenvalues[i].getReal()) * eigenvalues[i].getImag();
+                            
+                            const ScalarType temp1 = matrixT(j, j) - eigenvalues[i].getReal();
 
-                            ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(x * dot12 - lastw * dot22 - eigenvalues[i].getImag() * dot21,
-                                                                                    x * dot11 - lastw * dot21 - eigenvalues[i].getImag() * dot22)
+                            ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(x * dot21 - temp1 * dot11 + eigenvalues[i].getImag() * dot12,
+                                                                                    x * dot22 - temp1 * dot12 - eigenvalues[i].getImag() * dot11)
                                                           / ComplexScalar(vr,vi);
-                            matrixT(j - 1, i - 1) = c.getImag();
-                            matrixT(j - 1, i) = c.getReal();
-                            if (abs(x) > (abs(lastw) + abs(eigenvalues[i].getImag()))) {
-                                matrixT(j, i - 1) = (-dot22 - w * matrixT(j - 1, i - 1) - eigenvalues[i].getImag() * matrixT(j - 1, i)) / x;
-                                matrixT(j, i) = (-dot21 - w * matrixT(j - 1, i) + eigenvalues[i].getImag() * matrixT(j - 1, i - 1)) / x;
+                            matrixT(j - 1, i - 1) = c.getReal();
+                            matrixT(j - 1, i) = c.getImag();
+                            if (abs(x) > (abs(temp1) + abs(eigenvalues[i].getImag()))) {
+                                const ScalarType temp2 = matrixT(j - 1, j - 1) - eigenvalues[i].getReal();
+                                matrixT(j, i - 1) = (-dot11 - temp2 * matrixT(j - 1, i - 1) + eigenvalues[i].getImag() * matrixT(j - 1, i)) / x;
+                                matrixT(j, i) = (-dot12 - temp2 * matrixT(j - 1, i) - eigenvalues[i].getImag() * matrixT(j - 1, i - 1)) / x;
                             }
                             else {
-                                c = ComplexScalar(-dot12 - y * matrixT(j - 1, i - 1), -dot11 - y * matrixT(j - 1, i)) / ComplexScalar(lastw, -eigenvalues[i].getImag());
-                                matrixT(j, i - 1) = c.getImag();
-                                matrixT(j, i) = c.getReal();
+                                c = ComplexScalar(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i)) / ComplexScalar(temp1, eigenvalues[i].getImag());
+                                matrixT(j, i - 1) = c.getReal();
+                                matrixT(j, i) = c.getImag();
                             }
                             --j;
                         }
@@ -176,7 +180,12 @@ namespace Physica::Core {
                     --i;
                 }
             }
-            eigenvectorStorage = schur.getMatrixU() * matrixT;
+            const auto& matrixU = schur.getMatrixU();
+            for (size_t i = 0; i < order; ++i) {
+                auto topRows = matrixT.topRows(i + 1);
+                auto toCol = eigenvectorStorage.col(i);
+                toCol = (matrixU.leftCols(i + 1) * topRows.col(i));
+            }
         }
     }
 
@@ -194,9 +203,9 @@ namespace Physica::Core {
                 auto toCol2 = result.col(i + 1);
                 auto fromCol1 = eigenvectorStorage.col(i);
                 auto fromCol2 = eigenvectorStorage.col(i + 1);
-                for (size_t j = 0; j <= i; ++j) {
-                    toCol1[i] = ComplexScalar<ScalarType>(fromCol1[i], fromCol2[i]);
-                    toCol2[i] = ComplexScalar<ScalarType>(fromCol1[i], -fromCol2[i]);
+                for (size_t j = 0; j < order; ++j) {
+                    toCol1[j] = ComplexScalar<ScalarType>(fromCol1[j], fromCol2[j]);
+                    toCol2[j] = ComplexScalar<ScalarType>(fromCol1[j], -fromCol2[j]);
                 }
                 ++i;
             }
