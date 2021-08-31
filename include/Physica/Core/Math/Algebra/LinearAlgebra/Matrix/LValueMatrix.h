@@ -42,6 +42,8 @@ namespace Physica::Core {
         using RowVector = MatrixBlock<Derived, 1, Dynamic>;
         using ColVector = MatrixBlock<Derived, Dynamic, 1>;
         constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption; //It is declared here because MatrixOption makes no sence to a RValueMatrix
+        constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<Derived>();
+        constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<Derived>();
     public:
         /* Operators */
         template<class OtherMatrix>
@@ -96,6 +98,8 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
+        [[nodiscard]] ScalarType max() const;
+        [[nodiscard]] ScalarType min() const;
         [[nodiscard]] inline size_t getMaxMajor() const noexcept;
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);

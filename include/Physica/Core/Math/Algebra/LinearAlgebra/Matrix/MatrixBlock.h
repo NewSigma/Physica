@@ -146,6 +146,8 @@ namespace Physica::Core {
         using VectorBase::calc;
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        using VectorBase::max;
+        using VectorBase::min;
     };
 
     template<class MatrixType>
@@ -175,6 +177,8 @@ namespace Physica::Core {
         using VectorBase::calc;
         [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        using VectorBase::max;
+        using VectorBase::min;
     };
 
     template<class MatrixType>

@@ -56,6 +56,8 @@ namespace Physica::Core {
         RowMatrix copyToRowMatrix() const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] ScalarType max() const;
+        [[nodiscard]] ScalarType min() const;
     };
 
     template<class Derived>
@@ -70,5 +72,29 @@ namespace Physica::Core {
         RowMatrix mat(1, getLength());
         mat[0] = *this;
         return mat;
+    }
+
+    template<class VectorType>
+    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::max() const {
+        assert(getLength() != 0);
+        ScalarType result = calc(0);
+        for(size_t i = 1; i < getLength(); ++i) {
+            ScalarType temp = calc(i);
+            if (result < temp)
+                result = temp;
+        }
+        return result;
+    }
+
+    template<class VectorType>
+    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::min() const {
+        assert(getLength() != 0);
+        ScalarType result = (*this[0]);
+        for(size_t i = 1; i < getLength(); ++i) {
+            ScalarType temp = calc(i);
+            if (result > temp)
+                result = temp;
+        }
+        return result;
     }
 }

@@ -59,10 +59,16 @@ namespace Physica::Core {
             , source(source_.getDerived())
             , computeMatrixU(computeMatrixU_) {
         assert(source.getRow() == source.getColumn());
-        Hessenburg hess(source);
+
+        MatrixType buffer = abs(source);
+        const ScalarType factor = buffer.max();
+        const ScalarType inv_factor = reciprocal(factor);
+        buffer = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost accuracy(from 10^15 to 10^14)
+        const Hessenburg hess(buffer);
         matrixT = hess.getMatrixH();
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
+
         const size_t order = matrixT.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
@@ -83,6 +89,7 @@ namespace Physica::Core {
                 ++iter;
             }
         }
+        matrixT *= factor;
 
         if (computeMatrixU) {
             WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;

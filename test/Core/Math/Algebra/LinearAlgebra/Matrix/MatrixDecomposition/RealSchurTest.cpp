@@ -50,6 +50,7 @@ bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+    std::cout << A << std::endl;
     if (!matrixNear(A, mat, precision))
         return false;
     return true;
@@ -59,7 +60,7 @@ int main() {
     {
         using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
-        if (!realSchurTest(mat1, 1E-15))
+        if (!realSchurTest(mat1, 1E-14))
             return 1;
         const MatrixType mat2{{-0.590316, -2.19514, -2.37463},
                               {-1.25006, -0.297493, 1.40349},

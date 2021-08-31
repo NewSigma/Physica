@@ -194,7 +194,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
-
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Sqrt, VectorType>
             : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>> {
@@ -205,6 +204,18 @@ namespace Physica::Core {
 
         typename Base::ScalarType calc(size_t s) const { return sqrt(exp.calc(s)); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
+
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Abs, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Abs, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Abs, VectorType>>;
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return abs(v.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
 
@@ -266,5 +277,10 @@ namespace Physica::Core {
     template<class VectorType>
     VectorExpression<Utils::ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) {
         return VectorExpression<Utils::ExpressionType::Sqrt, VectorType>(v);
+    }
+
+    template<class VectorType>
+    VectorExpression<Utils::ExpressionType::Abs, VectorType> abs(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Abs, VectorType>(v);
     }
 }

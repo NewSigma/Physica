@@ -75,9 +75,6 @@ namespace Physica::Core {
         RowMatrix moveToRowMatrix();
         /* Getters */
         using Storage::getLength;
-        [[nodiscard]] bool isZero() const;
-        [[nodiscard]] T max() const;
-        [[nodiscard]] T min() const;
         /* Helpers */
         static Vector<T> Zeros(size_t len);
         static Vector<T> randomVector(size_t len);

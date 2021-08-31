@@ -337,6 +337,50 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::max() const {
+        ScalarType result;
+        if constexpr (isColumnMatrix) {
+            result = col(0).max();
+            for (size_t i = 1; i < Base::getColumn(); ++i) {
+                ScalarType temp = col(i).max();
+                if (temp > result)
+                    result = temp;
+            }
+        }
+        else {
+            result = row(0).max();
+            for (size_t i = 1; i < Base::getRow(); ++i) {
+                ScalarType temp = row(i).max();
+                if (temp > result)
+                    result = temp;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
+    typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::min() const {
+        ScalarType result;
+        if constexpr (isColumnMatrix) {
+            result = col(0).max();
+            for (size_t i = 1; i < Base::getColumn(); ++i) {
+                ScalarType temp = col(i).max();
+                if (temp < result)
+                    result = temp;
+            }
+        }
+        else {
+            result = row(0).max();
+            for (size_t i = 1; i < Base::getRow(); ++i) {
+                ScalarType temp = row(i).max();
+                if (temp < result)
+                    result = temp;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
     inline size_t LValueMatrix<Derived>::getMaxMajor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
             return Base::getColumn();

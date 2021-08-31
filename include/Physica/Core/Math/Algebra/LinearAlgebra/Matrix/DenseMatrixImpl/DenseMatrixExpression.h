@@ -179,10 +179,10 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>> {
+    class DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, AnyScalar>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, AnyScalar>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarBase<AnyScalar>>>;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, AnyScalar>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -191,9 +191,25 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp.calc(row, col) / ScalarType(scalar); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) / ScalarType(scalar); }
         [[nodiscard]] size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+    };
+    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+    template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType>> {
+    public:
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& mat;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return abs(mat.calc(row, col)); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
@@ -237,5 +253,10 @@ namespace Physica::Core {
     inline DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarType>
     operator/(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) {
         return DenseMatrixExpression<Utils::ExpressionType::Div, MatrixType, ScalarType>(m, s);
+    }
+    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+    template<class MatrixType>
+    DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType> abs(const RValueMatrix<MatrixType>& m) {
+        return DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType>(m);
     }
 }
