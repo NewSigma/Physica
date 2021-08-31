@@ -123,6 +123,6 @@ namespace Physica::Gui {
         chart()->createDefaultAxes();
 
         update();
-        return series;
+        return *series;
     }
 }

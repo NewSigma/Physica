@@ -267,12 +267,21 @@ public:
         do {
             MatrixType hamilton = getHamiltonMatrix(trial_solution);
             MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-            EigenSolver solver(hamilton_mod);
+            EigenSolver solver(hamilton_mod, true);
             auto eigenvalues = solver.getEigenvalues();
-            for (size_t i = 0; i < baseSetCount; ++i)
+            size_t groundStateIndex = 0;
+            for (size_t i = 0; i < baseSetCount; ++i) {
                 real_eigenvalues[i] = eigenvalues[i].getReal();
-            stop = VectorType(real_eigenvalues - trial_solution).norm() < criteria;
-            trial_solution = real_eigenvalues;
+                if (real_eigenvalues[i] < real_eigenvalues[groundStateIndex])
+                    groundStateIndex = i;
+            }
+
+            auto eigenvectors = solver.getEigenvectors();
+            VectorType real_eigenvector{};
+            for (size_t i = 0; i < baseSetCount; ++i)
+                real_eigenvector[i] = eigenvectors.col(groundStateIndex)[i].getReal();
+            stop = VectorType(real_eigenvector - trial_solution).norm() < criteria;
+            trial_solution = real_eigenvector;
         } while(!stop);
         for (size_t i = 0; i < baseSetCount; ++i)
             std::cout << '\t' << real_eigenvalues[i] << '\n';
@@ -324,8 +333,8 @@ int main(int argc, char** argv) {
     exit_code |= InfiniteDeepWell().execute(argc, argv);
     std::cout << "Example 2:\n";
     exit_code |= HedrogenAtom().execute(argc, argv);
-    HedrogenAtom().execute();
+    std::cout << "Example 3:\n";
     typename HeliumAtom::VectorType solution{1, 1, 1, 1};
     HeliumAtom().execute(solution, 1E-3);
-    return 0;
+    return exit_code;
 }
