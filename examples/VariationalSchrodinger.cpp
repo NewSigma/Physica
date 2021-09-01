@@ -217,7 +217,7 @@ private:
         constexpr size_t sampleCount = 100;
         Array<ScalarType, sampleCount> x{};
         Array<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType::One() / ScalarType(sampleCount);
+        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
         ScalarType temp_x = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp_x;
@@ -235,7 +235,7 @@ private:
         constexpr size_t sampleCount = 100;
         Array<ScalarType, sampleCount> x{};
         Array<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType::One() / ScalarType(sampleCount);
+        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
         ScalarType temp = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp;
@@ -257,7 +257,7 @@ public:
                                 baseSetCount>;
     using VectorType = typename MatrixType::VectorType;
 public:
-    void execute(VectorType& trial_solution, const ScalarType& criteria) {
+    int execute(int argc, char** argv, VectorType& trial_solution, const ScalarType& criteria) {
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
@@ -277,35 +277,38 @@ public:
             }
 
             auto eigenvectors = solver.getEigenvectors();
-            VectorType real_eigenvector{};
+            DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 1> real_eigenvector{};
             for (size_t i = 0; i < baseSetCount; ++i)
-                real_eigenvector[i] = eigenvectors.col(groundStateIndex)[i].getReal();
-            stop = VectorType(real_eigenvector - trial_solution).norm() < criteria;
-            trial_solution = real_eigenvector;
+                real_eigenvector(i, 0) = eigenvectors.col(groundStateIndex)[i].getReal();
+            const ScalarType norm = ((real_eigenvector.transpose() * overlap).compute() * real_eigenvector).calc(0, 0);
+            real_eigenvector *= reciprocal(sqrt(norm));
+
+            stop = VectorType(real_eigenvector.col(0) - trial_solution).norm() < criteria;
+            trial_solution = real_eigenvector.col(0);
         } while(!stop);
-        for (size_t i = 0; i < baseSetCount; ++i)
-            std::cout << '\t' << real_eigenvalues[i] << '\n';
+
+        std::cout << "Ground state energy: " << groundStateEnergy(trial_solution) << std::endl;
+
+        QApplication app(argc, argv);
+        Plot* plot = new Plot();
+        plotWave(*plot, trial_solution);
+        plot->show();
+        return QApplication::exec();
     }
 private:
+    ScalarType baseFunction(const ScalarType& s, size_t n) {
+        return exp(ScalarType(-baseSetCoeff[n]) * square(s));
+    }
+
     MatrixType getHamiltonMatrix(const VectorType& trial_solution) {
         MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
-                const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
-                const ScalarType pro = ScalarType(baseSetCoeff[i] * baseSetCoeff[j]);
-                const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
-                const ScalarType coulomb1 = ScalarType(-4) * ScalarType(M_PI) / sum;
                 ScalarType coulomb2 = ScalarType::Zero();
-                for (size_t m = 0; m < baseSetCount; ++m) {
-                    for (size_t n = 0; n < baseSetCount; ++n) {
-                        const ScalarType sum1 = ScalarType(baseSetCoeff[m] + baseSetCoeff[n]);
-                        const ScalarType demoninator = sum * sum1 * sqrt(sum + sum1);
-                        const ScalarType numerator = ScalarType::Two() * sqrt(ScalarType(M_PI)) * square(ScalarType(M_PI));
-                        const ScalarType Q = numerator / demoninator;
-                        coulomb2 += Q * trial_solution[m] * trial_solution[n];
-                    }
-                }
-                result(i, j) = kinetic + coulomb1 + coulomb2;
+                for (size_t m = 0; m < baseSetCount; ++m)
+                    for (size_t n = 0; n < baseSetCount; ++n)
+                        coulomb2 += Q_value(i, m, j, n) * trial_solution[m] * trial_solution[n];
+                result(i, j) = h_value(i, j) + coulomb2;
             }
         }
         return result;
@@ -322,19 +325,69 @@ private:
         }
         return result;
     }
+
+    ScalarType h_value(size_t p, size_t r) {
+        const ScalarType sum = ScalarType(baseSetCoeff[p] + baseSetCoeff[r]);
+        const ScalarType pro = ScalarType(baseSetCoeff[p] * baseSetCoeff[r]);
+        const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
+        const ScalarType coulomb1 = ScalarType(-4 * M_PI) / sum;
+        return kinetic + coulomb1;
+    }
+
+    ScalarType Q_value(size_t p, size_t r, size_t q, size_t s) {
+        const ScalarType sum = ScalarType(baseSetCoeff[p] + baseSetCoeff[q]);
+        const ScalarType sum1 = ScalarType(baseSetCoeff[r] + baseSetCoeff[s]);
+        const ScalarType demoninator = sum * sum1 * sqrt(sum + sum1);
+        const ScalarType numerator = ScalarType::Two() * sqrt(ScalarType(M_PI)) * square(ScalarType(M_PI));
+        return numerator / demoninator;
+    }
+
+    ScalarType groundStateEnergy(const VectorType& solution) {
+        ScalarType energy = ScalarType::Zero();
+        for (size_t i = 0; i < baseSetCount; ++i) {
+            for (size_t j = 0; j < baseSetCount; ++j) {
+                energy += ScalarType::Two() * solution[i] * solution[j] * h_value(i, j);
+                for (size_t m = 0; m < baseSetCount; ++m)
+                    for (size_t n = 0; n < baseSetCount; ++n)
+                        energy += Q_value(i, m, j, n) * solution[i] * solution[j] * solution[m] * solution[n];
+            }
+        }
+        return energy;
+    }
+
+    template<class VectorType>
+    void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
+        constexpr size_t sampleCount = 100;
+        Array<ScalarType, sampleCount> x{};
+        Array<ScalarType, sampleCount> y{};
+        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
+        ScalarType temp_x = ScalarType::Zero();
+        for (size_t i = 0; i < sampleCount; ++i) {
+            x[i] = temp_x;
+            ScalarType temp_y = ScalarType::Zero();
+            for (size_t j = 0; j < baseSetCount; ++j)
+                temp_y += coeff[j] * baseFunction(temp_x, j);
+            y[i] = temp_y;
+            temp_x += step;
+        }
+        auto& spline = plot.spline(x, y);
+        spline.setName("Numerical");
+    }
 };
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-37
+ * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-51
  */
 int main(int argc, char** argv) {
     int exit_code = 0;
     std::cout << "Example 1:\n";
     exit_code |= InfiniteDeepWell().execute(argc, argv);
+
     std::cout << "Example 2:\n";
     exit_code |= HedrogenAtom().execute(argc, argv);
+
     std::cout << "Example 3:\n";
-    typename HeliumAtom::VectorType solution{1, 1, 1, 1};
-    HeliumAtom().execute(solution, 1E-3);
+    typename HeliumAtom::VectorType solution{0.25, 0.25, 0.25, 0.25};
+    exit_code |= HeliumAtom().execute(argc, argv, solution, 1E-8);
     return exit_code;
 }
