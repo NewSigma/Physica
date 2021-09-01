@@ -22,54 +22,54 @@
 
 namespace Physica::Utils::Internal {
     template<class Pointer, class Derived>
-    ContainerIterator<Pointer, AbstractArray<Derived>>&
-    ContainerIterator<Pointer, AbstractArray<Derived>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
+    ContainerIterator<Pointer, ArrayStorage<Derived>>&
+    ContainerIterator<Pointer, ArrayStorage<Derived>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    ContainerIterator<Pointer, AbstractArray<Derived>>&
-    ContainerIterator<Pointer, AbstractArray<Derived>>::operator++() {
+    ContainerIterator<Pointer, ArrayStorage<Derived>>&
+    ContainerIterator<Pointer, ArrayStorage<Derived>>::operator++() {
         ++p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const ContainerIterator<Pointer, AbstractArray<Derived>>
-    ContainerIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
+    const ContainerIterator<Pointer, ArrayStorage<Derived>>
+    ContainerIterator<Pointer, ArrayStorage<Derived>>::operator++(int) {
         return ContainerIterator(p++);
     }
 
     template<class Pointer, class Derived>
-    ReverseContainerIterator<Pointer, AbstractArray<Derived>>&
-    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator=(const ReverseContainerIterator& ite) { //NOLINT Self assign is ok.
+    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
+    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator=(const ReverseContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    ReverseContainerIterator<Pointer, AbstractArray<Derived>>&
-    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator++() {
+    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
+    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator++() {
         --p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const ReverseContainerIterator<Pointer, AbstractArray<Derived>>
-    ReverseContainerIterator<Pointer, AbstractArray<Derived>>::operator++(int) {
+    const ReverseContainerIterator<Pointer, ArrayStorage<Derived>>
+    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator++(int) {
         return ReverseContainerIterator(p--);
     }
 
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(size_t capacity)
+    ArrayStorage<Derived>::ArrayStorage(size_t capacity)
             : alloc() {
         arr = alloc.allocate(capacity);
     }
 
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(const AbstractArray<Derived>& array)
-            : AbstractArray(array.getDerived().getCapacity()) {
+    ArrayStorage<Derived>::ArrayStorage(const ArrayStorage<Derived>& array)
+            : ArrayStorage(array.getDerived().getCapacity()) {
         if constexpr (!std::is_trivial<T>::value)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 AllocatorTraits::construct(alloc, arr + i, array[i]);
@@ -78,17 +78,17 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(AbstractArray<Derived>&& array) noexcept
+    ArrayStorage<Derived>::ArrayStorage(ArrayStorage<Derived>&& array) noexcept
             : arr(array.arr)
             , alloc() {
         array.arr = nullptr;
     }
 
     template<class Derived>
-    AbstractArray<Derived>::AbstractArray(T* __restrict arr_) : arr(arr_), alloc() {}
+    ArrayStorage<Derived>::ArrayStorage(T* __restrict arr_) : arr(arr_), alloc() {}
 
     template<class Derived>
-    AbstractArray<Derived>::~AbstractArray() {
+    ArrayStorage<Derived>::~ArrayStorage() {
         const size_t length = Base::getDerived().getLength();
         if constexpr (!std::is_trivial<T>::value)
             if (arr != nullptr)
@@ -98,19 +98,19 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    inline typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) {
+    inline typename ArrayStorage<Derived>::T& ArrayStorage<Derived>::operator[](size_t index) {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    inline const typename AbstractArray<Derived>::T& AbstractArray<Derived>::operator[](size_t index) const {
+    inline const typename ArrayStorage<Derived>::T& ArrayStorage<Derived>::operator[](size_t index) const {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    bool AbstractArray<Derived>::operator==(const AbstractArray& array) const {
+    bool ArrayStorage<Derived>::operator==(const ArrayStorage& array) const {
         if (Base::getDerived().getLength() != array.getDerived().getLength())
             return false;
         if (Base::getDerived().getCapacity() != array.getDerived().getLength())
@@ -122,7 +122,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    inline void AbstractArray<Derived>::swap(AbstractArray<Derived>& array) noexcept {
+    inline void ArrayStorage<Derived>::swap(ArrayStorage<Derived>& array) noexcept {
         std::swap(arr, array.arr);
     }
 }

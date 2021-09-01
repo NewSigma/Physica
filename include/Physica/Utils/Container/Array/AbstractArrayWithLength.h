@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "AbstractArray.h"
+#include "ArrayStorage.h"
 
 namespace Physica::Utils::Internal {
     template<class Derived>
-    class AbstractArrayWithLength : public AbstractArray<Derived> {
+    class AbstractArrayWithLength : public ArrayStorage<Derived> {
     private:
-        using Base = AbstractArray<Derived>;
+        using Base = ArrayStorage<Derived>;
         using typename Base::T;
     protected:
         using Base::arr;

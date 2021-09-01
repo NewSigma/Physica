@@ -27,13 +27,13 @@
 namespace Physica::Utils::Internal {
     //Forward declaration
     template<class T> class Traits;
-    template<class Derived> class AbstractArray;
+    template<class Derived> class ArrayStorage;
 
     template<class Pointer, class Container>
     class ContainerIterator;
     
     template<class Pointer, class Derived>
-    class ContainerIterator<Pointer, AbstractArray<Derived>> {
+    class ContainerIterator<Pointer, ArrayStorage<Derived>> {
         Pointer* p;
     public:
         ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
@@ -48,14 +48,14 @@ namespace Physica::Utils::Internal {
     private:
         explicit ContainerIterator(Pointer* p) : p(p) {}
 
-        friend class AbstractArray<Derived>;
+        friend class ArrayStorage<Derived>;
     };
 
     template<class Pointer, class Container>
     class ReverseContainerIterator;
     
     template<class Pointer, class Derived>
-    class ReverseContainerIterator<Pointer, AbstractArray<Derived>> {
+    class ReverseContainerIterator<Pointer, ArrayStorage<Derived>> {
         Pointer* p;
     public:
         ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
@@ -70,13 +70,13 @@ namespace Physica::Utils::Internal {
     private:
         explicit ReverseContainerIterator(Pointer* p) : p(p) {}
 
-        friend class AbstractArray<Derived>;
+        friend class ArrayStorage<Derived>;
     };
     /**
      * Public parts among specializations of \class Array.
      */
     template<class Derived>
-    class AbstractArray : public Utils::CRTPBase<Derived> {
+    class ArrayStorage : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     protected:
         using T = typename Traits<Derived>::ElementType;
@@ -86,19 +86,19 @@ namespace Physica::Utils::Internal {
         T* __restrict arr;
         allocator_type alloc;
     public:
-        using Iterator = ContainerIterator<T, AbstractArray<Derived>>;
-        using ConstIterator = ContainerIterator<const T, AbstractArray<Derived>>;
-        using ReverseIterator = ReverseContainerIterator<T, AbstractArray<Derived>>;
-        using ConstReverseIterator = ReverseContainerIterator<const T, AbstractArray<Derived>>;
+        using Iterator = ContainerIterator<T, ArrayStorage<Derived>>;
+        using ConstIterator = ContainerIterator<const T, ArrayStorage<Derived>>;
+        using ReverseIterator = ReverseContainerIterator<T, ArrayStorage<Derived>>;
+        using ConstReverseIterator = ReverseContainerIterator<const T, ArrayStorage<Derived>>;
     public:
-        AbstractArray() = delete;
+        ArrayStorage() = delete;
         /* Operators */
-        AbstractArray& operator=(const AbstractArray& array) = delete;
-        AbstractArray& operator=(AbstractArray&& array) noexcept = delete;
+        ArrayStorage& operator=(const ArrayStorage& array) = delete;
+        ArrayStorage& operator=(ArrayStorage&& array) noexcept = delete;
         [[nodiscard]] T& operator[](size_t index);
         [[nodiscard]] const T& operator[](size_t index) const;
-        bool operator==(const AbstractArray& array) const;
-        bool operator!=(const AbstractArray& array) const { return !(*this == array); }
+        bool operator==(const ArrayStorage& array) const;
+        bool operator!=(const ArrayStorage& array) const { return !(*this == array); }
         /* Iterator */
         Iterator begin() noexcept { return Iterator(arr); }
         Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
@@ -114,14 +114,14 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] const T* data() const noexcept { return arr; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
     protected:
-        explicit AbstractArray(size_t capacity);
-        explicit AbstractArray(T* __restrict arr_);
-        AbstractArray(const AbstractArray& array);
-        AbstractArray(AbstractArray&& array) noexcept;
-        ~AbstractArray();
+        explicit ArrayStorage(size_t capacity);
+        explicit ArrayStorage(T* __restrict arr_);
+        ArrayStorage(const ArrayStorage& array);
+        ArrayStorage(ArrayStorage&& array) noexcept;
+        ~ArrayStorage();
         /* Helpers */
-        inline void swap(AbstractArray& array) noexcept;
+        inline void swap(ArrayStorage& array) noexcept;
     };
 }
 
-#include "AbstractArrayImpl.h"
+#include "ArrayStorageImpl.h"

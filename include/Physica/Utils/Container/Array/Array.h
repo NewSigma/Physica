@@ -62,14 +62,14 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    class Array : public Internal::AbstractArray<Array<T, Length, Capacity, Allocator>> {
+    class Array : public Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
     public:
         using ElementType = T;
         constexpr static size_t ArrayLength = Length;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
-        using Base = Internal::AbstractArray<Array<T, Length, Capacity, Allocator>>;
+        using Base = Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>>;
         using Base::arr;
         using Base::alloc;
         using Base::getDerived;
