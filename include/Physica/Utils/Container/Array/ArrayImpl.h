@@ -30,7 +30,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(size_t length_, const T& t) : Base(length_) {
+    Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
             alloc.construct(arr + i, t);
@@ -196,7 +196,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Capacity, Allocator>::Array() : Base(Capacity) {}
 
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, const T& t) : Base(length_, Capacity) {
+    Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, Capacity) {
         assert(length_ < Capacity);
         for (size_t i = 0; i < length_; ++i)
             alloc.construct(arr + i, t);
@@ -366,13 +366,13 @@ namespace Physica::Utils {
      * Wrap structure: append() <- grow() <- allocate()
      */
     template<class T, size_t Capacity, class Allocator>
-    inline void Array<T, Dynamic, Capacity, Allocator>::append(const T& t) {
+    inline void Array<T, Dynamic, Capacity, Allocator>::append(ConstLValueReferenceType t) {
         assert(length < Capacity);
         Base::grow(t);
     }
 
     template<class T, size_t Capacity, class Allocator>
-    inline void Array<T, Dynamic, Capacity, Allocator>::append(T&& t) {
+    inline void Array<T, Dynamic, Capacity, Allocator>::append(RValueReferenceType t) {
         assert(length < Capacity);
         Base::grow(std::move(t));
     }
@@ -415,7 +415,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, const T& t) : Base(length_, length_), capacity(length_) {
+    Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
             alloc.construct(arr + i, t);
     }
@@ -554,14 +554,14 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::append(const T& t) {
+    void Array<T, Dynamic, Dynamic, Allocator>::append(ConstLValueReferenceType t) {
         if(length == capacity)
             increase(capacity + 1);
         Base::grow(t);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::append(T&& t) {
+    void Array<T, Dynamic, Dynamic, Allocator>::append(RValueReferenceType t) {
         if(length == capacity)
             increase(capacity + 1);
         Base::grow(std::move(t));

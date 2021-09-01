@@ -54,7 +54,7 @@ namespace Physica::Utils {
         template<class T, size_t Length, size_t Capacity, class Allocator>
         class Traits<Array<T, Length, Capacity, Allocator>> {
         public:
-            using ElementType = T;
+            using ValueType = T;
             constexpr static size_t ArrayLength = Length;
             constexpr static size_t ArrayCapacity = Capacity;
             using AllocatorType = Allocator;
@@ -65,17 +65,21 @@ namespace Physica::Utils {
     class Array : public Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
     public:
-        using ElementType = T;
+        using Base = Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>>;
+        using typename Base::ValueType;
+        using typename Base::PointerType;
+        using typename Base::LValueReferenceType;
+        using typename Base::ConstLValueReferenceType;
+        using typename Base::RValueReferenceType;
         constexpr static size_t ArrayLength = Length;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
-        using Base = Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>>;
         using Base::arr;
         using Base::alloc;
         using Base::getDerived;
     public:
         Array();
-        explicit Array(size_t length_, const T& t = T());
+        explicit Array(size_t length_, ConstLValueReferenceType t = T());
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
@@ -120,18 +124,22 @@ namespace Physica::Utils {
     class Array<T, Dynamic, Capacity, Allocator>
         : public Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>> {
     public:
-        using ElementType = T;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>>;
+        using typename Base::ValueType;
+        using typename Base::PointerType;
+        using typename Base::LValueReferenceType;
+        using typename Base::ConstLValueReferenceType;
+        using typename Base::RValueReferenceType;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>>;
         using Base::length;
         using Base::arr;
         using Base::alloc;
         using Base::getDerived;
     public:
         Array();
-        explicit Array(size_t length_, const T& t = T());
+        explicit Array(size_t length_, ConstLValueReferenceType t = T());
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
@@ -159,8 +167,8 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
-        inline void append(const T& t);
-        inline void append(T&& t);
+        inline void append(ConstLValueReferenceType t);
+        inline void append(RValueReferenceType t);
         void append(const Array& t);
         void append(Array&& t);
         void reserve(size_t size);
@@ -175,11 +183,15 @@ namespace Physica::Utils {
     class Array<T, Dynamic, Dynamic, Allocator>
         : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>> {
     public:
-        using ElementType = T;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>>;
+        using typename Base::ValueType;
+        using typename Base::PointerType;
+        using typename Base::LValueReferenceType;
+        using typename Base::ConstLValueReferenceType;
+        using typename Base::RValueReferenceType;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Dynamic;
     private:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>>;
         using Base::length;
         using Base::arr;
         using Base::alloc;
@@ -188,7 +200,7 @@ namespace Physica::Utils {
         size_t capacity;
     public:
         Array();
-        explicit Array(size_t length_, const T& t = T());
+        explicit Array(size_t length_, ConstLValueReferenceType t = T());
         Array(std::initializer_list<T> list);
         Array(const Array& array);
         Array(Array&& array) noexcept;
@@ -213,8 +225,8 @@ namespace Physica::Utils {
         template<class OtherT, size_t OtherLength, size_t OtherCapacity>
         Array& operator=(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
         /* Helpers */
-        void append(const T& t);
-        void append(T&& t);
+        void append(ConstLValueReferenceType t);
+        void append(RValueReferenceType t);
         void append(const Array& t);
         void append(Array&& t);
         void reserve(size_t size);

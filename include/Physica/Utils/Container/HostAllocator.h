@@ -92,6 +92,9 @@ namespace std {
         using const_pointer = const T*;
         using void_pointer = void*;
         using const_void_pointer = const void*;
+        using lvalue_reference = T&;
+        using const_lvalue_reference = const T&;
+        using rvalue_reference = T&&;
         using size_type = typename allocator_type::size_type;
         using difference_type = typename allocator_type::difference_type;
         using propagate_on_container_copy_assignment = std::false_type;

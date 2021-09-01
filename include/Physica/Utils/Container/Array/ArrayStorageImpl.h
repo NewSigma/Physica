@@ -70,11 +70,11 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     ArrayStorage<Derived>::ArrayStorage(const ArrayStorage<Derived>& array)
             : ArrayStorage(array.getDerived().getCapacity()) {
-        if constexpr (!std::is_trivial<T>::value)
+        if constexpr (!std::is_trivial<ValueType>::value)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 AllocatorTraits::construct(alloc, arr + i, array[i]);
         else
-            memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(T));
+            memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
     }
 
     template<class Derived>
@@ -85,26 +85,26 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    ArrayStorage<Derived>::ArrayStorage(T* __restrict arr_) : arr(arr_), alloc() {}
+    ArrayStorage<Derived>::ArrayStorage(PointerType arr_) : arr(arr_), alloc() {}
 
     template<class Derived>
     ArrayStorage<Derived>::~ArrayStorage() {
         const size_t length = Base::getDerived().getLength();
-        if constexpr (!std::is_trivial<T>::value)
+        if constexpr (!std::is_trivial<ValueType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
-                    (arr + i)->~T();
+                    (arr + i)->~ValueType();
         alloc.deallocate(arr, length);
     }
 
     template<class Derived>
-    inline typename ArrayStorage<Derived>::T& ArrayStorage<Derived>::operator[](size_t index) {
+    inline typename ArrayStorage<Derived>::LValueReferenceType ArrayStorage<Derived>::operator[](size_t index) {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    inline const typename ArrayStorage<Derived>::T& ArrayStorage<Derived>::operator[](size_t index) const {
+    inline typename ArrayStorage<Derived>::ConstLValueReferenceType ArrayStorage<Derived>::operator[](size_t index) const {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }

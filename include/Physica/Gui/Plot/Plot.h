@@ -68,7 +68,7 @@ namespace Physica::Gui {
 
     template<class Array>
     QtCharts::QAreaSeries& Plot::hist(const Array& data, size_t binCount, bool dencity) {
-        using T = typename Array::ElementType;
+        using T = typename Array::ValueType;
         
         double binWidth, min;
         const size_t length = data.getLength();

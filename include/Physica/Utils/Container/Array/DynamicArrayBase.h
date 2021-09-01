@@ -23,9 +23,13 @@
 namespace Physica::Utils::Internal {
     template<class Derived>
     class DynamicArrayBase : public ArrayStorage<Derived> {
-    private:
+    public:
         using Base = ArrayStorage<Derived>;
-        using typename Base::T;
+        using typename Base::ValueType;
+        using typename Base::PointerType;
+        using typename Base::LValueReferenceType;
+        using typename Base::ConstLValueReferenceType;
+        using typename Base::RValueReferenceType;
     protected:
         using Base::arr;
         size_t length;
@@ -35,19 +39,19 @@ namespace Physica::Utils::Internal {
         /* Operators */
         DynamicArrayBase& operator=(const DynamicArrayBase& array) = delete;
         DynamicArrayBase& operator=(DynamicArrayBase&& array) noexcept = delete;
-        Derived& operator<<(const T& t) { Base::getDerived().append(t); return Base::getDerived(); }
-        Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
+        Derived& operator<<(ConstLValueReferenceType t) { Base::getDerived().append(t); return Base::getDerived(); }
+        Derived& operator<<(RValueReferenceType t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
         using Base::alloc;
-        T cutLast();
-        inline void grow(const T& t);
-        inline void grow(T&& t);
+        ValueType cutLast();
+        inline void grow(ConstLValueReferenceType t);
+        inline void grow(RValueReferenceType t);
         void removeAt(size_t index);
         void clear() noexcept;
-        void insert(const T& t, size_t index);
-        void insert(T&& t, size_t index);
+        void insert(ConstLValueReferenceType t, size_t index);
+        void insert(RValueReferenceType t, size_t index);
         /* Setters */
         /**
          * Low level api. Designed for performance.
@@ -58,7 +62,7 @@ namespace Physica::Utils::Internal {
     protected:
         explicit DynamicArrayBase(size_t capacity);
         DynamicArrayBase(size_t length_, size_t capacity);
-        DynamicArrayBase(size_t length_, T* __restrict arr_);
+        DynamicArrayBase(size_t length_, PointerType arr_);
         DynamicArrayBase(const DynamicArrayBase& array);
         DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Helpers */
