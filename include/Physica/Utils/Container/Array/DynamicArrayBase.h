@@ -22,7 +22,7 @@
 
 namespace Physica::Utils::Internal {
     template<class Derived>
-    class AbstractArrayWithLength : public ArrayStorage<Derived> {
+    class DynamicArrayBase : public ArrayStorage<Derived> {
     private:
         using Base = ArrayStorage<Derived>;
         using typename Base::T;
@@ -30,11 +30,11 @@ namespace Physica::Utils::Internal {
         using Base::arr;
         size_t length;
     public:
-        AbstractArrayWithLength() = delete;
-        ~AbstractArrayWithLength() = default;
+        DynamicArrayBase() = delete;
+        ~DynamicArrayBase() = default;
         /* Operators */
-        AbstractArrayWithLength& operator=(const AbstractArrayWithLength& array) = delete;
-        AbstractArrayWithLength& operator=(AbstractArrayWithLength&& array) noexcept = delete;
+        DynamicArrayBase& operator=(const DynamicArrayBase& array) = delete;
+        DynamicArrayBase& operator=(DynamicArrayBase&& array) noexcept = delete;
         Derived& operator<<(const T& t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(T&& t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
@@ -56,14 +56,14 @@ namespace Physica::Utils::Internal {
          */
         void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
-        explicit AbstractArrayWithLength(size_t capacity);
-        AbstractArrayWithLength(size_t length_, size_t capacity);
-        AbstractArrayWithLength(size_t length_, T* __restrict arr_);
-        AbstractArrayWithLength(const AbstractArrayWithLength& array);
-        AbstractArrayWithLength(AbstractArrayWithLength&& array) noexcept;
+        explicit DynamicArrayBase(size_t capacity);
+        DynamicArrayBase(size_t length_, size_t capacity);
+        DynamicArrayBase(size_t length_, T* __restrict arr_);
+        DynamicArrayBase(const DynamicArrayBase& array);
+        DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Helpers */
-        void swap(AbstractArrayWithLength& array);
+        void swap(DynamicArrayBase& array);
     };
 }
 
-#include "AbstractArrayWithLengthImpl.h"
+#include "DynamicArrayBaseImpl.h"

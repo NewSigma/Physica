@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <cstdlib>
-#include "AbstractArrayWithLength.h"
+#include "DynamicArrayBase.h"
 #include "Physica/Utils/Container/HostAllocator.h"
 
 namespace Physica::Utils {
@@ -118,13 +118,13 @@ namespace Physica::Utils {
 
     template<class T, size_t Capacity, class Allocator>
     class Array<T, Dynamic, Capacity, Allocator>
-        : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity, Allocator>> {
+        : public Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>> {
     public:
         using ElementType = T;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
-        using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Capacity, Allocator>>;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>>;
         using Base::length;
         using Base::arr;
         using Base::alloc;
@@ -173,13 +173,13 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     class Array<T, Dynamic, Dynamic, Allocator>
-        : public Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic, Allocator>> {
+        : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>> {
     public:
         using ElementType = T;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Dynamic;
     private:
-        using Base = Internal::AbstractArrayWithLength<Array<T, Dynamic, Dynamic, Allocator>>;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>>;
         using Base::length;
         using Base::arr;
         using Base::alloc;
