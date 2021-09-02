@@ -23,6 +23,7 @@
 #include <utility>
 #include <memory>
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "Physica/Utils/Container/DeivceAllocator.cuh"
 
 namespace Physica::Utils::Internal {
     //Forward declaration
@@ -39,17 +40,17 @@ namespace Physica::Utils::Internal {
 
         PointerType p;
     public:
-        ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
+        __host__ __device__ ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
         ~ContainerIterator() = default;
         /* Operators */
-        ContainerIterator& operator=(const ContainerIterator& ite);
-        bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
-        bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
-        ContainerIterator& operator++();
-        const ContainerIterator operator++(int);
-        LValueReferenceType operator*() const { return *p; }
+        __host__ __device__ ContainerIterator& operator=(const ContainerIterator& ite);
+        __host__ __device__ bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
+        __host__ __device__ bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
+        __host__ __device__ ContainerIterator& operator++();
+        __host__ __device__ const ContainerIterator operator++(int);
+        __host__ __device__ LValueReferenceType operator*() const { return *p; }
     private:
-        explicit ContainerIterator(PointerType p) : p(p) {}
+        __host__ __device__ explicit ContainerIterator(PointerType p) : p(p) {}
 
         friend class ArrayStorage<Derived>;
     };
@@ -64,17 +65,17 @@ namespace Physica::Utils::Internal {
 
         PointerType p;
     public:
-        ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
+        __host__ __device__ ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
         ~ReverseContainerIterator() = default;
         /* Operators */
-        ReverseContainerIterator& operator=(const ReverseContainerIterator& ite);
-        bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
-        bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
-        ReverseContainerIterator& operator++();
-        const ReverseContainerIterator operator++(int);
-        LValueReferenceType operator*() const { return *p; }
+        __host__ __device__ ReverseContainerIterator& operator=(const ReverseContainerIterator& ite);
+        __host__ __device__ bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
+        __host__ __device__ bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
+        __host__ __device__ ReverseContainerIterator& operator++();
+        __host__ __device__ const ReverseContainerIterator operator++(int);
+        __host__ __device__ LValueReferenceType operator*() const { return *p; }
     private:
-        explicit ReverseContainerIterator(PointerType p) : p(p) {}
+        __host__ __device__ explicit ReverseContainerIterator(PointerType p) : p(p) {}
 
         friend class ArrayStorage<Derived>;
     };
@@ -105,32 +106,32 @@ namespace Physica::Utils::Internal {
         /* Operators */
         ArrayStorage& operator=(const ArrayStorage& array) = delete;
         ArrayStorage& operator=(ArrayStorage&& array) noexcept = delete;
-        [[nodiscard]] LValueReferenceType operator[](size_t index);
-        [[nodiscard]] ConstLValueReferenceType operator[](size_t index) const;
+        [[nodiscard]] __host__ __device__ LValueReferenceType operator[](size_t index);
+        [[nodiscard]] __host__ __device__ ConstLValueReferenceType operator[](size_t index) const;
         bool operator==(const ArrayStorage& array) const;
-        bool operator!=(const ArrayStorage& array) const { return !(*this == array); }
+        __host__ __device__ bool operator!=(const ArrayStorage& array) const { return !(*this == array); }
         /* Iterator */
-        Iterator begin() noexcept { return Iterator(arr); }
-        Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
-        ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
-        ConstIterator cend() const noexcept { return ConstIterator(arr + Base::getDerived().getLength()); }
-        ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength()); }
-        ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
-        ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength()); }
-        ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
+        __host__ __device__ Iterator begin() noexcept { return Iterator(arr); }
+        __host__ __device__ Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
+        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
+        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */
-        [[nodiscard]] bool empty() const { return Base::getDerived().getLength() == 0; }
-        [[nodiscard]] PointerType data() noexcept { return arr; }
-        [[nodiscard]] const PointerType data() const noexcept { return arr; }
-        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
+        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const PointerType data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
     protected:
-        explicit ArrayStorage(size_t capacity);
-        explicit ArrayStorage(PointerType arr_);
-        ArrayStorage(const ArrayStorage& array);
-        ArrayStorage(ArrayStorage&& array) noexcept;
-        ~ArrayStorage();
+        __host__ __device__ explicit ArrayStorage(size_t capacity);
+        __host__ __device__ explicit ArrayStorage(PointerType arr_);
+        __host__ __device__ ArrayStorage(const ArrayStorage& array);
+        __host__ __device__ ArrayStorage(ArrayStorage&& array) noexcept;
+        __host__ __device__ ~ArrayStorage();
         /* Helpers */
-        inline void swap(ArrayStorage& array) noexcept;
+        __host__ __device__ inline void swap(ArrayStorage& array) noexcept;
     };
 }
 

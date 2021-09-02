@@ -78,11 +78,11 @@ namespace Physica::Utils {
         using Base::alloc;
         using Base::getDerived;
     public:
-        Array();
-        explicit Array(size_t length_, ConstLValueReferenceType t = T());
-        Array(std::initializer_list<T> list);
-        Array(const Array& array);
-        Array(Array&& array) noexcept;
+        __host__ __device__ Array();
+        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        __host__ __device__ Array(std::initializer_list<T> list);
+        __host__ __device__ Array(const Array& array);
+        __host__ __device__ Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -108,16 +108,16 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
-        void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
-        void resize([[maybe_unused]] size_t size) { assert(size == Length); }
+        __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
+        __host__ __device__ void resize([[maybe_unused]] size_t size) { assert(size == Length); }
         void resize(size_t size, const T& t);
-        void swap(Array& array) noexcept { Base::swap(array); }
+        __host__ __device__ void swap(Array& array) noexcept { Base::swap(array); }
         /* Getters */
-        [[nodiscard]] constexpr static size_t size() { return Length; }
-        [[nodiscard]] constexpr static size_t getLength() { return Length; }
-        [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
         /* Setters */
-        void setLength(size_t size) { assert(size == Length); }
+        __host__ __device__ void setLength(size_t size) { assert(size == Length); }
     };
 
     template<class T, size_t Capacity, class Allocator>
@@ -138,11 +138,11 @@ namespace Physica::Utils {
         using Base::alloc;
         using Base::getDerived;
     public:
-        Array();
-        explicit Array(size_t length_, ConstLValueReferenceType t = T());
-        Array(std::initializer_list<T> list);
-        Array(const Array& array);
-        Array(Array&& array) noexcept;
+        __host__ __device__ Array();
+        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        __host__ __device__ Array(std::initializer_list<T> list);
+        __host__ __device__ Array(const Array& array);
+        __host__ __device__ Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -171,12 +171,12 @@ namespace Physica::Utils {
         inline void append(RValueReferenceType t);
         void append(const Array& t);
         void append(Array&& t);
-        void reserve(size_t size);
-        void swap(Array& array) noexcept;
+        __host__ __device__ void reserve(size_t size);
+        __host__ __device__ void swap(Array& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t size() const noexcept { return length; }
-        [[nodiscard]] size_t getLength() const noexcept { return length; }
-        [[nodiscard]] constexpr static size_t getCapacity() { return Capacity; }
+        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
     };
 
     template<class T, class Allocator>
@@ -199,11 +199,11 @@ namespace Physica::Utils {
     protected:
         size_t capacity;
     public:
-        Array();
-        explicit Array(size_t length_, ConstLValueReferenceType t = T());
-        Array(std::initializer_list<T> list);
-        Array(const Array& array);
-        Array(Array&& array) noexcept;
+        __host__ __device__ Array();
+        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        __host__ __device__ Array(std::initializer_list<T> list);
+        __host__ __device__ Array(const Array& array);
+        __host__ __device__ Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -235,11 +235,11 @@ namespace Physica::Utils {
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
-        void swap(Array& array) noexcept;
+        __host__ __device__ void swap(Array& array) noexcept;
         /* Getters */
-        [[nodiscard]] size_t size() const noexcept { return length; }
-        [[nodiscard]] size_t getLength() const noexcept { return length; }
-        [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>

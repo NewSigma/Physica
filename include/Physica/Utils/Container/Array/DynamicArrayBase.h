@@ -32,6 +32,7 @@ namespace Physica::Utils::Internal {
         using typename Base::RValueReferenceType;
     protected:
         using Base::arr;
+        using Base::alloc;
         size_t length;
     public:
         DynamicArrayBase() = delete;
@@ -44,12 +45,11 @@ namespace Physica::Utils::Internal {
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
-        using Base::alloc;
         ValueType cutLast();
-        inline void grow(ConstLValueReferenceType t);
-        inline void grow(RValueReferenceType t);
+        __host__ __device__ inline void grow(ConstLValueReferenceType t);
+        __host__ __device__ inline void grow(RValueReferenceType t);
         void removeAt(size_t index);
-        void clear() noexcept;
+        __host__ __device__ void clear() noexcept;
         void insert(ConstLValueReferenceType t, size_t index);
         void insert(RValueReferenceType t, size_t index);
         /* Setters */
@@ -58,15 +58,15 @@ namespace Physica::Utils::Internal {
          * \size must larger than current length. Because we can not delete the elements we do not need if not.
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
-        void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
+        __host__ __device__ void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
     protected:
-        explicit DynamicArrayBase(size_t capacity);
-        DynamicArrayBase(size_t length_, size_t capacity);
-        DynamicArrayBase(size_t length_, PointerType arr_);
-        DynamicArrayBase(const DynamicArrayBase& array);
-        DynamicArrayBase(DynamicArrayBase&& array) noexcept;
+        __host__ __device__ explicit DynamicArrayBase(size_t capacity);
+        __host__ __device__ DynamicArrayBase(size_t length_, size_t capacity);
+        __host__ __device__ DynamicArrayBase(size_t length_, PointerType arr_);
+        __host__ __device__ DynamicArrayBase(const DynamicArrayBase& array);
+        __host__ __device__ DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Helpers */
-        void swap(DynamicArrayBase& array);
+        __host__ __device__ void swap(DynamicArrayBase& array);
     };
 }
 

@@ -22,89 +22,99 @@
 
 namespace Physica::Utils::Internal {
     template<class Pointer, class Derived>
-    ContainerIterator<Pointer, ArrayStorage<Derived>>&
+    __host__ __device__ ContainerIterator<Pointer, ArrayStorage<Derived>>&
     ContainerIterator<Pointer, ArrayStorage<Derived>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    ContainerIterator<Pointer, ArrayStorage<Derived>>&
+    __host__ __device__ ContainerIterator<Pointer, ArrayStorage<Derived>>&
     ContainerIterator<Pointer, ArrayStorage<Derived>>::operator++() {
         ++p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const ContainerIterator<Pointer, ArrayStorage<Derived>>
+    __host__ __device__ const ContainerIterator<Pointer, ArrayStorage<Derived>>
     ContainerIterator<Pointer, ArrayStorage<Derived>>::operator++(int) {
         return ContainerIterator(p++);
     }
 
     template<class Pointer, class Derived>
-    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
+    __host__ __device__ ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
     ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator=(const ReverseContainerIterator& ite) { //NOLINT Self assign is ok.
         p = ite.p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
+    __host__ __device__ ReverseContainerIterator<Pointer, ArrayStorage<Derived>>&
     ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator++() {
         --p;
         return *this;
     }
 
     template<class Pointer, class Derived>
-    const ReverseContainerIterator<Pointer, ArrayStorage<Derived>>
+    __host__ __device__ const ReverseContainerIterator<Pointer, ArrayStorage<Derived>>
     ReverseContainerIterator<Pointer, ArrayStorage<Derived>>::operator++(int) {
         return ReverseContainerIterator(p--);
     }
 
     template<class Derived>
-    ArrayStorage<Derived>::ArrayStorage(size_t capacity)
+    __host__ __device__ ArrayStorage<Derived>::ArrayStorage(size_t capacity)
             : alloc() {
         arr = alloc.allocate(capacity);
     }
 
     template<class Derived>
-    ArrayStorage<Derived>::ArrayStorage(const ArrayStorage<Derived>& array)
+    __host__ __device__ ArrayStorage<Derived>::ArrayStorage(PointerType arr_) : arr(arr_), alloc() {}
+
+    template<class Derived>
+    __host__ __device__ ArrayStorage<Derived>::ArrayStorage(const ArrayStorage<Derived>& array)
             : ArrayStorage(array.getDerived().getCapacity()) {
         if constexpr (!std::is_trivial<ValueType>::value)
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 AllocatorTraits::construct(alloc, arr + i, array[i]);
-        else
+        else {
+        #ifdef __CUDA__ARCH__
             memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
+        #else
+            if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)
+                cudaMemcpy(arr.get(), array.arr.get(), array.getDerived().getLength() * sizeof(ValueType), cudaMemcpyDeviceToDevice);
+            else
+                memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
+        #endif
+        }
     }
 
     template<class Derived>
-    ArrayStorage<Derived>::ArrayStorage(ArrayStorage<Derived>&& array) noexcept
+    __host__ __device__ ArrayStorage<Derived>::ArrayStorage(ArrayStorage<Derived>&& array) noexcept
             : arr(array.arr)
             , alloc() {
         array.arr = nullptr;
     }
 
     template<class Derived>
-    ArrayStorage<Derived>::ArrayStorage(PointerType arr_) : arr(arr_), alloc() {}
-
-    template<class Derived>
-    ArrayStorage<Derived>::~ArrayStorage() {
+    __host__ __device__ ArrayStorage<Derived>::~ArrayStorage() {
         const size_t length = Base::getDerived().getLength();
         if constexpr (!std::is_trivial<ValueType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
-                    (arr + i)->~ValueType();
+                    AllocatorTraits::destroy(alloc, arr + i);
         alloc.deallocate(arr, length);
     }
 
     template<class Derived>
-    inline typename ArrayStorage<Derived>::LValueReferenceType ArrayStorage<Derived>::operator[](size_t index) {
+    __host__ __device__ inline typename ArrayStorage<Derived>::LValueReferenceType
+    ArrayStorage<Derived>::operator[](size_t index) {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }
 
     template<class Derived>
-    inline typename ArrayStorage<Derived>::ConstLValueReferenceType ArrayStorage<Derived>::operator[](size_t index) const {
+    __host__ __device__ inline typename ArrayStorage<Derived>::ConstLValueReferenceType
+    ArrayStorage<Derived>::operator[](size_t index) const {
         assert(index < Base::getDerived().getLength());
         return arr[index];
     }
@@ -122,7 +132,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    inline void ArrayStorage<Derived>::swap(ArrayStorage<Derived>& array) noexcept {
+    __host__ __device__ inline void ArrayStorage<Derived>::swap(ArrayStorage<Derived>& array) noexcept {
         std::swap(arr, array.arr);
     }
 }

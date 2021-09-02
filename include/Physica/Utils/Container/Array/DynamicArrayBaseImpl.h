@@ -20,25 +20,25 @@
 
 namespace Physica::Utils::Internal {
     template<class Derived>
-    DynamicArrayBase<Derived>::DynamicArrayBase(size_t capacity)
+    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t capacity)
         : Base(capacity), length(0) {}
 
     template<class Derived>
-    DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, size_t capacity)
+    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, size_t capacity)
             : Base(capacity), length(length_) {
         assert(length <= capacity);
     }
 
     template<class Derived>
-    DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, PointerType arr_)
+    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, PointerType arr_)
             : Base(arr_), length(length_) {}
 
     template<class Derived>
-    DynamicArrayBase<Derived>::DynamicArrayBase(
+    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
         const DynamicArrayBase& array) : Base(array), length(array.length) {}
     
     template<class Derived>
-    DynamicArrayBase<Derived>::DynamicArrayBase(
+    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
         DynamicArrayBase&& array) noexcept : Base(std::move(array)), length(array.length) {}
     /**
      * Get the last element in the array and remove it from the array.
@@ -58,13 +58,13 @@ namespace Physica::Utils::Internal {
      * This function can be used when you are sure the current capacity is enough.
      */
     template<class Derived>
-    inline void DynamicArrayBase<Derived>::grow(ConstLValueReferenceType t) {
+    __host__ __device__ inline void DynamicArrayBase<Derived>::grow(ConstLValueReferenceType t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, t);
     }
 
     template<class Derived>
-    inline void DynamicArrayBase<Derived>::grow(RValueReferenceType t) {
+    __host__ __device__ inline void DynamicArrayBase<Derived>::grow(RValueReferenceType t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, std::move(t));
     }
@@ -73,15 +73,15 @@ namespace Physica::Utils::Internal {
     void DynamicArrayBase<Derived>::removeAt(size_t index) {
         assert(index < length);
         if constexpr (!std::is_trivial<ValueType>::value)
-            (arr + index)->~T();
+            alloc.destroy(arr + index);
         --length;
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(ValueType));
     }
 
     template<class Derived>
-    void DynamicArrayBase<Derived>::clear() noexcept {
+    __host__ __device__ void DynamicArrayBase<Derived>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
-            (arr + i)->~ValueType();
+            alloc.destroy(arr + i);
         length = 0;
     }
 
@@ -102,7 +102,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
-    void DynamicArrayBase<Derived>::swap(DynamicArrayBase& array) {
+    __host__ __device__ void DynamicArrayBase<Derived>::swap(DynamicArrayBase& array) {
         Base::swap(array);
         std::swap(length, array.length);
     }

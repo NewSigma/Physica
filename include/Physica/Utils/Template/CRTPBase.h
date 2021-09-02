@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <cuda_runtime_api.h>
+
 namespace Physica::Utils {
     /**
      * This class helps implemant CRTP.
@@ -25,9 +27,9 @@ namespace Physica::Utils {
     template<class Derived>
     class CRTPBase {
     public:
-        [[nodiscard]] Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
-        [[nodiscard]] const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
-        [[nodiscard]] const Derived& getConstDerived() const noexcept { return *static_cast<Derived*>(this); }
-        [[nodiscard]] Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
+        [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
+        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *static_cast<Derived*>(this); }
+        [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
     };
 }

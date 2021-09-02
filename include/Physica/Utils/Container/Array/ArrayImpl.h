@@ -24,20 +24,20 @@
 namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array() : Base(Capacity) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array() : Base(Capacity) {
         for (size_t i = 0; i < Length; ++i)
             alloc.construct(arr + i);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
             alloc.construct(arr + i, t);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Length) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Length) {
         assert(list.size() <= Capacity);
         size_t i = 0;
         const auto end = list.end();
@@ -48,10 +48,10 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base(array) {}
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base(array) {}
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept
             : Base(std::move(array)) {}
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -193,17 +193,17 @@ namespace Physica::Utils {
     }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array() : Base(Capacity) {}
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array() : Base(Capacity) {}
 
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, Capacity) {
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, Capacity) {
         assert(length_ < Capacity);
         for (size_t i = 0; i < length_; ++i)
             alloc.construct(arr + i, t);
     }
 
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Capacity) {
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Capacity) {
         constexpr auto length = list.size();
         static_assert(length <= Capacity);
         size_t i = 0;
@@ -214,11 +214,11 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(const Array<T, Dynamic, Capacity, Allocator>& array)
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(const Array<T, Dynamic, Capacity, Allocator>& array)
             : Base(array) {}
 
     template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(Array<T, Dynamic, Capacity, Allocator>&& array) noexcept
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(Array<T, Dynamic, Capacity, Allocator>&& array) noexcept
             : Base(std::move(array)) {}
 
     template<class T, size_t Capacity, class Allocator>
@@ -402,26 +402,26 @@ namespace Physica::Utils {
      * For the convenience of implementing templates.
      */
     template<class T, size_t Capacity, class Allocator>
-    void Array<T, Dynamic, Capacity, Allocator>::reserve(size_t size) {
+    __host__ __device__ void Array<T, Dynamic, Capacity, Allocator>::reserve(size_t size) {
         assert(size == Capacity);
     }
 
     template<class T, size_t Capacity, class Allocator>
-    void Array<T, Dynamic, Capacity, Allocator>::swap(Array<T, Dynamic, Capacity, Allocator>& array) noexcept {
+    __host__ __device__ void Array<T, Dynamic, Capacity, Allocator>::swap(Array<T, Dynamic, Capacity, Allocator>& array) noexcept {
         Base::swap(array);
     }
     ///////////////////////////////////////Array<T, Dynamic, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, length_), capacity(length_) {
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
             alloc.construct(arr + i, t);
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(std::initializer_list<T> list)
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(std::initializer_list<T> list)
             : Base(list.size()), capacity(list.size()) {
         size_t i = 0;
         const auto end = list.end();
@@ -431,11 +431,11 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(const Array& array)
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(const Array& array)
             : Base(array), capacity(array.capacity) {}
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept
             : Base(std::move(array)), capacity(array.capacity) {}
 
     template<class T, class Allocator>
@@ -657,7 +657,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& array) noexcept {
+    __host__ __device__ void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& array) noexcept {
         Base::swap(array);
         std::swap(capacity, array.capacity);
     }
