@@ -13,9 +13,6 @@ set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies
 cmake_policy(SET CMP0074 NEW)
-# Platform related
-set(GPU_ARCHITECTURE compute_75)
-set(GPU_CODE sm_75)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -38,9 +35,8 @@ ${CMAKE_CXX_FLAGS} \
 
 set(CMAKE_CUDA_FLAGS "\
 ${CMAKE_CUDA_FLAGS} \
---gpu-architecture ${GPU_ARCHITECTURE} \
---gpu-code ${GPU_CODE} \
 --relocatable-device-code=true \
+--diag-suppress 20011 \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
 
 if(${RUN_CHECKS})
