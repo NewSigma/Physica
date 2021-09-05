@@ -30,12 +30,13 @@ namespace Physica::Core {
         static_assert(dim > 0, "0 dim point is not allowed\n");
     public:
         static constexpr size_t length = dim;
+        using VectorType = Vector<ScalarType, dim>;
     private:
-        Vector<ScalarType, dim> v;
+        VectorType v;
     public:
         Point() = default;
-        template<class VectorType>
-        Point(const LValueVector<VectorType>& v_) : v(v_) {}
+        template<class Derived>
+        Point(const LValueVector<Derived>& v_) : v(v_) {}
         Point(std::initializer_list<ScalarType> list) : v(std::move(list)) {}
         Point(const Point& p) = default;
         Point(Point&& p) noexcept = default;
@@ -44,11 +45,24 @@ namespace Physica::Core {
         Point& operator=(const Point& p) = default;
         Point& operator=(Point&& p) noexcept = default;
         /* Getters */
+        VectorType& getVector() noexcept { return v; }
+        const VectorType& getVector() const noexcept { return v; }
         const ScalarType& getX() const { return v[0]; }
         const ScalarType& getY() const { return v[1]; }
         const ScalarType& getZ() const { return v[2]; }
         const ScalarType& getW() const { return v[3]; }
+        ScalarType dist(const Point& p) const;
     };
+
+    template<size_t dim, class ScalarType>
+    std::ostream& operator<<(std::ostream& os, const Point<dim, ScalarType>& p) {
+        return os << p.getVector();
+    }
+
+    template<size_t dim, class ScalarType>
+    ScalarType Point<dim, ScalarType>::dist(const Point<dim, ScalarType>& p) const {
+        return (v - p.v).norm();
+    }
 
     typedef Point<1> Point1D;
     typedef Point<2> Point2D;

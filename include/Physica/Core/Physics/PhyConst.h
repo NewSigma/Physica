@@ -28,5 +28,9 @@ namespace Physica::Core::Physics {
         constexpr static double unitCharge = 1.602176634E-19; 
         constexpr static double protonMass = 1.6726231E-27;
         constexpr static double neutronMass = 1.6749286E-27;
+        /**
+         * The first element is a space holder
+         */
+        constexpr static double relativeAtomMass[5]{0, 1.00794, 4.002602, 6.941, 9.012182};
     };
 }
