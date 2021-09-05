@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_GENEALGORITHMIMPL_H
-#define PHYSICA_GENEALGORITHMIMPL_H
+#pragma once
 
 namespace Physica::Core {
     template<ScalarOption option>
@@ -33,9 +32,9 @@ namespace Physica::Core {
         const auto mode = config.mode;
         const auto& lower = range.lowerBound;
         if (mode == LinearChoose) {
-            Scalar<option, false> stepLength =
+            ScalarType stepLength =
                     regionLength / MultiScalar(static_cast<SignedMPUnit>(population));
-            Scalar<option, false> temp(lower);
+            ScalarType temp(lower);
             for (int i = 0; i < population; i++) {
                 points[i] = temp;
                 temp += stepLength;
@@ -48,7 +47,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption option>
-    Point<2, option> GeneAlgorithm<1, option>::solve() const {
+    Point<2, typename GeneAlgorithm<1, option>::ScalarType> GeneAlgorithm<1, option>::solve() const {
         Q_UNUSED(option)
         unsigned int generation = 0;
         while (generation < config.maxGeneration) {
@@ -96,5 +95,3 @@ namespace Physica::Core {
         }
     }
 }
-
-#endif

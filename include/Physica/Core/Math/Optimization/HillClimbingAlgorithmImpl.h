@@ -21,7 +21,7 @@
 namespace Physica::Core {
     template<ScalarOption option>
     HillClimbingAlgorithm<1, option>::HillClimbingAlgorithm(const VectorFunction<option, false>& func
-            , const Scalar<option, false> initial, const Scalar<option, false> minStep)
+            , const ScalarType initial, const ScalarType minStep)
             : func(func), x_initial(initial), minStep(minStep) {
         state = minStep.isZero() ? Unavailable : Ready;
     }
@@ -38,18 +38,18 @@ namespace Physica::Core {
             , state(alg.state) {}
 
     template<ScalarOption option>
-    Point<2, option, false> HillClimbingAlgorithm<1, option>::solve() const {
+    Point<2, typename HillClimbingAlgorithm<1, option>::ScalarType> HillClimbingAlgorithm<1, option>::solve() const {
         if(state != Ready)
             return func(x_initial);
 
-        const Scalar<option, false> y_initial = func(x_initial);
-        Scalar<option, false> x_last(x_initial);
-        Scalar<option, false> y_last(y_initial);
-        Scalar<option, false> x = x_initial + minStep;
-        Scalar<option, false> y = func(x_last);
-        Scalar<option, false> x_result{};
-        Scalar<option, false> y_result{};
-        Scalar<option, false> stepSize(minStep);
+        const ScalarType y_initial = func(x_initial);
+        ScalarType x_last(x_initial);
+        ScalarType y_last(y_initial);
+        ScalarType x = x_initial + minStep;
+        ScalarType y = func(x_last);
+        ScalarType x_result{};
+        ScalarType y_result{};
+        ScalarType stepSize(minStep);
         /*
          * We use changeable stepSize, if y > y_last, stepMultiple += 1, otherwise stepMultiple -= 1.
          * The current step size is minStep * (stepMultiple + 1).
@@ -79,6 +79,6 @@ namespace Physica::Core {
             x = x_last + stepSize;
             y = func(x);
         }
-        return Point<2, option, false>(x_result, y_result);
+        return Point<2, ScalarType>{x_result, y_result};
     }
 }

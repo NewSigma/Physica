@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_GENEALGORITHM_H
-#define PHYSICA_GENEALGORITHM_H
+#pragma once
 
 #include <ctime>
 #include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
@@ -60,20 +59,21 @@ namespace Physica::Core {
     template<ScalarOption option>
     class GeneAlgorithm<1, option> : public AbstractGeneAlgorithm {
     public:
+        using ScalarType = Scalar<option, false>;
         struct Range {
-            Scalar<option, false> lowerBound;
-            Scalar<option, false> upperBound;
+            ScalarType lowerBound;
+            ScalarType upperBound;
         };
     private:
         VectorFunction<option, false> func;
         Range range;
-        Scalar<option, false> regionLength;
-        std::vector<Scalar<option, false>> points;
+        ScalarType regionLength;
+        std::vector<ScalarType> points;
     public:
         GeneAlgorithm(const VectorFunction<option, false>& func, const Range& range, const AlgorithmConfig& config);
         ~GeneAlgorithm() = default;
 
-        Point<2, option> solve() const;
+        Point<2, ScalarType> solve() const;
     private:
         void crossover();
         void mutation();
@@ -81,5 +81,3 @@ namespace Physica::Core {
 }
 
 #include "GeneAlgorithmImpl.h"
-
-#endif

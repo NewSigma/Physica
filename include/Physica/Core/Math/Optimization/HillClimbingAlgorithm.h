@@ -40,29 +40,30 @@ namespace Physica::Core {
             OverFlow
         };
     private:
+        using ScalarType = Scalar<option, false>;
         const VectorFunction<option, false> func;
-        Scalar<option, false> x_initial;
+        ScalarType x_initial;
         /*!
          * \minStep is the minimum step size that depends the precision of our result.
          * Set a positive value to search from the positive axe of x,
          * or a negative value to search from negative value.
          */
-        Scalar<option, false> minStep;
+        ScalarType minStep;
         State state;
     public:
         HillClimbingAlgorithm(const VectorFunction<option, false>& func
-                              , const Scalar<option, false> initial
-                              , const Scalar<option, false> minStep);
+                              , const ScalarType initial
+                              , const ScalarType minStep);
         HillClimbingAlgorithm(const HillClimbingAlgorithm& alg);
         HillClimbingAlgorithm(HillClimbingAlgorithm& alg);
         ~HillClimbingAlgorithm() = default;
         /* Operations */
-        Point<2, option, false> solve() const;
+        Point<2, ScalarType> solve() const;
         /* Getters */
-        [[nodiscard]] Scalar<option, false> getMinStep() const { return minStep; }
+        [[nodiscard]] ScalarType getMinStep() const { return minStep; }
         [[nodiscard]] State getState() const { return state; }
         /* Setters */
-        void setMinStep(const Scalar<option, false>& s) { minStep = s; }
+        void setMinStep(const ScalarType& s) { minStep = s; }
     };
 }
 

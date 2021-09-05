@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,86 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_POINT_H
-#define PHYSICA_POINT_H
+#pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     /*!
      * By default, point do not need high precision, so @param type is set to @enum ScalarType::Float.
      */
-    template<size_t dim, ScalarOption option = Float, bool errorTrack = false>
+    template<size_t dim, class ScalarType = Scalar<Float, false>>
     class Point {
-        Scalar<option, errorTrack>* arr;
+        static_assert(dim > 0, "0 dim point is not allowed\n");
     public:
         static constexpr size_t length = dim;
-
-        Point() : arr(new Scalar<option, errorTrack>[dim]) {}
-        Point(const Point& p);
-        Point(Point&& p) noexcept : arr(p.arr) { p.arr = nullptr; }
-        ~Point() { delete[] arr; }
-        /* Operators */
-        Point& operator=(const Point& p);
-        Point& operator=(Point&& p) noexcept { this->~Point(); arr = p.arr; p.arr = nullptr; }
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Point<1, option, errorTrack> {
-        Scalar<option, errorTrack> x;
+    private:
+        Vector<ScalarType, dim> v;
     public:
         Point() = default;
-        explicit Point(Scalar<option, errorTrack> x);
-        Point(const Point& p);
-        Point(Point&& p) noexcept;
+        template<class VectorType>
+        Point(const LValueVector<VectorType>& v_) : v(v_) {}
+        Point(std::initializer_list<ScalarType> list) : v(std::move(list)) {}
+        Point(const Point& p) = default;
+        Point(Point&& p) noexcept = default;
         ~Point() = default;
         /* Operators */
-        Point& operator=(const Point& p);
-        Point& operator=(Point&& p) noexcept;
+        Point& operator=(const Point& p) = default;
+        Point& operator=(Point&& p) noexcept = default;
         /* Getters */
-        const Scalar<option, errorTrack>& getX() const { return x; }
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Point<2, option, errorTrack> {
-        Scalar<option, errorTrack> x, y;
-    public:
-        Point() = default;
-        Point(Scalar<option, errorTrack> x, Scalar<option, errorTrack> y);
-        Point(const Point& p);
-        Point(Point&& p) noexcept;
-        ~Point() = default;
-        /* Operators */
-        Point& operator=(const Point& p);
-        Point& operator=(Point&& p) noexcept;
-        /* Getters */
-        const Scalar<option, errorTrack>& getX() const { return x; }
-        const Scalar<option, errorTrack>& getY() const { return y; }
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Point<3, option, errorTrack> {
-        Scalar<option, errorTrack> x, y, z;
-    public:
-        Point() = default;
-        Point(Scalar<option, errorTrack> x, Scalar<option, errorTrack> y, Scalar<option, errorTrack> z);
-        Point(const Point& p);
-        Point(Point&& p) noexcept;
-        ~Point() = default;
-        /* Operators */
-        Point& operator=(const Point& p);
-        Point& operator=(Point&& p) noexcept;
-        /* Getters */
-        const Scalar<option, errorTrack>& getX() const { return x; }
-        const Scalar<option, errorTrack>& getY() const { return y; }
-        const Scalar<option, errorTrack>& getZ() const { return z; }
+        const ScalarType& getX() const { return v[0]; }
+        const ScalarType& getY() const { return v[1]; }
+        const ScalarType& getZ() const { return v[2]; }
+        const ScalarType& getW() const { return v[3]; }
     };
 
     typedef Point<1> Point1D;
     typedef Point<2> Point2D;
     typedef Point<3> Point3D;
 }
-
-#include "PointImpl.h"
-
-#endif
