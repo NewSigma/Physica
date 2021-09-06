@@ -45,17 +45,23 @@ namespace Physica::Core::Parallel {
         auto& queue = data.queue;
         std::unique_lock locker(data.queueMutex, std::defer_lock);
         while (true) {
+            locker.lock();
             if (!queue.empty()) {
-                locker.lock();
                 std::unique_ptr<Task> task(std::move(queue.front()));
                 queue.pop();
                 locker.unlock();
                 task->execute();
             }
-            else if (exit)
-                return;
-            else
-                std::this_thread::yield();
+            else {
+                locker.unlock();
+                std::unique_ptr<Task> task = steal();
+                if (task != nullptr)
+                    task->execute();
+                else if (exit)
+                    return;
+                else
+                    std::this_thread::yield();
+            }
         }
     }
 
@@ -73,5 +79,24 @@ namespace Physica::Core::Parallel {
         if (instance == nullptr) {
             instance = new ThreadPool(threadCount);
         }
+    }
+
+    std::unique_ptr<Task> ThreadPool::steal() {
+        const unsigned int threadCount = getThreadCount();
+        const unsigned int random = threadRand(getThreadInfo().randState);
+        for (size_t i = 0; i < threadCount; ++i) {
+            ThreadData& data = thread_data[(random + i) % threadCount];
+            if (data.queueMutex.try_lock()) {
+                auto& queue = data.queue;
+                if (!queue.empty()) {
+                    std::unique_ptr<Task> task(std::move(queue.front()));
+                    queue.pop();
+                    data.queueMutex.unlock();
+                    return task;
+                }
+                data.queueMutex.unlock();
+            }
+        }
+        return std::unique_ptr<Task>(nullptr);
     }
 }

@@ -64,9 +64,10 @@ namespace Physica::Core::Parallel {
         /* Operations */
         template<class Function, class... Args>
         std::future<typename std::invoke_result<Function>::type> schedule(Function func, Args... args);
-        void shouldExit() { exit = true; }
         /* Getters */
         [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.size(); }
+        /* Setters */
+        void shouldExit() { exit = true; }
         /* Static Members */
         [[nodiscard]] static ThreadInfo& getThreadInfo();
         static void initThreadPool(unsigned int threadCount);
@@ -74,7 +75,9 @@ namespace Physica::Core::Parallel {
         [[nodiscard]] static ThreadPool& getInstance() { return *instance; }
     private:
         ThreadPool(unsigned int threadCount);
+        /* Operations */
         void workerMainLoop(unsigned int thread_id);
+        std::unique_ptr<Task> steal();
         /* Static Members */
         [[nodiscard]] static inline unsigned int defaultThreadNum() noexcept { return get_nprocs() * 3 / 4; }
         [[nodiscard]] static inline unsigned int threadRand(uint64_t& state);
