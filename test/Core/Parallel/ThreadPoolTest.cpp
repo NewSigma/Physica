@@ -26,9 +26,11 @@ void func() {
 }
 
 int main() {
-    ThreadPool pool(4);
+    ThreadPool::initThreadPool(4);
+    ThreadPool& pool = ThreadPool::getInstance();
     for (int i = 0; i < 20; ++i)
         pool.schedule(func);
     pool.shouldExit();
+    ThreadPool::deInitThreadPool();
     return 0;
 }

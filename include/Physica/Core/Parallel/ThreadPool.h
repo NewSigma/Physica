@@ -49,12 +49,12 @@ namespace Physica::Core::Parallel {
             size_t id;
         };
     private:
+        static ThreadPool* instance;
         thread_local static ThreadInfo* info;
 
         std::vector<ThreadData> thread_data;
         bool exit;
     public:
-        ThreadPool(unsigned int threadCount);
         ThreadPool(const ThreadPool&) = delete;
         ThreadPool(ThreadPool&&) noexcept = delete;
         ~ThreadPool();
@@ -69,7 +69,11 @@ namespace Physica::Core::Parallel {
         [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.size(); }
         /* Static Members */
         [[nodiscard]] static ThreadInfo& getThreadInfo();
+        static void initThreadPool(unsigned int threadCount);
+        static void deInitThreadPool() { delete instance; instance = nullptr; }
+        [[nodiscard]] static ThreadPool& getInstance() { return *instance; }
     private:
+        ThreadPool(unsigned int threadCount);
         void workerMainLoop(unsigned int thread_id);
         /* Static Members */
         [[nodiscard]] static inline unsigned int defaultThreadNum() noexcept { return get_nprocs() * 3 / 4; }

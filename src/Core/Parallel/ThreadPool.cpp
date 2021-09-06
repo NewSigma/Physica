@@ -19,6 +19,7 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core::Parallel {
+    ThreadPool* ThreadPool::instance = nullptr;
     thread_local ThreadPool::ThreadInfo* ThreadPool::info = nullptr;
 
     ThreadPool::ThreadPool(unsigned int threadCount) : thread_data(threadCount), exit(false) {
@@ -66,5 +67,11 @@ namespace Physica::Core::Parallel {
             info->id = 0;
         }
         return *info;
+    }
+
+    void ThreadPool::initThreadPool(unsigned int threadCount) {
+        if (instance == nullptr) {
+            instance = new ThreadPool(threadCount);
+        }
     }
 }
