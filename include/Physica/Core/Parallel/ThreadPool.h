@@ -24,7 +24,9 @@
 #include <queue>
 #include <functional>
 #include <vector>
+#include <future>
 #include <sys/sysinfo.h>
+#include "PackagedTask.h"
 
 namespace Physica::Core::Parallel {
     /**
@@ -35,7 +37,7 @@ namespace Physica::Core::Parallel {
     public:
         struct ThreadData {
             std::unique_ptr<std::thread> thread;
-            std::queue<std::function<void()>> queue;
+            std::queue<std::unique_ptr<Task>> queue;
             std::mutex queueMutex;
 
             ThreadData() : thread(), queue(), queueMutex() {}
@@ -60,7 +62,8 @@ namespace Physica::Core::Parallel {
         ThreadPool& operator=(const ThreadPool&) = delete;
         ThreadPool& operator=(ThreadPool&&) noexcept = delete;
         /* Operations */
-        void schedule(std::function<void()> func);
+        template<class Function, class... Args>
+        std::future<typename std::invoke_result<Function>::type> schedule(Function func, Args... args);
         void shouldExit() { exit = true; }
         /* Getters */
         [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.size(); }
@@ -78,5 +81,17 @@ namespace Physica::Core::Parallel {
         state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
         // Generate the random output (using the PCG-XSH-RS scheme)
         return static_cast<unsigned int>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
+    }
+
+    template<class Function, class ... Args>
+    std::future<typename std::invoke_result<Function>::type> ThreadPool::schedule(Function func, Args... args) {
+        using ResultType = typename std::invoke_result<Function>::type;
+        std::packaged_task<ResultType(Args...)> task(std::bind(func, args...));
+        auto result = task.get_future();
+        unsigned int random_id = threadRand(getThreadInfo().randState) % thread_data.size();
+        auto& data = thread_data[random_id];
+        std::lock_guard lock(data.queueMutex);
+        data.queue.emplace(new PackagedTask(std::move(task)));
+        return result;
     }
 }

@@ -36,13 +36,6 @@ namespace Physica::Core::Parallel {
         }
     }
 
-    void ThreadPool::schedule(std::function<void()> func) {
-        unsigned int random_id = threadRand(getThreadInfo().randState) % thread_data.size();
-        auto& data = thread_data[random_id];
-        std::lock_guard lock(data.queueMutex);
-        data.queue.emplace(std::move(func));
-    }
-
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
         auto& threadInfo = getThreadInfo();
         threadInfo.pool = this;
@@ -53,10 +46,10 @@ namespace Physica::Core::Parallel {
         while (true) {
             if (!queue.empty()) {
                 locker.lock();
-                std::function<void()> task(std::move(queue.front()));
+                std::unique_ptr<Task> task(std::move(queue.front()));
                 queue.pop();
                 locker.unlock();
-                task();
+                task->execute();
             }
             else if (exit)
                 return;
