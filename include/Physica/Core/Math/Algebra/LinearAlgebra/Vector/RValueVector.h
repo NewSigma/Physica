@@ -56,6 +56,8 @@ namespace Physica::Core {
         RowMatrix copyToRowMatrix() const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] ScalarType norm() const;
+        [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
     };
@@ -72,6 +74,19 @@ namespace Physica::Core {
         RowMatrix mat(1, getLength());
         mat[0] = *this;
         return mat;
+    }
+
+    template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::norm() const {
+        return sqrt(squaredNorm());
+    }
+
+    template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::squaredNorm() const {
+        auto result = ScalarType::Zero();
+        for(size_t i = 0; i < getLength(); ++i)
+            result += square(calc(i));
+        return result;
     }
 
     template<class VectorType>

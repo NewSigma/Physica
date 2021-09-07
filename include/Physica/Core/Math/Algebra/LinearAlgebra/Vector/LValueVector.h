@@ -51,8 +51,6 @@ namespace Physica::Core {
         VectorBlock<Derived> segment(size_t from, size_t to) { return VectorBlock<Derived>(Base::getDerived(), from, to); }
         const VectorBlock<Derived> segment(size_t from, size_t to) const { return VectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
         /* Getters */
-        [[nodiscard]] ScalarType norm() const;
-        [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] bool isZero() const;
     };
 
@@ -77,19 +75,6 @@ namespace Physica::Core {
     void LValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
         for (size_t i = 0; i < Base::getLength(); ++i)
             v[i] = (*this)[i];
-    }
-
-    template<class Derived>
-    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::norm() const {
-        return sqrt(squaredNorm());
-    }
-
-    template<class Derived>
-    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::squaredNorm() const {
-        auto result = ScalarType::Zero();
-        for(size_t i = 0; i < Base::getLength(); ++i)
-            result += square((*this)[i]);
-        return result;
     }
 
     template<class Derived>
