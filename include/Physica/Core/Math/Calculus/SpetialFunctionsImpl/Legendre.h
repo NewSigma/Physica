@@ -21,25 +21,6 @@
 #include <cassert>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class ScalarType>
-        ScalarType factorial(unsigned int x) {
-            constexpr static int size = 16;
-            static const double cache[size] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368000};
-            if (x < size)
-                return cache[x];
-            else {
-                double s = cache[size - 1];
-                double i_d = size;
-                for (unsigned int i = size; i <= x; i++) {
-                    s *= i_d;
-                    i_d += 1.0;
-                }
-                return s;
-            }
-        }
-    }
-
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> legendreP(unsigned int l, const Scalar<option, errorTrack>& x) {
         using T = Scalar<option, errorTrack>;
