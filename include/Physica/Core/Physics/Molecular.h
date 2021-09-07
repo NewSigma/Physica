@@ -28,18 +28,21 @@ namespace Physica::Core::Physics {
     class Molecular {
         using PointType = Point<3, ScalarType>;
         Array<PointType> atoms;
-        Array<unsigned char> atomNumbers;
+        Array<unsigned char> atomicNumbers;
     public:
         Molecular();
         ~Molecular() = default;
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Molecular& m);
         /* Getters */
-        ScalarType getPairDist(size_t i, size_t j) const;
-        ScalarType getTripleAngle(size_t i, size_t j, size_t k) const;
-        ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
-        ScalarType getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const;
-        PointType getMassCenter() const;
+        [[nodiscard]] size_t atomCount() const noexcept { return atoms.getLength(); }
+        [[nodiscard]] PointType getAtom(size_t i) const { return atoms[i]; }
+        [[nodiscard]] unsigned char getAtomicNumber(size_t i) const { return atomicNumber[i]; }
+        [[nodiscard]] ScalarType getPairDist(size_t i, size_t j) const;
+        [[nodiscard]] ScalarType getTripleAngle(size_t i, size_t j, size_t k) const;
+        [[nodiscard]] ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
+        [[nodiscard]] ScalarType getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const;
+        [[nodiscard]] PointType getMassCenter() const;
     };
 
     template<class ScalarType>
@@ -96,7 +99,7 @@ namespace Physica::Core::Physics {
         const size_t length = atoms.getLength();
         VectorType result = VectorType::Zeros(length);
         for (size_t i = 0; i < length; ++i) {
-            double atomMass = PhyConst::relativeAtomMass[atomNumbers[i]];
+            double atomMass = PhyConst::relativeAtomMass[atomicNumbers[i]];
             totalMass += atomMass;
             result += ScalarType(atomMass) * atoms[i].getVector();
         }

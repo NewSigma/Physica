@@ -44,7 +44,7 @@ namespace Physica::Core {
         template<class ScalarType>
         ScalarType doubleFactorial(size_t x) {
             constexpr static size_t size = 16;
-            static const double cache[size] = {1, 2, 3, 8, 15, 48, 105, 384, 945, 3840, 10395, 46080, 135135, 645120, 2027025, 10321920};
+            static const double cache[size] = {1, 1, 2, 3, 8, 15, 48, 105, 384, 945, 3840, 10395, 46080, 135135, 645120, 2027025};
             if (x < size)
                 return cache[x];
             else {
