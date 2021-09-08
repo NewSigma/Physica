@@ -34,6 +34,18 @@ ScalarType overlap_1s_1s(const ScalarType& alpha1,
     return factor * exp(-alpha1 * alpha2 / alpha_sum * (v1 - v2).squaredNorm());
 }
 
+ScalarType kinetic_1s_1s(const ScalarType& alpha1,
+                         const Vector<ScalarType, 3>& v1,
+                         const ScalarType& alpha2,
+                         const Vector<ScalarType, 3>& v2) {
+    const ScalarType alpha_sum = alpha1 + alpha2;
+    const ScalarType temp = ScalarType(M_PI) / alpha_sum;
+    const ScalarType factor = temp * sqrt(temp);
+    const ScalarType temp1 = alpha1 * alpha2 / alpha_sum;
+    const ScalarType squaredNorm = (v1 - v2).squaredNorm();
+    return factor * exp(-temp1 * squaredNorm) * temp1 * (ScalarType(6) - ScalarType(4) * temp1 * squaredNorm) * ScalarType(0.5);
+}
+
 int main() {
     ScalarType alpha1 = ScalarType(1.25);
     Vector<ScalarType, 3> v1{2, 5, -1};
@@ -42,6 +54,8 @@ int main() {
     Vector<ScalarType, 3> v2{-3, 6, 1};
     GaussBase<ScalarType> base2 = GaussBase<ScalarType>(v2, alpha2, 0, 0, 0);
     if (!scalarNear(base1.overlap(base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+        return 1;
+    if (!scalarNear(base1.kinetic(base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
         return 1;
     return 0;
 }
