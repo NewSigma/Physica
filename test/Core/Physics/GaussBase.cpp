@@ -74,6 +74,7 @@ ScalarType attraction_1s_1s(const ScalarType& alpha1,
 }
 
 int main() {
+    using BaseFunc = GaussBase<ScalarType>;
     if (!test_helper_F())
         return 1;
 
@@ -83,12 +84,12 @@ int main() {
     ScalarType alpha2 = ScalarType(0.76);
     Vector<ScalarType, 3> v2{-3, 6, 1};
     GaussBase<ScalarType> base2 = GaussBase<ScalarType>(v2, alpha2, 0, 0, 0);
-    if (!scalarNear(base1.overlap(base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+    if (!scalarNear(BaseFunc::overlap(base1, base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
         return 1;
-    if (!scalarNear(base1.kinetic(base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+    if (!scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
         return 1;
     Vector<ScalarType, 3> v3{1.5, 1.7, -0.4};
-    if (!scalarNear(base1.nuclearAttraction(base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
+    if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
         return 1;
     return 0;
 }

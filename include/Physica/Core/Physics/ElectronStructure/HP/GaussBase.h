@@ -44,9 +44,9 @@ namespace Physica::Core::Physics {
         GaussBase& operator=(const GaussBase& base) = default;
         GaussBase& operator=(GaussBase&& base) noexcept = default;
         /* Getters */
-        [[nodiscard]] ScalarType overlap(const GaussBase& base) const;
-        [[nodiscard]] ScalarType kinetic(const GaussBase& base) const;
-        [[nodiscard]] ScalarType nuclearAttraction(const GaussBase& base, const Vector<ScalarType, 3>& corePos) const;
+        [[nodiscard]] static ScalarType overlap(const GaussBase& base1, const GaussBase& base2);
+        [[nodiscard]] static ScalarType kinetic(const GaussBase& base1, const GaussBase& base2);
+        [[nodiscard]] static ScalarType nuclearAttraction(const GaussBase& base1, const GaussBase& base2, const Vector<ScalarType, 3>& corePos);
     private:
         [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] static ScalarType overlapImpl(const ScalarType& element_pa, const ScalarType& element_pb, const ScalarType& alpha_sum, size_t index1, size_t index2);
@@ -94,79 +94,81 @@ namespace Physica::Core::Physics {
     }
 
     template<class ScalarType>
-    ScalarType GaussBase<ScalarType>::overlap(const GaussBase& base) const {
-        const ScalarType alpha_sum = alpha + base.alpha;
+    ScalarType GaussBase<ScalarType>::overlap(const GaussBase& base1, const GaussBase& base2) {
+        const ScalarType alpha_sum = base1.alpha + base2.alpha;
         const ScalarType inv_alpha_sum = reciprocal(alpha_sum);
         const ScalarType temp = ScalarType(M_PI) * inv_alpha_sum;
         const ScalarType factor = temp * sqrt(temp);
 
-        const ScalarType temp1 = alpha * inv_alpha_sum;
+        const ScalarType temp1 = base1.alpha * inv_alpha_sum;
         const ScalarType temp2 = ScalarType::One() - temp1;
-        const ScalarType factor2 = exp(-temp1 * base.alpha * (center - base.center).squaredNorm());
+        const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
-        const Vector<ScalarType, 3> vector_p = temp1 * center + temp2 * base.center;
-        const Vector<ScalarType, 3> vector_pa = vector_p - center;
-        const Vector<ScalarType, 3> vector_pb = vector_p - base.center;
-        const ScalarType factor3_x = overlapImpl(vector_pa[0], vector_pb[0], alpha_sum, l, base.l);
-        const ScalarType factor3_y = overlapImpl(vector_pa[1], vector_pb[1], alpha_sum, m, base.m);
-        const ScalarType factor3_z = overlapImpl(vector_pa[2], vector_pb[2], alpha_sum, n, base.n);
+        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
+        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
+        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
+        const ScalarType factor3_x = overlapImpl(vector_pa[0], vector_pb[0], alpha_sum, base1.l, base2.l);
+        const ScalarType factor3_y = overlapImpl(vector_pa[1], vector_pb[1], alpha_sum, base1.m, base2.m);
+        const ScalarType factor3_z = overlapImpl(vector_pa[2], vector_pb[2], alpha_sum, base1.n, base2.n);
         return factor * factor2 * factor3_x * factor3_y * factor3_z;
     }
 
     template<class ScalarType>
-    ScalarType GaussBase<ScalarType>::kinetic(const GaussBase& base) const {
-        GaussBase copy = base;
-        ScalarType result = base.alpha * ScalarType(2 * (base.l + base.m + base.n) + 3) * overlap(base);
+    ScalarType GaussBase<ScalarType>::kinetic(const GaussBase& base1, const GaussBase& base2) {
+        GaussBase copy = base2;
+        ScalarType result = base2.alpha * ScalarType(2 * (base2.l + base2.m + base2.n) + 3) * overlap(base1, base2);
         {
             copy.l += 2;
-            const ScalarType temp1 = overlap(copy);
+            const ScalarType temp1 = overlap(base1, copy);
             copy.l -= 2;
             copy.m += 2;
-            const ScalarType temp2 = overlap(copy);
+            const ScalarType temp2 = overlap(base1, copy);
             copy.m -= 2;
             copy.n += 2;
-            const ScalarType temp3 = overlap(copy);
+            const ScalarType temp3 = overlap(base1, copy);
             copy.n -= 2;
-            result -= ScalarType::Two() * square(base.alpha) * (temp1 + temp2 + temp3);
+            result -= ScalarType::Two() * square(base2.alpha) * (temp1 + temp2 + temp3);
         }
-        if (base.l >= 2) {
+        if (base2.l >= 2) {
             copy.l -= 2;
-            result -= ScalarType(0.5) * ScalarType(base.l * (base.l - 1)) * overlap(copy);
+            result -= ScalarType(0.5) * ScalarType(base2.l * (base2.l - 1)) * overlap(base1, copy);
             copy.l += 2;
         }
-        if (base.m >= 2) {
+        if (base2.m >= 2) {
             copy.m -= 2;
-            result -= ScalarType(0.5) * ScalarType(base.m * (base.m - 1)) * overlap(copy);
+            result -= ScalarType(0.5) * ScalarType(base2.m * (base2.m - 1)) * overlap(base1, copy);
             copy.m += 2;
         }
-        if (base.n >= 2) {
+        if (base2.n >= 2) {
             copy.n -= 2;
-            result -= ScalarType(0.5) * ScalarType(base.n * (base.n - 1)) * overlap(copy);
+            result -= ScalarType(0.5) * ScalarType(base2.n * (base2.n - 1)) * overlap(base1, copy);
         }
         return result;
     }
 
     template<class ScalarType>
-    ScalarType GaussBase<ScalarType>::nuclearAttraction(const GaussBase& base, const Vector<ScalarType, 3>& corePos) const {
-        const ScalarType alpha_sum = alpha + base.alpha;
+    ScalarType GaussBase<ScalarType>::nuclearAttraction(const GaussBase& base1,
+                                                        const GaussBase& base2,
+                                                        const Vector<ScalarType, 3>& corePos) {
+        const ScalarType alpha_sum = base1.alpha + base2.alpha;
         const ScalarType inv_alpha_sum = reciprocal(alpha_sum);
         const ScalarType factor = ScalarType::Two() * ScalarType(M_PI) / alpha_sum;
-        const ScalarType temp1 = alpha * inv_alpha_sum;
+        const ScalarType temp1 = base1.alpha * inv_alpha_sum;
         const ScalarType temp2 = ScalarType::One() - temp1;
-        const ScalarType factor2 = exp(-temp1 * base.alpha * (center - base.center).squaredNorm());
+        const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
-        const Vector<ScalarType, 3> vector_p = temp1 * center + temp2 * base.center;
-        const Vector<ScalarType, 3> vector_pa = vector_p - center;
-        const Vector<ScalarType, 3> vector_pb = vector_p - base.center;
+        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
+        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
+        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
         const Vector<ScalarType, 3> vector_cp = corePos - vector_p;
         const ScalarType temp = alpha_sum * vector_cp.squaredNorm();
         ScalarType factor3 = ScalarType::Zero();
-        for (size_t i = 0; i <= l + base.l; ++i) {
-            for (size_t j = 0; j <= m + base.m; ++j) {
-                for (size_t k = 0; k <= n + base.n; ++k) {
-                    factor3 += attractionHelper(i, l, base.l, vector_pa[0], vector_pb[0], vector_cp[0], alpha_sum)
-                             * attractionHelper(j, m, base.m, vector_pa[1], vector_pb[1], vector_cp[1], alpha_sum)
-                             * attractionHelper(k, n, base.n, vector_pa[2], vector_pb[2], vector_cp[2], alpha_sum)
+        for (size_t i = 0; i <= base1.l + base2.l; ++i) {
+            for (size_t j = 0; j <= base1.m + base2.m; ++j) {
+                for (size_t k = 0; k <= base1.n + base2.n; ++k) {
+                    factor3 += attractionHelper(i, base1.l, base2.l, vector_pa[0], vector_pb[0], vector_cp[0], alpha_sum)
+                             * attractionHelper(j, base1.m, base2.m, vector_pa[1], vector_pb[1], vector_cp[1], alpha_sum)
+                             * attractionHelper(k, base1.n, base2.n, vector_pa[2], vector_pb[2], vector_cp[2], alpha_sum)
                              * helper_F(i + j + k, temp);
                 }
             }
