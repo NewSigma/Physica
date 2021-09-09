@@ -49,27 +49,27 @@ namespace Physica::Core::Physics {
         [[nodiscard]] ScalarType nuclearAttraction(const GaussBase& base, const Vector<ScalarType, 3>& corePos) const;
     private:
         [[nodiscard]] ScalarType squaredNorm() const;
-        [[nodiscard]] ScalarType overlapImpl(const ScalarType& element_pa, const ScalarType& element_pb, const ScalarType& alpha_sum, size_t index1, size_t index2) const;
-        [[nodiscard]] ScalarType attractionHelper(size_t i,
-                                                  size_t index1,
-                                                  size_t index2,
-                                                  const ScalarType& element_pa,
-                                                  const ScalarType& element_pb,
-                                                  const ScalarType& element_cp,
-                                                  const ScalarType& alpha_sum) const;
-        [[nodiscard]] inline ScalarType attractionHelperG(size_t L,
-                                                          size_t index1,
-                                                          size_t index2,
-                                                          const ScalarType& element_pa,
-                                                          const ScalarType& element_pb,
-                                                          const ScalarType& epsilon) const;
-        [[nodiscard]] inline ScalarType attractionHelperH(size_t i,
-                                                          size_t lambda,
-                                                          size_t index1,
-                                                          size_t index2,
-                                                          const ScalarType& element_pa,
-                                                          const ScalarType& element_pb,
-                                                          const ScalarType& epsilon) const;
+        [[nodiscard]] static ScalarType overlapImpl(const ScalarType& element_pa, const ScalarType& element_pb, const ScalarType& alpha_sum, size_t index1, size_t index2);
+        [[nodiscard]] static ScalarType attractionHelper(size_t i,
+                                                         size_t index1,
+                                                         size_t index2,
+                                                         const ScalarType& element_pa,
+                                                         const ScalarType& element_pb,
+                                                         const ScalarType& element_cp,
+                                                         const ScalarType& alpha_sum);
+        [[nodiscard]] static inline ScalarType attractionHelperG(size_t L,
+                                                                 size_t index1,
+                                                                 size_t index2,
+                                                                 const ScalarType& element_pa,
+                                                                 const ScalarType& element_pb,
+                                                                 const ScalarType& epsilon);
+        [[nodiscard]] static inline ScalarType attractionHelperH(size_t i,
+                                                                 size_t lambda,
+                                                                 size_t index1,
+                                                                 size_t index2,
+                                                                 const ScalarType& element_pa,
+                                                                 const ScalarType& element_pb,
+                                                                 const ScalarType& epsilon);
         /* Static members */
         [[nodiscard]] static ScalarType helper_f(size_t j, size_t l, size_t m, const ScalarType& a, const ScalarType& b);
         [[nodiscard]] static ScalarType helper_F(size_t v, const ScalarType& t);
@@ -190,7 +190,7 @@ namespace Physica::Core::Physics {
                                                   const ScalarType& element_pb,
                                                   const ScalarType& alpha_sum,
                                                   size_t index1,
-                                                  size_t index2) const {
+                                                  size_t index2) {
         ScalarType result = ScalarType::Zero();
         ScalarType i_float = ScalarType::Zero();
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
@@ -210,7 +210,7 @@ namespace Physica::Core::Physics {
                                                        const ScalarType& element_pa,
                                                        const ScalarType& element_pb,
                                                        const ScalarType& element_cp,
-                                                       const ScalarType& alpha_sum) const {
+                                                       const ScalarType& alpha_sum) {
         const size_t lower = (2 * i > (index1 + index2)) ? (2 * i - index1 - index2) : size_t(0);
         const ScalarType epsilon = reciprocal(ScalarType(4) * alpha_sum);
         ScalarType result = ScalarType::Zero();
@@ -227,7 +227,7 @@ namespace Physica::Core::Physics {
                                                                size_t index2,
                                                                const ScalarType& element_pa,
                                                                const ScalarType& element_pb,
-                                                               const ScalarType& epsilon) const {
+                                                               const ScalarType& epsilon) {
         ScalarType result = ScalarType::Zero();
         for (size_t l = 0; l <= (index1 + index2); ++l) {
             const ScalarType temp = Internal::factorial<ScalarType>(l) * helper_f(l, index1, index2, element_pa, element_pb);
@@ -247,7 +247,7 @@ namespace Physica::Core::Physics {
                                                                size_t index2,
                                                                const ScalarType& element_pa,
                                                                const ScalarType& element_pb,
-                                                               const ScalarType& epsilon) const {
+                                                               const ScalarType& epsilon) {
         ScalarType result = ScalarType::Zero();
         for (size_t L = 0; L <= (index1 + index2); ++L) {
             const ScalarType temp = attractionHelperG(L, index1, index2, element_pa, element_pb, epsilon);
