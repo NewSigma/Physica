@@ -24,6 +24,19 @@ using namespace Physica::Core::Physics;
 
 using ScalarType = Scalar<Double, false>;
 
+namespace Physica::Core::Physics {
+    class Test {
+    public:
+        [[nodiscard]] static ScalarType helper_F(size_t v, const ScalarType& t) { return GaussBase<ScalarType>::helper_F(v, t); }
+    };
+}
+
+bool test_helper_F() {
+    if (!scalarNear(Test::helper_F(0, 39.03714925), ScalarType(0.1418423419), 1E-10))
+        return false;
+    return true;
+}
+
 ScalarType overlap_1s_1s(const ScalarType& alpha1,
                          const Vector<ScalarType, 3>& v1,
                          const ScalarType& alpha2,
@@ -46,7 +59,24 @@ ScalarType kinetic_1s_1s(const ScalarType& alpha1,
     return factor * exp(-temp1 * squaredNorm) * temp1 * (ScalarType(6) - ScalarType(4) * temp1 * squaredNorm) * ScalarType(0.5);
 }
 
+ScalarType attraction_1s_1s(const ScalarType& alpha1,
+                         const Vector<ScalarType, 3>& v1,
+                         const ScalarType& alpha2,
+                         const Vector<ScalarType, 3>& v2,
+                         const Vector<ScalarType, 3>& corePos) {
+    const ScalarType alpha_sum = alpha1 + alpha2;
+    const ScalarType factor = ScalarType(2 * M_PI) / alpha_sum;
+    const ScalarType temp1 = alpha1 / alpha_sum;
+    const ScalarType temp2 = ScalarType::One() - temp1;
+    const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v2;
+    const ScalarType squaredNorm = (v1 - v2).squaredNorm();
+    return factor * exp(-temp1 * alpha2 * squaredNorm) * Test::helper_F(0, alpha_sum * (vector_p - corePos).squaredNorm());
+}
+
 int main() {
+    if (!test_helper_F())
+        return 1;
+
     ScalarType alpha1 = ScalarType(1.25);
     Vector<ScalarType, 3> v1{2, 5, -1};
     GaussBase<ScalarType> base1 = GaussBase<ScalarType>(v1, alpha1, 0, 0, 0);
@@ -56,6 +86,9 @@ int main() {
     if (!scalarNear(base1.overlap(base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
         return 1;
     if (!scalarNear(base1.kinetic(base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+        return 1;
+    Vector<ScalarType, 3> v3{1.5, 1.7, -0.4};
+    if (!scalarNear(base1.nuclearAttraction(base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
         return 1;
     return 0;
 }
