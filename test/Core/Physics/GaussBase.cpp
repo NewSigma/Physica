@@ -73,6 +73,29 @@ ScalarType attraction_1s_1s(const ScalarType& alpha1,
     return factor * exp(-temp1 * alpha2 * squaredNorm) * Test::helper_F(0, alpha_sum * (vector_p - corePos).squaredNorm());
 }
 
+ScalarType repulsion_1s_1s(const ScalarType& alpha1,
+                           const Vector<ScalarType, 3>& v1,
+                           const ScalarType& alpha2,
+                           const Vector<ScalarType, 3>& v2,
+                           const ScalarType& alpha3,
+                           const Vector<ScalarType, 3>& v3,
+                           const ScalarType& alpha4,
+                           const Vector<ScalarType, 3>& v4) {
+    const ScalarType alpha_sum1 = alpha1 + alpha2;
+    const ScalarType alpha_sum2 = alpha3 + alpha4;
+    const ScalarType factor = ScalarType(2 * std::pow(M_PI, 2.5)) / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
+    const ScalarType temp1 = alpha1 / alpha_sum1;
+    const ScalarType temp2 = ScalarType::One() - temp1;
+    const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v2;
+    const ScalarType squaredNorm1 = (v1 - v2).squaredNorm();
+    const ScalarType temp3 = alpha3 / alpha_sum2;
+    const ScalarType temp4 = ScalarType::One() - temp3;
+    const Vector<ScalarType, 3> vector_q = temp3 * v3 + temp4 * v4;
+    const ScalarType squaredNorm2 = (v3 - v4).squaredNorm();
+    return factor * exp(-temp1 * alpha2 * squaredNorm1) * exp(-temp3 * alpha4 * squaredNorm2)
+         * Test::helper_F(0, alpha_sum1 * alpha_sum2 * (vector_p - vector_q).squaredNorm() / (alpha_sum1 + alpha_sum2));
+}
+
 int main() {
     using BaseFunc = GaussBase<ScalarType>;
     if (!test_helper_F())
@@ -88,8 +111,19 @@ int main() {
         return 1;
     if (!scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
         return 1;
+
     Vector<ScalarType, 3> v3{1.5, 1.7, -0.4};
     if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
+        return 1;
+
+    ScalarType alpha3 = ScalarType(3.78);
+    ScalarType alpha4 = ScalarType(11.7);
+    Vector<ScalarType, 3> v4{2.7, 0, -3};
+    GaussBase<ScalarType> base3 = GaussBase<ScalarType>(v3, alpha3, 0, 0, 0);
+    GaussBase<ScalarType> base4 = GaussBase<ScalarType>(v4, alpha4, 0, 0, 0);
+    if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base3, base4),
+                    repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha3, v3, alpha4, v4),
+                    1E-14))
         return 1;
     return 0;
 }

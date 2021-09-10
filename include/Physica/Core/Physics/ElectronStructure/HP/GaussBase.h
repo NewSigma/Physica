@@ -46,7 +46,13 @@ namespace Physica::Core::Physics {
         /* Getters */
         [[nodiscard]] static ScalarType overlap(const GaussBase& base1, const GaussBase& base2);
         [[nodiscard]] static ScalarType kinetic(const GaussBase& base1, const GaussBase& base2);
-        [[nodiscard]] static ScalarType nuclearAttraction(const GaussBase& base1, const GaussBase& base2, const Vector<ScalarType, 3>& corePos);
+        [[nodiscard]] static ScalarType nuclearAttraction(const GaussBase& base1,
+                                                          const GaussBase& base2,
+                                                          const Vector<ScalarType, 3>& corePos);
+        [[nodiscard]] static ScalarType electronRepulsion(const GaussBase& base1,
+                                                          const GaussBase& base2,
+                                                          const GaussBase& base3,
+                                                          const GaussBase& base4);
     private:
         [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] static ScalarType overlapImpl(const ScalarType& element_pa, const ScalarType& element_pb, const ScalarType& alpha_sum, size_t index1, size_t index2);
@@ -70,6 +76,26 @@ namespace Physica::Core::Physics {
                                                                  const ScalarType& element_pa,
                                                                  const ScalarType& element_pb,
                                                                  const ScalarType& epsilon);
+        [[nodiscard]] static ScalarType repulsionHelper(size_t i,
+                                                        size_t index1,
+                                                        size_t index2,
+                                                        size_t index3,
+                                                        size_t index4,
+                                                        const ScalarType& element_pq,
+                                                        const ScalarType& element_pa,
+                                                        const ScalarType& element_pb,
+                                                        const ScalarType& element_qc,
+                                                        const ScalarType& element_qd,
+                                                        const ScalarType& epsilon1,
+                                                        const ScalarType& epsilon2,
+                                                        const ScalarType& delta);
+        [[nodiscard]] static inline ScalarType repulsionHelperH(size_t L,
+                                                                size_t index1,
+                                                                size_t index2,
+                                                                const ScalarType& element1,
+                                                                const ScalarType& element2,
+                                                                const ScalarType& epsilon,
+                                                                bool type);
         /* Static members */
         [[nodiscard]] static ScalarType helper_f(size_t j, size_t l, size_t m, const ScalarType& a, const ScalarType& b);
         [[nodiscard]] static ScalarType helper_F(size_t v, const ScalarType& t);
@@ -177,6 +203,53 @@ namespace Physica::Core::Physics {
     }
 
     template<class ScalarType>
+    ScalarType GaussBase<ScalarType>::electronRepulsion(const GaussBase& base1,
+                                                        const GaussBase& base2,
+                                                        const GaussBase& base3,
+                                                        const GaussBase& base4) {
+        const ScalarType alpha_sum1 = base1.alpha + base2.alpha;
+        const ScalarType alpha_sum2 = base3.alpha + base4.alpha;
+
+        const ScalarType factor = ScalarType::Two() * square(ScalarType(M_PI)) * sqrt(ScalarType(M_PI))
+                                / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
+
+        const ScalarType inv_alpha_sum1 = reciprocal(alpha_sum1);
+        const ScalarType temp1 = base1.alpha * inv_alpha_sum1;
+        const ScalarType temp2 = ScalarType::One() - temp1;
+        const ScalarType factor1 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
+        
+        const ScalarType inv_alpha_sum2 = reciprocal(alpha_sum2);
+        const ScalarType temp3 = base3.alpha * inv_alpha_sum2;
+        const ScalarType temp4 = ScalarType::One() - temp3;
+        const ScalarType factor2 = exp(-temp3 * base4.alpha * (base3.center - base4.center).squaredNorm());
+
+        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
+        const Vector<ScalarType, 3> vector_q = temp3 * base3.center + temp4 * base4.center;
+        const Vector<ScalarType, 3> vector_pq = vector_p - vector_q;
+        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
+        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
+        const Vector<ScalarType, 3> vector_qc = vector_q - base3.center;
+        const Vector<ScalarType, 3> vector_qd = vector_q - base4.center;
+
+        const ScalarType epsilon1 = reciprocal(ScalarType(4) * alpha_sum1);
+        const ScalarType epsilon2 = reciprocal(ScalarType(4) * alpha_sum2);
+        const ScalarType delta = epsilon1 + epsilon2;
+        const ScalarType temp = vector_pq.squaredNorm() / (inv_alpha_sum1 + inv_alpha_sum2);
+        ScalarType result = ScalarType::Zero();
+        for (size_t i = 0; i <= base1.l + base2.l + base3.l + base4.l; ++i) {
+            for (size_t j = 0; j <= base1.m + base2.m + base3.m + base4.m; ++j) {
+                for (size_t k = 0; k <= base1.n + base2.n + base3.n + base4.n; ++k) {
+                    result += repulsionHelper(i, base1.l, base2.l, base3.l, base4.l, vector_pq[0], vector_pa[0], vector_pb[0], vector_qc[0], vector_qd[0], epsilon1, epsilon2, delta)
+                            * repulsionHelper(j, base1.m, base2.m, base3.m, base4.m, vector_pq[1], vector_pa[1], vector_pb[1], vector_qc[1], vector_qd[1], epsilon1, epsilon2, delta)
+                            * repulsionHelper(k, base1.n, base2.n, base3.n, base4.n, vector_pq[2], vector_pa[2], vector_pb[2], vector_qc[2], vector_qd[2], epsilon1, epsilon2, delta)
+                            * helper_F(i + j + k, temp);
+                }
+            }
+        }
+        return factor * factor1 * factor2 * result;
+    }
+
+    template<class ScalarType>
     ScalarType GaussBase<ScalarType>::squaredNorm() const {
         const ScalarType temp = ScalarType(M_PI_2) / alpha;
         const ScalarType factor = temp * sqrt(temp);
@@ -258,6 +331,61 @@ namespace Physica::Core::Physics {
                     result += temp * pow(-epsilon, ScalarType(t)) / (Internal::factorial<ScalarType>(t) * Internal::factorial<ScalarType>(L - 2 * t));
         }
         return result;
+    }
+
+    template<class ScalarType>
+    ScalarType GaussBase<ScalarType>::repulsionHelper(size_t i,
+                                                      size_t index1,
+                                                      size_t index2,
+                                                      size_t index3,
+                                                      size_t index4,
+                                                      const ScalarType& element_pq,
+                                                      const ScalarType& element_pa,
+                                                      const ScalarType& element_pb,
+                                                      const ScalarType& element_qc,
+                                                      const ScalarType& element_qd,
+                                                      const ScalarType& epsilon1,
+                                                      const ScalarType& epsilon2,
+                                                      const ScalarType& delta) {
+        ScalarType result = ScalarType::Zero();
+        for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
+            const ScalarType factor1 = repulsionHelperH(L1, index1, index2, element_pa, element_pb, epsilon1, false);
+            for (size_t L2 = 0; L2 <= index3 + index4; ++L2) {
+                const ScalarType factor2 = Internal::factorial<ScalarType>(L1 + L2);
+                const ScalarType factor3 = repulsionHelperH(L2, index3, index4, element_qc, element_qd, epsilon2, true);
+                for (size_t t = 0; t <= (L1 + L2) / 2; ++t) {
+                    if ((L1 + L2 - t) == i) {
+                        result += ((t % 2 == 0) ? factor1 : -factor1) * factor2 * factor3
+                                * pow(element_pq, ScalarType(L1 + L2 - 2 * t))
+                                / (Internal::factorial<ScalarType>(t) * Internal::factorial<ScalarType>(L1 + L2 - 2 * t) * pow(delta, ScalarType(L1 + L2 - t)));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    /**
+     * Implemented function $H$ in reference [2]
+     */
+    template<class ScalarType>
+    inline ScalarType GaussBase<ScalarType>::repulsionHelperH(size_t L,
+                                                              size_t index1,
+                                                              size_t index2,
+                                                              const ScalarType& element1,
+                                                              const ScalarType& element2,
+                                                              const ScalarType& epsilon,
+                                                              bool type) {
+        ScalarType result = ScalarType::Zero();
+        const ScalarType factor = reciprocal(Internal::factorial<ScalarType>(L));
+        for (size_t l = 0; l <= index1 + index2; ++l) {
+            const ScalarType temp = Internal::factorial<ScalarType>(l) * helper_f(l, index1, index2, element1, element2);
+            for (size_t q = 0; q <= l / 2; ++q)
+                if ((l - 2 * q) == L)
+                    result += (type || (l % 2 == 0) ? temp : -temp)
+                            * pow(epsilon, ScalarType(l - q))
+                            / Internal::factorial<ScalarType>(q);
+        }
+        return result * factor;
     }
 
     template<class ScalarType>
