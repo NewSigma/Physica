@@ -83,6 +83,36 @@ namespace Physica::Core {
         template<class Derived>
         friend class Internal::VectorExpressionHelper;
     };
+
+    namespace Internal {
+        template<class VectorType>
+        class RealVectorReturnType {
+            using ComplexType = typename VectorType::ScalarType;
+            using ScalarType = Scalar<Traits<ComplexType>::option, Traits<ComplexType>::errorTrack>;
+            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+        public:
+            using Type = Vector<ScalarType, SizeAtCompile, MaxSizeAtCompile>;
+        };
+    }
+
+    template<class VectorType>
+    [[nodiscard]] typename Internal::RealVectorReturnType<VectorType>::Type toRealVector(const RValueVector<VectorType>& v) {
+        using ResultType = typename Internal::RealVectorReturnType<VectorType>::Type;
+        ResultType result = ResultType(v.getLength());
+        for (size_t i = 0; i < v.getLength(); ++i)
+            result[i] = v.calc(i).getReal();
+        return result;
+    }
+
+    template<class VectorType>
+    [[nodiscard]] typename Internal::RealVectorReturnType<VectorType>::Type toImagVector(const RValueVector<VectorType>& v) {
+        using ResultType = typename Internal::RealVectorReturnType<VectorType>::Type;
+        ResultType result = ResultType(v.getLength());
+        for (size_t i = 0; i < v.getLength(); ++i)
+            result[i] = v.calc(i).getImag();
+        return result;
+    }
 }
 
 #include "VectorImpl.h"
