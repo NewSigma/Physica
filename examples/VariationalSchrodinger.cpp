@@ -280,6 +280,7 @@ public:
             DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 1> real_eigenvector{};
             for (size_t i = 0; i < baseSetCount; ++i)
                 real_eigenvector(i, 0) = eigenvectors.col(groundStateIndex)[i].getReal();
+            real_eigenvector = inv_cholesky.transpose() * real_eigenvector;
             const ScalarType norm = ((real_eigenvector.transpose() * overlap).compute() * real_eigenvector).calc(0, 0);
             real_eigenvector *= reciprocal(sqrt(norm));
 
