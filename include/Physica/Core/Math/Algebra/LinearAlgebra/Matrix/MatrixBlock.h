@@ -133,6 +133,8 @@ namespace Physica::Core {
         MatrixBlock(MatrixBlock&&) noexcept = delete;
         ~MatrixBlock() = default;
         /* Operators */
+        using Base::operator=;
+        using VectorBase::operator=;
         MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
         MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(row == 0); return VectorBase::operator[](col); }
@@ -164,6 +166,7 @@ namespace Physica::Core {
         ~MatrixBlock() = default;
         /* Operators */
         using Base::operator=;
+        using VectorBase::operator=;
         MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
         MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }

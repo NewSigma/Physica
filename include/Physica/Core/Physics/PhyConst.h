@@ -31,6 +31,6 @@ namespace Physica::Core::Physics {
         /**
          * The first element is a space holder
          */
-        constexpr static double relativeAtomMass[5]{0, 1.00794, 4.002602, 6.941, 9.012182};
+        constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
     };
 }

@@ -23,6 +23,17 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 namespace Physica::Core::Physics {
+    template<class ScalarType> class GaussBase;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<class T>
+        class Traits<GaussBase<T>> {
+        public:
+            using ScalarType = T;
+        };
+    }
     /**
      * Reference:
      * [1] Clementi E, Davis D R. Electronic structure of large molecular systems[J]. Journal of Computational Physics, 1966, 1(2):223-244.
@@ -30,12 +41,14 @@ namespace Physica::Core::Physics {
      */
     template<class ScalarType>
     class GaussBase {
+    private:
         Vector<ScalarType, 3> center;
         ScalarType alpha;
         size_t l;
         size_t m;
         size_t n;
     public:
+        GaussBase() = default;
         GaussBase(const Vector<ScalarType, 3> center_, const ScalarType& alpha_, size_t l_, size_t m_, size_t n_);
         GaussBase(const GaussBase& base) = default;
         GaussBase(GaussBase&& base) noexcept = default;
@@ -138,7 +151,9 @@ namespace Physica::Core::Physics {
         const ScalarType factor3_z = overlapImpl(vector_pa[2], vector_pb[2], alpha_sum, base1.n, base2.n);
         return factor * factor2 * factor3_x * factor3_y * factor3_z;
     }
-
+    /**
+     * Implement operator $-\frac{1}{2} \nabla^2$
+     */
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::kinetic(const GaussBase& base1, const GaussBase& base2) {
         GaussBase copy = base2;
@@ -171,7 +186,9 @@ namespace Physica::Core::Physics {
         }
         return result;
     }
-
+    /**
+     * Implement operator $\frac{1}{r_c}$, where $r_c$ is vector to nuclear core.
+     */
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::nuclearAttraction(const GaussBase& base1,
                                                         const GaussBase& base2,
@@ -251,11 +268,12 @@ namespace Physica::Core::Physics {
 
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::squaredNorm() const {
+        using Physica::Core::Internal::doubleFactorial;
         const ScalarType temp = ScalarType(M_PI_2) / alpha;
         const ScalarType factor = temp * sqrt(temp);
-        const ScalarType numerator = Internal::doubleFactorial<ScalarType>(l != 0 ? (2 * l - 1) : size_t(0))
-                                   * Internal::doubleFactorial<ScalarType>(m != 0 ? (2 * m - 1) : size_t(0))
-                                   * Internal::doubleFactorial<ScalarType>(n != 0 ? (2 * n - 1) : size_t(0));
+        const ScalarType numerator = doubleFactorial<ScalarType>(l != 0 ? (2 * l - 1) : size_t(0))
+                                   * doubleFactorial<ScalarType>(m != 0 ? (2 * m - 1) : size_t(0))
+                                   * doubleFactorial<ScalarType>(n != 0 ? (2 * n - 1) : size_t(0));
         const ScalarType denominator = pow(ScalarType(4) * alpha, ScalarType(l + m + n));
         return factor * numerator / denominator;
     }
@@ -266,10 +284,11 @@ namespace Physica::Core::Physics {
                                                   const ScalarType& alpha_sum,
                                                   size_t index1,
                                                   size_t index2) {
+        using Physica::Core::Internal::doubleFactorial;
         ScalarType result = ScalarType::Zero();
         ScalarType i_float = ScalarType::Zero();
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
-            const ScalarType temp = Internal::doubleFactorial<ScalarType>(i != 0 ? (2 * i - 1) : size_t(0))
+            const ScalarType temp = doubleFactorial<ScalarType>(i != 0 ? (2 * i - 1) : size_t(0))
                                    / pow(ScalarType::Two() * alpha_sum, i_float);
             const ScalarType temp_x = helper_f(2 * i, index1, index2, element_pa, element_pb);
             result += temp_x * temp;
@@ -303,12 +322,13 @@ namespace Physica::Core::Physics {
                                                                const ScalarType& element_pa,
                                                                const ScalarType& element_pb,
                                                                const ScalarType& epsilon) {
+        using Physica::Core::Internal::factorial;
         ScalarType result = ScalarType::Zero();
         for (size_t l = 0; l <= (index1 + index2); ++l) {
-            const ScalarType temp = Internal::factorial<ScalarType>(l) * helper_f(l, index1, index2, element_pa, element_pb);
+            const ScalarType temp = factorial<ScalarType>(l) * helper_f(l, index1, index2, element_pa, element_pb);
             for (size_t q = 0; q <= l / 2; ++q)
                 if ((l - 2 * q) == L)
-                    result += temp * pow(epsilon, ScalarType(q)) / Internal::factorial<ScalarType>(q);
+                    result += temp * pow(epsilon, ScalarType(q)) / factorial<ScalarType>(q);
         }
         return result;
     }
@@ -323,12 +343,13 @@ namespace Physica::Core::Physics {
                                                                const ScalarType& element_pa,
                                                                const ScalarType& element_pb,
                                                                const ScalarType& epsilon) {
+        using Physica::Core::Internal::factorial;
         ScalarType result = ScalarType::Zero();
         for (size_t L = 0; L <= (index1 + index2); ++L) {
             const ScalarType temp = attractionHelperG(L, index1, index2, element_pa, element_pb, epsilon);
             for (size_t t = 0; t <= L / 2; ++t)
                 if ((L - t) == i && (L - 2 * t == lambda))
-                    result += temp * pow(-epsilon, ScalarType(t)) / (Internal::factorial<ScalarType>(t) * Internal::factorial<ScalarType>(L - 2 * t));
+                    result += temp * pow(-epsilon, ScalarType(t)) / (factorial<ScalarType>(t) * factorial<ScalarType>(L - 2 * t));
         }
         return result;
     }
@@ -347,17 +368,18 @@ namespace Physica::Core::Physics {
                                                       const ScalarType& epsilon1,
                                                       const ScalarType& epsilon2,
                                                       const ScalarType& delta) {
+        using Physica::Core::Internal::factorial;
         ScalarType result = ScalarType::Zero();
         for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
             const ScalarType factor1 = repulsionHelperH(L1, index1, index2, element_pa, element_pb, epsilon1, false);
             for (size_t L2 = 0; L2 <= index3 + index4; ++L2) {
-                const ScalarType factor2 = Internal::factorial<ScalarType>(L1 + L2);
+                const ScalarType factor2 = factorial<ScalarType>(L1 + L2);
                 const ScalarType factor3 = repulsionHelperH(L2, index3, index4, element_qc, element_qd, epsilon2, true);
                 for (size_t t = 0; t <= (L1 + L2) / 2; ++t) {
                     if ((L1 + L2 - t) == i) {
                         result += ((t % 2 == 0) ? factor1 : -factor1) * factor2 * factor3
                                 * pow(element_pq, ScalarType(L1 + L2 - 2 * t))
-                                / (Internal::factorial<ScalarType>(t) * Internal::factorial<ScalarType>(L1 + L2 - 2 * t) * pow(delta, ScalarType(L1 + L2 - t)));
+                                / (factorial<ScalarType>(t) * factorial<ScalarType>(L1 + L2 - 2 * t) * pow(delta, ScalarType(L1 + L2 - t)));
                     }
                 }
             }
@@ -375,15 +397,16 @@ namespace Physica::Core::Physics {
                                                               const ScalarType& element2,
                                                               const ScalarType& epsilon,
                                                               bool type) {
+        using Physica::Core::Internal::factorial;
         ScalarType result = ScalarType::Zero();
-        const ScalarType factor = reciprocal(Internal::factorial<ScalarType>(L));
+        const ScalarType factor = reciprocal(factorial<ScalarType>(L));
         for (size_t l = 0; l <= index1 + index2; ++l) {
-            const ScalarType temp = Internal::factorial<ScalarType>(l) * helper_f(l, index1, index2, element1, element2);
+            const ScalarType temp = factorial<ScalarType>(l) * helper_f(l, index1, index2, element1, element2);
             for (size_t q = 0; q <= l / 2; ++q)
                 if ((l - 2 * q) == L)
                     result += (type || (l % 2 == 0) ? temp : -temp)
                             * pow(epsilon, ScalarType(l - q))
-                            / Internal::factorial<ScalarType>(q);
+                            / factorial<ScalarType>(q);
         }
         return result * factor;
     }

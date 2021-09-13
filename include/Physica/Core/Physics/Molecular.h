@@ -27,17 +27,17 @@ namespace Physica::Core::Physics {
     template<class ScalarType>
     class Molecular {
         using PointType = Point<3, ScalarType>;
-        Array<PointType> atoms;
-        Array<unsigned char> atomicNumbers;
+        Utils::Array<PointType> atoms;
+        Utils::Array<unsigned char> atomicNumbers;
     public:
-        Molecular();
+        Molecular(size_t atomCount);
         ~Molecular() = default;
-        /* Operators */
-        friend std::ostream& operator<<(std::ostream& os, const Molecular& m);
         /* Getters */
-        [[nodiscard]] size_t atomCount() const noexcept { return atoms.getLength(); }
+        [[nodiscard]] Utils::Array<PointType>& getAtoms() noexcept { return atoms; }
+        [[nodiscard]] Utils::Array<unsigned char>& getAtomicNumbers() noexcept { return atomicNumbers; }
+        [[nodiscard]] size_t getAtomCount() const noexcept { return atoms.getLength(); }
         [[nodiscard]] PointType getAtom(size_t i) const { return atoms[i]; }
-        [[nodiscard]] unsigned char getAtomicNumber(size_t i) const { return atomicNumber[i]; }
+        [[nodiscard]] unsigned char getAtomicNumber(size_t i) const { return atomicNumbers[i]; }
         [[nodiscard]] ScalarType getPairDist(size_t i, size_t j) const;
         [[nodiscard]] ScalarType getTripleAngle(size_t i, size_t j, size_t k) const;
         [[nodiscard]] ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
@@ -46,9 +46,13 @@ namespace Physica::Core::Physics {
     };
 
     template<class ScalarType>
-    std::ostream& operator<<(std::ostream& os, const Molecular& m) {
-        os << atoms.getLength() << '\n';
-        for (auto& atom : atoms)
+    Molecular<ScalarType>::Molecular(size_t atomCount) : atoms(atomCount), atomicNumbers(atomCount) {}
+
+    template<class ScalarType>
+    std::ostream& operator<<(std::ostream& os, const Molecular<ScalarType>& m) {
+        os << m.atomCount() << '\n';
+        const auto& atoms = m.getAtoms();
+        for (const auto& atom : atoms)
             os << atom << '\n';
         return os;
     }
@@ -61,7 +65,7 @@ namespace Physica::Core::Physics {
      * \returns The angle between vector ji and vector jk
      */
     template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getTripleAngle(size_t i, size_t j, size_t k) {
+    ScalarType Molecular<ScalarType>::getTripleAngle(size_t i, size_t j, size_t k) const {
         using VectorType = typename PointType::VectorType;
         const VectorType vector_ji = atoms[i].getVector() - atoms[j].getVector();
         const VectorType vector_jk = atoms[k].getVector() - atoms[j].getVector();
@@ -94,7 +98,8 @@ namespace Physica::Core::Physics {
     }
 
     template<class ScalarType>
-    Molecular<ScalarType>::PointType Molecular<ScalarType>::getMassCenter() const {
+    typename Molecular<ScalarType>::PointType Molecular<ScalarType>::getMassCenter() const {
+        using VectorType = typename PointType::VectorType;
         double totalMass = 0;
         const size_t length = atoms.getLength();
         VectorType result = VectorType::Zeros(length);

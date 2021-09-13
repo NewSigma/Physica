@@ -65,7 +65,7 @@ namespace Physica::Core::Internal {
         const size_t column = matrix.getColumn();
         assert(r1 < row && r2 < row);
         for (size_t i = 0, temp = 0; i < column; ++i, temp += column)
-            swap(matrix[temp + r1], matrix[temp + r2]);
+            Physica::Core::swap(matrix[temp + r1], matrix[temp + r2]);
     }
 
     template<class Derived>
@@ -76,9 +76,8 @@ namespace Physica::Core::Internal {
         assert(c1 < column && c2 < column);
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
-        for (size_t i = 0; i < row; ++i) {
-            swap(matrix[offset1 + i], matrix[offset2 + i]);
-        }
+        for (size_t i = 0; i < row; ++i)
+            Physica::Core::swap(matrix[offset1 + i], matrix[offset2 + i]);
     }
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
     template<class Derived>

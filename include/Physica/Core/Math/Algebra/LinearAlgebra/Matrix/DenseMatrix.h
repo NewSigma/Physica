@@ -81,6 +81,7 @@ namespace Physica::Core {
         using Storage::getRow;
         using Storage::getColumn;
         /* Static members */
+        [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
     };
