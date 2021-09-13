@@ -8,6 +8,8 @@ option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(RUN_CHECKS "Run Checks" ON)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
+set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
+
 set(UseASM 1)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
@@ -29,6 +31,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "\
 ${CMAKE_CXX_FLAGS} \
+${PHYSICA_SIMD_OPTION} \
 -Wall -Wextra \
 -fPIC \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
