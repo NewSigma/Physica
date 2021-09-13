@@ -427,7 +427,7 @@ namespace Physica::Core::Physics {
             const ScalarType temp = const_1 / (factorial<ScalarType>(i)
                                               * factorial<ScalarType>(l - i)
                                               * factorial<ScalarType>(j - i)
-                                              * factorial<ScalarType>(m - j - i));
+                                              * factorial<ScalarType>(m + i - j));
             result += temp * temp1 * temp2;
             temp1 *= inv_a;
             temp2 *= b;
