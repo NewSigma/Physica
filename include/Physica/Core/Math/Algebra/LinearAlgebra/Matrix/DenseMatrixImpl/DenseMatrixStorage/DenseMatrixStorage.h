@@ -136,7 +136,7 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixOption::Column | DenseMatrixOption::Element>;
-    protected:
+    private:
         size_t row;
     public:
         DenseMatrixStorage() : Base(), row(0) {}
@@ -236,7 +236,7 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixOption::Row | DenseMatrixOption::Element>;
-    protected:
+    private:
         size_t row;
     public:
         DenseMatrixStorage() : Base(), row(0) {}
