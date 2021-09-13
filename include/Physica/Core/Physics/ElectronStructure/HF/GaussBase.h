@@ -413,6 +413,7 @@ namespace Physica::Core::Physics {
 
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::helper_f(size_t j, size_t l, size_t m, const ScalarType& a, const ScalarType& b) {
+        using Physica::Core::Internal::factorial;
         assert(l + m >= j);
         const size_t lower = j > m ? (j - m) : 0;
         const size_t upper = std::min(j, l);
@@ -420,15 +421,14 @@ namespace Physica::Core::Physics {
         ScalarType result = ScalarType::Zero();
         ScalarType temp1 = pow(a, ScalarType(l - lower));
         ScalarType temp2 = pow(b, ScalarType(m + lower - j));
-        const ScalarType const_1 = lnGamma(ScalarType(l + 1)) + lnGamma(ScalarType(m + 1));
+        const ScalarType const_1 = factorial<ScalarType>(l) * factorial<ScalarType>(m);
         const ScalarType inv_a = reciprocal(a);
         for (size_t i = lower; i <= upper; ++i) {
-            const ScalarType temp = const_1
-                                    - lnGamma(ScalarType(i + 1))
-                                    - lnGamma(ScalarType(l - i + 1))
-                                    - lnGamma(ScalarType(j - i + 1))
-                                    - lnGamma(ScalarType(m - j - i + 1));
-            result += exp(temp) * temp1 * temp2;
+            const ScalarType temp = const_1 / (factorial<ScalarType>(i)
+                                              * factorial<ScalarType>(l - i)
+                                              * factorial<ScalarType>(j - i)
+                                              * factorial<ScalarType>(m - j - i));
+            result += temp * temp1 * temp2;
             temp1 *= inv_a;
             temp2 *= b;
         }
