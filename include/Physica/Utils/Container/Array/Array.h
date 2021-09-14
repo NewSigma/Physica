@@ -90,16 +90,7 @@ namespace Physica::Utils {
         explicit Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
         ~Array() = default;
         /* Operators */
-        Array& operator=(const Array& array);
-        Array& operator=(Array&& array) noexcept;
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array);
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
+        Array& operator=(Array array) noexcept { swap(array); return *this; }
         /* Helpers */
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, Length); }
@@ -150,16 +141,7 @@ namespace Physica::Utils {
         explicit Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
         ~Array() = default;
         /* Operators */
-        Array& operator=(const Array& array);
-        Array& operator=(Array&& array) noexcept;
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array);
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
+        Array& operator=(Array array) noexcept { swap(array); return *this; }
         /* Helpers */
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, length); }
@@ -211,16 +193,7 @@ namespace Physica::Utils {
         explicit Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
         ~Array() = default;
         /* Operators */
-        Array& operator=(const Array& array);
-        Array& operator=(Array&& array) noexcept;
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
-        template<size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array);
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        Array& operator=(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
+        Array& operator=(Array array) noexcept { swap(array); return *this; }
         /* Helpers */
         void append(ConstLValueReferenceType t);
         void append(RValueReferenceType t);

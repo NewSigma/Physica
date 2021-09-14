@@ -47,7 +47,7 @@ int main() {
     baseSet[i++] = GTO3G<ScalarType>::randomBase(pos_F, 0, 1, 0);
     baseSet[i++] = GTO3G<ScalarType>::randomBase(pos_F, 0, 1, 0);
     baseSet[i++] = GTO3G<ScalarType>::randomBase(pos_F, 0, 0, 1);
-    if (solver.compute(1E-5, 50000)) {
+    if (!solver.compute(1E-5, 50000)) {
         std::cout << "[Warning]: Not converged\n";
         return 1;
     }

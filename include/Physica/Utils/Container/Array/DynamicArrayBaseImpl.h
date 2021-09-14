@@ -40,6 +40,12 @@ namespace Physica::Utils::Internal {
     template<class Derived>
     __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
         DynamicArrayBase&& array) noexcept : Base(std::move(array)), length(array.length) {}
+    
+    template<class Derived>
+    DynamicArrayBase<Derived>& DynamicArrayBase<Derived>::operator=(DynamicArrayBase array) noexcept {
+        swap(array);
+        return *this;
+    }
     /**
      * Get the last element in the array and remove it from the array.
      */

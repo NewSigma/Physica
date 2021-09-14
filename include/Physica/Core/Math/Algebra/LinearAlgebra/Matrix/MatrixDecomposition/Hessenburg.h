@@ -66,8 +66,10 @@ namespace Physica::Core {
     template<class MatrixType>
     Hessenburg<MatrixType>::Hessenburg(const LValueMatrix<MatrixType>& source_)
             : working(source_.getRow(), source_.getRow())
+            , normVector(source_.getRow() - 2)
             , source(source_.getDerived()) {
         assert(source.getRow() == source.getColumn());
+        assert(source.getRow() > 2);
         compute();
     }
 

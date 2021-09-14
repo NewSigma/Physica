@@ -104,8 +104,6 @@ namespace Physica::Utils::Internal {
     public:
         ArrayStorage() = delete;
         /* Operators */
-        ArrayStorage& operator=(const ArrayStorage& array) = delete;
-        ArrayStorage& operator=(ArrayStorage&& array) noexcept = delete;
         [[nodiscard]] __host__ __device__ LValueReferenceType operator[](size_t index);
         [[nodiscard]] __host__ __device__ ConstLValueReferenceType operator[](size_t index) const;
         bool operator==(const ArrayStorage& array) const;
@@ -130,6 +128,8 @@ namespace Physica::Utils::Internal {
         __host__ __device__ ArrayStorage(const ArrayStorage& array);
         __host__ __device__ ArrayStorage(ArrayStorage&& array) noexcept;
         __host__ __device__ ~ArrayStorage();
+        /* Operators */
+        ArrayStorage& operator=(ArrayStorage array) noexcept;
         /* Helpers */
         __host__ __device__ inline void swap(ArrayStorage& array) noexcept;
     };

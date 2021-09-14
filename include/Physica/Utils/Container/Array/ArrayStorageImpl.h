@@ -106,6 +106,12 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived>
+    ArrayStorage<Derived>& ArrayStorage<Derived>::operator=(ArrayStorage array) noexcept {
+        swap(array);
+        return *this;
+    }
+
+    template<class Derived>
     __host__ __device__ inline typename ArrayStorage<Derived>::LValueReferenceType
     ArrayStorage<Derived>::operator[](size_t index) {
         assert(index < Base::getDerived().getLength());

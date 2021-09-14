@@ -38,8 +38,6 @@ namespace Physica::Utils::Internal {
         DynamicArrayBase() = delete;
         ~DynamicArrayBase() = default;
         /* Operators */
-        DynamicArrayBase& operator=(const DynamicArrayBase& array) = delete;
-        DynamicArrayBase& operator=(DynamicArrayBase&& array) noexcept = delete;
         Derived& operator<<(ConstLValueReferenceType t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(RValueReferenceType t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
@@ -65,6 +63,8 @@ namespace Physica::Utils::Internal {
         __host__ __device__ DynamicArrayBase(size_t length_, PointerType arr_);
         __host__ __device__ DynamicArrayBase(const DynamicArrayBase& array);
         __host__ __device__ DynamicArrayBase(DynamicArrayBase&& array) noexcept;
+        /* Operators */
+        DynamicArrayBase& operator=(DynamicArrayBase array) noexcept;
         /* Helpers */
         __host__ __device__ void swap(DynamicArrayBase& array);
     };
