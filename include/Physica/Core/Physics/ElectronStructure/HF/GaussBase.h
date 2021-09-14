@@ -439,6 +439,8 @@ namespace Physica::Core::Physics {
     ScalarType GaussBase<ScalarType>::helper_F(size_t v, const ScalarType& t) {
         const ScalarType half = ScalarType(0.5);
         const ScalarType v1 = ScalarType(v) + half;
+        if (t.isZero())
+            return v1 * half;
         return half * pow(t, -v1) * gamma(v1) * (ScalarType::One() - gammaQ(v1, t));
     }
 }
