@@ -28,7 +28,7 @@ int main() {
     Molecular<ScalarType> LiF = Molecular<ScalarType>(2);
     auto& atoms = LiF.getAtoms();
     const Vector<ScalarType> pos_Li{0, 0, 0};
-    const Vector<ScalarType> pos_F{0, 0, 0};
+    const Vector<ScalarType> pos_F{0, 0, 1};
     atoms[0] = pos_Li;
     atoms[1] = pos_F;
     auto& atomicNumbers = LiF.getAtomicNumbers();

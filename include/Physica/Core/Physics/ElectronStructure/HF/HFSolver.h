@@ -92,7 +92,7 @@ namespace Physica::Core::Physics {
         MatrixType inv_cholesky = cholesky.inverse();
 
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
-        MatrixType fock = singleHamilton;
+        MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
         ScalarType electron_energy = ScalarType::Zero();
         size_t lowEigenvalueIndex[electronCount];
@@ -149,7 +149,7 @@ namespace Physica::Core::Physics {
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
                     temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).getVector())
                             * ScalarType(molecular.getAtomicNumber(k));
-                singleHamilton(j, i) = BaseSetType::kinetic(baseSet[i], baseSet[j]);
+                singleHamilton(j, i) = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
             }
         }
     }

@@ -100,30 +100,41 @@ int main() {
     using BaseFunc = GaussBase<ScalarType>;
     if (!test_helper_F())
         return 1;
+    {
+        ScalarType alpha1 = ScalarType(1.25);
+        Vector<ScalarType, 3> v1{2, 5, -1};
+        GaussBase<ScalarType> base1 = GaussBase<ScalarType>(v1, alpha1, 0, 0, 0);
+        ScalarType alpha2 = ScalarType(0.76);
+        Vector<ScalarType, 3> v2{-3, 6, 1};
+        GaussBase<ScalarType> base2 = GaussBase<ScalarType>(v2, alpha2, 0, 0, 0);
+        if (!scalarNear(BaseFunc::overlap(base1, base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+            return 1;
+        if (!scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
+            return 1;
 
-    ScalarType alpha1 = ScalarType(1.25);
-    Vector<ScalarType, 3> v1{2, 5, -1};
-    GaussBase<ScalarType> base1 = GaussBase<ScalarType>(v1, alpha1, 0, 0, 0);
-    ScalarType alpha2 = ScalarType(0.76);
-    Vector<ScalarType, 3> v2{-3, 6, 1};
-    GaussBase<ScalarType> base2 = GaussBase<ScalarType>(v2, alpha2, 0, 0, 0);
-    if (!scalarNear(BaseFunc::overlap(base1, base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
-        return 1;
-    if (!scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
-        return 1;
+        Vector<ScalarType, 3> v3{1.5, 1.7, -0.4};
+        if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
+            return 1;
 
-    Vector<ScalarType, 3> v3{1.5, 1.7, -0.4};
-    if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
-        return 1;
-
-    ScalarType alpha3 = ScalarType(3.78);
-    ScalarType alpha4 = ScalarType(11.7);
-    Vector<ScalarType, 3> v4{2.7, 0, -3};
-    GaussBase<ScalarType> base3 = GaussBase<ScalarType>(v3, alpha3, 0, 0, 0);
-    GaussBase<ScalarType> base4 = GaussBase<ScalarType>(v4, alpha4, 0, 0, 0);
-    if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base3, base4),
-                    repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha3, v3, alpha4, v4),
-                    1E-14))
-        return 1;
+        ScalarType alpha3 = ScalarType(3.78);
+        ScalarType alpha4 = ScalarType(11.7);
+        Vector<ScalarType, 3> v4{2.7, 0, -3};
+        GaussBase<ScalarType> base3 = GaussBase<ScalarType>(v3, alpha3, 0, 0, 0);
+        GaussBase<ScalarType> base4 = GaussBase<ScalarType>(v4, alpha4, 0, 0, 0);
+        if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base3, base4),
+                        repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha3, v3, alpha4, v4),
+                        1E-14))
+            return 1;
+    }
+    {
+        Vector<ScalarType, 3> v{0, 0, 0};
+        GaussBase<ScalarType> base1(v, 0.89, 1, 0, 0);
+        GaussBase<ScalarType> base2(v, 12.7, 2, 0, 0);
+        if (!scalarNear(BaseFunc::overlap(base1, base2), ScalarType::Zero(), 1E-15))
+            return 1;
+        GaussBase<ScalarType> base3(v, 0.89, 2, 0, 0);
+        if (!scalarNear(BaseFunc::overlap(base2, base3), ScalarType(0.0004513547048841694), 1E-15))
+            return 1;
+    }
     return 0;
 }

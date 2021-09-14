@@ -422,7 +422,7 @@ namespace Physica::Core::Physics {
         ScalarType temp1 = pow(a, ScalarType(l - lower));
         ScalarType temp2 = pow(b, ScalarType(m + lower - j));
         const ScalarType const_1 = factorial<ScalarType>(l) * factorial<ScalarType>(m);
-        const ScalarType inv_a = reciprocal(a);
+        const ScalarType inv_a = a.isZero() ? ScalarType::Zero() : reciprocal(a);
         for (size_t i = lower; i <= upper; ++i) {
             const ScalarType temp = const_1 / (factorial<ScalarType>(i)
                                               * factorial<ScalarType>(l - i)
