@@ -115,6 +115,7 @@ namespace Physica::Core::Physics {
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
             updateSelfConsistentEnergy(eigenvalues, lowEigenvalueIndex, densityMat);
             const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
+            std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
             // Check convergence
             if (delta < criteria)
                 return true;
@@ -167,20 +168,19 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& density, const MatrixType& wave_func) {
-        const size_t maxMajor = density.getMaxMajor();
-        const size_t maxMinor = density.getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i) {
-            auto col_i = wave_func.col(i);
+        const size_t baseSetSize = getBaseSetSize();
+        for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j)
-                density.getElementFromMajorMinor(i, j) = density.getElementFromMajorMinor(j, i);
+                density(j, i) = density(i, j);
 
-            for (; j < maxMinor; ++j) {
-                auto col_j = wave_func.col(j);
+            for (; j < baseSetSize; ++j) {
                 ScalarType temp = ScalarType::Zero();
-                for (size_t k = 0; k < electronCount; ++k)
-                    temp += col_i[k] * col_j[k];
-                density.getElementFromMajorMinor(i, j) = ScalarType::Two() * temp;
+                for (size_t k = 0; k < electronCount; ++k) {
+                    auto wave = wave_func.col(k);
+                    temp += wave[i] * wave[j];
+                }
+                density(j, i) = ScalarType::Two() * temp;
             }
         }
     }
