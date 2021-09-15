@@ -37,16 +37,22 @@ namespace Physica::Core {
                                                LValueVector<OtherVector>& __restrict target) {
         using ScalarType = typename AnyVector::ScalarType;
         assert(source.getLength() == target.getLength());
-        const ScalarType abs_first = abs(source[0]);
-        const bool minus = source[0].isNegative();
         const ScalarType norm = source.getDerived().norm();
-        ScalarType factor = reciprocal(ScalarType(abs_first + norm));
-        if (minus)
-            factor.toOpposite();
+        if (norm > std::numeric_limits<ScalarType>::min()) {
+            const ScalarType abs_first = abs(source[0]);
+            const bool minus = source[0].isNegative();
+            ScalarType factor = reciprocal(ScalarType(abs_first + norm));
+            if (minus)
+                factor.toOpposite();
 
-        target.tail(1) = source.tail(1) * factor;
-        target[0] = ScalarType(1) + abs_first / norm;
-        return norm;
+            target.tail(1) = source.tail(1) * factor;
+            target[0] = ScalarType(1) + abs_first / norm;
+            return norm;
+        }
+        else {
+            target = ScalarType::Zero();
+            return ScalarType::Zero();
+        }
     }
 
     template<class AnyVector>

@@ -25,12 +25,12 @@ using namespace Physica::Core;
 
 int main() {
     using T = Scalar<Double, false>;
-    const Vector<T> x{2, 3, 4, 5};
-
-    const size_t rank = x.getLength();
-    Vector<T> v(rank);
-    const T norm = householder(x, v);
     {
+        const Vector<T> x{2, 3, 4, 5};
+        const size_t rank = x.getLength();
+        Vector<T> v(rank);
+        const T norm = householder(x, v);
+
         Vector<T> copy = v;
         const T tau = copy[0];
         const T beta = x[0].isNegative() ? norm : -norm;
@@ -45,10 +45,16 @@ int main() {
     }
 
     {
+        const Vector<T> x{2, 3, 4, 5};
+        const size_t rank = x.getLength();
+        Vector<T> v(rank);
+        const T norm = householder(x, v);
+
         using MatrixType = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 4>;
         const MatrixType m{x, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
         const MatrixType l_answer{{-7.34849, 0, 0, 0}, {-13.0639, 0.203133, -0.729156, -1.66145}, {-20.6846, 0.473976, -1.70137, -3.87671}, {-28.3052, 0.74482, -2.67357, -6.09197}};
         MatrixType l_result = m;
+
         applyHouseholder(v, l_result);
         for (int i = 0; i < 4; ++i)
             for (int j = 0; j < 4; ++j)
@@ -62,6 +68,15 @@ int main() {
             for (int j = 0; j < 4; ++j)
                 if (!scalarNear(r_result(i, j), r_answer(i, j), 1E-5))
                     return 1;
+    }
+    {
+        const Vector<T> x{0, 0, 0, 0};
+        Vector<T> v(4);
+        const T norm = householder(x, v);
+        if (!norm.isZero())
+            return 1;
+        if (!v.norm().isZero())
+            return 1;
     }
     return 0;
 }

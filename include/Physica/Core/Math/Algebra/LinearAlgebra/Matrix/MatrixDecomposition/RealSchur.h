@@ -63,7 +63,7 @@ namespace Physica::Core {
         MatrixType buffer = abs(source);
         const ScalarType factor = buffer.max();
         const ScalarType inv_factor = reciprocal(factor);
-        buffer = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost accuracy(from 10^15 to 10^14)
+        buffer = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
         const Hessenburg hess(buffer);
         matrixT = hess.getMatrixH();
         if (computeMatrixU)

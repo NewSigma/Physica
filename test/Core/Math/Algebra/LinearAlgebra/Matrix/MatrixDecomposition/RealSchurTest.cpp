@@ -50,7 +50,6 @@ bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
-    std::cout << A << std::endl;
     if (!matrixNear(A, mat, precision))
         return false;
     return true;
