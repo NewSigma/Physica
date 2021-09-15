@@ -51,5 +51,7 @@ int main() {
         std::cout << "[Warning]: Not converged\n";
         return 1;
     }
+    std::cout << "Self consistent energy(in hartree): " << solver.getSelfConsistentEnergy() << '\n';
+    std::cout << "Totle energy(in hartree): " << solver.getTotalEnergy() << '\n';
     return 0;
 }

@@ -42,6 +42,7 @@ namespace Physica::Core::Physics {
         MatrixType singleHamilton;
         MatrixType overlap;
         Utils::Array<BaseSetType> baseSet;
+        ScalarType selfConsistentEnergy;
         size_t electronCount;
     public:
         HFSolver(const Molecular<ScalarType>& m, size_t electronCount_, size_t baseSetSize);
@@ -57,11 +58,15 @@ namespace Physica::Core::Physics {
         [[nodiscard]] Utils::Array<BaseSetType>& getBaseSet() noexcept { return baseSet; }
         [[nodiscard]] const Utils::Array<BaseSetType>& getBaseSet() const noexcept { return baseSet; }
         [[nodiscard]] size_t getBaseSetSize() const noexcept { return baseSet.getLength(); }
+        [[nodiscard]] ScalarType getSelfConsistentEnergy() const noexcept { return selfConsistentEnergy; }
+        [[nodiscard]] ScalarType getTotalEnergy() const noexcept { return selfConsistentEnergy + molecular.getNuclearRepulsionEnergy(); }
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
         void formDensityMatrix(MatrixType& density, const MatrixType& wave_func);
         void formFockMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
+        template<class VectorType>
+        void updateSelfConsistentEnergy(const VectorType& eigenvalues, const size_t* lowEigenvalueIndex, const MatrixType& electronDencity);
         void getLowestEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, size_t* index) const;
         void nomalizeWave(Vector<ScalarType>& eigenvector);
     };
@@ -72,6 +77,7 @@ namespace Physica::Core::Physics {
             , singleHamilton(baseSetSize, baseSetSize)
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
+            , selfConsistentEnergy()
             , electronCount(electronCount_) {
         assert(electronCount <= baseSetSize);
     }
@@ -94,7 +100,6 @@ namespace Physica::Core::Physics {
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
         MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
-        ScalarType electron_energy = ScalarType::Zero();
         size_t lowEigenvalueIndex[electronCount];
         Vector<ScalarType> temp{};
 
@@ -107,16 +112,9 @@ namespace Physica::Core::Physics {
             const auto& eigenvalues = solver.getEigenvalues();
             getLowestEigenvalues(eigenvalues, lowEigenvalueIndex);
 
-            ScalarType new_electron_energy = ScalarType::Zero();
-            for (size_t i = 0; i < electronCount; ++i)
-                new_electron_energy += eigenvalues[lowEigenvalueIndex[i]].getReal();
-
-            new_electron_energy *= ScalarType(0.5);
-            for (size_t i = 0; i < baseSetSize; ++i)
-                for (size_t j = i; j < baseSetSize; ++j)
-                    new_electron_energy += singleHamilton(j, i) * densityMat(j, i);
-            const ScalarType delta = abs(electron_energy - new_electron_energy);
-            electron_energy = new_electron_energy;
+            const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
+            updateSelfConsistentEnergy(eigenvalues, lowEigenvalueIndex, densityMat);
+            const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
             // Check convergence
             if (delta < criteria)
                 return true;
@@ -203,6 +201,20 @@ namespace Physica::Core::Physics {
                 fock(q, p) = temp;
             }
         }
+    }
+
+    template<class BaseSetType>
+    template<class VectorType>
+    void HFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues, const size_t* lowEigenvalueIndex, const MatrixType& electronDencity) {
+        const size_t baseSetSize = getBaseSetSize();
+        selfConsistentEnergy = ScalarType::Zero();
+        for (size_t i = 0; i < electronCount; ++i)
+            selfConsistentEnergy += eigenvalues[lowEigenvalueIndex[i]].getReal();
+
+        selfConsistentEnergy *= ScalarType(0.5);
+        for (size_t i = 0; i < baseSetSize; ++i)
+            for (size_t j = i; j < baseSetSize; ++j)
+                selfConsistentEnergy += singleHamilton(j, i) * electronDencity(j, i);
     }
 
     template<class BaseSetType>

@@ -43,6 +43,7 @@ namespace Physica::Core::Physics {
         [[nodiscard]] ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
         [[nodiscard]] ScalarType getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const;
         [[nodiscard]] PointType getMassCenter() const;
+        [[nodiscard]] ScalarType getNuclearRepulsionEnergy() const;
     };
 
     template<class ScalarType>
@@ -110,5 +111,22 @@ namespace Physica::Core::Physics {
         }
         result *= reciprocal(ScalarType(totalMass));
         return PointType(std::move(result));
+    }
+
+    template<class ScalarType>
+    ScalarType Molecular<ScalarType>::getNuclearRepulsionEnergy() const {
+        constexpr double temp = PhyConst::reducedPlanck / PhyConst::unitCharge;
+        constexpr double factor = temp * temp * 4E10 * M_PI * PhyConst::vacuumDielectric / PhyConst::electroMass; //factor that tranform the unit of result to hartree
+        ScalarType result = ScalarType::Zero();
+        const size_t atomCount = getAtomCount();
+        for (size_t i = 0; i < atomCount - 1; ++i) {
+            const ScalarType atomicNumber1 = ScalarType(getAtomicNumber(i));
+            for (size_t j = i + 1; j < atomCount; ++j) {
+                const ScalarType atomicNumber2 = ScalarType(getAtomicNumber(j));
+                const ScalarType dist = getPairDist(i, j);
+                result += atomicNumber1 * atomicNumber2 / dist;
+            }
+        }
+        return result * ScalarType(factor);
     }
 }
