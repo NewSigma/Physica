@@ -174,7 +174,7 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
-        void resize(size_t row, size_t col) { assert(row == getRow() && col == 1); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
         /* Getters */
         using Base::calc;
         using VectorBase::calc;

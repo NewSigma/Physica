@@ -40,7 +40,7 @@ int main() {
         if (abs(T(result[0] - beta) / beta) > T(1E-15))
             return 1;
         for (size_t i = 1; i < rank; ++i)
-            if (abs(result[i]) > T(1E-15))
+            if (abs(result[i]) > T(1E-14)) //In debug mode, precision can reach 10^-15
                 return 1;
     }
 
