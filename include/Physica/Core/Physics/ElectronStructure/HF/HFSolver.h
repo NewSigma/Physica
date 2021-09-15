@@ -191,7 +191,7 @@ namespace Physica::Core::Physics {
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
                 ScalarType temp = ScalarType::Zero();
-                for (size_t r; r < size; ++r) {
+                for (size_t r = 0; r < size; ++r) {
                     for (size_t s = 0; s < size; ++s) {
                         const ScalarType coulomb = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[q], baseSet[s]);
                         const ScalarType exchange = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[s], baseSet[q]);
