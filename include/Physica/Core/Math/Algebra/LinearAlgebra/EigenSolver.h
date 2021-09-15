@@ -56,7 +56,7 @@ namespace Physica::Core {
     EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors)
             : source(source_.getDerived())
             , eigenvalues(source_.getRow())
-            , eigenvectorStorage() {
+            , eigenvectorStorage(source_.getRow(), source_.getRow()) {
         assert(source.getRow() == source.getColumn());
         auto schur = RealSchur(source, computeEigenvectors);
 
