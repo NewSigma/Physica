@@ -24,14 +24,13 @@ namespace Physica::Core {
     inline ScalarType randomScalar() {
         return ScalarType(static_cast<double>(random()) / RAND_MAX);
     }
-    //!Return a real number lowerBound and upperBound.
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> randomScalar(
-            const Scalar<option, errorTrack>& lowerBound,
-            const Scalar<option, errorTrack>& upperBound) {
-        auto castUpper = static_cast<Scalar<option, false>>(upperBound);
-        auto castLower = static_cast<Scalar<option, false>>(lowerBound);
-        auto s = randomScalar<Scalar<option, errorTrack>>();
+    //!Return a real number between lowerBound and upperBound.
+    template<class ScalarType>
+    inline ScalarType randomScalar(const ScalarBase<ScalarType>& lowerBound, const ScalarBase<ScalarType>& upperBound) {
+        using ResultType = typename Internal::RemoveErrorTrack<ScalarType>::Type;
+        auto castUpper = ResultType(upperBound.getDerived());
+        auto castLower = ResultType(lowerBound.getDerived());
+        auto s = randomScalar<ResultType>();
         return s * (castUpper - castLower) + castLower;
     }
 

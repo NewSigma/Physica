@@ -22,10 +22,8 @@ namespace Physica::Core {
     template<class ScalarType>
     inline ScalarType randomScalar();
     
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> randomScalar(
-            const Scalar<option, errorTrack>& lowerBound,
-            const Scalar<option, errorTrack>& upperBound);
+    template<class ScalarType>
+    inline ScalarType randomScalar(const ScalarBase<ScalarType>& lowerBound, const ScalarBase<ScalarType>& upperBound);
 
     template<ScalarOption option, bool errorTrack>
     inline Scalar<option, errorTrack> floor(const Scalar<option, errorTrack>& s);

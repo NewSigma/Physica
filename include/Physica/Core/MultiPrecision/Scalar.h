@@ -69,6 +69,14 @@ namespace Physica::Core {
             using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option, errorTrack>>, Scalar<option, errorTrack>>::type;
         };
 
+        template<class ScalarType>
+        class RemoveErrorTrack {
+            static constexpr ScalarOption option = Traits<ScalarType>::option;
+            static constexpr bool isComplex = Traits<ScalarType>::isComplex;
+        public:
+            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option, false>>, Scalar<option, false>>::type;
+        };
+
         template<ScalarOption option>
         class AbstractScalar;
 
