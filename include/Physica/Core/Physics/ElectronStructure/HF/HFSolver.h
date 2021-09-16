@@ -66,8 +66,8 @@ namespace Physica::Core::Physics {
         void formDensityMatrix(MatrixType& density, const MatrixType& wave_func);
         void formFockMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
         template<class VectorType>
-        void updateSelfConsistentEnergy(const VectorType& eigenvalues, const size_t* lowEigenvalueIndex, const MatrixType& electronDencity);
-        void getLowestEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, size_t* index) const;
+        void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& electronDencity);
+        void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
         void nomalizeWave(Vector<ScalarType>& eigenvector);
     };
 
@@ -100,7 +100,7 @@ namespace Physica::Core::Physics {
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
         MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
-        size_t lowEigenvalueIndex[electronCount];
+        Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(electronCount);
         Vector<ScalarType> temp{};
 
         size_t iteration = 0;
@@ -110,10 +110,10 @@ namespace Physica::Core::Physics {
             const EigenSolver<MatrixType> solver(modifiedFock, true);
             // Get ground state energy
             const auto& eigenvalues = solver.getEigenvalues();
-            getLowestEigenvalues(eigenvalues, lowEigenvalueIndex);
+            sortEigenvalues(eigenvalues, sortedEigenvalues);
 
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
-            updateSelfConsistentEnergy(eigenvalues, lowEigenvalueIndex, densityMat);
+            updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, densityMat);
             const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
             std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
             // Check convergence
@@ -124,7 +124,7 @@ namespace Physica::Core::Physics {
             // Prepare for next iteration
             auto eigenvectors = solver.getEigenvectors();
             for (size_t i = 0; i < electronCount; ++i) {
-                temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(lowEigenvalueIndex[i])).moveToColMatrix()).compute().col(0);
+                temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
                 nomalizeWave(temp);
                 auto col = waves.col(i);
                 temp.assignTo(col);
@@ -205,36 +205,40 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     template<class VectorType>
-    void HFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues, const size_t* lowEigenvalueIndex, const MatrixType& electronDencity) {
+    void HFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues,
+                                                           const Utils::Array<size_t>& sortedEigenvalues,
+                                                           const MatrixType& electronDencity) {
         const size_t baseSetSize = getBaseSetSize();
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < electronCount; ++i)
-            selfConsistentEnergy += eigenvalues[lowEigenvalueIndex[i]].getReal();
+            selfConsistentEnergy += eigenvalues[sortedEigenvalues[i]].getReal();
 
         selfConsistentEnergy *= ScalarType(0.5);
         for (size_t i = 0; i < baseSetSize; ++i)
             for (size_t j = i; j < baseSetSize; ++j)
                 selfConsistentEnergy += singleHamilton(j, i) * electronDencity(j, i);
     }
-
+    /**
+     * Get the first \param electronCount lowest eigenvalues and save their indexes to array \param index,
+     * the eigenvalues are in ascending order.
+     * 
+     * \param index
+     * A array whose length is \param electronCount
+     */
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::getLowestEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, size_t* index) const {
-        size_t i = 0;
-        size_t max_index = 0;
-        for (; i < electronCount; ++i) {
-            assert(eigenvalues[i].getImag().isZero());
-            index[i] = i;
-            max_index = eigenvalues[i].getReal() > eigenvalues[max_index].getReal() ? i : max_index;
-        }
-
-        for (; i < getBaseSetSize(); ++i) {
-            assert(eigenvalues[i].getImag().isZero());
-            const auto& value = eigenvalues[i].getReal();
-            if (value < eigenvalues[i].getReal()) {
-                index[max_index] = i;
-                for (size_t j = 0; j < electronCount; ++j)
-                    max_index = eigenvalues[j].getReal() > eigenvalues[max_index].getReal() ? j : max_index;
+    void HFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
+                                                Utils::Array<size_t>& indexToSort) const {
+        indexToSort[0] = 0;
+        for (size_t i = 1; i < electronCount; ++i) {
+            const ScalarType& toInsert = eigenvalues[i].getReal();
+            size_t insertTo = 0;
+            for (; insertTo < i; ++insertTo) {
+                if (toInsert < eigenvalues[insertTo].getReal())
+                    break;
             }
+            size_t temp = i;
+            for (size_t j = insertTo; j <= i; ++j)
+                std::swap(temp, indexToSort[j]);
         }
     }
 
