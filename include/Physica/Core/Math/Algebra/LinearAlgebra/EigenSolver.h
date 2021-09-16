@@ -196,7 +196,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i) {
             if (eigenvalues[i].getImag().isZero()) {
                 auto toCol = result.col(i);
-                toCol = eigenvectorStorage.col(i);
+                toCol.asVector() = eigenvectorStorage.col(i);
             }
             else {
                 auto toCol1 = result.col(i);

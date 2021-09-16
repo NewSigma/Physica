@@ -87,16 +87,6 @@ namespace Physica::Core {
         result.setLength(len);
         return result;
     }
-
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::simplyMultiply(const Vector& v1, const Vector& v2) {
-        const auto len = v1.getLength();
-        assert(len == v2.getLength());
-        Vector<T, Length, MaxLength> result(len);
-        for (size_t i = 0; i < len; ++i)
-            result[i] = v1[i] * v2[i];
-        return result;
-    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
     template<class T, size_t Length, size_t MaxLength>

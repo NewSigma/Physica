@@ -81,8 +81,6 @@ namespace Physica::Core {
         ~RowVector() = default;
         /* Operators */
         using Base::operator=;
-        RowVector& operator=(const RowVector& m) { Base::operator=(m); return *this; }
-        RowVector& operator=(RowVector&& m) noexcept { Base::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < colCount); return mat(row, fromCol + index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
         /* Operations */
@@ -110,12 +108,11 @@ namespace Physica::Core {
         ColVector(ColVector&&) noexcept = delete;
         ~ColVector() = default;
         /* Operators */
-        ColVector& operator=(const ColVector& m) { Base::operator=(m); return *this; }
-        ColVector& operator=(ColVector&& m) noexcept { Base::operator=(m); return *this; }
+        using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < rowCount); return mat(fromRow + index, col); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < rowCount); return mat(fromRow + index, col); }
         /* Operations */
-        void resize(size_t length) { assert(length == rowCount); }
+        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return rowCount; }
     };
@@ -135,8 +132,6 @@ namespace Physica::Core {
         /* Operators */
         using Base::operator=;
         using VectorBase::operator=;
-        MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
-        MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
         /* Operations */
@@ -150,6 +145,13 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         using VectorBase::max;
         using VectorBase::min;
+        /**
+         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
+         */
+        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
+        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType>
@@ -167,8 +169,6 @@ namespace Physica::Core {
         /* Operators */
         using Base::operator=;
         using VectorBase::operator=;
-        MatrixBlock& operator=(const MatrixBlock& m) { VectorBase::operator=(m); return *this; }
-        MatrixBlock& operator=(MatrixBlock&& m) noexcept { VectorBase::operator=(m); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
         /* Operations */
@@ -182,6 +182,13 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
+        /**
+         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
+         */
+        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
+        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType>

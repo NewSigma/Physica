@@ -30,6 +30,7 @@ namespace Physica::Utils {
         Div,
         Reciprocal,
         Sqrt,
-        Abs
+        Abs,
+        Square
     };
 }
