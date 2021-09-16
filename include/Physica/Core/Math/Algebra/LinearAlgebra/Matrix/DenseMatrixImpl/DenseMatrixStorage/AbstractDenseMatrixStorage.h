@@ -57,7 +57,7 @@ namespace Physica::Core::Internal {
         using Base::resize;
         /* Getters */
         using Base::getLength;
-        using Base::swap;
+        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
     };
 
     template<class T, size_t MaxSize>
@@ -87,7 +87,7 @@ namespace Physica::Core::Internal {
         using Base::resize;
         /* Getters */
         using Base::getLength;
-        using Base::swap;
+        void swap(DenseMatrixStorageHelper& helper) noexcept { Base::swap(helper); }
     };
     /**
      * This layer handles specialization of operator().

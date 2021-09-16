@@ -99,9 +99,12 @@ namespace Physica::Core::Physics {
 
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
         MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
+        MatrixType older_waves = MatrixType(baseSetSize, electronCount);
+        MatrixType old_waves = MatrixType(baseSetSize, electronCount);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(electronCount);
         Vector<ScalarType> temp{};
+        Vector<ScalarType> temp1{};
 
         size_t iteration = 0;
         do {
@@ -115,7 +118,7 @@ namespace Physica::Core::Physics {
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
             updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, densityMat);
             const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
-            std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
+            //std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
             // Check convergence
             if (delta < criteria)
                 return true;
@@ -126,10 +129,17 @@ namespace Physica::Core::Physics {
             for (size_t i = 0; i < electronCount; ++i) {
                 temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
                 nomalizeWave(temp);
-                auto col = waves.col(i);
-                temp.assignTo(col);
+                auto older_wave = older_waves.col(i);
+                auto old_wave = old_waves.col(i);
+                auto wave = waves.col(i);
+                if (iteration > 3)
+                    wave.asVector() = divide(multiply(temp, old_wave) - square(older_wave), temp + older_wave - older_wave.asVector() * ScalarType::Two());
+                else
+                    wave = temp;
             }
             formDensityMatrix(densityMat, waves);
+            older_waves.swap(old_waves);
+            old_waves.swap(waves);
             formFockMatrix(fock, densityMat);
         } while(true);
         return true;
