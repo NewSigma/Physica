@@ -94,8 +94,8 @@ namespace Physica::Core::Physics {
         formSingleHamilton();
         formOverlapMatrix();
 
-        MatrixType cholesky = Cholesky(overlap);
-        MatrixType inv_cholesky = cholesky.inverse();
+        const MatrixType cholesky = Cholesky(overlap);
+        const MatrixType inv_cholesky = cholesky.inverse();
 
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
         MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
@@ -124,7 +124,7 @@ namespace Physica::Core::Physics {
             // Prepare for next iteration
             auto eigenvectors = solver.getEigenvectors();
             for (size_t i = 0; i < electronCount; ++i) {
-                temp = (inv_cholesky * toRealVector(eigenvectors.col(lowEigenvalueIndex[i])).moveToColMatrix()).compute().col(0);
+                temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(lowEigenvalueIndex[i])).moveToColMatrix()).compute().col(0);
                 nomalizeWave(temp);
                 auto col = waves.col(i);
                 temp.assignTo(col);
