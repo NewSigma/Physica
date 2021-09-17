@@ -135,7 +135,7 @@ namespace Physica::Core {
     }
 
     Integer Integer::operator/(const Integer& i) const {
-        if (Q_UNLIKELY(i.isZero()))
+        if (i.isZero())
             throw DivideByZeroException();
         if (isZero())
             return 0;

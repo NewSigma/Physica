@@ -72,7 +72,7 @@ namespace Physica::Core {
      * Optimize: refer to the Optimize above.
      */
     Rational Rational::operator/(const Rational& r) const {
-        if (Q_UNLIKELY(r.isZero()))
+        if (r.isZero())
             throw DivideByZeroException();
         Integer numerator_ = numerator * r.denominator;
         Integer denominator_ = denominator * r.numerator;

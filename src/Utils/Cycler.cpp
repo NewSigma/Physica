@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 #include <sys/time.h>
 #include <cstring>
 #include <iostream>
-#include <qglobal.h>
+#include <cassert>
 #include "Physica/Utils/Cycler.h"
 
 
@@ -88,7 +88,7 @@ namespace Physica::Utils {
      *      The time in nanoseconds corresponding to cycles (rounded).
      */
     uint64_t Cycler::toNanoseconds(uint64_t cycles, double cyclesPerSec) {
-        Q_ASSERT(cyclesPerSec > 0);
+        assert(cyclesPerSec > 0);
         if (cyclesPerSec == 0)
             cyclesPerSec = getCyclesPerSec();
         /*
@@ -113,7 +113,7 @@ namespace Physica::Utils {
      *      The time in microseconds corresponding to cycles (rounded).
      */
     uint64_t Cycler::toMicroseconds(uint64_t cycles, double cyclesPerSec) {
-        Q_ASSERT(cyclesPerSec > 0);
+        assert(cyclesPerSec > 0);
         return toNanoseconds(cycles, cyclesPerSec) / 1000;
     }
     /*!
@@ -130,7 +130,7 @@ namespace Physica::Utils {
      *      The time in seconds corresponding to cycles.
      */
     double Cycler::toSeconds(int64_t cycles, double cyclesPerSec) {
-        Q_ASSERT(cyclesPerSec > 0);
+        assert(cyclesPerSec > 0);
         if (cyclesPerSec == 0)
             cyclesPerSec = getCyclesPerSec();
         return static_cast<double>(cycles) / cyclesPerSec;
@@ -149,7 +149,7 @@ namespace Physica::Utils {
      *      The approximate number of cycles for the same time length.
      */
     uint64_t Cycler::fromNanoseconds(uint64_t ns, double cyclesPerSec) {
-        Q_ASSERT(cyclesPerSec > 0);
+        assert(cyclesPerSec > 0);
         if (cyclesPerSec == 0)
             cyclesPerSec = getCyclesPerSec();
         /*
@@ -173,7 +173,7 @@ namespace Physica::Utils {
      *      The approximate number of cycles corresponding to #seconds.
      */
     uint64_t Cycler::fromSeconds(double seconds, double cyclesPerSec) {
-        Q_ASSERT(cyclesPerSec > 0);
+        assert(cyclesPerSec > 0);
         if (cyclesPerSec == 0)
             cyclesPerSec = getCyclesPerSec();
         /*

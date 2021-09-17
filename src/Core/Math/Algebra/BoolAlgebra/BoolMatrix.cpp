@@ -17,15 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
-#include <qglobal.h>
 
 namespace Physica::Core {
     BoolMatrix::BoolMatrix(size_t column, size_t row) : arr(row, BitArray(column)) {
-        Q_ASSERT(column > 0 && row > 0);
+        assert(column > 0 && row > 0);
     }
 
     BoolMatrix::BoolMatrix(size_t column, size_t row, bool initial) : arr(row, BitArray(column, initial)) {
-        Q_ASSERT(column > 0 && row > 0);
+        assert(column > 0 && row > 0);
     }
     /*!
      * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
@@ -36,7 +35,7 @@ namespace Physica::Core {
         const size_t c1 = getColumn();
         const size_t r1 = getRow();
         const size_t c2 = m.getColumn();
-        Q_ASSERT(c1 == m.getRow());
+        assert(c1 == m.getRow());
 
         Array<BitArray> array{};
         array.reserve(r1);
@@ -61,7 +60,7 @@ namespace Physica::Core {
      * Complexity: O(row)
      */
     BoolMatrix BoolMatrix::operator&(const BoolMatrix& m) const {
-        Q_ASSERT(hasSameSize(m));
+        assert(hasSameSize(m));
         const size_t row = getRow();
         Array<BitArray> array{};
         array.reserve(row);
@@ -74,7 +73,7 @@ namespace Physica::Core {
      * Complexity: O(row)
      */
     BoolMatrix BoolMatrix::operator|(const BoolMatrix& m) const {
-        Q_ASSERT(hasSameSize(m));
+        assert(hasSameSize(m));
         const size_t row = getRow();
         Array<BitArray> array{};
         array.reserve(row);

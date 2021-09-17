@@ -51,14 +51,12 @@ namespace Physica::Core::Internal {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subWithError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
         }
@@ -128,14 +126,12 @@ namespace Physica::Core::Internal {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = subNoError(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
         }
@@ -204,7 +200,6 @@ namespace Physica::Core::Internal {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = addWithError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
@@ -276,15 +271,12 @@ namespace Physica::Core::Internal {
                 auto result = addWithError(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 AbstractScalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = subWithError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
-                Q_UNUSED(shallow_copy)
-                Q_UNUSED(shallow_copy_1)
                 return result;
             }
         }
@@ -301,7 +293,6 @@ namespace Physica::Core::Internal {
                 AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = addNoError(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
@@ -372,15 +363,12 @@ namespace Physica::Core::Internal {
                 Scalar result = addNoError(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
-                Q_UNUSED(shallow_copy)
                 return result;
             }
             else {
                 AbstractScalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 Scalar result = subNoError(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
-                Q_UNUSED(shallow_copy)
-                Q_UNUSED(shallow_copy_1)
                 return result;
             }
         }
@@ -440,7 +428,7 @@ namespace Physica::Core::Internal {
 
     inline Scalar<MultiPrecision, true> AbstractScalar<MultiPrecision>::divWithError(
             const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
-        if(Q_UNLIKELY(s2.isZero()))
+        if(s2.isZero())
             throw DivideByZeroException();
 
         if(!s1.isZero()) {
@@ -495,7 +483,7 @@ namespace Physica::Core::Internal {
 
     inline Scalar<MultiPrecision, false> AbstractScalar<MultiPrecision>::divNoError(
             const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
-        if(Q_UNLIKELY(s2.isZero()))
+        if(s2.isZero())
             throw DivideByZeroException();
 
         if(!s1.isZero()) {

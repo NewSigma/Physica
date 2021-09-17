@@ -28,9 +28,7 @@ void printElements(const MultiScalar& n) {
         std::cout << n[i] << ' ';
 }
 
-int main(int argc, char** argv) {
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
+int main() {
     initPhysica();
     /* test Pi */ {
         auto Pi = MathConst::getInstance().PI;

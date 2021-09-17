@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <QtCore/qlogging.h>
+#include <iostream>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Interpreter/TokenWord.h"
 #include "Physica/Interpreter/TokenNum.h"
@@ -29,7 +29,6 @@ using namespace Physica::Core;
 Tokenizer::Tokenizer(const char* str) : str(str), line(1) {
     Token::init();
     while(*str != '\0') {
-        Q_UNUSED(str)
         readToken();
     }
 }
@@ -131,7 +130,8 @@ void Tokenizer::readToken() {
         readWord();
         return;
     }
-    qFatal("Unrecognized token.");
+    std::cerr << "[Error]: Unrecognized token\n";
+    exit(EXIT_FAILURE);
 }
 //Return if the next char equals to ch.
 bool Tokenizer::readChar(char ch) {
@@ -268,8 +268,7 @@ void Tokenizer::readNum() {
                 break;
         }
     }
-    if(!stoppable)
-        qFatal("Encountered tokenizer error.");
+    assert(stoppable);
     if(!isExpPositive)
         exp.toOpposite();
     exp += MultiScalar(power);
@@ -303,8 +302,7 @@ void Tokenizer::readWord() {
                 break;
         }
     }
-    if(!stoppable)
-        qFatal("Encountered tokenizer error.");
+    assert(stoppable);
     //Recognize keywords
     if(buffer == "if")
         tokens.push_back(Token::keyWordIf);

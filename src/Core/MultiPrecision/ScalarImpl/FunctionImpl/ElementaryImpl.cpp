@@ -22,8 +22,7 @@
 namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, false> sqrt(const Scalar<MultiPrecision, false>& s) {
-        if(s.isNegative())
-            qFatal("Can not resolve the square root of a minus value.");
+        assert(!s.isNegative());
         if(s.isZero())
             return Scalar(BasicConst::getInstance()._0);
         Scalar copy_s(s);
@@ -50,8 +49,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> sqrt(const Scalar<MultiPrecision, true>& s) {
-        if(s.isNegative())
-            qFatal("Can not resolve the square root of a minus value.");
+        assert(!s.isNegative());
         if(s.isZero())
             return Scalar<MultiPrecision, true>(BasicConst::getInstance()._0);
         Scalar copy_s(s);
@@ -90,8 +88,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> ln(const Scalar<MultiPrecision, false>& s) {
-        if(!s.isPositive())
-            qFatal("Can not resolve the logarithm of zero or a negative value.");
+        assert(s.isPositive());
         Scalar<MultiPrecision, false> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;
@@ -122,8 +119,7 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, true> ln(const Scalar<MultiPrecision, true>& s) {
-        if(!s.isPositive())
-            qFatal("Can not resolve the logarithm of zero or a negative value.");
+        assert(s.isPositive());
         Scalar<MultiPrecision, true> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;

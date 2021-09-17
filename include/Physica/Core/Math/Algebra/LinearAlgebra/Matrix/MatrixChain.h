@@ -20,7 +20,6 @@
 #define PHYSICA_MATRIXCHAIN_H
 
 #include <cstdlib>
-#include <qglobal.h>
 #include <memory>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
@@ -35,7 +34,7 @@ namespace Physica::Core {
         explicit MatrixChain(size_t length);
         ~MatrixChain();
 
-        DenseMatrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { Q_ASSERT(i < length); return chain[i]; }
+        DenseMatrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { assert(i < length); return chain[i]; }
         DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> solve();
     private:
         DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> multiply(size_t from, size_t to);
@@ -69,9 +68,9 @@ namespace Physica::Core {
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
-        Q_UNUSED(type)
-        Q_UNUSED(maxRow)
-        Q_UNUSED(maxColumn)
+        void(type);
+        void(maxRow);
+        void(maxColumn);
         delete[] chain;
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
@@ -86,9 +85,9 @@ namespace Physica::Core {
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
     template<class T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
-        Q_UNUSED(type)
-        Q_UNUSED(maxRow)
-        Q_UNUSED(maxColumn)
+        void(type);
+        void(maxRow);
+        void(maxColumn);
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;
 
@@ -123,8 +122,8 @@ namespace Physica::Core {
     //!Both \from and \to are included.
     template<class T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
-        Q_UNUSED(maxRow)
-        Q_UNUSED(maxColumn)
+        void(maxRow);
+        void(maxColumn);
         if(from == to)
             return DenseMatrix<T, type, Dynamic, Dynamic>(*chain[from]);
         const auto cut_at = point[from][to];

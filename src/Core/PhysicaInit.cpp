@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <QTime>
 #include <Physica/Logger/LoggerRuntime.h>
 #include "Physica/Core/PhysicaInit.h"
 #include "Physica/Utils/Cycler.h"

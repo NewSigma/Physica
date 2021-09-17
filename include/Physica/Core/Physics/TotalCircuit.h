@@ -36,7 +36,7 @@ namespace Physica::Core {
             int pos1, pos2;
         public:
             inline void setData(MultiScalar* p_scalar, int i1, int i2) {
-                Q_ASSERT(i1 < i2);
+                assert(i1 < i2);
                 resistance = p_scalar;
                 pos1 = i1;
                 pos2 = i2;

@@ -30,24 +30,16 @@ namespace Physica::Core {
 
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left)
-            : left(new TreeFunctionData(std::move(left))), right(nullptr), type(type) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
-    }
+            : left(new TreeFunctionData(std::move(left))), right(nullptr), type(type) {}
 
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>::TreeFunctionData(FunctionType type, TreeFunctionData&& left, TreeFunctionData&& right)
-            : left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))), type(type) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
-    }
+            : left(new TreeFunctionData(std::move(left))), right(new TreeFunctionData(std::move(right))), type(type) {}
     /*!
      * May be a large cost function. Declared private to avoid incorrect use.
      */
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>::TreeFunctionData(const TreeFunctionData& data) : type(data.type) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         //Optimize: may be use operator ? and reinterpret_cast to avoid branches.
         if(data.type == Value) {
             index = data.index;
@@ -62,15 +54,11 @@ namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>::TreeFunctionData(TreeFunctionData&& data) noexcept
             : left(data.left), right(data.right), type(data.type) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         data.left = data.right = nullptr;
     }
 
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>::~TreeFunctionData() {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         if(getType() != Value) {
             delete left;
             delete right;
@@ -81,8 +69,6 @@ namespace Physica::Core {
      */
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>& TreeFunctionData<option, errorTrack>::operator=(const TreeFunctionData& data) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         if(this != &data) {
             this->~TreeFunctionData();
             type = data.type;
@@ -100,8 +86,6 @@ namespace Physica::Core {
 
     template<ScalarOption option, bool errorTrack>
     TreeFunctionData<option, errorTrack>& TreeFunctionData<option, errorTrack>::operator=(TreeFunctionData&& data) noexcept {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         type = data.type;
         left = data.left;
         right = data.right;

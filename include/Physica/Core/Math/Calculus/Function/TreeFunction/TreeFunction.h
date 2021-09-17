@@ -48,7 +48,7 @@ namespace Physica::Core {
         [[nodiscard]] Scalar<option, errorTrack> operator()(Scalar<option, errorTrack> s1, Scalar<option, errorTrack> s2) const;
         [[nodiscard]] Scalar<option, errorTrack> operator()(Scalar<option, errorTrack> s1, Scalar<option, errorTrack> s2, Scalar<option, errorTrack> s3) const;
         /* Operations */
-        [[nodiscard]] Scalar<option, errorTrack> solve() const { Q_ASSERT(tree.get()); return tree->solve(*this); };
+        [[nodiscard]] Scalar<option, errorTrack> solve() const { assert(tree.get()); return tree->solve(*this); };
         /* Getters */
         void printTree(std::ostream& os);
         [[nodiscard]] const TreeFunction<option, errorTrack>& getTree() const { return *tree; }

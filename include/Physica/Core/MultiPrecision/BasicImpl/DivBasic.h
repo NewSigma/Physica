@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "qglobal.h"
 #include "SubBasic.h"
 #include "MulBasic.h"
 
@@ -69,8 +68,8 @@ namespace Physica::Core {
      */
     inline void div2WordByFullWord(MPUnit& quotient, MPUnit& remainder
             , MPUnit high, MPUnit low, MPUnit divisor) {
-        Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(high < divisor);
+        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
         MPUnit quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -82,7 +81,7 @@ namespace Physica::Core {
             --quotient;
             remainder += divisor;
         }
-        if(Q_UNLIKELY(remainder >= divisor)) {
+        if(remainder >= divisor) {
             ++quotient;
             remainder -= divisor;
         }
@@ -91,8 +90,8 @@ namespace Physica::Core {
      * This is a simplified version of div2WordByFullWord(), which returns the quotient only.
      */
     inline MPUnit div2WordByFullWordQ(MPUnit high, MPUnit low, MPUnit divisor) {
-        Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(high < divisor);
+        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
         MPUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -104,7 +103,7 @@ namespace Physica::Core {
             --quotient;
             remainder += divisor;
         }
-        if(Q_UNLIKELY(remainder >= divisor))
+        if(remainder >= divisor)
             ++quotient;
         return quotient;
     }
@@ -112,8 +111,8 @@ namespace Physica::Core {
      * This is a simplified version of div2WordByFullWord(), which returns the remainder only.
      */
     inline MPUnit div2WordByFullWordR(MPUnit high, MPUnit low, MPUnit divisor) {
-        Q_ASSERT(high < divisor);
-        Q_ASSERT(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(high < divisor);
+        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
         MPUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -123,7 +122,7 @@ namespace Physica::Core {
         auto remainder = low - quotient * divisor;
         if(remainder > quotient2)
             remainder += divisor;
-        if(Q_UNLIKELY(remainder >= divisor))
+        if(remainder >= divisor)
             remainder -= divisor;
         return remainder;
     }
@@ -139,7 +138,7 @@ namespace Physica::Core {
      */
     inline MPUnit divArrByFullArrWith1Word(const MPUnit* __restrict dividend
             , const MPUnit* __restrict divisor, size_t len) {
-        Q_ASSERT(len >= 1);
+        assert(len >= 1);
         MPUnit q = dividend[len] >= divisor[len - 1] ? MPUnitMax :
                        div2WordByFullWordQ(dividend[len], dividend[len - 1], divisor[len - 1]);
         if(len == 1) //May be ask len > 1 to avoid branches.

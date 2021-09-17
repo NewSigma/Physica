@@ -31,22 +31,14 @@ namespace Physica::Core {
 
     template<ScalarOption option, bool errorTrack>
     AbstractFunction<option, errorTrack>::AbstractFunction(const AbstractFunction& f)
-            : variables(f.variables), constants(f.constants) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
-    }
+            : variables(f.variables), constants(f.constants) {}
 
     template<ScalarOption option, bool errorTrack>
     AbstractFunction<option, errorTrack>::AbstractFunction(AbstractFunction&& f) noexcept
-            : variables(std::move(f.variables)), constants(std::move(f.constants)) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
-    }
+            : variables(std::move(f.variables)), constants(std::move(f.constants)) {}
     /* Operators */
     template<ScalarOption option, bool errorTrack>
     AbstractFunction<option, errorTrack>& AbstractFunction<option, errorTrack>::operator=(const AbstractFunction& f) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         if(this != &f) {
             variables = f.variables;
             constants = f.constants;
@@ -55,8 +47,6 @@ namespace Physica::Core {
     }
     template<ScalarOption option, bool errorTrack>
     AbstractFunction<option, errorTrack>& AbstractFunction<option, errorTrack>::operator=(AbstractFunction&& f) noexcept {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         variables = std::move(f.variables);
         constants = std::move(f.constants);
         return *this;

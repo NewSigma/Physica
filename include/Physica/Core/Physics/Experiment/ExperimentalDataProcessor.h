@@ -65,7 +65,7 @@ namespace Physica::Core::Physics {
     };
 
     inline ExperimentalDataProcessor::ExperimentalDataProcessor(DataMatrix m) : data(std::move(m)) {
-        Q_ASSERT(data.getColumn() < MPUnitMax); //Too much data is not supported.
+        assert(data.getColumn() < MPUnitMax); //Too much data is not supported.
         updateInfo();
     }
 }

@@ -59,10 +59,7 @@ namespace Physica::Core {
             : AbstractFunction<option, errorTrack>(f)
             , typeVector(f.typeVector)
             , valueVector(f.valueVector)
-            , valueIte(f.valueIte) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
-    }
+            , valueIte(f.valueIte) {}
 
     template<ScalarOption option, bool errorTrack>
     VectorFunction<option, errorTrack>::VectorFunction(VectorFunction&& f) noexcept
@@ -70,8 +67,6 @@ namespace Physica::Core {
             , typeVector(std::move(f.typeVector))
             , valueVector(std::move(f.valueVector))
             , valueIte(f.valueIte) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
     }
 
     template<ScalarOption option, bool errorTrack>

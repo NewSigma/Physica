@@ -39,7 +39,7 @@ namespace Physica::Core {
     TotalCircuit::TotalCircuit(std::vector<MultiScalar> v) : resistances(v.size()), nodesCount(2) {
         //In case overflow
         size = resistances.size();
-        Q_ASSERT(size < static_cast<size_t>(INT_MAX));
+        assert(size < static_cast<size_t>(INT_MAX));
 
         for(auto& s : v)
             resistances.allocate(std::move(s));

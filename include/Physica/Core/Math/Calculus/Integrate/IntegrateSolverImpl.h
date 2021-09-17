@@ -26,9 +26,7 @@ namespace Physica::Core {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<ScalarOption option, bool errorTrack>
     IntegrateSolver<Rectangular, 1, option, errorTrack>::IntegrateSolver(Scalar<option, false> stepSize)
-            : stepSize(std::move(stepSize)) {
-        Q_UNUSED(errorTrack)
-    }
+            : stepSize(std::move(stepSize)) {}
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> IntegrateSolver<Rectangular, 1, option, errorTrack>::solve(
@@ -50,9 +48,7 @@ namespace Physica::Core {
     //////////////////////////////////Ladder//////////////////////////////////
     template<ScalarOption option, bool errorTrack>
     IntegrateSolver<Ladder, 1, option, errorTrack>::IntegrateSolver(Scalar<option, false> stepSize)
-            : stepSize(std::move(stepSize)) {
-        Q_UNUSED(errorTrack)
-    }
+            : stepSize(std::move(stepSize)) {}
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> IntegrateSolver<Ladder, 1, option, errorTrack>::solve(
@@ -73,9 +69,7 @@ namespace Physica::Core {
     //////////////////////////////////Simpson//////////////////////////////////
     template<ScalarOption option, bool errorTrack>
     IntegrateSolver<Simpson, 1, option, errorTrack>::IntegrateSolver(Scalar<option, false> stepSize)
-            : stepSize(std::move(stepSize)) {
-        Q_UNUSED(errorTrack)
-    }
+            : stepSize(std::move(stepSize)) {}
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> IntegrateSolver<Simpson, 1, option, errorTrack>::solve(
@@ -106,9 +100,7 @@ namespace Physica::Core {
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     template<ScalarOption option, bool errorTrack>
     IntegrateSolver<Tanh_Sinh, 1, option, errorTrack>::IntegrateSolver(Scalar<option, false> stepSize, size_t pointCount)
-            : stepSize(std::move(stepSize)), pointCount(pointCount) {
-        Q_UNUSED(errorTrack)
-    }
+            : stepSize(std::move(stepSize)), pointCount(pointCount) {}
     /*!
      * Reference:
      * [1] Vanherck, Joren Sorée, Bart Magnus, Wim.

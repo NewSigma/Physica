@@ -19,7 +19,6 @@
 #pragma once
 
 #include <cmath>
-#include <qglobal.h>
 #include <ostream>
 #include "MultiPrecisionType.h"
 #include "Rational.h"
@@ -114,7 +113,7 @@ namespace Physica::Core {
                 explicit AbstractScalar(const wchar_t* s);
                 ~AbstractScalar();
                 /* Operators */
-                MPUnit operator[](unsigned int index) const { Q_ASSERT(index < static_cast<unsigned int>(getSize())); return byte[index]; }
+                MPUnit operator[](unsigned int index) const { assert(index < static_cast<unsigned int>(getSize())); return byte[index]; }
                 explicit operator double() const;
                 AbstractScalar operator-() const;
                 /* Helpers */
@@ -131,7 +130,7 @@ namespace Physica::Core {
                 [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
                 /* Setters */
                 void setPower(int i) noexcept { power = i; }
-                void setByte(unsigned int index, MPUnit value) { Q_ASSERT(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
+                void setByte(unsigned int index, MPUnit value) { assert(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
             protected:
                 /**
                  * Degigned for performance,

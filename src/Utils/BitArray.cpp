@@ -17,9 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cstdlib>
-#include <climits>
 #include <cstring>
-#include "qglobal.h"
+#include <cassert>
+#include <climits>
+#include <limits>
 #include "Physica/Utils/BitArray.h"
 
 namespace Physica::Utils {
@@ -75,7 +76,7 @@ namespace Physica::Utils {
      * Access the s.th bool, s starts from 0.
      */
     bool BitArray::operator[](size_t s) const {
-        Q_ASSERT(bitCount > s);
+        assert(bitCount > s);
         s += 1;
         const auto quotient = s / CHAR_BIT;
         const auto reminder = s - quotient * CHAR_BIT;
@@ -85,7 +86,7 @@ namespace Physica::Utils {
     }
 
     BitArray BitArray::operator&(const BitArray& array) const {
-        Q_ASSERT(bitCount == array.bitCount);
+        assert(bitCount == array.bitCount);
         const size_t length = getLength();
         auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
         for(size_t s = 0; s < length; ++s)
@@ -94,7 +95,7 @@ namespace Physica::Utils {
     }
 
     BitArray BitArray::operator|(const BitArray& array) const {
-        Q_ASSERT(bitCount == array.bitCount);
+        assert(bitCount == array.bitCount);
         const size_t length = getLength();
         auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
         for(size_t s = 0; s < length; ++s)
@@ -111,7 +112,7 @@ namespace Physica::Utils {
     }
 
     void BitArray::setBit(size_t s, bool b) {
-        Q_ASSERT(bitCount > s);
+        assert(bitCount > s);
         s += 1;
         const auto quotient = s / CHAR_BIT;
         const auto reminder = s - quotient * CHAR_BIT;

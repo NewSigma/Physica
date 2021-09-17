@@ -31,21 +31,21 @@ namespace Physica::Core {
      */
     template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix() : DenseMatrix<T, type, maxSize, maxSize>() {
-        Q_UNUSED(type)
-        Q_UNUSED(maxSize)
+        void(type);
+        void(maxSize);
     }
 
     template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix(size_t length) : DenseMatrix<T, type, maxSize, maxSize>(length) {
-        Q_UNUSED(type)
-        Q_UNUSED(maxSize)
+        void(type);
+        void(maxSize);
     }
 
     template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize>::SquareMatrix(SquareMatrix&& matrix) noexcept
             : DenseMatrix<T, type, maxSize, maxSize>(std::move(matrix)) {
-        Q_UNUSED(type)
-        Q_UNUSED(maxSize)
+        void(type);
+        void(maxSize);
     }
 
     template<class T, DenseMatrixOption type, size_t maxSize>
@@ -93,7 +93,7 @@ namespace Physica::Core {
     
     template<class T, DenseMatrixOption type, size_t maxSize>
     SquareMatrix<T, type, maxSize> SquareMatrix<T, type, maxSize>::getUnitMatrix(size_t length) {
-        Q_UNUSED(type)
+        void(type);
         SquareMatrix result(length);
         for(size_t i = 0; i < length; ++i) {
             Vector<T, maxSize> vector(length);

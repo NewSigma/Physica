@@ -177,8 +177,6 @@ namespace Physica::Core {
 
     template<ScalarOption option, bool errorTrack>
     void TreeFunctionPrinter<option, errorTrack>::printList() {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
         for(const char* str : list)
             os << str;
     }

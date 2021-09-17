@@ -43,9 +43,7 @@ namespace Physica::Core {
             return Scalar<option, errorTrack>(x1);
         if(n == y2)
             return Scalar<option, errorTrack>(x2);
-
-        if((Scalar<option, false>(n - y1).getLength() ^ Scalar<option, false>(n - y2).getLength()) >= 0) // NOLINT(hicpp-signed-bitwise)
-            qFatal("Root is nonexistent.");
+        assert((Scalar<option, false>(n - y1).getLength() ^ Scalar<option, false>(n - y2).getLength()) < 0); //Root must be existent
 
         Scalar<option, false> result = (x1 + x2) >> 1;
         Scalar<option, false> y_result(static_cast<SignedMPUnit>(1));

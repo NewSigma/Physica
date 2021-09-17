@@ -35,43 +35,43 @@ namespace Physica::Core {
 
     template<ScalarOption option, bool errorTrack>
     FFT<option, errorTrack>::FFT(const FFT& fft) : data(fft.data) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
     }
 
     template<ScalarOption option, bool errorTrack>
     FFT<option, errorTrack>::FFT(FFT&& fft) noexcept : data(std::move(fft.data)) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
     }
 
     template<ScalarOption option, bool errorTrack>
     FFT<option, errorTrack>& FFT<option, errorTrack>::operator=(const FFT& fft) {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
         data = fft.data;
         return *this;
     }
 
     template<ScalarOption option, bool errorTrack>
     FFT<option, errorTrack>& FFT<option, errorTrack>::operator=(FFT&& fft) noexcept {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
         data = std::move(fft.data);
         return *this;
     }
 
     template<ScalarOption option, bool errorTrack>
     inline void FFT<option, errorTrack>::transform() {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
         transformImpl((MathConst::getInstance() / data.getLength()) << 1);
     }
 
     template<ScalarOption option, bool errorTrack>
     inline void FFT<option, errorTrack>::invTransform() {
-        Q_UNUSED(option)
-        Q_UNUSED(errorTrack)
+        void(option);
+        void(errorTrack);
         transformImpl(-(MathConst::getInstance() / data.getLength()) << 1);
     }
 

@@ -530,7 +530,6 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
             const Scalar<MultiPrecision, false>& s) const {
-        Q_UNUSED(MultiPrecision)
         auto result = mulWithError(*this, s);
         cutLength(result);
         if(getA() != 0)
@@ -540,7 +539,6 @@ namespace Physica::Core {
 
     Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator/(
             const Scalar<MultiPrecision, false>& s) const {
-        Q_UNUSED(MultiPrecision)
         auto result = divWithError(*this, s);
         if(getA() != 0)
             result.applyError(getAccuracy() / s);

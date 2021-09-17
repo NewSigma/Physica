@@ -48,7 +48,7 @@ namespace Physica::Core {
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::completePivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column) {
         const auto rank = matrix.getRow();
-        Q_ASSERT(column < rank);
+        assert(column < rank);
         size_t main_row_index = 0, main_column_index = 0;
         const T zero = T::Zero();
         const T* main = &zero;
@@ -78,7 +78,7 @@ namespace Physica::Core {
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column) {
         const auto rank = matrix.getRow();
-        Q_ASSERT(column < rank);
+        assert(column < rank);
         size_t main_index = column;
         const T* main = &matrix(column, column);
         for(size_t j = column + 1; j < rank; ++j) {
@@ -103,7 +103,7 @@ namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::impactPivoting(
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t row) {
-        Q_ASSERT(row < matrix.getRow());
+        assert(row < matrix.getRow());
         const auto col = matrix.getColumn();
         const T* main = &matrix(row, 0);
         for(size_t i = 1; i < col; ++i) {

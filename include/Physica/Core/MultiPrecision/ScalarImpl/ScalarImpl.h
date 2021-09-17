@@ -32,7 +32,7 @@ namespace Physica::Core {
          */
         inline bool AbstractScalar<MultiPrecision>::matchSign(
                 const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
-            Q_ASSERT(!s1.isZero() && !s2.isZero());
+            assert(!s1.isZero() && !s2.isZero());
             return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
         }
         /**

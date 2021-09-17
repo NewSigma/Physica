@@ -153,9 +153,7 @@ bool numericalDivTest(unsigned int loop) {
     return true;
 }
 
-int main(int argc, char** argv) {
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
+int main() {
     initPhysica();
     bool result = numericalAddTest(iterateCount)
             && numericalSubTest(iterateCount)

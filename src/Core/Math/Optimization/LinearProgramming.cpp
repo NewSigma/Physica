@@ -172,7 +172,7 @@ namespace Physica::Core {
         for(tempTermOrder = 0; tempTermOrder < orderLength; ++tempTermOrder)
             if(order[tempTermOrder] == 0)
                 break;
-        Q_ASSERT(tempTermOrder != orderLength);
+        assert(tempTermOrder != orderLength);
         //If temp term is a basic variable, exchange it with a non-basic variable.
         if(tempTermOrder >= column) {
             size_t i;
@@ -210,7 +210,7 @@ namespace Physica::Core {
                     }
                 }
             }
-            Q_ASSERT(isNonBasic);
+            assert(isNonBasic);
         }
     }
     /*!
@@ -220,7 +220,7 @@ namespace Physica::Core {
      */
     void LinearProgramming::pivot(size_t basic, size_t nonBasic) {
         const auto dataSize = data.getRow();
-        Q_ASSERT(basic < dataSize && nonBasic < target.getLength());
+        assert(basic < dataSize && nonBasic < target.getLength());
         /* Handle order */
         std::swap(order[data.getColumn() - 1 + basic], order[nonBasic]);
         /* Handle row basic */
@@ -275,7 +275,7 @@ namespace Physica::Core {
 
     size_t LinearProgramming::findMinConst() const {
         const auto row = data.getRow();
-        Q_ASSERT(row > 0);
+        assert(row > 0);
         size_t minimumIndex = 0; //Assume element at 0 is minimum
         for(size_t i = 1; i < row; ++i)
             minimumIndex = data(minimumIndex, 0) < data(i, 0) ? minimumIndex : i;

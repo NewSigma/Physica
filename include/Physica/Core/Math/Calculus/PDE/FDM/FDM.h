@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_FDM_H
-#define PHYSICA_FDM_H
+#pragma once
 
-#include <QtCore/QVector>
+#include <vector>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 /*!
  * Solve the laplace equation using FDM. This is created for study and is very shabby.
@@ -56,7 +55,7 @@ namespace Physica::Core {
         using DataMatrix = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, Dynamic, Dynamic>;
     private:
         DataMatrix data;
-        QVector<Boundary> boundaries;
+        std::vector<Boundary> boundaries;
     public:
         FDM(size_t column, size_t row);
         /* Operations */
@@ -70,5 +69,3 @@ namespace Physica::Core {
 }
 
 #include "FDMImpl.h"
-
-#endif

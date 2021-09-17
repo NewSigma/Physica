@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<int dim>
     RegionTree<dim>::~RegionTree() {
-        Q_UNUSED(dim)
+        void(dim);
         delete left;
         delete right;
     }
@@ -67,7 +67,7 @@ namespace Physica::Core {
 
     template<int dim>
     GeometryRegion<dim>* RegionTree<dim>::release() {
-        Q_UNUSED(dim)
+        void(dim);
         return new RegionTree(std::move(*this));
     }
 }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <QtCore/qlogging.h>
+#include <iostream>
 #include "Physica/AI/DNN.h"
 #include "Physica/AI/Layer.h"
 #include "Physica/AI/Node.h"
@@ -45,7 +45,7 @@ namespace Physica::AI {
 
     void DNN::loadData(const Vector<MultiScalar>& loadInputs, const MultiScalar& loadExpect) {
         if(loadInputs.getLength() != static_cast<size_t>(inputSize)) {
-            qWarning("Insufficient data!");
+            std::cout << "[Warning]: Insufficient data!\n";
             return;
         }
         inputs = loadInputs;
