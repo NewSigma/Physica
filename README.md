@@ -19,11 +19,10 @@ but it is a good platform to improve your mathematics, physics and programming a
 
 ## Install
 
-This project uses the following software. Go check them out if you don't have them locally installed:  
+This project uses the following packages:  
 
-[CMake](https://cmake.org/)  
-[Qt](https://www.qt.io/)  
-[CUDA](https://developer.nvidia.com/cuda-downloads).
+[Qt](https://www.qt.io/)  (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads)  (Optional)  
 
 Then you can compile Physica using the following commands:
 
@@ -36,7 +35,7 @@ $ make install    (alternatively $ make -j<N> install)
 
 ## Usage
 
-You can run the executable file your console:
+You can run the executable file in your console:
 
 ```sh
 $ /path/where/Physica/should/be/installed/to/Physica

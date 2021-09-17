@@ -1,7 +1,9 @@
 #############################################Project##############################################
 add_subdirectory(AI)
 add_subdirectory(Core)
-add_subdirectory(Gui)
+if(${PHYSICA_GUI})
+    add_subdirectory(Gui)
+endif()
 add_subdirectory(Interpreter)
 add_subdirectory(Logger)
 add_subdirectory(Utils)

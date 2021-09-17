@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(Physica VERSION 0.0.1 LANGUAGES CXX CUDA)
+project(Physica VERSION 0.0.1 LANGUAGES CXX)
 #include all macros
 include(cmake/Modules/PhysicaCheck.cmake)
 #############################################Settings#############################################
@@ -8,13 +8,19 @@ option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(RUN_CHECKS "Run Checks" ON)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
+option(PHYSICA_CUDA "Enable CUDA support" OFF)
+option(PHYSICA_GUI "Enable GUI support" OFF)
 set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
+set(UseASM 1 CACHE STRING "Enable inline assembly code")
 
-set(UseASM 1)
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies
 cmake_policy(SET CMP0074 NEW)
+
+if(${PHYSICA_CUDA})
+    enable_language(CUDA)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -50,7 +56,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+if(${PHYSICA_GUI})
+    find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+endif()
+
 if(${PHYSICA_PROFILE})
     include_directories(${GPerfTools_INCLUDE_DIR})
     find_package(GPerfTools REQUIRED)
@@ -68,14 +77,16 @@ if(${BUILD_TESTS})
     add_subdirectory(test)
 endif()
 
-set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
-add_executable(Physica Physica.cpp ${HEADERS})
-target_link_libraries(Physica ${GPerfTools_LIBRARY})
-target_compile_options(Physica PRIVATE -Wl,--rpath=${CMAKE_INSTALL_PREFIX}/lib)
+if(${PHYSICA_GUI})
+    set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
+    add_executable(Physica Physica.cpp ${HEADERS})
+    target_link_libraries(Physica ${GPerfTools_LIBRARY})
+    target_compile_options(Physica PRIVATE -Wl,--rpath=${CMAKE_INSTALL_PREFIX}/lib)
 
-install(TARGETS Physica DESTINATION bin)
-install(FILES include/Physica/Config.h DESTINATION include/Physica)
-install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
-install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
-#############################################Options##############################################
-target_link_libraries(Physica PhysicaCore PhysicaGui Qt5::Core Qt5::Widgets)
+    install(TARGETS Physica DESTINATION bin)
+    install(FILES include/Physica/Config.h DESTINATION include/Physica)
+    install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
+    install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
+    #############################################Options##############################################
+    target_link_libraries(Physica PhysicaCore PhysicaGui Qt5::Core Qt5::Widgets)
+endif()
