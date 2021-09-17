@@ -76,8 +76,9 @@ namespace Physica::Core {
         /* Getters */
         using Storage::getLength;
         /* Helpers */
-        static Vector<T> Zeros(size_t len);
-        static Vector<T> randomVector(size_t len);
+        static Vector Zeros(size_t len);
+        static Vector randomVector(size_t len);
+        static Vector randomVector(const Vector& v1, const Vector& v2);
     private:
         template<class Derived>
         friend class Internal::VectorExpressionHelper;

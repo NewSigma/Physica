@@ -18,62 +18,43 @@
  */
 #pragma once
 
-#include <ctime>
-#include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
-#include "Physica/Core/Math/Geometry/Point.h"
+#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    class AbstractGeneAlgorithm {
+    /**
+     * Search for minimum value
+     */
+    template<class Function, class VectorType>
+    class GeneAlgorithm {
+        using ScalarType = typename VectorType::ScalarType;
     public:
-        enum ChooseMode {
-            LinearChoose,
-            RandomChoose
-        };
-
         struct AlgorithmConfig {
-            float crossoverRate = 0.6;
-            float mutationRate = 0.1;
-            //The size of initial points we will spawn.
-            unsigned int population = 100;
-            //Stopping args
-            unsigned int maxGeneration = 100;
-            ChooseMode mode = LinearChoose;
-        };
-    protected:
-        AlgorithmConfig config;
-    public:
-        ~AbstractGeneAlgorithm() = default;
-        /* Getters */
-        [[nodiscard]] const AlgorithmConfig& getConfig() const { return config; }
-        /* Setters */
-        void setConfig(const AlgorithmConfig& c) { config = c; }
-    protected:
-        explicit AbstractGeneAlgorithm(const AlgorithmConfig& c);
-    };
-    
-    template<size_t dim, ScalarOption option>
-    class GeneAlgorithm : public AbstractGeneAlgorithm {
-        static_assert(dim > 0, "dim must be positive.");
-    };
-    
-    template<ScalarOption option>
-    class GeneAlgorithm<1, option> : public AbstractGeneAlgorithm {
-    public:
-        using ScalarType = Scalar<option, false>;
-        struct Range {
-            ScalarType lowerBound;
-            ScalarType upperBound;
+            float crossoverRate;
+            float mutationRate;
+            unsigned int populationSize;
+            unsigned int maxGeneration;
+            VectorType lowerBound;
+            VectorType upperBound;
         };
     private:
-        VectorFunction<option, false> func;
-        Range range;
-        ScalarType regionLength;
-        std::vector<ScalarType> points;
+        AlgorithmConfig config;
+        Function func;
+        Utils::Array<VectorType> population;
+        Utils::Array<ScalarType> fitness;
+        size_t minFitnessIndex;
     public:
-        GeneAlgorithm(const VectorFunction<option, false>& func, const Range& range, const AlgorithmConfig& config);
+        GeneAlgorithm(Function func_, const AlgorithmConfig& config_);
         ~GeneAlgorithm() = default;
 
-        Point<2, ScalarType> solve() const;
+        void solve();
+        /* Getters */
+        [[nodiscard]] const AlgorithmConfig& getConfig() const noexcept { return config; }
+        [[nodiscard]] size_t getDim() const noexcept { return config.lowerBound.getLength(); }
+        [[nodiscard]] const VectorType getOptimizedParams() const noexcept { return population[minFitnessIndex]; }
+        [[nodiscard]] ScalarType getOptimizedValue() const noexcept { return fitness[minFitnessIndex]; }
+        /* Setters */
+        void setConfig(const AlgorithmConfig& c) { config = c; }
     private:
         void crossover();
         void mutation();

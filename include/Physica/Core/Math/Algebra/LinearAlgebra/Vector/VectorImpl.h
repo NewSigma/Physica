@@ -70,21 +70,30 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T> Vector<T, Length, MaxLength>::Zeros(size_t len) {
-        Vector<T> result(len);
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::Zeros(size_t len) {
+        Vector<T, Length, MaxLength> result{};
+        result.reserve(len);
         for(size_t i = 0; i < len; ++i)
-            result[i] = T::Zero();
+            result.get_allocator().construct(result.data() + i, T::Zero());
         result.setLength(len);
         return result;
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T> Vector<T, Length, MaxLength>::randomVector(size_t len) {
-        Vector<T> result{};
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::randomVector(size_t len) {
+        Vector<T, Length, MaxLength> result{};
         result.reserve(len);
         for (size_t i = 0; i < len; ++i)
             result.get_allocator().construct(result.data() + i, randomScalar<T>());
         result.setLength(len);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::randomVector(const Vector& v1, const Vector& v2) {
+        assert(v1.getLength() == v2.getLength());
+        Vector<T, Length, MaxLength> result = randomVector(v1.getLength());
+        result = v1 + multiply((v2 - v1), result);
         return result;
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

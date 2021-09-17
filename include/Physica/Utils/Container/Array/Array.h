@@ -105,7 +105,7 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
         /* Setters */
-        __host__ __device__ void setLength(size_t size) { assert(size == Length); }
+        __host__ __device__ void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
     };
 
     template<class T, size_t Capacity, class Allocator>

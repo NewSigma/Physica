@@ -19,79 +19,64 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption option>
-    GeneAlgorithm<1, option>::GeneAlgorithm(
-            const VectorFunction<option, false> &func,
-            const Range &range,
-            const AlgorithmConfig& config)
-            : AbstractGeneAlgorithm(config)
-            , func(func)
-            , range(range)
-            , regionLength(range.upperBound - range.lowerBound) {
-        const auto population = config.population;
-        const auto mode = config.mode;
-        const auto& lower = range.lowerBound;
-        if (mode == LinearChoose) {
-            ScalarType stepLength =
-                    regionLength / MultiScalar(static_cast<SignedMPUnit>(population));
-            ScalarType temp(lower);
-            for (int i = 0; i < population; i++) {
-                points[i] = temp;
-                temp += stepLength;
-            }
-        }
-        else {
-            for (int i = 0; i < population; i++)
-                points[i] = lower + randomScalar<Scalar<MultiPrecision, false>>() * regionLength;
+    template<class Function, class VectorType>
+    GeneAlgorithm<Function, VectorType>::GeneAlgorithm(Function func_, const AlgorithmConfig& config_)
+            : config(config_)
+            , func(func_)
+            , population(config_.populationSize)
+            , fitness(config_.populationSize)
+            , minFitnessIndex(0) {
+        assert(config.lowerBound.getLength() == config.upperBound.getLength());
+        assert(config.populationSize > 0);
+        for (size_t i = 0; i < population.getLength(); ++i) {
+            population[i] = VectorType::randomVector(config.lowerBound, config.upperBound);
+            fitness[i] = func(std::cref(population[i]));
         }
     }
 
-    template<ScalarOption option>
-    Point<2, typename GeneAlgorithm<1, option>::ScalarType> GeneAlgorithm<1, option>::solve() const {
-        Q_UNUSED(option)
-        unsigned int generation = 0;
-        while (generation < config.maxGeneration) {
+    template<class Function, class VectorType>
+    void GeneAlgorithm<Function, VectorType>::solve() {
+        for (size_t iteration = 0; iteration < config.maxGeneration; ++iteration) {
             crossover();
             mutation();
-            generation += 1;
         }
-        return points;
+
+        for (size_t i = 1; i < config.populationSize; ++i) {
+            if (fitness[i] < fitness[minFitnessIndex])
+                minFitnessIndex = i;
+        }
     }
 
-    template<ScalarOption option>
-    void GeneAlgorithm<1, option>::crossover() {
-        const auto population = config.population;
+    template<class Function, class VectorType>
+    void GeneAlgorithm<Function, VectorType>::crossover() {
+        const auto populationSize = config.populationSize;
         const auto crossoverRate = config.crossoverRate;
-        for (int i = 0; i < population; i++) {
-            auto r = static_cast<double>(rand()) / RAND_MAX;
-            if (r < crossoverRate) {
-                unsigned int randomIndex1 = random() % population;
-                unsigned int randomIndex2 = random() % population;
-                auto& random1 = points[randomIndex1];
-                auto& random2 = points[randomIndex2];
+        for (size_t i = 0; i < populationSize; i++) {
+            const ScalarType random = randomScalar<ScalarType>();
+            if (random < ScalarType(crossoverRate)) {
+                unsigned int sampleIndex1 = std::rand() % populationSize;
+                unsigned int sampleIndex2 = std::rand() % populationSize;
+                auto& sample1 = population[sampleIndex1];
+                auto& sample2 = population[sampleIndex2];
 
-                r = randomScalar<option, false>();
-                //Whether random2 > random1 or not is not important.
-                auto child = random1 + (random2 - random1) * r;
-                auto child_y = func(child);
-                auto y_random1 = func(random1);
-                auto y_random2 = func(random2);
-                if (child_y > y_random1)
-                    random1 = child;
-                else if (child_y > y_random2)
-                    random2 = child;
+                const ScalarType random1 = randomScalar<ScalarType>();
+                //Whether random2 > random1 or not does not matter.
+                VectorType child = sample1 + (sample2 - sample1) * random1;
+                ScalarType fitness_child = func(std::cref(child));
+                if (fitness_child < fitness[sampleIndex1])
+                    sample1 = std::move(child);
+                else if (fitness_child < fitness[sampleIndex2])
+                    sample2 = std::move(child);
             }
         }
     }
 
-    template<ScalarOption option>
-    void GeneAlgorithm<1, option>::mutation() {
-        Q_UNUSED(option)
-        auto r = static_cast<double>(rand()) / RAND_MAX;
-        if(r < config.mutationRate) {
-            unsigned int randomIndex = random() % config.population;
-            points[randomIndex] =
-                    range.lowerBound + randomScalar<Scalar<MultiPrecision, false>>() * regionLength;
+    template<class Function, class VectorType>
+    void GeneAlgorithm<Function, VectorType>::mutation() {
+        const ScalarType random = randomScalar<ScalarType>();
+        if(random < ScalarType(config.mutationRate)) {
+            unsigned int randomIndex = std::rand() % config.populationSize;
+            population[randomIndex] = VectorType::randomVector(config.lowerBound, config.upperBound);
         }
     }
 }
