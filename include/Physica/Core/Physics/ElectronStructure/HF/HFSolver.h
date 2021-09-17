@@ -223,10 +223,10 @@ namespace Physica::Core::Physics {
         for (size_t i = 0; i < electronCount; ++i)
             selfConsistentEnergy += eigenvalues[sortedEigenvalues[i]].getReal();
 
-        selfConsistentEnergy *= ScalarType(0.5);
         for (size_t i = 0; i < baseSetSize; ++i)
             for (size_t j = i; j < baseSetSize; ++j)
                 selfConsistentEnergy += singleHamilton(j, i) * electronDencity(j, i);
+        selfConsistentEnergy *= ScalarType(0.5);
     }
     /**
      * Get the first \param electronCount lowest eigenvalues and save their indexes to array \param index,
