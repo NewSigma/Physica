@@ -136,5 +136,12 @@ int main() {
         if (!scalarNear(BaseFunc::overlap(base2, base3), ScalarType(0.0004513547048841694), 1E-15))
             return 1;
     }
+    {
+        Vector<ScalarType, 3> v{0, 0, 0};
+        GaussBase<ScalarType> base1(v, 0.298073, 0, 0, 0);
+        GaussBase<ScalarType> base2(v, 0.298073, 0, 0, 0);
+        if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v), ScalarType(10.539675360028560918), 1E-15))
+            return 1;
+    }
     return 0;
 }
