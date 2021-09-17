@@ -1,5 +1,4 @@
 ##############################################Libs################################################
-find_package(Boost REQUIRED)
 #############################################Project##############################################
 file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
 add_library(PhysicaCore SHARED ${SOURCES_CORE})
