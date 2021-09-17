@@ -64,7 +64,7 @@ namespace Physica::Core::Physics {
         void formSingleHamilton();
         void formOverlapMatrix();
         void formDensityMatrix(MatrixType& density, const MatrixType& wave_func);
-        void formFockMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
+        void formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
         template<class VectorType>
         void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& electronDencity);
         void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
@@ -140,7 +140,7 @@ namespace Physica::Core::Physics {
             formDensityMatrix(densityMat, waves);
             older_waves.swap(old_waves);
             old_waves.swap(waves);
-            formFockMatrix(fock, densityMat);
+            formCoulombMatrix(fock, densityMat);
         } while(true);
         return true;
     }
@@ -196,7 +196,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formFockMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density) {
+    void HFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density) {
         const size_t size = getBaseSetSize();
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
