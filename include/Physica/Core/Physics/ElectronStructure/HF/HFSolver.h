@@ -68,7 +68,6 @@ namespace Physica::Core::Physics {
         template<class VectorType>
         void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& electronDencity);
         void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
-        void nomalizeWave(Vector<ScalarType>& eigenvector);
     };
 
     template<class BaseSetType>
@@ -128,7 +127,6 @@ namespace Physica::Core::Physics {
             auto eigenvectors = solver.getEigenvectors();
             for (size_t i = 0; i < electronCount; ++i) {
                 temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
-                nomalizeWave(temp);
                 auto older_wave = older_waves.col(i);
                 auto old_wave = old_waves.col(i);
                 auto wave = waves.col(i);
@@ -250,13 +248,5 @@ namespace Physica::Core::Physics {
             for (size_t j = insertTo; j <= i; ++j)
                 std::swap(temp, indexToSort[j]);
         }
-    }
-
-    template<class BaseSetType>
-    void HFSolver<BaseSetType>::nomalizeWave(Vector<ScalarType>& eigenvector) {
-        auto mat = eigenvector.moveToColMatrix();
-        ScalarType norm = ((mat.transpose() * overlap).compute() * mat).calc(0, 0);
-        mat *= reciprocal(norm);
-        eigenvector = mat.col(0);
     }
 }

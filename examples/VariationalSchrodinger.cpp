@@ -279,8 +279,6 @@ public:
             auto eigenvectors = solver.getEigenvectors();
             auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex)).moveToColMatrix();
             real_eigenvector = inv_cholesky.transpose() * real_eigenvector;
-            const ScalarType norm = ((real_eigenvector.transpose() * overlap).compute() * real_eigenvector).calc(0, 0);
-            real_eigenvector *= reciprocal(sqrt(norm));
 
             stop = VectorType(real_eigenvector.col(0) - trial_solution).norm() < criteria;
             trial_solution = real_eigenvector.col(0);
