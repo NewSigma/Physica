@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cstdint>
 #include "Physica/SystemBits.h"
 /**
  * This header contains some types and definitions used by package MultiPrecision.
@@ -25,26 +26,16 @@
  */
 #ifdef PHYSICA_64BIT
     #define MPUnitWidth (64U)
+    using MPUnit = uint64_t;
+    using SignedMPUnit = int64_t;
+    #define MPUnitMax INT64_MAX
 #endif
 
 #ifdef PHYSICA_32BIT
     #define MPUnitWidth (32U)
-#endif
-
-#if PhysicaWordSize == INT_WIDTH
-    typedef unsigned int MPUnit;
-    typedef int SignedMPUnit;
-    #define MPUnitMax UINT_MAX
-#elif PhysicaWordSize == LONG_WIDTH
-    typedef unsigned long MPUnit;
-    typedef long SignedMPUnit;
-    #define MPUnitMax ULONG_MAX
-#elif PhysicaWordSize == LLONG_WIDTH
-    typedef unsigned long long MPUnit;
-    typedef long long SignedMPUnit;
-    #define MPUnitMax ULLLONG_MAX
-#else
-    #error No marching MPUnit.
+    using MPUnit = uint32_t;
+    using SignedMPUnit = int32_t;
+    #define MPUnitMax INT32_MAX
 #endif
 
 #define MPUnitHighestBitMask ((MPUnit)1 << (MPUnitWidth - 1))
@@ -62,5 +53,4 @@ namespace Physica::Core {
      * which is also compatible with float and double.
      */
     template<ScalarOption option = MultiPrecision, bool errorTrack = true> class Scalar;
-
 }

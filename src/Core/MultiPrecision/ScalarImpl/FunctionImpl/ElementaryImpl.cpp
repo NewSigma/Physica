@@ -40,8 +40,7 @@ namespace Physica::Core {
         }
 
         Scalar result = Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(1));
-        //3.33 is the big approximate value of ln(10)/ln(2)
-        for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
+        for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
             result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
@@ -67,8 +66,7 @@ namespace Physica::Core {
         }
 
         Scalar result = Scalar<MultiPrecision, true>(static_cast<SignedMPUnit>(1));
-        //3.33 is the big approximate value of ln(10)/ln(2)
-        for(int i = 0; i < LONG_WIDTH * GlobalPrecision; ++i)
+        for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
             result = (result + Scalar<MultiPrecision, false>::divNoError(copy_s, result)) >> 1U;
         result.power += add_power;
 
