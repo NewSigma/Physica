@@ -176,7 +176,12 @@ public:
         }
         QApplication app(argc, argv);
         Plot* plot = new Plot();
-        plotWave(*plot, solver.getEigenvectors().col(groundStateIndex));
+
+        auto eigenvectors = solver.getEigenvectors();
+        auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex)).moveToColMatrix();
+        real_eigenvector = inv_cholesky.transpose() * real_eigenvector;
+        plotWave(*plot, real_eigenvector.col(0));
+
         plotReferenceWave(*plot);
         plot->show();
         return QApplication::exec();
@@ -223,7 +228,7 @@ private:
             x[i] = temp_x;
             ScalarType temp_y = ScalarType::Zero();
             for (size_t j = 0; j < baseSetCount; ++j)
-                temp_y += coeff[j].getReal() * baseFunction(temp_x, j);
+                temp_y += coeff[j] * baseFunction(temp_x, j);
             y[i] = temp_y;
             temp_x += step;
         }
@@ -239,7 +244,7 @@ private:
         ScalarType temp = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp;
-            y[i] = ScalarType::Two() * exp(-temp);
+            y[i] = exp(-temp) / sqrt(ScalarType(M_PI)); //The wave function in [1] is not normalized
             temp += step;
         }
         auto& spline = plot.spline(x, y);
