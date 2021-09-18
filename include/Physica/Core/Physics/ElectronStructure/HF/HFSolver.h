@@ -101,7 +101,7 @@ namespace Physica::Core::Physics {
         MatrixType older_waves = MatrixType(baseSetSize, electronCount);
         MatrixType old_waves = MatrixType(baseSetSize, electronCount);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
-        Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(electronCount);
+        Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
         Vector<ScalarType> temp{};
         Vector<ScalarType> temp1{};
 
@@ -236,17 +236,19 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     void HFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
                                                 Utils::Array<size_t>& indexToSort) const {
-        indexToSort[0] = 0;
-        for (size_t i = 1; i < electronCount; ++i) {
-            const ScalarType& toInsert = eigenvalues[i].getReal();
-            size_t insertTo = 0;
-            for (; insertTo < i; ++insertTo) {
-                if (toInsert < eigenvalues[insertTo].getReal())
-                    break;
+        auto arrayToSort = toRealVector(eigenvalues);
+        for (size_t i = 0; i < getBaseSetSize(); ++i)
+            indexToSort[i] = i;
+
+        for (size_t i = 0; i < electronCount; ++i) {
+            size_t indexOfToInsert = i;
+            for (size_t j = i + 1; j < getBaseSetSize(); ++j) {
+                if (arrayToSort[indexOfToInsert] > arrayToSort[j])
+                    indexOfToInsert = j;
             }
-            size_t temp = i;
-            for (size_t j = insertTo; j <= i; ++j)
-                std::swap(temp, indexToSort[j]);
+            std::swap(arrayToSort[i], arrayToSort[indexOfToInsert]);
+            std::swap(indexToSort[i], indexToSort[indexOfToInsert]);
+            assert(eigenvalues[indexToSort[i]].getReal() >= eigenvalues[indexToSort[i == 0 ? 0 : i - 1]].getReal());
         }
     }
 }
