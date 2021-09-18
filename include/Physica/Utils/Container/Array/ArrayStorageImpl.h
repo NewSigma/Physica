@@ -20,6 +20,10 @@
 
 #include <cstring>
 
+namespace Physica::Utils {
+    template<class T> class DeviceAllocator;
+}
+
 namespace Physica::Utils::Internal {
     template<class Pointer, class Derived>
     __host__ __device__ ContainerIterator<Pointer, ArrayStorage<Derived>>&
@@ -77,13 +81,17 @@ namespace Physica::Utils::Internal {
             for(size_t i = 0; i < array.getDerived().getLength(); ++i)
                 AllocatorTraits::construct(alloc, arr + i, array[i]);
         else {
-        #ifdef __CUDA__ARCH__
-            memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
-        #else
-            if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)
-                cudaMemcpy(arr.get(), array.arr.get(), array.getDerived().getLength() * sizeof(ValueType), cudaMemcpyDeviceToDevice);
-            else
+        #ifdef PHYSICA_CUDA
+            #ifdef __CUDA__ARCH__
                 memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
+            #else
+                if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)
+                    cudaMemcpy(arr.get(), array.arr.get(), array.getDerived().getLength() * sizeof(ValueType), cudaMemcpyDeviceToDevice);
+                else
+                    memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
+            #endif
+        #else
+            memcpy(arr, array.arr, array.getDerived().getLength() * sizeof(ValueType));
         #endif
         }
     }

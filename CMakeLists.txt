@@ -18,16 +18,8 @@ message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies
 cmake_policy(SET CMP0074 NEW)
 
-if(${PHYSICA_CUDA})
-    enable_language(CUDA)
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CUDA_STANDARD 17)
-set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
-set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-set(CMAKE_CUDA_ARCHITECTURES 75)
 
 if(${DEBUG_MODE})
     set(CMAKE_CXX_FLAGS -O0)
@@ -42,11 +34,19 @@ ${PHYSICA_SIMD_OPTION} \
 -fPIC \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
 
-set(CMAKE_CUDA_FLAGS "\
-${CMAKE_CUDA_FLAGS} \
---relocatable-device-code=true \
---diag-suppress 20011 \
--D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
+if(${PHYSICA_CUDA})
+    add_definitions(-DPHYSICA_CUDA)
+    enable_language(CUDA)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+    set(CMAKE_CUDA_ARCHITECTURES 75)
+    set(CMAKE_CUDA_FLAGS "\
+    ${CMAKE_CUDA_FLAGS} \
+    --relocatable-device-code=true \
+    --diag-suppress 20011 \
+    -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
+endif()
 
 if(${RUN_CHECKS})
     add_subdirectory(config)

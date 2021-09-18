@@ -23,7 +23,6 @@
 #include <utility>
 #include <memory>
 #include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Utils/Container/DeivceAllocator.cuh"
 
 namespace Physica::Utils::Internal {
     //Forward declaration

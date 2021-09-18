@@ -18,7 +18,10 @@
  */
 #pragma once
 
-#include <cuda_runtime_api.h>
+#include "Physica/Config.h"
+#ifdef PHYSICA_CUDA
+    #include <cuda_runtime_api.h>
+#endif
 
 namespace Physica::Utils {
     /**

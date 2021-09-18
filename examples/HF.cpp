@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/HFSolver.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
