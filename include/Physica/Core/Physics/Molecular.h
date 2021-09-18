@@ -112,11 +112,11 @@ namespace Physica::Core::Physics {
         result *= reciprocal(ScalarType(totalMass));
         return PointType(std::move(result));
     }
-
+    /**
+     * Using atom unit
+     */
     template<class ScalarType>
     ScalarType Molecular<ScalarType>::getNuclearRepulsionEnergy() const {
-        constexpr double temp = PhyConst::reducedPlanck / PhyConst::unitCharge;
-        constexpr double factor = temp * temp * 4E10 * M_PI * PhyConst::vacuumDielectric / PhyConst::electroMass; //factor that tranform the unit of result to hartree
         ScalarType result = ScalarType::Zero();
         const size_t atomCount = getAtomCount();
         for (size_t i = 0; i < atomCount - 1; ++i) {
@@ -127,6 +127,6 @@ namespace Physica::Core::Physics {
                 result += atomicNumber1 * atomicNumber2 / dist;
             }
         }
-        return result * ScalarType(factor);
+        return result;
     }
 }
