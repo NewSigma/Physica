@@ -99,8 +99,8 @@ namespace Physica::Core {
                             col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i].getReal() - eigenvalues[j].getReal());
                         }
                         else {
-                            auto row1 = matrixT.row(j - 1);
-                            auto row2 = matrixT.row(j);
+                            auto row1 = block.row(j - 1);
+                            auto row2 = block.row(j);
                             auto tail = col.tail(j + 1);
                             ScalarType dot1 = tail * row1.tail(j + 1);
                             ScalarType dot2 = tail * row2.tail(j + 1);
