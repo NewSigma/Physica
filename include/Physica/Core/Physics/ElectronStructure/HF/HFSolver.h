@@ -66,7 +66,7 @@ namespace Physica::Core::Physics {
         void formDensityMatrix(MatrixType& density, const MatrixType& wave_func);
         void formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
         template<class VectorType>
-        void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& electronDencity);
+        void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waves);
         void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
     };
 
@@ -98,12 +98,8 @@ namespace Physica::Core::Physics {
 
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
         MatrixType fock = singleHamilton;
-        MatrixType older_waves = MatrixType(baseSetSize, electronCount);
-        MatrixType old_waves = MatrixType(baseSetSize, electronCount);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
-        Vector<ScalarType> temp{};
-        Vector<ScalarType> temp1{};
 
         size_t iteration = 0;
         do {
@@ -114,22 +110,14 @@ namespace Physica::Core::Physics {
             sortEigenvalues(eigenvalues, sortedEigenvalues);
             auto eigenvectors = solver.getEigenvectors();
             for (size_t i = 0; i < electronCount; ++i) {
-                temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
-                auto older_wave = older_waves.col(i);
-                auto old_wave = old_waves.col(i);
                 auto wave = waves.col(i);
-                if (iteration > 3)
-                    wave.asVector() = divide(multiply(temp, old_wave) - square(older_wave), temp + older_wave - older_wave.asVector() * ScalarType::Two());
-                else
-                    wave = temp;
+                wave.asVector() = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
             }
             formDensityMatrix(densityMat, waves);
-            older_waves.swap(old_waves);
-            old_waves.swap(waves);
             formCoulombMatrix(fock, densityMat);
             // Get ground state energy
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
-            updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, densityMat);
+            updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, waves);
             const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
             std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
             // Check convergence
@@ -215,15 +203,13 @@ namespace Physica::Core::Physics {
     template<class VectorType>
     void HFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues,
                                                            const Utils::Array<size_t>& sortedEigenvalues,
-                                                           const MatrixType& electronDencity) {
-        const size_t baseSetSize = getBaseSetSize();
+                                                           const MatrixType& waves) {
         selfConsistentEnergy = ScalarType::Zero();
-        for (size_t i = 0; i < electronCount; ++i)
+        for (size_t i = 0; i < electronCount; ++i) {
             selfConsistentEnergy += eigenvalues[sortedEigenvalues[i]].getReal();
-
-        for (size_t i = 0; i < baseSetSize; ++i)
-            for (size_t j = i; j < baseSetSize; ++j)
-                selfConsistentEnergy += singleHamilton(j, i) * electronDencity(j, i);
+            auto wave = waves.col(i);
+            selfConsistentEnergy += ((waves.transpose() * singleHamilton).compute() * wave).calc(0, 0);
+        }
         selfConsistentEnergy *= ScalarType(0.5);
     }
     /**
