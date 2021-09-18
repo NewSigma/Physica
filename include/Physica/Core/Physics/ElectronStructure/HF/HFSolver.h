@@ -97,7 +97,7 @@ namespace Physica::Core::Physics {
         const MatrixType inv_cholesky = cholesky.inverse();
 
         MatrixType densityMat = MatrixType::Zeros(baseSetSize);
-        MatrixType fock = MatrixType::Zeros(baseSetSize, baseSetSize);
+        MatrixType fock = singleHamilton;
         MatrixType older_waves = MatrixType(baseSetSize, electronCount);
         MatrixType old_waves = MatrixType(baseSetSize, electronCount);
         MatrixType waves = MatrixType(baseSetSize, electronCount);
@@ -107,23 +107,11 @@ namespace Physica::Core::Physics {
 
         size_t iteration = 0;
         do {
-            fock += singleHamilton;
             const MatrixType modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             const EigenSolver<MatrixType> solver(modifiedFock, true);
-            // Get ground state energy
+            
             const auto& eigenvalues = solver.getEigenvalues();
             sortEigenvalues(eigenvalues, sortedEigenvalues);
-
-            const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
-            updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, densityMat);
-            const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
-            //std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
-            // Check convergence
-            if (delta < criteria)
-                return true;
-            if ((++iteration) == maxIte)
-                return false;
-            // Prepare for next iteration
             auto eigenvectors = solver.getEigenvectors();
             for (size_t i = 0; i < electronCount; ++i) {
                 temp = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
@@ -139,6 +127,18 @@ namespace Physica::Core::Physics {
             older_waves.swap(old_waves);
             old_waves.swap(waves);
             formCoulombMatrix(fock, densityMat);
+            // Get ground state energy
+            const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
+            updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, densityMat);
+            const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
+            std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
+            // Check convergence
+            if (delta < criteria)
+                return true;
+            if ((++iteration) == maxIte)
+                return false;
+            // Prepare for next iteration
+            fock += singleHamilton;
         } while(true);
         return true;
     }
