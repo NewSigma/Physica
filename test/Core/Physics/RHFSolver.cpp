@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "TestHelper.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/HFSolver.h"
+#include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
 
 using namespace Physica::Core;
@@ -33,7 +33,7 @@ ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const Ve
     auto& atomicNumbers = system.getAtomicNumbers();
     atomicNumbers[0] = atomicNumber;
 
-    HFSolver<GaussBase<ScalarType>> solver = HFSolver<GaussBase<ScalarType>>(system, config, alphas.getLength());
+    RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(system, config, alphas.getLength());
     auto& baseSet = solver.getBaseSet();
     for (size_t i = 0; i < alphas.getLength(); ++i)
         baseSet[i] = GaussBase<ScalarType>(pos_atom, abs(alphas[i]), 0, 0, 0);

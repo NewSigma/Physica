@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/HFSolver.h"
+#include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
 
 using namespace Physica::Core;
@@ -36,7 +36,7 @@ ScalarType scf_loop_He(const Vector<ScalarType, 6>& alphas) {
 
     ElectronConfig config = ElectronConfig(1);
     config.setOrbitState(0, ElectronConfig::SingleOccupacy);
-    HFSolver<GaussBase<ScalarType>> solver = HFSolver<GaussBase<ScalarType>>(H2, config, 6);
+    RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(H2, config, 6);
     auto& baseSet = solver.getBaseSet();
     size_t i = 0;
     baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[0]), 0, 0, 0);

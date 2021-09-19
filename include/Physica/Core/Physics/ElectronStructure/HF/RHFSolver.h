@@ -35,7 +35,7 @@ namespace Physica::Core::Physics {
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:43-88
      */
     template<class BaseSetType>
-    class HFSolver {
+    class RHFSolver {
         using ScalarType = typename Internal::Traits<BaseSetType>::ScalarType;
         using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     private:
@@ -46,13 +46,13 @@ namespace Physica::Core::Physics {
         Utils::Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
     public:
-        HFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);
-        HFSolver(const HFSolver&) = delete;
-        HFSolver(HFSolver&&) noexcept = delete;
-        ~HFSolver() = default;
+        RHFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);
+        RHFSolver(const RHFSolver&) = delete;
+        RHFSolver(RHFSolver&&) noexcept = delete;
+        ~RHFSolver() = default;
         /* Operators */
-        HFSolver& operator=(const HFSolver& base) = delete;
-        HFSolver& operator=(HFSolver&& base) noexcept = delete;
+        RHFSolver& operator=(const RHFSolver& base) = delete;
+        RHFSolver& operator=(RHFSolver&& base) noexcept = delete;
         /* Operations */
         bool compute(const ScalarType& criteria, size_t maxIte);
         /* Getters */
@@ -77,7 +77,7 @@ namespace Physica::Core::Physics {
     };
 
     template<class BaseSetType>
-    HFSolver<BaseSetType>::HFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
+    RHFSolver<BaseSetType>::RHFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
             : molecular(m)
             , electronConfig(electronConfig_)
             , singleHamilton(baseSetSize, baseSetSize)
@@ -92,7 +92,7 @@ namespace Physica::Core::Physics {
      * \return true if converged, false otherwise
      */
     template<class BaseSetType>
-    bool HFSolver<BaseSetType>::compute(const ScalarType& criteria, size_t maxIte) {
+    bool RHFSolver<BaseSetType>::compute(const ScalarType& criteria, size_t maxIte) {
         assert(criteria.isPositive());
 
         const size_t baseSetSize = getBaseSetSize();
@@ -141,7 +141,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formSingleHamilton() {
+    void RHFSolver<BaseSetType>::formSingleHamilton() {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -159,7 +159,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formOverlapMatrix() {
+    void RHFSolver<BaseSetType>::formOverlapMatrix() {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -172,7 +172,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
+    void RHFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
                                                   MatrixType& __restrict sameSpinElectronDensity,
                                                   const MatrixType& __restrict wave_func,
                                                   size_t numOccupiedOrbit) {
@@ -204,7 +204,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock,
+    void RHFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock,
                                                   const MatrixType& __restrict electronDensity,
                                                   const MatrixType& __restrict sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
@@ -225,7 +225,7 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     template<class VectorType>
-    void HFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues,
+    void RHFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues,
                                                            const Utils::Array<size_t>& sortedEigenvalues,
                                                            const MatrixType& waves) {
         selfConsistentEnergy = ScalarType::Zero();
@@ -249,7 +249,7 @@ namespace Physica::Core::Physics {
      * A array whose length is \param orbitCount
      */
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
+    void RHFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
                                                 Utils::Array<size_t>& indexToSort) const {
         auto arrayToSort = toRealVector(eigenvalues);
         for (size_t i = 0; i < getBaseSetSize(); ++i)
