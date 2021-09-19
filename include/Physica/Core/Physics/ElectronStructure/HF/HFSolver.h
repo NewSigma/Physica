@@ -64,8 +64,13 @@ namespace Physica::Core::Physics {
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
-        void formDensityMatrix(MatrixType& density, const MatrixType& wave_func, size_t numOccupiedOrbit);
-        void formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
+        void formDensityMatrix(MatrixType& __restrict electronDensity,
+                               MatrixType& __restrict sameSpinElectronDensity,
+                               const MatrixType& __restrict wave_func,
+                               size_t numOccupiedOrbit);
+        void formCoulombMatrix(MatrixType& __restrict fock,
+                               const MatrixType& __restrict electronDensity,
+                               const MatrixType& __restrict sameSpinElectronDensity);
         template<class VectorType>
         void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waves);
         void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
@@ -99,6 +104,7 @@ namespace Physica::Core::Physics {
         const MatrixType inv_cholesky = cholesky.inverse();
 
         MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
+        MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType fock = singleHamilton;
         MatrixType waves = MatrixType(baseSetSize, numOccupiedOrbit);
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
@@ -128,8 +134,8 @@ namespace Physica::Core::Physics {
             if ((++iteration) == maxIte)
                 return false;
             // Prepare for next iteration
-            formDensityMatrix(electronDensity, waves, numOccupiedOrbit);
-            formCoulombMatrix(fock, electronDensity);
+            formDensityMatrix(electronDensity, sameSpinElectronDensity, waves, numOccupiedOrbit);
+            formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
             fock += singleHamilton;
         } while(true);
         return true;
@@ -167,38 +173,41 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& density, const MatrixType& wave_func, size_t numOccupiedOrbit) {
+    void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
+                                                  MatrixType& __restrict sameSpinElectronDensity,
+                                                  const MatrixType& __restrict wave_func,
+                                                  size_t numOccupiedOrbit) {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
-            for (; j < i; ++j)
-                density(j, i) = density(i, j);
+            for (; j < i; ++j) {
+                electronDensity(j, i) = electronDensity(i, j);
+                sameSpinElectronDensity(j, i) = sameSpinElectronDensity(i, j);
+            }
 
             for (; j < baseSetSize; ++j) {
-                ScalarType temp = ScalarType::Zero();
+                ScalarType temp1 = ScalarType::Zero();
+                ScalarType temp2 = ScalarType::Zero();
                 for (size_t k = 0; k < numOccupiedOrbit; ++k) {
                     const size_t orbitPos = electronConfig.getOccupiedOrbitPos(k);
-                    switch(electronConfig.getOrbitState(orbitPos)) {
-                        case ElectronConfig::NoOccupacy:
-                            break;
-                        case ElectronConfig::SingleOccupacy: {
-                            auto wave = wave_func.col(k);
-                            temp += wave[i] * wave[j];
-                            break;
-                        }
-                        case ElectronConfig::DoubleOccupacy: {
-                            auto wave = wave_func.col(k);
-                            temp += ScalarType::Two() * wave[i] * wave[j];
-                        }
-                    }
+                    const auto orbitState = electronConfig.getOrbitState(orbitPos);
+                    assert(orbitState != ElectronConfig::NoOccupacy);
+                    const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
+                    auto wave = wave_func.col(k);
+                    const ScalarType dot = wave[i] * wave[j];
+                    temp1 += isSingleOccupacy ? dot : ScalarType::Two() * dot;
+                    temp2 += dot;
                 }
-                density(j, i) = temp;
+                electronDensity(j, i) = temp1;
+                sameSpinElectronDensity(j, i) = temp2;
             }
         }
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density) {
+    void HFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock,
+                                                  const MatrixType& __restrict electronDensity,
+                                                  const MatrixType& __restrict sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
@@ -207,7 +216,7 @@ namespace Physica::Core::Physics {
                     for (size_t s = 0; s < size; ++s) {
                         const ScalarType coulomb = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[q], baseSet[s]);
                         const ScalarType exchange = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[s], baseSet[q]);
-                        temp += density(s, r) * (coulomb - exchange);
+                        temp += electronDensity(s, r) * coulomb - sameSpinElectronDensity(s, r) * exchange;
                     }
                 }
                 fock(q, p) = temp;
@@ -222,9 +231,14 @@ namespace Physica::Core::Physics {
                                                            const MatrixType& waves) {
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < waves.getColumn(); ++i) {
-            selfConsistentEnergy += eigenvalues[sortedEigenvalues[i]].getReal();
+            const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
+            ScalarType temp = eigenvalues[sortedEigenvalues[orbitPos]].getReal();
             auto wave = waves.col(i);
-            selfConsistentEnergy += ((waves.transpose() * singleHamilton).compute() * wave).calc(0, 0);
+            temp += ((wave.transpose() * singleHamilton).compute() * wave).calc(0, 0);
+            const auto orbitState = electronConfig.getOrbitState(orbitPos);
+            assert(orbitState != ElectronConfig::NoOccupacy);
+            const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
+            selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType::Two() * temp);
         }
         selfConsistentEnergy *= ScalarType(0.5);
     }
