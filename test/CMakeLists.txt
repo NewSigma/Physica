@@ -30,6 +30,7 @@ physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 physica_add_test(ThreadPool Core/Parallel/ThreadPoolTest.cpp)
 # Physics
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
+physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
 # Logger
 physica_add_test(Logger Logger/LoggerTest.cpp)
 # Utils

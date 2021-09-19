@@ -127,7 +127,6 @@ namespace Physica::Core::Physics {
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
             updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, waves);
             const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
-            std::cout << iteration << ' ' << oldSelfConsistentEnergy << std::endl;
             // Check convergence
             if (delta < criteria)
                 return true;
