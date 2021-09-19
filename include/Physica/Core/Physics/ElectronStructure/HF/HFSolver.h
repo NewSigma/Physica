@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/Molecular.h"
+#include "Physica/Core/Physics/ElectronStructure/ElectronConfig.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrix.h"
@@ -39,13 +40,13 @@ namespace Physica::Core::Physics {
         using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector>;
     private:
         const Molecular<ScalarType>& molecular;
+        ElectronConfig electronConfig;
         MatrixType singleHamilton;
         MatrixType overlap;
         Utils::Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
-        size_t electronCount;
     public:
-        HFSolver(const Molecular<ScalarType>& m, size_t electronCount_, size_t baseSetSize);
+        HFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);
         HFSolver(const HFSolver&) = delete;
         HFSolver(HFSolver&&) noexcept = delete;
         ~HFSolver() = default;
@@ -63,7 +64,7 @@ namespace Physica::Core::Physics {
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
-        void formDensityMatrix(MatrixType& density, const MatrixType& wave_func);
+        void formDensityMatrix(MatrixType& density, const MatrixType& wave_func, size_t numOccupiedOrbit);
         void formCoulombMatrix(MatrixType& __restrict fock, const MatrixType& __restrict density);
         template<class VectorType>
         void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waves);
@@ -71,14 +72,14 @@ namespace Physica::Core::Physics {
     };
 
     template<class BaseSetType>
-    HFSolver<BaseSetType>::HFSolver(const Molecular<ScalarType>& m, size_t electronCount_, size_t baseSetSize)
+    HFSolver<BaseSetType>::HFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
             : molecular(m)
+            , electronConfig(electronConfig_)
             , singleHamilton(baseSetSize, baseSetSize)
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
-            , selfConsistentEnergy()
-            , electronCount(electronCount_) {
-        assert(electronCount <= baseSetSize);
+            , selfConsistentEnergy() {
+        assert(electronConfig.getNumOccupiedOrbit() <= baseSetSize);
     }
     /**
      * Perform self-consistant computation
@@ -90,15 +91,16 @@ namespace Physica::Core::Physics {
         assert(criteria.isPositive());
 
         const size_t baseSetSize = getBaseSetSize();
+        const size_t numOccupiedOrbit = electronConfig.getNumOccupiedOrbit();
         formSingleHamilton();
         formOverlapMatrix();
 
         const MatrixType cholesky = Cholesky(overlap);
         const MatrixType inv_cholesky = cholesky.inverse();
 
-        MatrixType densityMat = MatrixType::Zeros(baseSetSize);
+        MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType fock = singleHamilton;
-        MatrixType waves = MatrixType(baseSetSize, electronCount);
+        MatrixType waves = MatrixType(baseSetSize, numOccupiedOrbit);
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         size_t iteration = 0;
@@ -109,12 +111,12 @@ namespace Physica::Core::Physics {
             const auto& eigenvalues = solver.getEigenvalues();
             sortEigenvalues(eigenvalues, sortedEigenvalues);
             auto eigenvectors = solver.getEigenvectors();
-            for (size_t i = 0; i < electronCount; ++i) {
+            for (size_t i = 0; i < numOccupiedOrbit; ++i) {
                 auto wave = waves.col(i);
-                wave.asVector() = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(sortedEigenvalues[i])).moveToColMatrix()).compute().col(0);
+                const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
+                const size_t solutionPos = sortedEigenvalues[orbitPos];
+                wave.asVector() = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(solutionPos)).moveToColMatrix()).compute().col(0);
             }
-            formDensityMatrix(densityMat, waves);
-            formCoulombMatrix(fock, densityMat);
             // Get ground state energy
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
             updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, waves);
@@ -126,6 +128,8 @@ namespace Physica::Core::Physics {
             if ((++iteration) == maxIte)
                 return false;
             // Prepare for next iteration
+            formDensityMatrix(electronDensity, waves, numOccupiedOrbit);
+            formCoulombMatrix(fock, electronDensity);
             fock += singleHamilton;
         } while(true);
         return true;
@@ -163,7 +167,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& density, const MatrixType& wave_func) {
+    void HFSolver<BaseSetType>::formDensityMatrix(MatrixType& density, const MatrixType& wave_func, size_t numOccupiedOrbit) {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -172,11 +176,23 @@ namespace Physica::Core::Physics {
 
             for (; j < baseSetSize; ++j) {
                 ScalarType temp = ScalarType::Zero();
-                for (size_t k = 0; k < electronCount; ++k) {
-                    auto wave = wave_func.col(k);
-                    temp += wave[i] * wave[j];
+                for (size_t k = 0; k < numOccupiedOrbit; ++k) {
+                    const size_t orbitPos = electronConfig.getOccupiedOrbitPos(k);
+                    switch(electronConfig.getOrbitState(orbitPos)) {
+                        case ElectronConfig::NoOccupacy:
+                            break;
+                        case ElectronConfig::SingleOccupacy: {
+                            auto wave = wave_func.col(k);
+                            temp += wave[i] * wave[j];
+                            break;
+                        }
+                        case ElectronConfig::DoubleOccupacy: {
+                            auto wave = wave_func.col(k);
+                            temp += ScalarType::Two() * wave[i] * wave[j];
+                        }
+                    }
                 }
-                density(j, i) = ScalarType::Two() * temp;
+                density(j, i) = temp;
             }
         }
     }
@@ -191,7 +207,7 @@ namespace Physica::Core::Physics {
                     for (size_t s = 0; s < size; ++s) {
                         const ScalarType coulomb = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[q], baseSet[s]);
                         const ScalarType exchange = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[s], baseSet[q]);
-                        temp += density(s, r) * (coulomb - ScalarType(0.5) * exchange);
+                        temp += density(s, r) * (coulomb - exchange);
                     }
                 }
                 fock(q, p) = temp;
@@ -205,7 +221,7 @@ namespace Physica::Core::Physics {
                                                            const Utils::Array<size_t>& sortedEigenvalues,
                                                            const MatrixType& waves) {
         selfConsistentEnergy = ScalarType::Zero();
-        for (size_t i = 0; i < electronCount; ++i) {
+        for (size_t i = 0; i < waves.getColumn(); ++i) {
             selfConsistentEnergy += eigenvalues[sortedEigenvalues[i]].getReal();
             auto wave = waves.col(i);
             selfConsistentEnergy += ((waves.transpose() * singleHamilton).compute() * wave).calc(0, 0);
@@ -213,11 +229,11 @@ namespace Physica::Core::Physics {
         selfConsistentEnergy *= ScalarType(0.5);
     }
     /**
-     * Get the first \param electronCount lowest eigenvalues and save their indexes to array \param index,
+     * Get the first \param orbitCount lowest eigenvalues and save their indexes to array \param index,
      * the eigenvalues are in ascending order.
      * 
      * \param index
-     * A array whose length is \param electronCount
+     * A array whose length is \param orbitCount
      */
     template<class BaseSetType>
     void HFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
@@ -226,7 +242,7 @@ namespace Physica::Core::Physics {
         for (size_t i = 0; i < getBaseSetSize(); ++i)
             indexToSort[i] = i;
 
-        for (size_t i = 0; i < electronCount; ++i) {
+        for (size_t i = 0; i < getBaseSetSize(); ++i) {
             size_t indexOfToInsert = i;
             for (size_t j = i + 1; j < getBaseSetSize(); ++j) {
                 if (arrayToSort[indexOfToInsert] > arrayToSort[j])

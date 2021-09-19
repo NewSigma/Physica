@@ -27,36 +27,28 @@ using namespace Physica::Core::Physics;
 using ScalarType = Scalar<Double, false>;
 
 ScalarType scf_loop_He(const Vector<ScalarType, 4>& alphas) {
-    Molecular<ScalarType> He = Molecular<ScalarType>(1);
-    auto& atoms = He.getAtoms();
-    const Vector<ScalarType> pos_He{0, 0, 0};
-    atoms[0] = pos_He;
-    auto& atomicNumbers = He.getAtomicNumbers();
-    atomicNumbers[0] = 2;
+    Molecular<ScalarType> H2 = Molecular<ScalarType>(1);
+    auto& atoms = H2.getAtoms();
+    const Vector<ScalarType, 3> pos_H1{0, 0, 0};
+    atoms[0] = pos_H1;
+    auto& atomicNumbers = H2.getAtomicNumbers();
+    atomicNumbers[0] = 1;
 
-    HFSolver<GaussBase<ScalarType>> solver = HFSolver<GaussBase<ScalarType>>(He, 2, 4);
+    ElectronConfig config = ElectronConfig(1);
+    config.setOrbitState(0, ElectronConfig::SingleOccupacy);
+    HFSolver<GaussBase<ScalarType>> solver = HFSolver<GaussBase<ScalarType>>(H2, config, 4);
     auto& baseSet = solver.getBaseSet();
     size_t i = 0;
-    baseSet[i++] = GaussBase<ScalarType>(pos_He, abs(alphas[0]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_He, abs(alphas[1]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_He, abs(alphas[2]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_He, abs(alphas[3]), 0, 0, 0);
+    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[0]), 0, 0, 0);
+    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[1]), 0, 0, 0);
+    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[2]), 0, 0, 0);
+    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[3]), 0, 0, 0);
     if (!solver.compute(1E-5, 128))
         return ScalarType(1E5);
     return solver.getSelfConsistentEnergy();
 }
 
 int main() {
-    srand(time(nullptr));
-    Vector<ScalarType, 4> x{randomScalar<ScalarType>(ScalarType(0), ScalarType(10)),
-                            randomScalar<ScalarType>(ScalarType(0), ScalarType(10)),
-                            randomScalar<ScalarType>(ScalarType(0), ScalarType(10)),
-                            randomScalar<ScalarType>(ScalarType(0), ScalarType(10))};
-    const Vector<ScalarType, 4> lower{0, 0, 0, 0};
-    const Vector<ScalarType, 4> upper{50, 50, 50, 50};
-    GeneAlgorithm<ScalarType (*)(const Vector<ScalarType, 4>&), Vector<ScalarType, 4>> ga(scf_loop_He, {0.6, 0.1, 100, 50, lower, upper});
-    ga.solve();
-    std::cout << ga.getOptimizedValue() << '\n';
-    std::cout << ga.getOptimizedParams() << '\n';
+    scf_loop_He({13.00773, 1.962079, 0.444529, 0.1219492});
     return 0;
 }
