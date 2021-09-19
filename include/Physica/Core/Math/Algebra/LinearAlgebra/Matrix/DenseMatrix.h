@@ -84,6 +84,8 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
+        [[nodiscard]] static DenseMatrix randomMatrix(size_t order) { return randomMatrix(order, order); }
+        [[nodiscard]] static DenseMatrix randomMatrix(size_t row, size_t column);
     };
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

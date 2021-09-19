@@ -44,6 +44,15 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::randomMatrix(size_t row, size_t column) {
+        DenseMatrix result(row, column);
+        for (size_t i = 0; i < result.getMaxMajor(); ++i)
+            for (size_t j = 0; j < result.getMaxMinor(); ++j)
+                result.getElementFromMajorMinor(i, j) = randomScalar<T>();
+        return result;
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat) {
         const size_t column = mat.getColumn();
         const size_t row = mat.getRow();
