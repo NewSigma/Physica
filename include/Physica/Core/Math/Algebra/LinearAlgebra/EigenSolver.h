@@ -31,7 +31,7 @@ namespace Physica::Core {
     class EigenSolver {
         using ScalarType = typename MatrixType::ScalarType;
     private:
-        using EigenvectorStorage = DenseMatrix<ScalarType,
+        using RawEigenvectorType = DenseMatrix<ScalarType,
                                                DenseMatrixOption::Column | DenseMatrixOption::Vector,
                                                MatrixType::RowAtCompile,
                                                MatrixType::RowAtCompile>;
@@ -42,22 +42,38 @@ namespace Physica::Core {
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
     private:
-        const MatrixType& source;
         EigenvalueVector eigenvalues;
-        EigenvectorStorage eigenvectorStorage;
+        RawEigenvectorType rawEigenvectors;
     public:
-        EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors);
+        EigenSolver(size_t size);
+        EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors);
         /* Operations */
+        void compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors);
+        /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
+        /**
+         * It is faster if all eigenvalues are real.
+         */
+        [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
     };
 
     template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source_, bool computeEigenvectors)
-            : source(source_.getDerived())
-            , eigenvalues(source_.getRow())
-            , eigenvectorStorage(source_.getRow(), source_.getRow()) {
+    EigenSolver<MatrixType>::EigenSolver(size_t size)
+            : eigenvalues(size)
+            , rawEigenvectors(size, size) {}
+
+    template<class MatrixType>
+    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors)
+            : eigenvalues(source.getRow())
+            , rawEigenvectors(source.getRow(), source.getRow()) {
+        compute(source, computeEigenvectors);
+    }
+
+    template<class MatrixType>
+    void EigenSolver<MatrixType>::compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors) {
         assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == eigenvalues.getLength());
         auto schur = RealSchur(source, computeEigenvectors);
 
         auto& matrixT = schur.getMatrixT();
@@ -183,7 +199,7 @@ namespace Physica::Core {
             const auto& matrixU = schur.getMatrixU();
             for (size_t i = 0; i < order; ++i) {
                 auto topRows = matrixT.topRows(i + 1);
-                auto toCol = eigenvectorStorage.col(i);
+                auto toCol = rawEigenvectors.col(i);
                 toCol = (matrixU.leftCols(i + 1) * topRows.col(i));
             }
         }
@@ -196,13 +212,13 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i) {
             if (eigenvalues[i].getImag().isZero()) {
                 auto toCol = result.col(i);
-                toCol.asVector() = eigenvectorStorage.col(i);
+                toCol.asVector() = rawEigenvectors.col(i);
             }
             else {
                 auto toCol1 = result.col(i);
                 auto toCol2 = result.col(i + 1);
-                auto fromCol1 = eigenvectorStorage.col(i);
-                auto fromCol2 = eigenvectorStorage.col(i + 1);
+                auto fromCol1 = rawEigenvectors.col(i);
+                auto fromCol2 = rawEigenvectors.col(i + 1);
                 for (size_t j = 0; j < order; ++j) {
                     toCol1[j] = ComplexScalar<ScalarType>(fromCol1[j], fromCol2[j]);
                     toCol2[j] = ComplexScalar<ScalarType>(fromCol1[j], -fromCol2[j]);
