@@ -41,6 +41,7 @@ namespace Physica::Core::Physics {
     private:
         const Molecular<ScalarType>& molecular;
         ElectronConfig electronConfig;
+        size_t numOccupiedOrbit;
         MatrixType singleHamilton;
         MatrixType overlap;
         Utils::Array<BaseSetType> baseSet;
@@ -66,11 +67,15 @@ namespace Physica::Core::Physics {
         void formOverlapMatrix();
         void formDensityMatrix(MatrixType& __restrict electronDensity,
                                MatrixType& __restrict sameSpinElectronDensity,
-                               const MatrixType& __restrict wave_func,
-                               size_t numOccupiedOrbit);
+                               const MatrixType& __restrict wave_func);
         void formCoulombMatrix(MatrixType& __restrict fock,
                                const MatrixType& __restrict electronDensity,
                                const MatrixType& __restrict sameSpinElectronDensity);
+        template<class AnyMatrix>
+        void updateWaves(const AnyMatrix& eigenvectors,
+                         const MatrixType& inv_cholesky,
+                         MatrixType& waves,
+                         const Utils::Array<size_t>& sortedEigenvalues);
         template<class VectorType>
         void updateSelfConsistentEnergy(const VectorType& eigenvalues, const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waves);
         void sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues, Utils::Array<size_t>& indexToSort) const;
@@ -80,11 +85,13 @@ namespace Physica::Core::Physics {
     RHFSolver<BaseSetType>::RHFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
             : molecular(m)
             , electronConfig(electronConfig_)
+            , numOccupiedOrbit(0)
             , singleHamilton(baseSetSize, baseSetSize)
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
             , selfConsistentEnergy() {
-        assert(electronConfig.getNumOccupiedOrbit() <= baseSetSize);
+        numOccupiedOrbit = electronConfig.getNumOccupiedOrbit();
+        assert(numOccupiedOrbit <= baseSetSize);
     }
     /**
      * Perform self-consistant computation
@@ -96,7 +103,6 @@ namespace Physica::Core::Physics {
         assert(criteria.isPositive());
 
         const size_t baseSetSize = getBaseSetSize();
-        const size_t numOccupiedOrbit = electronConfig.getNumOccupiedOrbit();
         formSingleHamilton();
         formOverlapMatrix();
 
@@ -116,13 +122,7 @@ namespace Physica::Core::Physics {
             
             const auto& eigenvalues = solver.getEigenvalues();
             sortEigenvalues(eigenvalues, sortedEigenvalues);
-            auto eigenvectors = solver.getEigenvectors();
-            for (size_t i = 0; i < numOccupiedOrbit; ++i) {
-                auto wave = waves.col(i);
-                const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
-                const size_t solutionPos = sortedEigenvalues[orbitPos];
-                wave.asVector() = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(solutionPos)).moveToColMatrix()).compute().col(0);
-            }
+            updateWaves(solver.getEigenvectors(), inv_cholesky, waves, sortedEigenvalues);
             // Get ground state energy
             const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
             updateSelfConsistentEnergy(eigenvalues, sortedEigenvalues, waves);
@@ -133,7 +133,7 @@ namespace Physica::Core::Physics {
             if ((++iteration) == maxIte)
                 return false;
             // Prepare for next iteration
-            formDensityMatrix(electronDensity, sameSpinElectronDensity, waves, numOccupiedOrbit);
+            formDensityMatrix(electronDensity, sameSpinElectronDensity, waves);
             formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
             fock += singleHamilton;
         } while(true);
@@ -173,9 +173,8 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
-                                                  MatrixType& __restrict sameSpinElectronDensity,
-                                                  const MatrixType& __restrict wave_func,
-                                                  size_t numOccupiedOrbit) {
+                                                   MatrixType& __restrict sameSpinElectronDensity,
+                                                   const MatrixType& __restrict wave_func) {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -205,8 +204,8 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock,
-                                                  const MatrixType& __restrict electronDensity,
-                                                  const MatrixType& __restrict sameSpinElectronDensity) {
+                                                   const MatrixType& __restrict electronDensity,
+                                                   const MatrixType& __restrict sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
@@ -224,10 +223,24 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
+    template<class AnyMatrix>
+    void RHFSolver<BaseSetType>::updateWaves(const AnyMatrix& eigenvectors,
+                                             const MatrixType& inv_cholesky,
+                                             MatrixType& waves,
+                                             const Utils::Array<size_t>& sortedEigenvalues) {
+        for (size_t i = 0; i < numOccupiedOrbit; ++i) {
+            auto wave = waves.col(i);
+            const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
+            const size_t solutionPos = sortedEigenvalues[orbitPos];
+            wave.asVector() = (inv_cholesky.transpose() * toRealVector(eigenvectors.col(solutionPos)).moveToColMatrix()).compute().col(0);
+        }
+    }
+
+    template<class BaseSetType>
     template<class VectorType>
     void RHFSolver<BaseSetType>::updateSelfConsistentEnergy(const VectorType& eigenvalues,
-                                                           const Utils::Array<size_t>& sortedEigenvalues,
-                                                           const MatrixType& waves) {
+                                                            const Utils::Array<size_t>& sortedEigenvalues,
+                                                            const MatrixType& waves) {
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < waves.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
@@ -250,7 +263,7 @@ namespace Physica::Core::Physics {
      */
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::sortEigenvalues(const typename EigenSolver<MatrixType>::EigenvalueVector& eigenvalues,
-                                                Utils::Array<size_t>& indexToSort) const {
+                                                 Utils::Array<size_t>& indexToSort) const {
         auto arrayToSort = toRealVector(eigenvalues);
         for (size_t i = 0; i < getBaseSetSize(); ++i)
             indexToSort[i] = i;
