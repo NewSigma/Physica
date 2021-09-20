@@ -88,7 +88,7 @@ namespace Physica::Core::Physics {
                          DeltaWaveGroup& deltaWaveGroup,
                          const Utils::Array<size_t>& sortedEigenvalues);
         [[nodiscard]] static ScalarType waveMatrixDot(const MatrixType& m1, const MatrixType& m2);
-        void updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
+        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
     };
 
@@ -131,24 +131,22 @@ namespace Physica::Core::Physics {
 
         iteration = 0;
         do {
+            formDensityMatrix(electronDensity, sameSpinElectronDensity, *waveGroup.rbegin());
+            formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
+            fock += singleHamilton;
+
             const MatrixType modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock, true);
 
             sortEigenvalues(sortedEigenvalues);
             updateWaves(inv_cholesky, waveGroup, deltaWaveGroup, sortedEigenvalues);
-            // Get ground state energy
-            const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
-            updateSelfConsistentEnergy(sortedEigenvalues, *waveGroup.rbegin());
-            const ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
-            // Check convergence
+            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, *waveGroup.rbegin());
+
             if (delta < criteria)
                 return true;
+
             if ((++iteration) == maxIte)
                 return false;
-            // Prepare for next iteration
-            formDensityMatrix(electronDensity, sameSpinElectronDensity, *waveGroup.rbegin());
-            formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
-            fock += singleHamilton;
         } while(true);
         return true;
     }
@@ -296,9 +294,11 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues,
-                                                            const MatrixType& waveGroup) {
+    typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
+            const Utils::Array<size_t>& sortedEigenvalues,
+            const MatrixType& waveGroup) {
         const auto& eigenvalues = eigenSolver.getEigenvalues();
+        const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < waveGroup.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
@@ -311,6 +311,8 @@ namespace Physica::Core::Physics {
             selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType::Two() * temp);
         }
         selfConsistentEnergy *= ScalarType(0.5);
+        ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
+        return delta;
     }
     /**
      * Get the first \param orbitCount lowest eigenvalues and save their indexes to array \param index,
