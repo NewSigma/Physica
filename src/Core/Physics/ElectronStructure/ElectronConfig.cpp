@@ -32,6 +32,7 @@ namespace Physica::Core::Physics {
         size_t scannedOrbit = 0;
         for (; i < states.getLength() && scannedOrbit <= orbitIndex; ++i)
             scannedOrbit += states[i] != NoOccupacy;
+        assert(scannedOrbit == orbitIndex + 1);
         return i - 1;
     }
 }

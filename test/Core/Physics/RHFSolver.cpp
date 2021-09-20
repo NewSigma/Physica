@@ -25,6 +25,8 @@ using namespace Physica::Core::Physics;
 
 using ScalarType = Scalar<Double, false>;
 
+constexpr double precitionGoal = 1E-8;
+
 ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const Vector<ScalarType>& alphas) {
     Molecular<ScalarType> system = Molecular<ScalarType>(1);
     auto& atoms = system.getAtoms();
@@ -37,7 +39,7 @@ ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const Ve
     auto& baseSet = solver.getBaseSet();
     for (size_t i = 0; i < alphas.getLength(); ++i)
         baseSet[i] = GaussBase<ScalarType>(pos_atom, abs(alphas[i]), 0, 0, 0);
-    if (!solver.compute(1E-5, 128))
+    if (!solver.compute(precitionGoal, 128))
         return ScalarType(1E5);
     return solver.getSelfConsistentEnergy();
 }
@@ -50,7 +52,14 @@ int main() {
         ElectronConfig config = ElectronConfig(1);
         config.setOrbitState(0, ElectronConfig::SingleOccupacy);
         const Vector<ScalarType, 6> base{8.2921890E1, 1.2452437E1, 2.8330562, 8.0001038E-1, 2.5859469E-1, 8.9968966E-2};
-        if (!scalarNear(scf_solve(1, config, base), ScalarType(-0.499945570), 1E-9))
+        if (!scalarNear(scf_solve(1, config, base), ScalarType(-0.499945570), precitionGoal))
+            return 1;
+    }
+    {
+        ElectronConfig config = ElectronConfig(1);
+        config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
+        const Vector<ScalarType, 6> base{2.3406425E2, 3.5174075E1, 7.9911108, 2.2124201, 6.6706872E-1, 2.0894727E-1};
+        if (!scalarNear(scf_solve(2, config, base), ScalarType( -2.86115334), precitionGoal))
             return 1;
     }
     return 0;
