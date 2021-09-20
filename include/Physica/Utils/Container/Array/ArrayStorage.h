@@ -112,9 +112,9 @@ namespace Physica::Utils::Internal {
         __host__ __device__ Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
         __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
         __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(arr + Base::getDerived().getLength()); }
-        __host__ __device__ ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength() - 1); }
         __host__ __device__ ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
-        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength()); }
+        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength() - 1); }
         __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
         /* Getters */
         [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
