@@ -18,6 +18,7 @@
  */
 #include "TestHelper.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GaussBase.h"
+#include "Physica/Utils/Container/Array/Array.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;
@@ -81,18 +82,18 @@ ScalarType repulsion_1s_1s(const ScalarType& alpha1,
                            const Vector<ScalarType, 3>& v3,
                            const ScalarType& alpha4,
                            const Vector<ScalarType, 3>& v4) {
-    const ScalarType alpha_sum1 = alpha1 + alpha2;
-    const ScalarType alpha_sum2 = alpha3 + alpha4;
+    const ScalarType alpha_sum1 = alpha1 + alpha3;
+    const ScalarType alpha_sum2 = alpha2 + alpha4;
     const ScalarType factor = ScalarType(2 * std::pow(M_PI, 2.5)) / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
     const ScalarType temp1 = alpha1 / alpha_sum1;
     const ScalarType temp2 = ScalarType::One() - temp1;
-    const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v2;
-    const ScalarType squaredNorm1 = (v1 - v2).squaredNorm();
-    const ScalarType temp3 = alpha3 / alpha_sum2;
+    const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v3;
+    const ScalarType squaredNorm1 = (v1 - v3).squaredNorm();
+    const ScalarType temp3 = alpha2 / alpha_sum2;
     const ScalarType temp4 = ScalarType::One() - temp3;
-    const Vector<ScalarType, 3> vector_q = temp3 * v3 + temp4 * v4;
-    const ScalarType squaredNorm2 = (v3 - v4).squaredNorm();
-    return factor * exp(-temp1 * alpha2 * squaredNorm1) * exp(-temp3 * alpha4 * squaredNorm2)
+    const Vector<ScalarType, 3> vector_q = temp3 * v2 + temp4 * v4;
+    const ScalarType squaredNorm2 = (v2 - v4).squaredNorm();
+    return factor * exp(-temp1 * alpha3 * squaredNorm1) * exp(-temp3 * alpha4 * squaredNorm2)
          * Test::helper_F(0, alpha_sum1 * alpha_sum2 * (vector_p - vector_q).squaredNorm() / (alpha_sum1 + alpha_sum2));
 }
 
@@ -141,6 +142,18 @@ int main() {
         GaussBase<ScalarType> base1(v, 0.298073, 0, 0, 0);
         GaussBase<ScalarType> base2(v, 0.298073, 0, 0, 0);
         if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v), ScalarType(10.539675360028560918), 1E-15))
+            return 1;
+    }
+    {
+        const ScalarType alpha1 = ScalarType(13.00773);
+        const ScalarType alpha2 = ScalarType(0.444529);
+        const Vector<ScalarType, 3> v1{0, 0, 0};
+        const Vector<ScalarType, 3> v2{0, 0, 1};
+        const GaussBase<ScalarType> base1(v1, alpha1, 0, 0, 0);
+        const GaussBase<ScalarType> base2(v2, alpha2, 0, 0, 0);
+        if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base2, base1),
+                        repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha2, v2, alpha1, v1),
+                        1E-14))
             return 1;
     }
     return 0;

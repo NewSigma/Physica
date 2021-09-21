@@ -224,8 +224,8 @@ namespace Physica::Core::Physics {
                                                         const GaussBase& base2,
                                                         const GaussBase& base3,
                                                         const GaussBase& base4) {
-        const ScalarType alpha_sum1 = base1.alpha + base2.alpha;
-        const ScalarType alpha_sum2 = base3.alpha + base4.alpha;
+        const ScalarType alpha_sum1 = base1.alpha + base3.alpha;
+        const ScalarType alpha_sum2 = base2.alpha + base4.alpha;
 
         const ScalarType factor = ScalarType::Two() * square(ScalarType(M_PI)) * sqrt(ScalarType(M_PI))
                                 / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
@@ -233,15 +233,15 @@ namespace Physica::Core::Physics {
         const ScalarType inv_alpha_sum1 = reciprocal(alpha_sum1);
         const ScalarType temp1 = base1.alpha * inv_alpha_sum1;
         const ScalarType temp2 = ScalarType::One() - temp1;
-        const ScalarType factor1 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
+        const ScalarType factor1 = exp(-temp1 * base3.alpha * (base1.center - base3.center).squaredNorm());
         
         const ScalarType inv_alpha_sum2 = reciprocal(alpha_sum2);
-        const ScalarType temp3 = base3.alpha * inv_alpha_sum2;
+        const ScalarType temp3 = base2.alpha * inv_alpha_sum2;
         const ScalarType temp4 = ScalarType::One() - temp3;
-        const ScalarType factor2 = exp(-temp3 * base4.alpha * (base3.center - base4.center).squaredNorm());
+        const ScalarType factor2 = exp(-temp3 * base4.alpha * (base2.center - base4.center).squaredNorm());
 
-        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
-        const Vector<ScalarType, 3> vector_q = temp3 * base3.center + temp4 * base4.center;
+        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base3.center;
+        const Vector<ScalarType, 3> vector_q = temp3 * base2.center + temp4 * base4.center;
         const Vector<ScalarType, 3> vector_pq = vector_p - vector_q;
         const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
         const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
@@ -434,13 +434,16 @@ namespace Physica::Core::Physics {
         }
         return result;
     }
-
+    /**
+     * Optimize: Note that in the implementation of gammaP function, we have calculated pow(t, v1),
+     * which is unnecessary and will cancel with the pow operation here
+     */
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::helper_F(size_t v, const ScalarType& t) {
         const ScalarType half = ScalarType(0.5);
         const ScalarType v1 = ScalarType(v) + half;
         if (t.isZero())
             return half / v1;
-        return half * pow(t, -v1) * gamma(v1) * (ScalarType::One() - gammaQ(v1, t));
+        return half * pow(t, -v1) * gamma(v1) * gammaP(v1, t);
     }
 }
