@@ -185,7 +185,7 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
                                                    MatrixType& __restrict sameSpinElectronDensity,
-                                                   const MatrixType& __restrict wave_func) {
+                                                   const MatrixType& __restrict wave) {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -202,8 +202,8 @@ namespace Physica::Core::Physics {
                     const auto orbitState = electronConfig.getOrbitState(orbitPos);
                     assert(orbitState != ElectronConfig::NoOccupacy);
                     const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
-                    auto wave = wave_func.col(k);
-                    const ScalarType dot = wave[i] * wave[j];
+                    auto orbit = wave.col(k);
+                    const ScalarType dot = orbit[i] * orbit[j];
                     temp1 += isSingleOccupacy ? dot : ScalarType::Two() * dot;
                     temp2 += dot;
                 }
@@ -296,15 +296,15 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
             const Utils::Array<size_t>& sortedEigenvalues,
-            const MatrixType& waveGroup) {
+            const MatrixType& wave) {
         const auto& eigenvalues = eigenSolver.getEigenvalues();
         const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
         selfConsistentEnergy = ScalarType::Zero();
-        for (size_t i = 0; i < waveGroup.getColumn(); ++i) {
+        for (size_t i = 0; i < wave.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             ScalarType temp = eigenvalues[sortedEigenvalues[orbitPos]].getReal();
-            auto wave = waveGroup.col(i);
-            temp += ((wave.transpose() * singleHamilton).compute() * wave).calc(0, 0);
+            auto orbit = wave.col(i);
+            temp += ((orbit.transpose() * singleHamilton).compute() * orbit).calc(0, 0);
             const auto orbitState = electronConfig.getOrbitState(orbitPos);
             assert(orbitState != ElectronConfig::NoOccupacy);
             const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
