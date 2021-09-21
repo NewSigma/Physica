@@ -72,7 +72,7 @@ namespace Physica::Core::Internal {
     void AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Column | DenseMatrixOption::Element>::columnSwap(size_t c1, size_t c2) {
         Derived& matrix = getDerived();
         const size_t row = matrix.getRow();
-        const size_t column = matrix.getColumn();
+        [[maybe_unused]] const size_t column = matrix.getColumn();
         assert(c1 < column && c2 < column);
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
