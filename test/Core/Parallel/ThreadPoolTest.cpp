@@ -17,19 +17,18 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Parallel/ParallelFor.h"
 
 using namespace Physica::Core::Parallel;
 
-void func() {
+void func([[maybe_unused]] size_t i) {
     printf("Thread ID: %ld\n", ThreadPool::getThreadInfo().id);
 }
 
 int main() {
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
-    for (int i = 0; i < 20; ++i)
-        pool.schedule(func);
+    parallel_for(func, 20, 4);
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
     return 0;

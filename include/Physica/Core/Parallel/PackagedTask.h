@@ -25,11 +25,11 @@ namespace Physica::Core::Parallel {
         virtual void execute() = 0;
     };
 
-    template<class Function, class... Args>
+    template<class Function>
     class PackagedTask : public Task {
-        std::packaged_task<Function(Args...)> task;
+        std::packaged_task<Function()> task;
     public:
-        PackagedTask(std::packaged_task<Function(Args...)> task_) : task(std::move(task_)) {}
+        PackagedTask(std::packaged_task<Function()> task_) : task(std::move(task_)) {}
         ~PackagedTask() override = default;
         /* Operations */
         void execute() override { task(); }

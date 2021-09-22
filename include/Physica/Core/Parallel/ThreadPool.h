@@ -63,7 +63,7 @@ namespace Physica::Core::Parallel {
         ThreadPool& operator=(ThreadPool&&) noexcept = delete;
         /* Operations */
         template<class Function, class... Args>
-        std::future<typename std::invoke_result<Function>::type> schedule(Function func, Args... args);
+        std::future<typename std::invoke_result<Function, Args...>::type> schedule(Function func, Args... args);
         /* Getters */
         [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.size(); }
         /* Setters */
@@ -91,9 +91,9 @@ namespace Physica::Core::Parallel {
     }
 
     template<class Function, class ... Args>
-    std::future<typename std::invoke_result<Function>::type> ThreadPool::schedule(Function func, Args... args) {
-        using ResultType = typename std::invoke_result<Function>::type;
-        std::packaged_task<ResultType(Args...)> task(std::bind(func, args...));
+    std::future<typename std::invoke_result<Function, Args...>::type> ThreadPool::schedule(Function func, Args... args) {
+        using ResultType = typename std::invoke_result<Function, Args...>::type;
+        std::packaged_task<ResultType()> task(std::bind(func, args...));
         auto result = task.get_future();
         unsigned int random_id = threadRand(getThreadInfo().randState) % thread_data.size();
         auto& data = thread_data[random_id];
