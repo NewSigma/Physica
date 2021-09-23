@@ -60,7 +60,11 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
     electronEnergy = solver.getSelfConsistentEnergy();
     potentialEnergy = H2.getNuclearRepulsionEnergy();
 }
-
+/**
+ * Reference:
+ * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:84
+ * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods.
+ */
 int main(int argc, char** argv) {
     const double from = 0.1;
     const double to = 8;
