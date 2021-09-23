@@ -44,9 +44,10 @@ namespace Physica::Core::Physics {
          */
         constexpr static size_t DIISMultiplicity = 3;
         static_assert(DIISMultiplicity >= 3, "DIISMultiplicity less than three makes no sence");
-        using WaveGroup = Utils::Array<MatrixType, DIISMultiplicity>;
-        using DeltaWaveGroup = Utils::Array<MatrixType, DIISMultiplicity - 1>;
+        using WaveGroup = Utils::Array<MatrixType, DIISMultiplicity - 1>;
         using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISMultiplicity, DIISMultiplicity>;
+    public:
+        using WaveType = MatrixType;
     private:
         const Molecular<ScalarType>& molecular;
         ElectronConfig electronConfig;
@@ -55,6 +56,7 @@ namespace Physica::Core::Physics {
         MatrixType overlap;
         Utils::Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
+        MatrixType wave;
         EigenSolver<MatrixType> eigenSolver;
         size_t iteration;
     public:
@@ -73,7 +75,10 @@ namespace Physica::Core::Physics {
         [[nodiscard]] size_t getBaseSetSize() const noexcept { return baseSet.getLength(); }
         [[nodiscard]] ScalarType getSelfConsistentEnergy() const noexcept { return selfConsistentEnergy; }
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept { return selfConsistentEnergy + molecular.getNuclearRepulsionEnergy(); }
+        [[nodiscard]] const MatrixType& getWave() const noexcept { return wave; }
         [[nodiscard]] size_t getIteration() const noexcept { return iteration; }
+        /* Setters */
+        void setInitialWave(const MatrixType& initialWave) { wave = initialWave; }
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
@@ -85,7 +90,7 @@ namespace Physica::Core::Physics {
                                const MatrixType& __restrict sameSpinElectronDensity);
         void updateWaves(const MatrixType& inv_cholesky,
                          WaveGroup& waveGroup,
-                         DeltaWaveGroup& deltaWaveGroup,
+                         WaveGroup& deltaWaveGroup,
                          const Utils::Array<size_t>& sortedEigenvalues);
         [[nodiscard]] static ScalarType waveMatrixDot(const MatrixType& m1, const MatrixType& m2);
         [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
@@ -96,14 +101,14 @@ namespace Physica::Core::Physics {
     RHFSolver<BaseSetType>::RHFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize)
             : molecular(m)
             , electronConfig(electronConfig_)
-            , numOccupiedOrbit(0)
+            , numOccupiedOrbit(electronConfig.getNumOccupiedOrbit())
             , singleHamilton(baseSetSize, baseSetSize)
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
             , selfConsistentEnergy()
+            , wave(MatrixType::Zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
             , eigenSolver(baseSetSize)
             , iteration(0) {
-        numOccupiedOrbit = electronConfig.getNumOccupiedOrbit();
         assert(numOccupiedOrbit <= baseSetSize);
     }
     /**
@@ -125,13 +130,13 @@ namespace Physica::Core::Physics {
         MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType fock = singleHamilton;
-        WaveGroup waveGroup = WaveGroup(DIISMultiplicity, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
-        DeltaWaveGroup deltaWaveGroup = DeltaWaveGroup(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
+        WaveGroup waveGroup = WaveGroup(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
+        WaveGroup deltaWaveGroup = WaveGroup(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         iteration = 0;
         do {
-            formDensityMatrix(electronDensity, sameSpinElectronDensity, *waveGroup.rbegin());
+            formDensityMatrix(electronDensity, sameSpinElectronDensity, wave);
             formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
             fock += singleHamilton;
 
@@ -140,7 +145,7 @@ namespace Physica::Core::Physics {
 
             sortEigenvalues(sortedEigenvalues);
             updateWaves(inv_cholesky, waveGroup, deltaWaveGroup, sortedEigenvalues);
-            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, *waveGroup.rbegin());
+            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, wave);
 
             if (delta < criteria)
                 return true;
@@ -236,23 +241,22 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::updateWaves(const MatrixType& inv_cholesky,
                                              WaveGroup& waveGroup,
-                                             DeltaWaveGroup& deltaWaveGroup,
+                                             WaveGroup& deltaWaveGroup,
                                              const Utils::Array<size_t>& sortedEigenvalues) {
-        for (size_t i = 0; i < waveGroup.getLength() - 2; ++i) {
+        for (size_t i = 0; i < waveGroup.getLength() - 1; ++i) {
             swap(waveGroup[i], waveGroup[i + 1]);
             swap(deltaWaveGroup[i], deltaWaveGroup[i + 1]);
         }
-        swap(waveGroup[waveGroup.getLength() - 2], waveGroup[waveGroup.getLength() - 1]);
+        swap(waveGroup[waveGroup.getLength() - 1], wave);
 
-        auto& newWave = *waveGroup.rbegin();
         const auto& eigenvectors = eigenSolver.getRawEigenvectors();
         for (size_t i = 0; i < numOccupiedOrbit; ++i) {
-            auto eigenState = newWave.col(i);
+            auto eigenState = wave.col(i);
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             const size_t solutionPos = sortedEigenvalues[orbitPos];
             eigenState.asVector() = (inv_cholesky.transpose() * eigenvectors.col(solutionPos)).compute().col(0);
         }
-        deltaWaveGroup[waveGroup.getLength() - 2] = newWave - waveGroup[waveGroup.getLength() - 2];
+        deltaWaveGroup[waveGroup.getLength() - 2] = wave - waveGroup[waveGroup.getLength() - 2];
 
         const bool readyForDIIS = iteration >= DIISMultiplicity - 1 && iteration % 6 == 0; // Constant 6 comes from Reference: Improved SCF Convergence Acceleration[J]. Journal of Computational Chemistry, 1982, 3(4):556-560.
         if (readyForDIIS) {
@@ -268,12 +272,12 @@ namespace Physica::Core::Physics {
                 const DIISMatrix inv_A = A.inverse();
                 x = (inv_A * b.moveToColMatrix()).compute().col(0);
             }
-            newWave = ScalarType::Zero();
+            wave = ScalarType::Zero();
             for (size_t i = 0; i < DIISMultiplicity - 1; ++i)
-                newWave += waveGroup[i] * x[i];
+                wave += waveGroup[i] * x[i];
 
             for (size_t i = 0; i < numOccupiedOrbit; ++i) {
-                auto col = newWave.col(i);
+                auto col = wave.col(i);
                 auto norm = ((col.transpose() * overlap).compute() * col).calc(0, 0);
                 col.asVector() *= reciprocal(sqrt(norm));
             }

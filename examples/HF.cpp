@@ -64,6 +64,8 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:84
  * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods.
+ * 
+ * TODO: Add p-orbital may improve the result, but will lead to divergence, try to enhance the DIIS procedure
  */
 int main(int argc, char** argv) {
     const double from = 0.1;
