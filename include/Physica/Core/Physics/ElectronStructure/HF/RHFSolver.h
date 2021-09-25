@@ -45,7 +45,7 @@ namespace Physica::Core::Physics {
          */
         constexpr static size_t DIISMultiplicity = 3;
         static_assert(DIISMultiplicity >= 3, "DIISMultiplicity less than three makes no sence");
-        using WaveGroup = Utils::Array<MatrixType, DIISMultiplicity - 1>;
+        using DIISArray = Utils::Array<MatrixType, DIISMultiplicity - 1>;
         using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISMultiplicity, DIISMultiplicity>;
     public:
         using WaveType = MatrixType;
@@ -90,8 +90,8 @@ namespace Physica::Core::Physics {
                                const MatrixType& __restrict electronDensity,
                                const MatrixType& __restrict sameSpinElectronDensity);
         void updateWaves(const MatrixType& inv_cholesky,
-                         WaveGroup& waveGroup,
-                         WaveGroup& deltaWaveGroup,
+                         DIISArray& waveGroup,
+                         DIISArray& deltaDIISArray,
                          const Utils::Array<size_t>& sortedEigenvalues);
         [[nodiscard]] static ScalarType waveMatrixDot(const MatrixType& m1, const MatrixType& m2);
         [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
@@ -131,8 +131,8 @@ namespace Physica::Core::Physics {
         MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType fock = singleHamilton;
-        WaveGroup waveGroup = WaveGroup(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
-        WaveGroup deltaWaveGroup = WaveGroup(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
+        DIISArray waveGroup = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
+        DIISArray deltaDIISArray = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         iteration = 0;
@@ -145,7 +145,7 @@ namespace Physica::Core::Physics {
             eigenSolver.compute(modifiedFock, true);
 
             sortEigenvalues(sortedEigenvalues);
-            updateWaves(inv_cholesky, waveGroup, deltaWaveGroup, sortedEigenvalues);
+            updateWaves(inv_cholesky, waveGroup, deltaDIISArray, sortedEigenvalues);
             const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, wave);
 
             if (delta < criteria)
@@ -237,12 +237,12 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::updateWaves(const MatrixType& inv_cholesky,
-                                             WaveGroup& waveGroup,
-                                             WaveGroup& deltaWaveGroup,
+                                             DIISArray& waveGroup,
+                                             DIISArray& deltaDIISArray,
                                              const Utils::Array<size_t>& sortedEigenvalues) {
         for (size_t i = 0; i < waveGroup.getLength() - 1; ++i) {
             swap(waveGroup[i], waveGroup[i + 1]);
-            swap(deltaWaveGroup[i], deltaWaveGroup[i + 1]);
+            swap(deltaDIISArray[i], deltaDIISArray[i + 1]);
         }
         swap(waveGroup[waveGroup.getLength() - 1], wave);
 
@@ -253,7 +253,7 @@ namespace Physica::Core::Physics {
             const size_t solutionPos = sortedEigenvalues[orbitPos];
             eigenState.asVector() = (inv_cholesky.transpose() * eigenvectors.col(solutionPos)).compute().col(0);
         }
-        deltaWaveGroup[waveGroup.getLength() - 2] = wave - waveGroup[waveGroup.getLength() - 2];
+        deltaDIISArray[waveGroup.getLength() - 2] = wave - waveGroup[waveGroup.getLength() - 2];
 
         const bool readyForDIIS = iteration >= DIISMultiplicity - 1 && iteration % 6 == 0; // Constant 6 comes from Reference: Improved SCF Convergence Acceleration[J]. Journal of Computational Chemistry, 1982, 3(4):556-560.
         if (readyForDIIS) {
@@ -263,7 +263,7 @@ namespace Physica::Core::Physics {
                 A(DIISMultiplicity - 1, DIISMultiplicity - 1) = ScalarType::Zero();
                 for (size_t i = 0; i < A.getColumn() - 1; ++i)
                     for (size_t j = 0; j < A.getRow() - 1; ++j)
-                        A(i, j) = waveMatrixDot(deltaWaveGroup[i], deltaWaveGroup[j]);
+                        A(i, j) = waveMatrixDot(deltaDIISArray[i], deltaDIISArray[j]);
                 Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
                 b[DIISMultiplicity - 1] = -ScalarType::One();
                 const DIISMatrix inv_A = A.inverse();
