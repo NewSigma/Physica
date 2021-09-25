@@ -312,7 +312,7 @@ namespace Physica::Core::Physics {
             selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType::Two() * temp);
         }
         selfConsistentEnergy *= ScalarType(0.5);
-        ScalarType delta = abs(oldSelfConsistentEnergy - selfConsistentEnergy);
+        ScalarType delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
         return delta;
     }
     /**
