@@ -107,9 +107,6 @@ namespace Physica::Core::Internal {
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>;
-    public:
-        using ElementIterator = typename Base::Iterator;
-        using ConstElementIterator = typename Base::ConstIterator;
     private:
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
@@ -135,19 +132,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        /* Getters */
-        /**
-         * The first argument is index of major direction
-         */
-        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s2, s1); }
-        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s2, s1); }
-        /**
-         * ebegin() stands for element begin()
-         * cebegin() stands for const element begin()
-         */
-        [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return ite; }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return ite; }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return ite; }
         /* Helpers */
         /**
          * Does not use Base::swap directly to avoid incorrect swaps
@@ -167,9 +151,6 @@ namespace Physica::Core::Internal {
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>;
-    public:
-        using ElementIterator = typename Base::Iterator;
-        using ConstElementIterator = typename Base::ConstIterator;
     private:
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
@@ -195,12 +176,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        /* Getters */
-        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s1, s2); }
-        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s1, s2); }
-        [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return ite; }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return ite; }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return ite; }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -219,9 +194,6 @@ namespace Physica::Core::Internal {
         using Base = DenseMatrixStorageHelper<VectorType
                                              , Traits<Derived>::ColumnAtCompile
                                              , Traits<Derived>::MaxColumnAtCompile>;
-    public:
-        using ElementIterator = typename VectorType::Iterator;
-        using ConstElementIterator = typename VectorType::ConstIterator;
     private:
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
@@ -247,12 +219,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        /* Getters */
-        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s2, s1); }
-        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s2, s1); }
-        [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
@@ -271,9 +237,6 @@ namespace Physica::Core::Internal {
         using Base = DenseMatrixStorageHelper<VectorType
                                              , Traits<Derived>::RowAtCompile
                                              , Traits<Derived>::MaxRowAtCompile>;
-    public:
-        using ElementIterator = typename VectorType::Iterator;
-        using ConstElementIterator = typename VectorType::ConstIterator;
     private:
         using Utils::CRTPBase<Derived>::getDerived;
         using T = typename Traits<Derived>::ScalarType;
@@ -299,12 +262,6 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        /* Getters */
-        [[nodiscard]] T& majorGet(size_t s1, size_t s2) { return operator()(s1, s2); }
-        [[nodiscard]] const T& majorGet(size_t s1, size_t s2) const { return operator()(s1, s2); }
-        [[nodiscard]] static ElementIterator ebegin(typename Base::Iterator ite) noexcept { return (*ite).begin(); }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::Iterator ite) noexcept { return (*ite).cbegin(); }
-        [[nodiscard]] static ConstElementIterator cebegin(typename Base::ConstIterator ite) noexcept { return (*ite).cbegin(); }
         /* Helpers */
         void swap(AbstractDenseMatrixStorage& storage) noexcept { Base::swap(storage); }
     };
