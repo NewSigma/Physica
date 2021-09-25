@@ -47,7 +47,17 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+        [[nodiscard]] ScalarType trace() const;
     };
+
+    template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
+        assert(getRow() == getColumn());
+        ScalarType result = ScalarType::Zero();
+        for (size_t i = 0; i < getRow(); ++i)
+            result += calc(i, i);
+        return result;
+    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
     Derived reciprocal(const RValueMatrix<Derived>& m);
