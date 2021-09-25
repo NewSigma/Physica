@@ -32,20 +32,32 @@ namespace Physica::Core {
     class DenseMatrixOption {
     public:
         enum {
-            Column = 0b00,
-            Row = 0b01,
-            Vector = 0b00,
-            Element = 0b10
+            Column = 0b000,
+            Row = 0b001,
+            AnyMajor = 0b010,
+            Vector = 0b000,
+            Element = 0b100
         };
     public:
         template<class Matrix>
-        constexpr static bool isColumnMatrix() { return !(Internal::Traits<Matrix>::MatrixOption & Row); }
+        constexpr static bool isColumnMatrix() {
+            return isAnyMajor<Matrix>() || !(Internal::Traits<Matrix>::MatrixOption & Row);
+        }
 
         template<class Matrix>
-        constexpr static bool isRowMatrix() { return !isColumnMatrix<Matrix>(); }
+        constexpr static bool isRowMatrix() {
+            return isAnyMajor<Matrix>() || !isColumnMatrix<Matrix>();
+        }
 
         template<class Matrix>
-        constexpr static int getMajor() { return isColumnMatrix<Matrix>() ? Column : Row; }
+        constexpr static bool isAnyMajor() {
+            return Internal::Traits<Matrix>::MatrixOption & AnyMajor;
+        }
+
+        template<class Matrix>
+        constexpr static int getMajor() {
+            return isAnyMajor<Matrix>() ? AnyMajor : (isColumnMatrix<Matrix>() ? Column : Row);
+        }
 
         template<class Matrix>
         constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::MatrixOption & Element; }

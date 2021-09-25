@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/Molecular.h"
 #include "Physica/Core/Physics/ElectronStructure/ElectronConfig.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
@@ -52,7 +53,7 @@ namespace Physica::Core::Physics {
         const Molecular<ScalarType>& molecular;
         ElectronConfig electronConfig;
         size_t numOccupiedOrbit;
-        MatrixType singleHamilton;
+        DenseSymmMatrix<ScalarType, Dynamic> singleHamilton;
         MatrixType overlap;
         Utils::Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
@@ -102,7 +103,7 @@ namespace Physica::Core::Physics {
             : molecular(m)
             , electronConfig(electronConfig_)
             , numOccupiedOrbit(electronConfig.getNumOccupiedOrbit())
-            , singleHamilton(baseSetSize, baseSetSize)
+            , singleHamilton(baseSetSize)
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
             , selfConsistentEnergy()
@@ -160,16 +161,12 @@ namespace Physica::Core::Physics {
     void RHFSolver<BaseSetType>::formSingleHamilton() {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
-            size_t j = 0;
-            for (; j < i; ++j)
-                singleHamilton(j, i) = singleHamilton(i, j);
-
-            for (; j < baseSetSize; ++j) {
+            for (size_t j = i; j < baseSetSize; ++j) {
                 ScalarType temp = ScalarType::Zero();
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
                     temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).getVector())
                             * ScalarType(molecular.getAtomicNumber(k));
-                singleHamilton(j, i) = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
+                singleHamilton(i, j) = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
             }
         }
     }
