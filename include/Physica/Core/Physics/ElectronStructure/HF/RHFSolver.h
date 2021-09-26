@@ -86,14 +86,16 @@ namespace Physica::Core::Physics {
         void formDensityMatrix(MatrixType& __restrict electronDensity,
                                MatrixType& __restrict sameSpinElectronDensity,
                                const MatrixType& __restrict wave_func);
-        void formCoulombMatrix(MatrixType& __restrict fock,
-                               const MatrixType& __restrict electronDensity,
-                               const MatrixType& __restrict sameSpinElectronDensity);
+        void formFockMatrix(DIISArray& fockMatrices,
+                            const MatrixType& electronDensity,
+                            const MatrixType& sameSpinElectronDensity);
+        MatrixType DIISInterpolation(DIISArray& fockMatrices,
+                                     DIISArray& errorMatrices,
+                                     const MatrixType& electronMatrix,
+                                     const MatrixType& inv_cholesky,
+                                     DIISMatrix& DIISMat);
         void updateWaves(const MatrixType& inv_cholesky,
-                         DIISArray& waveGroup,
-                         DIISArray& deltaDIISArray,
                          const Utils::Array<size_t>& sortedEigenvalues);
-        [[nodiscard]] static ScalarType waveMatrixDot(const MatrixType& m1, const MatrixType& m2);
         [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
     };
@@ -130,22 +132,23 @@ namespace Physica::Core::Physics {
 
         MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
-        MatrixType fock = singleHamilton;
-        DIISArray waveGroup = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
-        DIISArray deltaDIISArray = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, numOccupiedOrbit));
+        DIISArray fockMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        DIISArray errorMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        DIISMatrix DIISMat = DIISMatrix(DIISMultiplicity, DIISMultiplicity, -ScalarType::One());
+        DIISMat(0, 0) = ScalarType::Zero();
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         iteration = 0;
         do {
             formDensityMatrix(electronDensity, sameSpinElectronDensity, wave);
-            formCoulombMatrix(fock, electronDensity, sameSpinElectronDensity);
-            fock += singleHamilton;
+            formFockMatrix(fockMatrices, electronDensity, sameSpinElectronDensity);
+            const auto fock = DIISInterpolation(fockMatrices, errorMatrices, electronDensity, inv_cholesky, DIISMat);
 
             const MatrixType modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock, true);
 
             sortEigenvalues(sortedEigenvalues);
-            updateWaves(inv_cholesky, waveGroup, deltaDIISArray, sortedEigenvalues);
+            updateWaves(inv_cholesky, sortedEigenvalues);
             const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, wave);
 
             if (delta < criteria)
@@ -216,10 +219,11 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::formCoulombMatrix(MatrixType& __restrict fock,
-                                                   const MatrixType& __restrict electronDensity,
-                                                   const MatrixType& __restrict sameSpinElectronDensity) {
+    void RHFSolver<BaseSetType>::formFockMatrix(DIISArray& fockMatrices,
+                                                const MatrixType& electronDensity,
+                                                const MatrixType& sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
+        auto& fock = *fockMatrices.begin();
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
                 ScalarType temp = ScalarType::Zero();
@@ -233,19 +237,55 @@ namespace Physica::Core::Physics {
                 fock(q, p) = temp;
             }
         }
+        fock += singleHamilton;
+        for (size_t i = 0; i < fockMatrices.getLength() - 1; ++i)
+            swap(fockMatrices[i], fockMatrices[i + 1]);
+    }
+
+    template<class BaseSetType>
+    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISInterpolation(DIISArray& fockMatrices,
+                                                                                          DIISArray& errorMatrices,
+                                                                                          const MatrixType& electronMatrix,
+                                                                                          const MatrixType& inv_cholesky,
+                                                                                          DIISMatrix& DIISMat) {
+        /* Insert next error matrix */ {
+            const MatrixType term1 = (*fockMatrices.crbegin() * electronMatrix).compute() * overlap;
+            const MatrixType term2 = (overlap * electronMatrix).compute() * (*fockMatrices.crbegin());
+            const MatrixType temp = term1 - term2;
+            errorMatrices[0] = (inv_cholesky * temp).compute() * inv_cholesky.transpose();
+            for (size_t i = 0; i < errorMatrices.getLength() - 1; ++i)
+                swap(errorMatrices[i], errorMatrices[i + 1]);
+        }
+        /* Construct equation */ {
+            for (size_t i = 1; i < DIISMat.getRow(); ++i) {
+                for (size_t j = i; j < DIISMat.getRow(); ++j) {
+                    ScalarType temp = (errorMatrices[i - 1] * errorMatrices[j - 1]).trace();
+                    DIISMat(i, j) = temp;
+                    DIISMat(j, i) = temp;
+                }
+            }
+        }
+        const bool readyForDIIS = iteration >= DIISMultiplicity - 1;
+        if (readyForDIIS) {
+            Vector<ScalarType, DIISMultiplicity> x{};
+            /* Solve linear equation */ {
+                Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
+                b[0] = -ScalarType::One();
+                const DIISMatrix inv_A = DIISMat.inverse();
+                x = (inv_A * b.moveToColMatrix()).compute().col(0);
+            }
+
+            MatrixType interpolate_fock = MatrixType::Zeros(getBaseSetSize());
+            for (size_t i = 1; i < x.getLength(); ++i)
+                interpolate_fock += fockMatrices[i - 1] * x[i];
+            return interpolate_fock;
+        }
+        return *fockMatrices.crbegin();
     }
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::updateWaves(const MatrixType& inv_cholesky,
-                                             DIISArray& waveGroup,
-                                             DIISArray& deltaDIISArray,
                                              const Utils::Array<size_t>& sortedEigenvalues) {
-        for (size_t i = 0; i < waveGroup.getLength() - 1; ++i) {
-            swap(waveGroup[i], waveGroup[i + 1]);
-            swap(deltaDIISArray[i], deltaDIISArray[i + 1]);
-        }
-        swap(waveGroup[waveGroup.getLength() - 1], wave);
-
         const auto& eigenvectors = eigenSolver.getRawEigenvectors();
         for (size_t i = 0; i < numOccupiedOrbit; ++i) {
             auto eigenState = wave.col(i);
@@ -253,45 +293,6 @@ namespace Physica::Core::Physics {
             const size_t solutionPos = sortedEigenvalues[orbitPos];
             eigenState.asVector() = (inv_cholesky.transpose() * eigenvectors.col(solutionPos)).compute().col(0);
         }
-        deltaDIISArray[waveGroup.getLength() - 2] = wave - waveGroup[waveGroup.getLength() - 2];
-
-        const bool readyForDIIS = iteration >= DIISMultiplicity - 1 && iteration % 6 == 0; // Constant 6 comes from Reference: Improved SCF Convergence Acceleration[J]. Journal of Computational Chemistry, 1982, 3(4):556-560.
-        if (readyForDIIS) {
-            Vector<ScalarType, DIISMultiplicity> x{};
-            /* Solve linear equation */ {
-                DIISMatrix A = DIISMatrix(DIISMultiplicity, DIISMultiplicity, -ScalarType::One());
-                A(DIISMultiplicity - 1, DIISMultiplicity - 1) = ScalarType::Zero();
-                for (size_t i = 0; i < A.getColumn() - 1; ++i)
-                    for (size_t j = 0; j < A.getRow() - 1; ++j)
-                        A(i, j) = waveMatrixDot(deltaDIISArray[i], deltaDIISArray[j]);
-                Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
-                b[DIISMultiplicity - 1] = -ScalarType::One();
-                const DIISMatrix inv_A = A.inverse();
-                x = (inv_A * b.moveToColMatrix()).compute().col(0);
-            }
-            wave = ScalarType::Zero();
-            for (size_t i = 0; i < DIISMultiplicity - 1; ++i)
-                wave += waveGroup[i] * x[i];
-
-            for (size_t i = 0; i < numOccupiedOrbit; ++i) {
-                auto col = wave.col(i);
-                auto norm = ((col.transpose() * overlap).compute() * col).calc(0, 0);
-                col.asVector() *= reciprocal(sqrt(norm));
-            }
-        }
-    }
-
-    template<class BaseSetType>
-    typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::waveMatrixDot(const MatrixType& m1, const MatrixType& m2) {
-        ScalarType result = ScalarType::Zero();
-        assert(m1.getRow() == m2.getRow());
-        assert(m1.getColumn() == m2.getColumn());
-        for (size_t i = 0; i < m1.getColumn(); ++i) {
-            auto col1 = m1.col(i);
-            auto col2 = m2.col(i);
-            result += col1.asVector() * col2.asVector();
-        }
-        return result;
     }
 
     template<class BaseSetType>
