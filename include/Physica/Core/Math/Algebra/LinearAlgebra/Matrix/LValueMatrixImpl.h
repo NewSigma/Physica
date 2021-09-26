@@ -26,6 +26,7 @@ namespace Physica::Core {
          */
         template<class Derived, size_t rank>
         class DeterminateImpl {
+        public:
             static typename Derived::ScalarType run(const Derived& m) {
                 //TODO
                 assert(false);
@@ -34,6 +35,7 @@ namespace Physica::Core {
 
         template<class Derived>
         class DeterminateImpl<Derived, 1> {
+        public:
             static inline typename Derived::ScalarType run(const Derived& m) {
                 return m(0, 0);
             }
@@ -41,6 +43,7 @@ namespace Physica::Core {
 
         template<class Derived>
         class DeterminateImpl<Derived, 2> {
+        public:
             static inline typename Derived::ScalarType run(const Derived& m) {
                 return m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
             }
@@ -48,6 +51,7 @@ namespace Physica::Core {
 
         template<class Derived>
         class DeterminateImpl<Derived, 3> {
+        public:
             static inline typename Derived::ScalarType run(const Derived& m) {
             return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1))
                     + m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2))
