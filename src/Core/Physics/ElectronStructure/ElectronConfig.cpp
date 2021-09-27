@@ -35,4 +35,28 @@ namespace Physica::Core::Physics {
         assert(scannedOrbit == orbitIndex + 1);
         return i - 1;
     }
+
+    size_t ElectronConfig::getElectronCount() const {
+        size_t result = 0;
+        for (size_t i = 0; i < states.getLength(); ++i) {
+            switch (states[i]) {
+                case NoOccupacy:
+                    break;
+                case SingleOccupacy:
+                    result += 1;
+                    break;
+                case DoubleOccupacy:
+                    result += 2;
+                    break;
+            }
+        }
+        return result;
+    }
+
+    size_t ElectronConfig::getDownSpinElectronCount() const {
+        size_t result = 0;
+        for (size_t i = 0; i < states.getLength(); ++i)
+            result += states[i] == DoubleOccupacy;
+        return result;
+    }
 }

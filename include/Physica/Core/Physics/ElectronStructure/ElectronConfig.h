@@ -39,5 +39,8 @@ namespace Physica::Core::Physics {
         [[nodiscard]] OrbitState getOrbitState(size_t orbitIndex) const { return states[orbitIndex]; }
         [[nodiscard]] size_t getNumOccupiedOrbit() const noexcept;
         [[nodiscard]] size_t getOccupiedOrbitPos(size_t orbitIndex) const;
+        [[nodiscard]] size_t getElectronCount() const;
+        [[nodiscard]] size_t getUpSpinElectronCount() const noexcept { return getNumOccupiedOrbit(); }
+        [[nodiscard]] size_t getDownSpinElectronCount() const;
     };
 }
