@@ -53,7 +53,7 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
     baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[5]), 0, 0, 0);
     baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[6]), 0, 0, 0);
     baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[7]), 0, 0, 0);
-    if (!solver.compute(1E-5, 128)) {
+    if (!solver.compute(1E-5, 6)) {
         std::cerr << "[Error]: Cannot converge\n";
         exit(EXIT_FAILURE);
     }

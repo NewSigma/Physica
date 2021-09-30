@@ -154,7 +154,7 @@ namespace Physica::Core::Physics {
             if (delta < criteria)
                 return true;
 
-            if ((++iteration) == maxIte)
+            if ((++iteration) > maxIte)
                 return false;
         } while(true);
         return true;
