@@ -73,3 +73,39 @@ $$= \sum_i \alpha_i^2  c_i c_i^T$$
 Notice that $D = \sum_i \alpha_i  c_i c_i^T$, $\hat{D} = \sum_i c_i c_i^T$ and $\alpha$ can be 1 or 2 only, we obtain:
 
 $$\qquad DSD = 3D - 2 \hat{D} \ge D$$
+
+## Expression of energy
+
+The energy can be expressed as
+
+$$E(D) = Tr((h + F(D))D)$$
+
+where $h$ is single electron hamilton and $F(D)$ is fock matrix.
+
+### Prove
+
+It is well known that $D = \sum_i \alpha_i  c_i c_i^T$ and $E = \sum_i \alpha_i  c_i (h + F) c_i^T$.
+
+We have to show that
+
+$$\sum_i \alpha_i  c_i (h + F) c_i^T = Tr((h + F(D))D)$$
+
+That is, suppose a symmetric matrix $A$ and a vector $v$, we have to prove
+
+$$Tr(v v^T A) = Tr(A v v^T) = v^T A v$$
+
+The first equality is obvious from the property of trace of matrices, we are to prove the second.
+
+$$A = \left[ \begin{matrix} a_1 & a_2 & ... & a_n \end{matrix} \right] = \left[ \begin{matrix} a_1^T \\ a_2^T \\ ... \\ a_n^T \end{matrix} \right] $$
+
+$$LHS = Tr(\left[ \begin{matrix} a_1 & a_2 & ... & a_n \end{matrix} \right] v v^T)$$
+
+$$= Tr((\sum_i v_i a_i) * v^T)$$
+
+$$= \sum_i v_i Tr(a_i * v^T)$$
+
+$$= \sum_i v_i (a_i^T \cdot v)$$
+
+$$= (\sum_i v_i a_i^T) \cdot v$$
+
+$$= v^T \left[ \begin{matrix} a_1^T \\ a_2^T \\ ... \\ a_n^T \end{matrix} \right] v = RHS$$
