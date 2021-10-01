@@ -77,15 +77,17 @@ namespace Physica::Core {
             else
                 throw BadFileFormatException();
         }
-
-        const size_t atomCount = poscar.getAtomCount();
-        poscar.pos.resize(atomCount, 3);
-        for (size_t i = 0; i < atomCount; i++) {
+        /* Read atom pos */ {
+            const size_t atomCount = poscar.getAtomCount();
+            poscar.pos.resize(atomCount, 3);
+            size_t i = 0;
+            for (; i < atomCount - 1; i++) {
+                is >> poscar.pos(i, 0) >> poscar.pos(i, 1) >> poscar.pos(i, 2);
+                is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
             is >> poscar.pos(i, 0) >> poscar.pos(i, 1) >> poscar.pos(i, 2);
-            is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
-
-        if (!is.good())
+        if (!is)
             throw BadFileFormatException();
         return is;
     }
@@ -93,12 +95,20 @@ namespace Physica::Core {
      * Extend the cell in z direction, with all distance of atoms in cell not changed.
      */
     void Poscar::extendInZ(ScalarType factor) {
+        assert(type == Direct);
         assert(lattice(0, 1).isZero());
         assert(lattice(0, 2).isZero());
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;
+
+        const ScalarType inv_factor = reciprocal(factor);
         auto col = pos.col(2);
-        col.asVector() *= reciprocal(factor);
+        col.asVector() *= inv_factor;
+
+        const ScalarType temp = ScalarType::One() - inv_factor;
+        for (size_t i = 0; i < col.getLength(); ++i)
+            if (col[i] > ScalarType(0.5))
+                col[i] += temp;
     }
 
     size_t Poscar::getAtomCount() const noexcept {
