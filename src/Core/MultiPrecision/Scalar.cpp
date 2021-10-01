@@ -205,6 +205,16 @@ namespace Physica::Core {
             std::swap(power, s.power);
         }
 
+        std::istream& operator>>(std::istream& is, AbstractScalar<Float>& scalar) {
+            is >> scalar.f;
+            return is;
+        }
+
+        std::istream& operator>>(std::istream& is, AbstractScalar<Double>& scalar) {
+            is >> scalar.d;
+            return is;
+        }
+
         bool AbstractScalar<Float>::isInteger() const {
             float_extract extract{f};
             const auto exp = extract.exp;

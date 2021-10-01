@@ -188,6 +188,7 @@ namespace Physica::Core {
             /* Operators */
             explicit operator float() const { return f; }
             explicit operator double() const { return f; }
+            friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
             [[nodiscard]] float getTrivial() const noexcept { return f; }
@@ -218,6 +219,7 @@ namespace Physica::Core {
             /* Operators */
             explicit operator float() const { return d; }
             explicit operator double() const { return d; }
+            friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
             [[nodiscard]] double getTrivial() const noexcept { return d; }
