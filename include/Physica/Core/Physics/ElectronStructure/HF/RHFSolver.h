@@ -84,19 +84,19 @@ namespace Physica::Core::Physics {
         void formSingleHamilton();
         void formOverlapMatrix();
         void formDensityMatrix(MatrixType& __restrict electronDensity,
-                               MatrixType& __restrict sameSpinElectronDensity,
-                               const MatrixType& __restrict wave_func);
+                               MatrixType& __restrict sameSpinElectronDensity);
         void formFockMatrix(DIISArray& fockMatrices,
                             const MatrixType& electronDensity,
                             const MatrixType& sameSpinElectronDensity);
-        MatrixType DIISInterpolation(DIISArray& fockMatrices,
-                                     DIISArray& errorMatrices,
-                                     const MatrixType& electronMatrix,
-                                     const MatrixType& inv_cholesky,
-                                     DIISMatrix& DIISMat);
+        void preDIIS(DIISArray& fockMatrices,
+                     DIISArray& errorMatrices,
+                     const MatrixType& electronDensity,
+                     const MatrixType& inv_cholesky,
+                     DIISMatrix& DIISMat);
+        MatrixType DIISExtrapolation(DIISArray& fockMatrices, DIISMatrix& DIISMat);
         void updateWaves(const MatrixType& inv_cholesky,
                          const Utils::Array<size_t>& sortedEigenvalues);
-        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues, const MatrixType& waveGroup);
+        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
     };
 
@@ -133,6 +133,7 @@ namespace Physica::Core::Physics {
         MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
         DIISArray fockMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        MatrixType fock;
         DIISArray errorMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
         DIISMatrix DIISMat = DIISMatrix(DIISMultiplicity, DIISMultiplicity, -ScalarType::One());
         DIISMat(0, 0) = ScalarType::Zero();
@@ -140,16 +141,22 @@ namespace Physica::Core::Physics {
 
         iteration = 0;
         do {
-            formDensityMatrix(electronDensity, sameSpinElectronDensity, wave);
+            formDensityMatrix(electronDensity, sameSpinElectronDensity);
             formFockMatrix(fockMatrices, electronDensity, sameSpinElectronDensity);
-            const auto fock = DIISInterpolation(fockMatrices, errorMatrices, electronDensity, inv_cholesky, DIISMat);
+
+            preDIIS(fockMatrices, errorMatrices, electronDensity, inv_cholesky, DIISMat);
+            const bool doDIIS = iteration >= DIISMultiplicity - 1;
+            if (doDIIS)
+                fock = DIISExtrapolation(fockMatrices, DIISMat);
+            else
+                fock = *fockMatrices.crbegin();
 
             const MatrixType modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock, true);
 
             sortEigenvalues(sortedEigenvalues);
             updateWaves(inv_cholesky, sortedEigenvalues);
-            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, wave);
+            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues);
 
             if (delta < criteria)
                 return true;
@@ -189,8 +196,7 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
-                                                   MatrixType& __restrict sameSpinElectronDensity,
-                                                   const MatrixType& __restrict wave) {
+                                                   MatrixType& __restrict sameSpinElectronDensity) {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
@@ -243,14 +249,14 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISInterpolation(DIISArray& fockMatrices,
-                                                                                          DIISArray& errorMatrices,
-                                                                                          const MatrixType& electronMatrix,
-                                                                                          const MatrixType& inv_cholesky,
-                                                                                          DIISMatrix& DIISMat) {
+    void RHFSolver<BaseSetType>::preDIIS(DIISArray& fockMatrices,
+                                         DIISArray& errorMatrices,
+                                         const MatrixType& electronDensity,
+                                         const MatrixType& inv_cholesky,
+                                         DIISMatrix& DIISMat) {
         /* Insert next error matrix */ {
-            const MatrixType term1 = (*fockMatrices.crbegin() * electronMatrix).compute() * overlap;
-            const MatrixType term2 = (overlap * electronMatrix).compute() * (*fockMatrices.crbegin());
+            const MatrixType term1 = (*fockMatrices.crbegin() * electronDensity).compute() * overlap;
+            const MatrixType term2 = (overlap * electronDensity).compute() * (*fockMatrices.crbegin());
             const MatrixType temp = term1 - term2;
             errorMatrices[0] = (inv_cholesky * temp).compute() * inv_cholesky.transpose();
             for (size_t i = 0; i < errorMatrices.getLength() - 1; ++i)
@@ -265,22 +271,23 @@ namespace Physica::Core::Physics {
                 }
             }
         }
-        const bool readyForDIIS = iteration >= DIISMultiplicity - 1;
-        if (readyForDIIS) {
-            Vector<ScalarType, DIISMultiplicity> x{};
-            /* Solve linear equation */ {
-                Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
-                b[0] = -ScalarType::One();
-                const DIISMatrix inv_A = DIISMat.inverse();
-                x = (inv_A * b.moveToColMatrix()).compute().col(0);
-            }
+    }
 
-            MatrixType interpolate_fock = MatrixType::Zeros(getBaseSetSize());
-            for (size_t i = 1; i < x.getLength(); ++i)
-                interpolate_fock += fockMatrices[i - 1] * x[i];
-            return interpolate_fock;
+    template<class BaseSetType>
+    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(DIISArray& fockMatrices,
+                                                                                          DIISMatrix& DIISMat) {
+        Vector<ScalarType, DIISMultiplicity> x{};
+        /* Solve linear equation */ {
+            Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
+            b[0] = -ScalarType::One();
+            const DIISMatrix inv_A = DIISMat.inverse();
+            x = (inv_A * b.moveToColMatrix()).compute().col(0);
         }
-        return *fockMatrices.crbegin();
+
+        MatrixType interpolate_fock = MatrixType::Zeros(getBaseSetSize());
+        for (size_t i = 1; i < x.getLength(); ++i)
+            interpolate_fock += fockMatrices[i - 1] * x[i];
+        return interpolate_fock;
     }
 
     template<class BaseSetType>
@@ -297,8 +304,7 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
-            const Utils::Array<size_t>& sortedEigenvalues,
-            const MatrixType& wave) {
+            const Utils::Array<size_t>& sortedEigenvalues) {
         const auto& eigenvalues = eigenSolver.getEigenvalues();
         const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
         selfConsistentEnergy = ScalarType::Zero();
