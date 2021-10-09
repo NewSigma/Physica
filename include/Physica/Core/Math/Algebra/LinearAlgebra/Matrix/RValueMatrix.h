@@ -58,6 +58,9 @@ namespace Physica::Core {
             result += calc(i, i);
         return result;
     }
+
+    template<class Derived>
+    std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
     Derived reciprocal(const RValueMatrix<Derived>& m);
