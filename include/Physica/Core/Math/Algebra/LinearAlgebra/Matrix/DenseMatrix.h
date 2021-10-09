@@ -22,9 +22,9 @@
 #include "LValueMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "DenseMatrixImpl/MatrixProduct.h"
-#include "MatrixDecomposition/Cholesky.h"
-#include "MatrixDecomposition/LUDecomposition.h"
 #include "InverseMatrix.h"
+#include "Transpose.h"
+#include "MatrixDecomposition/LUDecomposition.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, int option = DenseMatrixOption::Column | DenseMatrixOption::Vector

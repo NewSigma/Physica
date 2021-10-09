@@ -18,6 +18,7 @@
  */
 #include "TestHelper.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
 
 using namespace Physica::Core;
 

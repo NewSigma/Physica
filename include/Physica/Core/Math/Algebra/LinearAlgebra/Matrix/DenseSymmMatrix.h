@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "LValueMatrix.h"
+#include "DenseMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixStorage/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
@@ -47,6 +47,8 @@ namespace Physica::Core {
         using Base = LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>;
         using Storage = Internal::HalfDenseMatrixStorage<DenseSymmMatrix<ScalarType, Order, MaxOrder>>;
     public:
+        template<class OtherMatrix>
+        DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
         /* Operators */
         using Base::operator=;
@@ -58,6 +60,18 @@ namespace Physica::Core {
     private:
         [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
     };
+    /**
+     * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
+     */
+    template<class ScalarType, size_t Order, size_t MaxOrder>
+    template<class OtherMatrix>
+    DenseSymmMatrix<ScalarType, Order, MaxOrder>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
+            : DenseSymmMatrix(mat.getRow()) {
+        assert(mat.getRow() == mat.getColumn());
+        for (size_t i = 0; i < mat.getRow(); ++i)
+            for (size_t j = i; j < mat.getRow(); ++j)
+                operator()(i, j) = mat.calc(i, j);
+    }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     size_t DenseSymmMatrix<ScalarType, Order, MaxOrder>::accessingIndex(size_t r, size_t c) const noexcept {
