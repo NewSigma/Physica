@@ -38,6 +38,17 @@ bool scalarNear(const ComplexScalar<ScalarType>& s1, const ComplexScalar<ScalarT
     return scalarNear(s1.getReal(), s2.getReal(), precision) && scalarNear(s1.getImag(), s2.getImag(), precision);
 }
 
+template<class VectorType1, class VectorType2>
+bool vectorNear(const Physica::Core::LValueVector<VectorType1>& v1,
+                const Physica::Core::LValueVector<VectorType2>& v2,
+                double precision) {
+    assert(v1.getLength() == v2.getLength());
+    for (size_t i = 0; i < v1.getLength(); ++i)
+        if (!scalarNear(v1[i], v2[i], precision))
+            return false;
+    return true;
+}
+
 template<class MatrixType, class MatrixType2>
 bool matrixNear(const Physica::Core::LValueMatrix<MatrixType>& m1,
                 const Physica::Core::LValueMatrix<MatrixType2>& m2,
