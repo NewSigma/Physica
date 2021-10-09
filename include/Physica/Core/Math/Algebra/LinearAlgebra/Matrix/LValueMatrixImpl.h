@@ -195,18 +195,6 @@ namespace Physica::Core {
 
     template<class Derived>
     inline MatrixBlock<Derived>
-    LValueMatrix<Derived>::topRightCorner(size_t size) {
-        return MatrixBlock<Derived>(Base::getDerived(), 0, size, Base::getRow() - size, size);
-    }
-
-    template<class Derived>
-    inline const MatrixBlock<Derived>
-    LValueMatrix<Derived>::topRightCorner(size_t size) const {
-        return MatrixBlock<Derived>(Base::getConstCastDerived(), 0, size, Base::getRow() - size, size);
-    }
-
-    template<class Derived>
-    inline MatrixBlock<Derived>
     LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) {
         return MatrixBlock<Derived>(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
@@ -215,18 +203,6 @@ namespace Physica::Core {
     inline const MatrixBlock<Derived>
     LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const {
         return MatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
-    }
-
-    template<class Derived>
-    inline MatrixBlock<Derived>
-    LValueMatrix<Derived>::bottomLeftCorner(size_t size) {
-        return MatrixBlock<Derived>(Base::getDerived(), Base::getRow() - size, size, 0, size);
-    }
-
-    template<class Derived>
-    inline const MatrixBlock<Derived>
-    LValueMatrix<Derived>::bottomLeftCorner(size_t size) const {
-        return MatrixBlock<Derived>(Base::getConstCastDerived(), Base::getRow() - size, size, 0, size);
     }
 
     template<class Derived>
