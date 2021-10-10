@@ -136,6 +136,7 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixOption::Column | DenseMatrixOption::Element>;
+        using Base::resize;
     private:
         size_t row;
     public:
@@ -146,6 +147,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
+        /* Operations */
+        void resize(size_t row_, size_t column_) { row = row_; Base::resize(row_, column_); }
     protected:
         /* Helper */
         void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); std::swap(row, storage.row); }
@@ -236,6 +239,7 @@ namespace Physica::Core {
                                                                            , MaxRow
                                                                            , MaxColumn>
                                                          , DenseMatrixOption::Row | DenseMatrixOption::Element>;
+        using Base::resize;
     private:
         size_t row;
     public:
@@ -246,6 +250,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return row; }
         [[nodiscard]] size_t getColumn() const noexcept { assert(Base::getLength() % getRow() == 0); return Base::getLength() / getRow(); }
+        /* Operations */
+        void resize(size_t row_, size_t column_) { row = row_; Base::resize(row_, column_); }
     protected:
         /* Helper */
         void swap(DenseMatrixStorage& storage) noexcept { Base::swap(storage); std::swap(row, storage.row); }

@@ -45,7 +45,10 @@ namespace Physica::Core {
         constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<Derived>();
         constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<Derived>();
     public:
+        ~LValueMatrix() = default;
         /* Operators */
+        LValueMatrix& operator=(const LValueMatrix& m);
+        LValueMatrix& operator=(LValueMatrix&& m) { return (*this) = m; }
         template<class OtherMatrix>
         Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         template<ScalarOption option, bool errorTrack>
@@ -113,6 +116,10 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
+    protected:
+        LValueMatrix() = default;
+        LValueMatrix(const LValueMatrix&) = default;
+        LValueMatrix(LValueMatrix&&) noexcept = default;
     };
 
     template<class Derived, class OtherDerived>

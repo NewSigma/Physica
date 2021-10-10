@@ -33,7 +33,10 @@ namespace Physica::Core {
         using Base = RValueVector<Derived>;
         using typename Base::ScalarType;
     public:
+        ~LValueVector() = default;
         /* Operators */
+        LValueVector& operator=(const LValueVector& v);
+        LValueVector& operator=(LValueVector&& v) { return (*this) = v; }
         template<class OtherVector>
         Derived& operator=(const RValueVector<OtherVector>& v);
         template<ScalarOption option, bool errorTrack>
@@ -52,7 +55,18 @@ namespace Physica::Core {
         const VectorBlock<Derived> segment(size_t from, size_t to) const { return VectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
         /* Getters */
         [[nodiscard]] bool isZero() const;
+    protected:
+        LValueVector() = default;
+        LValueVector(const LValueVector&) = default;
+        LValueVector(LValueVector&&) noexcept = default;
     };
+
+    template<class Derived>
+    LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
+        Base::getDerived().resize(v.getLength());
+        v.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     template<class OtherVector>
