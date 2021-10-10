@@ -33,6 +33,7 @@ namespace Physica::Core {
         Vector<ScalarType, Dynamic> objectiveVecC;
         DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> constraints;
         Vector<ScalarType, Dynamic> x;
+        Vector<ScalarType, Dynamic> multipliers;
     public:
         template<class MatrixType1, class VectorType1, class MatrixType2, class VectorType2>
         EqualityQuadraticProgramming(const RValueMatrix<MatrixType1>& objectiveMatG_,
@@ -49,6 +50,7 @@ namespace Physica::Core {
         void compute();
         /* Getters */
         [[nodiscard]] const Vector<ScalarType, Dynamic>& getSolution() const noexcept { return x; }
+        [[nodiscard]] const Vector<ScalarType, Dynamic>& getMultipliers() const noexcept { return multipliers; }
     };
 
     template<class ScalarType>
@@ -97,6 +99,9 @@ namespace Physica::Core {
             bottomRight = ScalarType::Zero();
         }
         const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
-        x -= (inv_equationMatA * equationVecB.moveToColMatrix()).compute().col(0).head(length);
+        const auto solution = (inv_equationMatA * equationVecB.moveToColMatrix()).compute();
+        const auto col = solution.col(0);
+        x -= col.head(length);
+        multipliers = col.tail(length);
     }
 }
