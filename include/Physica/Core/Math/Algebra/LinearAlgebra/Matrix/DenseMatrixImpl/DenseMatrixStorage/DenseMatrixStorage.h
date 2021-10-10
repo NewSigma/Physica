@@ -339,7 +339,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::operator[](0).getLength(); }
+        [[nodiscard]] size_t getRow() const noexcept { return getColumn() == 0 ? 0 : Base::operator[](0).getLength(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getLength(); }
     };
     ////////////////////////////////////RowVector////////////////////////////////////
@@ -432,6 +432,6 @@ namespace Physica::Core {
         using Base::Base;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getLength(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return Base::operator[](0).getLength(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return getRow() == 0 ? 0 : Base::operator[](0).getLength(); }
     };
 }
