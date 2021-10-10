@@ -34,22 +34,27 @@ namespace Physica::Utils::Internal {
     
     template<class ValueType, class Derived>
     class ContainerIterator<ValueType, ArrayStorage<Derived>> {
-        using PointerType = typename std::add_pointer<ValueType>::type;
-        using LValueReferenceType = typename std::add_lvalue_reference<ValueType>::type;
-
-        PointerType p;
+    public:
+        using difference_type = std::ptrdiff_t;
+        using value_type = ValueType;
+        using pointer = typename std::add_pointer<ValueType>::type;;
+        using reference = typename std::add_lvalue_reference<ValueType>::type;
+        using iterator_category = std::random_access_iterator_tag;
+    private:
+        pointer p;
     public:
         __host__ __device__ ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
         ~ContainerIterator() = default;
         /* Operators */
         __host__ __device__ ContainerIterator& operator=(const ContainerIterator& ite);
-        __host__ __device__ bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
-        __host__ __device__ bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
+        __host__ __device__ difference_type operator-(const ContainerIterator& ite) { return p - ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
         __host__ __device__ ContainerIterator& operator++();
         __host__ __device__ const ContainerIterator operator++(int);
-        __host__ __device__ LValueReferenceType operator*() const { return *p; }
+        __host__ __device__ [[nodiscard]] reference operator*() const { return *p; }
     private:
-        __host__ __device__ explicit ContainerIterator(PointerType p) : p(p) {}
+        __host__ __device__ explicit ContainerIterator(pointer p) : p(p) {}
 
         friend class ArrayStorage<Derived>;
     };
@@ -59,22 +64,26 @@ namespace Physica::Utils::Internal {
     
     template<class ValueType, class Derived>
     class ReverseContainerIterator<ValueType, ArrayStorage<Derived>> {
-        using PointerType = typename std::add_pointer<ValueType>::type;
-        using LValueReferenceType = typename std::add_lvalue_reference<ValueType>::type;
-
-        PointerType p;
+    public:
+        using difference_type = std::ptrdiff_t;
+        using value_type = ValueType;
+        using pointer = typename std::add_pointer<ValueType>::type;;
+        using reference = typename std::add_lvalue_reference<ValueType>::type;
+        using iterator_category = std::random_access_iterator_tag;
+    private:
+        pointer p;
     public:
         __host__ __device__ ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
         ~ReverseContainerIterator() = default;
         /* Operators */
         __host__ __device__ ReverseContainerIterator& operator=(const ReverseContainerIterator& ite);
-        __host__ __device__ bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
-        __host__ __device__ bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
         __host__ __device__ ReverseContainerIterator& operator++();
         __host__ __device__ const ReverseContainerIterator operator++(int);
-        __host__ __device__ LValueReferenceType operator*() const { return *p; }
+        __host__ __device__ [[nodiscard]] reference operator*() const { return *p; }
     private:
-        __host__ __device__ explicit ReverseContainerIterator(PointerType p) : p(p) {}
+        __host__ __device__ explicit ReverseContainerIterator(pointer p) : p(p) {}
 
         friend class ArrayStorage<Derived>;
     };
