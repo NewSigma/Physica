@@ -24,6 +24,13 @@
 
 namespace Physica::Core {
     /**
+     * Solve quadratic programming with equality constraints only, that is
+     * 
+     * min 1/2 x^T G x + c^T x
+     * s.t. A x = b
+     * 
+     * constraints is matrix [A b]
+     * 
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.448-496
      */
@@ -64,44 +71,52 @@ namespace Physica::Core {
             , constraints(constraints_)
             , x(initial) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
-        assert(constraints_.getColumn() == objectiveVecC.getLength() + 1);
+        assert(constraints_.getColumn() == 0 || constraints_.getColumn() == objectiveVecC.getLength() + 1);
         assert(x.getLength() == objectiveVecC.getLength());
         compute();
     }
 
     template<class ScalarType>
     void EqualityQuadraticProgramming<ScalarType>::compute() {
-        const Vector<ScalarType, Dynamic> g = (objectiveMatG * x.copyToColMatrix()).compute().col(0) + objectiveVecC;
-        
-        const size_t length = x.getLength();
-        const auto matA = constraints.leftCols(length);
-        const auto vecB = constraints.col(length);
-        const Vector<ScalarType, Dynamic> h = (matA * x.copyToColMatrix()).compute().col(0) - vecB.asVector();
-        
-        const size_t totalLength = g.getLength() + h.getLength();
-        Vector<ScalarType, Dynamic> equationVecB(totalLength);
+        const size_t degreeOfFreedom = x.getLength();
+        const bool haveConstraints = constraints.getRow() != 0;
+        Vector<ScalarType, Dynamic> equationVecB(objectiveMatG.getRow() + constraints.getRow());
         /* Assemble vector */ {
-            auto head = equationVecB.head(g.getLength());
+            const Vector<ScalarType, Dynamic> g = (objectiveMatG * x.copyToColMatrix()).compute().col(0) + objectiveVecC;
+            auto head = equationVecB.head(degreeOfFreedom);
             head = g;
-            auto tail = equationVecB.tail(g.getLength());
-            tail = h;
+
+            if (haveConstraints) {
+                const auto matA = constraints.leftCols(degreeOfFreedom);
+                const auto vecB = constraints.col(degreeOfFreedom);
+                const Vector<ScalarType, Dynamic> h = (matA * x.copyToColMatrix()).compute().col(0) - vecB.asVector();
+                auto tail = equationVecB.tail(degreeOfFreedom);
+                tail = h;
+            }
         }
 
-        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> equationMatA(totalLength, totalLength);
+        const size_t problemSize = degreeOfFreedom + constraints.getRow();
+        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> equationMatA(problemSize, problemSize);
         /* Assemble matrix */ {
-            auto topLeft = equationMatA.topLeftCorner(g.getLength());
-            topLeft = objectiveMatG;
-            auto bottomLeft = equationMatA.bottomLeftCorner(g.getLength(), g.getLength());
-            bottomLeft = matA;
-            auto topRight = equationMatA.topRightCorner(g.getLength(), g.getLength());
-            topRight = matA.transpose();
-            auto bottomRight = equationMatA.bottomRightCorner(g.getLength());
-            bottomRight = ScalarType::Zero();
+            if (haveConstraints) {
+                const auto matA = constraints.leftCols(degreeOfFreedom);
+                auto topLeft = equationMatA.topLeftCorner(degreeOfFreedom);
+                topLeft = objectiveMatG;
+                auto bottomLeft = equationMatA.bottomLeftCorner(degreeOfFreedom, degreeOfFreedom);
+                bottomLeft = matA;
+                auto topRight = equationMatA.topRightCorner(degreeOfFreedom, degreeOfFreedom);
+                topRight = matA.transpose();
+                auto bottomRight = equationMatA.bottomRightCorner(degreeOfFreedom);
+                bottomRight = ScalarType::Zero();
+            }
+            else
+                equationMatA = objectiveMatG;
         }
         const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
         const auto solution = (inv_equationMatA * equationVecB.moveToColMatrix()).compute();
         const auto col = solution.col(0);
-        x -= col.head(length);
-        multipliers = col.tail(length);
+        x -= col.head(degreeOfFreedom);
+        if (haveConstraints)
+            multipliers = col.tail(degreeOfFreedom);
     }
 }
