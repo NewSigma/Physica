@@ -112,4 +112,18 @@ namespace Physica::Core {
         }
         return result;
     }
+
+    template<class VectorType>
+    std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
+        os << '(';
+        size_t length = v.getLength();
+        if (length > 0) {
+            --length;
+            for (size_t i = 0; i < length; ++i)
+                os << v.calc(i) << ", ";
+            os << v.calc(length);
+        }
+        os << ')';
+        return os;
+    }
 }
