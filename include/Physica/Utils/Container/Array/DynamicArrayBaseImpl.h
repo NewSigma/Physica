@@ -39,7 +39,7 @@ namespace Physica::Utils::Internal {
     
     template<class Derived>
     __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
-        DynamicArrayBase&& array) noexcept : Base(std::move(array)), length(array.length) {}
+        DynamicArrayBase&& array) noexcept : Base(std::move(array)), length(array.length) { array.length = 0; }
     
     template<class Derived>
     DynamicArrayBase<Derived>& DynamicArrayBase<Derived>::operator=(DynamicArrayBase array) noexcept {

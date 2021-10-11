@@ -221,7 +221,7 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept
-            : Base(std::move(array)), capacity(array.capacity) {}
+            : Base(std::move(array)), capacity(array.capacity) { array.capacity = 0; }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::append(ConstLValueReferenceType t) {
