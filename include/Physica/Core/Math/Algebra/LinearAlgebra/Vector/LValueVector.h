@@ -87,6 +87,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void LValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
+        assert(v.getLength() == Base::getLength());
         for (size_t i = 0; i < Base::getLength(); ++i)
             v[i] = (*this)[i];
     }

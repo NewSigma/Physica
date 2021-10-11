@@ -25,6 +25,7 @@ physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
 physica_add_test(Adam Core/Math/Optimization/AdamTest.cpp)
 physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradientTest.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
+physica_add_test(QuadraticProgramming Core/Math/Optimization/QuadraticProgramming.cpp)
 # MultiPrecision
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Integer Core/MultiPrecision/IntegerTest.cpp)

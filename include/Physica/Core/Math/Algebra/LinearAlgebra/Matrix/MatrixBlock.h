@@ -74,7 +74,7 @@ namespace Physica::Core {
     public:
         RowVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getRow());
+            assert(fromCol + colCount <= mat.getColumn());
         }
         RowVector(const RowVector&) = default;
         RowVector(RowVector&&) noexcept = delete;
@@ -150,8 +150,8 @@ namespace Physica::Core {
          */
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
+        [[nodiscard]] typename VectorBase::Base& asVector() noexcept { return *this; }
+        [[nodiscard]] const typename VectorBase::Base& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType>
@@ -187,8 +187,8 @@ namespace Physica::Core {
          */
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
+        [[nodiscard]] typename VectorBase::Base& asVector() noexcept { return *this; }
+        [[nodiscard]] const typename VectorBase::Base& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType>
