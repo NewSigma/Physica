@@ -92,15 +92,22 @@ namespace Physica::Core {
         while (true) {
             const EqualityQuadraticProgramming<ScalarType> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
             const Vector<ScalarType> vec_p = EQP.getSolution() - x;
-            if (vec_p.norm() < std::numeric_limits<ScalarType>::min()) {
+            if (vec_p.norm() < std::numeric_limits<ScalarType>::epsilon()) {
                 const auto& multipliers = EQP.getMultipliers();
-                auto minimum_ite = std::min_element(multipliers.cbegin(), multipliers.cend());
+                const auto minimum_ite = std::min_element(multipliers.cbegin(), multipliers.cend());
                 if (!(*minimum_ite).isNegative())
                     break;
                 
                 auto minimum_index = std::distance(multipliers.cbegin(), minimum_ite);
-                assert(activeConstraintFlags[minimum_index] == true);
-                activeConstraintFlags[minimum_index] = false;
+                for (auto ite = activeConstraintFlags.begin(); ite != activeConstraintFlags.end(); ++ite) {
+                    if (*ite == true) {
+                        if (minimum_index == 0) {
+                            *ite = false;
+                            break;
+                        }
+                        --minimum_index;
+                    }
+                }
             }
             else {
                 size_t blockedAt;
