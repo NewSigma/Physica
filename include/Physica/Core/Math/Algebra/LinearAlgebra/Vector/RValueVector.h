@@ -104,7 +104,7 @@ namespace Physica::Core {
     template<class VectorType>
     typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::min() const {
         assert(getLength() != 0);
-        ScalarType result = (*this[0]);
+        ScalarType result = calc(0);
         for(size_t i = 1; i < getLength(); ++i) {
             ScalarType temp = calc(i);
             if (result > temp)
