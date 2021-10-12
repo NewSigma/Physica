@@ -84,7 +84,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < colCount); return mat(row, fromCol + index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
         /* Operations */
-        void resize(size_t length) { assert(length == colCount); }
+        void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return colCount; }
     };
