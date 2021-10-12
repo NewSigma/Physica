@@ -315,7 +315,8 @@ namespace Physica::Core::Physics {
         auto block = inequalityConstraint.leftCols(problemDim);
         block.toUnitMatrix();
         auto initial = Vector<ScalarType>(problemDim, ScalarType::Zero());
-        const QuadraticProgramming<ScalarType> QP(G, energyBuffer, equalityConstraint, inequalityConstraint, initial, ScalarType(1E-10));
+        QuadraticProgramming<ScalarType> QP(G, energyBuffer, equalityConstraint, inequalityConstraint, initial);
+        QP.compute_nonconvex(ScalarType(1E-10));
 
         auto& newFock = deltaFock;
         auto& newDensity = deltaDensity;
