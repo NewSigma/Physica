@@ -26,6 +26,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
 
 namespace Physica::Core::Physics {
     namespace Internal {
@@ -35,18 +36,21 @@ namespace Physica::Core::Physics {
      * Reference:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:43-88
      * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods.
+     * [3] Kudin K N, Scuseria G E, Cances E. A black-box self-consistent field convergence algorithm: One step closer[J]. Journal of Chemical Physics, 2002, 116(19):8255-8261.
      */
     template<class BaseSetType>
     class RHFSolver {
         using ScalarType = typename Internal::Traits<BaseSetType>::ScalarType;
         using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector>;
-        /**
-         * Infer next wave function from the \param DIISMultiplicity wave functions before, refer to [2]
-         */
-        constexpr static size_t DIISMultiplicity = 3;
-        static_assert(DIISMultiplicity >= 3, "DIISMultiplicity less than three makes no sence");
-        using DIISArray = Utils::Array<MatrixType, DIISMultiplicity - 1>;
-        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISMultiplicity, DIISMultiplicity>;
+
+        constexpr static size_t EDIISBufferSize = 4; //Refer EDIIS from [3]
+        constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
+        constexpr static size_t MatrixBufferSize = std::max(EDIISBufferSize, DIISBufferSize);
+        static_assert(DIISBufferSize >= 3, "DIISBufferSize less than three makes no sence");
+        using EDIISBuffer = Utils::Array<MatrixType, EDIISBufferSize>;
+        using DIISBuffer = Utils::Array<MatrixType, DIISBufferSize - 1>;
+        using MatrixBuffer = Utils::Array<MatrixType, MatrixBufferSize>;
+        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
     public:
         using WaveType = MatrixType;
     private:
@@ -83,20 +87,24 @@ namespace Physica::Core::Physics {
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
-        void formDensityMatrix(MatrixType& __restrict electronDensity,
-                               MatrixType& __restrict sameSpinElectronDensity);
-        void formFockMatrix(DIISArray& fockMatrices,
+        void formDensityMatrix(EDIISBuffer& densityMatrices,
+                               MatrixType& sameSpinElectronDensity);
+        void formFockMatrix(MatrixBuffer& fockMatrices,
                             const MatrixType& electronDensity,
                             const MatrixType& sameSpinElectronDensity);
-        void preDIIS(DIISArray& fockMatrices,
-                     DIISArray& errorMatrices,
+        void preDIIS(const MatrixBuffer& fockMatrices,
+                     DIISBuffer& errorMatrices,
                      const MatrixType& electronDensity,
                      const MatrixType& inv_cholesky,
                      DIISMatrix& DIISMat);
-        MatrixType DIISExtrapolation(DIISArray& fockMatrices, DIISMatrix& DIISMat);
+        void EDIISInterpolation(MatrixBuffer& fockMatrices,
+                                EDIISBuffer& densityMatrices,
+                                const Vector<ScalarType, EDIISBufferSize>& energyBuffer);
+        MatrixType DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
         void updateWaves(const MatrixType& inv_cholesky,
                          const Utils::Array<size_t>& sortedEigenvalues);
-        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues);
+        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues,
+                                                            Vector<ScalarType, EDIISBufferSize>& energyBuffer);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
     };
 
@@ -130,22 +138,30 @@ namespace Physica::Core::Physics {
         const MatrixType cholesky = Cholesky(overlap);
         const MatrixType inv_cholesky = cholesky.inverse();
 
-        MatrixType electronDensity = MatrixType::Zeros(baseSetSize);
+        auto densityMatrices = EDIISBuffer(EDIISBufferSize, MatrixType::Zeros(baseSetSize, baseSetSize));
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
-        DIISArray fockMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        auto fockMatrices = MatrixBuffer(MatrixBufferSize, MatrixType::Zeros(baseSetSize, baseSetSize));
         MatrixType fock;
-        DIISArray errorMatrices = DIISArray(DIISMultiplicity - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
-        DIISMatrix DIISMat = DIISMatrix(DIISMultiplicity, DIISMultiplicity, -ScalarType::One());
+        auto errorMatrices = DIISBuffer(DIISBufferSize - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
         DIISMat(0, 0) = ScalarType::Zero();
+        Vector<ScalarType, EDIISBufferSize> energyBuffer{};
         Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         iteration = 0;
         do {
-            formDensityMatrix(electronDensity, sameSpinElectronDensity);
-            formFockMatrix(fockMatrices, electronDensity, sameSpinElectronDensity);
+            MatrixType& abs_error = fock;
+            abs_error = abs(*errorMatrices.crbegin());
+            const bool doEDIIS = (iteration > EDIISBufferSize) && abs_error.max() > ScalarType(1E-2);
+            if (doEDIIS)
+                EDIISInterpolation(fockMatrices, densityMatrices, energyBuffer);
+            else {
+                formDensityMatrix(densityMatrices, sameSpinElectronDensity);
+                formFockMatrix(fockMatrices, *densityMatrices.crbegin(), sameSpinElectronDensity);
+            }
 
-            preDIIS(fockMatrices, errorMatrices, electronDensity, inv_cholesky, DIISMat);
-            const bool doDIIS = iteration >= DIISMultiplicity - 1;
+            preDIIS(fockMatrices, errorMatrices, *densityMatrices.crbegin(), inv_cholesky, DIISMat);
+            const bool doDIIS = !doEDIIS && iteration >= DIISBufferSize - 1;
             if (doDIIS)
                 fock = DIISExtrapolation(fockMatrices, DIISMat);
             else
@@ -156,8 +172,8 @@ namespace Physica::Core::Physics {
 
             sortEigenvalues(sortedEigenvalues);
             updateWaves(inv_cholesky, sortedEigenvalues);
-            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues);
 
+            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, energyBuffer);
             if (delta < criteria)
                 return true;
 
@@ -195,9 +211,13 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::formDensityMatrix(MatrixType& __restrict electronDensity,
-                                                   MatrixType& __restrict sameSpinElectronDensity) {
+    void RHFSolver<BaseSetType>::formDensityMatrix(EDIISBuffer& densityMatrices,
+                                                   MatrixType& sameSpinElectronDensity) {
+        for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
+            std::swap(densityMatrices[i], densityMatrices[i + 1]);
+
         const size_t baseSetSize = getBaseSetSize();
+        MatrixType& electronDensity = *densityMatrices.rbegin();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j) {
@@ -225,7 +245,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::formFockMatrix(DIISArray& fockMatrices,
+    void RHFSolver<BaseSetType>::formFockMatrix(MatrixBuffer& fockMatrices,
                                                 const MatrixType& electronDensity,
                                                 const MatrixType& sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
@@ -249,8 +269,8 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::preDIIS(DIISArray& fockMatrices,
-                                         DIISArray& errorMatrices,
+    void RHFSolver<BaseSetType>::preDIIS(const MatrixBuffer& fockMatrices,
+                                         DIISBuffer& errorMatrices,
                                          const MatrixType& electronDensity,
                                          const MatrixType& inv_cholesky,
                                          DIISMatrix& DIISMat) {
@@ -274,20 +294,62 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(DIISArray& fockMatrices,
+    void RHFSolver<BaseSetType>::EDIISInterpolation(MatrixBuffer& fockMatrices,
+                                                    EDIISBuffer& densityMatrices,
+                                                    const Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
+        constexpr size_t problemDim = EDIISBuffer::getLength();
+        auto G = DenseSymmMatrix<ScalarType>(problemDim, ScalarType::Zero());
+        MatrixType deltaFock;
+        MatrixType deltaDensity;
+        constexpr size_t offset = MatrixBuffer::getLength() - problemDim;
+        for (size_t r = 0; r < problemDim; ++r) {
+            for (size_t c = r + 1; c < problemDim; ++c) {
+                deltaFock = fockMatrices[offset + r] - fockMatrices[offset + c];
+                deltaDensity = densityMatrices[c] - densityMatrices[r];
+                G(r, c) = (deltaFock * deltaDensity).trace();
+            }
+        }
+
+        auto equalityConstraint = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 1, Dynamic>(1, problemDim + 1, ScalarType::One());
+        auto inequalityConstraint = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>(problemDim, problemDim + 1, ScalarType::Zero());
+        auto block = inequalityConstraint.leftCols(problemDim);
+        block.toUnitMatrix();
+        auto initial = Vector<ScalarType>(problemDim, ScalarType::Zero());
+        const QuadraticProgramming<ScalarType> QP(G, energyBuffer, equalityConstraint, inequalityConstraint, initial, ScalarType(1E-10));
+
+        auto& newFock = deltaFock;
+        auto& newDensity = deltaDensity;
+        newFock = ScalarType::Zero();
+        newDensity = ScalarType::Zero();
+        for (size_t i = 0; i < problemDim; ++i) {
+            newFock += fockMatrices[offset + i] * QP.getSolution()[i];
+            newDensity += densityMatrices[i] * QP.getSolution()[i];
+        }
+
+        for (size_t i = 0; i < fockMatrices.getLength() - 1; ++i)
+            std::swap(fockMatrices[i], fockMatrices[i + 1]);
+        for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
+            std::swap(densityMatrices[i], densityMatrices[i + 1]);
+        *fockMatrices.rbegin() = newFock;
+        *densityMatrices.rbegin() = newDensity;
+    }
+
+    template<class BaseSetType>
+    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices,
                                                                                           DIISMatrix& DIISMat) {
-        Vector<ScalarType, DIISMultiplicity> x{};
+        Vector<ScalarType, DIISBufferSize> x{};
         /* Solve linear equation */ {
-            Vector<ScalarType, DIISMultiplicity> b = Vector<ScalarType, DIISMultiplicity>(DIISMultiplicity, ScalarType::Zero());
+            Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
             b[0] = -ScalarType::One();
             const DIISMatrix inv_A = DIISMat.inverse();
             x = (inv_A * b.moveToColMatrix()).compute().col(0);
         }
 
-        MatrixType interpolate_fock = MatrixType::Zeros(getBaseSetSize());
+        MatrixType extrapolate_fock = MatrixType::Zeros(getBaseSetSize());
+        constexpr size_t offset = MatrixBuffer::getLength() - DIISBuffer::getLength();
         for (size_t i = 1; i < x.getLength(); ++i)
-            interpolate_fock += fockMatrices[i - 1] * x[i];
-        return interpolate_fock;
+            extrapolate_fock += fockMatrices[offset + i - 1] * x[i];
+        return extrapolate_fock;
     }
 
     template<class BaseSetType>
@@ -304,9 +366,12 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
-            const Utils::Array<size_t>& sortedEigenvalues) {
+            const Utils::Array<size_t>& sortedEigenvalues,
+            Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
+        for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
+            std::swap(energyBuffer[i], energyBuffer[i + 1]);
+
         const auto& eigenvalues = eigenSolver.getEigenvalues();
-        const ScalarType oldSelfConsistentEnergy = selfConsistentEnergy;
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < wave.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
@@ -319,7 +384,10 @@ namespace Physica::Core::Physics {
             selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType::Two() * temp);
         }
         selfConsistentEnergy *= ScalarType(0.5);
-        ScalarType delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
+        auto ite = energyBuffer.rbegin();
+        *ite = selfConsistentEnergy;
+        const ScalarType oldSelfConsistentEnergy = *(++ite);
+        const ScalarType delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
         return delta;
     }
     /**

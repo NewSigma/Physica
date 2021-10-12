@@ -22,7 +22,7 @@
 #include "DenseMatrixImpl/DenseMatrixStorage/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order, size_t MaxOrder = Order> class DenseSymmMatrix;
+    template<class ScalarType, size_t Order = Dynamic, size_t MaxOrder = Order> class DenseSymmMatrix;
 
     namespace Internal {
         template<class T> class Traits;
@@ -54,6 +54,8 @@ namespace Physica::Core {
         using Base::operator=;
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Storage::operator[](accessingIndex(row, column)); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Storage::operator[](accessingIndex(row, column)); }
+        /* Operations */
+        using Storage::resize;
         /* Getters */
         using Storage::getRow;
         using Storage::getColumn;
