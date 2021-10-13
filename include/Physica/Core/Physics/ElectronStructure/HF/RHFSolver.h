@@ -43,7 +43,7 @@ namespace Physica::Core::Physics {
         using ScalarType = typename Internal::Traits<BaseSetType>::ScalarType;
         using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector>;
 
-        constexpr static size_t EDIISBufferSize = 4; //Refer EDIIS from [3]
+        constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
         constexpr static size_t MatrixBufferSize = std::max(EDIISBufferSize, DIISBufferSize);
         static_assert(DIISBufferSize >= 3, "DIISBufferSize less than three makes no sence");
@@ -152,7 +152,8 @@ namespace Physica::Core::Physics {
         do {
             MatrixType& abs_error = fock;
             abs_error = abs(*errorMatrices.crbegin());
-            const bool doEDIIS = (iteration > EDIISBufferSize) && abs_error.max() > ScalarType(1E-2);
+            const bool nearConverge = abs_error.max() <= ScalarType(0.5);
+            const bool doEDIIS = iteration > 0 && (iteration % EDIISBufferSize == 0) && !nearConverge;
             if (doEDIIS)
                 EDIISInterpolation(fockMatrices, densityMatrices, energyBuffer);
             else {
@@ -161,7 +162,7 @@ namespace Physica::Core::Physics {
             }
 
             preDIIS(fockMatrices, errorMatrices, *densityMatrices.crbegin(), inv_cholesky, DIISMat);
-            const bool doDIIS = !doEDIIS && iteration >= DIISBufferSize - 1;
+            const bool doDIIS = nearConverge && iteration >= DIISBufferSize - 1;
             if (doDIIS)
                 fock = DIISExtrapolation(fockMatrices, DIISMat);
             else
