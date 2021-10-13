@@ -20,6 +20,7 @@
 
 #include "Hessenburg.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Physica/Core/Exception/BadConvergenceException.h"
 
 namespace Physica::Core {
     /**
@@ -76,6 +77,7 @@ namespace Physica::Core {
         const size_t order = matrixT.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
+        const size_t max_iter = matItePerCol * order;
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowLower(matrixT, upper);
             if (lower == upper) {
@@ -92,6 +94,9 @@ namespace Physica::Core {
                 francisQR(lower, sub_order);
                 ++iter;
             }
+
+            if (iter == max_iter)
+                throw BadConvergenceException();
         }
         matrixT *= factor;
 
