@@ -70,7 +70,7 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
 int main(int argc, char** argv) {
     const double from = 0.1;
     const double to = 8;
-    const size_t sampleCount = 100;
+    const size_t sampleCount = 800;
 
     Vector<ScalarType> r = Vector<ScalarType>(sampleCount);
     Vector<ScalarType> electronEnergy = Vector<ScalarType>(sampleCount);
