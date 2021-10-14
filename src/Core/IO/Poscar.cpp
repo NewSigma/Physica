@@ -19,6 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 namespace Physica::Core {
     Poscar::Poscar() : lattice(LatticeMatrix::unitMatrix(3))
@@ -90,6 +91,21 @@ namespace Physica::Core {
         if (!is)
             throw BadFileFormatException();
         return is;
+    }
+
+    void Poscar::standrizeLattice() {
+        using MatrixType = typename LatticeMatrix::ColMatrix;
+        MatrixType temp = lattice.transpose();
+        using VectorType = Vector<ScalarType, 3>;
+        VectorType buffer{};
+        householder(temp.col(0), buffer);
+        applyHouseholder(buffer, temp);
+
+        auto buffer1 = buffer.head(2);
+        householder(temp.col(1).tail(1), buffer1);
+        auto corner = temp.bottomRightCorner(1);
+        applyHouseholder(buffer1, corner);
+        lattice = temp.transpose();
     }
     /**
      * Extend the cell in z direction, with all distance of atoms in cell not changed.

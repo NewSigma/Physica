@@ -41,6 +41,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
         friend std::istream& operator>>(std::istream& is, Poscar& poscar);
         /* Operations */
+        void standrizeLattice();
         void extendInZ(ScalarType factor);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
