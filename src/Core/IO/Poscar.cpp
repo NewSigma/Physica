@@ -105,6 +105,7 @@ namespace Physica::Core {
         householder(temp.col(1).tail(1), buffer1);
         auto corner = temp.bottomRightCorner(1);
         applyHouseholder(buffer1, corner);
+        temp(1, 0) = temp(2, 0) = temp(2, 1) = ScalarType::Zero(); //Clear numeric error
         lattice = temp.transpose();
     }
     /**
