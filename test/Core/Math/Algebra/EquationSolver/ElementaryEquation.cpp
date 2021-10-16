@@ -23,9 +23,17 @@ int main() {
     using namespace Physica::Core;
     using ScalarType = Scalar<Double, false>;
     auto func = [](const ScalarType& x) { return exp(x) - ScalarType(5); };
-    ScalarType result = bisectionMethod(func, ScalarType::Zero(), ScalarType(3));
-    const ScalarType answer = ScalarType(1.6094379124341003746);
-    if (!scalarNear(result, answer, 1E-15))
-        return 1;
+    {
+        ScalarType result = bisectionMethod(func, ScalarType::Zero(), ScalarType(3));
+        const ScalarType answer = ScalarType(1.6094379124341003746);
+        if (!scalarNear(result, answer, 1E-15))
+            return 1;
+    }
+    {
+        ScalarType result = secant(func, ScalarType::Zero(), ScalarType(3), ScalarType(1E-9));
+        const ScalarType answer = ScalarType(1.6094379124341003746);
+        if (!scalarNear(result, answer, 1E-15))
+            return 1;
+    }
     return 0;
 }

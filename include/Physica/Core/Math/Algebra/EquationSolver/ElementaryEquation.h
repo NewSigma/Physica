@@ -74,4 +74,46 @@ namespace Physica::Core {
         result.toUnitA();
         return result;
     }
+    /**
+     * Reference:
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:559-560
+     */
+    template<class Function, class ScalarType>
+    ScalarType secant(
+            Function func,
+            const ScalarType& x1,
+            const ScalarType& x2,
+            const ScalarType& abs_error) {
+        const ScalarType y1 = func(x1);
+        const ScalarType y2 = func(x2);
+        return secant<Function, ScalarType>(func, x1, x2, y1, y2, abs_error);
+    }
+
+    template<class Function, class ScalarType>
+    ScalarType secant(
+            Function func,
+            const ScalarType& x1,
+            const ScalarType& x2,
+            const ScalarType& y1,
+            const ScalarType& y2,
+            const ScalarType& abs_error) {
+        if(y1.isZero())
+            return x1;
+        if(y2.isZero())
+            return x2;
+        assert(!ScalarType::matchSign(y1, y2)); //Root must be existent
+
+        ScalarType x_old = x1;
+        ScalarType x_now = x2;
+        ScalarType y_old = y1;
+        ScalarType y_now = y2;
+        do {
+            ScalarType temp = (x_old * y_now - x_now * y_old) / (y_now - y_old);
+            x_old = std::move(x_now);
+            y_old = std::move(y_now);
+            x_now = std::move(temp);
+            y_now = func(x_now);
+        } while(abs(x_now - x_old) > abs_error);
+        return x_now;
+    }
 }
