@@ -152,7 +152,7 @@ namespace Physica::Core::Physics {
         do {
             MatrixType& abs_error = fock;
             abs_error = abs(*errorMatrices.crbegin());
-            const bool nearConverge = abs_error.max() <= ScalarType(0.5);
+            const bool nearConverge = abs_error.max() <= ScalarType(1E-1); //1E-1 seleted by experiment
             const bool doEDIIS = iteration > 0 && (iteration % EDIISBufferSize == 0) && !nearConverge;
             if (doEDIIS)
                 EDIISInterpolation(fockMatrices, densityMatrices, energyBuffer);
