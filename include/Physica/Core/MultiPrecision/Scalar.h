@@ -189,6 +189,8 @@ namespace Physica::Core {
             explicit operator float() const { return f; }
             explicit operator double() const { return f; }
             friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
+            /* Helpers */
+            static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
             [[nodiscard]] float getTrivial() const noexcept { return f; }
@@ -220,6 +222,8 @@ namespace Physica::Core {
             explicit operator float() const { return d; }
             explicit operator double() const { return d; }
             friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
+            /* Helpers */
+            static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2) { return (s1.d > 0 && s2.d > 0) || (s1.d < 0 && s2.d < 0); }
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
             [[nodiscard]] double getTrivial() const noexcept { return d; }
@@ -557,7 +561,20 @@ namespace Physica::Core {
     [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
+#include "Const.h"
+
 namespace std {
+    template<bool errorTrack>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::MultiPrecision, errorTrack>> {
+        using T = Physica::Core::Scalar<Physica::Core::MultiPrecision, errorTrack>;
+    public:
+        static constexpr T epsilon() noexcept {
+            T result = T::One();
+            result.setPower(1 - Physica::Core::GlobalPrecision);
+            return result;
+        }
+    };
+
     template<bool errorTrack>
     struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float, errorTrack>> : public numeric_limits<float> {};
 
@@ -565,5 +582,4 @@ namespace std {
     struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double, errorTrack>> : public numeric_limits<double> {};
 }
 
-#include "Const.h"
 #include "ScalarImpl/ScalarImpl.h"

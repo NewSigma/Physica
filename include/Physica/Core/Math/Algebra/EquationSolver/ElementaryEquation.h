@@ -46,10 +46,11 @@ namespace Physica::Core {
             return x2;
         assert(!ScalarType::matchSign(y1, y2)); //Root must be existent
 
-        ScalarType result = (x1 + x2) >> 1;
+        const ScalarType half = ScalarType(0.5);
+        ScalarType result = (x1 + x2) * half;
         ScalarType y_result = ScalarType::One();
 
-        ScalarType error = ScalarType(x1 - x2).toAbs() >> 1;
+        ScalarType error = ScalarType(x1 - x2).toAbs() * half;
         ScalarType x_left(x1);
         ScalarType x_right(x2);
         ScalarType y_left(y1);
@@ -67,9 +68,9 @@ namespace Physica::Core {
             }
             else
                 x_right = result;
-            result = (x_left + x_right) >> 1;
-            error >>= 1;
-        } while(result.getPower() - error.getPower() < GlobalPrecision);
+            result = (x_left + x_right) * half;
+            error *= half;
+        } while(abs(result * std::numeric_limits<ScalarType>::epsilon()) < error);
         result.toUnitA();
         return result;
     }

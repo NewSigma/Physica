@@ -4,6 +4,10 @@ include(../cmake/Modules/PhysicaAddTest.cmake)
 message(STATUS "Configuring tests.")
 include_directories(./)
 # Math
+## Algebra
+### Equation Solver
+physica_add_test(ElementaryEquation Core/Math/Algebra/EquationSolver/ElementaryEquation.cpp)
+### Linear Algebra
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
 physica_add_test(RealSchur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchurTest.cpp)
