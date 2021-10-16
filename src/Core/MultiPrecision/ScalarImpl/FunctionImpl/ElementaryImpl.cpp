@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/ScalarImpl/FunctionImpl/BisectionMethod.h"
+#include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 namespace Physica::Core {
     template<>
@@ -343,30 +343,46 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision, false> arccos(const Scalar<MultiPrecision, false>& s) {
-        return bisectionMethod<MultiPrecision, false>(cos, s
-                , BasicConst::getInstance()._0, MathConst::getInstance().PI
-                , BasicConst::getInstance()._1, BasicConst::getInstance().Minus_1);
+        using ScalarType = Scalar<MultiPrecision, false>;
+        auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
+        return bisectionMethod<decltype(func), ScalarType>(func,
+                                                           BasicConst::getInstance()._0,
+                                                           MathConst::getInstance().PI,
+                                                           BasicConst::getInstance()._1,
+                                                           BasicConst::getInstance().Minus_1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arccos(const Scalar<MultiPrecision, true>& s) {
-        return bisectionMethod<MultiPrecision, true>(cos, s
-                , BasicConst::getInstance()._0, MathConst::getInstance().PI
-                , BasicConst::getInstance()._1, BasicConst::getInstance().Minus_1);
+        using ScalarType = Scalar<MultiPrecision, true>;
+        auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
+        return bisectionMethod<decltype(func), ScalarType>(func,
+                                                           BasicConst::getInstance()._0,
+                                                           MathConst::getInstance().PI,
+                                                           BasicConst::getInstance()._1,
+                                                           BasicConst::getInstance().Minus_1);
     }
 
     template<>
     Scalar<MultiPrecision, false> arcsin(const Scalar<MultiPrecision, false>& s) {
-        return bisectionMethod<MultiPrecision, false>(sin, s
-                , MathConst::getInstance().Minus_PI_2, MathConst::getInstance().PI_2
-                , BasicConst::getInstance().Minus_1, BasicConst::getInstance()._1);
+        using ScalarType = Scalar<MultiPrecision, false>;
+        auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
+        return bisectionMethod<decltype(func), ScalarType>(func,
+                                                           MathConst::getInstance().Minus_PI_2,
+                                                           MathConst::getInstance().PI_2,
+                                                           BasicConst::getInstance().Minus_1,
+                                                           BasicConst::getInstance()._1);
     }
 
     template<>
     Scalar<MultiPrecision, true> arcsin(const Scalar<MultiPrecision, true>& s) {
-        return bisectionMethod<MultiPrecision, true>(sin, s
-                , MathConst::getInstance().Minus_PI_2, MathConst::getInstance().PI_2
-                , BasicConst::getInstance().Minus_1, BasicConst::getInstance()._1);
+        using ScalarType = Scalar<MultiPrecision, true>;
+        auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
+        return bisectionMethod<decltype(func), ScalarType>(func,
+                                                           MathConst::getInstance().Minus_PI_2,
+                                                           MathConst::getInstance().PI_2,
+                                                           BasicConst::getInstance().Minus_1,
+                                                           BasicConst::getInstance()._1);
     }
     //!FixIt: arctan() does not consider accuracy.
     template<>
