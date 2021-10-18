@@ -30,16 +30,18 @@ void testLnGamma() {
     constexpr static double doubleResult[count]{21.77464517303463, 1.09579799481807552};
     
     for (int i = 0; i < count; ++i) {
-        Scalar<Float, false> s(value[i]);
+        using T = Scalar<Float, false>;
+        T s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(float(temp) - floatResult[i]) / fabs(floatResult[i]) >= 1E-6F))
+        if (!scalarNear(temp, T(floatResult[i]), 1E-6))
             exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < count; ++i) {
-        Scalar<Double, false> s(value[i]);
+        using T = Scalar<Double, false>;
+        T s(value[i]);
         auto temp = lnGamma(s);
-        if ((fabs(double(temp) - doubleResult[i]) / fabs(doubleResult[i]) >= 1E-14))
+        if (!scalarNear(temp, T(doubleResult[i]), 1E-15))
             exit(EXIT_FAILURE);
     }
 }
@@ -53,10 +55,10 @@ void testGammaPQ() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = gammaP(T(a[i]), T(x[i]));
-        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-14))
+        if (!scalarNear(temp, T(result[i]), 1E-14))
             exit(EXIT_FAILURE);
         temp = gammaQ(T(a[i]), T(x[i]));
-        if ((fabs(1 - double(temp) - result[i]) >= fabs(result[i]) * 1E-9))
+        if (!scalarNear(temp, T(1 - result[i]), 1E-11))
             exit(EXIT_FAILURE);
     }
 }
@@ -70,7 +72,7 @@ void testBesselJ() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = besselJn(n[i], T(x[i]));
-        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-8))
+        if (!scalarNear(temp, T(result[i]), 1E-8))
             exit(EXIT_FAILURE);
     }
 }
@@ -84,7 +86,7 @@ void testBesselY() {
 
     for (int i = 0; i < count; ++i) {
         auto temp = besselYn(n[i], T(x[i]));
-        if ((fabs(double(temp) - result[i]) >= fabs(result[i]) * 1E-7))
+        if (!scalarNear(temp, T(result[i]), 1E-7))
             exit(EXIT_FAILURE);
     }
 }
@@ -102,13 +104,13 @@ void testBesselJn_Yn_dJn_dYn() {
     for (int i = 0; i < count; ++i) {
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(T(n[i]), T(x[i]), Jn, Yn, dJn, dYn);
-        if ((fabs(double(Jn) - result_Jn[i]) >= fabs(result_Jn[i]) * 1E-9))
+        if (!scalarNear(Jn, T(result_Jn[i]), 1E-9))
             exit(EXIT_FAILURE);
-        if ((fabs(double(dJn) - result_dJn[i]) >= fabs(result_dJn[i]) * 1E-10))
+        if (!scalarNear(dJn, T(result_dJn[i]), 1E-10))
             exit(EXIT_FAILURE);
-        if ((fabs(double(Yn) - result_Yn[i]) >= fabs(result_Yn[i]) * 1E-10))
+        if (!scalarNear(Yn, T(result_Yn[i]), 1E-10))
             exit(EXIT_FAILURE);
-        if ((fabs(double(dYn) - result_dYn[i]) >= fabs(result_dYn[i]) * 1E-9))
+        if (!scalarNear(dYn, T(result_dYn[i]), 1E-9))
             exit(EXIT_FAILURE);
     }
 }
@@ -125,9 +127,9 @@ void testLegendreP() {
     for (int i = 0; i < count; ++i) {
         auto result1 = legendreP(l[i], T(theta[i]));
         auto result2 = legendreP(l[i], m[i], T(theta[i]));
-        if ((fabs(double(result1) - answer1[i]) >= fabs(answer1[i]) * 1E-15))
+        if (!scalarNear(result1, T(answer1[i]), 1E-15))
             exit(EXIT_FAILURE);
-        if ((fabs(double(result2) - answer2[i]) >= fabs(answer2[i]) * 1E-15))
+        if (!scalarNear(result2, T(answer2[i]), 1E-15))
             exit(EXIT_FAILURE);
     }
 }
@@ -144,9 +146,7 @@ void testSphericalHarmomicY() {
 
     for (int i = 0; i < count; ++i) {
         auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
-        if ((fabs(double(result.getReal()) - result_real[i]) >= fabs(result_real[i]) * 1E-5))
-            exit(EXIT_FAILURE);
-        if ((fabs(double(result.getImag()) - result_imag[i]) >= fabs(result_imag[i]) * 1E-5))
+        if (!scalarNear(result, ComplexScalar<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
             exit(EXIT_FAILURE);
     }
 }
