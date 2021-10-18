@@ -193,6 +193,20 @@ void testHamonicRotator() {
     }
 }
 
+void testHermiteH() {
+    using T = Scalar<Double, false>;
+    constexpr static size_t count = 3;
+    constexpr static unsigned int n[count]{2, 5, 3};
+    constexpr static double x[count]{3, 3, 18};
+    constexpr static double result[count]{34, 3816, 46440};
+
+    for (size_t i = 0; i < count; ++i) {
+        auto temp = hermiteH(n[i], T(x[i]));
+        if (!scalarNear(temp, T(result[i]), 1E-14))
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main() {
     testLnGamma();
     testGammaPQ();
@@ -202,5 +216,6 @@ int main() {
     testLegendreP();
     testSphericalHarmomicY();
     testHamonicRotator();
+    testHermiteH();
     return 0;
 }

@@ -188,8 +188,12 @@ namespace Physica::Core {
         ScalarType V(int m, int n, int l);
         ScalarType W(int m, int n, int l);
     };
+
+    template<class ScalarType>
+    ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x);
 }
 
 #include "SpetialFunctionsImpl/Bessel.h"
 #include "SpetialFunctionsImpl/Gamma.h"
 #include "SpetialFunctionsImpl/Legendre.h"
+#include "SpetialFunctionsImpl/Hermite.h"
