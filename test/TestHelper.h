@@ -29,7 +29,11 @@ bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarTy
     assert(precision > 0);
     const auto& s1 = scalar1.getDerived();
     const auto& s2 = scalar2.getDerived();
-    return s2.isZero() ? (abs(s1) < ScalarType(precision)) : (abs((s1 - s2) / s2) < ScalarType(precision));
+    const ScalarType min = std::numeric_limits<ScalarType>::min();
+    const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
+    const ScalarType delta = s1 - s2;
+    const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / s2);
+    return error < ScalarType(precision);
 }
 
 template<class ScalarType>
