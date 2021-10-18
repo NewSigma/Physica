@@ -21,36 +21,23 @@
 namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> lnGamma(const Scalar<option, errorTrack>& s);
-    /**
-     * Reference:
-     * [1] Hochstrasser, U. W. “Orthogonal Polynomials.” Handbook of Mathematical Functions with
-     * Formulas, Graphs, and Mathematical Tables. (M. Abramowitz and I. A. Stegun, eds.). New York: Dover, 1972.789
-     */
+
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {
-        const ScalarType square_x = square(x.getDerived());
-        ScalarType a = ScalarType::One();
-        ScalarType b = ScalarType::Two();
+        if (n == 0)
+            return ScalarType::One();
+        const ScalarType double_x = ScalarType::Two() * x.getDerived();
+        if (n == 1)
+            return double_x;
 
-        const unsigned int k = n / 2;
-        ScalarType float_m = ScalarType(k);
-        const bool isEven = n % 2 == 0;
-        const ScalarType term = isEven ? -ScalarType::One() : ScalarType::One();
-        ScalarType c = float_m * (ScalarType::Two() * float_m + term);
-
-        unsigned int m = k;
-        while (m > 0) {
-            --m;
-            float_m -= ScalarType::One();
-            a = ScalarType::One() - (b / c) * (square_x * a);
-            b += ScalarType::Two();
-            c = float_m * (ScalarType::Two() * float_m + term);
+        ScalarType old_H = ScalarType::One();
+        ScalarType H = double_x;
+        ScalarType float_i = ScalarType(1);
+        for (unsigned int i = 1; i != n; ++i) {
+            old_H = double_x * H - float_i * old_H * ScalarType::Two();
+            std::swap(old_H, H);
+            float_i += ScalarType::One();
         }
-
-        ScalarType result = exp(lnGamma(ScalarType(n + 1)) - lnGamma(ScalarType(k + 1)));
-        if (!isEven)
-            result *= ScalarType::Two() * x.getDerived();
-        result *= (k % 2 == 0) ? a : -a;
-        return result;
+        return H;
     }
 }
