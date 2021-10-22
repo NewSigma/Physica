@@ -344,7 +344,7 @@ namespace Physica::Core::Physics {
             Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
             b[0] = -ScalarType::One();
             const DIISMatrix inv_A = DIISMat.inverse();
-            x = (inv_A * b.moveToColMatrix()).compute().col(0);
+            x = inv_A * b;
         }
 
         MatrixType extrapolate_fock = MatrixType::Zeros(getBaseSetSize());
@@ -362,7 +362,7 @@ namespace Physica::Core::Physics {
             auto eigenState = wave.col(i);
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             const size_t solutionPos = sortedEigenvalues[orbitPos];
-            eigenState.asVector() = (inv_cholesky.transpose() * eigenvectors.col(solutionPos)).compute().col(0);
+            eigenState = inv_cholesky.transpose() * eigenvectors.col(solutionPos);
         }
     }
 
@@ -379,7 +379,7 @@ namespace Physica::Core::Physics {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             ScalarType temp = eigenvalues[sortedEigenvalues[orbitPos]].getReal();
             auto orbit = wave.col(i);
-            temp += ((orbit.transpose() * singleHamilton).compute() * orbit).calc(0, 0);
+            temp += (orbit.transpose() * singleHamilton).compute().row(0) * orbit;
             const auto orbitState = electronConfig.getOrbitState(orbitPos);
             assert(orbitState != ElectronConfig::NoOccupacy);
             const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;

@@ -178,9 +178,9 @@ public:
         Plot* plot = new Plot();
 
         auto eigenvectors = solver.getEigenvectors();
-        auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex)).moveToColMatrix();
-        real_eigenvector = inv_cholesky.transpose() * real_eigenvector;
-        plotWave(*plot, real_eigenvector.col(0));
+        auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
+        real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
+        plotWave(*plot, real_eigenvector);
 
         plotReferenceWave(*plot);
         plot->show();
@@ -282,11 +282,11 @@ public:
             }
 
             auto eigenvectors = solver.getEigenvectors();
-            auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex)).moveToColMatrix();
-            real_eigenvector = inv_cholesky.transpose() * real_eigenvector;
+            auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
+            real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
 
-            stop = VectorType(real_eigenvector.col(0) - trial_solution).norm() < criteria;
-            trial_solution = real_eigenvector.col(0);
+            stop = VectorType(real_eigenvector - trial_solution).norm() < criteria;
+            trial_solution = real_eigenvector;
         } while(!stop);
 
         std::cout << "Ground state energy: " << groundStateEnergy(trial_solution) << std::endl;

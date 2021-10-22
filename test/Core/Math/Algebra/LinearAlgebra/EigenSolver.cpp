@@ -35,12 +35,13 @@ bool vectorNearZero(const LValueVector<VectorType>& v, double precision) {
 template<class MatrixType>
 bool eigenTest(const MatrixType& mat, double precision) {
     EigenSolver solver = EigenSolver(mat, true);
+    using ComplexVector = typename EigenSolver<MatrixType>::EigenvalueVector;
     using ComplexMatrix = typename EigenSolver<MatrixType>::EigenvectorMatrix;
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
-        auto result = (ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i)).compute();
-        if (!vectorNearZero(result.col(0), precision))
+        ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
+        if (!vectorNearZero(result, precision))
             return false;
     }
     return true;

@@ -80,16 +80,16 @@ namespace Physica::Core {
     void EqualityQuadraticProgramming<ScalarType>::compute() {
         const size_t degreeOfFreedom = x.getLength();
         const bool haveConstraints = constraints.getRow() != 0;
-        Vector<ScalarType, Dynamic> equationVecB(objectiveMatG.getRow() + constraints.getRow());
+        Vector<ScalarType> equationVecB(objectiveMatG.getRow() + constraints.getRow());
         /* Assemble vector */ {
-            const Vector<ScalarType, Dynamic> g = (objectiveMatG * x.copyToColMatrix()).compute().col(0) + objectiveVecC;
+            const Vector<ScalarType> g = objectiveMatG * x + objectiveVecC;
             auto head = equationVecB.head(degreeOfFreedom);
             head = g;
 
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
                 const auto vecB = constraints.col(degreeOfFreedom);
-                const Vector<ScalarType, Dynamic> h = (matA * x.copyToColMatrix()).compute().col(0) - vecB.asVector();
+                const Vector<ScalarType> h = matA * x - vecB;
                 auto tail = equationVecB.tail(degreeOfFreedom);
                 tail = h;
             }
@@ -113,10 +113,9 @@ namespace Physica::Core {
                 equationMatA = objectiveMatG;
         }
         const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
-        const auto solution = (inv_equationMatA * equationVecB.moveToColMatrix()).compute();
-        const auto col = solution.col(0);
-        x -= col.head(degreeOfFreedom);
+        const Vector<ScalarType> solution = inv_equationMatA * equationVecB;
+        x -= solution.head(degreeOfFreedom);
         if (haveConstraints)
-            multipliers = col.tail(degreeOfFreedom);
+            multipliers = solution.tail(degreeOfFreedom);
     }
 }

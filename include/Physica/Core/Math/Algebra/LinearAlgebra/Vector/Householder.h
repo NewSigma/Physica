@@ -77,6 +77,6 @@ namespace Physica::Core {
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
         const auto mat1 = (copy * temp).copyToRowMatrix();
-        mat -= (mat * copy.copyToColMatrix()).compute() * mat1;
+        mat -= (mat * copy).copyToColMatrix() * mat1;
     }
 }

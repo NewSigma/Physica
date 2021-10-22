@@ -21,6 +21,8 @@
 namespace Physica::Core {
     template<class MatrixType1, class MatrixType2> class MatrixProduct;
 
+    template<class MatrixType, class VectorType> class MatrixVectorProduct;
+
     namespace Internal {
         template<class MatrixType1, class MatrixType2>
         struct ProductOption {
@@ -46,6 +48,15 @@ namespace Physica::Core {
             constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
             constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        };
+
+        template<class MatrixType, class VectorType>
+        class Traits<MatrixVectorProduct<MatrixType, VectorType>> {
+        public:
+            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
+                                                                           typename VectorType::ScalarType>::Type;
+            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
         };
     }
 
@@ -84,42 +95,46 @@ namespace Physica::Core {
         [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
 
+    template<class MatrixType, class VectorType>
+    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<MatrixType, VectorType>> {
+        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
+                      MatrixType::ColumnAtCompile == Dynamic ||
+                      VectorType::SizeAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+    public:
+        using Base = RValueVector<MatrixVectorProduct<MatrixType, VectorType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& mat;
+        const VectorType& vec;
+    public:
+        MatrixVectorProduct(const RValueMatrix<MatrixType>& mat_, const RValueVector<VectorType>& vec_)
+                : mat(mat_.getDerived()), vec(vec_.getDerived()) {
+            assert(mat.getColumn() == vec.getLength());
+        }
+        /* Operations */
+        template<class OtherDerived>
+        void assignTo(LValueVector<OtherDerived>& target) const;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] size_t getLength() const { return mat.getRow(); }
+        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
+        [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+    };
+
     template<class MatrixType1, class MatrixType2>
-    template<class OtherDerived>
-    void MatrixProduct<MatrixType1, MatrixType2>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        constexpr static int defaultMajor = Internal::ProductOption<MatrixType1, MatrixType2>::Major;
-        constexpr static bool isDynamic = defaultMajor == Dynamic;
-        using TargetType = LValueMatrix<OtherDerived>;
-
-        if constexpr (isDynamic) {
-            for (size_t i = 0; i < target.getMaxMajor(); ++i)
-                for (size_t j = 0; j < target.getMaxMinor(); ++j)
-                    target.getElementFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
-                                                                 TargetType::columnFromMajorMinor(i, j));
-        }
-        else {
-            for (size_t i = 0; i < (defaultMajor == DenseMatrixOption::Column ? getColumn() : getRow()); ++i) {
-                for (size_t j = 0; j < (defaultMajor == DenseMatrixOption::Column ?  getRow() : getColumn()); ++j) {
-                    const size_t r = DefaultType::rowFromMajorMinor(i, j);
-                    const size_t c = DefaultType::columnFromMajorMinor(i, j);
-                    target(r, c) = calc(r, c);
-                }
-            }
-        }
-    }
-
-    template<class T1, class T2>
-    typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t column) const {
-        ScalarType result = ScalarType::Zero();
-        for (size_t i = 0; i < mat1.getColumn(); ++i)
-            result += ScalarType(mat1.calc(row, i) * mat2.calc(i, column));
-        return result;
-    }
-
-    template<class Derived, class OtherDerived>
-    inline MatrixProduct<Derived, OtherDerived>
-    operator*(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
+    inline typename std::enable_if<MatrixType2::ColumnAtCompile != 1, MatrixProduct<MatrixType1, MatrixType2>>::type
+    operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
+
+    template<class MatrixType, class VectorType>
+    inline MatrixVectorProduct<MatrixType, VectorType>
+    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
+        assert(mat.getColumn() == vec.getLength());
+        return MatrixVectorProduct(mat, vec);
+    }
 }
+
+#include "MatrixProductImpl.h"
