@@ -71,8 +71,6 @@ namespace Physica::Core {
         void toUnit();
         template<class OtherVector>
         [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const RValueVector<OtherVector>& v) const noexcept;
-        ColMatrix moveToColMatrix();
-        RowMatrix moveToRowMatrix();
         /* Getters */
         using Storage::getLength;
         /* Helpers */

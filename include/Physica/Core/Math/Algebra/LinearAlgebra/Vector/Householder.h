@@ -66,8 +66,8 @@ namespace Physica::Core {
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
-        const auto mat1 = (copy * temp).copyToColMatrix();
-        mat -= mat1 * (copy.copyToRowMatrix() * mat).compute();
+        const Vector<ScalarType> temp1 = copy * temp;
+        mat -= temp1 * (copy.transpose() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
@@ -76,7 +76,7 @@ namespace Physica::Core {
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
-        const auto mat1 = (copy * temp).copyToRowMatrix();
-        mat -= (mat * copy).copyToColMatrix() * mat1;
+        const Vector<ScalarType> temp1 = copy * temp;
+        mat -= Vector<ScalarType>(mat * copy) * temp1.transpose();
     }
 }

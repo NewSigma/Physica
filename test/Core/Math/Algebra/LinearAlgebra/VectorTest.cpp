@@ -24,13 +24,9 @@ using namespace Physica::Core;
 
 int main() {
     using T = Scalar<Float, false>;
-    Vector<T> v{1, 2, 3, 4};
-    auto col = v.copyToColMatrix();
-    auto row = v.moveToRowMatrix();
-
-    Vector<Scalar<Double, false>> v1{3.845971,0.000000,0.000000};
-    Vector<Scalar<Double, false>> v2{-0.007733,3.835502,0.000000};
-    Vector<Scalar<Double, false>> v3(v1.crossProduct(v2));
+    Vector<T> v1{3.845971,0.000000,0.000000};
+    Vector<T> v2{-0.007733,3.835502,0.000000};
+    Vector<T> v3(v1.crossProduct(v2));
     if (fabs(v3.norm().getTrivial() / 2 - 7.375614) / 7.375614 > 10E-8)
         return 1;
     return 0;

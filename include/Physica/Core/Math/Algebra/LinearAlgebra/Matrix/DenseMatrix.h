@@ -71,6 +71,8 @@ namespace Physica::Core {
         using Storage::Storage;
         template<class OtherMatrix>
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
+        template<class VectorType>
+        DenseMatrix(const RValueVector<VectorType>& mat);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
         /* Operators */

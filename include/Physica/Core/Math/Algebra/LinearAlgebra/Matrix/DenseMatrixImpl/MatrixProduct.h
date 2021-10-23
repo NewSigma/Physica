@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     template<class MatrixType1, class MatrixType2> class MatrixProduct;
-
+    template<class VectorType, class MatrixType> class VectorMatrixProduct;
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
 
     namespace Internal {
@@ -46,6 +46,19 @@ namespace Physica::Core {
             constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
             constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
+            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        };
+
+        template<class VectorType, class MatrixType>
+        class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
+        public:
+            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
+                                                                           typename MatrixType::ScalarType>::Type;
+            constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+            constexpr static size_t MaxRowAtCompile = VectorType::MaxSizeAtCompile;
+            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
             constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
         };
@@ -95,6 +108,32 @@ namespace Physica::Core {
         [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
 
+    template<class VectorType, class MatrixType>
+    class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
+        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+    public:
+        using Base = RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const VectorType& vec;
+        const MatrixType& mat;
+    public:
+        VectorMatrixProduct(const RValueVector<VectorType>& vec_, const RValueMatrix<MatrixType>& mat_)
+                : vec(vec_.getDerived()), mat(mat_.getDerived()) {
+            assert(mat.getRow() == 1);
+        }
+        /* Operations */
+        template<class OtherDerived>
+        void assignTo(LValueMatrix<OtherDerived>& target) const;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
+        [[nodiscard]] size_t getRow() const { return vec.getLength(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
+        [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
+    };
+
     template<class MatrixType, class VectorType>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<MatrixType, VectorType>> {
         static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
@@ -127,6 +166,13 @@ namespace Physica::Core {
     operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
+    }
+
+    template<class VectorType, class MatrixType>
+    inline VectorMatrixProduct<VectorType, MatrixType>
+    operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) {
+        assert(mat.getRow() == 1);
+        return VectorMatrixProduct(vec, mat);
     }
 
     template<class MatrixType, class VectorType>

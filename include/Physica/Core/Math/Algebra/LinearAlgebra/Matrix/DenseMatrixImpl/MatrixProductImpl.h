@@ -51,6 +51,23 @@ namespace Physica::Core {
         return result;
     }
 
+    template<class VectorType, class MatrixType>
+    template<class OtherDerived>
+    void VectorMatrixProduct<VectorType, MatrixType>::assignTo(LValueMatrix<OtherDerived>& target) const {
+        using TargetType = LValueMatrix<OtherDerived>;
+        const size_t maxMajor = target.getMaxMajor();
+        const size_t maxMinor = target.getMaxMinor();
+        for (size_t i = 0; i < maxMajor; ++i)
+            for (size_t j = 0; j < maxMinor; ++j)
+                target.getElementFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
+                                                             TargetType::columnFromMajorMinor(i, j));
+    }
+
+    template<class VectorType, class MatrixType>
+    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t column) const {
+        return vec.calc(row) * mat.calc(0, column);
+    }
+
     template<class MatrixType, class VectorType>
     template<class OtherDerived>
     void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {

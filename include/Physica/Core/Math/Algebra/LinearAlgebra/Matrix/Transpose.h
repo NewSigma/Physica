@@ -23,6 +23,8 @@
 namespace Physica::Core {
     template<class MatrixType> class Transpose;
 
+    template<class VectorType> class TransposeVector;
+
     namespace Internal {
         template<class T> class Traits;
 
@@ -40,6 +42,19 @@ namespace Physica::Core {
             constexpr static size_t MaxColumnAtCompile = MatrixType::MaxRowAtCompile;
             constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
+        };
+
+        template<class VectorType>
+        class Traits<TransposeVector<VectorType>> {
+        public:
+            using ScalarType = typename VectorType::ScalarType;
+            constexpr static int MatrixOption = DenseMatrixOption::Row | DenseMatrixOption::Vector;
+            constexpr static size_t RowAtCompile = 1;
+            constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t MaxRowAtCompile = 1;
+            constexpr static size_t MaxColumnAtCompile = VectorType::MaxSizeAtCompile;
+            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
         };
     }
 
@@ -70,6 +85,32 @@ namespace Physica::Core {
                 target.getElementFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
                                                              TargetType::columnFromMajorMinor(i, j));
             }
+        }
+    }
+
+    template<class VectorType>
+    class TransposeVector : public RValueMatrix<TransposeVector<VectorType>> {
+        const VectorType& vec;
+    public:
+        using Base = RValueMatrix<TransposeVector<VectorType>>;
+        using typename Base::ScalarType;
+    public:
+        TransposeVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        template<class OtherMatrix>
+        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        /* Getters */
+        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] size_t getColumn() const noexcept { return vec.getLength(); }
+    };
+
+    template<class VectorType>
+    template<class OtherMatrix>
+    void TransposeVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+        using TargetType = LValueMatrix<OtherMatrix>;
+        for (size_t i = 0; i < vec.getLength(); ++i) {
+            target.getElementFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i),
+                                                         TargetType::columnFromMajorMinor(0, i));
         }
     }
 }

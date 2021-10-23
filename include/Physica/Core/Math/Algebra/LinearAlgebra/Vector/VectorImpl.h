@@ -56,20 +56,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    typename Vector<T, Length, MaxLength>::ColMatrix Vector<T, Length, MaxLength>::moveToColMatrix() {
-        ColMatrix mat(this->getLength(), 1);
-        mat[0] = std::move(*this);
-        return mat;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    typename Vector<T, Length, MaxLength>::RowMatrix Vector<T, Length, MaxLength>::moveToRowMatrix() {
-        RowMatrix mat(1, this->getLength());
-        mat[0] = std::move(*this);
-        return mat;
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::Zeros(size_t len) {
         Vector<T, Length, MaxLength> result{};
         result.reserve(len);

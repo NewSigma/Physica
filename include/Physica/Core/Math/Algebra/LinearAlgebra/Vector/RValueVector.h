@@ -22,6 +22,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
+    template<class VectorType> class TransposeVector;
+
     namespace Internal {
         template<class T> class Traits;
     }
@@ -52,8 +54,7 @@ namespace Physica::Core {
         }
 
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
-        ColMatrix copyToColMatrix() const;
-        RowMatrix copyToRowMatrix() const;
+        [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] ScalarType norm() const;
@@ -61,20 +62,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
     };
-
-    template<class Derived>
-    typename RValueVector<Derived>::ColMatrix RValueVector<Derived>::copyToColMatrix() const {
-        ColMatrix mat(getLength(), 1);
-        mat[0] = *this;
-        return mat;
-    }
-
-    template<class Derived>
-    typename RValueVector<Derived>::RowMatrix RValueVector<Derived>::copyToRowMatrix() const {
-        RowMatrix mat(1, getLength());
-        mat[0] = *this;
-        return mat;
-    }
 
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::norm() const {

@@ -26,7 +26,7 @@ using T = Scalar<Double, false>;
 int main() {
     Vector<T, 2> v{2, 1};
     auto givens_vector = givens(v, 0, 1);
-    auto v_mat = v.copyToColMatrix();
+    DenseMatrix<T> v_mat = v;
     applyGivens(givens_vector, v_mat, 0, 1);
     if (abs(v_mat(1, 0)) > T(1E-15))
         return 1;
