@@ -53,11 +53,12 @@ namespace Physica::Core {
         LinearEquations& operator=(LinearEquations&& l) noexcept;
         /* Operations */
         void solve(LinearEquationsMethod method);
+        void conjugateGradient() const;
         /* Helpers */
         [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() noexcept { return std::move(matrix); }
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] T& getResult(size_t index) { return matrix(index, matrix.getColumn() - 1); }
+        [[nodiscard]] auto getSolution() { return matrix.col(matrix.getColumn() - 1); }
     };
 }
 

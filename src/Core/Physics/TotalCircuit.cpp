@@ -163,7 +163,7 @@ namespace Physica::Core {
                     auto current = reciprocal(*p->getResistance());
                     assert(index2 >= 0);
                     if(static_cast<size_t>(index2) != size)
-                        current -= current * le.getResult(index2);
+                        current -= current * le.getSolution()[index2];
                     totalCurrent += current;
                 }
                 ++p;
