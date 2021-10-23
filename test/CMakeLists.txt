@@ -21,7 +21,9 @@ physica_add_test(LinearEquations Core/Math/Algebra/LinearAlgebra/LinearEquations
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecompositionTest.cpp)
 physica_add_test(Vector Core/Math/Algebra/LinearAlgebra/VectorTest.cpp)
 physica_add_test(Polynomial Core/Math/Algebra/Polynomial.cpp)
+## Calculus
 physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)
+physica_add_test(Differential Core/Math/Calculus/Differential.cpp)
 physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
 physica_add_test(ODE Core/Math/Calculus/ODETest.cpp)
