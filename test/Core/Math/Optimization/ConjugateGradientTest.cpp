@@ -16,22 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "TestHelper.h"
 #include "Functions.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 
 using namespace Physica::Core::Math;
 
-using T = Scalar<Double, false>;
+using ScalarType = Scalar<Double, false>;
 
 int main() {
     {
-        ConjugateGradient cg(func1<T>, Vector<T>{-1, -2, -5}, T(1E-14), T(0.00001));
-        if (fabs(cg.compute().getTrivial()) > 1E-14)
+        ConjugateGradient cg(func1<ScalarType>, Vector<ScalarType>{-1, -2, -5}, ScalarType(10), ScalarType(1), ScalarType(1E-5));
+        if (!scalarNear(cg.compute(), ScalarType::Zero(), 1E-15))
             return 1;
     }
     {
-        ConjugateGradient cg(func2<T>, Vector<T>{1, 3, 2}, T(1E-14), T(0.0001));
-        if (fabs(cg.compute().getTrivial() - 2.25) / 2.25 > 1E-14)
+        ConjugateGradient cg(func2<ScalarType>, Vector<ScalarType>{1, 3, 2}, ScalarType(1E-15), ScalarType(1), ScalarType(1E-6));
+        if (!scalarNear(cg.compute(), ScalarType(2.25), 1E-14))
+            return 1;
+    }
+    {
+        ConjugateGradient cg(rosenbrock<ScalarType>, Vector<ScalarType>{-1.2, 1}, ScalarType(1E-12), ScalarType(1), ScalarType(1E-6));
+        if (!scalarNear(cg.compute(), ScalarType::Zero(), 1E-19))
             return 1;
     }
     return 0;

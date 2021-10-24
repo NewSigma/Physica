@@ -40,3 +40,8 @@ T func2(const Vector<T>& v) {
     const T term3 = x + z;
     return (reciprocal(term1 * term1) + reciprocal(term2 * term2) + reciprocal(term3 * term3)) * T(x * y + x * z + y * z);
 }
+
+template<class ScalarType>
+ScalarType rosenbrock(const Vector<ScalarType>& v) {
+    return ScalarType(100) * square(v[1] - square(v[0])) + square(ScalarType::One() - v[0]);
+}
