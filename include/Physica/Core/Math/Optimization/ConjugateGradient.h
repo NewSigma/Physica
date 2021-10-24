@@ -37,6 +37,7 @@ namespace Physica::Core::Math {
     class ConjugateGradient {
         constexpr static double c1 = 1E-4;
         constexpr static double c2 = 0.1;
+        constexpr static size_t maxIteration = 100000;
 
         Function func;
         VectorType x;
@@ -85,9 +86,9 @@ namespace Physica::Core::Math {
             const ScalarType factor = lineSearch(g, direction);
             x += factor * direction;
 
-            VectorType g1 = getGradient(x);
-            ScalarType new_error = g1.squaredNorm();
-            ScalarType alpha = (new_error - g * g1) / error;
+            const VectorType g1 = getGradient(x);
+            const ScalarType new_error = g1.squaredNorm();
+            const ScalarType alpha = (new_error - g * g1) / error;
             g = g1;
             error = new_error;
             direction = alpha * direction - g1;
@@ -146,7 +147,7 @@ namespace Physica::Core::Math {
             step = (step_lower + step_upper) / ScalarType::Two();
             if (abs(step_upper - step) < std::numeric_limits<ScalarType>::epsilon())
                 return step_upper;
-            if (++i > 100000)
+            if (++i > maxIteration)
                 throw BadConvergenceException();
         }
     }
