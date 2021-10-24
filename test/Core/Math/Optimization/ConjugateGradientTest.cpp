@@ -36,7 +36,7 @@ int main() {
             return 1;
     }
     {
-        ConjugateGradient cg(rosenbrock<ScalarType>, Vector<ScalarType>{-1.2, 1}, ScalarType(1E-12), ScalarType(1), ScalarType(1E-6));
+        ConjugateGradient cg(rosenbrock<ScalarType>, Vector<ScalarType>{-1.2, 1}, ScalarType(1E-13), ScalarType(1), ScalarType(3E-6));
         if (!scalarNear(cg.compute(), ScalarType::Zero(), 1E-19))
             return 1;
     }

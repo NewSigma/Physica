@@ -82,16 +82,25 @@ namespace Physica::Core::Math {
         VectorType g = getGradient(x);
         VectorType direction = -g;
         ScalarType error = g.squaredNorm();
+
+        size_t ite = 0;
+        const size_t N = x.getLength();
         while (error > epsilon) {
             const ScalarType factor = lineSearch(g, direction);
             x += factor * direction;
 
             const VectorType g1 = getGradient(x);
             const ScalarType new_error = g1.squaredNorm();
-            const ScalarType alpha = (new_error - g * g1) / error;
+            if (++ite == N) {
+                direction = -g1;
+                ite = 0;
+            }
+            else {
+                const ScalarType alpha = (new_error - g * g1) / error;
+                direction = alpha * direction - g1;
+            }
             g = g1;
             error = new_error;
-            direction = alpha * direction - g1;
         }
         return func(std::cref(x));
     }
