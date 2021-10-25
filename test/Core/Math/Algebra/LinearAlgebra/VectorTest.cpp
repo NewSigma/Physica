@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
+#include "TestHelper.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 
@@ -27,7 +26,7 @@ int main() {
     Vector<T> v1{3.845971,0.000000,0.000000};
     Vector<T> v2{-0.007733,3.835502,0.000000};
     Vector<T> v3(v1.crossProduct(v2));
-    if (fabs(v3.norm().getTrivial() / 2 - 7.375614) / 7.375614 > 10E-8)
+    if (!scalarNear(v3.norm() / T::Two(), T(7.375614), 1E-7))
         return 1;
     return 0;
 }
