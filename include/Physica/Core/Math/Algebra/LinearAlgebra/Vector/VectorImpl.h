@@ -82,6 +82,18 @@ namespace Physica::Core {
         result = v1 + multiply((v2 - v1), result);
         return result;
     }
+
+    template<class T, size_t Length, size_t MaxLength>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::linspace(T from, T to, size_t count) {
+        assert(from < to);
+        const T step = (to - from) / T(count);
+        Vector result = Vector(count);
+        for (size_t i = 0; i < count; ++i) {
+            result[i] = from;
+            from += step;
+        }
+        return result;
+    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
     template<class T, size_t Length, size_t MaxLength>
