@@ -28,23 +28,23 @@
 using Physica::Core::MultiScalar;
 
 namespace Physica::Gui {
-    class Plot : public QtCharts::QChartView {
+    class Plot : public QChartView {
     public:
         Plot(QWidget* parent = nullptr);
         Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
                 , const MultiScalar& end, QWidget* parent = nullptr);
         /* Operations */
         template<class Array>
-        QtCharts::QSplineSeries& spline(const Array& x, const Array& y);
+        QSplineSeries& spline(const Array& x, const Array& y);
         template<class Array>
-        QtCharts::QScatterSeries& scatter(const Array& x, const Array& y);
+        QScatterSeries& scatter(const Array& x, const Array& y);
         template<class Array>
-        QtCharts::QAreaSeries& hist(const Array& data, size_t binCount, bool dencity = false);
+        QAreaSeries& hist(const Array& data, size_t binCount, bool dencity = false);
     };
 
     template<class Array>
-    QtCharts::QSplineSeries& Plot::spline(const Array& x, const Array& y) {
-        QtCharts::QSplineSeries* series = new QtCharts::QSplineSeries();
+    QSplineSeries& Plot::spline(const Array& x, const Array& y) {
+        QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
@@ -55,8 +55,8 @@ namespace Physica::Gui {
     }
 
     template<class Array>
-    QtCharts::QScatterSeries& Plot::scatter(const Array& x, const Array& y) {
-        QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries();
+    QScatterSeries& Plot::scatter(const Array& x, const Array& y) {
+        QScatterSeries* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
@@ -67,7 +67,7 @@ namespace Physica::Gui {
     }
 
     template<class Array>
-    QtCharts::QAreaSeries& Plot::hist(const Array& data, size_t binCount, bool dencity) {
+    QAreaSeries& Plot::hist(const Array& data, size_t binCount, bool dencity) {
         using T = typename Array::ValueType;
         
         double binWidth, min;
@@ -95,7 +95,7 @@ namespace Physica::Gui {
             arr[binIndex]++;
         }
 
-        QtCharts::QLineSeries* upper_series = new QtCharts::QLineSeries();
+        QLineSeries* upper_series = new QLineSeries();
         double current_x = min;
         if (dencity) {
             const double dencity_factor = 1 / (binWidth * length);
@@ -114,10 +114,10 @@ namespace Physica::Gui {
                 *upper_series << QPointF(current_x, y);
             }
         }
-        QtCharts::QLineSeries* lower_series = new QtCharts::QLineSeries();
+        QLineSeries* lower_series = new QLineSeries();
         *lower_series << QPointF(min, 0) << QPointF(current_x, 0);
 
-        QtCharts::QAreaSeries* series = new QtCharts::QAreaSeries(upper_series, lower_series);
+        QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
 
         chart()->addSeries(series);
         chart()->createDefaultAxes();

@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 
 namespace Physica::Gui {
-    Plot::Plot(QWidget* parent) : QtCharts::QChartView(parent) {
+    Plot::Plot(QWidget* parent) : QChartView(parent) {
         setAttribute(Qt::WA_DeleteOnClose);
 
         setChart(new QChart());
@@ -30,12 +30,12 @@ namespace Physica::Gui {
     }
 
     Plot::Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin, const MultiScalar& end, QWidget* parent)
-            : QtCharts::QChartView(parent) {
+            : QChartView(parent) {
         setAttribute(Qt::WA_DeleteOnClose);
 
         MultiScalar maxStepSize = (end - begin) / BasicConst::getInstance().plotPoints;
         MultiScalar point = MultiScalar(begin);
-        QtCharts::QSplineSeries* series = new QtCharts::QSplineSeries();
+        QSplineSeries* series = new QSplineSeries();
         do {
             MultiScalar y = func(point);
             *series << QPointF(double(point), double(y));

@@ -57,7 +57,7 @@ include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
 if(${PHYSICA_GUI})
-    find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+    find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 endif()
 
 if(${PHYSICA_PROFILE})
@@ -88,5 +88,5 @@ if(${PHYSICA_GUI})
     install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
     install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
     #############################################Options##############################################
-    target_link_libraries(Physica PhysicaCore PhysicaGui Qt5::Core Qt5::Widgets)
+    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets)
 endif()
