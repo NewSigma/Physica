@@ -75,13 +75,18 @@ namespace Physica::Core {
         DenseMatrix(const RValueVector<VectorType>& mat);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
+        DenseMatrix(const DenseMatrix& m);
+        DenseMatrix(DenseMatrix&& m) noexcept;
         /* Operators */
+        DenseMatrix& operator=(DenseMatrix m);
         using Base::operator=;
         using Storage::operator();
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
         /* Getters */
         using Storage::getRow;
         using Storage::getColumn;
+        /* Helpers */
+        void swap(DenseMatrix& m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }

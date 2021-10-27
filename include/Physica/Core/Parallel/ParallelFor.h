@@ -43,6 +43,6 @@ namespace Physica::Core::Parallel {
             const size_t next_to = to + maxLoopPerCore;
             to = next_to > loopCount ? loopCount : next_to;
         }
-        return std::move(result);
+        return result;
     }
 }

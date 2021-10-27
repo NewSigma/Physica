@@ -39,7 +39,7 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Length) {
         assert(list.size() <= Capacity);
-        size_t i = 0;
+        unsigned int i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             alloc.construct(arr + i, *ite);
@@ -262,7 +262,7 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::reserve(size_t size) {
         assert (size > getCapacity());
-        arr = alloc.reallocate(arr, size);
+        arr = alloc.reallocate(arr, size, capacity);
         capacity = size;
     }
 
@@ -298,7 +298,7 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::squeeze() {
-        arr = alloc.reallocate(arr, length);
+        arr = alloc.reallocate(arr, length, capacity);
         capacity = length;
     }
     /*!
@@ -308,7 +308,7 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::increase(size_t size) {
         assert(size >= capacity);
-        arr = alloc.reallocate(arr, size);
+        arr = alloc.reallocate(arr, size, capacity);
         capacity = size;
     }
     /*!

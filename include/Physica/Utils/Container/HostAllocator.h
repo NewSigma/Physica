@@ -44,9 +44,9 @@ namespace Physica::Utils {
         HostAllocator& operator=(const HostAllocator&) noexcept = default;
         HostAllocator& operator=(HostAllocator&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] static T* allocate(size_t n);
-        static void deallocate(T* p, size_t n) noexcept;
-        [[nodiscard]] static T* reallocate(T* p, size_t n);
+        [[nodiscard]] T* allocate(size_t n);
+        void deallocate(T* p, size_t n) noexcept;
+        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
         template<class... Args>
         void construct(T* p, Args&&... args);
         void destroy(T* p);
@@ -54,7 +54,10 @@ namespace Physica::Utils {
 
     template<class T>
     [[nodiscard]] T* HostAllocator<T>::allocate(size_t n) {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
+    #pragma GCC diagnostic pop
         if (!p)
             throw std::bad_alloc();
         return p;
@@ -66,8 +69,16 @@ namespace Physica::Utils {
     }
 
     template<class T>
-    [[nodiscard]] T* HostAllocator<T>::reallocate(T* p, size_t n) {
-        return reinterpret_cast<T*>(realloc(p, n * sizeof(T)));
+    [[nodiscard]] T* HostAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+        if constexpr (std::is_trivially_copyable<T>::value)
+            return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
+        else {
+            T* new_p = allocate(new_size);
+            for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+                construct(new_p + i, std::move(p[i]));
+            deallocate(p, old_size);
+            return new_p;
+        }
     }
 
     template<class T>

@@ -45,6 +45,24 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrix& m) : Base(), Storage(m) {}
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)) {}
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>&
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::operator=(DenseMatrix m) {
+        swap(m);
+        return *this;
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::swap(DenseMatrix& m) noexcept {
+        Storage::swap(m);
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();

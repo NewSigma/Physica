@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2021 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,9 +26,6 @@ int main(int argc, char** argv) {
     QApplication::setApplicationName("Physica");
     QApplication::setApplicationVersion("0.0.1");
     QApplication::setOrganizationName("NewSigma@163.com");
-
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);
 

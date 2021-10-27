@@ -93,9 +93,9 @@ T calcPhase(const ProgramArgs& args, const Vector<T>& h, const Vector<T>& wave) 
     const T factor = r1 * wave2 / (r2 * wave1);
     const T k_r1 = wave_vector * r1;
     const T k_r2 = wave_vector * r2;
-    T j1, j2, n1, n2, unused;
-    sphericalBesselJn_Yn_dJn_dYn(args.radialNum, k_r1, j1, n1, unused, unused);
-    sphericalBesselJn_Yn_dJn_dYn(args.radialNum, k_r2, j2, n2, unused, unused);
+    T j1, j2, n1, n2, unused1, unused2;
+    sphericalBesselJn_Yn_dJn_dYn(args.radialNum, k_r1, j1, n1, unused1, unused2);
+    sphericalBesselJn_Yn_dJn_dYn(args.radialNum, k_r2, j2, n2, unused1, unused2);
     return arctan(T(factor * j1 - j2) / T(factor * n1 - n2));
 }
 

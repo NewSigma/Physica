@@ -33,8 +33,8 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class AnyVector, class OtherVector>
-    typename AnyVector::ScalarType householder(const LValueVector<AnyVector>& __restrict source,
-                                               LValueVector<OtherVector>& __restrict target) {
+    typename AnyVector::ScalarType householder(const LValueVector<AnyVector>& source,
+                                               LValueVector<OtherVector>& target) {
         using ScalarType = typename AnyVector::ScalarType;
         assert(source.getLength() == target.getLength());
         const ScalarType norm = source.getDerived().norm();
