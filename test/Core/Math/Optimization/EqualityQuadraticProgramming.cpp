@@ -44,7 +44,7 @@ int main() {
 
         const VectorType initial{1, 1, 1};
         EqualityQuadraticProgramming<ScalarType> QP(G, c, constraints, initial);
-        if (!vectorNear(QP.getSolution(), answer, 1E-16))
+        if (!vectorNear(QP.getSolution(), answer, 1E-15)) //Precision can reach 1E-16 in debug mode
             return 1;
     }
     return 0;
