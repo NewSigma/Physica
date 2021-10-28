@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2021 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,26 +23,30 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
-    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
-    class FFT {
-    protected:
-        Vector<ComplexScalar<option, errorTrack>, Dynamic> data;
-        Scalar<option, false> distance;
+    template<class ScalarType>
+    class DFT {
+        using RealType = typename ScalarType::ScalarType;
+        using ComplexType = ComplexScalar<RealType>;
+        Vector<ComplexType> data;
+        ScalarType distance;
     public:
-        FFT(Vector<ComplexScalar<option, errorTrack>, Dynamic> data, Scalar<option, false> distance);
-        FFT(const FFT& fft);
-        FFT(FFT&& fft) noexcept;
-        ~FFT() = default;
+        DFT(const Vector<ScalarType>& data_, const ScalarType& distance_);
+        DFT(const DFT& dft);
+        DFT(DFT&& dft) noexcept;
+        ~DFT() = default;
         /* Operators */
-        FFT& operator=(const FFT& fft);
-        FFT& operator=(FFT&& fft) noexcept;
-        ComplexScalar<option, errorTrack> operator()(size_t i) { return data[i]; }
+        DFT& operator=(DFT dft);
+        ComplexType operator()(size_t i) { return data[i]; }
         /* Transforms */
         inline void transform();
         inline void invTransform();
+        /* Getters */
+        [[nodiscard]] const Vector<ComplexType>& getData() const noexcept { return data; }
+        /* Helpers */
+        void swap(DFT& dft);
     private:
-        void transformImpl(const Scalar<option, errorTrack>&& phase);
+        void transformImpl(const RealType&& phase);
     };
 }
 
-#include "FFTImpl.h"
+#include "DFTImpl.h"

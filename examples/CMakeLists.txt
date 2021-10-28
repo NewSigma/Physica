@@ -14,4 +14,5 @@ if(${PHYSICA_GUI})
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
 
+physica_add_example(DFT DFT.cpp)
 physica_add_example(HF HF.cpp)
