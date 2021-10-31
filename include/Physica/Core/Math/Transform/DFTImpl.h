@@ -45,15 +45,14 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void DFT<ScalarType>::transform() {
-        transformImpl(RealType(M_PI / data.getLength()) * RealType::Two());
+        transformImpl(RealType(-2 * M_PI / data.getLength()));
         data *= distance;
     }
 
     template<class ScalarType>
     inline void DFT<ScalarType>::invTransform() {
-        const RealType temp = reciprocal(RealType(data.getLength()));
-        transformImpl(RealType(-M_PI) * temp * RealType::Two());
-        data *= temp;
+        transformImpl(RealType(2 * M_PI / data.getLength()));
+        data /= distance * data.getLength();
     }
 
     template<class ScalarType>
@@ -63,7 +62,27 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DFT<ScalarType>::transformImpl(const RealType&& phase) {
+    typename DFT<ScalarType>::ComplexType DFT<ScalarType>::getComponent(ssize_t index) const {
+        const size_t length = data.getLength();
+        assert(length <= SSIZE_MAX);
+        assert(index <= static_cast<ssize_t>(length) / 2);
+        assert(-static_cast<ssize_t>(length) / 2 <= index);
+        if (index < 0)
+            index += static_cast<ssize_t>(length);
+        return data[index];
+    }
+
+    template<class ScalarType>
+    Vector<typename DFT<ScalarType>::ComplexType> DFT<ScalarType>::getComponents() const {
+        Vector<ComplexType> result = Vector<ComplexType>(data.getLength());
+        const ssize_t half_size = static_cast<ssize_t>(data.getLength() / 2);
+        for (ssize_t i = -half_size; i < half_size; ++i)
+            result[i + half_size] = getComponent(i);
+        return result;
+    }
+
+    template<class ScalarType>
+    void DFT<ScalarType>::transformImpl(const RealType& phase) {
         const size_t length = data.getLength();
         Vector<ComplexType> buffer(length);
         //Optimize:

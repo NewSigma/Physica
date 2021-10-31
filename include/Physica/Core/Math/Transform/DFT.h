@@ -41,11 +41,13 @@ namespace Physica::Core {
         inline void transform();
         inline void invTransform();
         /* Getters */
+        [[nodiscard]] ComplexType getComponent(ssize_t index) const;
+        [[nodiscard]] Vector<ComplexType> getComponents() const;
         [[nodiscard]] const Vector<ComplexType>& getData() const noexcept { return data; }
         /* Helpers */
         void swap(DFT& dft);
     private:
-        void transformImpl(const RealType&& phase);
+        void transformImpl(const RealType& phase);
     };
 }
 

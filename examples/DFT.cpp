@@ -18,24 +18,35 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Transform/DFT.h"
+#include <QtWidgets/QApplication>
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
+using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 
 ScalarType func(ScalarType x) {
-    if (x < ScalarType::One())
-        return ScalarType::One();
-    else
-        return -ScalarType::One();
+    return sin(ScalarType(2 * M_PI * 3) * x) + sin(ScalarType(6 * M_PI) * x) * 5;
 }
 
-int main() {
-    const size_t N = 50;
-    const Vector<ScalarType> data = Vector<ScalarType>::linspace(ScalarType::Zero(), ScalarType::Two(), N);
-    DFT<ScalarType> dft(data, ScalarType(2.0 / N));
+int main(int argc, char** argv) {
+    const size_t N = 100;
+    const double t_max = 1;
+    const Vector<ScalarType> x = Vector<ScalarType>::linspace(ScalarType::Zero(), ScalarType(t_max), N);
+    Vector<ScalarType> data(N);
+    for (size_t i = 0; i < N; ++i)
+        data[i] = func(x[i]);
+
+    DFT<ScalarType> dft(data, ScalarType(t_max / N));
     dft.transform();
-    dft.invTransform();
-    Vector<ScalarType> data1 = toRealVector(dft.getData());
-    std::cout << (data1) << std::endl;
-    return 0;
+    //dft.invTransform();
+    Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(N / t_max / -2), ScalarType(N / t_max / 2), N);
+    Vector<ScalarType> data1 = toImagVector(dft.getComponents());
+
+    QApplication app(argc, argv);
+    Plot* plot = new Plot();
+    auto& scatter = plot->scatter(f, data1);
+    scatter.setMarkerSize(8);
+    plot->show();
+    return QApplication::exec();
 }
