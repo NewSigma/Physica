@@ -48,7 +48,6 @@ namespace Physica::Gui {
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
-        chart()->createDefaultAxes();
 
         update();
         return *series;
@@ -60,7 +59,6 @@ namespace Physica::Gui {
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
-        chart()->createDefaultAxes();
 
         update();
         return *series;
@@ -120,7 +118,6 @@ namespace Physica::Gui {
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
 
         chart()->addSeries(series);
-        chart()->createDefaultAxes();
 
         update();
         return *series;
