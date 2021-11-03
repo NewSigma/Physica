@@ -44,6 +44,7 @@ namespace Physica::Gui {
 
     template<class Array>
     QSplineSeries& Plot::spline(const Array& x, const Array& y) {
+        assert(x.getLength() == y.getLength());
         QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
@@ -55,6 +56,7 @@ namespace Physica::Gui {
 
     template<class Array>
     QScatterSeries& Plot::scatter(const Array& x, const Array& y) {
+        assert(x.getLength() == y.getLength());
         QScatterSeries* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
