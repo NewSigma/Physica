@@ -135,6 +135,7 @@ void plotWaveFunction(double energy, double radialNum) {
     chart.setTitle("h-wave function");
     chart.legend()->hide();
     auto axes = chart.axes();
+    chart.createDefaultAxes();
     chart.axes(Qt::Horizontal).first()->setTitleText("h");
     chart.axes(Qt::Vertical).first()->setTitleText("wave function");
     plot->show();
@@ -168,6 +169,7 @@ int main(int argc, char** argv) {
     auto& chart = *plot->chart();
     chart.setTitle("E-cross section");
     chart.legend()->hide();
+    chart.createDefaultAxes();
     chart.axes(Qt::Horizontal).first()->setTitleText("E/meV");
     chart.axes(Qt::Vertical).first()->setTitleText("cross section/rho^2");
     plot->show();

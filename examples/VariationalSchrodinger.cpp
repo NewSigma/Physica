@@ -62,6 +62,7 @@ public:
         numerical->chart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotWave(*numerical, solver, i);
+        numerical->chart()->createDefaultAxes();
         numerical->show();
 
         Plot* analytical = new Plot();
@@ -69,6 +70,7 @@ public:
         analytical->chart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotReferenceWave(*analytical, i);
+        analytical->chart()->createDefaultAxes();
         analytical->show();
         return QApplication::exec();
     }
@@ -183,6 +185,7 @@ public:
         plotWave(*plot, real_eigenvector);
 
         plotReferenceWave(*plot);
+        plot->chart()->createDefaultAxes();
         plot->show();
         return QApplication::exec();
     }
@@ -294,6 +297,7 @@ public:
         QApplication app(argc, argv);
         Plot* plot = new Plot();
         plotWave(*plot, trial_solution);
+        plot->chart()->createDefaultAxes();
         plot->show();
         return QApplication::exec();
     }

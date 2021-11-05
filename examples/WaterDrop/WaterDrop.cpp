@@ -112,6 +112,7 @@ int WaterDropSolver::output() {
         auto& chart = *r_z->chart();
         chart.setTitle("r-z");
         chart.legend()->hide();
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
         chart.axes(Qt::Vertical).first()->setTitleText("z/m");
         r_z->show();
@@ -210,6 +211,7 @@ int main(int argc, char** argv) {
         auto& chart = *r_lambda->chart();
         chart.legend()->hide();
         chart.setTitle("r-lambda");
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
         chart.axes(Qt::Vertical).first()->setTitleText("lambda");
         r_lambda->show();
@@ -220,6 +222,7 @@ int main(int argc, char** argv) {
         auto& chart = *r_volume->chart();
         chart.legend()->hide();
         chart.setTitle("r-volume");
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
         chart.axes(Qt::Vertical).first()->setTitleText("volume/m^3");
         r_volume->show();

@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
         auto& chart = *plot->chart();
         chart.legend()->hide();
         chart.setTitle("t_x");
+        chart.createDefaultAxes();
         auto axes = chart.axes();
         axes[0]->setTitleText("t");
         axes[1]->setTitleText("x");
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
         auto& chart = *plot->chart();
         chart.legend()->hide();
         chart.setTitle("t_v");
+        chart.createDefaultAxes();
         auto axes = chart.axes();
         axes[0]->setTitleText("t");
         axes[1]->setTitleText("v");
@@ -81,6 +83,7 @@ int main(int argc, char** argv) {
         series->setMarkerSize(5);
         chart.legend()->hide();
         chart.setTitle("x_v");
+        chart.createDefaultAxes();
         auto axes = chart.axes();
         axes[0]->setTitleText("x");
         axes[1]->setTitleText("v");

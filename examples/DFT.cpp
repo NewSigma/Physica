@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
 
     DFT<ScalarType> dft(data, ScalarType(t_max / N));
     dft.transform();
-    //dft.invTransform();
     Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(N / t_max / -2), ScalarType(N / t_max / 2), N);
     Vector<ScalarType> data1 = toImagVector(dft.getComponents());
 
@@ -47,6 +46,7 @@ int main(int argc, char** argv) {
     Plot* plot = new Plot();
     auto& scatter = plot->scatter(f, data1);
     scatter.setMarkerSize(8);
+    plot->chart()->createDefaultAxes();
     plot->show();
     return QApplication::exec();
 }

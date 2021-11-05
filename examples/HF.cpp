@@ -107,6 +107,7 @@ int main(int argc, char** argv) {
     auto& chart = *plot->chart();
     chart.setTitle("Energy in hytrogen molecule");
     chart.legend()->setAlignment(Qt::AlignRight);
+    chart.createDefaultAxes();
     chart.axes(Qt::Horizontal).first()->setTitleText("R/Bohr radii");
     chart.axes(Qt::Vertical).first()->setTitleText("Energy/Hartree");
     plot->show();

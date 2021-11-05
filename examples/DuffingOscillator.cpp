@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
         auto& chart = *t_x->chart();
         chart.setTitle("t-x");
         chart.legend()->hide();
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("t");
         chart.axes(Qt::Vertical).first()->setTitleText("x");
         t_x->show();
@@ -102,6 +103,7 @@ int main(int argc, char** argv) {
         auto& chart = *t_p->chart();
         chart.setTitle("t-p");
         chart.legend()->hide();
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("t");
         chart.axes(Qt::Vertical).first()->setTitleText("p");
         t_p->show();
@@ -112,6 +114,7 @@ int main(int argc, char** argv) {
         auto& chart = *x_p->chart();
         chart.setTitle("x-p");
         chart.legend()->hide();
+        chart.createDefaultAxes();
         chart.axes(Qt::Horizontal).first()->setTitleText("x");
         chart.axes(Qt::Vertical).first()->setTitleText("p");
         x_p->show();

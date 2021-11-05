@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
     
     QApplication app(argc, argv);
     Plot* plot = new Plot();
-    plot->hist(arr, 100);   
+    plot->hist(arr, 100);
+    plot->chart()->createDefaultAxes();
     plot->show();
     return QApplication::exec();
 }
