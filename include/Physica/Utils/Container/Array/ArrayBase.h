@@ -27,13 +27,13 @@
 namespace Physica::Utils::Internal {
     //Forward declaration
     template<class T> class Traits;
-    template<class Derived> class ArrayStorage;
+    template<class Derived, class Allocator> class ArrayBase;
 
     template<class T, class Container>
     class ContainerIterator;
     
-    template<class ValueType, class Derived>
-    class ContainerIterator<ValueType, ArrayStorage<Derived>> {
+    template<class ValueType, class Derived, class Allocator>
+    class ContainerIterator<ValueType, ArrayBase<Derived, Allocator>> {
     public:
         using difference_type = std::ptrdiff_t;
         using value_type = ValueType;
@@ -56,14 +56,14 @@ namespace Physica::Utils::Internal {
     private:
         __host__ __device__ explicit ContainerIterator(pointer p) : p(p) {}
 
-        friend class ArrayStorage<Derived>;
+        friend class ArrayBase<Derived, Allocator>;
     };
 
     template<class Pointer, class Container>
     class ReverseContainerIterator;
     
-    template<class ValueType, class Derived>
-    class ReverseContainerIterator<ValueType, ArrayStorage<Derived>> {
+    template<class ValueType, class Derived, class Allocator>
+    class ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>> {
     public:
         using difference_type = std::ptrdiff_t;
         using value_type = ValueType;
@@ -85,62 +85,55 @@ namespace Physica::Utils::Internal {
     private:
         __host__ __device__ explicit ReverseContainerIterator(pointer p) : p(p) {}
 
-        friend class ArrayStorage<Derived>;
+        friend class ArrayBase<Derived, Allocator>;
     };
     /**
      * Public parts among specializations of \class Array.
      */
-    template<class Derived>
-    class ArrayStorage : public Utils::CRTPBase<Derived> {
+    template<class Derived, class Allocator>
+    class ArrayBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
-        using allocator_type = typename Traits<Derived>::AllocatorType;
+        using allocator_type = Allocator;
         using AllocatorTraits = std::allocator_traits<allocator_type>;
         using ValueType = typename AllocatorTraits::value_type;
         using PointerType = typename AllocatorTraits::pointer;
+        using const_pointer = typename AllocatorTraits::const_pointer;
         using LValueReferenceType = typename AllocatorTraits::lvalue_reference;
         using ConstLValueReferenceType = typename AllocatorTraits::const_lvalue_reference;
         using RValueReferenceType = typename AllocatorTraits::rvalue_reference;
-    protected:
-        PointerType arr;
-        allocator_type alloc;
+        using Iterator = ContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
+        using ConstIterator = ContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
+        using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
+        using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
     public:
-        using Iterator = ContainerIterator<ValueType, ArrayStorage<Derived>>;
-        using ConstIterator = ContainerIterator<const ValueType, ArrayStorage<Derived>>;
-        using ReverseIterator = ReverseContainerIterator<ValueType, ArrayStorage<Derived>>;
-        using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayStorage<Derived>>;
-    public:
-        ArrayStorage() = delete;
         /* Operators */
         [[nodiscard]] __host__ __device__ LValueReferenceType operator[](size_t index);
         [[nodiscard]] __host__ __device__ ConstLValueReferenceType operator[](size_t index) const;
-        bool operator==(const ArrayStorage& array) const;
-        __host__ __device__ bool operator!=(const ArrayStorage& array) const { return !(*this == array); }
+        bool operator==(const ArrayBase& array) const;
+        __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterator */
-        __host__ __device__ Iterator begin() noexcept { return Iterator(arr); }
-        __host__ __device__ Iterator end() noexcept { return Iterator(arr + Base::getDerived().getLength()); }
-        __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(arr); }
-        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(arr + Base::getDerived().getLength()); }
-        __host__ __device__ ReverseIterator rbegin() const noexcept { return ReverseIterator(arr + Base::getDerived().getLength() - 1); }
-        __host__ __device__ ReverseIterator rend() const noexcept { return ReverseIterator(arr - 1); }
-        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(arr + Base::getDerived().getLength() - 1); }
-        __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(arr - 1); }
+        __host__ __device__ Iterator begin() noexcept { return Iterator(data()); }
+        __host__ __device__ Iterator end() noexcept { return Iterator(data() + Base::getDerived().getLength()); }
+        __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(data()); }
+        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(data() + Base::getDerived().getLength()); }
+        __host__ __device__ ReverseIterator rbegin() noexcept { return ReverseIterator(data() + Base::getDerived().getLength() - 1); }
+        __host__ __device__ ReverseIterator rend() noexcept { return ReverseIterator(data() - 1); }
+        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(data() + Base::getDerived().getLength() - 1); }
+        __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(data() - 1); }
         /* Getters */
         [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
-        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const PointerType data() const noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return Base::getDerived().data(); }
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
     protected:
-        __host__ __device__ explicit ArrayStorage(size_t capacity);
-        __host__ __device__ explicit ArrayStorage(PointerType arr_);
-        __host__ __device__ ArrayStorage(const ArrayStorage& array);
-        __host__ __device__ ArrayStorage(ArrayStorage&& array) noexcept;
-        __host__ __device__ ~ArrayStorage();
+        __host__ __device__ ArrayBase() = default;
+        __host__ __device__ ArrayBase(const ArrayBase&) = default;
+        __host__ __device__ ArrayBase(ArrayBase&&) noexcept = default;
+        __host__ __device__ ~ArrayBase() = default;
         /* Operators */
-        ArrayStorage& operator=(ArrayStorage array) noexcept;
-        /* Helpers */
-        __host__ __device__ inline void swap(ArrayStorage& array) noexcept;
+        ArrayBase& operator=(const ArrayBase&) = default;
+        ArrayBase& operator=(ArrayBase&&) noexcept = default;
     };
 }
 
-#include "ArrayStorageImpl.h"
+#include "ArrayBaseImpl.h"

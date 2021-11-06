@@ -18,25 +18,28 @@
  */
 #pragma once
 
-#include "ArrayStorage.h"
+#include "ArrayBase.h"
 
 namespace Physica::Utils::Internal {
-    template<class Derived>
-    class DynamicArrayBase : public ArrayStorage<Derived> {
+    template<class Derived, class Allocator>
+    class DynamicArrayBase : public ArrayBase<Derived, Allocator> {
     public:
-        using Base = ArrayStorage<Derived>;
+        using Base = ArrayBase<Derived, Allocator>;
+        using typename Base::allocator_type;
+        using typename Base::AllocatorTraits;
         using typename Base::ValueType;
         using typename Base::PointerType;
+        using const_pointer = typename AllocatorTraits::const_pointer;
         using typename Base::LValueReferenceType;
         using typename Base::ConstLValueReferenceType;
         using typename Base::RValueReferenceType;
     protected:
-        using Base::arr;
-        using Base::alloc;
+        PointerType arr;
+        allocator_type alloc;
         size_t length;
     public:
         DynamicArrayBase() = delete;
-        ~DynamicArrayBase() = default;
+        __host__ __device__ ~DynamicArrayBase();
         /* Operators */
         Derived& operator<<(ConstLValueReferenceType t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(RValueReferenceType t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
@@ -57,6 +60,10 @@ namespace Physica::Utils::Internal {
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
         __host__ __device__ void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
     protected:
         __host__ __device__ explicit DynamicArrayBase(size_t capacity);
         __host__ __device__ DynamicArrayBase(size_t length_, size_t capacity);

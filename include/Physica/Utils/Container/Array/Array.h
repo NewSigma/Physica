@@ -59,35 +59,29 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    class Array : public Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>> {
+    class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
     public:
-        using Base = Internal::ArrayStorage<Array<T, Length, Capacity, Allocator>>;
+        using Base = Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator>;
+        using typename Base::allocator_type;
+        using typename Base::AllocatorTraits;
         using typename Base::ValueType;
         using typename Base::PointerType;
+        using const_pointer = typename AllocatorTraits::const_pointer;
         using typename Base::LValueReferenceType;
         using typename Base::ConstLValueReferenceType;
         using typename Base::RValueReferenceType;
         constexpr static size_t ArrayLength = Length;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
-        using Base::arr;
-        using Base::alloc;
-        using Base::getDerived;
+        T arr[Length];
+        allocator_type alloc;
     public:
-        __host__ __device__ Array();
+        __host__ __device__ Array() = default;
         __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
         __host__ __device__ Array(std::initializer_list<T> list);
         __host__ __device__ Array(const Array& array);
         __host__ __device__ Array(Array&& array) noexcept;
-        template<size_t OtherLength, size_t OtherCapacity>
-        explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
-        template<size_t OtherLength, size_t OtherCapacity>
-        explicit Array(Array<T, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        explicit Array(const Array<OtherT, OtherLength, OtherCapacity, Allocator>& array);
-        template<class OtherT, size_t OtherLength, size_t OtherCapacity>
-        explicit Array(Array<OtherT, OtherLength, OtherCapacity, Allocator>&& array) noexcept;
         ~Array() = default;
         /* Operators */
         Array& operator=(Array array) noexcept { swap(array); return *this; }
@@ -99,20 +93,23 @@ namespace Physica::Utils {
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
         __host__ __device__ void resize([[maybe_unused]] size_t size) { assert(size == Length); }
         void resize(size_t size, const T& t);
-        __host__ __device__ void swap(Array& array) noexcept { Base::swap(array); }
+        __host__ __device__ void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
+        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         __host__ __device__ void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
     };
 
     template<class T, size_t Capacity, class Allocator>
     class Array<T, Dynamic, Capacity, Allocator>
-        : public Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>> {
+        : public Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator> {
     public:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>>;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator>;
         using typename Base::ValueType;
         using typename Base::PointerType;
         using typename Base::LValueReferenceType;
@@ -160,9 +157,9 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     class Array<T, Dynamic, Dynamic, Allocator>
-        : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>> {
+        : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator> {
     public:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>>;
+        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator>;
         using typename Base::ValueType;
         using typename Base::PointerType;
         using typename Base::LValueReferenceType;

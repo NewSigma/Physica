@@ -24,35 +24,32 @@
 namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array() : Base(Capacity) {
-        for (size_t i = 0; i < Length; ++i)
-            alloc.construct(arr + i);
-    }
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
-            alloc.construct(arr + i, t);
+            *(arr + i) = t;
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Length) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) {
         assert(list.size() <= Capacity);
         unsigned int i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            alloc.construct(arr + i, *ite);
-        for (; i < Length; ++i)
-            alloc.construct(arr + i);
+            *(arr + i) = *ite;
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base(array) {}
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) {
+        for (size_t i = 0; i < Length; ++i)
+            arr[i] = array[i];
+    }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept
-            : Base(std::move(array)) {}
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept {
+        for (size_t i = 0; i < Length; ++i)
+            arr[i] = std::move(array[i]);
+    }
     /*!
      * Return the sub array of current array. \from is included and \to is excluded.
      */
@@ -87,6 +84,12 @@ namespace Physica::Utils {
         assert(size == getLength());
         for (size_t i = 0; i < size; ++i)
             (*this)[i] = t;
+    }
+
+    template<class T, size_t Length, size_t Capacity, class Allocator>
+    void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
+        for (size_t i = 0; i < Length; ++i)
+            arr[i].swap(array[i]);
     }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity, class Allocator>

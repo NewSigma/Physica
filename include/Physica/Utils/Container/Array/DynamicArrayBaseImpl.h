@@ -19,38 +19,72 @@
 #pragma once
 
 namespace Physica::Utils::Internal {
-    template<class Derived>
-    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t capacity)
-        : Base(capacity), length(0) {}
-
-    template<class Derived>
-    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, size_t capacity)
-            : Base(capacity), length(length_) {
-        assert(length <= capacity);
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t capacity)
+            : alloc(), length(0) {
+        arr = alloc.allocate(capacity);
     }
 
-    template<class Derived>
-    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(size_t length_, PointerType arr_)
-            : Base(arr_), length(length_) {}
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, size_t capacity)
+            : DynamicArrayBase(capacity) {
+        assert(length <= capacity);
+        length = length_;
+    }
 
-    template<class Derived>
-    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
-        const DynamicArrayBase& array) : Base(array), length(array.length) {}
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, PointerType arr_)
+            : arr(arr_), alloc(), length(length_) {}
+
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
+            const DynamicArrayBase& array) : DynamicArrayBase(array.getDerived().getCapacity()) {
+        length = array.length;
+        if constexpr (!std::is_trivial<ValueType>::value)
+            for(size_t i = 0; i < length; ++i)
+                AllocatorTraits::construct(alloc, arr + i, array[i]);
+        else {
+        #ifdef PHYSICA_CUDA
+            #ifdef __CUDA__ARCH__
+                memcpy(arr, array.arr, length * sizeof(ValueType));
+            #else
+                if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)
+                    cudaMemcpy(arr.get(), array.arr.get(), length * sizeof(ValueType), cudaMemcpyDeviceToDevice);
+                else
+                    memcpy(arr, array.arr, length * sizeof(ValueType));
+            #endif
+        #else
+            memcpy(arr, array.arr, length * sizeof(ValueType));
+        #endif
+        }
+    }
     
-    template<class Derived>
-    __host__ __device__ DynamicArrayBase<Derived>::DynamicArrayBase(
-        DynamicArrayBase&& array) noexcept : Base(std::move(array)), length(array.length) { array.length = 0; }
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
+            DynamicArrayBase&& array) noexcept : arr(array.arr), alloc(), length(array.length) {
+        array.arr = nullptr;
+        array.length = 0;
+    }
     
-    template<class Derived>
-    DynamicArrayBase<Derived>& DynamicArrayBase<Derived>::operator=(DynamicArrayBase array) noexcept {
+    template<class Derived, class Allocator>
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::~DynamicArrayBase() {
+        if constexpr (!std::is_trivial<ValueType>::value)
+            if (arr != nullptr)
+                for(size_t i = 0; i < length; ++i)
+                    AllocatorTraits::destroy(alloc, arr + i);
+        alloc.deallocate(arr, length);
+    }
+
+    template<class Derived, class Allocator>
+    DynamicArrayBase<Derived, Allocator>& DynamicArrayBase<Derived, Allocator>::operator=(DynamicArrayBase array) noexcept {
         swap(array);
         return *this;
     }
     /**
      * Get the last element in the array and remove it from the array.
      */
-    template<class Derived>
-    typename DynamicArrayBase<Derived>::ValueType DynamicArrayBase<Derived>::cutLast() {
+    template<class Derived, class Allocator>
+    typename DynamicArrayBase<Derived, Allocator>::ValueType DynamicArrayBase<Derived, Allocator>::cutLast() {
         assert(length > 0);
         --length;
         if constexpr (!std::is_trivial<ValueType>::value)
@@ -63,20 +97,20 @@ namespace Physica::Utils::Internal {
      * Allocate a element at the end and increase the length.
      * This function can be used when you are sure the current capacity is enough.
      */
-    template<class Derived>
-    __host__ __device__ inline void DynamicArrayBase<Derived>::grow(ConstLValueReferenceType t) {
+    template<class Derived, class Allocator>
+    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(ConstLValueReferenceType t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, t);
     }
 
-    template<class Derived>
-    __host__ __device__ inline void DynamicArrayBase<Derived>::grow(RValueReferenceType t) {
+    template<class Derived, class Allocator>
+    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(RValueReferenceType t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, std::move(t));
     }
 
-    template<class Derived>
-    void DynamicArrayBase<Derived>::removeAt(size_t index) {
+    template<class Derived, class Allocator>
+    void DynamicArrayBase<Derived, Allocator>::removeAt(size_t index) {
         assert(index < length);
         if constexpr (!std::is_trivial<ValueType>::value)
             alloc.destroy(arr + index);
@@ -84,32 +118,32 @@ namespace Physica::Utils::Internal {
         memmove(arr + index, arr + index + 1, (length - index) * sizeof(ValueType));
     }
 
-    template<class Derived>
-    __host__ __device__ void DynamicArrayBase<Derived>::clear() noexcept {
+    template<class Derived, class Allocator>
+    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
             alloc.destroy(arr + i);
         length = 0;
     }
 
-    template<class Derived>
-    void DynamicArrayBase<Derived>::insert(ConstLValueReferenceType t, size_t index) {
+    template<class Derived, class Allocator>
+    void DynamicArrayBase<Derived, Allocator>::insert(ConstLValueReferenceType t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
         alloc.construct(arr + index, t);
         Base::setLength(length + 1);
     }
 
-    template<class Derived>
-    void DynamicArrayBase<Derived>::insert(RValueReferenceType t, size_t index) {
+    template<class Derived, class Allocator>
+    void DynamicArrayBase<Derived, Allocator>::insert(RValueReferenceType t, size_t index) {
         assert(length < Base::getCapacity());
         memmove(arr + index + 1, arr + index, length - index);
         alloc.construct(arr + index, std::move(t));
         Base::setLength(length + 1);
     }
 
-    template<class Derived>
-    __host__ __device__ void DynamicArrayBase<Derived>::swap(DynamicArrayBase& array) {
-        Base::swap(array);
+    template<class Derived, class Allocator>
+    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) {
+        std::swap(arr, array.arr);
         std::swap(length, array.length);
     }
 }
