@@ -20,6 +20,7 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 
 namespace Physica::Core {
     Poscar::Poscar() : lattice(LatticeMatrix::unitMatrix(3))
@@ -126,6 +127,17 @@ namespace Physica::Core {
         for (size_t i = 0; i < col.getLength(); ++i)
             if (col[i] > ScalarType(0.5))
                 col[i] += temp;
+    }
+
+    typename Poscar::LatticeMatrix Poscar::getReciprocal() const noexcept {
+        LatticeMatrix result{};
+        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
+        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
+        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
+        const ScalarType volume = abs(lattice.row(0).asVector() * result.row(0));
+        const ScalarType factor = ScalarType(2 * M_PI) / volume;
+        result *= factor;
+        return result;
     }
 
     size_t Poscar::getAtomCount() const noexcept {

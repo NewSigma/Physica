@@ -24,7 +24,6 @@
 #include "LValueVector.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
-#include "CrossProduct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
@@ -69,8 +68,6 @@ namespace Physica::Core {
         /* Operations */
         Vector& toOpposite();
         void toUnit();
-        template<class OtherVector>
-        [[nodiscard]] inline CrossProduct<Vector, OtherVector> crossProduct(const RValueVector<OtherVector>& v) const noexcept;
         /* Getters */
         using Storage::getLength;
         /* Helpers */

@@ -23,6 +23,7 @@
 
 namespace Physica::Core {
     template<class VectorType> class TransposeVector;
+    template<class AnyVector1, class AnyVector2> class CrossProduct;
 
     namespace Internal {
         template<class T> class Traits;
@@ -55,6 +56,8 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
+        template<class OtherDerived>
+        [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] ScalarType norm() const;
@@ -62,6 +65,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
     };
+
+    template<class Derived>
+    template<class OtherDerived>
+    inline CrossProduct<Derived, OtherDerived>
+    RValueVector<Derived>::crossProduct(const RValueVector<OtherDerived>& v) const noexcept {
+        return CrossProduct(*this, v);
+    }
 
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::norm() const {

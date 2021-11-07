@@ -23,6 +23,7 @@
 
 namespace Physica::Core {
     class Poscar {
+    public:
         enum PoscarType : bool {
             Direct,
             Cartesian
@@ -45,6 +46,7 @@ namespace Physica::Core {
         void extendInZ(ScalarType factor);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] LatticeMatrix getReciprocal() const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept;
     };
 }

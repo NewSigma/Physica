@@ -49,13 +49,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    template<class OtherVector>
-    inline CrossProduct<Vector<T, Length, MaxLength>, OtherVector>
-    Vector<T, Length, MaxLength>::crossProduct(const RValueVector<OtherVector>& v) const noexcept {
-        return CrossProduct(*this, v);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::Zeros(size_t len) {
         Vector<T, Length, MaxLength> result{};
         result.reserve(len);
