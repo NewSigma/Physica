@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "TestHelper.h"
+#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;
+using namespace Physica::Utils;
 
 using ScalarType = Scalar<Double, false>;
 

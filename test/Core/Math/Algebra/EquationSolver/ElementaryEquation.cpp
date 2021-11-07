@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "TestHelper.h"
+#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 int main() {
