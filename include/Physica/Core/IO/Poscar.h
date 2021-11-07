@@ -28,6 +28,17 @@ namespace Physica::Core {
             Direct,
             Cartesian
         };
+
+        enum CrystalSystem : char {
+            Triclinic,
+            Monoclinic,
+            Orthohombic,
+            Tetragonal,
+            Hexagonal,
+            Rhombohedral,
+            Cubic
+        };
+
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
         using PositionMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, 3>;
@@ -47,6 +58,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] LatticeMatrix getReciprocal() const noexcept;
+        [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept;
     };
 }

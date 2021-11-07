@@ -53,25 +53,19 @@ namespace Physica::Core {
             assert(v.getLength() == getLength());
             Base::getDerived().assignTo(v);
         }
-
+        /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
-        template<class OtherDerived>
-        [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
-        /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] ScalarType norm() const;
         [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
+        template<class OtherDerived>
+        [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
+        template<class OtherDerived>
+        [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
     };
-
-    template<class Derived>
-    template<class OtherDerived>
-    inline CrossProduct<Derived, OtherDerived>
-    RValueVector<Derived>::crossProduct(const RValueVector<OtherDerived>& v) const noexcept {
-        return CrossProduct(*this, v);
-    }
 
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::norm() const {
@@ -108,6 +102,20 @@ namespace Physica::Core {
                 result = temp;
         }
         return result;
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    inline CrossProduct<Derived, OtherDerived>
+    RValueVector<Derived>::crossProduct(const RValueVector<OtherDerived>& v) const noexcept {
+        return CrossProduct(*this, v);
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    typename RValueVector<Derived>::ScalarType
+    RValueVector<Derived>::angleTo(const RValueVector<OtherDerived>& v) const noexcept {
+        return arccos(Base::getDerived() * v.getDerived() / (norm() * v.norm()));
     }
 
     template<class VectorType>

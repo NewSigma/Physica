@@ -21,6 +21,7 @@
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
+#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     Poscar::Poscar() : lattice(LatticeMatrix::unitMatrix(3))
@@ -138,6 +139,52 @@ namespace Physica::Core {
         const ScalarType factor = ScalarType(2 * M_PI) / volume;
         result *= factor;
         return result;
+    }
+
+    Poscar::CrystalSystem Poscar::getCrystalSystem(double precision) const noexcept {
+        using namespace Utils;
+        const ScalarType norm_list[3]{lattice.row(0).squaredNorm(),
+                                      lattice.row(1).squaredNorm(),
+                                      lattice.row(2).squaredNorm()};
+        const ScalarType angle_list[3]{lattice.row(1).angleTo(lattice.row(2)),
+                                       lattice.row(0).angleTo(lattice.row(2)),
+                                       lattice.row(0).angleTo(lattice.row(1))};
+        const bool norm_equal_list[3]{scalarNear(norm_list[0], norm_list[1], precision),
+                                      scalarNear(norm_list[1], norm_list[2], precision),
+                                      scalarNear(norm_list[2], norm_list[0], precision)};
+        const bool angle_equal_list[3]{scalarNear(angle_list[0], angle_list[1], precision),
+                                       scalarNear(angle_list[1], angle_list[2], precision),
+                                       scalarNear(angle_list[2], angle_list[0], precision)};
+
+        const bool allAngleSame = angle_equal_list[0] && angle_equal_list[1];
+        if (allAngleSame) {
+            if (scalarNear(angle_list[0], ScalarType(M_PI_2), precision)) {
+                const unsigned int sameNormCount = norm_equal_list[0] + norm_equal_list[1] + norm_equal_list[2];
+                [[maybe_unused]] const bool compareTransitive = sameNormCount != 2;
+                assert(compareTransitive);
+                if (sameNormCount == 3)
+                    return Cubic;
+                if (sameNormCount == 1)
+                    return Tetragonal;
+                return Orthohombic;
+            }
+            return Rhombohedral;
+        }
+        else {
+            for (int i = 0; i < 3; ++i) {
+                if (angle_equal_list[i]) {
+                    if (scalarNear(angle_list[i], ScalarType(M_PI_2), precision)) {
+                        if (scalarNear(angle_list[(i + 2) % 3], ScalarType(M_PI * 2 / 3), precision))
+                            return Hexagonal;
+                        return Monoclinic;
+                    }
+                    [[maybe_unused]] const bool onlyOneSamePair = !angle_equal_list[(i + 1) % 3] && !angle_equal_list[(i + 2) % 3];
+                    assert(onlyOneSamePair);
+                    break;
+                }
+            }
+        }
+        return Triclinic;
     }
 
     size_t Poscar::getAtomCount() const noexcept {
