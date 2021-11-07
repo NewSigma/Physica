@@ -61,6 +61,7 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "Capacity of fixed array must equals to Length.");
+        static_assert(sizeof(T) * Length <= (1U << 16U), "Allocate large fixed array on stack is not recommanded");
     public:
         using Base = Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator>;
         using typename Base::allocator_type;
