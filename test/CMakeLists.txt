@@ -3,6 +3,8 @@ include(../cmake/Modules/PhysicaAddTest.cmake)
 
 message(STATUS "Configuring tests.")
 include_directories(./)
+# IO
+physica_add_test(Poscar Core/IO/Poscar.cpp)
 # Math
 ## Algebra
 ### Equation Solver

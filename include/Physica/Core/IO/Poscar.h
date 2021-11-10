@@ -58,7 +58,10 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] LatticeMatrix getReciprocal() const noexcept;
+        [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept;
+    private:
+        void readNumOfEachType(std::istream& is);
     };
 }

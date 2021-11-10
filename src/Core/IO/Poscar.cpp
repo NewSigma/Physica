@@ -49,27 +49,8 @@ namespace Physica::Core {
         is >> poscar.lattice(0, 0) >> poscar.lattice(0, 1) >> poscar.lattice(0, 2);
         is >> poscar.lattice(1, 0) >> poscar.lattice(1, 1) >> poscar.lattice(1, 2);
         is >> poscar.lattice(2, 0) >> poscar.lattice(2, 1) >> poscar.lattice(2, 2);
-        /* Test the format of poscar */ {
-            int temp;
-            is >> temp;
-            if (is.fail()) {
-                is.clear();
-                is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
-        }
-        /* Read numOfEachType */ {
-            poscar.numOfEachType.reserve(8);
-            do {
-                size_t count;
-                is >> count;
-                if (is.good())
-                    poscar.numOfEachType << count;
-                else
-                    break;
-            } while(true);
-            is.clear();
-            poscar.numOfEachType.squeeze();
-        }
+
+        poscar.readNumOfEachType(is);
         /* Read format type */ {
             const int ch = std::tolower(is.get());
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -192,5 +173,27 @@ namespace Physica::Core {
         for (size_t i = 0; i < numOfEachType.getLength(); ++i)
             result += numOfEachType[i];
         return result;
+    }
+
+    void Poscar::readNumOfEachType(std::istream& is) {
+        size_t count = 0;
+        /* Get first type count */ {
+            is >> count;
+            if (is.fail()) {
+                is.clear();
+                is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                is >> count;
+            }
+
+            if (!is)
+                throw BadFileFormatException();
+        }
+        numOfEachType.reserve(8);
+        do {
+            numOfEachType << count;
+            is >> count;
+        } while(is.good());
+        is.clear();
+        numOfEachType.squeeze();
     }
 }
