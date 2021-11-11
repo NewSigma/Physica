@@ -20,6 +20,10 @@
 #include <unistd.h>
 #include <fstream>
 #include "Physica/Core/IO/Poscar.h"
+#include "Physica/Utils/TestHelper.h"
+
+using namespace Physica::Core;
+using namespace Physica::Utils;
 
 const static char* data1 = "Structure	-97.8256	0.0003\n"
                            "1.0\n"
@@ -32,10 +36,7 @@ const static char* data1 = "Structure	-97.8256	0.0003\n"
                            "	    0.97162     0.88296     0.02801\n"
                            "	    0.73317     0.52985     0.03865\n";
 
-
-int main() {
-    using namespace Physica::Core;
-
+Poscar readTest() {
     const char* tempFile = tmpnam(nullptr);
     std::ofstream os(tempFile);
     os << data1;
@@ -50,6 +51,16 @@ int main() {
 
     const auto& numOfEachType = poscar.getNumOfEachType();
     if (!(numOfEachType[0] == 1 && numOfEachType[1] == 2))
+        exit(EXIT_FAILURE);
+    return poscar;
+}
+
+int main() {
+    Poscar poscar = readTest();
+
+    typename Poscar::LatticeMatrix mat = poscar.getLattice();
+    poscar.standrizeLattice();
+    if (!matrixNear(mat, poscar.getLattice(), 1E-15))
         return 1;
     return 0;
 }
