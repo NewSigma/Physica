@@ -24,7 +24,7 @@
 namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, ConstLValueReferenceType t) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
             *(arr + i) = t;
