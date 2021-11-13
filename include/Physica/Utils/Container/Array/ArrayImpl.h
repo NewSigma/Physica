@@ -271,32 +271,36 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::resize(size_t size) {
-        if constexpr (!std::is_trivial<T>::value) {
-            if (length > size) {
-                for (size_t i = size; i < length; ++i)
-                    (arr + i)->~T();
-                length = size;
-            }
-        }
         if (capacity < size)
             reserve(size);
-        for (; length < size; ++length)
-            alloc.construct(arr + length);
+
+        if (length > size) {
+            if constexpr (!std::is_trivial<T>::value)
+                for (size_t i = size; i < length; ++i)
+                    (arr + i)->~T();
+            length = size;
+        }
+        else {
+            for (; length < size; ++length)
+                alloc.construct(arr + length);
+        }
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::resize(size_t size, const T& t) {
-        if constexpr (!std::is_trivial<T>::value) {
-            if (length > size) {
-                for (size_t i = size; i < length; ++i)
-                    (arr + i)->~T();
-                length = size;
-            }
-        }
         if (capacity < size)
             reserve(size);
-        for (; length < size; ++length)
-            alloc.construct(arr + length, t);
+
+        if (length > size) {
+            if constexpr (!std::is_trivial<T>::value)
+                for (size_t i = size; i < length; ++i)
+                    (arr + i)->~T();
+            length = size;
+        }
+        else {
+            for (; length < size; ++length)
+                alloc.construct(arr + length, t);
+        }
     }
 
     template<class T, class Allocator>

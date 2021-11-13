@@ -5,6 +5,7 @@ message(STATUS "Configuring tests.")
 include_directories(./)
 # IO
 physica_add_test(Poscar Core/IO/Poscar.cpp)
+physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
 # Math
 ## Algebra
 ### Equation Solver
