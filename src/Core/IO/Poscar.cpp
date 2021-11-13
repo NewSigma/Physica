@@ -98,7 +98,7 @@ namespace Physica::Core {
         lattice = temp.transpose();
     }
     /**
-     * Extend the cell in z direction, with all distance of atoms in cell not changed.
+     * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
      */
     void Poscar::extendInZ(ScalarType factor) {
         assert(type == Direct);
@@ -108,13 +108,14 @@ namespace Physica::Core {
         lattice(2, 2) *= factor;
 
         const ScalarType inv_factor = reciprocal(factor);
-        auto col = pos.col(2);
-        col.asVector() *= inv_factor;
 
-        const ScalarType temp = ScalarType::One() - inv_factor;
-        for (size_t i = 0; i < col.getLength(); ++i)
+        auto col = pos.col(2);
+        for (size_t i = 0; i < col.getLength(); ++i) {
             if (col[i] > ScalarType(0.5))
-                col[i] += temp;
+                col[i] += (ScalarType::One() - col[i]) * inv_factor;
+            else
+                col[i] *= inv_factor;
+        }
     }
 
     typename Poscar::LatticeMatrix Poscar::getReciprocal() const noexcept {
