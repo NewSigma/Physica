@@ -262,6 +262,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Ln, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Ln, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Ln, VectorType>>;
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return ln(v.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
 
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
@@ -343,5 +355,10 @@ namespace Physica::Core {
     template<class VectorType>
     inline VectorExpression<Utils::ExpressionType::Square, VectorType> square(const RValueVector<VectorType>& v) {
         return VectorExpression<Utils::ExpressionType::Square, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Ln, VectorType>(v);
     }
 }

@@ -31,6 +31,7 @@ namespace Physica::Utils {
         Reciprocal,
         Sqrt,
         Abs,
-        Square
+        Square,
+        Ln
     };
 }

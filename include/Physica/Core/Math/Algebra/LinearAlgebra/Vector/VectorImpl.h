@@ -98,22 +98,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> ln(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(ln(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> log(const Vector<T, Length, MaxLength>& v, const T& a) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(log(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> exp(const Vector<T, Length, MaxLength>& v) {
         Vector<T, Length, MaxLength> result(v.getLength());
         size_t i = 0;
