@@ -117,6 +117,51 @@ namespace Physica::Core {
                 col[i] *= inv_factor;
         }
     }
+    /**
+     * Helper for phonopy, convert from super cell to unit cell
+     */
+    void Poscar::superToUnit(size_t x, size_t y, size_t z) {
+        assert(x > 0 && y > 0 && z > 0);
+        assert(pos.getRow() % (x * y * z) == 0);
+        const ScalarType inv_x = reciprocal(ScalarType(x));
+        const ScalarType inv_y = reciprocal(ScalarType(y));
+        const ScalarType inv_z = reciprocal(ScalarType(z));
+
+        auto rowX = lattice.row(0);
+        rowX *= inv_x;
+        auto rowY = lattice.row(1);
+        rowY *= inv_y;
+        auto rowZ = lattice.row(2);
+        rowZ *= inv_z;
+
+        auto colX = pos.col(0);
+        colX *= ScalarType(x);
+        auto colY = pos.col(1);
+        colY *= ScalarType(y);
+        auto colZ = pos.col(2);
+        colZ *= ScalarType(z);
+
+        const size_t newPosSize = pos.getRow() / (x * y * z);
+        PositionMatrix newPos(newPosSize, 3);
+        size_t toFill = 0;
+        size_t toCheck = 0;
+        const ScalarType one = ScalarType::One();
+        for (; toFill < newPosSize; ++toFill) {
+            for (; toCheck < pos.getRow(); ++toCheck) {
+                auto rowToCheck = pos.row(toCheck);
+                if (rowToCheck[0] <= one && rowToCheck[1] <= one && rowToCheck[2] <= one) {
+                    auto rowToFill = newPos.row(toFill);
+                    rowToFill = rowToCheck.asVector();
+                    ++toCheck;
+                    break;
+                }
+            }
+        }
+        pos = newPos;
+
+        for (size_t& num : numOfEachType)
+            num /= (x * y * z);
+    }
 
     typename Poscar::LatticeMatrix Poscar::getReciprocal() const noexcept {
         LatticeMatrix result{};

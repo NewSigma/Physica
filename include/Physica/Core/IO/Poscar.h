@@ -55,6 +55,7 @@ namespace Physica::Core {
         /* Operations */
         void standrizeLattice();
         void extendInZ(ScalarType factor);
+        void superToUnit(size_t x, size_t y, size_t z);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] LatticeMatrix getReciprocal() const noexcept;
