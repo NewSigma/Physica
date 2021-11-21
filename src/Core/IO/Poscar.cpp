@@ -102,7 +102,6 @@ namespace Physica::Core {
      */
     void Poscar::extendInZ(ScalarType factor) {
         assert(type == Direct);
-        assert(lattice(0, 1).isZero());
         assert(lattice(0, 2).isZero());
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;
