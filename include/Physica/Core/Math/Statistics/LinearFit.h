@@ -22,6 +22,43 @@
 
 namespace Physica::Core {
     template<class T, size_t Length, size_t Capacity>
+    T variance(const Utils::Array<T, Length, Capacity>& x) {
+        const size_t length = x.getLength();
+        T x_sum(0);
+        for (size_t i = 0; i < length; ++i)
+            x_sum += x[i];
+        const T x_mean = x_sum / T(length);
+
+        T result(0);
+        for (size_t i = 0; i < length; ++i) {
+            result += square(x[i] - x_mean);
+        }
+        result /= T(length);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    T covariance(const Utils::Array<T, Length, Capacity>& x, const Utils::Array<T, Length, Capacity>& y) {
+        assert(x.getLength() == y.getLength());
+        const size_t length = x.getLength();
+        T x_sum(0);
+        T y_sum(0);
+        for (size_t i = 0; i < length; ++i) {
+            x_sum += x[i];
+            y_sum += y[i];
+        }
+        const T x_mean = x_sum / T(length);
+        const T y_mean = y_sum / T(length);
+
+        T result(0);
+        for (size_t i = 0; i < length; ++i) {
+            result += (x[i] - x_mean) * (y[i] - y_mean);
+        }
+        result /= T(length);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t Capacity>
     std::pair<T, T> linearFit(const Utils::Array<T, Length, Capacity>& x, const Utils::Array<T, Length, Capacity>& y) {
         assert(x.getLength() == y.getLength());
         const size_t length = x.getLength();
@@ -42,5 +79,10 @@ namespace Physica::Core {
         T denominator = x_square_sum - square(x_sum) * length_1;
         T k = numerator / denominator;
         return {k, (y_sum - k * x_sum) * length_1};
+    }
+
+    template<class T, size_t Length, size_t Capacity>
+    T relatedCoeff(const Utils::Array<T, Length, Capacity>& x, const Utils::Array<T, Length, Capacity>& y) {
+        return covariance(x, y) / sqrt(variance(x) * variance(y));
     }
 }
