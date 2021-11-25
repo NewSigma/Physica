@@ -132,12 +132,12 @@ namespace Physica::Core {
         /* Operators */
         using Base::operator=;
         using VectorBase::operator=;
-        [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(row == 0); return VectorBase::operator[](col); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
+        [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
+        [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
-        void resize(size_t row, size_t col) { assert(row == 1 && col == getColumn()); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
