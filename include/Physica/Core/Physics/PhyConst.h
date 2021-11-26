@@ -17,15 +17,21 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 namespace Physica::Core::Physics {
-    /**
-     * Physical constants in International System of Units
-     */
-    class PhyConst {
+    enum UnitSystem {
+        SI,
+        AU
+    };
+
+    template<UnitSystem unitSystem = SI> class PhyConst;
+
+    template<>
+    class PhyConst<SI> {
     public:
         constexpr static double planck = 6.6260755E-34;
         constexpr static double reducedPlanck = 1.05457266E-34;
         constexpr static double electroMass = 9.10938215E-31;
-        constexpr static double unitCharge = 1.602176634E-19; 
+        constexpr static double unitCharge = 1.602176634E-19;
+        constexpr static double bohrRadius = 5.2917721067E-11;
         constexpr static double protonMass = 1.6726231E-27;
         constexpr static double neutronMass = 1.6749286E-27;
         constexpr static double vacuumDielectric = 8.854187817E-12;
@@ -33,5 +39,17 @@ namespace Physica::Core::Physics {
          * The first element is a space holder
          */
         constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
+    };
+
+    template<>
+    class PhyConst<AU> {
+    public:
+        constexpr static double planck = M_PI * 2;
+        constexpr static double reducedPlanck = 1;
+        constexpr static double electroMass = 1;
+        constexpr static double unitCharge = 1;
+        constexpr static double bohrRadius = 1;
+        constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
+        constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
     };
 }

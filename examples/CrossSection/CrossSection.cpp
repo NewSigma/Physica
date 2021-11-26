@@ -46,12 +46,12 @@ struct ProgramArgs {
             , r_max(r_max_)
             , energy(energy_)
             , radialNum(radialNum_) {
-        wave_length = sqrt(T(2) / (T(reducedMass) * energy * PhyConst::unitCharge * 1E-3)) * T(M_PI * PhyConst::reducedPlanck * 1E10); //1E10 for conversion from meter to angstrom
+        wave_length = sqrt(T(2) / (T(reducedMass) * energy * PhyConst<SI>::unitCharge * 1E-3)) * T(M_PI * PhyConst<SI>::reducedPlanck * 1E10); //1E10 for conversion from meter to angstrom
     }
 };
 
 std::unique_ptr<ODE> solveEqu(const ProgramArgs& args) {
-    const T m2_h_2 = T(2 * args.reducedMass.getTrivial() / (PhyConst::reducedPlanck * PhyConst::reducedPlanck) * PhyConst::unitCharge * 1E-23) * square(args.rho); //1E-23 for unit conversion
+    const T m2_h_2 = T(2 * args.reducedMass.getTrivial() / (PhyConst<SI>::reducedPlanck * PhyConst<SI>::reducedPlanck) * PhyConst<SI>::unitCharge * 1E-23) * square(args.rho); //1E-23 for unit conversion
     const T stepSize(0.001);
     T crossSection = 0;
 
@@ -100,7 +100,7 @@ T calcPhase(const ProgramArgs& args, const Vector<T>& h, const Vector<T>& wave) 
 }
 
 T calcCrossSection(double energy) {
-    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst::protonMass; //83.8 is the relative atomic mass of Kr
+    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst<SI>::protonMass; //83.8 is the relative atomic mass of Kr
     ProgramArgs args(5.9, 3.57, reducedMass, 5 * 3.57, energy, 0);
     const T l_max = T(2 * M_PI) * args.r_max / args.wave_length;
     T crossSection = 0;
@@ -120,7 +120,7 @@ T calcCrossSection(double energy) {
 }
 
 void plotWaveFunction(double energy, double radialNum) {
-    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst::protonMass; //83.8 is the relative atomic mass of Kr
+    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst<SI>::protonMass; //83.8 is the relative atomic mass of Kr
     ProgramArgs args(5.9, 3.57, reducedMass, 5 * 3.57, energy, radialNum);
     auto solver = solveEqu(args);
     const auto& h = solver->getX();

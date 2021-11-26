@@ -105,7 +105,7 @@ namespace Physica::Core::Physics {
         const size_t length = atoms.getLength();
         VectorType result = VectorType::Zeros(length);
         for (size_t i = 0; i < length; ++i) {
-            double atomMass = PhyConst::relativeAtomMass[atomicNumbers[i]];
+            double atomMass = PhyConst<SI>::relativeAtomMass[atomicNumbers[i]];
             totalMass += atomMass;
             result += ScalarType(atomMass) * atoms[i].getVector();
         }
