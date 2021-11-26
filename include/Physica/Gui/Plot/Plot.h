@@ -24,6 +24,7 @@
 #include <QtCharts/QScatterSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Utils/Container/Array/Array.h>
+#include "ContourSeries.h"
 
 using Physica::Core::MultiScalar;
 
@@ -40,6 +41,11 @@ namespace Physica::Gui {
         QScatterSeries& scatter(const Array& x, const Array& y);
         template<class Array>
         QAreaSeries& hist(const Array& data, size_t binCount, bool dencity = false);
+        template<class MatrixType>
+        ContourSeries<MatrixType>& contour(const Core::LValueMatrix<MatrixType>& x,
+                                           const Core::LValueMatrix<MatrixType>& y,
+                                           const Core::LValueMatrix<MatrixType>& z,
+                                           Utils::Array<double> levels);
     };
 
     template<class Array>
@@ -121,6 +127,17 @@ namespace Physica::Gui {
 
         chart()->addSeries(series);
 
+        update();
+        return *series;
+    }
+
+    template<class MatrixType>
+    ContourSeries<MatrixType>& Plot::contour(const Core::LValueMatrix<MatrixType>& x,
+                                             const Core::LValueMatrix<MatrixType>& y,
+                                             const Core::LValueMatrix<MatrixType>& z,
+                                             Utils::Array<double> levels) {
+        auto* series = new ContourSeries<MatrixType>(x, y, z, std::move(levels));
+        series->attachTo(*chart());
         update();
         return *series;
     }
