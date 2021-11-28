@@ -18,51 +18,27 @@
  */
 #pragma once
 
-#include <iosfwd>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    class Poscar {
-    public:
-        enum PoscarType : bool {
-            Direct,
-            Cartesian
-        };
+    class ReciprocalCell;
 
-        enum CrystalSystem : char {
-            Triclinic,
-            Monoclinic,
-            Orthohombic,
-            Tetragonal,
-            Hexagonal,
-            Rhombohedral,
-            Cubic
-        };
-
+    class CrystalCell {
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
         using PositionMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, 3>;
-    private:
+
         LatticeMatrix lattice;
         PositionMatrix pos;
-        Utils::Array<size_t> numOfEachType;
-        PoscarType type;
+        Utils::Array<unsigned char> atomicNumbers;
     public:
-        Poscar();
-        /* Operators */
-        friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
-        friend std::istream& operator>>(std::istream& is, Poscar& poscar);
-        /* Operations */
-        void standrizeLattice();
-        void extendInZ(ScalarType factor);
-        void superToUnit(size_t x, size_t y, size_t z);
+        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<unsigned char> atomicNumbers_);
+        CrystalCell(Poscar poscar);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
-        [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
-        [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
-        [[nodiscard]] size_t getAtomCount() const noexcept;
-    private:
-        void readNumOfEachType(std::istream& is);
+        [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
+        [[nodiscard]] ScalarType getVolume() const noexcept;
     };
 }

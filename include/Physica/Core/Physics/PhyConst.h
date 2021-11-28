@@ -51,5 +51,8 @@ namespace Physica::Core::Physics {
         constexpr static double bohrRadius = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
+
+        [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return 27.211652 * hartree; }
+        [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev / 27.211652; }
     };
 }
