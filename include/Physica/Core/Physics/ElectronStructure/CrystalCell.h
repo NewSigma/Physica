@@ -25,19 +25,21 @@ namespace Physica::Core {
     class ReciprocalCell;
 
     class CrystalCell {
+    public:
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
         using PositionMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, 3>;
-
+    private:
         LatticeMatrix lattice;
         PositionMatrix pos;
-        Utils::Array<unsigned char> atomicNumbers;
+        Utils::Array<int> charges;
     public:
-        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<unsigned char> atomicNumbers_);
+        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<int> atomicNumbers_);
         CrystalCell(Poscar poscar);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] int getCharge(size_t ionIndex) const { return charges[ionIndex]; }
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;
     };

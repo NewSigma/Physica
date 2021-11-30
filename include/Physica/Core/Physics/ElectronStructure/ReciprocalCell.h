@@ -29,6 +29,7 @@ namespace Physica::Core {
     public:
         ReciprocalCell(LatticeMatrix lattice_);
         /* Getters */
+        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept;
         [[nodiscard]] ScalarType getMinNorm() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;
     };

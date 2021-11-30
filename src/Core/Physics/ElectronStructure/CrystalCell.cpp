@@ -21,10 +21,12 @@
 #include "Physica/Core/Physics/ElectronStructure/ReciprocalCell.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<unsigned char> atomicNumbers_)
+    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<int> charges_)
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
-            , atomicNumbers(std::move(atomicNumbers_)) {}
+            , charges(std::move(charges_)) {
+        assert(pos.getRow() == charges.getLength());
+    }
 
     CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()) {}
 

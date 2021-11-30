@@ -43,6 +43,9 @@ namespace Physica::Core::Physics {
 
     template<>
     class PhyConst<AU> {
+    private:
+        constexpr static double hartreeInEv = 27.211652;
+        constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
     public:
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
@@ -52,7 +55,9 @@ namespace Physica::Core::Physics {
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
 
-        [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return 27.211652 * hartree; }
-        [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev / 27.211652; }
+        [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
+        [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
+        [[nodiscard]] constexpr static double bohrToAngstorm(double bohr) { return bohr * bohrInAngstorm; }
+        [[nodiscard]] constexpr static double angstormToBohr(double angstorm) { return angstorm * (1.0 / bohrInAngstorm); }
     };
 }

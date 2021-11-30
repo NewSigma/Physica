@@ -22,6 +22,10 @@
 namespace Physica::Core {
     ReciprocalCell::ReciprocalCell(LatticeMatrix lattice_) : lattice(std::move(lattice_)) {}
 
+    const ReciprocalCell::LatticeMatrix& ReciprocalCell::getLattice() const noexcept {
+        return lattice;
+    }
+
     typename ReciprocalCell::ScalarType ReciprocalCell::getMinNorm() const noexcept {
         const ScalarType norm1 = lattice.row(0).norm();
         const ScalarType norm2 = lattice.row(1).norm();

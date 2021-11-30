@@ -116,6 +116,11 @@ namespace Physica::Core {
         return Scalar<option, true>(result, error);
     }
 
+    template<ScalarOption option>
+    Scalar<option, false> cbrt(const Scalar<option, false>& s) {
+        return Scalar<option, false>(std::cbrt(s.getTrivial()));
+    }
+
     template<>
     Scalar<MultiPrecision, false> sqrt(const Scalar<MultiPrecision, false>& s);
 
