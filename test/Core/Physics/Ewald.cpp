@@ -32,7 +32,7 @@ void VASPTest() {
     CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {4});
     const auto repCell = cell.reciprocal();
     const auto ewald = getEwaldEnergy<ScalarType>(cell, repCell);
-    if (!scalarNear(ewald, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-5))
+    if (!scalarNear(ewald, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-8))
         exit(EXIT_FAILURE);
 }
 
@@ -55,7 +55,7 @@ void madelungTest() {
                         }, {1, 1, 1, 1, -1, -1, -1, -1});
         const auto ewald = getEwaldEnergy<ScalarType>(NaCl, NaCl.reciprocal());
         const auto madelung = -(ewald / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
-        if (!scalarNear(madelung, ScalarType(1.7475645946331822), 1E-5))
+        if (!scalarNear(madelung, ScalarType(1.7475645946331822), 1E-6))
             exit(EXIT_FAILURE);
     }
     {
@@ -66,7 +66,7 @@ void madelungTest() {
                         }, {1, -1});
         const auto ewald = getEwaldEnergy<ScalarType>(CsCl, CsCl.reciprocal());
         const auto madelung = -ewald * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        if (!scalarNear(madelung, ScalarType(1.76267477307099), 1E-5))
+        if (!scalarNear(madelung, ScalarType(1.76267477307099), 1E-6))
             exit(EXIT_FAILURE);
     }
     {
@@ -77,7 +77,7 @@ void madelungTest() {
                         }, {1, -1});
         const auto ewald = getEwaldEnergy<ScalarType>(ZnS, ZnS.reciprocal());
         const auto madelung = -ewald * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        if (!scalarNear(madelung, ScalarType(1.63805505338879), 1E-5))
+        if (!scalarNear(madelung, ScalarType(1.63805505338879), 1E-6))
             exit(EXIT_FAILURE);
     }
 }
