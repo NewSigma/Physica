@@ -23,6 +23,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 if(${DEBUG_MODE})
     set(CMAKE_CXX_FLAGS -O0)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
 else()
     set(CMAKE_CXX_FLAGS -O2)
 endif()

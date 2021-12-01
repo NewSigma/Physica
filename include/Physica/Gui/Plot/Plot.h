@@ -20,6 +20,7 @@
 
 #include <QtCharts>
 #include <QChartView>
+#include <QtCharts/QLineSeries>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QScatterSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
@@ -36,6 +37,8 @@ namespace Physica::Gui {
                 , const MultiScalar& end, QWidget* parent = nullptr);
         /* Operations */
         template<class Array>
+        QLineSeries& line(const Array& x, const Array& y);
+        template<class Array>
         QSplineSeries& spline(const Array& x, const Array& y);
         template<class Array>
         QScatterSeries& scatter(const Array& x, const Array& y);
@@ -47,6 +50,18 @@ namespace Physica::Gui {
                                            const Core::LValueMatrix<MatrixType>& z,
                                            Utils::Array<double> levels);
     };
+
+    template<class Array>
+    QLineSeries& Plot::line(const Array& x, const Array& y) {
+        assert(x.getLength() == y.getLength());
+        QLineSeries* series = new QSplineSeries();
+        for (size_t i = 0; i < x.getLength(); ++i)
+            *series << QPointF(double(x[i]), double(y[i]));
+        chart()->addSeries(series);
+
+        update();
+        return *series;
+    }
 
     template<class Array>
     QSplineSeries& Plot::spline(const Array& x, const Array& y) {

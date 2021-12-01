@@ -1,6 +1,6 @@
 ##############################################Libs################################################
 #############################################Project##############################################
-file(GLOB_RECURSE SOURCES_CORE *.cpp *.h)
+file(GLOB_RECURSE SOURCES_CORE *.cpp *.h *.cu)
 add_library(PhysicaCore SHARED ${SOURCES_CORE})
 
 install(TARGETS PhysicaCore DESTINATION lib)
