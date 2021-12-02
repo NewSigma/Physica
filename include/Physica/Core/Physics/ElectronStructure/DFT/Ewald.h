@@ -54,7 +54,7 @@ namespace Physica::Core {
                                                          + VectorType(latt.row(1)) * ScalarType(j)
                                                          + VectorType(latt.row(2)) * ScalarType(k);
                             const ScalarType norm = transVector.norm();
-                            sum += erfc(integralLimit * norm) / norm;
+                            sum += erfc(integralLimit * norm) / norm; //Optimize: VASP uses searching table method
                         }
                     }
                 }
@@ -103,23 +103,25 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
+     * [2] VASP (www.vasp.at)
      */
     template<class ScalarType>
     ScalarType getEwaldEnergy(const CrystalCell& cell, const ReciprocalCell& repCell) {
         const size_t ionCount = cell.getPos().getRow();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
+        //The following param chosen is referenced from VASP
         const ScalarType averageCellSize = cbrt(ScalarType(cell.getVolume()));
-        const auto realSumDim = Internal::getSumDimention(repCell.getLattice(), averageCellSize);
-        const auto repSumDim = Internal::getSumDimention(cell.getLattice(), ScalarType(2 * M_PI) * reciprocal(averageCellSize));
-        const ScalarType integralLimit = repCell.getMinNorm();
+        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
+        const auto realSumDim = Internal::getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
+        const auto repSumDim = Internal::getSumDimention(cell.getLattice(), ScalarType(4 / M_PI) * integralLimit);
 
         ScalarType result = ScalarType::Zero();
         int totalCharge = 0;
         unsigned int totalSquaredCharge = 0;
         for (size_t ion1 = 0; ion1 < ionCount; ++ion1) {
-            for (size_t ion2 = 0; ion2 < ionCount; ++ion2) {
+            for (size_t ion2 = 0; ion2 < ionCount; ++ion2) { //Optimize: possible to loop from ion2 = ion1
                 const Vector<ScalarType, 3> deltaPos = cell.getLattice() * (cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2));
-                ScalarType sum = Internal::realSum(cell, integralLimit, realSumDim, deltaPos);
+                ScalarType sum = Internal::realSum(cell, integralLimit, realSumDim, deltaPos); //Optimize: VASP puts this loop outside, consider its performance
                 sum += ScalarType(4 * M_PI) * Internal::reciprocalSum(repCell, integralLimit, repSumDim, deltaPos) * inv_volume;
 
                 const int charge1 = cell.getCharge(ion1);
