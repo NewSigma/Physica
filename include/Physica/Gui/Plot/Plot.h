@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include <QtCharts>
-#include <QChartView>
+#include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QScatterSeries>
+#include <QtCharts/QAreaSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Utils/Container/Array/Array.h>
 #include "ContourSeries.h"
