@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -31,12 +32,16 @@ namespace Physica::Core {
         /**
          * Coeff makes a grid of size [-baseDimX, baseDimX] * [-baseDimY, baseDimY] * [-baseDimZ, baseDimZ]
          */
-        Utils::Vector<ScalarType> baseCoeffs;
+        Vector<ScalarType> baseCoeffs;
         size_t baseDimX;
         size_t baseDimY;
         size_t baseDimZ;
     public:
         WaveFunction(ScalarType cutEnergy, LatticeMatrix mat);
+        /* Operators */
+        [[nodiscard]] ComplexScalar<ScalarType> operator(Vector<ScalarType, 3> r) const;
+        template<class VectorType>
+        [[nodiscard]] WaveFunction& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
         [[nodiscard]] size_t getPlainWaveCount() const noexcept { return baseCoeffs.getLength(); }
         [[nodiscard]] Vector<ScalarType, 3> getBaseFunc(size_t coeffIndex) const noexcept;
@@ -54,6 +59,24 @@ namespace Physica::Core {
         
         const size_t baseSize = (baseDimX * 2 + 1) * (baseDimY * 2 + 1) * (baseDimZ * 2 + 1);
         baseCoeffs.resize(baseSize);
+    }
+
+    template<class ScalarType>
+    ComplexScalar<ScalarType> WaveFunction<ScalarType>::operator(Vector<ScalarType, 3> r) const {
+        const size_t length = baseCoeffs.getLength();
+        ComplexScalar<ScalarType> result = ComplexScalar<ScalarType>::Zero();
+        for (size_t i = 0; i < length; ++i) {
+            const ScalarType phase = getBaseFunc(i) * r;
+            result += baseCoeffs[i] * ComplexScalar<ScalarType>(cos(phase), sin(phase));
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class VectorType>
+    WaveFunction<ScalarType>& WaveFunction<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
+        baseCoeffs = newCoeffs;
+        return *this;
     }
 
     template<class ScalarType>

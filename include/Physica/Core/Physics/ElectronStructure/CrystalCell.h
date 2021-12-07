@@ -39,6 +39,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         [[nodiscard]] int getCharge(size_t ionIndex) const { return charges[ionIndex]; }
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;
