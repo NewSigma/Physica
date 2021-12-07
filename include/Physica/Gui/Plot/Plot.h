@@ -54,7 +54,7 @@ namespace Physica::Gui {
     template<class Array>
     QLineSeries& Plot::line(const Array& x, const Array& y) {
         assert(x.getLength() == y.getLength());
-        QLineSeries* series = new QSplineSeries();
+        QLineSeries* series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);

@@ -26,12 +26,12 @@ using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 
 ScalarType func(ScalarType x) {
-    return sin(ScalarType(2 * M_PI * 3) * x) + sin(ScalarType(6 * M_PI) * x) * 5;
+    return sin(ScalarType(2 * M_PI * 3) * x) + sin(ScalarType(2 * M_PI * 4) * x) * 2;
 }
 
 int main(int argc, char** argv) {
     const size_t N = 100;
-    const double t_max = 1;
+    const double t_max = 2;
     const Vector<ScalarType> x = Vector<ScalarType>::linspace(ScalarType::Zero(), ScalarType(t_max), N);
     Vector<ScalarType> data(N);
     for (size_t i = 0; i < N; ++i)
@@ -39,14 +39,27 @@ int main(int argc, char** argv) {
 
     DFT<ScalarType> dft(data, ScalarType(t_max / N));
     dft.transform();
-    Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(N / t_max / -2), ScalarType(N / t_max / 2), N);
+    double x_range = N / t_max / 2;
+    Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(-x_range), ScalarType(x_range), N);
     Vector<ScalarType> data1 = toImagVector(dft.getComponents());
 
     QApplication app(argc, argv);
     Plot* plot = new Plot();
-    auto& scatter = plot->scatter(f, data1);
+    auto& scatter = plot->line(f, data1);
     scatter.setMarkerSize(8);
-    plot->chart()->createDefaultAxes();
+    {
+        auto& chart = *plot->chart();
+        chart.createDefaultAxes();
+        chart.legend()->setVisible(false);
+        chart.setTitle("DFT example");
+
+        auto* axisX = chart.axes(Qt::Horizontal).first();
+        axisX->setTitleText("f/Hz");
+        axisX->setRange(-x_range, x_range);
+        auto* axisY = chart.axes(Qt::Vertical).first();
+        axisY->setTitleText("Intensity");
+        axisY->setRange(-4, 4);
+    }
     plot->show();
     return QApplication::exec();
 }
