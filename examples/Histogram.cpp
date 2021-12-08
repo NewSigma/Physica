@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <random>
 #include <QtWidgets/QApplication>
 #include "Physica/Gui/Plot/Plot.h"
 

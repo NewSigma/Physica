@@ -17,8 +17,9 @@ There will be a lot of work to do in the future
 
 This project uses the following packages:  
 
-[Qt](https://www.qt.io/)  (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  (Optional)  
+[fftw](http://www.fftw.org)  3.3.10 (Optional but recommanded)
+[Qt](https://www.qt.io/)  6.2.1  (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads)  11.4  (Optional)  
 
 Then you can compile Physica using the following commands:
 

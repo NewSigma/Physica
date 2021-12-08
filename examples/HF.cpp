@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <QApplication>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"

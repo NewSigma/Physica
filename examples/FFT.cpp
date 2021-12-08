@@ -19,7 +19,7 @@
 #include <iostream>
 #include <QtWidgets/QApplication>
 #include <QtCharts/QValueAxis>
-#include "Physica/Core/Math/Transform/DFT.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;

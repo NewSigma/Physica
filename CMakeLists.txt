@@ -8,8 +8,9 @@ option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(RUN_CHECKS "Run Checks" ON)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
-option(PHYSICA_CUDA "Enable CUDA support" OFF)
+option(PHYSICA_FFTW3 "Use fftw3" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
+option(PHYSICA_CUDA "Enable CUDA support" OFF)
 set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 
@@ -56,6 +57,11 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
+
+if(${PHYSICA_FFTW3})
+    add_compile_definitions(PHYSICA_FFTW3)
+    find_package(FFTW3 REQUIRED)
+endif()
 
 if(${PHYSICA_GUI})
     find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
