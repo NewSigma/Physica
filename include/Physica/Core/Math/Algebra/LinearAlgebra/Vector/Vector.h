@@ -109,6 +109,15 @@ namespace Physica::Core {
             result[i] = v.calc(i).getImag();
         return result;
     }
+
+    template<class VectorType>
+    [[nodiscard]] typename Internal::RealVectorReturnType<VectorType>::Type toNormVector(const RValueVector<VectorType>& v) {
+        using ResultType = typename Internal::RealVectorReturnType<VectorType>::Type;
+        ResultType result = ResultType(v.getLength());
+        for (size_t i = 0; i < v.getLength(); ++i)
+            result[i] = v.calc(i).norm();
+        return result;
+    }
 }
 
 #include "VectorImpl.h"

@@ -17,8 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Transform/DFT.h"
 #include <QtWidgets/QApplication>
+#include <QtCharts/QValueAxis>
+#include "Physica/Core/Math/Transform/DFT.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -41,25 +42,41 @@ int main(int argc, char** argv) {
     dft.transform();
     double x_range = N / t_max / 2;
     Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(-x_range), ScalarType(x_range), N);
-    Vector<ScalarType> data1 = toImagVector(dft.getComponents());
-
+    Vector<ScalarType> intense = toNormVector(dft.getComponents());
+    
     QApplication app(argc, argv);
-    Plot* plot = new Plot();
-    auto& scatter = plot->line(f, data1);
-    scatter.setMarkerSize(8);
     {
+        Plot* plot = new Plot();
+
+        QValueAxis* axisX = new QValueAxis();
+        axisX->setTickAnchor(0);
+        axisX->setTickInterval(5);
+        axisX->setTickType(QValueAxis::TicksDynamic);
+        axisX->setMinorTickCount(4);
+        axisX->setMinorGridLineVisible(true);
+        QValueAxis* axisY = new QValueAxis();
+        axisY->setTickAnchor(0);
+        axisY->setTickInterval(1);
+        axisY->setTickType(QValueAxis::TicksDynamic);
+        axisY->setMinorTickCount(4);
+        axisY->setMinorGridLineVisible(true);
+        plot->chart()->addAxis(axisX, Qt::AlignBottom);
+        plot->chart()->addAxis(axisY, Qt::AlignLeft);
+
+        auto& series = plot->line(f, intense);
+        series.attachAxis(axisX);
+        series.attachAxis(axisY);
+        series.setMarkerSize(8);
+
         auto& chart = *plot->chart();
-        chart.createDefaultAxes();
         chart.legend()->setVisible(false);
         chart.setTitle("DFT example");
 
-        auto* axisX = chart.axes(Qt::Horizontal).first();
         axisX->setTitleText("f/Hz");
         axisX->setRange(-x_range, x_range);
-        auto* axisY = chart.axes(Qt::Vertical).first();
         axisY->setTitleText("Intensity");
-        axisY->setRange(-4, 4);
+        axisY->setRange(0, 3);
+        plot->show();
     }
-    plot->show();
     return QApplication::exec();
 }

@@ -44,6 +44,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         [[nodiscard]] const Vector<ComplexType>& getData() const noexcept { return data; }
+        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(distance * data.getLength()); }
         /* Helpers */
         void swap(DFT& dft);
     private:
