@@ -60,7 +60,7 @@ include_directories(3rdparty)
 
 if(${PHYSICA_FFTW3})
     add_compile_definitions(PHYSICA_FFTW3)
-    find_package(FFTW3 REQUIRED)
+    find_package(FFTW3 COMPONENTS fftw3 REQUIRED)
 endif()
 
 if(${PHYSICA_GUI})

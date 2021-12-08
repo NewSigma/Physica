@@ -38,11 +38,11 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < N; ++i)
         data[i] = func(x[i]);
 
-    DFT<ScalarType> dft(data, ScalarType(t_max / N));
-    dft.transform();
+    FFT<ScalarType> fft(data, ScalarType(t_max / N));
+    fft.transform();
     double x_range = N / t_max / 2;
     Vector<ScalarType> f = Vector<ScalarType>::linspace(ScalarType(-x_range), ScalarType(x_range), N);
-    Vector<ScalarType> intense = toNormVector(dft.getComponents());
+    Vector<ScalarType> intense = toNormVector(fft.getComponents());
     
     QApplication app(argc, argv);
     {

@@ -23,33 +23,47 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class ScalarType> class FFTImpl;
+    }
     template<class ScalarType>
-    class DFT {
+    class FFT {
+        using Impl = Internal::FFTImpl<ScalarType>;
         using RealType = typename ScalarType::ScalarType;
         using ComplexType = ComplexScalar<RealType>;
-        Vector<ComplexType> data;
-        ScalarType distance;
-    public:
-        DFT(const Vector<ScalarType>& data_, const ScalarType& distance_);
-        DFT(const DFT& dft);
-        DFT(DFT&& dft) noexcept;
-        ~DFT() = default;
-        /* Operators */
-        DFT& operator=(DFT dft);
-        ComplexType operator()(size_t i) { return data[i]; }
-        /* Transforms */
-        inline void transform();
-        inline void invTransform();
-        /* Getters */
-        [[nodiscard]] ComplexType getComponent(ssize_t index) const;
-        [[nodiscard]] Vector<ComplexType> getComponents() const;
-        [[nodiscard]] const Vector<ComplexType>& getData() const noexcept { return data; }
-        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(distance * data.getLength()); }
-        /* Helpers */
-        void swap(DFT& dft);
     private:
-        void transformImpl(const RealType& phase);
+        Impl impl;
+    public:
+        FFT(const Vector<ScalarType>& data, const ScalarType& distance);
+        FFT(const FFT&) = default;
+        FFT(FFT&&) noexcept = default;
+        ~FFT() = default;
+        /* Operators */
+        FFT& operator=(FFT fft);
+        ComplexType operator()(size_t i) { return impl(i); }
+        /* Operations */
+        void transform() { impl.transform(); }
+        void invTransform() { impl.invTransform(); }
+        /* Getters */
+        [[nodiscard]] ComplexType getComponent(ssize_t index) const { return impl.getComponent(index); }
+        [[nodiscard]] Vector<ComplexType> getComponents() const { return impl.getComponents(); }
+        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(impl.getDistance() * impl.getSize()); }
+        /* Helpers */
+        void swap(FFT& fft) { impl.swap(fft.impl); }
     };
+
+    template<class ScalarType>
+    FFT<ScalarType>::FFT(const Vector<ScalarType>& data, const ScalarType& distance) : impl(data, distance) {}
+
+    template<class ScalarType>
+    FFT<ScalarType>& FFT<ScalarType>::operator=(FFT<ScalarType> fft) {
+        swap(fft);
+        return *this;
+    }
 }
 
-#include "FFTImpl.h"
+#ifdef PHYSICA_FFTW3
+    #include "FFTImpl_FFTW3.h"
+#else
+    #include "FFTImpl.h"
+#endif
