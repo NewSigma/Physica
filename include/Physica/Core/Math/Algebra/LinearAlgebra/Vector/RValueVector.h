@@ -61,6 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] ScalarType sum() const;
         template<class OtherDerived>
         [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         template<class OtherDerived>
@@ -101,6 +102,15 @@ namespace Physica::Core {
             if (result > temp)
                 result = temp;
         }
+        return result;
+    }
+
+    template<class VectorType>
+    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::sum() const {
+        assert(getLength() != 0);
+        ScalarType result = ScalarType::Zero();
+        for(size_t i = 0; i < getLength(); ++i)
+            result += calc(i);
         return result;
     }
 
