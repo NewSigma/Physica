@@ -25,9 +25,9 @@ namespace Physica::Core::Internal {
         static constexpr bool isComplex = ScalarType::isComplex;
     private:
         Vector<ComplexType> data;
-        ScalarType distance;
+        RealType deltaT;
     public:
-        FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_);
+        FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_);
         FFTImpl(const FFTImpl& fft);
         FFTImpl(FFTImpl&& fft) noexcept;
         ~FFTImpl() = default;
@@ -39,7 +39,7 @@ namespace Physica::Core::Internal {
         void invTransform();
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return data.getLength(); }
-        [[nodiscard]] const ScalarType& getDistance() const noexcept { return distance; }
+        [[nodiscard]] const RealType& getDeltaT() const noexcept { return deltaT; }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
@@ -49,33 +49,33 @@ namespace Physica::Core::Internal {
     };
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_)
-            : data(data_), distance(distance_) {
+    FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
+            : data(data_), deltaT(deltaT_) {
         assert(data.getLength() % 2U == 0);
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft) : data(fft.data), distance(fft.distance) {}
+    FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft) : data(fft.data), deltaT(fft.deltaT) {}
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(FFTImpl&& fft) noexcept : data(std::move(fft.data)), distance(std::move(fft.distance)) {}
+    FFTImpl<ScalarType>::FFTImpl(FFTImpl&& fft) noexcept : data(std::move(fft.data)), deltaT(std::move(fft.deltaT)) {}
 
     template<class ScalarType>
     inline void FFTImpl<ScalarType>::transform() {
         transformImpl(RealType(-2 * M_PI / data.getLength()));
-        data *= distance;
+        data *= deltaT;
     }
 
     template<class ScalarType>
     inline void FFTImpl<ScalarType>::invTransform() {
         transformImpl(RealType(2 * M_PI / data.getLength()));
-        data /= distance * data.getLength();
+        data /= deltaT * data.getLength();
     }
 
     template<class ScalarType>
     void FFTImpl<ScalarType>::swap(FFTImpl& fft) {
         swap(data, fft.data);
-        swap(distance, fft.distance);
+        swap(deltaT, fft.deltaT);
     }
 
     template<class ScalarType>

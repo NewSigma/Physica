@@ -30,9 +30,9 @@ namespace Physica::Core::Internal {
         fftw_plan backward_plan;
         fftw_complex* buffer;
         int size;
-        ScalarType distance;
+        RealType deltaT;
     public:
-        FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_);
+        FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_);
         FFTImpl(const FFTImpl& fft);
         FFTImpl(FFTImpl&& fft) noexcept;
         ~FFTImpl();
@@ -44,7 +44,7 @@ namespace Physica::Core::Internal {
         void invTransform();
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return size; }
-        [[nodiscard]] const ScalarType& getDistance() const noexcept { return distance; }
+        [[nodiscard]] const ScalarType& getDeltaT() const noexcept { return deltaT; }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
@@ -52,10 +52,10 @@ namespace Physica::Core::Internal {
     };
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_)
+    FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
             : buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(data_.getLength() * sizeof(fftw_complex))))
             , size(static_cast<int>(data_.getLength()))
-            , distance(distance_) {
+            , deltaT(deltaT_) {
         assert(data_.getLength() <= INT_MAX);
         assert(size % 2 == 0);
 
@@ -72,7 +72,7 @@ namespace Physica::Core::Internal {
     FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft)
             : buffer(fftw_malloc(fft.size * sizeof(fftw_complex)))
             , size(fft.size)
-            , distance(fft.distance) {
+            , deltaT(fft.deltaT) {
         forward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
         backward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
     }
@@ -83,7 +83,7 @@ namespace Physica::Core::Internal {
             , backward_plan(fft.backward_plan)
             , buffer(fft.buffer)
             , size(fft.size)
-            , distance(std::move(fft.distance)) {
+            , deltaT(std::move(fft.deltaT)) {
         fft.plan = nullptr;
         fft.buffer = nullptr;
     }
@@ -116,7 +116,7 @@ namespace Physica::Core::Internal {
         std::swap(backward_plan, fft.backward_plan);
         std::swap(buffer, fft.buffer);
         std::swap(size, fft.size);
-        distance.swap(fft.distance);
+        deltaT.swap(fft.deltaT);
     }
 
     template<class ScalarType>
@@ -125,7 +125,7 @@ namespace Physica::Core::Internal {
         assert(-size / 2 <= index);
         if (index < 0)
             index += size;
-        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * distance;
+        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * deltaT;
     }
 
     template<class ScalarType>
