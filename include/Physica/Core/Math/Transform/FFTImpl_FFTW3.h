@@ -18,19 +18,24 @@
  */
 #pragma once
 
+#include <fftw3.h>
+
 namespace Physica::Core::Internal {
     template<class ScalarType> class FFTImpl {
         using RealType = typename ScalarType::ScalarType;
         using ComplexType = ComplexScalar<RealType>;
         static constexpr bool isComplex = ScalarType::isComplex;
     private:
-        Vector<ComplexType> data;
+        fftw_plan forward_plan;
+        fftw_plan backward_plan;
+        fftw_complex* buffer;
+        int size;
         ScalarType distance;
     public:
         FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_);
         FFTImpl(const FFTImpl& fft);
         FFTImpl(FFTImpl&& fft) noexcept;
-        ~FFTImpl() = default;
+        ~FFTImpl();
         /* Operators */
         FFTImpl& operator=(const FFTImpl&) = delete;
         FFTImpl& operator=(FFTImpl&&) noexcept = delete;
@@ -38,82 +43,97 @@ namespace Physica::Core::Internal {
         void transform();
         void invTransform();
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return data.getLength(); }
+        [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] const ScalarType& getDistance() const noexcept { return distance; }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
         void swap(FFTImpl& fft);
-    private:
-        void transformImpl(const RealType& phase);
     };
 
     template<class ScalarType>
     FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_)
-            : data(data_), distance(distance_) {
-        assert(data.getLength() % 2 == 0);
+            : buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(data_.getLength() * sizeof(fftw_complex))))
+            , size(static_cast<int>(data_.getLength()))
+            , distance(distance_) {
+        assert(data_.getLength() <= INT_MAX);
+        assert(size % 2 == 0);
+
+        forward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+        backward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+        for (int i = 0; i < size; ++i) {
+            const auto& complex = data_[i];
+            buffer[i][0] = double(complex.getReal());
+            buffer[i][1] = double(complex.getImag());
+        }
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft) : data(fft.data), distance(fft.distance) {}
+    FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft)
+            : buffer(fftw_malloc(fft.size * sizeof(fftw_complex)))
+            , size(fft.size)
+            , distance(fft.distance) {
+        forward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+        backward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+    }
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(FFTImpl&& fft) noexcept : data(std::move(fft.data)), distance(std::move(fft.distance)) {}
+    FFTImpl<ScalarType>::FFTImpl(FFTImpl&& fft) noexcept
+            : forward_plan(fft.forward_plan)
+            , backward_plan(fft.backward_plan)
+            , buffer(fft.buffer)
+            , size(fft.size)
+            , distance(std::move(fft.distance)) {
+        fft.plan = nullptr;
+        fft.buffer = nullptr;
+    }
+
+    template<class ScalarType>
+    FFTImpl<ScalarType>::~FFTImpl() {
+        fftw_destroy_plan(forward_plan);
+        fftw_destroy_plan(backward_plan);
+        fftw_free(buffer);
+    }
 
     template<class ScalarType>
     inline void FFTImpl<ScalarType>::transform() {
-        transformImpl(RealType(-2 * M_PI / data.getLength()));
-        data *= distance;
+        fftw_execute(forward_plan);
     }
 
     template<class ScalarType>
     inline void FFTImpl<ScalarType>::invTransform() {
-        transformImpl(RealType(2 * M_PI / data.getLength()));
-        data /= distance * data.getLength();
+        fftw_execute(backward_plan);
+        const double factor = 1.0 / size;
+        for (int i = 0; i < size; ++i) {
+            buffer[i][0] *= factor;
+            buffer[i][1] *= factor;
+        }
     }
 
     template<class ScalarType>
     void FFTImpl<ScalarType>::swap(FFTImpl& fft) {
-        swap(data, fft.data);
-        swap(distance, fft.distance);
+        std::swap(forward_plan, fft.forward_plan);
+        std::swap(backward_plan, fft.backward_plan);
+        std::swap(buffer, fft.buffer);
+        std::swap(size, fft.size);
+        distance.swap(fft.distance);
     }
 
     template<class ScalarType>
     typename FFTImpl<ScalarType>::ComplexType FFTImpl<ScalarType>::getComponent(ssize_t index) const {
-        const size_t length = data.getLength();
-        assert(length <= SSIZE_MAX);
-        assert(index <= static_cast<ssize_t>(length) / 2);
-        assert(-static_cast<ssize_t>(length) / 2 <= index);
+        assert(index <= size / 2);
+        assert(-size / 2 <= index);
         if (index < 0)
-            index += static_cast<ssize_t>(length);
-        return data[index];
+            index += size;
+        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * distance;
     }
 
     template<class ScalarType>
     Vector<typename FFTImpl<ScalarType>::ComplexType> FFTImpl<ScalarType>::getComponents() const {
-        Vector<ComplexType> result = Vector<ComplexType>(data.getLength());
-        const ssize_t half_size = static_cast<ssize_t>(data.getLength() / 2);
+        Vector<ComplexType> result = Vector<ComplexType>(size);
+        const ssize_t half_size = static_cast<ssize_t>(size / 2);
         for (ssize_t i = -half_size; i < half_size; ++i)
             result[i + half_size] = getComponent(i);
         return result;
-    }
-
-    template<class ScalarType>
-    void FFTImpl<ScalarType>::transformImpl(const RealType& phase) {
-        const size_t length = data.getLength();
-        Vector<ComplexType> buffer(length);
-        //Optimize:
-        //1.i and j is changeable.(dynamic programming)
-        //2.Use the formula such as sin(a + b) to avoid calculate sin and cos directly.
-        for(size_t i = 0; i < length; ++i) {
-            const RealType phase1 = phase * i;
-            auto result_i = ComplexType::Zero();
-            for(size_t j = 0; j < length; ++j) {
-                const RealType phase2 = phase1 * j;
-                result_i += ComplexType(cos(phase2), sin(phase2)) * data[j];
-            }
-            buffer[i] = result_i;
-        }
-        data = std::move(buffer);
     }
 }

@@ -20,7 +20,6 @@
 
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 namespace Physica::Core {
     namespace Internal {

@@ -51,7 +51,7 @@ namespace Physica::Core::Internal {
     template<class ScalarType>
     FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const ScalarType& distance_)
             : data(data_), distance(distance_) {
-        assert(data.getLength() % 2 == 0);
+        assert(data.getLength() % 2U == 0);
     }
 
     template<class ScalarType>
