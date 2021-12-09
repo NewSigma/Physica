@@ -20,8 +20,8 @@
 
 namespace Physica::Core::Internal {
     template<class ScalarType> class FFTImpl {
-        using RealType = typename ScalarType::ScalarType;
-        using ComplexType = ComplexScalar<RealType>;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = typename ScalarType::ComplexType;
         static constexpr bool isComplex = ScalarType::isComplex;
     private:
         Vector<ComplexType> data;
@@ -91,9 +91,10 @@ namespace Physica::Core::Internal {
 
     template<class ScalarType>
     Vector<typename FFTImpl<ScalarType>::ComplexType> FFTImpl<ScalarType>::getComponents() const {
-        Vector<ComplexType> result = Vector<ComplexType>(data.getLength());
+        const size_t result_size = data.getLength() + 1;
+        Vector<ComplexType> result = Vector<ComplexType>(result_size);
         const ssize_t half_size = static_cast<ssize_t>(data.getLength() / 2);
-        for (ssize_t i = -half_size; i < half_size; ++i)
+        for (ssize_t i = -half_size; i <= half_size; ++i)
             result[i + half_size] = getComponent(i);
         return result;
     }

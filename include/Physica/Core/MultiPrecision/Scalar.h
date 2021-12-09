@@ -243,8 +243,10 @@ namespace Physica::Core {
 
     template<class Derived>
     class ScalarBase : public Utils::CRTPBase<Derived> {
-        using RealType = typename Internal::Traits<Derived>::RealType;
     public:
+        using ScalarType = Derived;
+        using RealType = typename Internal::Traits<Derived>::RealType;
+        using ComplexType = typename Internal::Traits<Derived>::ComplexType;
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
         static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;
         static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;

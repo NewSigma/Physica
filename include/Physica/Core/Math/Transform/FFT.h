@@ -25,11 +25,12 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType> class FFTImpl;
     }
+
     template<class ScalarType>
     class FFT {
         using Impl = Internal::FFTImpl<ScalarType>;
-        using RealType = typename ScalarType::ScalarType;
-        using ComplexType = ComplexScalar<RealType>;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = typename ScalarType::ComplexType;
     private:
         Impl impl;
     public:

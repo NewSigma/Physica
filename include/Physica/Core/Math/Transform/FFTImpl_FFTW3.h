@@ -22,13 +22,16 @@
 
 namespace Physica::Core::Internal {
     template<class ScalarType> class FFTImpl {
-        using RealType = typename ScalarType::ScalarType;
-        using ComplexType = ComplexScalar<RealType>;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = typename ScalarType::ComplexType;
         static constexpr bool isComplex = ScalarType::isComplex;
     private:
         fftw_plan forward_plan;
         fftw_plan backward_plan;
-        fftw_complex* buffer;
+        union {
+            double* real_buffer;
+            fftw_complex* buffer;
+        };
         int size;
         RealType deltaT;
     public:
@@ -44,7 +47,7 @@ namespace Physica::Core::Internal {
         void invTransform();
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return size; }
-        [[nodiscard]] const ScalarType& getDeltaT() const noexcept { return deltaT; }
+        [[nodiscard]] const RealType& getDeltaT() const noexcept { return deltaT; }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
@@ -53,18 +56,27 @@ namespace Physica::Core::Internal {
 
     template<class ScalarType>
     FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
-            : buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(data_.getLength() * sizeof(fftw_complex))))
-            , size(static_cast<int>(data_.getLength()))
+            : size(static_cast<int>(data_.getLength()))
             , deltaT(deltaT_) {
         assert(data_.getLength() <= INT_MAX);
         assert(size % 2 == 0);
 
-        forward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-        backward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-        for (int i = 0; i < size; ++i) {
-            const auto& complex = data_[i];
-            buffer[i][0] = double(complex.getReal());
-            buffer[i][1] = double(complex.getImag());
+        if constexpr (isComplex) {
+            buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(data_.getLength() * sizeof(fftw_complex)));
+            forward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            backward_plan = fftw_plan_dft_1d(size, buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            for (int i = 0; i < size; ++i) {
+                const auto& complex = data_[i];
+                buffer[i][0] = double(complex.getReal());
+                buffer[i][1] = double(complex.getImag());
+            }
+        }
+        else {
+            buffer = reinterpret_cast<fftw_complex*>(fftw_malloc((size / 2 + 1) * sizeof(fftw_complex)));
+            forward_plan = fftw_plan_dft_r2c_1d(size, real_buffer, buffer, FFTW_ESTIMATE);
+            backward_plan = fftw_plan_dft_c2r_1d(size, buffer, real_buffer, FFTW_ESTIMATE);
+            for (int i = 0; i < size; ++i)
+                real_buffer[i] = double(data_[i]);
         }
     }
 
@@ -106,7 +118,8 @@ namespace Physica::Core::Internal {
         const double factor = 1.0 / size;
         for (int i = 0; i < size; ++i) {
             buffer[i][0] *= factor;
-            buffer[i][1] *= factor;
+            if constexpr (isComplex)
+                buffer[i][1] *= factor;
         }
     }
 
@@ -123,17 +136,31 @@ namespace Physica::Core::Internal {
     typename FFTImpl<ScalarType>::ComplexType FFTImpl<ScalarType>::getComponent(ssize_t index) const {
         assert(index <= size / 2);
         assert(-size / 2 <= index);
-        if (index < 0)
-            index += size;
+        if constexpr (isComplex) {
+            if (index < 0)
+                index += size;
+        }
+        else
+            index = std::abs(index);
         return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * deltaT;
     }
 
     template<class ScalarType>
     Vector<typename FFTImpl<ScalarType>::ComplexType> FFTImpl<ScalarType>::getComponents() const {
-        Vector<ComplexType> result = Vector<ComplexType>(size);
-        const ssize_t half_size = static_cast<ssize_t>(size / 2);
-        for (ssize_t i = -half_size; i < half_size; ++i)
-            result[i + half_size] = getComponent(i);
-        return result;
+        if constexpr (isComplex) {
+            const int result_size = size + 1;
+            Vector<ComplexType> result = Vector<ComplexType>(result_size);
+            const ssize_t half_size = static_cast<ssize_t>(size / 2);
+            for (ssize_t i = -half_size; i <= half_size; ++i)
+                result[i + half_size] = getComponent(i);
+            return result;
+        }
+        else {
+            const int result_size = size / 2 + 1;
+            Vector<ComplexType> result = Vector<ComplexType>(result_size);
+            for (ssize_t i = 0; i < result_size; ++i)
+                result[i] = getComponent(i);
+            return result;
+        }
     }
 }

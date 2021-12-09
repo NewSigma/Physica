@@ -21,36 +21,36 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
+using RealType = Scalar<Double, false>;
+using ComplexType = ComplexScalar<RealType>;
 
-ScalarType func(ScalarType x) {
-    return sin(ScalarType(2 * M_PI * 3) * x) + sin(ScalarType(2 * M_PI * 4) * x) * 2;
+RealType func(RealType x) {
+    return sin(RealType(2 * M_PI * 3) * x) + sin(RealType(2 * M_PI * 4) * x) * 2;
 }
 
 int main() {
     const size_t N = 100;
     const double t_max = 2;
     
-    Vector<ScalarType> data(N);
+    Vector<RealType> data(N);
     {
-        const Vector<ScalarType> x = Vector<ScalarType>::linspace(ScalarType::Zero(), ScalarType(t_max), N);
+        const Vector<RealType> x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N);
         for (size_t i = 0; i < N; ++i)
             data[i] = func(x[i]);
     }
-    FFT<ScalarType> fft(data, ScalarType(t_max / N));
+    FFT<RealType> fft(data, RealType(t_max / N));
     fft.transform();
-    const Vector<ScalarType> intense = toNormVector(fft.getComponents());
+    const Vector<RealType> intense = toNormVector(fft.getComponents());
 
     /* Parseval theorem */ {
-        const ScalarType power = square(data).sum();
-        const ScalarType power_fft = square(intense).sum() / ScalarType(t_max * t_max / N);
-        if (power != power_fft)
+        const RealType power = square(data).sum();
+        const RealType power_fft = square(intense).sum() / RealType(fft.getDeltaT() * fft.getDeltaT() * (intense.getLength() - 1));
+        if (!scalarNear(power, power_fft, 1E-15))
             return 1;
     }
-
-    const ScalarType freq1_power = fft.getFreqIntense(3).norm();
-    const ScalarType freq2_power = fft.getFreqIntense(4).norm();
-    if (!scalarNear(freq2_power / freq1_power, ScalarType(2), 1E-14))
+    const RealType freq1_power = fft.getFreqIntense(3).norm();
+    const RealType freq2_power = fft.getFreqIntense(4).norm();
+    if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
         return 1;
     return 0;
 }
