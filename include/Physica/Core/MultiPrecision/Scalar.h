@@ -50,6 +50,8 @@ namespace Physica::Core {
         template<ScalarOption option_, bool errorTrack_>
         class Traits<Scalar<option_, errorTrack_>> {
         public:
+            using RealType = Scalar<option_, errorTrack_>;
+            using ComplexType = ComplexScalar<Scalar<option_, errorTrack_>>;
             static constexpr ScalarOption option = option_;
             static constexpr bool errorTrack = errorTrack_;
             static constexpr bool isComplex = false;
@@ -238,15 +240,28 @@ namespace Physica::Core {
             void swap(AbstractScalar& s) noexcept { std::swap(d, s.d); }
         };
     }
-    /**
-     * Empty class that make other template declarations easier.
-     */
+
     template<class Derived>
     class ScalarBase : public Utils::CRTPBase<Derived> {
+        using RealType = typename Internal::Traits<Derived>::RealType;
     public:
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
-        static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;;
-        static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;;
+        static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;
+        static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
+
+        [[nodiscard]] const RealType& getReal() const {
+            if constexpr (isComplex)
+                return this->getDerived().getReal();
+            else
+                return this->getDerived();
+        }
+
+        [[nodiscard]] RealType getImag() const {
+            if constexpr (isComplex)
+                return this->getDerived().getImag();
+            else
+                return Derived::Zero();
+        }
     };
 
     template<>

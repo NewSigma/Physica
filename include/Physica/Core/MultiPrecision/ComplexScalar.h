@@ -27,6 +27,8 @@ namespace Physica::Core {
         template<class AnyScalar>
         class Traits<ComplexScalar<AnyScalar>> {
         public:
+            using RealType = AnyScalar;
+            using ComplexType = ComplexScalar<AnyScalar>;
             static constexpr ScalarOption option = Traits<AnyScalar>::option;
             static constexpr bool errorTrack = Traits<AnyScalar>::errorTrack;
             static constexpr bool isComplex = true;
