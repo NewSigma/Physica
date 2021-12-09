@@ -17,7 +17,7 @@ There will be a lot of work to do in the future
 
 This project uses the following packages:  
 
-[fftw](http://www.fftw.org)  3.3.10 (Optional but recommanded)
+[fftw](http://www.fftw.org)  3.3.10 (Optional but recommanded)  
 [Qt](https://www.qt.io/)  6.2.1  (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  11.4  (Optional)  
 
