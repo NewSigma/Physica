@@ -33,6 +33,7 @@ namespace Physica::Utils {
         Abs,
         Square,
         Ln,
-        Sin
+        Sin,
+        Cos
     };
 }

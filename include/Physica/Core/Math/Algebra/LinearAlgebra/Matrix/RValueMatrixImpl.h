@@ -112,17 +112,7 @@ namespace Physica::Core {
         result.setLength(length);
         return result;
     }
-    
-    template<class Derived>
-    Derived cos(const RValueMatrix<Derived>& m) {
-        const auto length = m.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(cos(m[i]), i);
-        result.setLength(length);
-        return result;
-    }
-    
+
     template<class Derived>
     Derived tan(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();

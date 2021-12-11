@@ -82,9 +82,6 @@ namespace Physica::Core {
     
     template<class Derived>
     Derived pow(const RValueMatrix<Derived>& m, const MultiScalar& a);
-    
-    template<class Derived>
-    Derived cos(const RValueMatrix<Derived>& m);
 
     template<class Derived>
     Derived tan(const RValueMatrix<Derived>& m);
