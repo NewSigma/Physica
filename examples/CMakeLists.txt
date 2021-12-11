@@ -11,6 +11,7 @@ if(${PHYSICA_GUI})
     physica_add_example(DuffingOscillator DuffingOscillator.cpp)
     physica_add_example(Histogram Histogram.cpp)
     physica_add_example(StochasticRungeKutta StochasticRungeKutta.cpp)
+    physica_add_example(SurfacePlot SurfacePlot.cpp)
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
 
