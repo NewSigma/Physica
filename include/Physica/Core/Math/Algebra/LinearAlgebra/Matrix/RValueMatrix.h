@@ -76,10 +76,7 @@ namespace Physica::Core {
     
     template<class Derived>
     Derived log(const RValueMatrix<Derived>& m, const MultiScalar& a);
-    
-    template<class Derived>
-    Derived exp(const RValueMatrix<Derived>& m);
-    
+
     template<class Derived>
     Derived pow(const RValueMatrix<Derived>& m, const MultiScalar& a);
 

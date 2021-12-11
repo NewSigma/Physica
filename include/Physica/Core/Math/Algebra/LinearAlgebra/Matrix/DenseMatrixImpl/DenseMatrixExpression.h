@@ -249,6 +249,22 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>> {
+    public:
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& mat;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp(mat.calc(row, col)); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+    };
+
+    template<class MatrixType>
     class DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>
             : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>> {
     public:
@@ -293,16 +309,28 @@ namespace Physica::Core {
         return DenseMatrixExpression<Utils::ExpressionType::Minus, DenseMatrixExpression<type, T1, T2>>(exp);
     }
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class Derived, class OtherDerived>
-    inline DenseMatrixExpression<Utils::ExpressionType::Add, Derived, OtherDerived>
-    operator+(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Add, Derived, OtherDerived>(mat1.getDerived(), mat2.getDerived());
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>
+    operator+(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) {
+        return DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>(mat, s);
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    inline DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType1, MatrixType2>
+    operator+(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
+        return DenseMatrixExpression<Utils::ExpressionType::Add, MatrixType1, MatrixType2>(mat1, mat2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class Derived, class OtherDerived>
-    inline DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>
-    operator-(const RValueMatrix<Derived>& mat1, const RValueMatrix<OtherDerived>& mat2) {
-        return DenseMatrixExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>(mat1.getDerived(), mat2.getDerived());
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>
+    operator-(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) {
+        return DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>(mat, s);
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    inline DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType1, MatrixType2>
+    operator-(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
+        return DenseMatrixExpression<Utils::ExpressionType::Sub, MatrixType1, MatrixType2>(mat1, mat2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class ScalarType>
@@ -337,6 +365,11 @@ namespace Physica::Core {
     template<class MatrixType>
     DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType> square(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType>(m);
+    }
+
+    template<class MatrixType>
+    DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType> exp(const RValueMatrix<MatrixType>& m) {
+        return DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>(m);
     }
 
     template<class MatrixType>
