@@ -87,6 +87,8 @@ namespace Physica::Core {
         using Storage::getColumn;
         /* Helpers */
         void swap(DenseMatrix& m) noexcept;
+        template<class VectorType>
+        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }

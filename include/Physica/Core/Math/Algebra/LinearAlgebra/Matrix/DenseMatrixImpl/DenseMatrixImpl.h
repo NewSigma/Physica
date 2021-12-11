@@ -63,6 +63,26 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class VectorType>
+    std::pair<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::meshgrid(
+            const LValueVector<VectorType>& vecX,
+            const LValueVector<VectorType>& vecY) {
+        using MatrixType = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>;
+        const size_t row = vecY.getLength();
+        const size_t col = vecX.getLength();
+        MatrixType x(row, col);
+        MatrixType y(row, col);
+        for (size_t i = 0; i < x.getMaxMajor(); ++i) {
+            for (size_t j = 0; j < x.getMaxMinor(); ++j) {
+                x.getElementFromMajorMinor(i, j) = vecX[MatrixType::columnFromMajorMinor(i, j)];
+                y.getElementFromMajorMinor(i, j) = vecY[MatrixType::rowFromMajorMinor(i, j)];
+            }
+        }
+        return std::make_pair(std::move(x), std::move(y));
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
