@@ -79,7 +79,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::linspace(T from, T to, size_t count) {
         assert(from < to);
-        const T step = (to - from) / T(count);
+        const T step = (to - from) / T(count - 1);
         Vector result = Vector(count);
         for (size_t i = 0; i < count; ++i) {
             result[i] = from;

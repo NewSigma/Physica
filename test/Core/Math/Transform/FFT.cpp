@@ -31,7 +31,7 @@ int main() {
         
         Vector<RealType> data(N);
         {
-            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N);
+            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
                 data[i] = sin(RealType(2 * M_PI * 3) * x) + sin(RealType(2 * M_PI * 4) * x) * 2;
