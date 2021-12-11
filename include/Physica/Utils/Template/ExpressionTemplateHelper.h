@@ -32,6 +32,7 @@ namespace Physica::Utils {
         Sqrt,
         Abs,
         Square,
-        Ln
+        Ln,
+        Sin
     };
 }

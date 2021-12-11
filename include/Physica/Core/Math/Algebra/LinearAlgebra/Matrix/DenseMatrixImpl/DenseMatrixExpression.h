@@ -247,6 +247,22 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
     };
+
+    template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>> {
+    public:
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& mat;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sin(mat.calc(row, col)); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
@@ -305,5 +321,10 @@ namespace Physica::Core {
     template<class MatrixType>
     DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType> square(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType>(m);
+    }
+
+    template<class MatrixType>
+    DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType> sin(const RValueMatrix<MatrixType>& m) {
+        return DenseMatrixExpression<Utils::ExpressionType::Sin, MatrixType>(m);
     }
 }

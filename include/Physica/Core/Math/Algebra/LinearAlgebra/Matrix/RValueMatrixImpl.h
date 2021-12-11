@@ -124,16 +124,6 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived sin(const RValueMatrix<Derived>& m) {
-        const auto length = m.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(sin(m[i]), i);
-        result.setLength(length);
-        return result;
-    }
-    
-    template<class Derived>
     Derived tan(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();

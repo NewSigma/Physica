@@ -85,10 +85,7 @@ namespace Physica::Core {
     
     template<class Derived>
     Derived cos(const RValueMatrix<Derived>& m);
-    
-    template<class Derived>
-    Derived sin(const RValueMatrix<Derived>& m);
-    
+
     template<class Derived>
     Derived tan(const RValueMatrix<Derived>& m);
     
