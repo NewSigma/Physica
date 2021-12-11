@@ -24,33 +24,34 @@ using namespace Physica::Utils;
 using RealType = Scalar<Double, false>;
 using ComplexType = ComplexScalar<RealType>;
 
-RealType func(RealType x) {
-    return sin(RealType(2 * M_PI * 3) * x) + sin(RealType(2 * M_PI * 4) * x) * 2;
-}
-
 int main() {
-    const size_t N = 100;
-    const double t_max = 2;
-    
-    Vector<RealType> data(N);
     {
-        const Vector<RealType> x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N);
-        for (size_t i = 0; i < N; ++i)
-            data[i] = func(x[i]);
-    }
-    FFT<RealType> fft(data, RealType(t_max / N));
-    fft.transform();
-    const Vector<RealType> intense = toNormVector(fft.getComponents());
+        const size_t N = 100;
+        const double t_max = 2;
+        
+        Vector<RealType> data(N);
+        {
+            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N);
+            for (size_t i = 0; i < N; ++i) {
+                const auto& x = v_x[i];
+                data[i] = sin(RealType(2 * M_PI * 3) * x) + sin(RealType(2 * M_PI * 4) * x) * 2;
+            }
+        }
+        FFT<RealType> fft(data, RealType(t_max / N));
+        fft.transform();
+        const Vector<RealType> intense = toNormVector(fft.getComponents());
 
-    /* Parseval theorem */ {
-        const RealType power = square(data).sum();
-        const RealType power_fft = square(intense).sum() / RealType(fft.getDeltaT() * fft.getDeltaT() * (intense.getLength() - 1));
-        if (!scalarNear(power, power_fft, 1E-15))
+        /* Parseval theorem */ {
+            const RealType power = square(data).sum();
+            const RealType power_fft = square(intense).sum() / RealType(fft.getDeltaT() * fft.getDeltaT() * (intense.getLength() - 1));
+            if (!scalarNear(power, power_fft, 1E-15))
+                return 1;
+        }
+        const RealType freq1_power = fft.getFreqIntense(3).norm();
+        const RealType freq2_power = fft.getFreqIntense(4).norm();
+        if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
             return 1;
     }
-    const RealType freq1_power = fft.getFreqIntense(3).norm();
-    const RealType freq2_power = fft.getFreqIntense(4).norm();
-    if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
-        return 1;
+
     return 0;
 }

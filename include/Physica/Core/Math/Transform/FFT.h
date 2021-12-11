@@ -23,12 +23,14 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType> class FFTImpl;
+        template<class ScalarType, size_t Dim> class FFTImpl;
     }
 
+    template<class ScalarType, size_t Dim = 1> class FFT;
+
     template<class ScalarType>
-    class FFT {
-        using Impl = Internal::FFTImpl<ScalarType>;
+    class FFT<ScalarType, 1> {
+        using Impl = Internal::FFTImpl<ScalarType, 1>;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
     private:
@@ -49,27 +51,78 @@ namespace Physica::Core {
         [[nodiscard]] const RealType& getDeltaT() const noexcept { return impl.getDeltaT(); }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const { return impl.getComponent(index); }
         [[nodiscard]] Vector<ComplexType> getComponents() const { return impl.getComponents(); }
-        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(impl.getDistance() * impl.getSize()); }
+        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(impl.getDeltaT() * impl.getSize()); }
         [[nodiscard]] ComplexType getFreqIntense(const RealType& freq) const noexcept;
         /* Helpers */
         void swap(FFT& fft) { impl.swap(fft.impl); }
     };
 
     template<class ScalarType>
-    FFT<ScalarType>::FFT(const Vector<ScalarType>& data, const RealType& deltaT) : impl(data, deltaT) {}
+    FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data, const RealType& deltaT) : impl(data, deltaT) {}
 
     template<class ScalarType>
-    FFT<ScalarType>& FFT<ScalarType>::operator=(FFT<ScalarType> fft) {
+    FFT<ScalarType, 1>& FFT<ScalarType, 1>::operator=(FFT<ScalarType, 1> fft) {
         swap(fft);
         return *this;
     }
 
     template<class ScalarType>
-    typename FFT<ScalarType>::ComplexType FFT<ScalarType>::getFreqIntense(const RealType& freq) const noexcept {
+    typename FFT<ScalarType, 1>::ComplexType FFT<ScalarType, 1>::getFreqIntense(const RealType& freq) const noexcept {
         const double round_helper = freq.isPositive() ? 0.5 : -0.5;
         const double float_index = double(getDeltaT() * freq * RealType(getSize()));
         const ssize_t index = static_cast<ssize_t>(float_index + round_helper);
         return getComponent(index);
+    }
+
+    template<class ScalarType, size_t Dim>
+    class FFT {
+        using Impl = Internal::FFTImpl<ScalarType, Dim>;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = typename ScalarType::ComplexType;
+    private:
+        Impl impl;
+    public:
+        FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
+        FFT(const FFT&) = default;
+        FFT(FFT&&) noexcept = default;
+        ~FFT() = default;
+        /* Operators */
+        FFT& operator=(FFT fft);
+        ComplexType operator()(size_t i) { return impl(i); }
+        /* Operations */
+        void transform() { impl.transform(); }
+        void invTransform() { impl.invTransform(); }
+        /* Getters */
+        [[nodiscard]] size_t getSize(size_t dim) const noexcept { return impl.getSize(dim); }
+        [[nodiscard]] const RealType& getDeltaT(size_t dim) const noexcept { return impl.getDeltaT(dim); }
+        [[nodiscard]] ComplexType getComponent(Utils::Array<ssize_t, Dim> indexes) const { return impl.getComponent(indexes); }
+        [[nodiscard]] Vector<ComplexType> getComponents() const { return impl.getComponents(); }
+        [[nodiscard]] RealType getDeltaFreq(size_t dim) const noexcept { return reciprocal(impl.getDeltaT(dim) * impl.getSize(dim)); }
+        [[nodiscard]] ComplexType getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept;
+        /* Helpers */
+        void swap(FFT& fft) { impl.swap(fft.impl); }
+    };
+
+    template<class ScalarType, size_t Dim>
+    FFT<ScalarType, Dim>::FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs)
+            : impl(data, size, deltaTs) {}
+
+    template<class ScalarType, size_t Dim>
+    FFT<ScalarType, Dim>& FFT<ScalarType, Dim>::operator=(FFT<ScalarType, Dim> fft) {
+        swap(fft);
+        return *this;
+    }
+
+    template<class ScalarType, size_t Dim>
+    typename FFT<ScalarType, Dim>::ComplexType FFT<ScalarType, Dim>::getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept {
+        Utils::Array<ssize_t, Dim> indexes{};
+        for (size_t i = 0; i < Dim; ++i) {
+            const RealType& f = freq[i];
+            const double round_helper = f.isPositive() ? 0.5 : -0.5;
+            const double float_index = double(getDeltaT() * f * RealType(getSize()));
+            indexes[i] = static_cast<ssize_t>(float_index + round_helper);
+        }
+        return getComponent(indexes);
     }
 }
 

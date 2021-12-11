@@ -19,7 +19,10 @@
 #pragma once
 
 namespace Physica::Core::Internal {
-    template<class ScalarType> class FFTImpl {
+    template<class ScalarType, size_t Dim> class FFTImpl;
+
+    template<class ScalarType>
+    class FFTImpl<ScalarType, 1> {
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
         static constexpr bool isComplex = ScalarType::isComplex;
@@ -49,37 +52,37 @@ namespace Physica::Core::Internal {
     };
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
+    FFTImpl<ScalarType, 1>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
             : data(data_), deltaT(deltaT_) {
         assert(data.getLength() % 2U == 0);
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(const FFTImpl& fft) : data(fft.data), deltaT(fft.deltaT) {}
+    FFTImpl<ScalarType, 1>::FFTImpl(const FFTImpl& fft) : data(fft.data), deltaT(fft.deltaT) {}
 
     template<class ScalarType>
-    FFTImpl<ScalarType>::FFTImpl(FFTImpl&& fft) noexcept : data(std::move(fft.data)), deltaT(std::move(fft.deltaT)) {}
+    FFTImpl<ScalarType, 1>::FFTImpl(FFTImpl&& fft) noexcept : data(std::move(fft.data)), deltaT(std::move(fft.deltaT)) {}
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType>::transform() {
+    inline void FFTImpl<ScalarType, 1>::transform() {
         transformImpl(RealType(-2 * M_PI / data.getLength()));
         data *= deltaT;
     }
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType>::invTransform() {
+    inline void FFTImpl<ScalarType, 1>::invTransform() {
         transformImpl(RealType(2 * M_PI / data.getLength()));
         data /= deltaT * data.getLength();
     }
 
     template<class ScalarType>
-    void FFTImpl<ScalarType>::swap(FFTImpl& fft) {
+    void FFTImpl<ScalarType, 1>::swap(FFTImpl& fft) {
         swap(data, fft.data);
         swap(deltaT, fft.deltaT);
     }
 
     template<class ScalarType>
-    typename FFTImpl<ScalarType>::ComplexType FFTImpl<ScalarType>::getComponent(ssize_t index) const {
+    typename FFTImpl<ScalarType, 1>::ComplexType FFTImpl<ScalarType, 1>::getComponent(ssize_t index) const {
         const size_t length = data.getLength();
         assert(length <= SSIZE_MAX);
         assert(index <= static_cast<ssize_t>(length) / 2);
@@ -90,7 +93,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    Vector<typename FFTImpl<ScalarType>::ComplexType> FFTImpl<ScalarType>::getComponents() const {
+    Vector<typename FFTImpl<ScalarType, 1>::ComplexType> FFTImpl<ScalarType, 1>::getComponents() const {
         const size_t result_size = data.getLength() + 1;
         Vector<ComplexType> result = Vector<ComplexType>(result_size);
         const ssize_t half_size = static_cast<ssize_t>(data.getLength() / 2);
@@ -100,7 +103,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    void FFTImpl<ScalarType>::transformImpl(const RealType& phase) {
+    void FFTImpl<ScalarType, 1>::transformImpl(const RealType& phase) {
         const size_t length = data.getLength();
         Vector<ComplexType> buffer(length);
         //Optimize:
