@@ -45,18 +45,13 @@ namespace Physica::Gui {
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());
 
         auto* dataArray = new QSurfaceDataArray;
-        dataArray->reserve(z.getMaxMajor());
-        for (size_t i = 0 ; i < z.getMaxMajor() ; ++i) {
-            auto* dataRow = new QSurfaceDataRow(z.getMaxMinor());
-            for (size_t j = 0; j < z.getMaxMinor(); j++)
-                if constexpr (Core::DenseMatrixOption::isColumnMatrix<MatrixType>())
-                    (*dataRow)[j].setPosition(QVector3D(float(y.getElementFromMajorMinor(i, j)),
-                                                        float(z.getElementFromMajorMinor(i, j)),
-                                                        float(x.getElementFromMajorMinor(i, j))));
-                else
-                    (*dataRow)[j].setPosition(QVector3D(float(y.transpose().calc(i, j)),
-                                                        float(z.transpose().calc(i, j)),
-                                                        float(x.transpose().calc(i, j))));
+        dataArray->reserve(z.getRow());
+        for (size_t i = 0 ; i < z.getRow() ; ++i) {
+            auto* dataRow = new QSurfaceDataRow(z.getColumn());
+            for (size_t j = 0; j < z.getColumn(); j++)
+                (*dataRow)[j].setPosition(QVector3D(float(x(i, j)),
+                                                    float(z(i, j)),
+                                                    float(y(i, j))));
             *dataArray << dataRow;
         }
         series->dataProxy()->resetArray(dataArray);

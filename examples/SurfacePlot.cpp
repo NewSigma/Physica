@@ -28,7 +28,7 @@ using RealType = Scalar<Double, false>;
 using ComplexType = ComplexScalar<RealType>;
 
 int main(int argc, char** argv) {
-    const size_t N1 = 100;
+    const size_t N1 = 50;
     const size_t N2 = 100;
     const double deltaX = 0.01;
     const double deltaY = 0.01;
@@ -46,12 +46,12 @@ int main(int argc, char** argv) {
     fft.transform();
     auto components = fft.getComponents();
 
-    DenseMatrix<RealType> f(N1 / 2 * 2 + 1, N2 / 2 * 2 + 1);
+    DenseMatrix<RealType> f(N2 / 2 * 2 + 1, N1 / 2 * 2 + 1);
     {
         size_t index = 0;
         for (size_t i = 0; i < N1 / 2 * 2 + 1; ++i) {
             for (size_t j = 0; j < N2 / 2 * 2 + 1; ++j) {
-                f(i, j) = components[index].norm();
+                f(j, i) = components[index].norm();
                 index++;
             }
         }
@@ -59,8 +59,9 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
-    Vector<RealType> v = Vector<RealType>::linspace(-1 / (2 * deltaX), 1 / (2 * deltaX), N1 / 2 * 2 + 1);
-    auto grid = DenseMatrix<RealType>::meshgrid(v, v);
+    Vector<RealType> v1 = Vector<RealType>::linspace(-1 / (2 * deltaX), 1 / (2 * deltaX), N1 / 2 * 2 + 1);
+    Vector<RealType> v2 = Vector<RealType>::linspace(-1 / (2 * deltaY), 1 / (2 * deltaY), N2 / 2 * 2 + 1);
+    auto grid = DenseMatrix<RealType>::meshgrid(v1, v2);
 
     Plot3D* plot3d = new Plot3D();
 
