@@ -147,7 +147,7 @@ namespace Physica::Core::Internal {
                 index += size;
         }
         else
-            index = std::abs(index);
+            assert(index >= 0);
         return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * deltaT;
     }
 
@@ -185,11 +185,6 @@ namespace Physica::Core::Internal {
         Utils::Array<int, Dim> size;
         Utils::Array<RealType, Dim> deltaTs;
     public:
-        FFTImpl(typename std::enable_if<Dim == 2, const Vector<ScalarType>&>::type data,
-                size_t dim0,
-                size_t dim1,
-                RealType deltaT0,
-                RealType deltaT1);
         FFTImpl(const Vector<ScalarType>& data,
                 const Utils::Array<size_t, Dim>& size_,
                 Utils::Array<RealType, Dim> deltaTs_);
@@ -221,41 +216,23 @@ namespace Physica::Core::Internal {
     };
 
     template<class ScalarType, size_t Dim>
-    FFTImpl<ScalarType, Dim>::FFTImpl(typename std::enable_if<Dim == 2, const Vector<ScalarType>&>::type data,
-                                      size_t dim0,
-                                      size_t dim1,
-                                      RealType deltaT0,
-                                      RealType deltaT1) {
-        assert(dim0 <= INT_MAX);
-        assert(dim1 <= INT_MAX);
-        size[0] = static_cast<int>(dim0);
-        size[1] = static_cast<int>(dim1);
-
-        const size_t totalSize = dim0 * dim1;
-        buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(totalSize * sizeof(fftw_complex)));
-        forward_plan = forwardPlan();
-        backward_plan = backwardPlan();
-        for (size_t i = 0; i < totalSize; ++i) {
-            const auto& complex = data[i];
-            buffer[i][0] = double(complex.getReal());
-            buffer[i][1] = double(complex.getImag());
-        }
-    }
-
-    template<class ScalarType, size_t Dim>
     FFTImpl<ScalarType, Dim>::FFTImpl(
             const Vector<ScalarType>& data,
             const Utils::Array<size_t, Dim>& size_,
             Utils::Array<RealType, Dim> deltaTs_) : size(size_.getLength()), deltaTs(std::move(deltaTs_)) {
-        for (size_t i = 0; i < size.getLength(); ++i)
+        for (size_t i = 0; i < getDimen(); ++i)
             size[i] = static_cast<int>(size_[i]);
 
         buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(totalSizeFrom(0) * sizeof(fftw_complex)));
         forward_plan = forwardPlan();
         backward_plan = backwardPlan();
         for (size_t i = 0; i < data.getLength(); ++i) {
-            buffer[i][0] = double(data[i].getReal());
-            buffer[i][1] = double(data[i].getImag());
+            if constexpr (isComplex) {
+                buffer[i][0] = double(data[i].getReal());
+                buffer[i][1] = double(data[i].getImag());
+            }
+            else
+                real_buffer[i] = double(data[i]);
         }
     }
 
@@ -336,34 +313,60 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Dim>
     fftw_plan FFTImpl<ScalarType, Dim>::forwardPlan() {
         if constexpr (Dim == 2)
-            return fftw_plan_dft_2d(size[0], size[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft_2d(size[0], size[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_r2c_2d(size[0], size[1], real_buffer, buffer, FFTW_ESTIMATE);
         else if constexpr (Dim == 3)
-            return fftw_plan_dft_3d(size[0], size[1], size[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft_3d(size[0], size[1], size[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_r2c_3d(size[0], size[1], size[2], real_buffer, buffer, FFTW_ESTIMATE);
         else
-            return fftw_plan_dft(size.getLength(), size.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft(getDimen(), size.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_r2c(getDimen(), size.data(), real_buffer, buffer, FFTW_ESTIMATE);
     }
     
     template<class ScalarType, size_t Dim>
     fftw_plan FFTImpl<ScalarType, Dim>::backwardPlan() {
         if constexpr (Dim == 2)
-            return fftw_plan_dft_2d(size[0], size[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft_2d(size[0], size[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_c2r_2d(size[0], size[1], buffer, real_buffer, FFTW_ESTIMATE);
         else if constexpr (Dim == 3)
-            return fftw_plan_dft_3d(size[0], size[1], size[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft_3d(size[0], size[1], size[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_c2r_3d(size[0], size[1], size[2], buffer, real_buffer, FFTW_ESTIMATE);
         else
-            return fftw_plan_dft(size.getLength(), size.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            if constexpr (isComplex)
+                return fftw_plan_dft(getDimen(), size.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            else
+                return fftw_plan_dft_c2r(getDimen(), size.data(), buffer, real_buffer, FFTW_ESTIMATE);
     }
 
     template<class ScalarType, size_t Dim>
     size_t FFTImpl<ScalarType, Dim>::totalSizeFrom(size_t dim) const {
         size_t result = 1;
-        for (size_t i = dim; i < size.getLength(); ++i)
-            result *= size[i];
+        for (size_t i = dim; i < getDimen(); ++i) {
+            if constexpr (isComplex)
+                result *= size[i];
+            else {
+                if (i == getDimen() - 1)
+                    result *= size[i] / 2 + 1;
+                else
+                    result *= size[i];
+            }
+        }
         return result;
     }
 
     template<class ScalarType, size_t Dim>
     void FFTImpl<ScalarType, Dim>::normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const {
-        for (size_t i = 0; i < size.getLength(); ++i) {
+        for (size_t i = 0; i < getDimen(); ++i) {
             const int size_i = size[i];
             ssize_t index = indexes[i];
             assert(index <= size_i / 2);
@@ -371,10 +374,10 @@ namespace Physica::Core::Internal {
             if constexpr (isComplex) {
                 if (index < 0)
                     index += size_i;
+                indexes[i] = index;
             }
             else
-                index = std::abs(index);
-            indexes[i] = index;
+                indexes[i] = std::abs(index);
         }
     }
 
@@ -389,8 +392,17 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Dim>
     size_t FFTImpl<ScalarType, Dim>::componentsSizeFrom(size_t dim) const {
         size_t result = 1;
-        for (size_t i = dim; i < getDimen(); ++i)
-            result *= size[i] / 2 * 2 + 1;
+        for (size_t i = dim; i < getDimen(); ++i) {
+            if constexpr (isComplex)
+                result *= size[i] / 2 * 2 + 1;
+            else {
+                if (i == getDimen() - 1)
+                    result *= size[i] / 2 + 1;
+                else
+                    result *= size[i] / 2 * 2 + 1;
+            }
+                
+        }
         return result;
     }
 
@@ -401,7 +413,14 @@ namespace Physica::Core::Internal {
             const size_t componentsSizeFrom_i = componentsSizeFrom(i + 1);
             ssize_t dim_i = index / componentsSizeFrom_i;
             index -= componentsSizeFrom_i * dim_i;
-            result[i] = dim_i - size[i] / 2;
+            if constexpr (isComplex)
+                result[i] = dim_i - size[i] / 2;
+            else {
+                if (i == getDimen() - 1)
+                    result[i] = dim_i;
+                else
+                    result[i] = dim_i - size[i] / 2;
+            }
         }
         return result;
     }

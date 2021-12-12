@@ -40,6 +40,8 @@ namespace Physica::Gui {
     Q3DSurface& Plot3D::surf(const Core::LValueMatrix<MatrixType>& x,
                              const Core::LValueMatrix<MatrixType>& y,
                              const Core::LValueMatrix<MatrixType>& z) {
+        assert(x.getColumn() == y.getColumn() && x.getRow() == y.getRow());
+        assert(y.getColumn() == z.getColumn() && y.getRow() == z.getRow());
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());
 
         auto* dataArray = new QSurfaceDataArray;

@@ -33,6 +33,7 @@ namespace Physica::Core {
         using Impl = Internal::FFTImpl<ScalarType, 1>;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
+        static constexpr bool isComplex = ScalarType::isComplex;
     private:
         Impl impl;
     public:
@@ -68,8 +69,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename FFT<ScalarType, 1>::ComplexType FFT<ScalarType, 1>::getFreqIntense(const RealType& freq) const noexcept {
-        const double round_helper = freq.isPositive() ? 0.5 : -0.5;
         const double float_index = double(getDeltaT() * freq * RealType(getSize()));
+        double round_helper;
+        if constexpr (isComplex) {
+            round_helper = freq.isPositive() ? 0.5 : -0.5;
+        }
+        else {
+            assert(!freq.isNegative());
+            round_helper = 0.5;
+        }
         const ssize_t index = static_cast<ssize_t>(float_index + round_helper);
         return getComponent(index);
     }
@@ -79,6 +87,7 @@ namespace Physica::Core {
         using Impl = Internal::FFTImpl<ScalarType, Dim>;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
+        static constexpr bool isComplex = ScalarType::isComplex;
     private:
         Impl impl;
     public:
@@ -118,7 +127,14 @@ namespace Physica::Core {
         Utils::Array<ssize_t, Dim> indexes{};
         for (size_t i = 0; i < Dim; ++i) {
             const RealType& f = freq[i];
-            const double round_helper = f.isPositive() ? 0.5 : -0.5;
+            double round_helper;
+            if constexpr (isComplex) {
+                round_helper = f.isPositive() ? 0.5 : -0.5;
+            }
+            else {
+                assert(!f.isNegative());
+                round_helper = 0.5;
+            }
             const double float_index = double(getDeltaT() * f * RealType(getSize()));
             indexes[i] = static_cast<ssize_t>(float_index + round_helper);
         }
