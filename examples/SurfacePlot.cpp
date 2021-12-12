@@ -17,25 +17,55 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
-#include "Physica/Gui/Plot/Plot3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Gui/Plot/Plot3D.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double, false>;
+using namespace Physica::Utils;
+using RealType = Scalar<Double, false>;
+using ComplexType = ComplexScalar<RealType>;
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
+    const size_t N1 = 100;
+    const size_t N2 = 100;
+    const double deltaX = 0.01;
+    const double deltaY = 0.01;
+
+    Vector<ComplexType> data(N1 * N2);
+    {
+        size_t index = 0;
+        for (size_t i = 0; i < N1; ++i) {
+            for (size_t j = 0; j < N2; ++j) {
+                data[index++] = ComplexType(RealType(std::sin(2 * M_PI * 10 * i * deltaX) + 2 * std::cos(2 * M_PI * 5 * j * deltaY)), RealType::Zero());
+            }
+        }
+    }
+    FFT<ComplexType, 2> fft(data, {N1, N2}, {deltaX, deltaY});
+    fft.transform();
+    auto components = fft.getComponents();
+
+    DenseMatrix<RealType> f(N1 / 2 * 2 + 1, N2 / 2 * 2 + 1);
+    {
+        size_t index = 0;
+        for (size_t i = 0; i < N1 / 2 * 2 + 1; ++i) {
+            for (size_t j = 0; j < N2 / 2 * 2 + 1; ++j) {
+                f(i, j) = components[index].norm();
+                index++;
+            }
+        }
+    }
+
     QApplication app(argc, argv);
 
-    Vector<ScalarType> v = Vector<ScalarType>::linspace(-5, 5, 50);
-    auto grid = DenseMatrix<ScalarType>::meshgrid(v, v);
-    DenseMatrix<ScalarType> z = multiply(square(grid.first) + square(grid.second), exp(-square(grid.first) - square(grid.second) + ScalarType::One()));
+    Vector<RealType> v = Vector<RealType>::linspace(-1 / (2 * deltaX), 1 / (2 * deltaX), N1 / 2 * 2 + 1);
+    auto grid = DenseMatrix<RealType>::meshgrid(v, v);
 
     Plot3D* plot3d = new Plot3D();
 
-    auto& surf = plot3d->surf(grid.first, grid.second, z);
+    auto& surf = plot3d->surf(grid.first, grid.second, f);
     surf.activeTheme()->setType(Q3DTheme::ThemePrimaryColors);
-
     {
         QLinearGradient gr;
         gr.setColorAt(0.0, Qt::blue);

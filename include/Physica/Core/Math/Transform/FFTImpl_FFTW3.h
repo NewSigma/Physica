@@ -389,7 +389,7 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Dim>
     size_t FFTImpl<ScalarType, Dim>::componentsSizeFrom(size_t dim) const {
         size_t result = 1;
-        for (size_t i = dim; i < size.getLength(); ++i)
+        for (size_t i = dim; i < getDimen(); ++i)
             result *= size[i] / 2 * 2 + 1;
         return result;
     }
