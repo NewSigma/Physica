@@ -135,7 +135,7 @@ namespace Physica::Core {
                 assert(!f.isNegative());
                 round_helper = 0.5;
             }
-            const double float_index = double(getDeltaT() * f * RealType(getSize()));
+            const double float_index = double(getDeltaT(i) * f * RealType(getSize(i)));
             indexes[i] = static_cast<ssize_t>(float_index + round_helper);
         }
         return getComponent(indexes);

@@ -25,7 +25,7 @@ using RealType = Scalar<Double, false>;
 using ComplexType = ComplexScalar<RealType>;
 
 int main() {
-    {
+    /* 1D real */ {
         const size_t N = 100;
         const double t_max = 2;
         
@@ -52,6 +52,28 @@ int main() {
         if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
             return 1;
     }
+    /* 2d real */ {
+        const size_t N1 = 50;
+        const size_t N2 = 100;
+        const double deltaX = 0.01;
+        const double deltaY = 0.01;
 
+        Vector<RealType> data(N1 * N2);
+        {
+            size_t index = 0;
+            for (size_t i = 0; i < N1; ++i) {
+                for (size_t j = 0; j < N2; ++j) {
+                    data[index++] = RealType(std::sin(2 * M_PI * 10 * i * deltaX) + 2 * std::cos(2 * M_PI * 5 * j * deltaY));
+                }
+            }
+        }
+        FFT<RealType, 2> fft(data, {N1, N2}, {deltaX, deltaY});
+        fft.transform();
+
+        const RealType freq1_power = fft.getFreqIntense({10, 0}).norm();
+        const RealType freq2_power = fft.getFreqIntense({0, 5}).norm();
+        if (!scalarNear(freq2_power / freq1_power, RealType(2), 2E-2))
+            return 1;
+    }
     return 0;
 }

@@ -208,7 +208,7 @@ namespace Physica::Core::Internal {
     private:
         [[nodiscard]] fftw_plan forwardPlan();
         [[nodiscard]] fftw_plan backwardPlan();
-        [[nodiscard]] size_t totalSizeFrom(size_t dim) const;
+        [[nodiscard]] size_t outputSizeFrom(size_t dim) const;
         void normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const;
         [[nodiscard]] RealType mulDeltaTs() const;
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
@@ -223,22 +223,31 @@ namespace Physica::Core::Internal {
         for (size_t i = 0; i < getDimen(); ++i)
             size[i] = static_cast<int>(size_[i]);
 
-        buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(totalSizeFrom(0) * sizeof(fftw_complex)));
+        buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(outputSizeFrom(0) * sizeof(fftw_complex)));
         forward_plan = forwardPlan();
         backward_plan = backwardPlan();
-        for (size_t i = 0; i < data.getLength(); ++i) {
-            if constexpr (isComplex) {
+
+        if constexpr (isComplex) {
+            for (size_t i = 0; i < data.getLength(); ++i) {
                 buffer[i][0] = double(data[i].getReal());
                 buffer[i][1] = double(data[i].getImag());
             }
-            else
-                real_buffer[i] = double(data[i]);
+        }
+        else {
+            const size_t lastDimSize = size[getDimen() - 1];
+            const size_t paddingCount = (lastDimSize / 2 + 1) * 2 - lastDimSize;
+            size_t j = 0;
+            for (size_t i = 0; i < data.getLength(); ++i, ++j) {
+                real_buffer[j] = double(data[i]);
+                if (i % lastDimSize == 0)
+                    j += paddingCount;
+            }
         }
     }
 
     template<class ScalarType, size_t Dim>
     FFTImpl<ScalarType, Dim>::FFTImpl(const FFTImpl& fft)
-            : buffer(fftw_malloc(fft.totalSizeFrom(0) * sizeof(fftw_complex)))
+            : buffer(fftw_malloc(fft.outputSizeFrom(0) * sizeof(fftw_complex)))
             , size(fft.size)
             , deltaTs(fft.deltaTs) {
         forward_plan = forwardPlan();
@@ -272,7 +281,7 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Dim>
     inline void FFTImpl<ScalarType, Dim>::invTransform() {
         fftw_execute(backward_plan);
-        const size_t totalSize = totalSizeFrom(0);
+        const size_t totalSize = outputSizeFrom(0);
         const double factor = 1.0 / totalSize;
         for (int i = 0; i < totalSize; ++i) {
             if constexpr (isComplex) {
@@ -298,7 +307,7 @@ namespace Physica::Core::Internal {
         normalizeIndexes(indexes);
         size_t index = 0;
         for (size_t i = 0; i < indexes.getLength(); ++i)
-            index += indexes[i] * totalSizeFrom(i + 1);
+            index += indexes[i] * outputSizeFrom(i + 1);
         return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * mulDeltaTs();
     }
 
@@ -349,7 +358,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType, size_t Dim>
-    size_t FFTImpl<ScalarType, Dim>::totalSizeFrom(size_t dim) const {
+    size_t FFTImpl<ScalarType, Dim>::outputSizeFrom(size_t dim) const {
         size_t result = 1;
         for (size_t i = dim; i < getDimen(); ++i) {
             if constexpr (isComplex)
@@ -371,13 +380,9 @@ namespace Physica::Core::Internal {
             ssize_t index = indexes[i];
             assert(index <= size_i / 2);
             assert(-size_i / 2 <= index);
-            if constexpr (isComplex) {
-                if (index < 0)
-                    index += size_i;
-                indexes[i] = index;
-            }
-            else
-                indexes[i] = std::abs(index);
+            if (index < 0)
+                index += size_i;
+            indexes[i] = index;
         }
     }
 
