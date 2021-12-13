@@ -19,16 +19,18 @@
 #include <iostream>
 #include <random>
 #include <QtWidgets/QApplication>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Gui/Plot/Plot.h"
 
+using namespace Physica::Core;
 using namespace Physica::Gui;
-using namespace Physica::Utils;
+using ScalarType = Scalar<Double, false>;
 
 int main(int argc, char** argv) {
     std::random_device rd{};
     std::mt19937 gen{rd()};
     std::normal_distribution phi{};
-    Array<double> arr(5000);
+    Vector<ScalarType> arr(5000);
     for (int i = 0; i < 5000; ++i)
         arr[i] = phi(gen);
     

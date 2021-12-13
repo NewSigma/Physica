@@ -24,7 +24,7 @@
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QAreaSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 #include "ContourSeries.h"
 
 using Physica::Core::MultiScalar;
@@ -36,14 +36,16 @@ namespace Physica::Gui {
         Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
                 , const MultiScalar& end, QWidget* parent = nullptr);
         /* Operations */
-        template<class Array>
-        QLineSeries& line(const Array& x, const Array& y);
-        template<class Array>
-        QSplineSeries& spline(const Array& x, const Array& y);
-        template<class Array>
-        QScatterSeries& scatter(const Array& x, const Array& y);
-        template<class Array>
-        QAreaSeries& hist(const Array& data, size_t binCount, bool dencity = false);
+        template<class VectorType1, class VectorType2>
+        QLineSeries& line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        template<class VectorType1, class VectorType2>
+        QSplineSeries& spline(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        template<class VectorType>
+        QScatterSeries& scatter(const Core::LValueVector<VectorType>& y);
+        template<class VectorType1, class VectorType2>
+        QScatterSeries& scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        template<class VectorType>
+        QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool dencity = false);
         template<class MatrixType>
         ContourSeries<MatrixType>& contour(const Core::LValueMatrix<MatrixType>& x,
                                            const Core::LValueMatrix<MatrixType>& y,
@@ -51,8 +53,8 @@ namespace Physica::Gui {
                                            Utils::Array<double> levels);
     };
 
-    template<class Array>
-    QLineSeries& Plot::line(const Array& x, const Array& y) {
+    template<class VectorType1, class VectorType2>
+    QLineSeries& Plot::line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
         assert(x.getLength() == y.getLength());
         QLineSeries* series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
@@ -63,8 +65,8 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<class Array>
-    QSplineSeries& Plot::spline(const Array& x, const Array& y) {
+    template<class VectorType1, class VectorType2>
+    QSplineSeries& Plot::spline(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
         assert(x.getLength() == y.getLength());
         QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
@@ -75,8 +77,14 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<class Array>
-    QScatterSeries& Plot::scatter(const Array& x, const Array& y) {
+    template<class VectorType>
+    QScatterSeries& Plot::scatter(const Core::LValueVector<VectorType>& y) {
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        return scatter(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
+    }
+
+    template<class VectorType1, class VectorType2>
+    QScatterSeries& Plot::scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
         assert(x.getLength() == y.getLength());
         QScatterSeries* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
@@ -87,16 +95,16 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<class Array>
-    QAreaSeries& Plot::hist(const Array& data, size_t binCount, bool dencity) {
-        using T = typename Array::ValueType;
+    template<class VectorType>
+    QAreaSeries& Plot::hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool dencity) {
+        using ScalarType = typename VectorType::ScalarType;
         
         double binWidth, min;
         const size_t length = data.getLength();
         /* Get binWidth and min */ {
-            T minimum = data[0], maximum = data[0];
+            ScalarType minimum = data[0], maximum = data[0];
             for (size_t i = 1; i < length; ++i) {
-                T temp = data[i];
+                ScalarType temp = data[i];
                 if (temp < minimum)
                     minimum = std::move(temp);
                 else if (temp > maximum)

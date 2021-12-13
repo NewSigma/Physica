@@ -109,8 +109,8 @@ private:
     template<class MatrixType>
     void plotWave(Plot& plot, const EigenSolver<MatrixType>& solver, size_t n) {
         constexpr size_t sampleCount = 100;
-        Array<ScalarType, sampleCount> x{};
-        Array<ScalarType, sampleCount> y{};
+        Vector<ScalarType, sampleCount> x{};
+        Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
         ScalarType temp_x = -ScalarType::One();
         for (size_t i = 0; i < sampleCount; ++i) {
@@ -128,8 +128,8 @@ private:
 
     void plotReferenceWave(Plot& plot, size_t n) {
         constexpr size_t sampleCount = 100;
-        Array<ScalarType, sampleCount> x{};
-        Array<ScalarType, sampleCount> y{};
+        Vector<ScalarType, sampleCount> x{};
+        Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
         ScalarType temp = -ScalarType::One();
         const ScalarType factor = square(ScalarType(n * M_PI * 0.25));
@@ -223,8 +223,8 @@ private:
     template<class VectorType>
     void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
         constexpr size_t sampleCount = 100;
-        Array<ScalarType, sampleCount> x{};
-        Array<ScalarType, sampleCount> y{};
+        Vector<ScalarType, sampleCount> x{};
+        Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
         ScalarType temp_x = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
@@ -241,8 +241,8 @@ private:
 
     void plotReferenceWave(Plot& plot) {
         constexpr size_t sampleCount = 100;
-        Array<ScalarType, sampleCount> x{};
-        Array<ScalarType, sampleCount> y{};
+        Vector<ScalarType, sampleCount> x{};
+        Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
         ScalarType temp = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
@@ -364,8 +364,8 @@ private:
     template<class VectorType>
     void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
         constexpr size_t sampleCount = 100;
-        Array<ScalarType, sampleCount> x{};
-        Array<ScalarType, sampleCount> y{};
+        Vector<ScalarType, sampleCount> x{};
+        Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
         ScalarType temp_x = ScalarType::Zero();
         for (size_t i = 0; i < sampleCount; ++i) {
