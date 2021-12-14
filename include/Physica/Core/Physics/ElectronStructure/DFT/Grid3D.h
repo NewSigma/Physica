@@ -70,9 +70,9 @@ namespace Physica::Core {
     template<class ScalarType>
     Vector<ScalarType, 3> Grid3D<ScalarType>::dimToPos(Dim dim) const {
         auto[x, y, z] = dim;
-        const ScalarType factor_x = ScalarType(x) / ScalarType(dimX);
-        const ScalarType factor_y = ScalarType(y) / ScalarType(dimY);
-        const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ);
+        const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
+        const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
+        const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
         return lattice.row(0) * factor_x + lattice.row(1) * factor_y + lattice(2) * factor_z;
     }
 

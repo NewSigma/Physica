@@ -35,8 +35,10 @@ namespace Physica::Core {
 
         CrystalCell cell;
         ScalarType cutEnergy;
+        Grid3D<ScalarType> densityGrid;
+        Grid3D<ScalarType> potentialGrid;
     public:
-        KSSolver(CrystalCell cell_, ScalarType cutEnergy_);
+        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
         ~KSSolver() = default;
@@ -48,22 +50,23 @@ namespace Physica::Core {
     private:
         [[nodiscard]] static size_t numOrbitToSolve(const CrystalCell& cell);
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
-        static void fillPotential(KPoint k, Hamilton& hamilton, const Grid3D& chargeDensity);
+        static void fillPotential(KPoint k, Hamilton& hamilton);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
-        static void updateDensity(Grid3D& chargeDensity, const KSOrbits& orbits);
+        static void updateDensity(const KSOrbits& orbits);
     };
 
     template<class ScalarType>
-    KSSolver<ScalarType>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_)
+    KSSolver<ScalarType>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX, size_t gridDimY, size_t gridDimZ)
             : cell(std::move(cell_))
-            , cutEnergy(std::move(cutEnergy_)) {}
+            , cutEnergy(std::move(cutEnergy_))
+            , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
+            , potentialGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ) {}
 
     template<class ScalarType>
     bool KSSolver<ScalarType>::solve(const ScalarType& criteria, size_t maxIte) {
         const size_t orbitCount = numOrbitToSolve(cell);
         auto orbits = KSOrbits(numOrbitToSolve(cell), KSOrbit(cutEnergy, cell.getReciprocal()));
-        auto chargeDensity = Grid3D<ScalarType>();
         KPoint toSolve{0, 0, 0};
 
         const size_t plainWaveCount = orbit.getPlainWaveCount();
@@ -74,7 +77,7 @@ namespace Physica::Core {
         size_t iteration = 0;
         while (true) {
             fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
-            fillPotential(toSolve, hamilton, chargeDensity);
+            fillPotential(toSolve, hamilton);
             eigenSolver.compute(hamilton, true);
             
             sortEigenvalues(sortedEigenvalues);
@@ -82,7 +85,7 @@ namespace Physica::Core {
                 break;
             hamilton = ScalarType::Zero();
             updateOrbits(eigenSolver, orbits);
-            updateDensity(chargeDensity, orbits);
+            updateDensity(orbits);
         };
         return true;
     }
@@ -101,9 +104,17 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i)
             hamilton(i, i) += (k + orbit.getBaseFunc(i)).squaredNorm() * ScalarType(0.5);
     }
-
+    /**
+     * Reference:
+     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479
+     */
     template<class ScalarType>
-    void KSSolver<ScalarType>::fillPotential(KPoint k, Hamilton& hamilton, const Grid3D& chargeDensity) {
+    void KSSolver<ScalarType>::fillPotential(KPoint k, Hamilton& hamilton) {
+        constexpr double exchange_factor = -0.98474502184269654;
+        constexpr double correlation_factor1 = -0.045 / 2;
+        constexpr double correlation_factor2 = 33.851831034345862;
+        potentialGrid.asVector() = pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
+        potentialGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
     }
     /**
      * Reference to RHFSolver module
@@ -138,16 +149,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void KSSolver<ScalarType>::updateDensity(Grid3D& chargeDensity, const KSOrbits& orbits) {
-        auto[dimX, dimY, dimZ] = chargeDensity.getDim();
+    void KSSolver<ScalarType>::updateDensity(const KSOrbits& orbits) {
+        auto[dimX, dimY, dimZ] = densityGrid.getDim();
         for (size_t i = 0; i < dimX; ++i) {
             for (size_t j = 0; j < dimY; ++j) {
                 for (size_t k = 0; k < dimZ; ++j) {
-                    const auto pos = chargeDensity.dimToPos({i, j, k});
+                    const auto pos = densityGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
                     for (const auto& orbit : orbits)
                         density += orbit(pos).squaredNorm();
-                    chargeDensity(i, j, k) = density;
+                    densityGrid(i, j, k) = density;
                 }
             }
         }
