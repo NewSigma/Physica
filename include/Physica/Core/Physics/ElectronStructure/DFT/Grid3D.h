@@ -37,6 +37,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z);
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Getters */
+        [[nodiscard]] size_t getSize() const noexcept;
         [[nodiscard]] Dim getDim() const noexcept;
         [[nodiscard]] Vector<ScalarType, 3> dimToPos(Dim dim) const;
         [[nodiscard]] size_t dimToIndex(size_t x, size_t y, size_t z) const noexcept;
@@ -60,6 +61,11 @@ namespace Physica::Core {
     template<class ScalarType>
     const ScalarType& Grid3D<ScalarType>::operator()(size_t x, size_t y, size_t z) const {
         return values[dimToIndex(x, y, z)];
+    }
+
+    template<class ScalarType>
+    size_t Grid3D<ScalarType>::getSize() const noexcept {
+        return dimX * dimY * dimZ;
     }
 
     template<class ScalarType>
