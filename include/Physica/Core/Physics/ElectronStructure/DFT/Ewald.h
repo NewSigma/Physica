@@ -42,11 +42,13 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
                                                 ScalarType integralLimit,
                                                 std::tuple<int, int, int> dim,
-                                                const Vector<ScalarType, 3>& deltaPos);
+                                                const Vector<ScalarType, 3>& deltaPos,
+                                                const ScalarType& averageCellSize);
         [[nodiscard]] static ScalarType reciprocalSum(const LatticeMatrix& cell,
                                                       ScalarType integralLimit,
                                                       std::tuple<int, int, int> dim,
                                                       const Vector<ScalarType, 3>& deltaPos);
+        [[nodiscard]] static bool isTooClose(ScalarType deltaR, ScalarType averageCellSize);
     };
 
     template<class ScalarType>
@@ -65,7 +67,7 @@ namespace Physica::Core {
         for (size_t ion1 = 0; ion1 < ionCount; ++ion1) {
             for (size_t ion2 = 0; ion2 < ionCount; ++ion2) { //Optimize: possible to loop from ion2 = ion1
                 const Vector3D deltaPos = cell.getLattice() * (cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2));
-                ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos); //Optimize: VASP puts this loop outside, consider its performance
+                ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize); //Optimize: VASP puts this loop outside, consider its performance
                 sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
 
                 const int charge1 = cell.getCharge(ion1);
@@ -97,7 +99,7 @@ namespace Physica::Core {
         ScalarType totalCharge = 0;
         for (size_t i = 0; i < chargeCount; ++i) {
             const Vector3D deltaPos = r - chargeGrid.indexToPos(i);
-            ScalarType sum = realSum(chargeGrid.getLattice(), integralLimit, realSumDim, deltaPos);
+            ScalarType sum = realSum(chargeGrid.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize);
             sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
 
             const ScalarType charge = chargeGrid[i];
@@ -112,7 +114,31 @@ namespace Physica::Core {
     
     template<class ScalarType>
     ScalarType Ewald<ScalarType>::potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell) {
+        const size_t ionCount = cell.getPos().getRow();
+        const ScalarType inv_volume = reciprocal(cell.getVolume());
+        //The following param chosen is referenced from VASP
+        const ScalarType averageCellSize = cbrt(ScalarType(cell.getVolume()));
+        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
+        const auto realSumDim = getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
+        const auto repSumDim = getSumDimention(cell.getLattice(), ScalarType(4 / M_PI) * integralLimit);
 
+        const ScalarType selfTerm = ScalarType::Two() * integralLimit / sqrt(ScalarType(M_PI));
+
+        ScalarType result = ScalarType::Zero();
+        int totalCharge = 0;
+        for (size_t i = 0; i < ionCount; ++i) {
+            const Vector3D deltaPos = r - cell.getLattice() * cell.getPos().row(i).asVector();
+            ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize);
+            sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
+            if (isTooClose(deltaPos.norm(), averageCellSize))
+                sum -= selfTerm;
+
+            const int charge = cell.getCharge(i);
+            result += sum * charge;
+            totalCharge += charge;
+        }
+        result -= ScalarType(M_PI) / (square(integralLimit)) * inv_volume * totalCharge;
+        return result;
     }
 
     template<class ScalarType>
@@ -130,10 +156,11 @@ namespace Physica::Core {
     ScalarType Ewald<ScalarType>::realSum(const LatticeMatrix& cellLattice,
                                           ScalarType integralLimit,
                                           std::tuple<int, int, int> dim,
-                                          const Vector<ScalarType, 3>& deltaPos) {
+                                          const Vector<ScalarType, 3>& deltaPos,
+                                          const ScalarType& averageCellSize) {
         ScalarType sum = ScalarType::Zero();
 
-        if (deltaPos.squaredNorm().isZero()) {
+        if (isTooClose(deltaPos.norm(), averageCellSize)) {
             for (int i = -std::get<0>(dim); i <= std::get<0>(dim); ++i) {
                 for (int j = -std::get<1>(dim); j <= std::get<1>(dim); ++j) {
                     for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
@@ -185,5 +212,10 @@ namespace Physica::Core {
             }
         }
         return sum;
+    }
+
+    template<class ScalarType>
+    bool Ewald<ScalarType>::isTooClose(ScalarType deltaR, ScalarType averageCellSize) {
+        return deltaR <= averageCellSize * std::numeric_limits<ScalarType>::epsilon();
     }
 }

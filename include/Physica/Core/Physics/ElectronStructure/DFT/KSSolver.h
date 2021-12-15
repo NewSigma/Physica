@@ -37,7 +37,8 @@ namespace Physica::Core {
         ReciprocalCell repCell;
         ScalarType cutEnergy;
         Grid3D<ScalarType> densityGrid;
-        Grid3D<ScalarType> potentialGrid;
+        Grid3D<ScalarType> totalPotGrid;
+        Grid3D<ScalarType> externalPotGrid;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
@@ -50,13 +51,13 @@ namespace Physica::Core {
         bool solve(const ScalarType& criteria, size_t maxIte);
     private:
         [[nodiscard]] static size_t numOrbitToSolve(const CrystalCell& cell);
+        void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
         void fillPotential(KPoint k, Hamilton& hamilton);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
         static void updateDensity(const KSOrbits& orbits);
         void updateHartree();
-        void updateExternalPot();
         void updateXCPot();
     };
 
@@ -66,7 +67,8 @@ namespace Physica::Core {
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
             , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
-            , potentialGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ) {}
+            , totalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
+            , externalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ) {}
 
     template<class ScalarType>
     bool KSSolver<ScalarType>::solve(const ScalarType& criteria, size_t maxIte) {
@@ -104,6 +106,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void KSSolver<ScalarType>::initExternalPot() {
+        const size_t gridSize = externalPotGrid.getSize();
+        for (size_t i = 0; i < gridSize; ++i)
+            externalPotGrid[i] = Ewald<ScalarType>(externalPotGrid.indexToPos(i), cell, repCell);
+    }
+
+    template<class ScalarType>
     void KSSolver<ScalarType>::fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit) {
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i)
@@ -112,10 +121,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::fillPotential(KPoint k, Hamilton& hamilton) {
-        potentialGrid.asVector() = ScalarType::Zero();
+        totalPotGrid.asVector() = ScalarType::Zero();
         updateHartree();
-        updateExternalPot();
         updateXCPot();
+        totalPotGrid.asVector() += externalPotGrid.asVector();
     }
     /**
      * Reference to RHFSolver module
@@ -167,14 +176,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::updateHartree() {
-        const size_t gridSize = potentialGrid.getSize();
+        const size_t gridSize = totalPotGrid.getSize();
         for (size_t i = 0; i < gridSize; ++i)
-            potentialGrid[i] += Ewald<ScalarType>(potentialGrid.indexToPos(i), densityGrid, repCell);
-    }
-
-    template<class ScalarType>
-    void KSSolver<ScalarType>::updateExternalPot() {
-
+            totalPotGrid[i] += Ewald<ScalarType>(totalPotGrid.indexToPos(i), densityGrid, repCell);
     }
     /**
      * Reference:
@@ -185,7 +189,7 @@ namespace Physica::Core {
         constexpr double exchange_factor = -0.98474502184269654;
         constexpr double correlation_factor1 = -0.045 / 2;
         constexpr double correlation_factor2 = 33.851831034345862;
-        potentialGrid.asVector() += pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
-        potentialGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
+        totalPotGrid.asVector() += pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
+        totalPotGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
     }
 }
