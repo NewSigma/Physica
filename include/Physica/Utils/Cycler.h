@@ -22,7 +22,7 @@
 #include <cstdint>
 
 namespace Physica::Utils {
-    /*!
+    /**
      * This class provides static methods that read the fine-grain CPU
      * cycle counter and translate between cycle-level times and absolute
      * times.
@@ -38,6 +38,7 @@ namespace Physica::Utils {
      * Reference:
      * [1] PAOLONI, G. How to benchmark code execution times on intel ia-32 and ia-64 instruction set
      * architectures. Intel Corporation, September 123 (2010).
+     * [2] NanoLog (https://github.com/PlatformLab/NanoLog)
      */
     class Cycler {
         /*!
@@ -47,11 +48,11 @@ namespace Physica::Utils {
     public:
         /* Static Members */
         static void init();
-        /*!
+        /**
          * Return the current value of the fine-grain CPU cycle counter
          *
          * Because of out of order execution, the result may be less  or more than several cycles.
-         * Use strictStart() and strictEnd() to avoid this problem.
+         * Use tic() and toc() to avoid this problem.
          */
         static __inline __attribute__((always_inline))
         uint64_t now() {
@@ -63,9 +64,9 @@ namespace Physica::Utils {
             );
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
-        /*!
+        /**
          * Start the timing, the instructions
-         * before this function is all executed, Use this function and strictEnd() in pair.
+         * before this function is all executed, Use this function and toc() in pair.
          *
          * This function is slower than now().
          */
@@ -80,9 +81,9 @@ namespace Physica::Utils {
             );
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
-        /*!
+        /**
          * End the timing, the instructions
-         * before this function is all executed, Use this function and strictEnd() in pair.
+         * before this function is all executed, Use this function and tic() in pair.
          *
          * This function is slower than now().
          */
@@ -97,7 +98,7 @@ namespace Physica::Utils {
             );
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
-        /*!
+        /**
          * Returns the conversion factor between cycles in seconds, using
          * a mock value for testing when appropriate.
          */
