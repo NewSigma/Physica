@@ -35,13 +35,15 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, 3>;
     public:
         static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell);
+        static ScalarType potHartree(const Vector3D& r, const Grid3D<ScalarType>& chargeGrid, const ReciprocalCell& repCell);
+        static ScalarType potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
-        [[nodiscard]] static ScalarType realSum(const CrystalCell& cell,
+        [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
                                                 ScalarType integralLimit,
                                                 std::tuple<int, int, int> dim,
                                                 const Vector<ScalarType, 3>& deltaPos);
-        [[nodiscard]] static ScalarType reciprocalSum(const ReciprocalCell& cell,
+        [[nodiscard]] static ScalarType reciprocalSum(const LatticeMatrix& cell,
                                                       ScalarType integralLimit,
                                                       std::tuple<int, int, int> dim,
                                                       const Vector<ScalarType, 3>& deltaPos);
@@ -63,8 +65,8 @@ namespace Physica::Core {
         for (size_t ion1 = 0; ion1 < ionCount; ++ion1) {
             for (size_t ion2 = 0; ion2 < ionCount; ++ion2) { //Optimize: possible to loop from ion2 = ion1
                 const Vector3D deltaPos = cell.getLattice() * (cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2));
-                ScalarType sum = realSum(cell, integralLimit, realSumDim, deltaPos); //Optimize: VASP puts this loop outside, consider its performance
-                sum += ScalarType(4 * M_PI) * reciprocalSum(repCell, integralLimit, repSumDim, deltaPos) * inv_volume;
+                ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos); //Optimize: VASP puts this loop outside, consider its performance
+                sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
 
                 const int charge1 = cell.getCharge(ion1);
                 const int charge2 = cell.getCharge(ion2);
@@ -82,6 +84,38 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType Ewald<ScalarType>::potHartree(const Vector3D& r, const Grid3D<ScalarType>& chargeGrid, const ReciprocalCell& repCell) {
+        const size_t chargeCount = chargeGrid.getSize();
+        const ScalarType inv_volume = reciprocal(chargeGrid.getVolume());
+        //The following param chosen is referenced from VASP
+        const ScalarType averageCellSize = cbrt(ScalarType(chargeGrid.getVolume()));
+        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
+        const auto realSumDim = getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
+        const auto repSumDim = getSumDimention(chargeGrid.getLattice(), ScalarType(4 / M_PI) * integralLimit);
+
+        ScalarType result = ScalarType::Zero();
+        ScalarType totalCharge = 0;
+        for (size_t i = 0; i < chargeCount; ++i) {
+            const Vector3D deltaPos = r - chargeGrid.indexToPos(i);
+            ScalarType sum = realSum(chargeGrid.getLattice(), integralLimit, realSumDim, deltaPos);
+            sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
+
+            const ScalarType charge = chargeGrid[i];
+            result += sum * charge;
+            totalCharge += charge;
+        }
+        result *= chargeGrid.getUnitVolume();
+        result -= ScalarType::Two() * integralLimit / sqrt(ScalarType(M_PI)) * totalCharge;
+        result -= ScalarType(M_PI) / (square(integralLimit)) * inv_volume * totalCharge;
+        return result;
+    }
+    
+    template<class ScalarType>
+    ScalarType Ewald<ScalarType>::potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell) {
+
+    }
+
+    template<class ScalarType>
     std::tuple<int, int, int> Ewald<ScalarType>::getSumDimention(const LatticeMatrix& latt, ScalarType factor) {
         constexpr double roundFactor = 1 - std::numeric_limits<double>::epsilon();
         static_assert(roundFactor < 1);
@@ -93,11 +127,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::realSum(const CrystalCell& cell,
+    ScalarType Ewald<ScalarType>::realSum(const LatticeMatrix& cellLattice,
                                           ScalarType integralLimit,
                                           std::tuple<int, int, int> dim,
                                           const Vector<ScalarType, 3>& deltaPos) {
-        const auto& latt = cell.getLattice();
         ScalarType sum = ScalarType::Zero();
 
         if (deltaPos.squaredNorm().isZero()) {
@@ -106,9 +139,9 @@ namespace Physica::Core {
                     for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
                         if (i == 0 && j == 0 && k == 0)
                             continue;
-                        const Vector3D transVector = Vector3D(latt.row(0)) * ScalarType(i)
-                                                   + Vector3D(latt.row(1)) * ScalarType(j)
-                                                   + Vector3D(latt.row(2)) * ScalarType(k);
+                        const Vector3D transVector = Vector3D(cellLattice.row(0)) * ScalarType(i)
+                                                   + Vector3D(cellLattice.row(1)) * ScalarType(j)
+                                                   + Vector3D(cellLattice.row(2)) * ScalarType(k);
                         const ScalarType norm = transVector.norm();
                         sum += erfc(integralLimit * norm) / norm; //Optimize: VASP uses searching table method
                     }
@@ -119,9 +152,9 @@ namespace Physica::Core {
             for (int i = -std::get<0>(dim); i <= std::get<0>(dim); ++i) {
                 for (int j = -std::get<1>(dim); j <= std::get<1>(dim); ++j) {
                     for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
-                        const Vector3D transVector = Vector3D(latt.row(0)) * ScalarType(i)
-                                                   + Vector3D(latt.row(1)) * ScalarType(j)
-                                                   + Vector3D(latt.row(2)) * ScalarType(k);
+                        const Vector3D transVector = Vector3D(cellLattice.row(0)) * ScalarType(i)
+                                                   + Vector3D(cellLattice.row(1)) * ScalarType(j)
+                                                   + Vector3D(cellLattice.row(2)) * ScalarType(k);
                         const ScalarType norm = (deltaPos - transVector).norm();
                         sum += erfc(integralLimit * norm) / norm;
                     }
@@ -132,7 +165,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::reciprocalSum(const ReciprocalCell& cell,
+    ScalarType Ewald<ScalarType>::reciprocalSum(const LatticeMatrix& repLattice,
                                                 ScalarType integralLimit,
                                                 std::tuple<int, int, int> dim,
                                                 const Vector<ScalarType, 3>& deltaPos) {
@@ -142,10 +175,9 @@ namespace Physica::Core {
                 for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
                     if (i == 0 && j == 0 && k == 0)
                         continue;
-                    const auto& latt = cell.getLattice();
-                    const Vector3D repVector = Vector3D(latt.row(0)) * ScalarType(i)
-                                             + Vector3D(latt.row(1)) * ScalarType(j)
-                                             + Vector3D(latt.row(2)) * ScalarType(k);
+                    const Vector3D repVector = Vector3D(repLattice.row(0)) * ScalarType(i)
+                                             + Vector3D(repLattice.row(1)) * ScalarType(j)
+                                             + Vector3D(repLattice.row(2)) * ScalarType(k);
                     const ScalarType squaredNorm = repVector.squaredNorm();
                     const ScalarType dot = repVector * deltaPos;
                     sum += cos(dot) / (squaredNorm * exp(squaredNorm / square(ScalarType::Two() * integralLimit)));

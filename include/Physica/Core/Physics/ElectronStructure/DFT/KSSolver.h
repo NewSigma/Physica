@@ -34,6 +34,7 @@ namespace Physica::Core {
         using KSOrbits = Utils::Array<KSOrbit>;
 
         CrystalCell cell;
+        ReciprocalCell repCell;
         ScalarType cutEnergy;
         Grid3D<ScalarType> densityGrid;
         Grid3D<ScalarType> potentialGrid;
@@ -50,15 +51,19 @@ namespace Physica::Core {
     private:
         [[nodiscard]] static size_t numOrbitToSolve(const CrystalCell& cell);
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
-        static void fillPotential(KPoint k, Hamilton& hamilton);
+        void fillPotential(KPoint k, Hamilton& hamilton);
         void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
         static void updateDensity(const KSOrbits& orbits);
+        void updateHartree();
+        void updateExternalPot();
+        void updateXCPot();
     };
 
     template<class ScalarType>
     KSSolver<ScalarType>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX, size_t gridDimY, size_t gridDimZ)
             : cell(std::move(cell_))
+            , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
             , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
             , potentialGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ) {}
@@ -104,17 +109,13 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i)
             hamilton(i, i) += (k + orbit.getBaseFunc(i)).squaredNorm() * ScalarType(0.5);
     }
-    /**
-     * Reference:
-     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479
-     */
+
     template<class ScalarType>
     void KSSolver<ScalarType>::fillPotential(KPoint k, Hamilton& hamilton) {
-        constexpr double exchange_factor = -0.98474502184269654;
-        constexpr double correlation_factor1 = -0.045 / 2;
-        constexpr double correlation_factor2 = 33.851831034345862;
-        potentialGrid.asVector() = pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
-        potentialGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
+        potentialGrid.asVector() = ScalarType::Zero();
+        updateHartree();
+        updateExternalPot();
+        updateXCPot();
     }
     /**
      * Reference to RHFSolver module
@@ -162,5 +163,29 @@ namespace Physica::Core {
                 }
             }
         }
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::updateHartree() {
+        const size_t gridSize = potentialGrid.getSize();
+        for (size_t i = 0; i < gridSize; ++i)
+            potentialGrid[i] += Ewald<ScalarType>(potentialGrid.indexToPos(i), densityGrid, repCell);
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::updateExternalPot() {
+
+    }
+    /**
+     * Reference:
+     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479
+     */
+    template<class ScalarType>
+    void KSSolver<ScalarType>::updateXCPot() {
+        constexpr double exchange_factor = -0.98474502184269654;
+        constexpr double correlation_factor1 = -0.045 / 2;
+        constexpr double correlation_factor2 = 33.851831034345862;
+        potentialGrid.asVector() += pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
+        potentialGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
     }
 }

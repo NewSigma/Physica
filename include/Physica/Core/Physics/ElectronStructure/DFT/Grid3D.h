@@ -34,12 +34,20 @@ namespace Physica::Core {
         template<class MatrixType>
         Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_);
         /* Operators */
+        [[nodiscard]] ScalarType& operator[](size_t index);
+        [[nodiscard]] const ScalarType& operator[](size_t index) const;
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z);
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Getters */
+        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] ScalarType getVolume() const noexcept;
+        [[nodiscard]] ScalarType getUnitVolume() const noexcept;
+        [[nodiscard]] Vector<ScalarType>& asVector() noexcept { return values; }
+        [[nodiscard]] const Vector<ScalarType>& asVector() const noexcept { return values; }
         [[nodiscard]] size_t getSize() const noexcept;
         [[nodiscard]] Dim getDim() const noexcept;
         [[nodiscard]] Vector<ScalarType, 3> dimToPos(Dim dim) const;
+        [[nodiscard]] Vector<ScalarType, 3> indexToPos(size_t index) const;
         [[nodiscard]] size_t dimToIndex(size_t x, size_t y, size_t z) const noexcept;
         [[nodiscard]] Dim indexToDim(size_t index) const noexcept;
     };
@@ -54,6 +62,16 @@ namespace Physica::Core {
             , dimZ(dimZ_) {}
 
     template<class ScalarType>
+    ScalarType& Grid3D<ScalarType>::operator[](size_t index) {
+        return values[index];
+    }
+
+    template<class ScalarType>
+    const ScalarType& Grid3D<ScalarType>::operator[](size_t index) const {
+        return values[index];
+    }
+
+    template<class ScalarType>
     ScalarType& Grid3D<ScalarType>::operator()(size_t x, size_t y, size_t z) {
         return values[dimToIndex(x, y, z)];
     }
@@ -61,6 +79,16 @@ namespace Physica::Core {
     template<class ScalarType>
     const ScalarType& Grid3D<ScalarType>::operator()(size_t x, size_t y, size_t z) const {
         return values[dimToIndex(x, y, z)];
+    }
+
+    template<class ScalarType>
+    ScalarType Grid3D<ScalarType>::getVolume() const noexcept {
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
+    }
+
+    template<class ScalarType>
+    ScalarType Grid3D<ScalarType>::getUnitVolume() const noexcept {
+        return getVolume() / ScalarType((dimX - 1) * (dimY - 1) * (dimZ - 1));
     }
 
     template<class ScalarType>
@@ -80,6 +108,11 @@ namespace Physica::Core {
         const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
         const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
         return lattice.row(0) * factor_x + lattice.row(1) * factor_y + lattice(2) * factor_z;
+    }
+
+    template<class ScalarType>
+    Vector<ScalarType, 3> Grid3D<ScalarType>::indexToPos(size_t index) const {
+        return dimToPos(indexToDim(index));
     }
 
     template<class ScalarType>
