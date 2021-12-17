@@ -101,11 +101,8 @@ namespace Physica::Core::Physics {
                                 EDIISBuffer& densityMatrices,
                                 const Vector<ScalarType, EDIISBufferSize>& energyBuffer);
         MatrixType DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
-        void updateWaves(const MatrixType& inv_cholesky,
-                         const Utils::Array<size_t>& sortedEigenvalues);
-        [[nodiscard]] ScalarType updateSelfConsistentEnergy(const Utils::Array<size_t>& sortedEigenvalues,
-                                                            Vector<ScalarType, EDIISBufferSize>& energyBuffer);
-        void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
+        void updateWaves(const MatrixType& inv_cholesky);
+        [[nodiscard]] ScalarType updateSelfConsistentEnergy(Vector<ScalarType, EDIISBufferSize>& energyBuffer);
     };
 
     template<class BaseSetType>
@@ -146,7 +143,6 @@ namespace Physica::Core::Physics {
         DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
         DIISMat(0, 0) = ScalarType::Zero();
         Vector<ScalarType, EDIISBufferSize> energyBuffer{};
-        Utils::Array<size_t> sortedEigenvalues = Utils::Array<size_t>(getBaseSetSize());
 
         iteration = 0;
         do {
@@ -170,11 +166,11 @@ namespace Physica::Core::Physics {
 
             const MatrixType modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock, true);
+            eigenSolver.sort();
 
-            sortEigenvalues(sortedEigenvalues);
-            updateWaves(inv_cholesky, sortedEigenvalues);
+            updateWaves(inv_cholesky);
 
-            const ScalarType delta = updateSelfConsistentEnergy(sortedEigenvalues, energyBuffer);
+            const ScalarType delta = updateSelfConsistentEnergy(energyBuffer);
             if (delta < criteria)
                 return true;
 
@@ -355,20 +351,17 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::updateWaves(const MatrixType& inv_cholesky,
-                                             const Utils::Array<size_t>& sortedEigenvalues) {
+    void RHFSolver<BaseSetType>::updateWaves(const MatrixType& inv_cholesky) {
         const auto& eigenvectors = eigenSolver.getRawEigenvectors();
         for (size_t i = 0; i < numOccupiedOrbit; ++i) {
             auto eigenState = wave.col(i);
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
-            const size_t solutionPos = sortedEigenvalues[orbitPos];
-            eigenState = inv_cholesky.transpose() * eigenvectors.col(solutionPos);
+            eigenState = inv_cholesky.transpose() * eigenvectors.col(orbitPos);
         }
     }
 
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
-            const Utils::Array<size_t>& sortedEigenvalues,
             Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
             std::swap(energyBuffer[i], energyBuffer[i + 1]);
@@ -377,7 +370,7 @@ namespace Physica::Core::Physics {
         selfConsistentEnergy = ScalarType::Zero();
         for (size_t i = 0; i < wave.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
-            ScalarType temp = eigenvalues[sortedEigenvalues[orbitPos]].getReal();
+            ScalarType temp = eigenvalues[orbitPos].getReal();
             auto orbit = wave.col(i);
             temp += (orbit.asMatrix().transpose() * singleHamilton).compute().row(0) * orbit;
             const auto orbitState = electronConfig.getOrbitState(orbitPos);
@@ -391,30 +384,5 @@ namespace Physica::Core::Physics {
         const ScalarType oldSelfConsistentEnergy = *(++ite);
         const ScalarType delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
         return delta;
-    }
-    /**
-     * Get the first \param orbitCount lowest eigenvalues and save their indexes to array \param index,
-     * the eigenvalues are in ascending order.
-     * 
-     * \param index
-     * A array whose length is \param orbitCount
-     */
-    template<class BaseSetType>
-    void RHFSolver<BaseSetType>::sortEigenvalues(Utils::Array<size_t>& indexToSort) const {
-        const auto& eigenvalues = eigenSolver.getEigenvalues();
-        auto arrayToSort = toRealVector(eigenvalues);
-        for (size_t i = 0; i < getBaseSetSize(); ++i)
-            indexToSort[i] = i;
-
-        for (size_t i = 0; i < getBaseSetSize(); ++i) {
-            size_t indexOfToInsert = i;
-            for (size_t j = i + 1; j < getBaseSetSize(); ++j) {
-                if (arrayToSort[indexOfToInsert] > arrayToSort[j])
-                    indexOfToInsert = j;
-            }
-            std::swap(arrayToSort[i], arrayToSort[indexOfToInsert]);
-            std::swap(indexToSort[i], indexToSort[indexOfToInsert]);
-            assert(eigenvalues[indexToSort[i]].getReal() >= eigenvalues[indexToSort[i == 0 ? 0 : i - 1]].getReal());
-        }
     }
 }

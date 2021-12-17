@@ -54,7 +54,6 @@ namespace Physica::Core {
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
         void fillPotential(KPoint k, Hamilton& hamilton);
-        void sortEigenvalues(Utils::Array<size_t>& indexToSort) const;
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
         static void updateDensity(const KSOrbits& orbits);
         void updateHartree();
@@ -86,8 +85,8 @@ namespace Physica::Core {
             fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
             fillPotential(toSolve, hamilton);
             eigenSolver.compute(hamilton, true);
-            
-            sortEigenvalues(sortedEigenvalues);
+            eigenSolver.sort();
+
             if (++iteration >= matIte)
                 break;
             hamilton = ScalarType::Zero();
@@ -125,29 +124,6 @@ namespace Physica::Core {
         updateHartree();
         updateXCPot();
         totalPotGrid.asVector() += externalPotGrid.asVector();
-    }
-    /**
-     * Reference to RHFSolver module
-     * TODO: eliminate code duplicate
-     */
-    template<class ScalarType>
-    void KSSolver<ScalarType>::sortEigenvalues(Utils::Array<size_t>& indexToSort) const {
-        const auto& eigenvalues = eigenSolver.getEigenvalues();
-        auto arrayToSort = toRealVector(eigenvalues);
-        const size_t length = indexToSort.getLength();
-        for (size_t i = 0; i < length; ++i)
-            indexToSort[i] = i;
-
-        for (size_t i = 0; i < length; ++i) {
-            size_t indexOfToInsert = i;
-            for (size_t j = i + 1; j < length; ++j) {
-                if (arrayToSort[indexOfToInsert] > arrayToSort[j])
-                    indexOfToInsert = j;
-            }
-            std::swap(arrayToSort[i], arrayToSort[indexOfToInsert]);
-            std::swap(indexToSort[i], indexToSort[indexOfToInsert]);
-            assert(eigenvalues[indexToSort[i]].getReal() >= eigenvalues[indexToSort[i == 0 ? 0 : i - 1]].getReal());
-        }
     }
 
     template<class ScalarType>
