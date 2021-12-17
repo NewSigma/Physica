@@ -37,6 +37,7 @@ namespace Physica::Core {
     private:
         Impl impl;
     public:
+        FFT(size_t size_, const RealType& deltaT);
         FFT(const Vector<ScalarType>& data, const RealType& deltaT);
         FFT(const FFT&) = default;
         FFT(FFT&&) noexcept = default;
@@ -45,8 +46,8 @@ namespace Physica::Core {
         FFT& operator=(FFT fft);
         ComplexType operator()(size_t i) { return impl(i); }
         /* Operations */
-        void transform() { impl.transform(); }
-        void invTransform() { impl.invTransform(); }
+        void transform(const Vector<ScalarType>& data) { impl.transform(data); }
+        void invTransform(const Vector<ComplexType>& data) { impl.invTransform(data); }
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return impl.getSize(); }
         [[nodiscard]] const RealType& getDeltaT() const noexcept { return impl.getDeltaT(); }
@@ -57,6 +58,9 @@ namespace Physica::Core {
         /* Helpers */
         void swap(FFT& fft) { impl.swap(fft.impl); }
     };
+
+    template<class ScalarType>
+    FFT<ScalarType, 1>::FFT(size_t size, const RealType& deltaT) : impl(size, deltaT) {}
 
     template<class ScalarType>
     FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data, const RealType& deltaT) : impl(data, deltaT) {}
@@ -91,6 +95,7 @@ namespace Physica::Core {
     private:
         Impl impl;
     public:
+        FFT(Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
         FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
         FFT(const FFT&) = default;
         FFT(FFT&&) noexcept = default;
@@ -99,8 +104,8 @@ namespace Physica::Core {
         FFT& operator=(FFT fft);
         ComplexType operator()(size_t i) { return impl(i); }
         /* Operations */
-        void transform() { impl.transform(); }
-        void invTransform() { impl.invTransform(); }
+        void transform(const Vector<ScalarType>& data) { impl.transform(data); }
+        void invTransform(const Vector<ComplexType>& data) { impl.invTransform(data); }
         /* Getters */
         [[nodiscard]] size_t getSize(size_t dim) const noexcept { return impl.getSize(dim); }
         [[nodiscard]] const RealType& getDeltaT(size_t dim) const noexcept { return impl.getDeltaT(dim); }
@@ -111,6 +116,10 @@ namespace Physica::Core {
         /* Helpers */
         void swap(FFT& fft) { impl.swap(fft.impl); }
     };
+
+    template<class ScalarType, size_t Dim>
+    FFT<ScalarType, Dim>::FFT(Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs)
+            : impl(size, deltaTs) {}
 
     template<class ScalarType, size_t Dim>
     FFT<ScalarType, Dim>::FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs)

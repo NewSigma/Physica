@@ -38,7 +38,6 @@ int main() {
             }
         }
         FFT<RealType> fft(data, RealType(t_max / N));
-        fft.transform();
         const Vector<RealType> intense = toNormVector(fft.getComponents());
 
         /* Parseval theorem */ {
@@ -68,7 +67,6 @@ int main() {
             }
         }
         FFT<RealType, 2> fft(data, {N1, N2}, {deltaX, deltaY});
-        fft.transform();
 
         const RealType freq1_power = fft.getFreqIntense({10, 0}).norm();
         const RealType freq2_power = fft.getFreqIntense({0, 5}).norm();
