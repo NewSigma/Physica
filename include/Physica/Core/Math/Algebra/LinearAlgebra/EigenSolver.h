@@ -44,11 +44,13 @@ namespace Physica::Core {
     private:
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;
+        bool computeEigenvectors;
     public:
         EigenSolver(size_t size);
-        EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors);
+        EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         /* Operations */
-        void compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors);
+        void compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        void sort();
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
@@ -64,16 +66,18 @@ namespace Physica::Core {
             , rawEigenvectors(size, size) {}
 
     template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors)
+    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_)
             : eigenvalues(source.getRow())
-            , rawEigenvectors(source.getRow(), source.getRow()) {
+            , rawEigenvectors(source.getRow(), source.getRow())
+            , computeEigenvectors(computeEigenvectors_) {
         compute(source, computeEigenvectors);
     }
 
     template<class MatrixType>
-    void EigenSolver<MatrixType>::compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors) {
+    void EigenSolver<MatrixType>::compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
+        computeEigenvectors = computeEigenvectors_;
         auto schur = RealSchur(source, computeEigenvectors);
 
         auto& matrixT = schur.getMatrixT();
@@ -202,6 +206,21 @@ namespace Physica::Core {
                 auto toCol = rawEigenvectors.col(i);
                 toCol = (matrixU.leftCols(i + 1) * topRows.col(i));
             }
+        }
+    }
+
+    template<class MatrixType>
+    void EigenSolver<MatrixType>::sort() {
+        const size_t order = eigenvalues.getLength();
+        for (size_t i = 0; i < order - 1; ++i) {
+            size_t index_min = i;
+            for (size_t j = i + 1; j < order; ++j) {
+                if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
+                    index_min = j;
+            }
+            std::swap(eigenvalues[i], eigenvalues[index_min]);
+            if (computeEigenvectors)
+                std::swap(rawEigenvectors[i], rawEigenvectors[index_min]);
         }
     }
 

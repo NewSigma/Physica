@@ -64,18 +64,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    bool ComplexScalar<ScalarType>::operator==(const ComplexScalar<ScalarType>& c) {
+    bool ComplexScalar<ScalarType>::operator==(const ComplexScalar<ScalarType>& c) const {
         return real == c.real && imag == c.imag;
-    }
-
-    template<class ScalarType>
-    bool ComplexScalar<ScalarType>::operator>(const ComplexScalar<ScalarType>& c) {
-        return (square(real) + square(imag)) > (square(c.real) + square(c.imag));
-    }
-
-    template<class ScalarType>
-    bool ComplexScalar<ScalarType>::operator<(const ComplexScalar<ScalarType>& c) {
-        return (square(real) + square(imag)) < (square(c.real) + square(c.imag));
     }
 
     template<class ScalarType>

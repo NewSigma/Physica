@@ -53,12 +53,8 @@ namespace Physica::Core {
         ComplexScalar& operator=(const ScalarBase<ScalarType>& s);
         void operator<<=(int i) { real <<= i; imag<<= i; }
         void operator>>=(int i) { real >>= i; imag>>= i; }
-        bool operator==(const ComplexScalar<ScalarType>& c);
-        bool operator!=(const ComplexScalar<ScalarType>& c) { return !(operator==(c)); }
-        bool operator>(const ComplexScalar<ScalarType>& c);
-        bool operator>=(const ComplexScalar<ScalarType>& c) { return !(operator<(c)); }
-        bool operator<(const ComplexScalar<ScalarType>& c);
-        bool operator<=(const ComplexScalar<ScalarType>& c) { return !(operator>(c)); }
+        bool operator==(const ComplexScalar<ScalarType>& c) const;
+        bool operator!=(const ComplexScalar<ScalarType>& c) const { return !(operator==(c)); }
         /* Helpers */
         void swap(ComplexScalar& c) noexcept;
         static inline ComplexScalar Zero();

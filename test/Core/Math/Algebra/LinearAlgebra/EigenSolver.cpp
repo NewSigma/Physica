@@ -44,6 +44,16 @@ bool eigenTest(const MatrixType& mat, double precision) {
         if (!vectorNearZero(result, precision))
             return false;
     }
+
+    solver.sort();
+    eigenvectors = solver.getEigenvectors();
+    for (size_t i = 0; i < order; ++i) {
+        if (i > 1 && solver.getEigenvalues()[i - 1].getReal() > solver.getEigenvalues()[i].getReal())
+            return false;
+        ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
+        if (!vectorNearZero(result, precision))
+            return false;
+    }
     return true;
 }
 
