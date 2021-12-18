@@ -274,6 +274,21 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Pow, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>>;
+        using typename Base::ScalarType;
+        const VectorType& v;
+        const ScalarType& s;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_, const ScalarBase<ScalarType>& s_)
+                : v(v_.getDerived()), s(s_.getDerived()) {}
+
+        ScalarType calc(size_t i) const { return pow(v.calc(i), s); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
 
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
@@ -360,5 +375,12 @@ namespace Physica::Core {
     template<class VectorType>
     inline VectorExpression<Utils::ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) {
         return VectorExpression<Utils::ExpressionType::Ln, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Pow, VectorType> pow(
+            const RValueVector<VectorType>& v,
+            const ScalarBase<typename VectorType::ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::Pow, VectorType>(v, s);
     }
 }

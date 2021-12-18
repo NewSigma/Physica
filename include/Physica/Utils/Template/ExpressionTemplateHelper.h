@@ -34,6 +34,7 @@ namespace Physica::Utils {
         Square,
         Ln,
         Exp,
+        Pow,
         Sin,
         Cos
     };
