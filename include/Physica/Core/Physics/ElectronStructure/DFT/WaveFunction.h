@@ -39,9 +39,9 @@ namespace Physica::Core {
     public:
         WaveFunction(ScalarType cutEnergy, LatticeMatrix mat);
         /* Operators */
-        [[nodiscard]] ComplexScalar<ScalarType> operator(Vector<ScalarType, 3> r) const;
+        [[nodiscard]] ComplexScalar<ScalarType> operator()(Vector<ScalarType, 3> r) const;
         template<class VectorType>
-        [[nodiscard]] WaveFunction& operator=(const RValueVector<VectorType>& newCoeffs);
+        WaveFunction& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
         [[nodiscard]] size_t getPlainWaveCount() const noexcept { return baseCoeffs.getLength(); }
         [[nodiscard]] Vector<ScalarType, 3> getBaseFunc(size_t coeffIndex) const noexcept;
@@ -51,8 +51,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     WaveFunction<ScalarType>::WaveFunction(ScalarType cutEnergy, LatticeMatrix mat) : reciprocalLattice(std::move(mat)) {
+        using namespace Physica::Core::Physics;
         const ScalarType factor = ScalarType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
-        const ScalarType maxMoment = sqrt(PhyConst<AU>::evToHartree(cutEnergy) * factor);
+        const ScalarType maxMoment = sqrt(factor * PhyConst<AU>::eVToHartree(cutEnergy.getTrivial()));
         baseDimX = size_t((reciprocalLattice.row(0).norm() / maxMoment).getTrivial());
         baseDimY = size_t((reciprocalLattice.row(1).norm() / maxMoment).getTrivial());
         baseDimZ = size_t((reciprocalLattice.row(2).norm() / maxMoment).getTrivial());
@@ -62,7 +63,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> WaveFunction<ScalarType>::operator(Vector<ScalarType, 3> r) const {
+    ComplexScalar<ScalarType> WaveFunction<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
         const size_t length = baseCoeffs.getLength();
         ComplexScalar<ScalarType> result = ComplexScalar<ScalarType>::Zero();
         for (size_t i = 0; i < length; ++i) {
@@ -83,9 +84,9 @@ namespace Physica::Core {
     Vector<ScalarType, 3> WaveFunction<ScalarType>::getBaseFunc(size_t coeffIndex) const noexcept {
         const Dim dim = indexToDim(coeffIndex);
         auto[n1, n2, n3] = dim;
-        return reciprocalLattice.row(0) * ScalarType(n1) +
-               reciprocalLattice.row(1) * ScalarType(n2) +
-               reciprocalLattice.row(2) * ScalarType(n3);
+        return reciprocalLattice.row(0).asVector() * ScalarType(n1) +
+               reciprocalLattice.row(1).asVector() * ScalarType(n2) +
+               reciprocalLattice.row(2).asVector() * ScalarType(n3);
     }
 
     template<class ScalarType>
@@ -100,7 +101,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Dim WaveFunction<ScalarType>::indexToDim(size_t index) const noexcept {
+    typename WaveFunction<ScalarType>::Dim WaveFunction<ScalarType>::indexToDim(size_t index) const noexcept {
         const size_t sizeX = 2 * baseDimX + 1;
         const size_t sizeXY = sizeX * (2 * baseDimY + 1);
 
@@ -112,6 +113,6 @@ namespace Physica::Core {
 
         return {static_cast<ssize_t>(normalized_x) - static_cast<ssize_t>(baseDimX),
                 static_cast<ssize_t>(normalized_y) - static_cast<ssize_t>(baseDimY),
-                static_cast<ssize_t>(normalized_z) - static_cast<ssize_t>(baseDimZ)}
+                static_cast<ssize_t>(normalized_z) - static_cast<ssize_t>(baseDimZ)};
     }
 }

@@ -64,6 +64,7 @@ namespace Physica::Core {
         /* Operators */
         Vector& operator=(const Vector&) = default;
         Vector& operator=(Vector&&) noexcept = default;
+        using Base::operator=;
         using Storage::operator[];
         /* Operations */
         Vector& toOpposite();

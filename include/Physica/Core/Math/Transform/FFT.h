@@ -135,13 +135,15 @@ namespace Physica::Core {
     typename FFT<ScalarType, Dim>::ComplexType FFT<ScalarType, Dim>::getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept {
         Utils::Array<ssize_t, Dim> indexes{};
         for (size_t i = 0; i < Dim; ++i) {
-            const RealType& f = freq[i];
+            RealType f = freq[i];
             double round_helper;
             if constexpr (isComplex) {
                 round_helper = f.isPositive() ? 0.5 : -0.5;
             }
             else {
                 assert(!f.isNegative());
+                if (i == freq.getLength() - 1)
+                    f.toAbs();
                 round_helper = 0.5;
             }
             const double float_index = double(getDeltaT(i) * f * RealType(getSize(i)));

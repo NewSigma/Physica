@@ -18,11 +18,14 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
+#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
+
 namespace Physica::Core {
     template<class ScalarType>
     class Grid3D {
     public:
-        using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
+        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
         using Dim = std::tuple<size_t, size_t, size_t>;
     private:
         LatticeMatrix lattice;
@@ -107,7 +110,7 @@ namespace Physica::Core {
         const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
         const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
         const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
-        return lattice.row(0) * factor_x + lattice.row(1) * factor_y + lattice(2) * factor_z;
+        return lattice.row(0).asVector() * factor_x + lattice.row(1).asVector() * factor_y + lattice.row(2).asVector() * factor_z;
     }
 
     template<class ScalarType>

@@ -18,9 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
-#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
+#include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronStructure/ReciprocalCell.h"
+#include "Ewald.h"
 #include "WaveFunction.h"
 #include "KPointGrid.h"
 #include "Grid3D.h"
@@ -39,6 +43,7 @@ namespace Physica::Core {
         Grid3D<ScalarType> densityGrid;
         Grid3D<ScalarType> totalPotGrid;
         Grid3D<ScalarType> externalPotGrid;
+        FFT<ScalarType, 3> fftSolver;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
@@ -50,12 +55,14 @@ namespace Physica::Core {
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
     private:
+        [[nodiscard]] static size_t electronCount(const CrystalCell& cell);
         [[nodiscard]] static size_t numOrbitToSolve(const CrystalCell& cell);
+        void initDensity();
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
-        void fillPotential(KPoint k, Hamilton& hamilton);
+        void fillPotential(Hamilton& hamilton, const KSOrbit& orbit);
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
-        static void updateDensity(const KSOrbits& orbits);
+        void updateDensity(const KSOrbits& orbits);
         void updateHartree();
         void updateXCPot();
     };
@@ -67,41 +74,59 @@ namespace Physica::Core {
             , cutEnergy(std::move(cutEnergy_))
             , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
             , totalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
-            , externalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ) {}
+            , externalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
+            , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
+                                                         ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
+                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)}) {}
 
     template<class ScalarType>
     bool KSSolver<ScalarType>::solve(const ScalarType& criteria, size_t maxIte) {
-        const size_t orbitCount = numOrbitToSolve(cell);
-        auto orbits = KSOrbits(numOrbitToSolve(cell), KSOrbit(cutEnergy, cell.getReciprocal()));
+        auto orbits = KSOrbits(numOrbitToSolve(cell), KSOrbit(cutEnergy, repCell.getLattice()));
         KPoint toSolve{0, 0, 0};
 
-        const size_t plainWaveCount = orbit.getPlainWaveCount();
+        const size_t plainWaveCount = orbits[0].getPlainWaveCount();
+        const ScalarType inv_volume = reciprocal(cell.getVolume());
         auto hamilton = Hamilton(plainWaveCount);
         auto eigenSolver = EigenSolver<Hamilton>(plainWaveCount);
-        auto sortedEigenvalues = Utils::Array<size_t>(orbitCount);
+        Grid3D<ScalarType> lastDensity = densityGrid;
 
         size_t iteration = 0;
         while (true) {
             fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
-            fillPotential(toSolve, hamilton);
+            fillPotential(hamilton, orbits[0]);
             eigenSolver.compute(hamilton, true);
             eigenSolver.sort();
 
-            if (++iteration >= matIte)
-                break;
             hamilton = ScalarType::Zero();
             updateOrbits(eigenSolver, orbits);
             updateDensity(orbits);
+
+            const bool isDensityConverged = abs(divide((densityGrid.asVector() - lastDensity.asVector()), densityGrid.asVector())).max() < criteria;
+            if (isDensityConverged)
+                break;
+
+            if (++iteration == maxIte)
+                throw BadConvergenceException();
         };
         return true;
     }
 
     template<class ScalarType>
-    size_t KSSolver<ScalarType>::numOrbitToSolve(const CrystalCell& cell) {
+    size_t KSSolver<ScalarType>::electronCount(const CrystalCell& cell) {
         size_t result = 0;
         for (size_t i = 0; i < cell.getAtomCount(); ++i)
-            result += cell.getCharge(i)
+            result += cell.getCharge(i);
         return result;
+    }
+
+    template<class ScalarType>
+    size_t KSSolver<ScalarType>::numOrbitToSolve(const CrystalCell& cell) {
+        return (electronCount(cell) + 1) / 2;
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::initDensity() {
+        densityGrid.asVector() = ScalarType(electronCount(cell)) / cell.getVolume();
     }
 
     template<class ScalarType>
@@ -115,15 +140,25 @@ namespace Physica::Core {
     void KSSolver<ScalarType>::fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit) {
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i)
-            hamilton(i, i) += (k + orbit.getBaseFunc(i)).squaredNorm() * ScalarType(0.5);
+            hamilton(i, i) += ScalarType((k + orbit.getBaseFunc(i)).squaredNorm()) * ScalarType(0.5);
     }
 
     template<class ScalarType>
-    void KSSolver<ScalarType>::fillPotential(KPoint k, Hamilton& hamilton) {
+    void KSSolver<ScalarType>::fillPotential(Hamilton& hamilton, const KSOrbit& orbit) {
         totalPotGrid.asVector() = ScalarType::Zero();
         updateHartree();
         updateXCPot();
         totalPotGrid.asVector() += externalPotGrid.asVector();
+        fftSolver.transform(totalPotGrid.asVector());
+
+        const size_t order = hamilton.getRow();
+        for (size_t i = 0; i < order; ++i) {
+            const Vector<ScalarType, 3> k1 = orbit.getBaseFunc(i);
+            for (size_t j = i; j < order; ++j) {
+                const Vector<ScalarType, 3> k2 = orbit.getBaseFunc(j);
+                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) / ScalarType(2 * M_PI))).norm(); //Not norm
+            }
+        }
     }
 
     template<class ScalarType>
@@ -142,8 +177,8 @@ namespace Physica::Core {
                 for (size_t k = 0; k < dimZ; ++j) {
                     const auto pos = densityGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
-                    for (const auto& orbit : orbits)
-                        density += orbit(pos).squaredNorm();
+                    for (size_t index = 0; index < orbits.getLength(); ++index)
+                        density += orbits[index](pos).squaredNorm(); //We need multiply the occupation number
                     densityGrid(i, j, k) = density;
                 }
             }
@@ -154,7 +189,7 @@ namespace Physica::Core {
     void KSSolver<ScalarType>::updateHartree() {
         const size_t gridSize = totalPotGrid.getSize();
         for (size_t i = 0; i < gridSize; ++i)
-            totalPotGrid[i] += Ewald<ScalarType>(totalPotGrid.indexToPos(i), densityGrid, repCell);
+            totalPotGrid[i] += Ewald<ScalarType>::potHartree(totalPotGrid.indexToPos(i), densityGrid, repCell);
     }
     /**
      * Reference:
@@ -165,7 +200,7 @@ namespace Physica::Core {
         constexpr double exchange_factor = -0.98474502184269654;
         constexpr double correlation_factor1 = -0.045 / 2;
         constexpr double correlation_factor2 = 33.851831034345862;
-        totalPotGrid.asVector() += pow(chargeGrid.asVector(), 1.0 / 3) * exchange_factor;
-        totalPotGrid.asVector() += correlation_factor1 * log(1 + correlation_factor2 * pow(chargeGrid.asVector(), 1.0 / 3)); //Reference [1]
+        totalPotGrid.asVector() += pow(densityGrid.asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
+        totalPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(densityGrid.asVector(), ScalarType(1.0 / 3))); //Reference [1]
     }
 }

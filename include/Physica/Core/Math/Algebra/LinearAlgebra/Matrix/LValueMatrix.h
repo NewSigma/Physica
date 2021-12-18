@@ -47,8 +47,8 @@ namespace Physica::Core {
     public:
         ~LValueMatrix() = default;
         /* Operators */
-        LValueMatrix& operator=(const LValueMatrix& m);
-        LValueMatrix& operator=(LValueMatrix&& m) { return (*this) = m; }
+        LValueMatrix& operator=(const LValueMatrix& m) = delete;
+        LValueMatrix& operator=(LValueMatrix&& m) = delete;
         template<class OtherMatrix>
         Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         template<ScalarOption option, bool errorTrack>

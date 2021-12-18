@@ -98,6 +98,9 @@ namespace Physica::Core {
     class VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>
             : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>> {
         using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>>;
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType1& exp1;
         const VectorType2& exp2;
     public:
@@ -106,7 +109,7 @@ namespace Physica::Core {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        typename Base::ScalarType calc(size_t s) const { return exp1.calc(s) + exp2.calc(s); }
+        ScalarType calc(size_t s) const { return ScalarType(exp1.calc(s)) + ScalarType(exp2.calc(s)); }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
@@ -158,13 +161,16 @@ namespace Physica::Core {
     class VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>
             : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>> {
         using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>>;
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& exp;
         const Scalar<option, errorTrack>& scalar;
     public:
         VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
-        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) * scalar; }
+        ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) * ScalarType(scalar); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -278,7 +284,9 @@ namespace Physica::Core {
     class VectorExpression<Utils::ExpressionType::Pow, VectorType>
             : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>> {
         using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>>;
+    public:
         using typename Base::ScalarType;
+    private:
         const VectorType& v;
         const ScalarType& s;
     public:

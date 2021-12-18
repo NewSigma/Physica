@@ -49,7 +49,7 @@ namespace Physica::Core::Physics {
     public:
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
-        constexpr static double electroMass = 1;
+        constexpr static double electronMass = 1;
         constexpr static double unitCharge = 1;
         constexpr static double bohrRadius = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
