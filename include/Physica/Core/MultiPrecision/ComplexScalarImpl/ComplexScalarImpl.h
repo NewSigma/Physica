@@ -95,8 +95,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType ComplexScalar<ScalarType>::squaredNorm() {
+        return square(real) + square(imag);
+    }
+
+    template<class ScalarType>
     inline ScalarType ComplexScalar<ScalarType>::norm() {
-        return sqrt(square(real) + square(imag));
+        return sqrt(squaredNorm());
     }
 
     template<class ScalarType>

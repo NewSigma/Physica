@@ -62,6 +62,7 @@ namespace Physica::Core {
         static inline ComplexScalar Two();
         static inline ComplexScalar Random();
         /* Getters */
+        [[nodiscard]] ScalarType squaredNorm();
         [[nodiscard]] inline ScalarType norm();
         [[nodiscard]] ScalarType arg();
         [[nodiscard]] const ScalarType& getReal() const { return real; }
