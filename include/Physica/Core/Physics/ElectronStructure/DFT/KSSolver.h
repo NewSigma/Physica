@@ -140,7 +140,7 @@ namespace Physica::Core {
     void KSSolver<ScalarType>::fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit) {
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i)
-            hamilton(i, i) += ScalarType((k + orbit.getBaseFunc(i)).squaredNorm()) * ScalarType(0.5);
+            hamilton(i, i) += ScalarType((k + orbit.getWaveVector(orbit.indexToDim(i))).squaredNorm()) * ScalarType(0.5);
     }
 
     template<class ScalarType>
@@ -153,9 +153,9 @@ namespace Physica::Core {
 
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i) {
-            const Vector<ScalarType, 3> k1 = orbit.getBaseFunc(i);
+            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
             for (size_t j = i; j < order; ++j) {
-                const Vector<ScalarType, 3> k2 = orbit.getBaseFunc(j);
+                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(i));
                 hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) / ScalarType(2 * M_PI))).norm(); //Not norm
             }
         }
