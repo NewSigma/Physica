@@ -25,7 +25,6 @@
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
-using namespace Physica::Core::Physics;
 using namespace Physica::Gui;
 using T = Scalar<Double, false>;
 using ODE = ODESolver<T, Vector<T>>;

@@ -23,7 +23,6 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 using namespace Physica::Core;
-using namespace Physica::Core::Physics;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 

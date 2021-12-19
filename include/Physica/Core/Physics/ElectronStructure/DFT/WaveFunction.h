@@ -55,7 +55,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     WaveFunction<ScalarType>::WaveFunction(ScalarType cutEnergy, LatticeMatrix mat) : reciprocalLattice(std::move(mat)) {
-        using namespace Physica::Core::Physics;
         const ScalarType factor = ScalarType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
         const ScalarType maxMoment = sqrt(factor * cutEnergy.getTrivial());
         baseDimX = size_t((maxMoment / reciprocalLattice.row(0).norm()).getTrivial());
@@ -94,7 +93,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType WaveFunction<ScalarType>::getKinetic(Dim dim) const noexcept {
-        using namespace Physica::Core::Physics;
         constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
         return getWaveVector(dim).squaredNorm() * ScalarType(factor);
     }

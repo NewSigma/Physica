@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-namespace Physica::Core::Physics {
+namespace Physica::Core {
     enum UnitSystem {
         SI,
         AU
