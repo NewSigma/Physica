@@ -32,10 +32,11 @@ namespace Physica::Core {
     template<class ScalarType>
     class Ewald {
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+        using UnsignedGrid = Grid3D<ScalarType, false>;
         using Vector3D = Vector<ScalarType, 3>;
     public:
         static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell);
-        static ScalarType potHartree(const Vector3D& r, const Grid3D<ScalarType>& chargeGrid, const ReciprocalCell& repCell);
+        static ScalarType potHartree(const Vector3D& r, const UnsignedGrid& chargeGrid, const ReciprocalCell& repCell);
         static ScalarType potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
@@ -86,7 +87,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::potHartree(const Vector3D& r, const Grid3D<ScalarType>& chargeGrid, const ReciprocalCell& repCell) {
+    ScalarType Ewald<ScalarType>::potHartree(const Vector3D& r, const UnsignedGrid& chargeGrid, const ReciprocalCell& repCell) {
         const size_t chargeCount = chargeGrid.getSize();
         const ScalarType inv_volume = reciprocal(chargeGrid.getVolume());
         //The following param chosen is referenced from VASP

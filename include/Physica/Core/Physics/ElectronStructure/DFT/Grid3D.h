@@ -22,11 +22,17 @@
 #include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    /**
+     * \tparam isSigned
+     * If true, the grid is [-dimX, dimX] * [-dimY, dimY] * [-dimZ, dimZ]
+     * If false, the grid is [0, dimX - 1] * [0, dimY - 1] * [0, dimZ - 1]
+     */
+    template<class ScalarType, bool isSigned>
     class Grid3D {
     public:
+        using IntType = typename std::conditional<isSigned, ssize_t, size_t>::type;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using Dim = std::tuple<size_t, size_t, size_t>;
+        using Dim = std::tuple<IntType, IntType, IntType>;
     private:
         LatticeMatrix lattice;
         Vector<ScalarType> values;
@@ -34,15 +40,23 @@ namespace Physica::Core {
         size_t dimY;
         size_t dimZ;
     public:
+        Grid3D() = default;
         template<class MatrixType>
         Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_);
+        Grid3D(const Grid3D&) = default;
+        Grid3D(Grid3D&&) noexcept = default;
+        ~Grid3D() = default;
         /* Operators */
+        Grid3D& operator=(Grid3D grid);
         [[nodiscard]] ScalarType& operator[](size_t index);
         [[nodiscard]] const ScalarType& operator[](size_t index) const;
-        [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const;
+        [[nodiscard]] ScalarType& operator()(IntType x, IntType y, IntType z);
+        [[nodiscard]] const ScalarType& operator()(IntType x, IntType y, IntType z) const;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] size_t getDimX() const noexcept { return dimX; }
+        [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
+        [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
         [[nodiscard]] ScalarType getVolume() const noexcept;
         [[nodiscard]] ScalarType getUnitVolume() const noexcept;
         [[nodiscard]] Vector<ScalarType>& asVector() noexcept { return values; }
@@ -51,61 +65,75 @@ namespace Physica::Core {
         [[nodiscard]] Dim getDim() const noexcept;
         [[nodiscard]] Vector<ScalarType, 3> dimToPos(Dim dim) const;
         [[nodiscard]] Vector<ScalarType, 3> indexToPos(size_t index) const;
-        [[nodiscard]] size_t dimToIndex(size_t x, size_t y, size_t z) const noexcept;
+        [[nodiscard]] size_t dimToIndex(IntType x, IntType y, IntType z) const noexcept;
         [[nodiscard]] Dim indexToDim(size_t index) const noexcept;
+        /* Helpers */
+        void swap(Grid3D& grid) noexcept;
     };
 
-    template<class ScalarType>
+    template<class ScalarType, bool isSigned>
     template<class MatrixType>
-    Grid3D<ScalarType>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_)
+    Grid3D<ScalarType, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_)
             : lattice(lattice_)
             , values(dimX_ * dimY_ * dimZ_)
             , dimX(dimX_)
             , dimY(dimY_)
             , dimZ(dimZ_) {}
 
-    template<class ScalarType>
-    ScalarType& Grid3D<ScalarType>::operator[](size_t index) {
+    template<class ScalarType, bool isSigned>
+    Grid3D<ScalarType, isSigned>& Grid3D<ScalarType, isSigned>::operator=(Grid3D grid) {
+        swap(grid);
+        return *this;
+    }
+
+    template<class ScalarType, bool isSigned>
+    ScalarType& Grid3D<ScalarType, isSigned>::operator[](size_t index) {
         return values[index];
     }
 
-    template<class ScalarType>
-    const ScalarType& Grid3D<ScalarType>::operator[](size_t index) const {
+    template<class ScalarType, bool isSigned>
+    const ScalarType& Grid3D<ScalarType, isSigned>::operator[](size_t index) const {
         return values[index];
     }
 
-    template<class ScalarType>
-    ScalarType& Grid3D<ScalarType>::operator()(size_t x, size_t y, size_t z) {
+    template<class ScalarType, bool isSigned>
+    ScalarType& Grid3D<ScalarType, isSigned>::operator()(IntType x, IntType y, IntType z) {
         return values[dimToIndex(x, y, z)];
     }
 
-    template<class ScalarType>
-    const ScalarType& Grid3D<ScalarType>::operator()(size_t x, size_t y, size_t z) const {
+    template<class ScalarType, bool isSigned>
+    const ScalarType& Grid3D<ScalarType, isSigned>::operator()(IntType x, IntType y, IntType z) const {
         return values[dimToIndex(x, y, z)];
     }
 
-    template<class ScalarType>
-    ScalarType Grid3D<ScalarType>::getVolume() const noexcept {
+    template<class ScalarType, bool isSigned>
+    ScalarType Grid3D<ScalarType, isSigned>::getVolume() const noexcept {
         return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
     }
 
-    template<class ScalarType>
-    ScalarType Grid3D<ScalarType>::getUnitVolume() const noexcept {
-        return getVolume() / ScalarType((dimX - 1) * (dimY - 1) * (dimZ - 1));
+    template<class ScalarType, bool isSigned>
+    ScalarType Grid3D<ScalarType, isSigned>::getUnitVolume() const noexcept {
+        if constexpr (isSigned)
+            return getVolume() / ScalarType((dimX - 1) * (dimY - 1) * (dimZ - 1) * 8);
+        else
+            return getVolume() / ScalarType((dimX - 1) * (dimY - 1) * (dimZ - 1));
     }
 
-    template<class ScalarType>
-    size_t Grid3D<ScalarType>::getSize() const noexcept {
-        return dimX * dimY * dimZ;
+    template<class ScalarType, bool isSigned>
+    size_t Grid3D<ScalarType, isSigned>::getSize() const noexcept {
+        if constexpr (isSigned)
+            return (2 * dimX + 1) * (2 * dimY + 1) * (2 * dimZ + 1);
+        else
+            return dimX * dimY * dimZ;
     }
 
-    template<class ScalarType>
-    typename Grid3D<ScalarType>::Dim Grid3D<ScalarType>::getDim() const noexcept {
+    template<class ScalarType, bool isSigned>
+    typename Grid3D<ScalarType, isSigned>::Dim Grid3D<ScalarType, isSigned>::getDim() const noexcept {
         return std::make_tuple(dimX, dimY, dimZ);
     }
 
-    template<class ScalarType>
-    Vector<ScalarType, 3> Grid3D<ScalarType>::dimToPos(Dim dim) const {
+    template<class ScalarType, bool isSigned>
+    Vector<ScalarType, 3> Grid3D<ScalarType, isSigned>::dimToPos(Dim dim) const {
         auto[x, y, z] = dim;
         const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
         const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
@@ -113,27 +141,71 @@ namespace Physica::Core {
         return lattice.row(0).asVector() * factor_x + lattice.row(1).asVector() * factor_y + lattice.row(2).asVector() * factor_z;
     }
 
-    template<class ScalarType>
-    Vector<ScalarType, 3> Grid3D<ScalarType>::indexToPos(size_t index) const {
+    template<class ScalarType, bool isSigned>
+    Vector<ScalarType, 3> Grid3D<ScalarType, isSigned>::indexToPos(size_t index) const {
         return dimToPos(indexToDim(index));
     }
 
-    template<class ScalarType>
-    size_t Grid3D<ScalarType>::dimToIndex(size_t x, size_t y, size_t z) const noexcept {
-        const size_t dimXY = dimX * dimY;
-        return z * dimXY + y * dimX + x;
+    template<class ScalarType, bool isSigned>
+    size_t Grid3D<ScalarType, isSigned>::dimToIndex(IntType x, IntType y, IntType z) const noexcept {
+        if constexpr (isSigned) {
+            const size_t sizeX = 2 * dimX + 1;
+            const size_t sizeXY = sizeX * (2 * dimY + 1);
+            
+            const size_t normalized_x = x + static_cast<ssize_t>(dimX);
+            const size_t normalized_y = y + static_cast<ssize_t>(dimY);
+            const size_t normalized_z = z + static_cast<ssize_t>(dimZ);
+            return normalized_z * sizeXY + normalized_y * sizeX + normalized_x;
+        }
+        else {
+            const size_t dimXY = dimX * dimY;
+            return z * dimXY + y * dimX + x;
+        }
     }
 
-    template<class ScalarType>
-    typename Grid3D<ScalarType>::Dim Grid3D<ScalarType>::indexToDim(size_t index) const noexcept {
-        const size_t dimXY = dimX * dimY;
+    template<class ScalarType, bool isSigned>
+    typename Grid3D<ScalarType, isSigned>::Dim Grid3D<ScalarType, isSigned>::indexToDim(size_t index) const noexcept {
+        if constexpr (isSigned) {
+            const size_t sizeX = 2 * dimX + 1;
+            const size_t sizeXY = sizeX * (2 * dimY + 1);
 
-        const size_t z = index / dimXY;
-        index -= dimXY * z;
-        const size_t y = index / dimX;
-        index -= dimX * y;
-        const size_t x = index;
+            const size_t normalized_z = index / sizeXY;
+            index -= sizeXY * normalized_z;
+            const size_t normalized_y = index / sizeX;
+            index -= sizeX * normalized_y;
+            const size_t normalized_x = index;
 
-        return {x, y, z};
+            return {static_cast<ssize_t>(normalized_x) - static_cast<ssize_t>(dimX),
+                    static_cast<ssize_t>(normalized_y) - static_cast<ssize_t>(dimY),
+                    static_cast<ssize_t>(normalized_z) - static_cast<ssize_t>(dimZ)};
+        }
+        else {
+            const size_t dimXY = dimX * dimY;
+
+            const size_t z = index / dimXY;
+            index -= dimXY * z;
+            const size_t y = index / dimX;
+            index -= dimX * y;
+            const size_t x = index;
+
+            return {x, y, z};
+        }
+    }
+
+    template<class ScalarType, bool isSigned>
+    void Grid3D<ScalarType, isSigned>::swap(Grid3D& grid) noexcept {
+        std::swap(lattice, grid.lattice);
+        std::swap(values, grid.values);
+        std::swap(dimX, grid.dimX);
+        std::swap(dimY, grid.dimY);
+        std::swap(dimZ, grid.dimZ);
+    }
+}
+
+namespace std {
+    template<class ScalarType, bool isSigned>
+    inline void swap(Physica::Core::Grid3D<ScalarType, isSigned>& grid1,
+                     Physica::Core::Grid3D<ScalarType, isSigned>& grid2) noexcept {
+        grid1.swap(grid2);
     }
 }

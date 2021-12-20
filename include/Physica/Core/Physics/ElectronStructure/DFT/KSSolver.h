@@ -36,13 +36,14 @@ namespace Physica::Core {
         using Hamilton = DenseSymmMatrix<ScalarType>;
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
+        using UnsignedGrid = Grid3D<ScalarType, false>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
         ScalarType cutEnergy;
-        Grid3D<ScalarType> densityGrid;
-        Grid3D<ScalarType> totalPotGrid;
-        Grid3D<ScalarType> externalPotGrid;
+        UnsignedGrid densityGrid;
+        UnsignedGrid totalPotGrid;
+        UnsignedGrid externalPotGrid;
         FFT<ScalarType, 3> fftSolver;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
@@ -88,7 +89,7 @@ namespace Physica::Core {
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         auto hamilton = Hamilton(plainWaveCount);
         auto eigenSolver = EigenSolver<Hamilton>(plainWaveCount);
-        Grid3D<ScalarType> lastDensity = densityGrid;
+        UnsignedGrid lastDensity = densityGrid;
 
         size_t iteration = 0;
         while (true) {
