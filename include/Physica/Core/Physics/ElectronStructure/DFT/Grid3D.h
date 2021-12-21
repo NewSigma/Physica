@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
     /**
@@ -69,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] Dim indexToDim(size_t index) const noexcept;
         /* Helpers */
         void swap(Grid3D& grid) noexcept;
+        [[nodiscard]] static Grid3D gridFromCutEnergy(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
     };
 
     template<class ScalarType, bool isSigned>
@@ -199,6 +201,16 @@ namespace Physica::Core {
         std::swap(dimX, grid.dimX);
         std::swap(dimY, grid.dimY);
         std::swap(dimZ, grid.dimZ);
+    }
+
+    template<class ScalarType, bool isSigned>
+    Grid3D<ScalarType, isSigned> Grid3D<ScalarType, isSigned>::gridFromCutEnergy(ScalarType cutEnergy, LatticeMatrix reciprocalLattice) {
+        const ScalarType factor = ScalarType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
+        const ScalarType maxMoment = sqrt(factor * cutEnergy.getTrivial());
+        const auto dimX = size_t((maxMoment / reciprocalLattice.row(0).norm()).getTrivial());
+        const auto dimY = size_t((maxMoment / reciprocalLattice.row(1).norm()).getTrivial());
+        const auto dimZ = size_t((maxMoment / reciprocalLattice.row(2).norm()).getTrivial());
+        return Grid3D<ScalarType, isSigned>(reciprocalLattice, dimX, dimY, dimZ);
     }
 }
 

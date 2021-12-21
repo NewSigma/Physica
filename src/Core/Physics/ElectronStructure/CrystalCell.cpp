@@ -21,11 +21,11 @@
 #include "Physica/Core/Physics/ElectronStructure/ReciprocalCell.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<int> charges_)
+    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_)
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
-            , charges(std::move(charges_)) {
-        assert(pos.getRow() == charges.getLength());
+            , atomicNumbers(std::move(atomicNumbers_)) {
+        assert(pos.getRow() == atomicNumbers.getLength());
     }
 
     CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()) {}
@@ -43,5 +43,12 @@ namespace Physica::Core {
 
     typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {
         return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
+    }
+
+    std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {
+        std::unordered_set<uint16_t> set{};
+        for (size_t i = 0; i < atomicNumbers.getLength(); ++i)
+            set.emplace(atomicNumbers[i]);
+        return set;
     }
 }

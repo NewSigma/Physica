@@ -35,9 +35,9 @@ namespace Physica::Core {
         using UnsignedGrid = Grid3D<ScalarType, false>;
         using Vector3D = Vector<ScalarType, 3>;
     public:
-        static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell);
+        static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges);
         static ScalarType potHartree(const Vector3D& r, const UnsignedGrid& chargeGrid, const ReciprocalCell& repCell);
-        static ScalarType potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell);
+        static ScalarType potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
@@ -53,7 +53,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell) {
+    ScalarType Ewald<ScalarType>::energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges) {
         const size_t ionCount = cell.getPos().getRow();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         //The following param chosen is referenced from VASP
@@ -71,12 +71,12 @@ namespace Physica::Core {
                 ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize); //Optimize: VASP puts this loop outside, consider its performance
                 sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
 
-                const int charge1 = cell.getCharge(ion1);
-                const int charge2 = cell.getCharge(ion2);
+                const int charge1 = charges[ion1];
+                const int charge2 = charges[ion2];
                 const ScalarType dotCharge = ScalarType(charge1 * charge2);
                 result += sum * dotCharge;
             }
-            const int charge = cell.getCharge(ion1);
+            const int charge = charges[ion1];
             totalCharge += charge;
             totalSquaredCharge += charge * charge;
         }
@@ -114,7 +114,7 @@ namespace Physica::Core {
     }
     
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell) {
+    ScalarType Ewald<ScalarType>::potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges) {
         const size_t ionCount = cell.getPos().getRow();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         //The following param chosen is referenced from VASP
@@ -134,7 +134,7 @@ namespace Physica::Core {
             if (isTooClose(deltaPos.norm(), averageCellSize))
                 sum -= selfTerm;
 
-            const int charge = cell.getCharge(i);
+            const int charge = charges[i];
             result += sum * charge;
             totalCharge += charge;
         }

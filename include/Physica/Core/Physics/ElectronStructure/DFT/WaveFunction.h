@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Grid3D.h"
 
@@ -32,7 +31,7 @@ namespace Physica::Core {
 
         SignedGrid grid;
     public:
-        WaveFunction(ScalarType cutEnergy, LatticeMatrix mat);
+        WaveFunction(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
         /* Operators */
         [[nodiscard]] ComplexScalar<ScalarType> operator()(Vector<ScalarType, 3> r) const;
         template<class VectorType>
@@ -49,15 +48,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    WaveFunction<ScalarType>::WaveFunction(ScalarType cutEnergy, LatticeMatrix mat) : grid() {
-        const ScalarType factor = ScalarType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
-        const ScalarType maxMoment = sqrt(factor * cutEnergy.getTrivial());
-        const auto dimX = size_t((maxMoment / mat.row(0).norm()).getTrivial());
-        const auto dimY = size_t((maxMoment / mat.row(1).norm()).getTrivial());
-        const auto dimZ = size_t((maxMoment / mat.row(2).norm()).getTrivial());
-        
-        grid = SignedGrid(mat, dimX, dimY, dimZ);
-    }
+    WaveFunction<ScalarType>::WaveFunction(ScalarType cutEnergy, LatticeMatrix reciprocalLattice)
+            : grid(SignedGrid::gridFromCutEnergy(cutEnergy, reciprocalLattice)) {}
 
     template<class ScalarType>
     ComplexScalar<ScalarType> WaveFunction<ScalarType>::operator()(Vector<ScalarType, 3> r) const {

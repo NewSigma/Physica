@@ -28,9 +28,9 @@ using ScalarType = Scalar<Double, false>;
 
 void VASPTest() {
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
-    CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {4});
+    CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {14});
     const auto repCell = cell.reciprocal();
-    const auto ewald = Ewald<ScalarType>::energyIonIon(cell, repCell);
+    const auto ewald = Ewald<ScalarType>::energyIonIon(cell, repCell, {4});
     if (!scalarNear(ewald, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-7))
         exit(EXIT_FAILURE);
 }
@@ -51,8 +51,8 @@ void madelungTest() {
                             0.5, 0.0, 0.0,
                             0.0, 0.5, 0.0,
                             0.0, 0.0, 0.5
-                        }, {1, 1, 1, 1, -1, -1, -1, -1});
-        const auto ewald = Ewald<ScalarType>::energyIonIon(NaCl, NaCl.reciprocal());
+                        }, {1, 1, 1, 1, 1, 1, 1, 1});
+        const auto ewald = Ewald<ScalarType>::energyIonIon(NaCl, NaCl.reciprocal(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto madelung = -(ewald / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
         if (!scalarNear(madelung, ScalarType(1.7475645946331822), 1E-7))
             exit(EXIT_FAILURE);
@@ -62,8 +62,8 @@ void madelungTest() {
         CrystalCell CsCl({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.5, 0.5, 0.5,
-                        }, {1, -1});
-        const auto ewald = Ewald<ScalarType>::energyIonIon(CsCl, CsCl.reciprocal());
+                        }, {1, 1});
+        const auto ewald = Ewald<ScalarType>::energyIonIon(CsCl, CsCl.reciprocal(), {1, -1});
         const auto madelung = -ewald * (lengthInBohr * 0.5 * std::sqrt(3.0));
         if (!scalarNear(madelung, ScalarType(1.76267477307099), 1E-7))
             exit(EXIT_FAILURE);
@@ -73,8 +73,8 @@ void madelungTest() {
         CrystalCell ZnS({0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
                             0.0, 0.0, 0.0,
                             0.25, 0.25, 0.25,
-                        }, {1, -1});
-        const auto ewald = Ewald<ScalarType>::energyIonIon(ZnS, ZnS.reciprocal());
+                        }, {1, 1});
+        const auto ewald = Ewald<ScalarType>::energyIonIon(ZnS, ZnS.reciprocal(), {1, -1});
         const auto madelung = -ewald * (lengthInBohr * 0.5 * std::sqrt(3.0));
         if (!scalarNear(madelung, ScalarType(1.63805505338879), 1E-8))
             exit(EXIT_FAILURE);

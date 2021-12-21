@@ -37,6 +37,7 @@ namespace Physica::Core {
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
         using UnsignedGrid = Grid3D<ScalarType, false>;
+        using SignedGrid = Grid3D<ScalarType, true>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
@@ -45,6 +46,7 @@ namespace Physica::Core {
         UnsignedGrid totalPotGrid;
         UnsignedGrid externalPotGrid;
         FFT<ScalarType, 3> fftSolver;
+        Utils::Array<int16_t> charges;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
@@ -56,8 +58,9 @@ namespace Physica::Core {
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
     private:
-        [[nodiscard]] static size_t electronCount(const CrystalCell& cell);
-        [[nodiscard]] static size_t numOrbitToSolve(const CrystalCell& cell);
+        [[nodiscard]] size_t electronCount() const;
+        [[nodiscard]] size_t numOrbitToSolve() const;
+        void initCharge();
         void initDensity();
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
@@ -66,6 +69,7 @@ namespace Physica::Core {
         void updateDensity(const KSOrbits& orbits);
         void updateHartree();
         void updateXCPot();
+        [[nodiscard]] SignedGrid getStructureFactor();
     };
 
     template<class ScalarType>
@@ -78,11 +82,14 @@ namespace Physica::Core {
             , externalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
             , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
                                                          ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
-                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)}) {}
+                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)})
+            , charges(cell_.getAtomCount()) {
+        initCharge();
+    }
 
     template<class ScalarType>
     bool KSSolver<ScalarType>::solve(const ScalarType& criteria, size_t maxIte) {
-        auto orbits = KSOrbits(numOrbitToSolve(cell), KSOrbit(cutEnergy, repCell.getLattice()));
+        auto orbits = KSOrbits(numOrbitToSolve(), KSOrbit(cutEnergy, repCell.getLattice()));
         KPoint toSolve{0, 0, 0};
 
         const size_t plainWaveCount = orbits[0].getPlainWaveCount();
@@ -113,16 +120,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t KSSolver<ScalarType>::electronCount(const CrystalCell& cell) {
+    size_t KSSolver<ScalarType>::electronCount() const {
         size_t result = 0;
-        for (size_t i = 0; i < cell.getAtomCount(); ++i)
-            result += cell.getCharge(i);
+        for (size_t i = 0; i < charges.getLength(); ++i)
+            result += charges[i];
         return result;
     }
 
     template<class ScalarType>
-    size_t KSSolver<ScalarType>::numOrbitToSolve(const CrystalCell& cell) {
-        return (electronCount(cell) + 1) / 2;
+    size_t KSSolver<ScalarType>::numOrbitToSolve() const {
+        return (electronCount() + 1) / 2;
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::initCharge() {
+        const size_t length = charges.getLength();
+        for (size_t i = 0; i < length; ++i)
+            charges[i] = cell.getAtomicNumber(i);
     }
 
     template<class ScalarType>
@@ -203,5 +217,34 @@ namespace Physica::Core {
         constexpr double correlation_factor2 = 33.851831034345862;
         totalPotGrid.asVector() += pow(densityGrid.asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
         totalPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(densityGrid.asVector(), ScalarType(1.0 / 3))); //Reference [1]
+    }
+
+    template<class ScalarType>
+    typename KSSolver<ScalarType>::SignedGrid KSSolver<ScalarType>::getStructureFactor() {
+        SignedGrid factors = SignedGrid::gridFromCutEnergy(cutEnergy, repCell);
+        const size_t size = factors.getSize();
+        const size_t atomCount = cell.getAtomCount();
+        const std::unordered_set<uint16_t> species = cell.getSpecies();
+        const auto& lattice = repCell.getLattice();
+
+        Vector<ScalarType, 3> g;
+        for (size_t i = 0; i < size; ++i) {
+            auto[n1, n2, n3] = factors.indexToDim(i);
+            g = lattice.row(0).asVector() * ScalarType(n1) +
+                lattice.row(1).asVector() * ScalarType(n2) +
+                lattice.row(2).asVector() * ScalarType(n3);
+            auto temp = ComplexScalar<ScalarType>::Zero();
+            for (int16_t element : species) {
+                for (size_t ion = 0; ion < atomCount; ++i) {
+                    if (cell.getAtomicNumber(ion) == element) {
+                        auto r = cell.getPos().row(i);
+                        const ScalarType phase = g * r;
+                        temp += ComplexScalar<ScalarType>(cos(phase), sin(phase));
+                    }
+                }       
+            }
+            factors.asVector()[i] = temp;
+        }
+        return factors;
     }
 }
