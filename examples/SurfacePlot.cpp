@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
     Vector<ScalarType> v = Vector<ScalarType>::linspace(-5, 5, 50);
     auto grid = DenseMatrix<ScalarType>::meshgrid(v, v);
-    DenseMatrix<ScalarType> z = multiply(square(grid.first) + square(grid.second), exp(-square(grid.first) - square(grid.second) + ScalarType::One()));
+    DenseMatrix<ScalarType> z = hadamard(square(grid.first) + square(grid.second), exp(-square(grid.first) - square(grid.second) + ScalarType::One()));
 
     Plot3D* plot3d = new Plot3D();
 

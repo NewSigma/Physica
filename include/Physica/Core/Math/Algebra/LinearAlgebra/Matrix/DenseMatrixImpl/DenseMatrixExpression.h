@@ -347,7 +347,7 @@ namespace Physica::Core {
 
     template<class MatrixType1, class MatrixType2>
     inline DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType1, MatrixType2>
-    multiply(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
+    hadamard(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
         return DenseMatrixExpression<Utils::ExpressionType::Mul, MatrixType1, MatrixType2>(mat1, mat2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
