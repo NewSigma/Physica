@@ -137,10 +137,17 @@ namespace Physica::Core {
     template<class ScalarType, bool isSigned>
     Vector<ScalarType, 3> Grid3D<ScalarType, isSigned>::dimToPos(Dim dim) const {
         auto[x, y, z] = dim;
-        const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
-        const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
-        const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
-        return lattice.row(0).asVector() * factor_x + lattice.row(1).asVector() * factor_y + lattice.row(2).asVector() * factor_z;
+        if constexpr (isSigned) {
+            return lattice.row(0).asVector() * ScalarType(x) +
+                   lattice.row(1).asVector() * ScalarType(y) +
+                   lattice.row(2).asVector() * ScalarType(z);
+        }
+        else {
+            const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
+            const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
+            const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
+            return lattice.row(0).asVector() * factor_x + lattice.row(1).asVector() * factor_y + lattice.row(2).asVector() * factor_z;
+        }
     }
 
     template<class ScalarType, bool isSigned>

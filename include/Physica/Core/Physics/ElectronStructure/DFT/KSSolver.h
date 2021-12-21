@@ -69,7 +69,7 @@ namespace Physica::Core {
         void updateDensity(const KSOrbits& orbits);
         void updateHartree();
         void updateXCPot();
-        [[nodiscard]] SignedGrid getStructureFactor();
+        [[nodiscard]] Utils::Array<SignedGrid> getStructureFactor();
     };
 
     template<class ScalarType>
@@ -220,31 +220,31 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename KSSolver<ScalarType>::SignedGrid KSSolver<ScalarType>::getStructureFactor() {
-        SignedGrid factors = SignedGrid::gridFromCutEnergy(cutEnergy, repCell);
-        const size_t size = factors.getSize();
-        const size_t atomCount = cell.getAtomCount();
+    typename Utils::Array<typename KSSolver<ScalarType>::SignedGrid> KSSolver<ScalarType>::getStructureFactor() {
         const std::unordered_set<uint16_t> species = cell.getSpecies();
+        auto all_factors = Utils::Array<SignedGrid>(species.size(), SignedGrid::gridFromCutEnergy(cutEnergy, repCell));
+        const size_t factors_size = all_factors[0].getSize();
+        const size_t atomCount = cell.getAtomCount();
         const auto& lattice = repCell.getLattice();
 
         Vector<ScalarType, 3> g;
-        for (size_t i = 0; i < size; ++i) {
-            auto[n1, n2, n3] = factors.indexToDim(i);
-            g = lattice.row(0).asVector() * ScalarType(n1) +
-                lattice.row(1).asVector() * ScalarType(n2) +
-                lattice.row(2).asVector() * ScalarType(n3);
-            auto temp = ComplexScalar<ScalarType>::Zero();
-            for (int16_t element : species) {
+        size_t j = 0;
+        for (int16_t element : species) {
+            SignedGrid& factors = all_factors[j];
+            for (size_t i = 0; i < factors_size; ++i) {
+                g = factors.indexToPos(i);
+                auto temp = ComplexScalar<ScalarType>::Zero();
                 for (size_t ion = 0; ion < atomCount; ++i) {
                     if (cell.getAtomicNumber(ion) == element) {
                         auto r = cell.getPos().row(i);
                         const ScalarType phase = g * r;
                         temp += ComplexScalar<ScalarType>(cos(phase), sin(phase));
                     }
-                }       
+                }
+                factors.asVector()[i] = temp;
             }
-            factors.asVector()[i] = temp;
+            ++j;
         }
-        return factors;
+        return all_factors;
     }
 }
