@@ -30,6 +30,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, bool isSigned>
     class Grid3D {
+        using RealType = typename ScalarType::RealType;
     public:
         using IntType = typename std::conditional<isSigned, ssize_t, size_t>::type;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
@@ -64,13 +65,13 @@ namespace Physica::Core {
         [[nodiscard]] const Vector<ScalarType>& asVector() const noexcept { return values; }
         [[nodiscard]] size_t getSize() const noexcept;
         [[nodiscard]] Dim getDim() const noexcept;
-        [[nodiscard]] Vector<ScalarType, 3> dimToPos(Dim dim) const;
-        [[nodiscard]] Vector<ScalarType, 3> indexToPos(size_t index) const;
+        [[nodiscard]] Vector<RealType, 3> dimToPos(Dim dim) const;
+        [[nodiscard]] Vector<RealType, 3> indexToPos(size_t index) const;
         [[nodiscard]] size_t dimToIndex(IntType x, IntType y, IntType z) const noexcept;
         [[nodiscard]] Dim indexToDim(size_t index) const noexcept;
         /* Helpers */
         void swap(Grid3D& grid) noexcept;
-        [[nodiscard]] static Grid3D gridFromCutEnergy(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
+        [[nodiscard]] static Grid3D gridFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice);
     };
 
     template<class ScalarType, bool isSigned>
@@ -135,23 +136,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool isSigned>
-    Vector<ScalarType, 3> Grid3D<ScalarType, isSigned>::dimToPos(Dim dim) const {
+    Vector<typename Grid3D<ScalarType, isSigned>::RealType, 3> Grid3D<ScalarType, isSigned>::dimToPos(Dim dim) const {
         auto[x, y, z] = dim;
         if constexpr (isSigned) {
-            return lattice.row(0).asVector() * ScalarType(x) +
-                   lattice.row(1).asVector() * ScalarType(y) +
-                   lattice.row(2).asVector() * ScalarType(z);
+            return lattice.row(0).asVector() * RealType(x) +
+                   lattice.row(1).asVector() * RealType(y) +
+                   lattice.row(2).asVector() * RealType(z);
         }
         else {
-            const ScalarType factor_x = ScalarType(x) / ScalarType(dimX - 1);
-            const ScalarType factor_y = ScalarType(y) / ScalarType(dimY - 1);
-            const ScalarType factor_z = ScalarType(z) / ScalarType(dimZ - 1);
+            const RealType factor_x = RealType(x) / RealType(dimX - 1);
+            const RealType factor_y = RealType(y) / RealType(dimY - 1);
+            const RealType factor_z = RealType(z) / RealType(dimZ - 1);
             return lattice.row(0).asVector() * factor_x + lattice.row(1).asVector() * factor_y + lattice.row(2).asVector() * factor_z;
         }
     }
 
     template<class ScalarType, bool isSigned>
-    Vector<ScalarType, 3> Grid3D<ScalarType, isSigned>::indexToPos(size_t index) const {
+    Vector<typename Grid3D<ScalarType, isSigned>::RealType, 3> Grid3D<ScalarType, isSigned>::indexToPos(size_t index) const {
         return dimToPos(indexToDim(index));
     }
 
@@ -211,9 +212,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool isSigned>
-    Grid3D<ScalarType, isSigned> Grid3D<ScalarType, isSigned>::gridFromCutEnergy(ScalarType cutEnergy, LatticeMatrix reciprocalLattice) {
-        const ScalarType factor = ScalarType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
-        const ScalarType maxMoment = sqrt(factor * cutEnergy.getTrivial());
+    Grid3D<ScalarType, isSigned> Grid3D<ScalarType, isSigned>::gridFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice) {
+        const auto factor = RealType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
+        const RealType maxMoment = sqrt(factor * cutEnergy);
         const auto dimX = size_t((maxMoment / reciprocalLattice.row(0).norm()).getTrivial());
         const auto dimY = size_t((maxMoment / reciprocalLattice.row(1).norm()).getTrivial());
         const auto dimZ = size_t((maxMoment / reciprocalLattice.row(2).norm()).getTrivial());

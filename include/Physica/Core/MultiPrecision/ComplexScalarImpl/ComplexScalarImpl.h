@@ -20,12 +20,12 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    ComplexScalar<ScalarType>::ComplexScalar(const ScalarBase<ScalarType>& real_)
-            : real(real_.getDerived()), imag(ScalarType::Zero()) {}
+    ComplexScalar<ScalarType>::ComplexScalar(const ScalarType& real_)
+            : real(real_), imag(ScalarType::Zero()) {}
 
     template<class ScalarType>
-    ComplexScalar<ScalarType>::ComplexScalar(const ScalarBase<ScalarType>& real_, const ScalarBase<ScalarType>& imag_)
-            : real(real_.getDerived()), imag(imag_.getDerived()) {}
+    ComplexScalar<ScalarType>::ComplexScalar(const ScalarType& real_, const ScalarType& imag_)
+            : real(real_), imag(imag_) {}
 
     template<class ScalarType>
     ComplexScalar<ScalarType>::ComplexScalar(std::initializer_list<ScalarType> list) {

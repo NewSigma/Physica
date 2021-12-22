@@ -62,8 +62,8 @@ namespace Physica::Core {
         template<class AnyScalar1, class AnyScalar2>
         class BinaryScalarOpReturnType {
             static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
-                                                                            ? Traits<AnyScalar2>::option
-                                                                            : Traits<AnyScalar1>::option;
+                                                                              ? Traits<AnyScalar1>::option
+                                                                              : Traits<AnyScalar2>::option;
             static constexpr bool errorTrack = Traits<AnyScalar1>::errorTrack || Traits<AnyScalar2>::errorTrack;
             static constexpr bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
         public:

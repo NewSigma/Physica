@@ -37,13 +37,14 @@ namespace Physica::Core {
 
     template<class ScalarType>
     class ComplexScalar : public ScalarBase<ComplexScalar<ScalarType>> {
+        static_assert(!ScalarType::isComplex);
     private:
         ScalarType real;
         ScalarType imag;
     public:
         ComplexScalar() = default;
-        ComplexScalar(const ScalarBase<ScalarType>& real_);
-        ComplexScalar(const ScalarBase<ScalarType>& real_, const ScalarBase<ScalarType>& imag_);
+        ComplexScalar(const ScalarType& real_);
+        ComplexScalar(const ScalarType& real_, const ScalarType& imag_);
         ComplexScalar(std::initializer_list<ScalarType> list);
         ComplexScalar(const ComplexScalar& c) = default;
         ComplexScalar(ComplexScalar&& c) noexcept;

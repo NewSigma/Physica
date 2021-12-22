@@ -52,10 +52,10 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile;
         };
 
-        template<Utils::ExpressionType type, class Exp, ScalarOption option, bool errorTrack>
-        class Traits<VectorExpression<type, Exp, Scalar<option, errorTrack>>> {
+        template<Utils::ExpressionType type, class Exp, class AnyScalar>
+        class Traits<VectorExpression<type, Exp, ScalarBase<AnyScalar>>> {
         public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, Scalar<option, errorTrack>>::Type;
+            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
             constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
         };
@@ -113,14 +113,14 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
-    template<class VectorType, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, Scalar<option, errorTrack>>>;
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) + scalar; }
@@ -143,31 +143,31 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
-    template<class VectorType, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, Scalar<option, errorTrack>>>;
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) - scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class VectorType, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, Scalar<option, errorTrack>>>;
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>;
     public:
         using typename Base::ScalarType;
     private:
         const VectorType& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) * ScalarType(scalar); }
@@ -190,15 +190,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class VectorType, ScalarOption option, bool errorTrack>
-    class VectorExpression<Utils::ExpressionType::Div, VectorType, Scalar<option, errorTrack>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, Scalar<option, errorTrack>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, Scalar<option, errorTrack>>>;
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
-        const Scalar<option, errorTrack>& scalar;
+        const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const Scalar<option, errorTrack>& scalar_)
-                : exp(exp_.getDerived()), scalar(scalar_.getDerived()) {}
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_) {}
 
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) / scalar; }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
@@ -312,12 +312,12 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarType> operator+(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
-        return VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<ScalarType>> operator+(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
-    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarType> operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v + s; }
+    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<ScalarType>> operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v + s; }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class Derived, class OtherDerived>
     inline VectorExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>
@@ -326,22 +326,22 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarType> operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
-        return VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+    inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>> operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarType> operator-(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
+    inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>> operator-(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
         return -v + s;
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType> operator*(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
-        return VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
-    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarType> operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v * s; }
+    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v * s; }
     
     template<class VectorType1, class VectorType2>
     inline VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2> multiply(
@@ -351,8 +351,8 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType> operator/(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
-        return VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+    inline VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<ScalarType>> operator/(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class VectorType1, class VectorType2>
