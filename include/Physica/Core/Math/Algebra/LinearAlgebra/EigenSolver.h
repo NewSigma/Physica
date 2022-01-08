@@ -30,6 +30,7 @@ namespace Physica::Core {
     template<class MatrixType>
     class EigenSolver {
         using ScalarType = typename MatrixType::ScalarType;
+        static_assert(!ScalarType::isComplex);
     private:
         using RawEigenvectorType = DenseMatrix<ScalarType,
                                                DenseMatrixOption::Column | DenseMatrixOption::Vector,

@@ -36,8 +36,6 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, 3>;
     public:
         static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges);
-        static ScalarType potHartree(const Vector3D& r, const UnsignedGrid& chargeGrid, const ReciprocalCell& repCell);
-        static ScalarType potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
@@ -83,62 +81,6 @@ namespace Physica::Core {
         result *= ScalarType(0.5);
         result -= ScalarType(totalSquaredCharge) * integralLimit / sqrt(ScalarType(M_PI));
         result -= ScalarType(totalCharge * totalCharge) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
-        return result;
-    }
-
-    template<class ScalarType>
-    ScalarType Ewald<ScalarType>::potHartree(const Vector3D& r, const UnsignedGrid& chargeGrid, const ReciprocalCell& repCell) {
-        const size_t chargeCount = chargeGrid.getSize();
-        const ScalarType inv_volume = reciprocal(chargeGrid.getVolume());
-        //The following param chosen is referenced from VASP
-        const ScalarType averageCellSize = cbrt(ScalarType(chargeGrid.getVolume()));
-        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
-        const auto realSumDim = getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
-        const auto repSumDim = getSumDimention(chargeGrid.getLattice(), ScalarType(4 / M_PI) * integralLimit);
-
-        ScalarType result = ScalarType::Zero();
-        ScalarType totalCharge = 0;
-        for (size_t i = 0; i < chargeCount; ++i) {
-            const Vector3D deltaPos = r - chargeGrid.indexToPos(i);
-            ScalarType sum = realSum(chargeGrid.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize);
-            sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
-
-            const ScalarType charge = chargeGrid[i];
-            result += sum * charge;
-            totalCharge += charge;
-        }
-        result *= chargeGrid.getUnitVolume();
-        result -= ScalarType::Two() * integralLimit / sqrt(ScalarType(M_PI)) * totalCharge;
-        result -= ScalarType(M_PI) / (square(integralLimit)) * inv_volume * totalCharge;
-        return result;
-    }
-    
-    template<class ScalarType>
-    ScalarType Ewald<ScalarType>::potIon(const Vector3D& r, const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges) {
-        const size_t ionCount = cell.getPos().getRow();
-        const ScalarType inv_volume = reciprocal(cell.getVolume());
-        //The following param chosen is referenced from VASP
-        const ScalarType averageCellSize = cbrt(ScalarType(cell.getVolume()));
-        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
-        const auto realSumDim = getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
-        const auto repSumDim = getSumDimention(cell.getLattice(), ScalarType(4 / M_PI) * integralLimit);
-
-        const ScalarType selfTerm = ScalarType::Two() * integralLimit / sqrt(ScalarType(M_PI));
-
-        ScalarType result = ScalarType::Zero();
-        int totalCharge = 0;
-        for (size_t i = 0; i < ionCount; ++i) {
-            const Vector3D deltaPos = r - cell.getLattice() * cell.getPos().row(i).asVector();
-            ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize);
-            sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
-            if (isTooClose(deltaPos.norm(), averageCellSize))
-                sum -= selfTerm;
-
-            const int charge = charges[i];
-            result += sum * charge;
-            totalCharge += charge;
-        }
-        result -= ScalarType(M_PI) / (square(integralLimit)) * inv_volume * totalCharge;
         return result;
     }
 
