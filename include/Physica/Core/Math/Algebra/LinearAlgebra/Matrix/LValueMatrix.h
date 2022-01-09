@@ -20,6 +20,7 @@
 
 #include "RValueMatrix.h"
 #include "MatrixBlock.h"
+#include "Conjugate.h"
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
@@ -89,6 +90,8 @@ namespace Physica::Core {
 
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
         [[nodiscard]] Transpose<Derived> transpose() const noexcept;
+        [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
+        [[nodiscard]] Transpose<Conjugate<Derived>> hermite() const noexcept;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);

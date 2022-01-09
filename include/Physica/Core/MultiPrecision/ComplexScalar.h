@@ -66,6 +66,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType squaredNorm();
         [[nodiscard]] inline ScalarType norm();
         [[nodiscard]] ScalarType arg();
+        [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
         [[nodiscard]] const ScalarType& getReal() const { return real; }
         [[nodiscard]] const ScalarType& getImag() const { return imag; }
         [[nodiscard]] bool isZero() { return real.isZero() && imag.isZero(); }
