@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "LValueMatrix.h"
+#include "RValueMatrix.h"
 
 namespace Physica::Core {
     template<class MatrixType> class Transpose;

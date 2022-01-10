@@ -95,17 +95,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType ComplexScalar<ScalarType>::squaredNorm() {
+    ScalarType ComplexScalar<ScalarType>::squaredNorm() const {
         return square(real) + square(imag);
     }
 
     template<class ScalarType>
-    inline ScalarType ComplexScalar<ScalarType>::norm() {
+    inline ScalarType ComplexScalar<ScalarType>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<class ScalarType>
-    ScalarType ComplexScalar<ScalarType>::arg() {
+    ScalarType ComplexScalar<ScalarType>::arg() const {
         auto result = arctan(imag / real);
         //arctan is defined on [-Pi / 2, Pi / 2], judging the quadrant is necessary.
         if(real.isPositive()) {

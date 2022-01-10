@@ -22,6 +22,8 @@
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
+    template<class MatrixType> class Transpose;
+    template<class MatrixType> class Conjugate;
     /**
      * The \class DenseRValueMatrix provide algorithms that a matrix should support.
      * 
@@ -48,6 +50,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
         [[nodiscard]] ScalarType trace() const;
+        [[nodiscard]] Transpose<Derived> transpose() const noexcept;
+        [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
     };
 
     template<class Derived>
@@ -57,6 +61,16 @@ namespace Physica::Core {
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
         return result;
+    }
+
+    template<class Derived>
+    Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
+        return Transpose<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
+    Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
+        return Conjugate<Derived>(this->getDerived());
     }
 
     template<class Derived>

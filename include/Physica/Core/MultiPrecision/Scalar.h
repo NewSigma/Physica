@@ -264,6 +264,27 @@ namespace Physica::Core {
             else
                 return Derived::Zero();
         }
+
+        [[nodiscard]] ScalarType conjugate() const {
+            if constexpr (isComplex)
+                return this->getDerived().conjugate();
+            else
+                return getReal();
+        }
+
+        [[nodiscard]] ScalarType unit() const {
+            if constexpr (isComplex)
+                return this->getDerived().unit();
+            else
+                return ScalarType(getReal().isNegative() ? -1 : 1);
+        }
+
+        [[nodiscard]] RealType squaredNorm() const {
+            if constexpr (isComplex)
+                return this->getDerived().squaredNorm();
+            else
+                return square(this->getDerived());
+        }
     };
 
     template<>

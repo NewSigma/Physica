@@ -69,6 +69,31 @@ int main() {
                 if (!scalarNear(r_result(i, j), r_answer(i, j), 1E-5))
                     return 1;
     }
+    /* Complex test */ {
+        using ScalarType = ComplexScalar<T>;
+        using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 2, 2>;
+
+        const Vector<ScalarType> x{{1, 1}, {3, -5}};
+        const size_t rank = x.getLength();
+        Vector<ScalarType> v(rank);
+        const T norm = householder(x, v);
+
+        const MatrixType m{x, {{-2, 7}, {1, 6}}};
+        MatrixType householderMat = MatrixType::unitMatrix(2);
+        applyHouseholder(v, householderMat);
+        MatrixType m1 = householderMat * m;
+        MatrixType m2 = m;
+        applyHouseholder(v, m2);
+
+        if (!scalarNear(m1(0, 0).norm(), norm, 1E-15))
+            return 1;
+        if (!scalarNear(m1(1, 0).norm(), T(0), 1E-15))
+            return 1;
+
+        m1(1, 0) = m2(1, 0) = T(0);
+        if (!matrixNear(m1, m2, 1E-14))
+            return 1;
+    }
     {
         const Vector<T> x{0, 0, 0, 0};
         Vector<T> v(4);

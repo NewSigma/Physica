@@ -39,8 +39,8 @@ namespace Physica::Core {
         LValueVector& operator=(LValueVector&& v) { return (*this) = v; }
         template<class OtherVector>
         Derived& operator=(const RValueVector<OtherVector>& v);
-        template<ScalarOption option, bool errorTrack>
-        Derived& operator=(const Scalar<option, errorTrack>& s);
+        template<class AnyScalar>
+        Derived& operator=(const ScalarBase<AnyScalar>& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
@@ -77,10 +77,10 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<ScalarOption option, bool errorTrack>
-    Derived& LValueVector<Derived>::operator=(const Scalar<option, errorTrack>& s) {
+    template<class AnyScalar>
+    Derived& LValueVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
         for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = s;
+            (*this)[i] = s.getDerived();
         return Base::getDerived();
     }
 

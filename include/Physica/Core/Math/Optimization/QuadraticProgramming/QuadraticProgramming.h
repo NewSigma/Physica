@@ -82,7 +82,7 @@ namespace Physica::Core {
             , equalityConstraint(equalityConstraint_)
             , inequalityConstraint(inequalityConstraint_)
             , x(initial)
-            , activeConstraintFlags(Vector<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
+            , activeConstraintFlags(Utils::Array<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
         assert(equalityConstraint.getColumn() == 0 || equalityConstraint.getColumn() == objectiveVecC.getLength() + 1);
         assert(inequalityConstraint.getColumn() == 0 || inequalityConstraint.getColumn() == objectiveVecC.getLength() + 1);

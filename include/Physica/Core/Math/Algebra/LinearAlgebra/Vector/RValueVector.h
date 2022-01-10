@@ -23,6 +23,7 @@
 
 namespace Physica::Core {
     template<class VectorType> class TransposeVector;
+    template<class VectorType> class ConjugateVector;
     template<class AnyVector1, class AnyVector2> class CrossProduct;
 
     namespace Internal {
@@ -46,6 +47,8 @@ namespace Physica::Core {
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
         using ColMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
         using RowMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile>;
+    private:
+        using RealType = typename ScalarType::RealType;
     public:
         /* Operations */
         template<class OtherDerived>
@@ -56,9 +59,10 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
+        [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
-        [[nodiscard]] ScalarType norm() const;
-        [[nodiscard]] ScalarType squaredNorm() const;
+        [[nodiscard]] RealType norm() const;
+        [[nodiscard]] RealType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
@@ -69,15 +73,15 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::norm() const {
+    typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::squaredNorm() const {
-        auto result = ScalarType::Zero();
+    typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
+        auto result = RealType::Zero();
         for(size_t i = 0; i < getLength(); ++i)
-            result += square(calc(i));
+            result += calc(i).squaredNorm();
         return result;
     }
 

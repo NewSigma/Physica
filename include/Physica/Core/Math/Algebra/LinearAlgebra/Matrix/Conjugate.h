@@ -23,11 +23,16 @@
 namespace Physica::Core {
     template<class MatrixType> class Conjugate;
 
+    template<class VectorType> class ConjugateVector;
+
     namespace Internal {
         template<class T> class Traits;
 
         template<class MatrixType>
         class Traits<Conjugate<MatrixType>> : public Traits<MatrixType> {};
+
+        template<class VectorType>
+        class Traits<ConjugateVector<VectorType>> : public Traits<VectorType> {};
     }
 
     template<class MatrixType>
@@ -58,5 +63,27 @@ namespace Physica::Core {
                                                              TargetType::columnFromMajorMinor(i, j));
             }
         }
+    }
+
+    template<class VectorType>
+    class ConjugateVector : public RValueVector<ConjugateVector<VectorType>> {
+        const VectorType& vec;
+    public:
+        using Base = RValueVector<ConjugateVector<VectorType>>;
+        using typename Base::ScalarType;
+    public:
+        ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        template<class OtherVector>
+        void assignTo(LValueVector<OtherVector>& target) const;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
+        [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
+    };
+
+    template<class VectorType>
+    template<class OtherVector>
+    void ConjugateVector<VectorType>::assignTo(LValueVector<OtherVector>& target) const {
+        for (size_t i = 0; i < vec.getLength(); ++i)
+            target[i] = calc(i);
     }
 }

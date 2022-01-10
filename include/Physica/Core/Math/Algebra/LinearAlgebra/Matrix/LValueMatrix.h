@@ -20,11 +20,9 @@
 
 #include "RValueMatrix.h"
 #include "MatrixBlock.h"
-#include "Conjugate.h"
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
-    template<class MatrixType> class Transpose;
 
     namespace Internal {
         template<class Derived>
@@ -89,9 +87,6 @@ namespace Physica::Core {
         [[nodiscard]] inline const MatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
 
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
-        [[nodiscard]] Transpose<Derived> transpose() const noexcept;
-        [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
-        [[nodiscard]] Transpose<Conjugate<Derived>> hermite() const noexcept;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void rowReduce(size_t r1, size_t r2, const ScalarType& factor);

@@ -243,21 +243,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    Transpose<Derived> LValueMatrix<Derived>::transpose() const noexcept {
-        return Transpose<Derived>(this->getDerived());
-    }
-
-    template<class Derived>
-    Conjugate<Derived> LValueMatrix<Derived>::conjugate() const noexcept {
-        return Conjugate<Derived>(this->getDerived());
-    }
-
-    template<class Derived>
-    Transpose<Conjugate<Derived>> LValueMatrix<Derived>::hermite() const noexcept {
-        return Transpose<Conjugate<Derived>>(this->getDerived());
-    }
-
-    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::determinate() const {
         assert(Base::getDerived().getRow() == Base::getDerived().getColumn());
         using namespace Internal;

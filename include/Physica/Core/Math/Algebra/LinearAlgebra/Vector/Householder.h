@@ -20,6 +20,8 @@
 
 #include "LValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Conjugate.h"
 
 namespace Physica::Core {
     /**
@@ -33,26 +35,24 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class AnyVector, class OtherVector>
-    typename AnyVector::ScalarType householder(const LValueVector<AnyVector>& source,
-                                               LValueVector<OtherVector>& target) {
+    typename AnyVector::ScalarType::RealType householder(const LValueVector<AnyVector>& source,
+                                                         LValueVector<OtherVector>& target) {
         using ScalarType = typename AnyVector::ScalarType;
+        using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
-        const ScalarType norm = source.getDerived().norm();
-        if (norm > std::numeric_limits<ScalarType>::min()) {
-            const ScalarType abs_first = abs(source[0]);
-            const bool minus = source[0].isNegative();
-            ScalarType factor = reciprocal(ScalarType(abs_first + norm));
-            if (minus)
-                factor.toOpposite();
 
-            target.tail(1) = source.tail(1) * factor;
-            target[0] = ScalarType(1) + abs_first / norm;
+        const RealType norm = source.getDerived().norm();
+        if (norm > std::numeric_limits<ScalarType>::min()) {
+            const ScalarType factor = source[0].unit() * norm;
+            const ScalarType factor1 = source[0] + factor;
+            const ScalarType factor2 = reciprocal(factor1);
+
+            target.tail(1) = source.tail(1) * factor2;
+            target[0] = (factor1 / factor).getReal();
             return norm;
         }
-        else {
-            target = ScalarType::Zero();
-            return ScalarType::Zero();
-        }
+        target = RealType::Zero();
+        return RealType::Zero();
     }
 
     template<class AnyVector>
@@ -67,7 +67,8 @@ namespace Physica::Core {
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
         const Vector<ScalarType> temp1 = copy * temp;
-        mat -= temp1 * (copy.transpose() * mat).compute();
+        const auto trans = copy.transpose();
+        mat -= temp1 * (trans.conjugate() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
@@ -76,7 +77,7 @@ namespace Physica::Core {
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
-        const Vector<ScalarType> temp1 = copy * temp;
+        const Vector<ScalarType> temp1 = copy.conjugate() * temp;
         mat -= Vector<ScalarType>(mat * copy) * temp1.transpose();
     }
 }

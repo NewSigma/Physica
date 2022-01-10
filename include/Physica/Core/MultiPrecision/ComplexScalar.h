@@ -63,9 +63,10 @@ namespace Physica::Core {
         static inline ComplexScalar Two();
         static inline ComplexScalar Random();
         /* Getters */
-        [[nodiscard]] ScalarType squaredNorm();
-        [[nodiscard]] inline ScalarType norm();
-        [[nodiscard]] ScalarType arg();
+        [[nodiscard]] ScalarType squaredNorm() const;
+        [[nodiscard]] inline ScalarType norm() const;
+        [[nodiscard]] ScalarType arg() const;
+        [[nodiscard]] ComplexScalar unit() const { return *this * reciprocal(norm()); }
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
         [[nodiscard]] const ScalarType& getReal() const { return real; }
         [[nodiscard]] const ScalarType& getImag() const { return imag; }
@@ -136,6 +137,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ComplexScalar<ScalarType> operator-(const ComplexScalar<ScalarType>& c) { return ComplexScalar(-c.getReal(), -c.getImag()); }
+
+    template<class ScalarType>
     void swap(ComplexScalar<ScalarType>& c1, ComplexScalar<ScalarType>& c2) noexcept { c1.swap(c2); }
 
     template<class ScalarType, class T>
@@ -149,6 +153,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class T>
     void operator/=(ComplexScalar<ScalarType>& c, const T& t) { c = c / t; }
+}
+
+namespace std {
+    template<class RealType>
+    struct numeric_limits<Physica::Core::ComplexScalar<RealType>> : public numeric_limits<RealType> {};
 }
 
 #include "ComplexScalarImpl/ComplexScalarImpl.h"
