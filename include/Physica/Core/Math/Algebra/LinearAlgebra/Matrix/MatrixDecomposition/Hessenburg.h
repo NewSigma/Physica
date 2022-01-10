@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,7 +33,7 @@ namespace Physica::Core {
         };
     }
     /**
-     * Decomposite matrix A like A = QHQ^T
+     * Decomposite matrix A like A = QHQ^H
      * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
@@ -88,12 +88,12 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 2; ++i) {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
-            const bool changeSign = temp[0].isNegative();
+            const auto unit = temp[0].unit();
             const ScalarType norm = householderInPlace(temp);
-            normVector[i] = changeSign ? norm : -norm;
+            normVector[i] = -norm * unit;
 
             auto target_right = working.rightCols(i + 1);
-            applyHouseholder(target_right, temp);
+            applyHouseholder(target_right, temp.conjugate());
             auto target_bottomRight = working.bottomRightCorner(i + 1);
             applyHouseholder(temp, target_bottomRight);
         }

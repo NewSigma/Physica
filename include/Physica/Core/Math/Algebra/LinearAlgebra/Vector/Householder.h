@@ -61,7 +61,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    void applyHouseholder(const LValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
+    void applyHouseholder(const RValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
         using ScalarType = typename MatrixType::ScalarType;
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
@@ -72,7 +72,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    void applyHouseholder(LValueMatrix<MatrixType>& mat, const LValueVector<VectorType>& householder) {
+    void applyHouseholder(LValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& householder) {
         using ScalarType = typename MatrixType::ScalarType;
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();

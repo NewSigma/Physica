@@ -70,7 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
         [[nodiscard]] const ScalarType& getReal() const { return real; }
         [[nodiscard]] const ScalarType& getImag() const { return imag; }
-        [[nodiscard]] bool isZero() { return real.isZero() && imag.isZero(); }
+        [[nodiscard]] bool isZero() const { return real.isZero() && imag.isZero(); }
         /* Setters */
         void setReal(const ScalarType& s) { real = s; }
         void setImag(const ScalarType& s) { imag = s; }
