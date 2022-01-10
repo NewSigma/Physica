@@ -16,19 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
-using T = Scalar<Double, false>;
 
 int main() {
-    Vector<T, 2> v{2, 1};
-    auto givens_vector = givens(v, 0, 1);
-    DenseMatrix<T> v_mat = v;
-    applyGivens(givens_vector, v_mat, 0, 1);
-    if (abs(v_mat(1, 0)) > T(1E-15))
-        return 1;
+    using RealType = Scalar<Double, false>;
+    using ComplexType = ComplexScalar<RealType>;
+    {
+        Vector<RealType, 2> v{2, 1};
+        auto givens_vector = givens(v, 0, 1);
+        DenseMatrix<RealType> v_mat = v;
+        applyGivens(givens_vector, v_mat, 0, 1);
+        if (abs(v_mat(1, 0)) > RealType(1E-15))
+            return 1;
+    }
+    {
+        Vector<ComplexType, 2> v{{2, 1}, {1, -3}};
+        auto givens_vector = givens(v, 0, 1);
+        DenseMatrix<ComplexType> v_mat = v;
+        applyGivens(givens_vector, v_mat, 0, 1);
+        if (v_mat(1, 0).norm() > RealType(1E-15))
+            return 1;
+    }
     return 0;
 }
