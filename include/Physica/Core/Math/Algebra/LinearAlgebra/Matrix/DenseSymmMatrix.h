@@ -49,6 +49,7 @@ namespace Physica::Core {
     public:
         using ColMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
         using RowMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
+        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
     public:
         template<class OtherMatrix>
         DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);

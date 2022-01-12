@@ -31,6 +31,8 @@ namespace Physica::Core {
     template<class MatrixType>
     class RealSchur {
         using ScalarType = typename MatrixType::ScalarType;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = ComplexScalar<RealType>;
         using WorkingMatrix = typename MatrixType::ColMatrix;
         constexpr static size_t matItePerCol = 40; //Reference to Eigen
     private:
@@ -51,6 +53,8 @@ namespace Physica::Core {
         void splitOffTwoRows(size_t index);
         void francisQR(size_t lower, size_t sub_order);
         void specialHessenburg(size_t lower, size_t sub_order);
+        ComplexType complexShift(size_t upper, size_t iter);
+        void complexQR(size_t lower, size_t upper, ComplexType shift);
     };
 
     template<class MatrixType>
@@ -63,20 +67,21 @@ namespace Physica::Core {
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
 
-        MatrixType buffer = abs(source);
-        const ScalarType factor = buffer.max();
+        typename MatrixType::RealMatrix buffer = abs(source);
+        const RealType factor = buffer.max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
-            matrixT = ScalarType::Zero();
+            matrixT = RealType::Zero();
             return;
         }
-        const ScalarType inv_factor = reciprocal(factor);
-        buffer = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
-        const Hessenburg hess(buffer);
+        const RealType inv_factor = reciprocal(factor);
+        const MatrixType normalized = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
+        const Hessenburg hess(normalized);
         matrixT = hess.getMatrixH();
 
         const size_t order = matrixT.getRow();
         size_t upper = order - 1;
         size_t iter = 0;
+        size_t total_iter = 0;
         const size_t max_iter = matItePerCol * order;
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowLower(matrixT, upper);
@@ -84,18 +89,28 @@ namespace Physica::Core {
                 upper -= 1;
                 iter = 0;
             }
-            else if (lower + 1 == upper) {
-                splitOffTwoRows(lower);
-                upper -= 2;
-                iter = 0;
-            }
             else {
-                const size_t sub_order = upper - lower + 1;
-                francisQR(lower, sub_order);
-                ++iter;
+                if constexpr (ScalarType::isComplex) {
+                    complexQR(lower, upper, complexShift(upper, iter));
+                    ++iter;
+                    ++total_iter;
+                }
+                else {
+                    if (lower + 1 == upper) {
+                        splitOffTwoRows(lower);
+                        upper -= 2;
+                        iter = 0;
+                    }
+                    else {
+                        const size_t sub_order = upper - lower + 1;
+                        francisQR(lower, sub_order);
+                        ++iter;
+                        ++total_iter;
+                    }
+                }
             }
 
-            if (iter == max_iter)
+            if (total_iter == max_iter)
                 throw BadConvergenceException();
         }
         matrixT *= factor;
@@ -117,8 +132,8 @@ namespace Physica::Core {
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
-            ScalarType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
-            temp = std::max(temp * std::numeric_limits<ScalarType>::epsilon(), ScalarType(std::numeric_limits<ScalarType>::min()));
+            RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
+            temp = std::max(abs(temp * RealType(std::numeric_limits<ScalarType>::epsilon())), RealType(std::numeric_limits<ScalarType>::min()));
             if (abs(mat(lower, lower_1)) < temp) {
                 mat(lower, lower_1) = ScalarType::Zero();
                 break;
@@ -247,6 +262,66 @@ namespace Physica::Core {
         if (computeMatrixU) {
             auto cols = matrixU.cols(lower + sub_order - 2, 2);
             applyHouseholder(cols, householderVector2D);
+        }
+    }
+
+    template<class MatrixType>
+    typename RealSchur<MatrixType>::ComplexType RealSchur<MatrixType>::complexShift(size_t upper, size_t iter) {
+        using Matrix2D = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 2, 2>;
+        if (iter == 10 || iter == 20) {
+            // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
+            return abs(matrixT(upper, upper - 1).getReal()) + abs(matrixT(upper - 1, upper - 2).getReal());
+        }
+        //compute the shift as one of the eigenvalues of t, the 2x2
+        //diagonal block on the bottom of the active submatrix
+        const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
+        RealType t_norm = abs(activeBlock(0, 0)) + abs(activeBlock(0, 1)) + abs(activeBlock(1, 0)) + abs(activeBlock(1, 1));
+        const Matrix2D t = activeBlock * reciprocal(t_norm); //Normalization to avoid under/overflow
+
+        const ComplexType b = t(0,1) * t(1,0);
+        const ComplexType c = t(0,0) - t(1,1);
+        const ComplexType disc = sqrt(square(c) + RealType(4) * b);
+        const ComplexType det = t(0,0) * t(1,1) - b;
+        const ComplexType trace = t(0,0) + t(1,1);
+        ComplexType eival1 = (trace + disc) * RealType(0.5);
+        ComplexType eival2 = (trace - disc) * RealType(0.5);
+        const RealType eival1_norm = eival1.norm();
+        const RealType eival2_norm = eival2.norm();
+        //A division by zero can only occur if eival1==eival2==0.
+        //In this case, det==0, and all we have to do is checking that eival2_norm!=0
+        if(eival1_norm > eival2_norm)
+            eival2 = det / eival1;
+        else if(!eival2_norm.isZero())
+            eival1 = det / eival2;
+
+        const bool firstEigenValueCloserToDiagonal = (eival1 - t(1,1)).norm() < (eival2 - t(1,1)).norm();
+        return t_norm * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
+    }
+
+    template<class MatrixType>
+    void RealSchur<MatrixType>::complexQR(size_t lower, size_t upper, ComplexType shift) {
+        using Vector2D = Vector<ScalarType, 2, 2>;
+        {
+            auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1,lower)}, 0, 1);
+            auto rightCols = matrixT.rightCols(lower);
+            applyGivens(givensVec, rightCols, lower, lower + 1);
+            givensVec[1] = -givensVec[1].conjugate();
+            auto topRows = matrixT.topRows(std::min(lower + 2, upper));
+            applyGivens(topRows, givensVec, lower, lower + 1);
+            if (computeMatrixU)
+                applyGivens(matrixU, givensVec, lower, lower + 1);
+        }
+
+        for(size_t i = lower + 1; i < upper; ++i) {
+            auto givensVec = givens(Vector2D{matrixT(i, i - 1), matrixT(i + 1, i - 1)}, 0, 1);
+            matrixT(i + 1, i - 1) = ScalarType::Zero();
+            auto rightCols = matrixT.rightCols(i);
+            applyGivens(givensVec, rightCols, i, i + 1);
+            givensVec[1] = -givensVec[1].conjugate();
+            auto topRows = matrixT.topRows(std::min(i + 2, upper));
+            applyGivens(topRows, givensVec, i, i + 1);
+            if (computeMatrixU)
+                applyGivens(matrixU, givensVec, i, i + 1);
         }
     }
 }

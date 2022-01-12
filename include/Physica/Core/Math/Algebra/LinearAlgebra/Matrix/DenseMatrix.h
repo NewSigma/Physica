@@ -67,6 +67,7 @@ namespace Physica::Core {
     public:
         using ColMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
+        using RealMatrix = DenseMatrix<typename T::RealType, option, Row, Column, MaxRow, MaxColumn>;
     public:
         using Storage::Storage;
         template<class OtherMatrix>

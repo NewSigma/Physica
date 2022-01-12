@@ -404,6 +404,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::sum() const {
+        ScalarType result;
+        if constexpr (isColumnMatrix) {
+            result = col(0).asVector().sum();
+            for (size_t i = 1; i < Base::getColumn(); ++i)
+                result += col(i).asVector().sum();
+        }
+        else {
+            result = row(0).asVector().sum();
+            for (size_t i = 1; i < Base::getRow(); ++i)
+                result += row(i).asVector().sum();
+        }
+        return result;
+    }
+
+    template<class Derived>
     inline size_t LValueMatrix<Derived>::getMaxMajor() const noexcept {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
             return Base::getColumn();

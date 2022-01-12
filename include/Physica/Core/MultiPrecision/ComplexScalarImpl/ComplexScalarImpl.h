@@ -106,14 +106,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType ComplexScalar<ScalarType>::arg() const {
+        using RealType = typename ScalarType::RealType;
         auto result = arctan(imag / real);
         //arctan is defined on [-Pi / 2, Pi / 2], judging the quadrant is necessary.
         if(real.isPositive()) {
             if(imag.isNegative())
-                result += MathConst::getInstance().PI << 1;
+                result += RealType(M_PI_2);
         }
         else
-            result += MathConst::getInstance().PI;
+            result += RealType(M_PI);
         return result;
     }
 
@@ -206,7 +207,7 @@ namespace Physica::Core {
     template<class ScalarType1, class ScalarType2>
     ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator-(
             const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(s.getDerived() - c.getReal(), c.getImagine());
+        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(s.getDerived() - c.getReal(), c.getImag());
     }
 
     template<class ScalarType1, class ScalarType2>

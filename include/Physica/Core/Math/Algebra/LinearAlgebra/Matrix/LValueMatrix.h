@@ -51,7 +51,7 @@ namespace Physica::Core {
         template<class OtherMatrix>
         Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         template<ScalarOption option, bool errorTrack>
-        Derived& operator=(const Scalar<option, errorTrack>& s);
+        Derived& operator=(const Scalar<option, errorTrack>& s); //No need for complex assignment, assign a complex number to real matrix is undefined
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
         /* Operations */
@@ -63,8 +63,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
         [[nodiscard]] inline MatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
         [[nodiscard]] inline const MatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
-        [[nodiscard]] inline MatrixBlock<Derived> topRows(size_t from);
-        [[nodiscard]] inline const MatrixBlock<Derived> topRows(size_t from) const;
+        [[nodiscard]] inline MatrixBlock<Derived> topRows(size_t to);
+        [[nodiscard]] inline const MatrixBlock<Derived> topRows(size_t to) const;
         [[nodiscard]] inline MatrixBlock<Derived> bottomRows(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> bottomRows(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> leftCols(size_t from);
@@ -105,6 +105,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] ScalarType sum() const;
         [[nodiscard]] inline size_t getMaxMajor() const noexcept;
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);

@@ -20,6 +20,9 @@
 
 namespace Physica::Core {
     template<class ScalarType>
+    ScalarType abs(const ComplexScalar<ScalarType>& c);
+
+    template<class ScalarType>
     ComplexScalar<ScalarType> square(const ComplexScalar<ScalarType>& c);
 
     template<class ScalarType>

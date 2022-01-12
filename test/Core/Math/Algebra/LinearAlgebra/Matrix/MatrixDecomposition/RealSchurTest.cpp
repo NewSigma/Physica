@@ -45,6 +45,18 @@ bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
 }
 
 template<class MatrixType>
+bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
+    if (m.getRow() != m.getColumn())
+        return false;
+    for (size_t i = 0; i < m.getRow() - 1; ++i) {
+        auto col = m.col(i);
+        if (!col.tail(i + 1).isZero())
+            return false;
+    }
+    return true;
+}
+
+template<class MatrixType>
 bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     RealSchur schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
@@ -55,9 +67,23 @@ bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     return true;
 }
 
+template<class MatrixType>
+bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
+    RealSchur schur(mat, true);
+    if (!isUpperTriangle(schur.getMatrixT()))
+        return false;
+    const auto conj = schur.getMatrixU().conjugate();
+    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * conj.transpose()).compute();
+    if (!matrixNear(A, mat, precision))
+        return false;
+    return true;
+}
+
 int main() {
+    using RealType = Scalar<Double, false>;
+    using ComplexType = ComplexScalar<RealType>;
     {
-        using MatrixType = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!realSchurTest(mat1, 1E-14))
             return 1;
@@ -65,6 +91,14 @@ int main() {
                               {-1.25006, -0.297493, 1.40349},
                               {0.517063, -0.956614, -0.920775}};
         if (!realSchurTest(mat2, 1E-14))
+            return 1;
+    }
+    {
+        using MatrixType = DenseMatrix<ComplexType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
+                              {{0, -50}, {0, 180}, {-9, 17}},
+                              {{12, -154}, {546, 8}, {-25, 9}}};
+        if (!schurTest(mat1, 1E-14))
             return 1;
     }
     return 0;

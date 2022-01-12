@@ -20,6 +20,11 @@
 
 namespace Physica::Core {
     template<class ScalarType>
+    ScalarType abs(const ComplexScalar<ScalarType>& c) {
+        return c.norm();
+    }
+
+    template<class ScalarType>
     ComplexScalar<ScalarType> square(const ComplexScalar<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
@@ -36,8 +41,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ComplexScalar<ScalarType> sqrt(const ComplexScalar<ScalarType>& c) {
-        const auto n = norm(c);
-        const auto a = arg(c) >> 1;
+        using RealType = typename ScalarType::RealType;
+        const auto n = c.norm();
+        const auto a = c.arg() * RealType(0.5);
         return ComplexScalar<ScalarType>(n * cos(a), n * sin(a));
     }
 
