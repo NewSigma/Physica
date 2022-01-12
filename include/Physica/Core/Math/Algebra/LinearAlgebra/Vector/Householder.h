@@ -56,7 +56,7 @@ namespace Physica::Core {
     }
 
     template<class AnyVector>
-    typename AnyVector::ScalarType householderInPlace(LValueVector<AnyVector>& v) {
+    typename AnyVector::ScalarType::RealType householderInPlace(LValueVector<AnyVector>& v) {
         return householder(v, v);
     }
 
@@ -67,8 +67,7 @@ namespace Physica::Core {
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
         const Vector<ScalarType> temp1 = copy * temp;
-        const auto trans = copy.transpose();
-        mat -= temp1 * (trans.conjugate() * mat).compute();
+        mat -= temp1 * (copy.transpose().conjugate() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
@@ -77,7 +76,6 @@ namespace Physica::Core {
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
         std::swap(temp, copy[0]);
-        const Vector<ScalarType> temp1 = copy.conjugate() * temp;
-        mat -= Vector<ScalarType>(mat * copy) * temp1.transpose();
+        mat -= Vector<ScalarType>(mat * copy) * (copy.conjugate().transpose() * temp);
     }
 }

@@ -45,7 +45,7 @@ bool hessTest(const MatrixType& source, double tolerance) {
     if (!isHessenburgMatrix(H))
         return false;
     MatrixType Q = hess.getMatrixQ();
-    MatrixType A = (Q * H).compute() * Q.transpose();
+    MatrixType A = (Q * H).compute() * Q.transpose().conjugate();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;
@@ -81,7 +81,7 @@ int main() {
     /* Complex case */ {
         using MatrixType = DenseMatrix<ComplexScalar<RealType>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
-        if (!hessTest(mat, 1E-12))
+        if (!hessTest(mat, 1E-13))
             return 1;
     }
     return 0;

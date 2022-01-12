@@ -44,6 +44,7 @@ namespace Physica::Core {
         static_assert(MatrixType::RowAtCompile > 2 || MatrixType::RowAtCompile == Dynamic,
                       "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         using ScalarType = typename MatrixType::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using MatrixH = HessenburgMatrixH<MatrixType>;
         using WorkingMatrix = typename MatrixType::ColMatrix;
 
@@ -89,11 +90,11 @@ namespace Physica::Core {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
             const auto unit = temp[0].unit();
-            const ScalarType norm = householderInPlace(temp);
+            const RealType norm = householderInPlace(temp);
             normVector[i] = -norm * unit;
 
             auto target_right = working.rightCols(i + 1);
-            applyHouseholder(target_right, temp.conjugate());
+            applyHouseholder(target_right, temp);
             auto target_bottomRight = working.bottomRightCorner(i + 1);
             applyHouseholder(temp, target_bottomRight);
         }
