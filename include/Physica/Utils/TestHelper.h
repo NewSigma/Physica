@@ -42,7 +42,7 @@ namespace Physica::Utils {
                     const Physica::Core::ComplexScalar<ScalarType>& s2,
                     double precision) {
         assert(precision > 0);
-        return scalarNear(s1.getReal(), s2.getReal(), precision) && scalarNear(s1.getImag(), s2.getImag(), precision);
+        return scalarNear((s1 - s2).norm(), typename ScalarType::RealType(0), precision);
     }
 
     template<class VectorType1, class VectorType2>
