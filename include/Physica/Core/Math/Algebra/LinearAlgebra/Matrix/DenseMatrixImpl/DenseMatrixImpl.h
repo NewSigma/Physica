@@ -108,7 +108,7 @@ namespace Physica::Core {
                 for (size_t r = 0; r < row; ++ r) {
                     std::stringstream stream{};
                     stream.copyfmt(os);
-                    stream << mat(r, c);
+                    stream << mat(r, c).getReal();
                     width = std::max(width, stream.str().length());
                 }
             }

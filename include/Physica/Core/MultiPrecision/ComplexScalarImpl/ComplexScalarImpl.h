@@ -108,12 +108,8 @@ namespace Physica::Core {
     ScalarType ComplexScalar<ScalarType>::arg() const {
         using RealType = typename ScalarType::RealType;
         auto result = arctan(imag / real);
-        //arctan is defined on [-Pi / 2, Pi / 2], judging the quadrant is necessary.
-        if(real.isPositive()) {
-            if(imag.isNegative())
-                result += RealType(M_PI_2);
-        }
-        else
+        //Result of arctan is defined on [-Pi / 2, Pi / 2], Result of arg is defined on [-Pi, Pi].
+        if(real.isNegative() && !imag.isZero())
             result += RealType(M_PI);
         return result;
     }
