@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Matrix/MatrixDecomposition/RealSchur.h"
+#include "Matrix/MatrixDecomposition/Schur.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 
 namespace Physica::Core {
@@ -78,7 +78,7 @@ namespace Physica::Core {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        auto schur = RealSchur(source, computeEigenvectors);
+        auto schur = Schur(source, computeEigenvectors);
 
         auto& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();

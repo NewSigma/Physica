@@ -7,4 +7,4 @@ LinearAlgebra
    DenseMatrix
    HouseHolder
    Matrix
-   RealSchur
+   Schur

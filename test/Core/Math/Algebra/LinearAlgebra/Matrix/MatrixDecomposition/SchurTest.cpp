@@ -19,7 +19,7 @@
 #include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchur.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 
 using namespace Physica::Core;
 
@@ -58,7 +58,7 @@ bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
 
 template<class MatrixType>
 bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    RealSchur schur(mat, true);
+    Schur schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
@@ -69,7 +69,7 @@ bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
 
 template<class MatrixType>
 bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    RealSchur schur(mat, true);
+    Schur schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose().conjugate()).compute();

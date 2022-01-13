@@ -13,7 +13,7 @@ physica_add_test(ElementaryEquation Core/Math/Algebra/EquationSolver/ElementaryE
 ### Linear Algebra
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
-physica_add_test(RealSchur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/RealSchurTest.cpp)
+physica_add_test(Schur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SchurTest.cpp)
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)
 physica_add_test(MatrixProduct Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct.cpp)

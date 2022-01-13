@@ -29,7 +29,7 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class MatrixType>
-    class RealSchur {
+    class Schur {
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
@@ -41,7 +41,7 @@ namespace Physica::Core {
         const MatrixType& source;
         bool computeMatrixU;
     public:
-        RealSchur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
+        Schur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
         [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
@@ -58,7 +58,7 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    RealSchur<MatrixType>::RealSchur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_)
+    Schur<MatrixType>::Schur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_)
             : matrixT(source_.getRow(), source_.getColumn())
             , matrixU()
             , source(source_.getDerived())
@@ -127,7 +127,7 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     template<class AnyMatrix>
-    size_t RealSchur<MatrixType>::activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper) {
+    size_t Schur<MatrixType>::activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper) {
         assert(upper < mat.getRow());
         size_t lower = upper;
         size_t lower_1 = upper - 1;
@@ -145,7 +145,7 @@ namespace Physica::Core {
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
      */
     template<class MatrixType>
-    void RealSchur<MatrixType>::splitOffTwoRows(size_t index) {
+    void Schur<MatrixType>::splitOffTwoRows(size_t index) {
         const size_t index_1 = index + 1;
         const ScalarType p = ScalarType(0.5) * (matrixT(index, index) - matrixT(index_1, index_1));
         const ScalarType q = square(p) + matrixT(index, index_1) * matrixT(index_1, index);
@@ -167,7 +167,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void RealSchur<MatrixType>::francisQR(size_t lower, size_t sub_order) {
+    void Schur<MatrixType>::francisQR(size_t lower, size_t sub_order) {
         auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
         const ScalarType s = subBlock(sub_order - 1, sub_order - 1) + subBlock(sub_order - 2, sub_order - 2);
         const ScalarType t = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2)
@@ -219,7 +219,7 @@ namespace Physica::Core {
      * A special designed Hessenburg decomposition for francis QR algorithm
      */
     template<class MatrixType>
-    void RealSchur<MatrixType>::specialHessenburg(size_t lower, size_t sub_order) {
+    void Schur<MatrixType>::specialHessenburg(size_t lower, size_t sub_order) {
         assert(sub_order > 2);
         Vector<ScalarType, 3> householderVector3D{};
         for (size_t i = 0; i < sub_order - 3; ++i) {
@@ -266,7 +266,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    typename RealSchur<MatrixType>::ComplexType RealSchur<MatrixType>::complexShift(size_t upper, size_t iter) {
+    typename Schur<MatrixType>::ComplexType Schur<MatrixType>::complexShift(size_t upper, size_t iter) {
         using Matrix2D = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
@@ -298,7 +298,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void RealSchur<MatrixType>::complexQR(size_t lower, size_t upper, ComplexType shift) {
+    void Schur<MatrixType>::complexQR(size_t lower, size_t upper, ComplexType shift) {
         using Vector2D = Vector<ScalarType, 2, 2>;
         {
             auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);
