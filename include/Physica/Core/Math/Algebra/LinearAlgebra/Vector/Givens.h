@@ -49,8 +49,8 @@ namespace Physica::Core {
             static ResultType run(const LValueVector<VectorType>& vector, size_t i, size_t j) {
                 ScalarType x_i = vector[i];
                 ScalarType x_j = vector[j];
-                const auto alpha = RealGivens::run(RealResultType{x_i.getReal(), x_j.getReal()}, 0, 1);
-                const auto beta = RealGivens::run(RealResultType{x_i.getImag(), x_j.getImag()}, 0, 1);
+                const auto alpha = RealGivens::run(RealResultType{x_i.getReal(), x_i.getImag()}, 0, 1);
+                const auto beta = RealGivens::run(RealResultType{x_j.getReal(), x_j.getImag()}, 0, 1);
                 const auto theta = RealGivens::run(RealResultType{x_i.norm(), x_j.norm()}, 0, 1);
                 const ScalarType factor = ScalarType(alpha[0] * beta[0] + alpha[1] * beta[1], alpha[1] * beta[0] - alpha[0] * beta[1]);
                 return ResultType{theta[0], theta[1] * factor};

@@ -42,5 +42,13 @@ int main() {
         if (v_mat(1, 0).norm() > RealType(1E-15))
             return 1;
     }
+    {
+        Vector<ComplexType, 2> v{{0.8699464447, 0.1883214037}, {-0.520340944, 0.1297693695}};
+        auto givens_vector = givens(v, 0, 1);
+        DenseMatrix<ComplexType> v_mat = v;
+        applyGivens(givens_vector, v_mat, 0, 1);
+        if (v_mat(1, 0).norm() > RealType(1E-15))
+            return 1;
+    }
     return 0;
 }
