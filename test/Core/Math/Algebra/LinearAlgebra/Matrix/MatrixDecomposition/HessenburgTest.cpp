@@ -75,13 +75,13 @@ int main() {
                             {0, 3.06186, 0, 30.4651, 0, 132.5, 0, 92.1458},
                             {0.318105, 0, 9.36654, 0, 55.789, 0, 195.5, 0},
                             {0, 2.12934, 0, 21.1867, 0, 92.1458, 0, 275.5}};
-        if (!hessTest(mat, 1E-11))
+        if (!hessTest(mat, 1E-13))
             return 1;
     }
     /* Complex case */ {
         using MatrixType = DenseMatrix<ComplexScalar<RealType>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
-        if (!hessTest(mat, 1E-13))
+        if (!hessTest(mat, 1E-12))
             return 1;
     }
     return 0;
