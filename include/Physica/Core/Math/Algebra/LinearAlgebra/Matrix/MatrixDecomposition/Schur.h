@@ -30,6 +30,7 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     class Schur {
+    public:
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
