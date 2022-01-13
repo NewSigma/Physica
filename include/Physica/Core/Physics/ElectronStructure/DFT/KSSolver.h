@@ -34,18 +34,18 @@ namespace Physica::Core {
     class KSSolver {
         using ComplexType = ComplexScalar<ScalarType>;
         using KPoint = typename KPointGrid::KPoint;
-        using Hamilton = DenseSymmMatrix<ScalarType>;
+        using Hamilton = DenseSymmMatrix<ComplexType>;
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
-        using UnsignedGrid = Grid3D<ScalarType, false>;
-        using SignedGrid = Grid3D<ComplexType, true>;
+        using UncenteredGrid = Grid3D<ScalarType, false>;
+        using CenteredGrid = Grid3D<ComplexType, true>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
         ScalarType cutEnergy;
-        UnsignedGrid densityGrid;
-        UnsignedGrid totalPotGrid;
-        SignedGrid externalPotGrid;
+        UncenteredGrid densityGrid;
+        UncenteredGrid totalPotGrid;
+        CenteredGrid externalPotGrid;
         FFT<ScalarType, 3> fftSolver;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
@@ -66,9 +66,8 @@ namespace Physica::Core {
         void fillPotential(Hamilton& hamilton, const KSOrbit& orbit);
         static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
         void updateDensity(const KSOrbits& orbits);
-        void updateHartree();
         void updateXCPot();
-        [[nodiscard]] Utils::Array<SignedGrid> getStructureFactor();
+        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor();
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
     };
 
@@ -82,7 +81,7 @@ namespace Physica::Core {
             , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
                                                          ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
                                                          ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)}) {
-        externalPotGrid = SignedGrid::gridFromCutEnergy(cutEnergy, repCell.getLattice());
+        externalPotGrid = CenteredGrid::gridFromCutEnergy(cutEnergy, repCell.getLattice());
         initExternalPot();
     }
 
@@ -95,7 +94,7 @@ namespace Physica::Core {
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         auto hamilton = Hamilton(plainWaveCount);
         auto eigenSolver = EigenSolver<Hamilton>(plainWaveCount);
-        UnsignedGrid lastDensity = densityGrid;
+        UncenteredGrid lastDensity = densityGrid;
 
         size_t iteration = 0;
         while (true) {
@@ -138,7 +137,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::initExternalPot() {
-        const Utils::Array<SignedGrid> all_factors = getStructureFactor();
+        const Utils::Array<CenteredGrid> all_factors = getStructureFactor();
         const ScalarType factor1 = ScalarType(-4 * M_PI) / cell.getVolume();
         const std::unordered_set<uint16_t> species = cell.getSpecies();
 
@@ -147,7 +146,7 @@ namespace Physica::Core {
 
         size_t j = 0;
         for (uint16_t element : species) {
-            const SignedGrid& factors = all_factors[j];
+            const CenteredGrid& factors = all_factors[j];
             for (size_t i = 0; i < gridSize; ++i)
                 externalPotGrid[i] += factor1 * getCharge(element) * factors[i] / factors.indexToPos(i).squaredNorm();
             ++j;
@@ -164,16 +163,27 @@ namespace Physica::Core {
     template<class ScalarType>
     void KSSolver<ScalarType>::fillPotential(Hamilton& hamilton, const KSOrbit& orbit) {
         totalPotGrid.asVector() = ScalarType::Zero();
-        updateHartree();
         updateXCPot();
         fftSolver.transform(totalPotGrid.asVector());
 
+        const ScalarType factor1 = reciprocal(ScalarType(2 * M_PI));
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i) {
             const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
             for (size_t j = i; j < order; ++j) {
                 const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
-                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) / ScalarType(2 * M_PI))).norm(); //Not norm
+                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor1));
+            }
+        }
+
+        fftSolver.transform(densityGrid.asVector());
+        const ScalarType factor = ScalarType(4 * M_PI) / cell.getVolume();
+        for (size_t i = 0; i < order; ++i) {
+            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
+            for (size_t j = i; j < order; ++j) {
+                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
+                const Vector<ScalarType, 3> k = k1 - k2;
+                hamilton(i, j) += fftSolver.getFreqIntense(k * factor1) * factor / k.squaredNorm();
             }
         }
     }
@@ -201,13 +211,6 @@ namespace Physica::Core {
             }
         }
     }
-
-    template<class ScalarType>
-    void KSSolver<ScalarType>::updateHartree() {
-        const size_t gridSize = totalPotGrid.getSize();
-        for (size_t i = 0; i < gridSize; ++i)
-            totalPotGrid[i] += Ewald<ScalarType>::potHartree(totalPotGrid.indexToPos(i), densityGrid, repCell);
-    }
     /**
      * Reference:
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479
@@ -222,17 +225,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename Utils::Array<typename KSSolver<ScalarType>::SignedGrid> KSSolver<ScalarType>::getStructureFactor() {
+    typename Utils::Array<typename KSSolver<ScalarType>::CenteredGrid> KSSolver<ScalarType>::getStructureFactor() {
         const std::unordered_set<uint16_t> species = cell.getSpecies();
         const auto& lattice = repCell.getLattice();
-        auto all_factors = Utils::Array<SignedGrid>(species.size(), SignedGrid::gridFromCutEnergy(cutEnergy, lattice));
+        auto all_factors = Utils::Array<CenteredGrid>(species.size(), CenteredGrid::gridFromCutEnergy(cutEnergy, lattice));
         const size_t factors_size = all_factors[0].getSize();
         const size_t atomCount = cell.getAtomCount();
 
         Vector<ScalarType, 3> g;
         size_t j = 0;
         for (int16_t element : species) {
-            SignedGrid& factors = all_factors[j];
+            CenteredGrid& factors = all_factors[j];
             for (size_t i = 0; i < factors_size; ++i) {
                 g = factors.indexToPos(i);
                 auto temp = ComplexType::Zero();
