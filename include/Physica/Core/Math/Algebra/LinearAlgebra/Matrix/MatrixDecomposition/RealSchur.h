@@ -268,7 +268,7 @@ namespace Physica::Core {
     template<class MatrixType>
     typename RealSchur<MatrixType>::ComplexType RealSchur<MatrixType>::complexShift(size_t upper, size_t iter) {
         using Matrix2D = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 2, 2>;
-        if (iter == 10 || iter == 20) {
+        if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
             return abs(matrixT(upper, upper - 1).getReal()) + abs(matrixT(upper - 1, upper - 2).getReal());
         }
@@ -287,8 +287,7 @@ namespace Physica::Core {
         ComplexType eival2 = (trace - disc) * RealType(0.5);
         const RealType eival1_norm = eival1.norm();
         const RealType eival2_norm = eival2.norm();
-        //A division by zero can only occur if eival1==eival2==0.
-        //In this case, det==0, and all we have to do is checking that eival2_norm!=0
+
         if(eival1_norm > eival2_norm)
             eival2 = det / eival1;
         else if(!eival2_norm.isZero())
@@ -302,11 +301,11 @@ namespace Physica::Core {
     void RealSchur<MatrixType>::complexQR(size_t lower, size_t upper, ComplexType shift) {
         using Vector2D = Vector<ScalarType, 2, 2>;
         {
-            auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1,lower)}, 0, 1);
+            auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);
             auto rightCols = matrixT.rightCols(lower);
             applyGivens(givensVec, rightCols, lower, lower + 1);
-            givensVec[1] = -givensVec[1].conjugate();
-            auto topRows = matrixT.topRows(std::min(lower + 2, upper));
+            givensVec[1] = -givensVec[1];
+            auto topRows = matrixT.topRows(std::min(lower + 2, upper) + 1);
             applyGivens(topRows, givensVec, lower, lower + 1);
             if (computeMatrixU)
                 applyGivens(matrixU, givensVec, lower, lower + 1);
@@ -314,11 +313,11 @@ namespace Physica::Core {
 
         for(size_t i = lower + 1; i < upper; ++i) {
             auto givensVec = givens(Vector2D{matrixT(i, i - 1), matrixT(i + 1, i - 1)}, 0, 1);
-            matrixT(i + 1, i - 1) = ScalarType::Zero();
-            auto rightCols = matrixT.rightCols(i);
+            auto rightCols = matrixT.rightCols(i - 1);
             applyGivens(givensVec, rightCols, i, i + 1);
-            givensVec[1] = -givensVec[1].conjugate();
-            auto topRows = matrixT.topRows(std::min(i + 2, upper));
+            matrixT(i + 1, i - 1) = ScalarType::Zero();
+            givensVec[1] = -givensVec[1];
+            auto topRows = matrixT.topRows(std::min(i + 2, upper) + 1);
             applyGivens(topRows, givensVec, i, i + 1);
             if (computeMatrixU)
                 applyGivens(matrixU, givensVec, i, i + 1);

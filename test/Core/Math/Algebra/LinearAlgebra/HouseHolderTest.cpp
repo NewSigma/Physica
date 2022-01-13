@@ -93,6 +93,13 @@ int main() {
         m1(1, 0) = m2(1, 0) = T(0);
         if (!matrixNear(m1, m2, 1E-14))
             return 1;
+        /* Idempotency */ {
+            MatrixType m3 = m;
+            applyHouseholder(v, m3);
+            applyHouseholder(v, m3);
+            if (!matrixNear(m, m3, 1E-14))
+                return 1;
+        }
     }
     {
         const Vector<T> x{0, 0, 0, 0};

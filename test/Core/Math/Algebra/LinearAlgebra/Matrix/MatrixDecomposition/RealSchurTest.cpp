@@ -72,8 +72,7 @@ bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     RealSchur schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
-    const auto conj = schur.getMatrixU().conjugate();
-    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * conj.transpose()).compute();
+    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose().conjugate()).compute();
     if (!matrixNear(A, mat, precision))
         return false;
     return true;
@@ -98,7 +97,7 @@ int main() {
         const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
-        if (!schurTest(mat1, 1E-14))
+        if (!schurTest(mat1, 1E-11))
             return 1;
     }
     return 0;
