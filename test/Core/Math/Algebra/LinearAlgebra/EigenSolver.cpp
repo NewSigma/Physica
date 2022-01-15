@@ -34,7 +34,7 @@ bool vectorNearZero(const LValueVector<VectorType>& v, double precision) {
 
 template<class MatrixType>
 bool eigenTest(const MatrixType& mat, double precision) {
-    EigenSolver solver = EigenSolver(mat, true);
+    EigenSolver<MatrixType> solver = EigenSolver<MatrixType>(mat, true);
     using ComplexVector = typename EigenSolver<MatrixType>::EigenvalueVector;
     using ComplexMatrix = typename EigenSolver<MatrixType>::EigenvectorMatrix;
     const size_t order = mat.getRow();

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronStructure/DFT/KSSolver.h"
 
@@ -24,7 +25,7 @@ using ScalarType = Scalar<Double, false>;
 
 int main() {
     CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14});
-    KSSolver<ScalarType> solver = KSSolver<ScalarType>(Si, 500, 100, 100, 100);
+    KSSolver<ScalarType> solver = KSSolver<ScalarType>(Si, 18, 100, 100, 100);
     solver.solve(1E-3, 100);
     return 0;
 }

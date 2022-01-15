@@ -78,10 +78,11 @@ namespace Physica::Core {
     template<class MatrixType>
     Grid3D<ScalarType, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_)
             : lattice(lattice_)
-            , values(dimX_ * dimY_ * dimZ_)
             , dimX(dimX_)
             , dimY(dimY_)
-            , dimZ(dimZ_) {}
+            , dimZ(dimZ_) {
+        values.resize(getSize());
+    }
 
     template<class ScalarType, bool isSigned>
     Grid3D<ScalarType, isSigned>& Grid3D<ScalarType, isSigned>::operator=(Grid3D grid) {

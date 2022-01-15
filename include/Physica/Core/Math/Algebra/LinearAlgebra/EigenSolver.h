@@ -50,9 +50,11 @@ namespace Physica::Core {
         bool computeEigenvectors;
     public:
         EigenSolver(size_t size);
-        EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        template<class OtherMatrix>
+        EigenSolver(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         /* Operations */
-        void compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        template<class OtherMatrix>
+        void compute(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         void sort();
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
@@ -73,7 +75,8 @@ namespace Physica::Core {
             , rawEigenvectors(size, size) {}
 
     template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_)
+    template<class OtherMatrix>
+    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
             : eigenvalues(source.getRow())
             , rawEigenvectors(source.getRow(), source.getRow())
             , computeEigenvectors(computeEigenvectors_) {
@@ -81,13 +84,14 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void EigenSolver<MatrixType>::compute(const LValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
+    template<class OtherMatrix>
+    void EigenSolver<MatrixType>::compute(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_) {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        auto schur = Schur(source, computeEigenvectors);
+        auto schur = Schur<MatrixType>(source, computeEigenvectors);
 
-        auto& matrixT = schur.getMatrixT();
+        WorkingMatrix& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
         if constexpr (isComplex) {
             for (size_t i = 0; i < order; ++i)

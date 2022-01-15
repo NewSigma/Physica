@@ -34,7 +34,7 @@ namespace Physica::Core::Internal {
         HalfDenseMatrixStorage() = default;
         HalfDenseMatrixStorage(size_t order_) : Base(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : Base(order_ * (order_ + 1) / 2, t), order(order_) {}
-        HalfDenseMatrixStorage(size_t row, size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
+        HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
         HalfDenseMatrixStorage(size_t row, size_t column, const T& t) : HalfDenseMatrixStorage(row, t) { assert(row == column); }
         HalfDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */

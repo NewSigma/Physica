@@ -42,7 +42,8 @@ namespace Physica::Core {
         const MatrixType& source;
         bool computeMatrixU;
     public:
-        Schur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
+        template<class OtherMatrix>
+        Schur(const LValueMatrix<OtherMatrix>& source_, bool computeMatrixU_ = false);
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
         [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
@@ -59,7 +60,8 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    Schur<MatrixType>::Schur(const LValueMatrix<MatrixType>& source_, bool computeMatrixU_)
+    template<class OtherMatrix>
+    Schur<MatrixType>::Schur(const LValueMatrix<OtherMatrix>& source_, bool computeMatrixU_)
             : matrixT(source_.getRow(), source_.getColumn())
             , matrixU()
             , source(source_.getDerived())

@@ -35,6 +35,7 @@ namespace Physica::Core {
         using ComplexType = ComplexScalar<ScalarType>;
         using KPoint = typename KPointGrid::KPoint;
         using Hamilton = DenseSymmMatrix<ComplexType>;
+        using MatrixType = DenseMatrix<ComplexType>;
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
         using UncenteredGrid = Grid3D<ScalarType, false>;
@@ -64,7 +65,7 @@ namespace Physica::Core {
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
         void fillPotential(Hamilton& hamilton, const KSOrbit& orbit);
-        static void updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits);
+        static void updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits);
         void updateDensity(const KSOrbits& orbits);
         void updateXCPot();
         [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor();
@@ -93,7 +94,7 @@ namespace Physica::Core {
         const size_t plainWaveCount = orbits[0].getPlainWaveCount();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         auto hamilton = Hamilton(plainWaveCount);
-        auto eigenSolver = EigenSolver<Hamilton>(plainWaveCount);
+        auto eigenSolver = EigenSolver<MatrixType>(plainWaveCount);
         UncenteredGrid lastDensity = densityGrid;
 
         size_t iteration = 0;
@@ -183,13 +184,13 @@ namespace Physica::Core {
             for (size_t j = i; j < order; ++j) {
                 const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
                 const Vector<ScalarType, 3> k = k1 - k2;
-                hamilton(i, j) += fftSolver.getFreqIntense(k * factor1) * factor / k.squaredNorm();
+                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>(k * factor1)) * factor / k.squaredNorm();
             }
         }
     }
 
     template<class ScalarType>
-    void KSSolver<ScalarType>::updateOrbits(const EigenSolver<Hamilton>& eigenSolver, KSOrbits& orbits) {
+    void KSSolver<ScalarType>::updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits) {
         const auto eigenVectors = eigenSolver.getEigenvectors();
         const size_t orbitCount = orbits.getLength();
         for (size_t i = 0; i < orbitCount; ++i)
@@ -239,9 +240,9 @@ namespace Physica::Core {
             for (size_t i = 0; i < factors_size; ++i) {
                 g = factors.indexToPos(i);
                 auto temp = ComplexType::Zero();
-                for (size_t ion = 0; ion < atomCount; ++i) {
+                for (size_t ion = 0; ion < atomCount; ++ion) {
                     if (cell.getAtomicNumber(ion) == element) {
-                        auto r = cell.getPos().row(i);
+                        auto r = cell.getPos().row(ion);
                         const ScalarType phase = g * r;
                         temp += ComplexType(cos(phase), sin(phase));
                     }

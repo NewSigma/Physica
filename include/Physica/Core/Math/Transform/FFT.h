@@ -141,7 +141,6 @@ namespace Physica::Core {
                 round_helper = f.isPositive() ? 0.5 : -0.5;
             }
             else {
-                assert(!f.isNegative());
                 if (i == freq.getLength() - 1)
                     f.toAbs();
                 round_helper = 0.5;
