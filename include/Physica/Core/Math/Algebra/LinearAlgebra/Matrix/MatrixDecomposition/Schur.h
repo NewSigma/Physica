@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -39,11 +39,10 @@ namespace Physica::Core {
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
-        const MatrixType& source;
         bool computeMatrixU;
     public:
         template<class OtherMatrix>
-        Schur(const LValueMatrix<OtherMatrix>& source_, bool computeMatrixU_ = false);
+        Schur(const RValueMatrix<OtherMatrix>& source, bool computeMatrixU_ = false);
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
         [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
@@ -61,10 +60,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     template<class OtherMatrix>
-    Schur<MatrixType>::Schur(const LValueMatrix<OtherMatrix>& source_, bool computeMatrixU_)
-            : matrixT(source_.getRow(), source_.getColumn())
+    Schur<MatrixType>::Schur(const RValueMatrix<OtherMatrix>& source, bool computeMatrixU_)
+            : matrixT(source.getRow(), source.getColumn())
             , matrixU()
-            , source(source_.getDerived())
             , computeMatrixU(computeMatrixU_) {
         assert(source.getRow() == source.getColumn());
         if (computeMatrixU)

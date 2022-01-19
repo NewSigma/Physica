@@ -89,14 +89,22 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 2; ++i) {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
-            const auto unit = temp[0].unit();
+
+            ScalarType unit;
+            if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
+                unit = ScalarType::One();
+            else
+                unit = temp[0].unit();
+
             const RealType norm = householderInPlace(temp);
             normVector[i] = -norm * unit;
 
-            auto target_right = working.rightCols(i + 1);
-            applyHouseholder(target_right, temp);
-            auto target_bottomRight = working.bottomRightCorner(i + 1);
-            applyHouseholder(temp, target_bottomRight);
+            if (!norm.isZero()) {
+                auto target_right = working.rightCols(i + 1);
+                applyHouseholder(target_right, temp);
+                auto target_bottomRight = working.bottomRightCorner(i + 1);
+                applyHouseholder(temp, target_bottomRight);
+            }
         }
     }
 

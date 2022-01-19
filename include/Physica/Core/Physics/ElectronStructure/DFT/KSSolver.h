@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
@@ -34,7 +34,7 @@ namespace Physica::Core {
     class KSSolver {
         using ComplexType = ComplexScalar<ScalarType>;
         using KPoint = typename KPointGrid::KPoint;
-        using Hamilton = DenseSymmMatrix<ComplexType>;
+        using Hamilton = DenseHermiteMatrix<ComplexType>;
         using MatrixType = DenseMatrix<ComplexType>;
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
@@ -45,9 +45,10 @@ namespace Physica::Core {
         ReciprocalCell repCell;
         ScalarType cutEnergy;
         UncenteredGrid densityGrid;
-        UncenteredGrid totalPotGrid;
+        UncenteredGrid xcPotGrid;
         CenteredGrid externalPotGrid;
         FFT<ScalarType, 3> fftSolver;
+        size_t iteration;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
@@ -68,7 +69,7 @@ namespace Physica::Core {
         static void updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits);
         void updateDensity(const KSOrbits& orbits);
         void updateXCPot();
-        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor();
+        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
     };
 
@@ -78,11 +79,11 @@ namespace Physica::Core {
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
             , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
-            , totalPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
+            , xcPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
             , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
                                                          ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
-                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)}) {
-        externalPotGrid = CenteredGrid::gridFromCutEnergy(cutEnergy, repCell.getLattice());
+                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)})
+            , iteration(0) {
         initExternalPot();
     }
 
@@ -97,7 +98,7 @@ namespace Physica::Core {
         auto eigenSolver = EigenSolver<MatrixType>(plainWaveCount);
         UncenteredGrid lastDensity = densityGrid;
 
-        size_t iteration = 0;
+        iteration = 0;
         while (true) {
             fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
             fillPotential(hamilton, orbits[0]);
@@ -108,7 +109,9 @@ namespace Physica::Core {
             updateOrbits(eigenSolver, orbits);
             updateDensity(orbits);
 
-            const bool isDensityConverged = abs(divide((densityGrid.asVector() - lastDensity.asVector()), densityGrid.asVector())).max() < criteria;
+            const ScalarType densityChange = abs(divide((densityGrid.asVector() - lastDensity.asVector()), densityGrid.asVector())).max();
+            lastDensity = densityGrid;
+            const bool isDensityConverged = densityChange < criteria;
             if (isDensityConverged)
                 break;
 
@@ -138,7 +141,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::initExternalPot() {
-        const Utils::Array<CenteredGrid> all_factors = getStructureFactor();
+        const ScalarType factorCutoff = cutEnergy * 8;
+        externalPotGrid = CenteredGrid::gridFromCutEnergy(factorCutoff, repCell.getLattice());
+        const Utils::Array<CenteredGrid> all_factors = getStructureFactor(factorCutoff);
         const ScalarType factor1 = ScalarType(-4 * M_PI) / cell.getVolume();
         const std::unordered_set<uint16_t> species = cell.getSpecies();
 
@@ -152,6 +157,7 @@ namespace Physica::Core {
                 externalPotGrid[i] += factor1 * getCharge(element) * factors[i] / factors.indexToPos(i).squaredNorm();
             ++j;
         }
+        externalPotGrid(0, 0, 0) = ComplexType::Zero();
     }
 
     template<class ScalarType>
@@ -163,17 +169,22 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::fillPotential(Hamilton& hamilton, const KSOrbit& orbit) {
-        totalPotGrid.asVector() = ScalarType::Zero();
+        using Dim = typename CenteredGrid::Dim;
+        xcPotGrid.asVector() = ScalarType::Zero();
         updateXCPot();
-        fftSolver.transform(totalPotGrid.asVector());
+        fftSolver.transform(xcPotGrid.asVector());
 
         const ScalarType factor1 = reciprocal(ScalarType(2 * M_PI));
         const size_t order = hamilton.getRow();
         for (size_t i = 0; i < order; ++i) {
-            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
+            const Dim dim1 = orbit.indexToDim(i);
+            auto[x1, y1, z1] = dim1;
+            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(dim1);
             for (size_t j = i; j < order; ++j) {
-                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
-                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor1));
+                const Dim dim2 = orbit.indexToDim(j);
+                auto[x2, y2, z2] = dim2;
+                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(dim2);
+                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor1)) + externalPotGrid(x1 - x2, y1 - y2, z1 - z2);
             }
         }
 
@@ -181,7 +192,7 @@ namespace Physica::Core {
         const ScalarType factor = ScalarType(4 * M_PI) / cell.getVolume();
         for (size_t i = 0; i < order; ++i) {
             const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
-            for (size_t j = i; j < order; ++j) {
+            for (size_t j = i + 1; j < order; ++j) {
                 const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
                 const Vector<ScalarType, 3> k = k1 - k2;
                 hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>(k * factor1)) * factor / k.squaredNorm();
@@ -202,7 +213,7 @@ namespace Physica::Core {
         auto[dimX, dimY, dimZ] = densityGrid.getDim();
         for (size_t i = 0; i < dimX; ++i) {
             for (size_t j = 0; j < dimY; ++j) {
-                for (size_t k = 0; k < dimZ; ++j) {
+                for (size_t k = 0; k < dimZ; ++k) {
                     const auto pos = densityGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
                     for (size_t index = 0; index < orbits.getLength(); ++index)
@@ -221,27 +232,27 @@ namespace Physica::Core {
         constexpr double exchange_factor = -0.98474502184269654;
         constexpr double correlation_factor1 = -0.045 / 2;
         constexpr double correlation_factor2 = 33.851831034345862;
-        totalPotGrid.asVector() += pow(densityGrid.asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
-        totalPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(densityGrid.asVector(), ScalarType(1.0 / 3))); //Reference [1]
+        xcPotGrid.asVector() += pow(densityGrid.asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
+        xcPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(densityGrid.asVector(), ScalarType(1.0 / 3))); //Reference [1]
     }
 
     template<class ScalarType>
-    typename Utils::Array<typename KSSolver<ScalarType>::CenteredGrid> KSSolver<ScalarType>::getStructureFactor() {
+    typename Utils::Array<typename KSSolver<ScalarType>::CenteredGrid> KSSolver<ScalarType>::getStructureFactor(ScalarType factorCutoff) {
         const std::unordered_set<uint16_t> species = cell.getSpecies();
         const auto& lattice = repCell.getLattice();
-        auto all_factors = Utils::Array<CenteredGrid>(species.size(), CenteredGrid::gridFromCutEnergy(cutEnergy, lattice));
+        auto all_factors = Utils::Array<CenteredGrid>(species.size(), CenteredGrid::gridFromCutEnergy(factorCutoff, lattice));
         const size_t factors_size = all_factors[0].getSize();
         const size_t atomCount = cell.getAtomCount();
 
         Vector<ScalarType, 3> g;
         size_t j = 0;
-        for (int16_t element : species) {
+        for (uint16_t element : species) {
             CenteredGrid& factors = all_factors[j];
             for (size_t i = 0; i < factors_size; ++i) {
                 g = factors.indexToPos(i);
                 auto temp = ComplexType::Zero();
                 for (size_t ion = 0; ion < atomCount; ++ion) {
-                    if (cell.getAtomicNumber(ion) == element) {
+                    if (cell.getAtomicNumber(ion) == element) { //We can use searching table method
                         auto r = cell.getPos().row(ion);
                         const ScalarType phase = g * r;
                         temp += ComplexType(cos(phase), sin(phase));

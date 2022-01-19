@@ -51,10 +51,10 @@ namespace Physica::Core {
     public:
         EigenSolver(size_t size);
         template<class OtherMatrix>
-        EigenSolver(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         /* Operations */
         template<class OtherMatrix>
-        void compute(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         void sort();
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
@@ -76,7 +76,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     template<class OtherMatrix>
-    EigenSolver<MatrixType>::EigenSolver(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
+    EigenSolver<MatrixType>::EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
             : eigenvalues(source.getRow())
             , rawEigenvectors(source.getRow(), source.getRow())
             , computeEigenvectors(computeEigenvectors_) {
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     template<class OtherMatrix>
-    void EigenSolver<MatrixType>::compute(const LValueMatrix<OtherMatrix>& source, bool computeEigenvectors_) {
+    void EigenSolver<MatrixType>::compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_) {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;

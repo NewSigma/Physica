@@ -41,8 +41,10 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
 
-        const RealType norm = source.getDerived().norm();
-        if (norm > std::numeric_limits<ScalarType>::min()) {
+        const RealType sourceNorm0 = source[0].squaredNorm();
+        const RealType squaredTailNorm = source.tail(1).squaredNorm();
+        if (squaredTailNorm > std::numeric_limits<ScalarType>::min()) {
+            const RealType norm = sqrt(squaredTailNorm + sourceNorm0);
             const ScalarType factor = source[0].unit() * norm;
             const ScalarType factor1 = source[0] + factor;
             const ScalarType factor2 = reciprocal(factor1);
@@ -52,7 +54,7 @@ namespace Physica::Core {
             return norm;
         }
         target = RealType::Zero();
-        return RealType::Zero();
+        return sqrt(sourceNorm0);
     }
 
     template<class AnyVector>
