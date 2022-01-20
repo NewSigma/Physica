@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ using ScalarType = Scalar<Double, false>;
 
 int main() {
     CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14});
-    KSSolver<ScalarType> solver = KSSolver<ScalarType>(Si, 18, 100, 100, 100);
+    KSSolver<ScalarType> solver = KSSolver<ScalarType>(Si, 0.8, 100, 100, 100);
     solver.solve(1E-3, 100);
     return 0;
 }

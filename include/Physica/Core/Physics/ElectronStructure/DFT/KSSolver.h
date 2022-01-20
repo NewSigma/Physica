@@ -202,10 +202,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits) {
-        const auto eigenVectors = eigenSolver.getEigenvectors();
+        const auto& eigenVectors = eigenSolver.getRawEigenvectors();
         const size_t orbitCount = orbits.getLength();
         for (size_t i = 0; i < orbitCount; ++i)
-            orbits[i] = toRealVector(eigenVectors.col(i));
+            orbits[i] = eigenVectors.col(i);
     }
 
     template<class ScalarType>
@@ -217,7 +217,7 @@ namespace Physica::Core {
                     const auto pos = densityGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
                     for (size_t index = 0; index < orbits.getLength(); ++index)
-                        density += orbits[index](pos).squaredNorm(); //We need multiply the occupation number
+                        density += orbits[index](pos).squaredNorm();
                     densityGrid(i, j, k) = density;
                 }
             }

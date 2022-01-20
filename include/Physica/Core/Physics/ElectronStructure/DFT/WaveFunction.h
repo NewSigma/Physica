@@ -25,15 +25,16 @@
 namespace Physica::Core {
     template<class ScalarType>
     class WaveFunction {
+        using ComplexType = ComplexScalar<ScalarType>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using SignedGrid = Grid3D<ScalarType, true>;
+        using SignedGrid = Grid3D<ComplexType, true>;
         using Dim = typename SignedGrid::Dim;
 
         SignedGrid grid;
     public:
         WaveFunction(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
         /* Operators */
-        [[nodiscard]] ComplexScalar<ScalarType> operator()(Vector<ScalarType, 3> r) const;
+        [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> r) const;
         template<class VectorType>
         WaveFunction& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
@@ -52,12 +53,12 @@ namespace Physica::Core {
             : grid(SignedGrid::gridFromCutEnergy(cutEnergy, reciprocalLattice)) {}
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> WaveFunction<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
+    typename WaveFunction<ScalarType>::ComplexType WaveFunction<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
         const size_t length = grid.getSize();
-        ComplexScalar<ScalarType> result = ComplexScalar<ScalarType>::Zero();
+        ComplexType result = ComplexType::Zero();
         for (size_t i = 0; i < length; ++i) {
             const ScalarType phase = getWaveVector(indexToDim(i)) * r;
-            result += grid[i] * ComplexScalar<ScalarType>(cos(phase), sin(phase));
+            result += grid[i] * ComplexType(cos(phase), sin(phase));
         }
         return result;
     }
