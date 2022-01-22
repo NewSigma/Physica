@@ -41,10 +41,15 @@ namespace Physica::Core {
         using UncenteredGrid = Grid3D<ScalarType, false>;
         using CenteredGrid = Grid3D<ComplexType, true>;
 
+        constexpr static size_t DIISBufferSize = 3;
+        using DensityRecord = Utils::Array<UncenteredGrid, DIISBufferSize>;
+        using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
+        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+
         CrystalCell cell;
         ReciprocalCell repCell;
         ScalarType cutEnergy;
-        UncenteredGrid densityGrid;
+        DensityRecord densityRecord;
         UncenteredGrid xcPotGrid;
         CenteredGrid externalPotGrid;
         FFT<ScalarType, 3> fftSolver;
@@ -62,6 +67,7 @@ namespace Physica::Core {
     private:
         [[nodiscard]] size_t numOrbitToSolve() const;
         [[nodiscard]] ScalarType occupacy(size_t orbitIndex) const;
+        [[nodiscard]] UncenteredGrid& currentDensity() { return *densityRecord.rbegin(); }
         void initDensity();
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
@@ -71,6 +77,8 @@ namespace Physica::Core {
         void updateXCPot();
         [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
+        void preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat);
+        void DIISExtrapolation(DIISMatrix& diisMat);
     };
 
     template<class ScalarType>
@@ -78,7 +86,7 @@ namespace Physica::Core {
             : cell(std::move(cell_))
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
-            , densityGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
+            , densityRecord(DIISBufferSize, UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ))
             , xcPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
             , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
                                                          ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
@@ -96,9 +104,13 @@ namespace Physica::Core {
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         auto hamilton = Hamilton(plainWaveCount);
         auto eigenSolver = EigenSolver<MatrixType>(plainWaveCount);
-        UncenteredGrid lastDensity = densityGrid;
+
+        auto densityResiduals = DIISBuffer(DIISBufferSize - 1, UncenteredGrid(cell.getLattice(), xcPotGrid.getDimX(), xcPotGrid.getDimY(), xcPotGrid.getDimZ()));
+        auto diisMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
+        diisMat(0, 0) = ScalarType::Zero();
 
         iteration = 0;
+        initDensity();
         while (true) {
             fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
             fillPotential(hamilton, orbits[0]);
@@ -109,11 +121,17 @@ namespace Physica::Core {
             updateOrbits(eigenSolver, orbits);
             updateDensity(orbits);
 
-            const ScalarType densityChange = abs(divide((densityGrid.asVector() - lastDensity.asVector()), densityGrid.asVector())).max();
-            lastDensity = densityGrid;
-            const bool isDensityConverged = densityChange < criteria;
-            if (isDensityConverged)
-                break;
+            if (iteration != 0) {
+                const ScalarType densityChange = abs(divide((*densityResiduals.crbegin()).asVector(), currentDensity().asVector())).max();
+                const bool isConverged = densityChange < criteria;
+                if (isConverged)
+                    break;
+            }
+
+            preDIIS(densityResiduals, diisMat);
+            const bool doDIIS = iteration % DIISBufferSize == 0;
+            if (doDIIS)
+                DIISExtrapolation(diisMat);
 
             if (++iteration == maxIte)
                 throw BadConvergenceException();
@@ -136,7 +154,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::initDensity() {
-        densityGrid.asVector() = ScalarType(cell.getElectronCount()) / cell.getVolume();
+        currentDensity().asVector() = ScalarType(cell.getElectronCount()) / cell.getVolume();
     }
 
     template<class ScalarType>
@@ -188,7 +206,7 @@ namespace Physica::Core {
             }
         }
 
-        fftSolver.transform(densityGrid.asVector());
+        fftSolver.transform(currentDensity().asVector());
         const ScalarType factor = ScalarType(4 * M_PI) / cell.getVolume();
         for (size_t i = 0; i < order; ++i) {
             const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
@@ -210,11 +228,12 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KSSolver<ScalarType>::updateDensity(const KSOrbits& orbits) {
-        auto[dimX, dimY, dimZ] = densityGrid.getDim();
+        auto& densityGrid = densityRecord[0];
+        auto[dimX, dimY, dimZ] = xcPotGrid.getDim();
         for (size_t i = 0; i < dimX; ++i) {
             for (size_t j = 0; j < dimY; ++j) {
                 for (size_t k = 0; k < dimZ; ++k) {
-                    const auto pos = densityGrid.dimToPos({i, j, k});
+                    const auto pos = xcPotGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
                     for (size_t index = 0; index < orbits.getLength(); ++index)
                         density += orbits[index](pos).squaredNorm() * occupacy(index);
@@ -222,6 +241,9 @@ namespace Physica::Core {
                 }
             }
         }
+
+        for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
+            std::swap(densityRecord[i], densityRecord[i + 1]);
     }
     /**
      * Reference:
@@ -232,8 +254,8 @@ namespace Physica::Core {
         constexpr double exchange_factor = -0.98474502184269654;
         constexpr double correlation_factor1 = -0.045 / 2;
         constexpr double correlation_factor2 = 33.851831034345862;
-        xcPotGrid.asVector() += pow(densityGrid.asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
-        xcPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(densityGrid.asVector(), ScalarType(1.0 / 3))); //Reference [1]
+        xcPotGrid.asVector() += pow(currentDensity().asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
+        xcPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(currentDensity().asVector(), ScalarType(1.0 / 3))); //Reference [1]
     }
 
     template<class ScalarType>
@@ -263,5 +285,42 @@ namespace Physica::Core {
             ++j;
         }
         return all_factors;
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat) {
+        /* Update residuals */ {
+            residuals[0].asVector() = currentDensity().asVector() - densityRecord[densityRecord.getLength() - 2].asVector();
+            for (size_t i = 0; i < residuals.getLength() - 1; ++i)
+                std::swap(residuals[i], residuals[i + 1]);
+        }
+        /* Construct equation */ {
+            for (size_t i = 1; i < diisMat.getRow(); ++i) {
+                for (size_t j = i; j < diisMat.getColumn(); ++j) {
+                    ScalarType temp = residuals[i - 1].asVector() * residuals[j - 1].asVector();
+                    diisMat(i, j) = temp;
+                    diisMat(j, i) = temp;
+                }
+            }
+        }
+    }
+
+    template<class ScalarType>
+    void KSSolver<ScalarType>::DIISExtrapolation(DIISMatrix& diisMat) {
+        Vector<ScalarType, DIISBufferSize> x{};
+        /* Solve linear equation */ {
+            Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
+            b[0] = -ScalarType::One();
+            const DIISMatrix inv_A = diisMat.inverse();
+            x = inv_A * b;
+        }
+
+        auto& current_density = currentDensity();
+        for (size_t i = 0; i < current_density.getSize(); ++i) {
+            ScalarType density = ScalarType::Zero();
+            for (size_t j = 1; j < x.getLength(); ++j)
+                density += densityRecord[j - 1].asVector()[i] * x[j];
+            currentDensity().asVector()[i] = density;
+        }
     }
 }
