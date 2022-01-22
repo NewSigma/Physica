@@ -51,4 +51,11 @@ namespace Physica::Core {
             set.emplace(atomicNumbers[i]);
         return set;
     }
+
+    size_t CrystalCell::getElectronCount() const {
+        size_t result = 0;
+        for (size_t i = 0; i < getAtomCount(); ++i)
+            result += getAtomicNumber(i);
+        return result;
+    }
 }

@@ -60,8 +60,8 @@ namespace Physica::Core {
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
     private:
-        [[nodiscard]] size_t electronCount() const;
         [[nodiscard]] size_t numOrbitToSolve() const;
+        [[nodiscard]] ScalarType occupacy(size_t orbitIndex) const;
         void initDensity();
         void initExternalPot();
         static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
@@ -122,21 +122,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t KSSolver<ScalarType>::electronCount() const {
-        size_t result = 0;
-        for (size_t i = 0; i < cell.getAtomCount(); ++i)
-            result += getCharge(cell.getAtomicNumber(i));
-        return result;
+    size_t KSSolver<ScalarType>::numOrbitToSolve() const {
+        return (cell.getElectronCount() + 1) / 2;
     }
 
     template<class ScalarType>
-    size_t KSSolver<ScalarType>::numOrbitToSolve() const {
-        return (electronCount() + 1) / 2;
+    ScalarType KSSolver<ScalarType>::occupacy(size_t orbitIndex) const {
+        if (orbitIndex == numOrbitToSolve() - 1)
+            return ScalarType(2 - (cell.getElectronCount() % 2U == 0U));
+        else
+            return ScalarType::Two();
     }
 
     template<class ScalarType>
     void KSSolver<ScalarType>::initDensity() {
-        densityGrid.asVector() = ScalarType(electronCount(cell)) / cell.getVolume();
+        densityGrid.asVector() = ScalarType(cell.getElectronCount()) / cell.getVolume();
     }
 
     template<class ScalarType>
@@ -217,7 +217,7 @@ namespace Physica::Core {
                     const auto pos = densityGrid.dimToPos({i, j, k});
                     auto density = ScalarType::Zero();
                     for (size_t index = 0; index < orbits.getLength(); ++index)
-                        density += orbits[index](pos).squaredNorm();
+                        density += orbits[index](pos).squaredNorm() * occupacy(index);
                     densityGrid(i, j, k) = density;
                 }
             }

@@ -45,5 +45,6 @@ namespace Physica::Core {
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
+        [[nodiscard]] size_t getElectronCount() const;
     };
 }
