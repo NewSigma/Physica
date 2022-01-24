@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronStructure/DFT/KSSolver.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;

@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronStructure/ReciprocalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 
 namespace Physica::Core {
     CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_)

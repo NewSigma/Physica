@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Utils/TestHelper.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/GaussBase.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 using namespace Physica::Core;

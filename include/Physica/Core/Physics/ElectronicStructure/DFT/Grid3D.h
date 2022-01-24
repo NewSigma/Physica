@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {

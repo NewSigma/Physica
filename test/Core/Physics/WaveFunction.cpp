@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Physics/ElectronStructure/DFT/WaveFunction.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/WaveFunction.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;

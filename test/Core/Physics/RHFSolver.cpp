@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Utils/TestHelper.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;

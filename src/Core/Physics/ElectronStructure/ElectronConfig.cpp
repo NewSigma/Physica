@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/ElectronStructure/ElectronConfig.h"
+#include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
 
 namespace Physica::Core::Physics {
     size_t ElectronConfig::getNumOccupiedOrbit() const noexcept {

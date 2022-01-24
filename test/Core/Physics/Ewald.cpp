@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Utils/TestHelper.h"
-#include "Physica/Core/Physics/ElectronStructure/DFT/Ewald.h"
-#include "Physica/Core/Physics/ElectronStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronStructure/ReciprocalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 using namespace Physica::Core;

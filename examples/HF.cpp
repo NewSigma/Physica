@@ -19,8 +19,8 @@
 #include <iostream>
 #include <QApplication>
 #include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/RHFSolver.h"
-#include "Physica/Core/Physics/ElectronStructure/HF/GTOnG.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
