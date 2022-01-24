@@ -81,9 +81,9 @@ namespace Physica::Core {
             VectorType g = gradient(func);
             const ScalarType beta1_1 = ScalarType::One() - beta1;
             m = m * beta1 + g * beta1_1;
-            v = v * args[2] + multiply(g, g) * ScalarType(ScalarType::One() -  args[2]);
+            v = v * args[2] + hadamard(g, g) * ScalarType(ScalarType::One() -  args[2]);
             const ScalarType alpha = args[0] / beta1_1 * sqrt(ScalarType(ScalarType::One() - args[2]));
-            params -= alpha * multiply(m, reciprocal(sqrt(v) + args[4]));
+            params -= alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
             beta1 *= args[3];
             ScalarType temp = func(std::cref(params));
             ++count;

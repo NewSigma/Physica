@@ -344,7 +344,7 @@ namespace Physica::Core {
     inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v * s; }
     
     template<class VectorType1, class VectorType2>
-    inline VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2> multiply(
+    inline VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2> hadamard(
             const RValueVector<VectorType1>& v1,
             const RValueVector<VectorType2>& v2) {
         return VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
