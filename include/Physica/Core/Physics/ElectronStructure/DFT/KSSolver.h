@@ -129,7 +129,7 @@ namespace Physica::Core {
             }
 
             preDIIS(densityResiduals, diisMat);
-            const bool doDIIS = iteration % DIISBufferSize == 0;
+            const bool doDIIS = iteration != 0 && iteration % DIISBufferSize == 0;
             if (doDIIS)
                 DIISExtrapolation(diisMat);
 
@@ -155,6 +155,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void KSSolver<ScalarType>::initDensity() {
         currentDensity().asVector() = ScalarType(cell.getElectronCount()) / cell.getVolume();
+        densityRecord[densityRecord.getLength() - 2].asVector() = ScalarType::Zero();
     }
 
     template<class ScalarType>
@@ -192,28 +193,32 @@ namespace Physica::Core {
         updateXCPot();
         fftSolver.transform(xcPotGrid.asVector());
 
-        const ScalarType factor1 = reciprocal(ScalarType(2 * M_PI));
+        const ScalarType factor = reciprocal(ScalarType(2 * M_PI));
+        const auto fft_nomalizer = reciprocal(ScalarType(xcPotGrid.getSize()));
         const size_t order = hamilton.getRow();
-        for (size_t i = 0; i < order; ++i) {
-            const Dim dim1 = orbit.indexToDim(i);
-            auto[x1, y1, z1] = dim1;
-            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(dim1);
-            for (size_t j = i; j < order; ++j) {
-                const Dim dim2 = orbit.indexToDim(j);
-                auto[x2, y2, z2] = dim2;
-                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(dim2);
-                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor1)) + externalPotGrid(x1 - x2, y1 - y2, z1 - z2);
+        /* Fill xc and external */ {
+            for (size_t i = 0; i < order; ++i) {
+                const Dim dim1 = orbit.indexToDim(i);
+                auto[x1, y1, z1] = dim1;
+                const Vector<ScalarType, 3> k1 = orbit.getWaveVector(dim1);
+                for (size_t j = i; j < order; ++j) {
+                    const Dim dim2 = orbit.indexToDim(j);
+                    auto[x2, y2, z2] = dim2;
+                    const Vector<ScalarType, 3> k2 = orbit.getWaveVector(dim2);
+                    hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor)) * fft_nomalizer + externalPotGrid(x1 - x2, y1 - y2, z1 - z2);
+                }
             }
         }
-
-        fftSolver.transform(currentDensity().asVector());
-        const ScalarType factor = ScalarType(4 * M_PI) / cell.getVolume();
-        for (size_t i = 0; i < order; ++i) {
-            const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
-            for (size_t j = i + 1; j < order; ++j) {
-                const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
-                const Vector<ScalarType, 3> k = k1 - k2;
-                hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>(k * factor1)) * factor / k.squaredNorm();
+        /* Fill hartree */ {
+            fftSolver.transform(currentDensity().asVector());
+            const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
+            for (size_t i = 0; i < order; ++i) {
+                const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
+                for (size_t j = i + 1; j < order; ++j) {
+                    const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
+                    const Vector<ScalarType, 3> k = k1 - k2;
+                    hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>(k * factor)) * factor1 / k.squaredNorm();
+                }
             }
         }
     }
@@ -223,7 +228,7 @@ namespace Physica::Core {
         const auto& eigenVectors = eigenSolver.getRawEigenvectors();
         const size_t orbitCount = orbits.getLength();
         for (size_t i = 0; i < orbitCount; ++i)
-            orbits[i] = eigenVectors.col(i);
+            orbits[i] = eigenVectors.col(i); //TODO: Eigenvectors have been nomalized, find out the reason
     }
 
     template<class ScalarType>
@@ -241,6 +246,8 @@ namespace Physica::Core {
                 }
             }
         }
+        const ScalarType inv_volume = reciprocal(cell.getVolume());
+        densityGrid.asVector() *= inv_volume;
 
         for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
             std::swap(densityRecord[i], densityRecord[i + 1]);
