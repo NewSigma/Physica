@@ -11,6 +11,7 @@ option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_FFTW3 "Use fftw3" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
 option(PHYSICA_CUDA "Enable CUDA support" OFF)
+option(PHYSICA_TORCH "Enable Torch support" OFF)
 set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 
@@ -38,7 +39,7 @@ ${PHYSICA_SIMD_OPTION} \
 
 if(${PHYSICA_CUDA})
     add_definitions(-DPHYSICA_CUDA)
-    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
     set(CMAKE_CUDA_STANDARD 17)
     set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
@@ -55,7 +56,7 @@ if(${RUN_CHECKS})
 endif()
 ##############################################Libs################################################
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+include_directories(${CUDAToolkit_INCLUDE_DIRS})
 include_directories(3rdparty)
 
 if(${PHYSICA_FFTW3})
@@ -70,6 +71,11 @@ endif()
 if(${PHYSICA_PROFILE})
     include_directories(${GPerfTools_INCLUDE_DIR})
     find_package(GPerfTools REQUIRED)
+endif()
+
+if(${PHYSICA_TORCH})
+    find_package(Torch REQUIRED)
+    include_directories(${Torch_INCLUDE_DIR})
 endif()
 #############################################Project##############################################
 include_directories(./include)
@@ -95,5 +101,5 @@ if(${PHYSICA_GUI})
     install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
     install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
     #############################################Options##############################################
-    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets)
+    target_link_libraries(Physica PhysicaCore PhysicaAI PhysicaGui Qt6::Core Qt6::Widgets)
 endif()
