@@ -40,6 +40,7 @@ ${PHYSICA_SIMD_OPTION} \
 if(${PHYSICA_CUDA})
     add_definitions(-DPHYSICA_CUDA)
     find_package(CUDAToolkit REQUIRED)
+    enable_language(CUDA)
     set(CMAKE_CUDA_STANDARD 17)
     set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
@@ -56,7 +57,7 @@ if(${RUN_CHECKS})
 endif()
 ##############################################Libs################################################
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-include_directories(${CUDAToolkit_INCLUDE_DIRS})
+include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
 if(${PHYSICA_FFTW3})
@@ -101,5 +102,5 @@ if(${PHYSICA_GUI})
     install(FILES include/Physica/PhysicaInit.h DESTINATION include/Physica)
     install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
     #############################################Options##############################################
-    target_link_libraries(Physica PhysicaCore PhysicaAI PhysicaGui Qt6::Core Qt6::Widgets)
+    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets)
 endif()

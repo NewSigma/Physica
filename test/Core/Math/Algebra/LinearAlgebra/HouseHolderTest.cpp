@@ -107,8 +107,6 @@ int main() {
         const T norm = householder(x, v);
         if (!norm.isZero())
             return 1;
-        if (!v.norm().isZero())
-            return 1;
     }
     return 0;
 }
