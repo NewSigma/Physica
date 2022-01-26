@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,19 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Grid3D.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/KPointGrid.h"
 
 namespace Physica::Core {
-    class KPointGrid : public Grid3D<Scalar<Float, false>, true> {
-        using Base = Grid3D<Scalar<Float, false>, true>;
-        using ScalarType = Scalar<Float, false>;
-    public:
-        using KPoint = Vector<ScalarType, 3>;
-    public:
-        template<class MatrixType>
-        KPointGrid(const RValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
-    };
+    template<class MatrixType>
+    KPointGrid::KPointGrid(const RValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ)
+            : Base(repLatt, dimX, dimY, dimZ) {}
 }
