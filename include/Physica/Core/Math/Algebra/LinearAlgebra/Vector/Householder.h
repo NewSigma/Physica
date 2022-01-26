@@ -53,7 +53,8 @@ namespace Physica::Core {
             target[0] = (factor1 / factor).getReal();
             return norm;
         }
-        target = RealType::Zero();
+        target[0] = ScalarType::Two();
+        target.tail(1) = ScalarType::Zero();
         return sqrt(sourceNorm0);
     }
 
