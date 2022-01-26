@@ -30,100 +30,128 @@
 #include "Grid3D.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<class ScalarType, class XCProvider>
     class KSSolver {
         using ComplexType = ComplexScalar<ScalarType>;
         using KPoint = typename KPointGrid::KPoint;
         using Hamilton = DenseHermiteMatrix<ComplexType>;
+        using HamiltonPair = std::pair<Hamilton, Hamilton>;
         using MatrixType = DenseMatrix<ComplexType>;
         using KSOrbit = WaveFunction<ScalarType>;
         using KSOrbits = Utils::Array<KSOrbit>;
+        using KSOrbitPair = std::pair<KSOrbits, KSOrbits>;
         using UncenteredGrid = Grid3D<ScalarType, false>;
+        using UnsignedDim = typename UncenteredGrid::Dim;
+        using DensityPair = std::pair<UncenteredGrid, UncenteredGrid>;
+        using PotPair = std::pair<UncenteredGrid, UncenteredGrid>;
         using CenteredGrid = Grid3D<ComplexType, true>;
+        using SignedDim = typename CenteredGrid::Dim;
 
         constexpr static size_t DIISBufferSize = 3;
-        using DensityRecord = Utils::Array<UncenteredGrid, DIISBufferSize>;
+        using DensityRecord = Utils::Array<DensityPair, DIISBufferSize>;
         using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
         using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
         ScalarType cutEnergy;
+        KSOrbitPair orbits;
         DensityRecord densityRecord;
-        UncenteredGrid xcPotGrid;
+        PotPair xcPot;
         CenteredGrid externalPotGrid;
-        FFT<ScalarType, 3> fftSolver;
+        FFT<ScalarType, 3>* fft_xc_up;
+        FFT<ScalarType, 3>* fft_xc_down;
+        FFT<ScalarType, 3>* fft_hartree;
+        XCProvider xcProvider;
         size_t iteration;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
-        ~KSSolver() = default;
+        ~KSSolver();
         /* Operators */
         KSSolver& operator=(const KSSolver& base) = delete;
         KSSolver& operator=(KSSolver&& base) noexcept = delete;
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
     private:
-        [[nodiscard]] size_t numOrbitToSolve() const;
-        [[nodiscard]] ScalarType occupacy(size_t orbitIndex) const;
-        [[nodiscard]] UncenteredGrid& currentDensity() { return *densityRecord.rbegin(); }
+        /* Operations */
+        void initialize(size_t gridDimX, size_t gridDimY, size_t gridDimZ);
         void initDensity();
         void initExternalPot();
-        static void fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit);
-        void fillPotential(Hamilton& hamilton, const KSOrbit& orbit);
-        static void updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits);
-        void updateDensity(const KSOrbits& orbits);
-        void updateXCPot();
-        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
-        [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
+        void assembleH(KPoint k, HamiltonPair& hPair);
+        void fillPotential(HamiltonPair& hPair);
+        void updateOrbits(const EigenSolver<MatrixType>& eigenSolver_up, const EigenSolver<MatrixType>& eigenSolver_down);
+        void updateDensity();
         void preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat);
         void DIISExtrapolation(DIISMatrix& diisMat);
+        /* Getters */
+        [[nodiscard]] size_t getPlainWaveCount() const noexcept { return orbits.first[0].getPlainWaveCount(); }
+        [[nodiscard]] size_t getDimX() const noexcept { return xcPot.first.getDimX(); }
+        [[nodiscard]] size_t getDimY() const noexcept { return xcPot.first.getDimY(); }
+        [[nodiscard]] size_t getDimZ() const noexcept { return xcPot.first.getDimZ(); }
+        [[nodiscard]] auto getDim() const noexcept { return xcPot.first.getDim(); }
+        [[nodiscard]] size_t getSize() const noexcept { return xcProvider.getBufferSize(); }
+        [[nodiscard]] size_t numOrbitToSolve() const { return (cell.getElectronCount() + 1) / 2; }
+        [[nodiscard]] DensityPair& currentDensity() { return *densityRecord.rbegin(); }
+        [[nodiscard]] auto dimToPos(UnsignedDim dim) const noexcept { return xcPot.first.dimToPos(dim); }
+        [[nodiscard]] SignedDim indexToSignedDim(size_t index) const noexcept { return orbits.first[0].indexToDim(index); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(SignedDim dim) const noexcept { return orbits.first[0].getWaveVector(dim); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return orbits.first[0].getWaveVector(index); }
+        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
+        [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
     };
 
-    template<class ScalarType>
-    KSSolver<ScalarType>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX, size_t gridDimY, size_t gridDimZ)
+    template<class ScalarType, class XCProvider>
+    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX, size_t gridDimY, size_t gridDimZ)
             : cell(std::move(cell_))
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
-            , densityRecord(DIISBufferSize, UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ))
-            , xcPotGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)
-            , fftSolver({gridDimX, gridDimY, gridDimZ}, {ScalarType(cell_.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
-                                                         ScalarType(cell_.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
-                                                         ScalarType(cell_.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)})
+            , densityRecord(DIISBufferSize, std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
+                                                           UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)))
+            , xcPot(std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
+                                   UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)))
+            , xcProvider(gridDimX * gridDimY * gridDimZ)
             , iteration(0) {
-        initExternalPot();
+        initialize(gridDimX, gridDimY, gridDimZ);
     }
 
-    template<class ScalarType>
-    bool KSSolver<ScalarType>::solve(const ScalarType& criteria, size_t maxIte) {
-        auto orbits = KSOrbits(numOrbitToSolve(), KSOrbit(cutEnergy, repCell.getLattice()));
+    template<class ScalarType, class XCProvider>
+    KSSolver<ScalarType, XCProvider>::~KSSolver() {
+        delete fft_xc_up;
+        delete fft_xc_down;
+        delete fft_hartree;
+    }
+
+    template<class ScalarType, class XCProvider>
+    bool KSSolver<ScalarType, XCProvider>::solve(const ScalarType& criteria, size_t maxIte) {
         KPoint toSolve{0, 0, 0};
 
-        const size_t plainWaveCount = orbits[0].getPlainWaveCount();
-        const ScalarType inv_volume = reciprocal(cell.getVolume());
-        auto hamilton = Hamilton(plainWaveCount);
-        auto eigenSolver = EigenSolver<MatrixType>(plainWaveCount);
+        const size_t plainWaveCount = getPlainWaveCount();
+        auto hamilton = std::make_pair(Hamilton(plainWaveCount), Hamilton(plainWaveCount));
+        auto eigenSolver_up = EigenSolver<MatrixType>(plainWaveCount);
+        auto eigenSolver_down = EigenSolver<MatrixType>(plainWaveCount);
 
-        auto densityResiduals = DIISBuffer(DIISBufferSize - 1, UncenteredGrid(cell.getLattice(), xcPotGrid.getDimX(), xcPotGrid.getDimY(), xcPotGrid.getDimZ()));
+        auto densityResiduals = DIISBuffer(DIISBufferSize - 1, UncenteredGrid(cell.getLattice(), getDimX(), getDimY(), getDimZ()));
         auto diisMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
         diisMat(0, 0) = ScalarType::Zero();
 
         iteration = 0;
-        initDensity();
         while (true) {
-            fillKinetic(toSolve, hamilton, orbits[0]); //Any orbit is ok, we need base function only
-            fillPotential(hamilton, orbits[0]);
-            eigenSolver.compute(hamilton, true);
-            eigenSolver.sort();
+            assembleH(toSolve, hamilton);
+            eigenSolver_up.compute(hamilton.first, true);
+            eigenSolver_down.compute(hamilton.second, true);
+            eigenSolver_up.sort();
+            eigenSolver_down.sort();
 
-            hamilton = ScalarType::Zero();
-            updateOrbits(eigenSolver, orbits);
-            updateDensity(orbits);
+            updateOrbits(eigenSolver_up, eigenSolver_down);
+            updateDensity();
 
             if (iteration != 0) {
-                const ScalarType densityChange = abs(divide((*densityResiduals.crbegin()).asVector(), currentDensity().asVector())).max();
-                const bool isConverged = densityChange < criteria;
+                const auto& last_rho = (*densityResiduals.crbegin()).asVector();
+                const auto& rho = currentDensity().first.asVector();
+                const ScalarType delta_rho = abs(divide(last_rho, rho)).max();
+                const bool isConverged = delta_rho < criteria;
                 if (isConverged)
                     break;
             }
@@ -139,27 +167,42 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType>
-    size_t KSSolver<ScalarType>::numOrbitToSolve() const {
-        return (cell.getElectronCount() + 1) / 2;
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initialize(size_t gridDimX, size_t gridDimY, size_t gridDimZ) {
+        const size_t electronCount = cell.getElectronCount();
+        orbits = std::make_pair(KSOrbits((electronCount + 1) / 2, KSOrbit(cutEnergy, repCell.getLattice())),
+                                KSOrbits(electronCount / 2, KSOrbit(cutEnergy, repCell.getLattice())));
+
+        const Utils::Array<size_t, 3> fftGrid{gridDimX, gridDimY, gridDimZ};
+        const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
+                                                     ScalarType(cell.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
+                                                     ScalarType(cell.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)};
+        fft_xc_up = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
+        fft_xc_down = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
+        fft_hartree = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
+
+        initExternalPot();
+        initDensity();
     }
 
-    template<class ScalarType>
-    ScalarType KSSolver<ScalarType>::occupacy(size_t orbitIndex) const {
-        if (orbitIndex == numOrbitToSolve() - 1)
-            return ScalarType(2 - (cell.getElectronCount() % 2U == 0U));
-        else
-            return ScalarType::Two();
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initDensity() {
+        const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
+        auto& pair1 = currentDensity();
+        auto& rho1 = pair1.first.asVector();
+        rho1 = averageDensity;
+        auto& zeta1 = pair1.second.asVector();
+        zeta1 = ScalarType::Zero();
+
+        auto& pair2 = densityRecord[densityRecord.getLength() - 2];
+        auto& rho2 = pair2.first.asVector();
+        rho2 = ScalarType::Zero();
+        auto& zeta2 = pair2.second.asVector();
+        zeta2 = ScalarType::Zero();
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::initDensity() {
-        currentDensity().asVector() = ScalarType(cell.getElectronCount()) / cell.getVolume();
-        densityRecord[densityRecord.getLength() - 2].asVector() = ScalarType::Zero();
-    }
-
-    template<class ScalarType>
-    void KSSolver<ScalarType>::initExternalPot() {
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initExternalPot() {
         const ScalarType factorCutoff = cutEnergy * 8;
         externalPotGrid = CenteredGrid::gridFromCutEnergy(factorCutoff, repCell.getLattice());
         const Utils::Array<CenteredGrid> all_factors = getStructureFactor(factorCutoff);
@@ -179,94 +222,121 @@ namespace Physica::Core {
         externalPotGrid(0, 0, 0) = ComplexType::Zero();
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::fillKinetic(KPoint k, Hamilton& hamilton, const KSOrbit& orbit) {
-        const size_t order = hamilton.getRow();
-        for (size_t i = 0; i < order; ++i)
-            hamilton(i, i) += ScalarType((k + orbit.getWaveVector(orbit.indexToDim(i))).squaredNorm()) * ScalarType(0.5);
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::assembleH(KPoint k, HamiltonPair& hPair) {
+        auto& h_up = hPair.first;
+        auto& h_down = hPair.second;
+        h_up = ScalarType::Zero();
+        h_down = ScalarType::Zero();
+        /* fill kinetic */ {
+            const size_t order = h_up.getRow();
+            for (size_t i = 0; i < order; ++i) {
+                const ScalarType temp = ScalarType((k + getWaveVector(i)).squaredNorm()) * ScalarType(0.5);
+                h_up(i, i) += temp;
+                h_down(i, i) += temp;
+            }
+        }
+        fillPotential(hPair);
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::fillPotential(Hamilton& hamilton, const KSOrbit& orbit) {
-        using Dim = typename CenteredGrid::Dim;
-        xcPotGrid.asVector() = ScalarType::Zero();
-        updateXCPot();
-        fftSolver.transform(xcPotGrid.asVector());
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::fillPotential(HamiltonPair& hPair) {
+        using VectorType = Vector<ScalarType, 3>;
+        xcProvider.fill(currentDensity(), xcPot);
+        fft_xc_up->transform(xcPot.first.asVector());
+        fft_xc_down->transform(xcPot.second.asVector());
+        fft_hartree->transform(currentDensity().first.asVector());
 
         const ScalarType factor = reciprocal(ScalarType(2 * M_PI));
-        const auto fft_nomalizer = reciprocal(ScalarType(xcPotGrid.getSize()));
-        const size_t order = hamilton.getRow();
-        /* Fill xc and external */ {
-            for (size_t i = 0; i < order; ++i) {
-                const Dim dim1 = orbit.indexToDim(i);
-                auto[x1, y1, z1] = dim1;
-                const Vector<ScalarType, 3> k1 = orbit.getWaveVector(dim1);
-                for (size_t j = i; j < order; ++j) {
-                    const Dim dim2 = orbit.indexToDim(j);
-                    auto[x2, y2, z2] = dim2;
-                    const Vector<ScalarType, 3> k2 = orbit.getWaveVector(dim2);
-                    hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>((k1 - k2) * factor)) * fft_nomalizer + externalPotGrid(x1 - x2, y1 - y2, z1 - z2);
-                }
-            }
-        }
-        /* Fill hartree */ {
-            fftSolver.transform(currentDensity().asVector());
-            const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
-            for (size_t i = 0; i < order; ++i) {
-                const Vector<ScalarType, 3> k1 = orbit.getWaveVector(orbit.indexToDim(i));
-                for (size_t j = i + 1; j < order; ++j) {
-                    const Vector<ScalarType, 3> k2 = orbit.getWaveVector(orbit.indexToDim(j));
-                    const Vector<ScalarType, 3> k = k1 - k2;
-                    hamilton(i, j) += fftSolver.getFreqIntense(Vector<ScalarType, 3>(k * factor)) * factor1 / k.squaredNorm();
-                }
+        const auto fft_nomalizer = reciprocal(ScalarType(getSize()));
+        const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
+        
+        auto& h_up = hPair.first;
+        auto& h_down = hPair.second;
+        const size_t order = h_up.getRow();
+        for (size_t i = 0; i < order; ++i) {
+            const auto dim1 = indexToSignedDim(i);
+            auto[x1, y1, z1] = dim1;
+            const VectorType k1 = getWaveVector(dim1);
+            for (size_t j = i; j < order; ++j) {
+                const auto dim2 = indexToSignedDim(j);
+                auto[x2, y2, z2] = dim2;
+                const VectorType k2 = getWaveVector(dim2);
+                const VectorType deltaK = k1 - k2;
+                const VectorType k = deltaK * factor;
+
+                const ComplexType xc_up = fft_xc_up->getFreqIntense(k) * fft_nomalizer;
+                const ComplexType xc_down = fft_xc_up->getFreqIntense(k) * fft_nomalizer;
+                ComplexType hartree;
+                if (i == j)
+                    hartree = ComplexType::Zero();
+                else
+                    hartree = fft_hartree->getFreqIntense(k) * factor1 / deltaK.squaredNorm();
+                const ComplexType external = externalPotGrid(x1 - x2, y1 - y2, z1 - z2);
+
+                h_up(i, j) += xc_up + hartree + external;
+                h_down(i, j) += xc_down + hartree + external;
             }
         }
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::updateOrbits(const EigenSolver<MatrixType>& eigenSolver, KSOrbits& orbits) {
-        const auto& eigenVectors = eigenSolver.getRawEigenvectors();
-        const size_t orbitCount = orbits.getLength();
-        for (size_t i = 0; i < orbitCount; ++i)
-            orbits[i] = eigenVectors.col(i); //TODO: Eigenvectors have been nomalized, find out the reason
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::updateOrbits(const EigenSolver<MatrixType>& eigenSolver_up, const EigenSolver<MatrixType>& eigenSolver_down) {
+        {
+            auto& orbits_up = orbits.first;
+            const size_t orbitCount = orbits_up.getLength();
+            for (size_t i = 0; i < orbitCount; ++i)
+                orbits_up[i] = eigenSolver_up.getRawEigenvectors().col(i); //TODO: Eigenvectors have been nomalized, find out the reason
+        }
+        {
+            auto& orbits_down = orbits.second;
+            const size_t orbitCount = orbits_down.getLength();
+            for (size_t i = 0; i < orbitCount; ++i)
+                orbits_down[i] = eigenSolver_down.getRawEigenvectors().col(i);
+        }
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::updateDensity(const KSOrbits& orbits) {
-        auto& densityGrid = densityRecord[0];
-        auto[dimX, dimY, dimZ] = xcPotGrid.getDim();
-        for (size_t i = 0; i < dimX; ++i) {
-            for (size_t j = 0; j < dimY; ++j) {
-                for (size_t k = 0; k < dimZ; ++k) {
-                    const auto pos = xcPotGrid.dimToPos({i, j, k});
-                    auto density = ScalarType::Zero();
-                    for (size_t index = 0; index < orbits.getLength(); ++index)
-                        density += orbits[index](pos).squaredNorm() * occupacy(index);
-                    densityGrid(i, j, k) = density;
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::updateDensity() {
+        /* Get density */ {
+            auto& density_up = densityRecord[0].first;
+            auto& density_down = densityRecord[0].second;
+            auto& orbits_up = orbits.first;
+            auto& orbits_down = orbits.second;
+            auto[dimX, dimY, dimZ] = getDim();
+            for (size_t i = 0; i < dimX; ++i) {
+                for (size_t j = 0; j < dimY; ++j) {
+                    for (size_t k = 0; k < dimZ; ++k) {
+                        const auto pos = dimToPos({i, j, k});
+                        auto rho_up = ScalarType::Zero();
+                        for (size_t index = 0; index < orbits_up.getLength(); ++index)
+                            rho_up += orbits_up[index](pos).squaredNorm();
+                        density_up(i, j, k) = rho_up;
+
+                        auto rho_down = ScalarType::Zero();
+                        for (size_t index = 0; index < orbits_down.getLength(); ++index)
+                            rho_down += orbits_down[index](pos).squaredNorm();
+                        density_down(i, j, k) = rho_down;
+                    }
                 }
             }
+            const ScalarType inv_volume = reciprocal(cell.getVolume());
+            density_up.asVector() *= inv_volume;
+            density_down.asVector() *= inv_volume;
         }
-        const ScalarType inv_volume = reciprocal(cell.getVolume());
-        densityGrid.asVector() *= inv_volume;
+        /* Change format */ {
+            auto& rho = densityRecord[0].first.asVector();
+            auto& zeta = densityRecord[0].second.asVector();
+            rho += zeta;
+            zeta = divide(rho - zeta * ScalarType::Two(), rho);
+        }
 
         for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
             std::swap(densityRecord[i], densityRecord[i + 1]);
     }
-    /**
-     * Reference:
-     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479
-     */
-    template<class ScalarType>
-    void KSSolver<ScalarType>::updateXCPot() {
-        constexpr double exchange_factor = -0.98474502184269654;
-        constexpr double correlation_factor1 = -0.045 / 2;
-        constexpr double correlation_factor2 = 33.851831034345862;
-        xcPotGrid.asVector() += pow(currentDensity().asVector(), ScalarType(1.0 / 3)) * ScalarType(exchange_factor);
-        xcPotGrid.asVector() += ScalarType(correlation_factor1) * ln(ScalarType::One() + ScalarType(correlation_factor2) * pow(currentDensity().asVector(), ScalarType(1.0 / 3))); //Reference [1]
-    }
 
-    template<class ScalarType>
-    typename Utils::Array<typename KSSolver<ScalarType>::CenteredGrid> KSSolver<ScalarType>::getStructureFactor(ScalarType factorCutoff) {
+    template<class ScalarType, class XCProvider>
+    typename Utils::Array<typename KSSolver<ScalarType, XCProvider>::CenteredGrid> KSSolver<ScalarType, XCProvider>::getStructureFactor(ScalarType factorCutoff) {
         const std::unordered_set<uint16_t> species = cell.getSpecies();
         const auto& lattice = repCell.getLattice();
         auto all_factors = Utils::Array<CenteredGrid>(species.size(), CenteredGrid::gridFromCutEnergy(factorCutoff, lattice));
@@ -294,10 +364,12 @@ namespace Physica::Core {
         return all_factors;
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat) {
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat) {
         /* Update residuals */ {
-            residuals[0].asVector() = currentDensity().asVector() - densityRecord[densityRecord.getLength() - 2].asVector();
+            const auto& rho_new = currentDensity().first.asVector();
+            const auto& rho_old = densityRecord[densityRecord.getLength() - 2].first.asVector();
+            residuals[0].asVector() = rho_new - rho_old;
             for (size_t i = 0; i < residuals.getLength() - 1; ++i)
                 std::swap(residuals[i], residuals[i + 1]);
         }
@@ -312,8 +384,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void KSSolver<ScalarType>::DIISExtrapolation(DIISMatrix& diisMat) {
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::DIISExtrapolation(DIISMatrix& diisMat) {
         Vector<ScalarType, DIISBufferSize> x{};
         /* Solve linear equation */ {
             Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
@@ -322,12 +394,11 @@ namespace Physica::Core {
             x = inv_A * b;
         }
 
-        auto& current_density = currentDensity();
-        for (size_t i = 0; i < current_density.getSize(); ++i) {
-            ScalarType density = ScalarType::Zero();
-            for (size_t j = 1; j < x.getLength(); ++j)
-                density += densityRecord[j - 1].asVector()[i] * x[j];
-            currentDensity().asVector()[i] = density;
+        auto& new_rho = currentDensity().first.asVector();
+        new_rho = ScalarType::Zero();
+        for (size_t i = 1; i < x.getLength(); ++i) {
+            const auto& rho = densityRecord[i - 1].first.asVector();
+            new_rho += rho * x[i];
         }
     }
 }

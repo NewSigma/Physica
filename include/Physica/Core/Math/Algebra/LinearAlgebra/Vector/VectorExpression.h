@@ -329,11 +329,6 @@ namespace Physica::Core {
     inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>> operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
         return VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
-
-    template<class VectorType, class ScalarType>
-    inline VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<ScalarType>> operator-(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
-        return -v + s;
-    }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
     inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {

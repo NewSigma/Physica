@@ -43,6 +43,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimY() const noexcept { return grid.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return grid.getDimZ(); }
         [[nodiscard]] Vector<ScalarType, 3> getWaveVector(Dim dim) const noexcept;
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return getWaveVector(indexToDim(index)); }
         [[nodiscard]] ScalarType getKinetic(Dim dim) const noexcept;
         [[nodiscard]] size_t dimToIndex(ssize_t x, ssize_t y, ssize_t z) const noexcept { return grid.dimToIndex(x, y, z); }
         [[nodiscard]] Dim indexToDim(size_t index) const noexcept { return grid.indexToDim(index); }
