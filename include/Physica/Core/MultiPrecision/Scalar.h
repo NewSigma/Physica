@@ -287,6 +287,9 @@ namespace Physica::Core {
         }
     };
 
+    template<class T>
+    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
+
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
     public:
