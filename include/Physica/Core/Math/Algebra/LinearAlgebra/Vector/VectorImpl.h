@@ -75,7 +75,9 @@ namespace Physica::Core {
         result = v1 + multiply((v2 - v1), result);
         return result;
     }
-
+    /**
+     * Both \param from and \param to are included
+     */
     template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::linspace(T from, T to, size_t count) {
         assert(from < to);
@@ -95,14 +97,6 @@ namespace Physica::Core {
         size_t i = 0;
         for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
             result.init(factorial(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> exp(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(exp(*ite), i);
     }
 
     template<class T, size_t Length, size_t MaxLength>

@@ -120,10 +120,12 @@ namespace Physica::Core {
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
+        using typename Base::ScalarType;
+    public:
         VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
-        typename Base::ScalarType calc(size_t s) const { return exp.calc(s) + scalar; }
+        ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) + ScalarType(scalar); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
@@ -281,6 +283,18 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Exp, VectorType>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Exp, VectorType>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Exp, VectorType>>;
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return exp(v.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Pow, VectorType>
             : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>> {
         using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>>;
@@ -378,6 +392,11 @@ namespace Physica::Core {
     template<class VectorType>
     inline VectorExpression<Utils::ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) {
         return VectorExpression<Utils::ExpressionType::Ln, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Exp, VectorType> exp(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Exp, VectorType>(v);
     }
 
     template<class VectorType>
