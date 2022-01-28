@@ -20,13 +20,18 @@
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/KPointGrid.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 
 int main() {
     CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14});
-    auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL>>(Si, 0.8, 100, 100, 100);
-    solver.solve(1E-3, 100);
+    ScalarType cutEnergy(0.8);
+    {
+        KPointGrid<ScalarType> grid(cutEnergy, Si.reciprocal().getLattice(), 1, 1, 1);
+        auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL>>(Si, cutEnergy, std::move(grid), 100, 100, 100);
+        solver.solve(1E-3, 100);
+    }
     return 0;
 }

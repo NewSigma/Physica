@@ -47,7 +47,7 @@ namespace Physica::Core {
     public:
         Grid3D() = default;
         template<class MatrixType>
-        Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_);
+        Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_, const T& = T());
         Grid3D(const Grid3D&) = default;
         Grid3D(Grid3D&&) noexcept = default;
         ~Grid3D() = default;
@@ -57,6 +57,15 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator[](size_t index) const;
         [[nodiscard]] T& operator()(IntType x, IntType y, IntType z);
         [[nodiscard]] const T& operator()(IntType x, IntType y, IntType z) const;
+        /* Iterator */
+        auto begin() noexcept { return values.begin(); }
+        auto end() noexcept { return values.end(); }
+        auto cbegin() const noexcept { return values.cbegin(); }
+        auto cend() const noexcept { return values.cend(); }
+        auto rbegin() noexcept { return values.rbegin(); }
+        auto rend() noexcept { return values.rend(); }
+        auto crbegin() const noexcept { return values.crbegin(); }
+        auto crend() const noexcept { return values.crend(); }
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getDimX() const noexcept { return dimX; }
@@ -75,17 +84,23 @@ namespace Physica::Core {
         /* Helpers */
         void swap(Grid3D& grid) noexcept;
         template<class RealType>
+        [[nodiscard]] static Dim dimFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice);
+        template<class RealType>
+        [[nodiscard]] static size_t sizeFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice);
+        template<class RealType>
         [[nodiscard]] static Grid3D gridFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice);
+    private:
+        [[nodiscard]] static size_t dimToSize(size_t dimX, size_t dimY, size_t dimZ);
     };
 
     template<class T, bool isSigned>
     template<class MatrixType>
-    Grid3D<T, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_)
+    Grid3D<T, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_, const T& t)
             : lattice(lattice_)
             , dimX(dimX_)
             , dimY(dimY_)
             , dimZ(dimZ_) {
-        values.resize(getSize());
+        values.resize(getSize(), t);
     }
 
     template<class T, bool isSigned>
@@ -129,10 +144,7 @@ namespace Physica::Core {
 
     template<class T, bool isSigned>
     size_t Grid3D<T, isSigned>::getSize() const noexcept {
-        if constexpr (isSigned)
-            return (2 * dimX + 1) * (2 * dimY + 1) * (2 * dimZ + 1);
-        else
-            return dimX * dimY * dimZ;
+        return dimToSize(dimX, dimY, dimZ);
     }
 
     template<class T, bool isSigned>
@@ -218,13 +230,36 @@ namespace Physica::Core {
 
     template<class T, bool isSigned>
     template<class RealType>
-    Grid3D<T, isSigned> Grid3D<T, isSigned>::gridFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice) {
+    typename Grid3D<T, isSigned>::Dim
+    Grid3D<T, isSigned>::dimFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice) {
         const auto factor = RealType(2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck);
         const RealType maxMoment = sqrt(factor * cutEnergy);
-        const auto dimX = size_t((maxMoment / reciprocalLattice.row(0).norm()).getTrivial());
-        const auto dimY = size_t((maxMoment / reciprocalLattice.row(1).norm()).getTrivial());
-        const auto dimZ = size_t((maxMoment / reciprocalLattice.row(2).norm()).getTrivial());
+        const auto dimX = IntType((maxMoment / reciprocalLattice.row(0).norm()).getTrivial());
+        const auto dimY = IntType((maxMoment / reciprocalLattice.row(1).norm()).getTrivial());
+        const auto dimZ = IntType((maxMoment / reciprocalLattice.row(2).norm()).getTrivial());
+        return {dimX, dimY, dimZ};
+    }
+
+    template<class T, bool isSigned>
+    template<class RealType>
+    size_t Grid3D<T, isSigned>::sizeFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice) {
+        const auto[dimX, dimY, dimZ] = dimFromCutEnergy(cutEnergy, reciprocalLattice);
+        return dimToSize(dimX, dimY, dimZ);
+    }
+
+    template<class T, bool isSigned>
+    template<class RealType>
+    Grid3D<T, isSigned> Grid3D<T, isSigned>::gridFromCutEnergy(RealType cutEnergy, LatticeMatrix reciprocalLattice) {
+        const auto[dimX, dimY, dimZ] = dimFromCutEnergy(cutEnergy, reciprocalLattice);
         return Grid3D<T, isSigned>(reciprocalLattice, dimX, dimY, dimZ);
+    }
+
+    template<class T, bool isSigned>
+    size_t Grid3D<T, isSigned>::dimToSize(size_t dimX, size_t dimY, size_t dimZ) {
+        if constexpr (isSigned)
+            return (2 * dimX + 1) * (2 * dimY + 1) * (2 * dimZ + 1);
+        else
+            return dimX * dimY * dimZ;
     }
 }
 

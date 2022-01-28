@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -36,13 +36,10 @@ namespace Physica::Utils {
      * Note:
      * If \T is a complex type, \T must have its copy and move constructors defined.
      *
-     * TODO:
-     * 1.Copy, move constructors and assign operators maybe able to accept different specializations. CPRT should be used
-     *
      * Optimize:
      * 1. Use more effective allocate strategy to avoid reallocate.
      * 2. Use the end pointer of arr instead of length may improve performance.
-     * 3. Add StackAllocator to avoid malloc in fixed size array
+     * 3. Initialize array using variable parameters
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length, class Allocator = HostAllocator<T>>
     class Array;

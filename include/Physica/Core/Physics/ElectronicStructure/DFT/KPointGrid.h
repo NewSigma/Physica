@@ -19,16 +19,42 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "KPointData.h"
 #include "Grid3D.h"
 
 namespace Physica::Core {
-    class KPointGrid : public Grid3D<Scalar<Float, false>, true> {
-        using Base = Grid3D<Scalar<Float, false>, true>;
-        using ScalarType = Scalar<Float, false>;
+    template<class ScalarType>
+    class KPointGrid : public Grid3D<KPointData<ScalarType>, true> {
+        using Base = Grid3D<KPointData<ScalarType>, true>;
+        using typename Base::LatticeMatrix;
     public:
         using KPoint = Vector<ScalarType, 3>;
     public:
         template<class MatrixType>
-        KPointGrid(const RValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
+        KPointGrid(ScalarType cutEnergy, const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
+    private:
+        template<class MatrixType>
+        static LatticeMatrix getGridLattice(const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
     };
+
+    template<class ScalarType>
+    template<class MatrixType>
+    KPointGrid<ScalarType>::KPointGrid(ScalarType cutEnergy,
+                                       const LValueMatrix<MatrixType>& repLatt,
+                                       size_t dimX,
+                                       size_t dimY,
+                                       size_t dimZ)
+            : Base(getGridLattice(repLatt, dimX, dimY, dimZ), dimX, dimY, dimZ, Base::sizeFromCutEnergy(cutEnergy, repLatt)) {}
+
+    template<class ScalarType>
+    template<class MatrixType>
+    typename KPointGrid<ScalarType>::LatticeMatrix
+    KPointGrid<ScalarType>::getGridLattice(const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ) {
+        using LatticeScalar = typename LatticeMatrix::ScalarType;
+        LatticeMatrix result{};
+        result.row(0) = repLatt.row(0).asVector() * reciprocal(LatticeScalar((dimX + 1) * 2));
+        result.row(1) = repLatt.row(1).asVector() * reciprocal(LatticeScalar((dimY + 1) * 2));
+        result.row(2) = repLatt.row(2).asVector() * reciprocal(LatticeScalar((dimZ + 1) * 2));
+        return result;
+    }
 }

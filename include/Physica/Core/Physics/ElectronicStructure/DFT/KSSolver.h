@@ -33,7 +33,7 @@ namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     class KSSolver {
         using ComplexType = ComplexScalar<ScalarType>;
-        using KPoint = typename KPointGrid::KPoint;
+        using KPoint = typename KPointGrid<ScalarType>::KPoint;
         using Hamilton = DenseHermiteMatrix<ComplexType>;
         using HamiltonPair = std::pair<Hamilton, Hamilton>;
         using MatrixType = DenseMatrix<ComplexType>;
@@ -56,6 +56,7 @@ namespace Physica::Core {
         ReciprocalCell repCell;
         ScalarType cutEnergy;
         KSOrbitPair orbits;
+        KPointGrid<ScalarType> kPoints;
         DensityRecord densityRecord;
         PotPair xcPot;
         CenteredGrid externalPotGrid;
@@ -65,7 +66,7 @@ namespace Physica::Core {
         XCProvider xcProvider;
         size_t iteration;
     public:
-        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
+        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, KPointGrid<ScalarType> kPoints_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
         ~KSSolver();
@@ -103,10 +104,16 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class XCProvider>
-    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, size_t gridDimX, size_t gridDimY, size_t gridDimZ)
+    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_,
+                                               ScalarType cutEnergy_,
+                                               KPointGrid<ScalarType> kPoints_,
+                                               size_t gridDimX,
+                                               size_t gridDimY,
+                                               size_t gridDimZ)
             : cell(std::move(cell_))
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
+            , kPoints(std::move(kPoints_))
             , densityRecord(DIISBufferSize, std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
                                                            UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)))
             , xcPot(std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
@@ -125,45 +132,49 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     bool KSSolver<ScalarType, XCProvider>::solve(const ScalarType& criteria, size_t maxIte) {
-        KPoint toSolve{0, 0, 0};
-
         const size_t plainWaveCount = getPlainWaveCount();
         auto hamilton = std::make_pair(Hamilton(plainWaveCount), Hamilton(plainWaveCount));
-        auto eigenSolver_up = EigenSolver<MatrixType>(plainWaveCount);
-        auto eigenSolver_down = EigenSolver<MatrixType>(plainWaveCount);
 
         auto densityResiduals = DIISBuffer(DIISBufferSize - 1, UncenteredGrid(cell.getLattice(), getDimX(), getDimY(), getDimZ()));
         auto diisMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
         diisMat(0, 0) = ScalarType::Zero();
 
-        iteration = 0;
-        while (true) {
-            assembleH(toSolve, hamilton);
-            eigenSolver_up.compute(hamilton.first, true);
-            eigenSolver_down.compute(hamilton.second, true);
-            eigenSolver_up.sort();
-            eigenSolver_down.sort();
+        auto eigenSolver_up = EigenSolver<MatrixType>(plainWaveCount);
+        auto eigenSolver_down = EigenSolver<MatrixType>(plainWaveCount);
 
-            updateOrbits(eigenSolver_up, eigenSolver_down);
-            updateDensity();
+        const size_t kPointCount = kPoints.getSize();
+        for (size_t i = 0; i < kPointCount; ++i) {
+            const KPoint kPoint = kPoints.indexToPos(i);
+            iteration = 0;
+            while (true) {
+                assembleH(kPoint, hamilton);
+                eigenSolver_up.compute(hamilton.first, true);
+                eigenSolver_down.compute(hamilton.second, true);
+                eigenSolver_up.sort();
+                eigenSolver_down.sort();
 
-            if (iteration != 0) {
-                const auto& last_rho = (*densityResiduals.crbegin()).asVector();
-                const auto& rho = currentDensity().first.asVector();
-                const ScalarType delta_rho = abs(divide(last_rho, rho)).max();
-                const bool isConverged = delta_rho < criteria;
-                if (isConverged)
-                    break;
-            }
+                updateOrbits(eigenSolver_up, eigenSolver_down);
+                updateDensity();
 
-            preDIIS(densityResiduals, diisMat);
-            const bool doDIIS = iteration != 0 && iteration % DIISBufferSize == 0;
-            if (doDIIS)
-                DIISExtrapolation(diisMat);
+                if (iteration != 0) {
+                    const auto& last_rho = (*densityResiduals.crbegin()).asVector();
+                    const auto& rho = currentDensity().first.asVector();
+                    const ScalarType delta_rho = abs(divide(last_rho, rho)).max();
+                    const bool isConverged = delta_rho < criteria;
+                    if (isConverged)
+                        break;
+                }
 
-            if (++iteration == maxIte)
-                throw BadConvergenceException();
-        };
+                preDIIS(densityResiduals, diisMat);
+                const bool doDIIS = iteration != 0 && iteration % DIISBufferSize == 0;
+                if (doDIIS)
+                    DIISExtrapolation(diisMat);
+
+                if (++iteration == maxIte)
+                    throw BadConvergenceException();
+            };
+            kPoints[i].setData(eigenSolver_up, eigenSolver_down);
+        }
         return true;
     }
 
