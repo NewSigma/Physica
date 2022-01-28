@@ -63,6 +63,8 @@ namespace Physica::Core {
          * It is faster if all eigenvalues are real.
          */
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
+        /* Helpers */
+        void swap(EigenSolver& solver);
     private:
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
@@ -297,5 +299,19 @@ namespace Physica::Core {
                 col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
             }
         }
+    }
+
+    template<class MatrixType>
+    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) {
+        std::swap(eigenvalues, solver.eigenvalues);
+        std::swap(rawEigenvectors, solver.rawEigenvectors);
+    }
+}
+
+namespace std {
+    template<class MatrixType>
+    inline void swap(Physica::Core::EigenSolver<MatrixType>& solver1,
+                     Physica::Core::EigenSolver<MatrixType>& solver2) noexcept {
+        solver1.swap(solver2);
     }
 }
