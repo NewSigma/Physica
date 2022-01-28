@@ -25,12 +25,29 @@ namespace Physica::Core {
         HL
     };
 
-    template<class ScalarType, LDAType type>
-    class LDA {
-        using Grid = Grid3D<ScalarType, false>;
-        using DensityType = std::pair<Grid, Grid>;
-        using PotType = std::pair<Grid, Grid>;
+    template<class ScalarType, LDAType type, bool isSpinPolarized> class LDA;
 
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<class ScalarType, LDAType type, bool polarized>
+        class Traits<LDA<ScalarType, type, polarized>> {
+            using Grid = Grid3D<ScalarType, false>;
+        public:
+            constexpr static bool isSpinPolarized = polarized;
+            using DensityType = typename std::conditional<isSpinPolarized, std::pair<Grid, Grid>, Grid>::type;
+            using PotType = typename std::conditional<isSpinPolarized, std::pair<Grid, Grid>, Grid>::type;
+        };
+    }
+
+    template<class ScalarType, LDAType type>
+    class LDA<ScalarType, type, true> {
+        using This = LDA<ScalarType, type, true>;
+    public:
+        constexpr static bool isSpinPolarized = Internal::Traits<This>::isSpinPolarized;
+        using DensityType = typename Internal::Traits<This>::DensityType;
+        using PotType = typename Internal::Traits<This>::PotType;
+    private:
         Vector<ScalarType> buffer;
         Vector<ScalarType> buffer1;
         Vector<ScalarType> buffer2;
@@ -53,13 +70,13 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, LDAType type>
-    LDA<ScalarType, type>::LDA(size_t bufferSize) : buffer(bufferSize)
-                                                  , buffer1(bufferSize)
-                                                  , buffer2(bufferSize)
-                                                  , buffer3(bufferSize) {}
+    LDA<ScalarType, type, true>::LDA(size_t bufferSize) : buffer(bufferSize)
+                                                        , buffer1(bufferSize)
+                                                        , buffer2(bufferSize)
+                                                        , buffer3(bufferSize) {}
 
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::fill(const DensityType& density, PotType& xc) {
+    void LDA<ScalarType, type, true>::fill(const DensityType& density, PotType& xc) {
         [[maybe_unused]] const auto& rho = density.first.asVector();
         [[maybe_unused]] const auto& zeta = density.second.asVector();
         assert(rho.getLength() == getBufferSize());
@@ -72,7 +89,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:106
      */
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::fillExchange(const DensityType& density, PotType& xc) {
+    void LDA<ScalarType, type, true>::fillExchange(const DensityType& density, PotType& xc) {
         constexpr double factor0 = -0.73855876638202240588;
         constexpr double factor1 = -0.93052573634910002500;
         constexpr double factor_f = 1.9236610509315363198;
@@ -111,7 +128,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479-480
      */
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
+    void LDA<ScalarType, type, true>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
         auto& xc_up = xc.first.asVector();
         auto& xc_down = xc.second.asVector();
         switch(type) {
@@ -121,6 +138,72 @@ namespace Physica::Core {
             buffer = ScalarType(factor1) * ln(ScalarType::One() + ScalarType(factor2) * buffer);
             xc_up += buffer;
             xc_down += buffer;
+        }
+    }
+
+    template<class ScalarType, LDAType type>
+    class LDA<ScalarType, type, false> {
+        using This = LDA<ScalarType, type, false>;
+    public:
+        constexpr static bool isSpinPolarized = Internal::Traits<This>::isSpinPolarized;
+        using DensityType = typename Internal::Traits<This>::DensityType;
+        using PotType = typename Internal::Traits<This>::PotType;
+    private:
+        Vector<ScalarType> buffer;
+    public:
+        LDA(size_t bufferSize);
+        LDA(const LDA&) = delete;
+        LDA(LDA&&) = delete;
+        ~LDA() = default;
+        /* Operators */
+        LDA& operator=(const LDA&) = delete;
+        LDA& operator=(LDA&&) = delete;
+        /* Operations */
+        void fill(const DensityType& density, PotType& xc);
+        /* Getters */
+        [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
+    private:
+        void fillExchange(const DensityType& density, PotType& xc);
+        void addCorreclation(const DensityType& density, PotType& xc);
+    };
+
+    template<class ScalarType, LDAType type>
+    LDA<ScalarType, type, false>::LDA(size_t bufferSize) : buffer(bufferSize) {}
+
+    template<class ScalarType, LDAType type>
+    void LDA<ScalarType, type, false>::fill(const DensityType& density, PotType& xc) {
+        [[maybe_unused]] const auto& rho = density.asVector();
+        assert(rho.getLength() == getBufferSize());
+        fillExchange(density, xc);
+        addCorreclation(density, xc);
+    }
+    /**
+     * Reference:
+     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:106
+     */
+    template<class ScalarType, LDAType type>
+    void LDA<ScalarType, type, false>::fillExchange(const DensityType& density, PotType& xc) {
+        constexpr double factor0 = -0.73855876638202240588;
+        constexpr double factor1 = -0.93052573634910002500;
+        const auto& rho = density.first.asVector();
+        auto& V = xc.asVector();
+
+        buffer = pow(rho, ScalarType(1.0 / 3));
+        V = ScalarType(4.0 / 3 * factor0) * buffer;
+    }
+    /**
+     * Reference:
+     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479-480
+     */
+    template<class ScalarType, LDAType type>
+    void LDA<ScalarType, type, false>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
+        auto& V = xc.asVector();
+        switch(type) {
+        case LDAType::HL:
+            constexpr double factor1 = -0.045 / 2;
+            constexpr double factor2 = 33.851831034345862;
+            buffer = ScalarType(factor1) * ln(ScalarType::One() + ScalarType(factor2) * buffer);
+            V += buffer;
         }
     }
 }
