@@ -28,8 +28,8 @@ namespace Physica::Core {
     template<class ScalarType, LDAType type>
     class LDA {
         using Grid = Grid3D<ScalarType, false>;
-        using DensityPair = std::pair<Grid, Grid>;
-        using PotPair = std::pair<Grid, Grid>;
+        using DensityType = std::pair<Grid, Grid>;
+        using PotType = std::pair<Grid, Grid>;
 
         Vector<ScalarType> buffer;
         Vector<ScalarType> buffer1;
@@ -44,12 +44,12 @@ namespace Physica::Core {
         LDA& operator=(const LDA&) = delete;
         LDA& operator=(LDA&&) = delete;
         /* Operations */
-        void fill(const DensityPair& density, PotPair& xc);
+        void fill(const DensityType& density, PotType& xc);
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
     private:
-        void fillExchange(const DensityPair& density, PotPair& xc);
-        void addCorreclation(const DensityPair& density, PotPair& xc);
+        void fillExchange(const DensityType& density, PotType& xc);
+        void addCorreclation(const DensityType& density, PotType& xc);
     };
 
     template<class ScalarType, LDAType type>
@@ -59,7 +59,7 @@ namespace Physica::Core {
                                                   , buffer3(bufferSize) {}
 
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::fill(const DensityPair& density, PotPair& xc) {
+    void LDA<ScalarType, type>::fill(const DensityType& density, PotType& xc) {
         [[maybe_unused]] const auto& rho = density.first.asVector();
         [[maybe_unused]] const auto& zeta = density.second.asVector();
         assert(rho.getLength() == getBufferSize());
@@ -72,7 +72,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:106
      */
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::fillExchange(const DensityPair& density, PotPair& xc) {
+    void LDA<ScalarType, type>::fillExchange(const DensityType& density, PotType& xc) {
         constexpr double factor0 = -0.73855876638202240588;
         constexpr double factor1 = -0.93052573634910002500;
         constexpr double factor_f = 1.9236610509315363198;
@@ -111,7 +111,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:479-480
      */
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type>::addCorreclation([[maybe_unused]] const DensityPair& density, PotPair& xc) {
+    void LDA<ScalarType, type>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
         auto& xc_up = xc.first.asVector();
         auto& xc_down = xc.second.asVector();
         switch(type) {

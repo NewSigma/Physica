@@ -23,23 +23,26 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    class KPointData {
+    class KPointInfo {
         using ComplexType = ComplexScalar<ScalarType>;
-        using DataType = EigenSolver<DenseMatrix<ComplexType>>;
+        using RawDataType = EigenSolver<DenseMatrix<ComplexType>>;
 
-        DataType bandUp;
-        DataType bandDown;
+        RawDataType bandUp;
+        RawDataType bandDown;
     public:
-        KPointData(size_t plainWaveCount);
+        KPointInfo(size_t plainWaveCount);
         /* Setters */
-        void setData(DataType& newBandUp, DataType& newBandDown);
+        void setRawData(RawDataType& newBandUp, RawDataType& newBandDown);
+        /* Getters */
+        const RawDataType& getBandUp() const noexcept { return bandUp; }
+        const RawDataType& getBandDown() const noexcept { return bandDown; }
     };
 
     template<class ScalarType>
-    KPointData<ScalarType>::KPointData(size_t plainWaveCount) : bandUp(plainWaveCount), bandDown(plainWaveCount) {}
+    KPointInfo<ScalarType>::KPointInfo(size_t plainWaveCount) : bandUp(plainWaveCount), bandDown(plainWaveCount) {}
 
     template<class ScalarType>
-    void KPointData<ScalarType>::setData(DataType& newBandUp, DataType& newBandDown) {
+    void KPointInfo<ScalarType>::setRawData(RawDataType& newBandUp, RawDataType& newBandDown) {
         std::swap(bandUp, newBandUp);
         std::swap(bandDown, newBandDown);
     }

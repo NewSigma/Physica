@@ -26,14 +26,14 @@
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Ewald.h"
 #include "WaveFunction.h"
-#include "KPointGrid.h"
+#include "BandGrid.h"
 #include "Grid3D.h"
 
 namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     class KSSolver {
         using ComplexType = ComplexScalar<ScalarType>;
-        using KPoint = typename KPointGrid<ScalarType>::KPoint;
+        using KPoint = typename BandGrid<ScalarType>::KPoint;
         using Hamilton = DenseHermiteMatrix<ComplexType>;
         using HamiltonPair = std::pair<Hamilton, Hamilton>;
         using MatrixType = DenseMatrix<ComplexType>;
@@ -56,7 +56,7 @@ namespace Physica::Core {
         ReciprocalCell repCell;
         ScalarType cutEnergy;
         KSOrbitPair orbits;
-        KPointGrid<ScalarType> kPoints;
+        BandGrid<ScalarType> kPoints;
         DensityRecord densityRecord;
         PotPair xcPot;
         CenteredGrid externalPotGrid;
@@ -66,7 +66,7 @@ namespace Physica::Core {
         XCProvider xcProvider;
         size_t iteration;
     public:
-        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, KPointGrid<ScalarType> kPoints_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
+        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, BandGrid<ScalarType> kPoints_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
         ~KSSolver();
@@ -75,6 +75,8 @@ namespace Physica::Core {
         KSSolver& operator=(KSSolver&& base) noexcept = delete;
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
+        /* Getters */
+        [[nodiscard]] const BandGrid<ScalarType>& getBandGrid() const noexcept { return kPoints; }
     private:
         /* Operations */
         void initialize(size_t gridDimX, size_t gridDimY, size_t gridDimZ);
@@ -106,7 +108,7 @@ namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_,
                                                ScalarType cutEnergy_,
-                                               KPointGrid<ScalarType> kPoints_,
+                                               BandGrid<ScalarType> kPoints_,
                                                size_t gridDimX,
                                                size_t gridDimY,
                                                size_t gridDimZ)
@@ -173,7 +175,7 @@ namespace Physica::Core {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            kPoints[i].setData(eigenSolver_up, eigenSolver_down);
+            kPoints[i].setRawData(eigenSolver_up, eigenSolver_down);
         }
         return true;
     }
