@@ -40,7 +40,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base() {
         for (size_t i = 0; i < Length; ++i)
             arr[i] = array[i];
     }
