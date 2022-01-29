@@ -49,9 +49,15 @@ namespace Physica::Core {
         RawEigenvectorType rawEigenvectors;
         bool computeEigenvectors;
     public:
+        EigenSolver() = default;
         EigenSolver(size_t size);
         template<class OtherMatrix>
         EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        EigenSolver(const EigenSolver&) = default;
+        EigenSolver(EigenSolver&&) = default;
+        ~EigenSolver() = default;
+        /* Operators */
+        EigenSolver& operator=(EigenSolver solver);
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
@@ -83,6 +89,12 @@ namespace Physica::Core {
             , rawEigenvectors(source.getRow(), source.getRow())
             , computeEigenvectors(computeEigenvectors_) {
         compute(source, computeEigenvectors);
+    }
+
+    template<class MatrixType>
+    EigenSolver<MatrixType>& EigenSolver<MatrixType>::operator=(EigenSolver<MatrixType> solver) {
+        swap(solver);
+        return *this;
     }
 
     template<class MatrixType>

@@ -184,8 +184,7 @@ namespace Physica::Core {
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, false>::fillExchange(const DensityType& density, PotType& xc) {
         constexpr double factor0 = -0.73855876638202240588;
-        constexpr double factor1 = -0.93052573634910002500;
-        const auto& rho = density.first.asVector();
+        const auto& rho = density.asVector();
         auto& V = xc.asVector();
 
         buffer = pow(rho, ScalarType(1.0 / 3));

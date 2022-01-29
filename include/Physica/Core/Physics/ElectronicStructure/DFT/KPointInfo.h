@@ -22,28 +22,52 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class KPointInfo {
-        using ComplexType = ComplexScalar<ScalarType>;
-        using RawDataType = EigenSolver<DenseMatrix<ComplexType>>;
+    template<class ScalarType, bool isSpinPolarized> class KPointInfo;
 
-        RawDataType bandUp;
-        RawDataType bandDown;
+    template<class ScalarType>
+    class KPointInfo<ScalarType, true> {
+        using ComplexType = ComplexScalar<ScalarType>;
+        using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
+
+        EigInfo eigUp;
+        EigInfo eigDown;
     public:
         KPointInfo(size_t plainWaveCount);
         /* Setters */
-        void setRawData(RawDataType& newBandUp, RawDataType& newBandDown);
+        void setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown);
         /* Getters */
-        const RawDataType& getBandUp() const noexcept { return bandUp; }
-        const RawDataType& getBandDown() const noexcept { return bandDown; }
+        const EigInfo& getEigUp() const noexcept { return eigUp; }
+        const EigInfo& getEigDown() const noexcept { return eigDown; }
     };
 
     template<class ScalarType>
-    KPointInfo<ScalarType>::KPointInfo(size_t plainWaveCount) : bandUp(plainWaveCount), bandDown(plainWaveCount) {}
+    KPointInfo<ScalarType, true>::KPointInfo(size_t plainWaveCount) : eigUp(plainWaveCount), eigDown(plainWaveCount) {}
 
     template<class ScalarType>
-    void KPointInfo<ScalarType>::setRawData(RawDataType& newBandUp, RawDataType& newBandDown) {
-        std::swap(bandUp, newBandUp);
-        std::swap(bandDown, newBandDown);
+    void KPointInfo<ScalarType, true>::setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown) {
+        std::swap(eigUp, newEigUp);
+        std::swap(eigDown, newEigDown);
+    }
+
+    template<class ScalarType>
+    class KPointInfo<ScalarType, false> {
+        using ComplexType = ComplexScalar<ScalarType>;
+        using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
+
+        EigInfo eig;
+    public:
+        KPointInfo(size_t plainWaveCount);
+        /* Setters */
+        void setEigInfo(EigInfo& newEig);
+        /* Getters */
+        const EigInfo& getEig() const noexcept { return eig; }
+    };
+
+    template<class ScalarType>
+    KPointInfo<ScalarType, false>::KPointInfo(size_t plainWaveCount) : eig(plainWaveCount) {}
+
+    template<class ScalarType>
+    void KPointInfo<ScalarType, false>::setEigInfo(EigInfo& newEig) {
+        std::swap(eig, newEig);
     }
 }

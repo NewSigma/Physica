@@ -47,6 +47,20 @@ namespace Physica::Core::Internal {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }
 
-        void swap(HalfDenseMatrixStorage& storage) { Base::swap(storage); }
+        void swap(HalfDenseMatrixStorage& storage);
     };
+
+    template<class Derived>
+    void HalfDenseMatrixStorage<Derived>::swap(HalfDenseMatrixStorage<Derived>& storage) {
+        std::swap(order, storage.order);
+        Base::swap(storage);
+    }
+}
+
+namespace std {
+    template<class Derived>
+    inline void swap(Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat1,
+                     Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat2) noexcept {
+        mat1.swap(mat2);
+    }
 }
