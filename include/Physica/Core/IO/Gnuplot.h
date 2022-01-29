@@ -22,8 +22,12 @@
 
 namespace Physica::Core {
     class Gnuplot {
-        Utils::Array<Utils::Array<double>> xDatas;
-        Utils::Array<Utils::Array<double>> yDatas;
+    public:
+        using VectorType = Vector<Scalar<Double, false>>;
+        using DataArray = Utils::Array<Vector<Scalar<Double, false>>>;
+    private:
+        DataArray xDatas;
+        DataArray yDatas;
     public:
         Gnuplot() = default;
         Gnuplot(const Gnuplot&) = default;
@@ -35,7 +39,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const Gnuplot& poscar);
         friend std::istream& operator>>(std::istream& is, Gnuplot& poscar);
         /* Getters */
-        [[nodiscard]] Utils::Array<Utils::Array<double>> getXDatas() const noexcept { return xDatas; }
-        [[nodiscard]] Utils::Array<Utils::Array<double>> getYDatas() const noexcept { return yDatas; }
+        [[nodiscard]] const DataArray& getXDatas() const noexcept { return xDatas; }
+        [[nodiscard]] const DataArray& getYDatas() const noexcept { return yDatas; }
     };
 }
