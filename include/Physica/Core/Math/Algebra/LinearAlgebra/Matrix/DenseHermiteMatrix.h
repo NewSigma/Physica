@@ -56,7 +56,7 @@ namespace Physica::Core {
         DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
         /* Operators */
-        DenseHermiteMatrix& operator=(DenseHermiteMatrix m);
+        DenseHermiteMatrix& operator=(DenseHermiteMatrix m) noexcept;
         DenseHermiteMatrix& operator=(RealType r);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column);
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -91,7 +91,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     DenseHermiteMatrix<ScalarType, Order, MaxOrder>&
-    DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator=(DenseHermiteMatrix m) {
+    DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator=(DenseHermiteMatrix m) noexcept {
         swap(m);
         return *this;
     }

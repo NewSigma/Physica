@@ -142,7 +142,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) {
+    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) noexcept {
         std::swap(arr, array.arr);
         std::swap(length, array.length);
     }

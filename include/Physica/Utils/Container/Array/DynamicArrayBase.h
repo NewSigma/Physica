@@ -73,7 +73,7 @@ namespace Physica::Utils::Internal {
         /* Operators */
         DynamicArrayBase& operator=(DynamicArrayBase array) noexcept;
         /* Helpers */
-        __host__ __device__ void swap(DynamicArrayBase& array);
+        __host__ __device__ void swap(DynamicArrayBase& array) noexcept;
     };
 }
 

@@ -46,7 +46,7 @@ namespace Physica::Core::Internal {
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
-        void swap(FFTImpl& fft);
+        void swap(FFTImpl& fft) noexcept;
     private:
         void transformImpl(const RealType& phase);
     };

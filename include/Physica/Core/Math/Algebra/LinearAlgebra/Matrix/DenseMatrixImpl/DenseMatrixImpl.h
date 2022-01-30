@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>&
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::operator=(DenseMatrix m) {
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::operator=(DenseMatrix m) noexcept {
         swap(m);
         return *this;
     }

@@ -43,7 +43,7 @@ namespace Physica::Core {
         FFT(FFT&&) noexcept = default;
         ~FFT() = default;
         /* Operators */
-        FFT& operator=(FFT fft);
+        FFT& operator=(FFT fft) noexcept;
         ComplexType operator()(size_t i) { return impl(i); }
         /* Operations */
         void transform(const Vector<ScalarType>& data) { impl.transform(data); }
@@ -56,7 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(impl.getDeltaT() * impl.getSize()); }
         [[nodiscard]] ComplexType getFreqIntense(const RealType& freq) const noexcept;
         /* Helpers */
-        void swap(FFT& fft) { impl.swap(fft.impl); }
+        void swap(FFT& fft) noexcept { impl.swap(fft.impl); }
     };
 
     template<class ScalarType>
@@ -66,7 +66,7 @@ namespace Physica::Core {
     FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data, const RealType& deltaT) : impl(data, deltaT) {}
 
     template<class ScalarType>
-    FFT<ScalarType, 1>& FFT<ScalarType, 1>::operator=(FFT<ScalarType, 1> fft) {
+    FFT<ScalarType, 1>& FFT<ScalarType, 1>::operator=(FFT<ScalarType, 1> fft) noexcept {
         swap(fft);
         return *this;
     }
@@ -101,7 +101,7 @@ namespace Physica::Core {
         FFT(FFT&&) noexcept = default;
         ~FFT() = default;
         /* Operators */
-        FFT& operator=(FFT fft);
+        FFT& operator=(FFT fft) noexcept;
         ComplexType operator()(size_t i) { return impl(i); }
         /* Operations */
         void transform(const Vector<ScalarType>& data) { impl.transform(data); }
@@ -114,7 +114,7 @@ namespace Physica::Core {
         [[nodiscard]] RealType getDeltaFreq(size_t dim) const noexcept { return reciprocal(impl.getDeltaT(dim) * impl.getSize(dim)); }
         [[nodiscard]] ComplexType getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept;
         /* Helpers */
-        void swap(FFT& fft) { impl.swap(fft.impl); }
+        void swap(FFT& fft) noexcept { impl.swap(fft.impl); }
     };
 
     template<class ScalarType, size_t Dim>
@@ -126,7 +126,7 @@ namespace Physica::Core {
             : impl(data, size, deltaTs) {}
 
     template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>& FFT<ScalarType, Dim>::operator=(FFT<ScalarType, Dim> fft) {
+    FFT<ScalarType, Dim>& FFT<ScalarType, Dim>::operator=(FFT<ScalarType, Dim> fft) noexcept {
         swap(fft);
         return *this;
     }

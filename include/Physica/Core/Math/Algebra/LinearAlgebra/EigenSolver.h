@@ -49,15 +49,15 @@ namespace Physica::Core {
         RawEigenvectorType rawEigenvectors;
         bool computeEigenvectors;
     public:
-        EigenSolver() = default;
+        EigenSolver();
         EigenSolver(size_t size);
         template<class OtherMatrix>
         EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         EigenSolver(const EigenSolver&) = default;
-        EigenSolver(EigenSolver&&) = default;
+        EigenSolver(EigenSolver&& solver) noexcept = default;
         ~EigenSolver() = default;
         /* Operators */
-        EigenSolver& operator=(EigenSolver solver);
+        EigenSolver& operator=(EigenSolver solver) noexcept;
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
@@ -70,12 +70,15 @@ namespace Physica::Core {
          */
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
         /* Helpers */
-        void swap(EigenSolver& solver);
+        void swap(EigenSolver& solver) noexcept;
     private:
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
     };
+
+    template<class MatrixType>
+    EigenSolver<MatrixType>::EigenSolver() : eigenvalues(), rawEigenvectors(), computeEigenvectors(false) {}
 
     template<class MatrixType>
     EigenSolver<MatrixType>::EigenSolver(size_t size)
@@ -92,7 +95,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    EigenSolver<MatrixType>& EigenSolver<MatrixType>::operator=(EigenSolver<MatrixType> solver) {
+    EigenSolver<MatrixType>& EigenSolver<MatrixType>::operator=(EigenSolver<MatrixType> solver) noexcept {
         swap(solver);
         return *this;
     }
@@ -314,7 +317,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) {
+    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) noexcept {
         std::swap(eigenvalues, solver.eigenvalues);
         std::swap(rawEigenvectors, solver.rawEigenvectors);
     }

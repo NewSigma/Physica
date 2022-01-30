@@ -52,7 +52,7 @@ namespace Physica::Core {
         Grid3D(Grid3D&&) noexcept = default;
         ~Grid3D() = default;
         /* Operators */
-        Grid3D& operator=(Grid3D grid);
+        Grid3D& operator=(Grid3D grid) noexcept;
         [[nodiscard]] T& operator[](size_t index);
         [[nodiscard]] const T& operator[](size_t index) const;
         [[nodiscard]] T& operator()(IntType x, IntType y, IntType z);
@@ -104,7 +104,7 @@ namespace Physica::Core {
     }
 
     template<class T, bool isSigned>
-    Grid3D<T, isSigned>& Grid3D<T, isSigned>::operator=(Grid3D grid) {
+    Grid3D<T, isSigned>& Grid3D<T, isSigned>::operator=(Grid3D grid) noexcept {
         swap(grid);
         return *this;
     }

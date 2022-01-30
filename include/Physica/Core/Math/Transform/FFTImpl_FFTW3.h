@@ -55,7 +55,7 @@ namespace Physica::Core::Internal {
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
-        void swap(FFTImpl& fft);
+        void swap(FFTImpl& fft) noexcept;
     private:
         void transform();
         void invTransform();
@@ -175,7 +175,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    void FFTImpl<ScalarType, 1>::swap(FFTImpl& fft) {
+    void FFTImpl<ScalarType, 1>::swap(FFTImpl& fft) noexcept {
         std::swap(forward_plan, fft.forward_plan);
         std::swap(backward_plan, fft.backward_plan);
         std::swap(buffer, fft.buffer);
@@ -238,7 +238,7 @@ namespace Physica::Core::Internal {
         [[nodiscard]] ComplexType getComponent(Utils::Array<ssize_t, Dim> indexes) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
-        void swap(FFTImpl& fft);
+        void swap(FFTImpl& fft) noexcept;
     private:
         void transform();
         void invTransform();
@@ -333,7 +333,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType, size_t Dim>
-    void FFTImpl<ScalarType, Dim>::swap(FFTImpl& fft) {
+    void FFTImpl<ScalarType, Dim>::swap(FFTImpl& fft) noexcept {
         std::swap(forward_plan, fft.forward_plan);
         std::swap(backward_plan, fft.backward_plan);
         std::swap(buffer, fft.buffer);

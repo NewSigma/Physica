@@ -55,7 +55,7 @@ namespace Physica::Core {
         DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
         /* Operators */
-        DenseSymmMatrix& operator=(DenseSymmMatrix m);
+        DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         using Base::operator=;
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Storage::operator[](accessingIndex(row, column)); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Storage::operator[](accessingIndex(row, column)); }
@@ -86,7 +86,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     DenseSymmMatrix<ScalarType, Order, MaxOrder>&
-    DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator=(DenseSymmMatrix m) {
+    DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator=(DenseSymmMatrix m) noexcept {
         swap(m);
         return *this;
     }

@@ -79,7 +79,7 @@ namespace Physica::Core {
         DenseMatrix(const DenseMatrix& m);
         DenseMatrix(DenseMatrix&& m) noexcept;
         /* Operators */
-        DenseMatrix& operator=(DenseMatrix m);
+        DenseMatrix& operator=(DenseMatrix m) noexcept;
         using Base::operator=;
         using Storage::operator();
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);

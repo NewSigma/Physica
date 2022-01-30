@@ -47,11 +47,11 @@ namespace Physica::Core::Internal {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }
 
-        void swap(HalfDenseMatrixStorage& storage);
+        void swap(HalfDenseMatrixStorage& storage) noexcept;
     };
 
     template<class Derived>
-    void HalfDenseMatrixStorage<Derived>::swap(HalfDenseMatrixStorage<Derived>& storage) {
+    void HalfDenseMatrixStorage<Derived>::swap(HalfDenseMatrixStorage<Derived>& storage) noexcept {
         std::swap(order, storage.order);
         Base::swap(storage);
     }
