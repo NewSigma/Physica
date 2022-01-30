@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "KPointInfo.h"
+#include "KPoint.h"
 #include "Grid3D.h"
 
 namespace Physica::Core {
@@ -27,10 +27,9 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     class BandGrid {
-        using KPoint = KPointInfo<ScalarType, isSpinPolarized>;
-        using KPoints = Utils::Array<KPoint>;
+        using KPoints = Utils::Array<KPoint<ScalarType, isSpinPolarized>>;
 
-        Utils::Array<KPoint> kPoints;
+        KPoints kPoints;
     public:
         template<class MatrixType>
         BandGrid(ScalarType cutEnergy, const LValueMatrix<MatrixType>& repLatt, size_t kPointX, size_t kPointY, size_t kPointZ);
@@ -66,7 +65,7 @@ namespace Physica::Core {
             for (size_t y = 1; y <= kPointY; ++y) {
                 kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPoints[kPointID] = KPointInfo<ScalarType, isSpinPolarized>(k, plainWaveCount);
+                    kPoints[kPointID] = KPoint<ScalarType, isSpinPolarized>(k, plainWaveCount);
                     kz += stepZ;
                     ++kPointID;
                 }
