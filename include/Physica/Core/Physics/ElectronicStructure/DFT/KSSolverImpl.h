@@ -39,7 +39,7 @@ namespace Physica::Core::Internal {
     protected:
         using ComplexType = ComplexScalar<ScalarType>;
         using BandType = BandGrid<ScalarType, true>;
-        using KPoint = typename BandType::KPoint;
+        using Vector3D = Vector<ScalarType, 3>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = std::pair<HermiteMatrix, HermiteMatrix>;
         using KSOrbit = WaveFunction<ScalarType>;
@@ -86,7 +86,7 @@ namespace Physica::Core::Internal {
     protected:
         /* Operations */
         void initDensity();
-        void assembleH(KPoint k, const CenteredGrid& externalPot);
+        void assembleH(Vector3D k, const CenteredGrid& externalPot);
         void fillPotential(const CenteredGrid& externalPot);
         void updateOrbits();
         void updateDensity();
@@ -160,12 +160,10 @@ namespace Physica::Core::Internal {
         auto& eigSolverUp = eigSolver.first;
         auto& eigSolverDown = eigSolver.second;
 
-        const size_t kPointCount = band.getSize();
-        for (size_t i = 0; i < kPointCount; ++i) {
-            const KPoint kPoint = band.indexToPos(i);
+        for (auto& kPoint : band.getKPoints()) {
             iteration = 0;
             while (true) {
-                assembleH(kPoint, externalPot);
+                assembleH(kPoint.getPos(), externalPot);
                 eigSolverUp.compute(h.first, true);
                 eigSolverDown.compute(h.second, true);
                 eigSolverUp.sort();
@@ -191,7 +189,7 @@ namespace Physica::Core::Internal {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            band[i].setEigInfo(eigSolverUp, eigSolverDown);
+            kPoint.setEigInfo(eigSolverUp, eigSolverDown);
         }
         return true;
     }
@@ -213,7 +211,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType, class XCProvider>
-    void KSSolverImpl<ScalarType, XCProvider, true>::assembleH(KPoint k, const CenteredGrid& externalPot) {
+    void KSSolverImpl<ScalarType, XCProvider, true>::assembleH(Vector3D k, const CenteredGrid& externalPot) {
         auto& h_up = h.first;
         auto& h_down = h.second;
         h_up = ScalarType::Zero();
@@ -371,7 +369,7 @@ namespace Physica::Core::Internal {
     protected:
         using ComplexType = ComplexScalar<ScalarType>;
         using BandType = BandGrid<ScalarType, false>;
-        using KPoint = typename BandType::KPoint;
+        using Vector3D = Vector<ScalarType, 3>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = HermiteMatrix;
         using KSOrbit = WaveFunction<ScalarType>;
@@ -417,7 +415,7 @@ namespace Physica::Core::Internal {
     protected:
         /* Operations */
         void initDensity();
-        void assembleH(KPoint k, const CenteredGrid& externalPot);
+        void assembleH(Vector3D k, const CenteredGrid& externalPot);
         void fillPotential(const CenteredGrid& externalPot);
         void updateOrbits();
         void updateDensity();
@@ -483,12 +481,10 @@ namespace Physica::Core::Internal {
         auto diisMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
         diisMat(0, 0) = ScalarType::Zero();
 
-        const size_t kPointCount = band.getSize();
-        for (size_t i = 0; i < kPointCount; ++i) {
-            const KPoint kPoint = band.indexToPos(i);
+        for (auto& kPoint : band.getKPoints()) {
             iteration = 0;
             while (true) {
-                assembleH(kPoint, externalPot);
+                assembleH(kPoint.getPos(), externalPot);
                 eigSolver.compute(h, true);
                 eigSolver.sort();
 
@@ -512,7 +508,7 @@ namespace Physica::Core::Internal {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            band[i].setEigInfo(eigSolver);
+            kPoint.setEigInfo(eigSolver);
         }
         return true;
     }
@@ -528,7 +524,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType, class XCProvider>
-    void KSSolverImpl<ScalarType, XCProvider, false>::assembleH(KPoint k, const CenteredGrid& externalPot) {
+    void KSSolverImpl<ScalarType, XCProvider, false>::assembleH(Vector3D k, const CenteredGrid& externalPot) {
         h = ScalarType::Zero();
         /* fill kinetic */ {
             const size_t order = h.getRow();

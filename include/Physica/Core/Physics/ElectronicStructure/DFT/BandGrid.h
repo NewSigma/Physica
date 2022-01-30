@@ -26,37 +26,53 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class BandGrid;
 
     template<class ScalarType, bool isSpinPolarized>
-    class BandGrid : public Grid3D<KPointInfo<ScalarType, isSpinPolarized>, true> {
-        using Base = Grid3D<KPointInfo<ScalarType, isSpinPolarized>, true>;
-        using typename Base::LatticeMatrix;
-    public:
-        using KPoint = Vector<ScalarType, 3>;
+    class BandGrid {
+        using KPoint = KPointInfo<ScalarType, isSpinPolarized>;
+        using KPoints = Utils::Array<KPoint>;
+
+        Utils::Array<KPoint> kPoints;
     public:
         template<class MatrixType>
-        BandGrid(ScalarType cutEnergy, const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
-    private:
-        template<class MatrixType>
-        static LatticeMatrix getGridLattice(const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ);
+        BandGrid(ScalarType cutEnergy, const LValueMatrix<MatrixType>& repLatt, size_t kPointX, size_t kPointY, size_t kPointZ);
+        /* Getters */
+        [[nodiscard]] KPoints& getKPoints() { return kPoints; }
+        [[nodiscard]] const KPoints& getKPoints() const noexcept { return kPoints; }
     };
 
     template<class ScalarType, bool isSpinPolarized>
     template<class MatrixType>
     BandGrid<ScalarType, isSpinPolarized>::BandGrid(ScalarType cutEnergy,
                                                     const LValueMatrix<MatrixType>& repLatt,
-                                                    size_t dimX,
-                                                    size_t dimY,
-                                                    size_t dimZ)
-            : Base(getGridLattice(repLatt, dimX, dimY, dimZ), dimX, dimY, dimZ, Base::sizeFromCutEnergy(cutEnergy, repLatt)) {}
+                                                    size_t kPointX,
+                                                    size_t kPointY,
+                                                    size_t kPointZ)
+            : kPoints(kPointX * kPointY * kPointZ) {
+        assert(kPoints.getLength() != 0);
+        size_t kPointID = 0;
+        const size_t plainWaveCount = Grid3D<double, true>::sizeFromCutEnergy(cutEnergy, repLatt); //TODO: signed/unsigned character can be moved to father class
+        
+        const ScalarType stepX = reciprocal(ScalarType(kPointX));
+        const ScalarType stepY = reciprocal(ScalarType(kPointY));
+        const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
 
-    template<class ScalarType, bool isSpinPolarized>
-    template<class MatrixType>
-    typename BandGrid<ScalarType, isSpinPolarized>::LatticeMatrix
-    BandGrid<ScalarType, isSpinPolarized>::getGridLattice(const LValueMatrix<MatrixType>& repLatt, size_t dimX, size_t dimY, size_t dimZ) {
-        using LatticeScalar = typename LatticeMatrix::ScalarType;
-        LatticeMatrix result{};
-        result.row(0) = repLatt.row(0).asVector() * reciprocal(LatticeScalar((dimX + 1) * 2));
-        result.row(1) = repLatt.row(1).asVector() * reciprocal(LatticeScalar((dimY + 1) * 2));
-        result.row(2) = repLatt.row(2).asVector() * reciprocal(LatticeScalar((dimZ + 1) * 2));
-        return result;
+        Vector<ScalarType, 3> k{};
+        ScalarType& kx = k[0];
+        ScalarType& ky = k[1];
+        ScalarType& kz = k[2];
+
+        kx = (ScalarType(1) - ScalarType(kPointX)) / ScalarType(2 * kPointX);
+        for (size_t x = 1; x <= kPointX; ++x) {
+            ky = (ScalarType(1) - ScalarType(kPointY)) / ScalarType(2 * kPointY);
+            for (size_t y = 1; y <= kPointY; ++y) {
+                kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
+                for (size_t z = 1; z <= kPointZ; ++z) {
+                    kPoints[kPointID] = KPointInfo<ScalarType, isSpinPolarized>(k, plainWaveCount);
+                    kz += stepZ;
+                    ++kPointID;
+                }
+                ky += stepY;
+            }
+            kx += stepX;
+        }
     }
 }

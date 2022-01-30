@@ -32,21 +32,21 @@ int main() {
     ScalarType cutEnergy(0.8);
     Vector<ScalarType> data{-7.792391329, -1.041100405, -1.035201289, -1.034604466, 0.6683090416, 1.089343903, 1.092870102, 1.320171657, 1.333518296, 1.338267588, 2.048168732, 2.067794503, 2.068418852, 2.279423053, 2.296210041, 2.299139794, 2.319865956, 2.599589113, 2.607027813, 2.783839081, 3.224438445, 3.230179297, 3.239812718, 3.45520247, 3.466638718, 3.467162989, 3.613037906};
     {
-        BandGrid<ScalarType, true> grid(cutEnergy, Si.reciprocal().getLattice(), 0, 0, 0);
+        BandGrid<ScalarType, true> grid(cutEnergy, Si.reciprocal().getLattice(), 1, 1, 1);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, true>>(Si, cutEnergy, std::move(grid), 100, 100, 100);
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
-        Vector<ComplexType> delta = abs(band[0].getEigUp().getEigenvalues() - data);
+        Vector<ComplexType> delta = abs(band.getKPoints()[0].getEigUp().getEigenvalues() - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
             if (scalarNear(delta.calc(i), ComplexType::Zero(), 1E-15))
                 return 1;
     }
     {
-        BandGrid<ScalarType, false> grid(cutEnergy, Si.reciprocal().getLattice(), 0, 0, 0);
+        BandGrid<ScalarType, false> grid(cutEnergy, Si.reciprocal().getLattice(), 1, 1, 1);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(Si, cutEnergy, std::move(grid), 100, 100, 100);
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
-        Vector<ComplexType> delta = abs(band[0].getEig().getEigenvalues() - data);
+        Vector<ComplexType> delta = abs(band.getKPoints()[0].getEig().getEigenvalues() - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
             if (scalarNear(delta.calc(i), ComplexType::Zero(), 1E-15))
                 return 1;
