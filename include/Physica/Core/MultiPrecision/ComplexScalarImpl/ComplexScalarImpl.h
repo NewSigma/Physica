@@ -70,8 +70,8 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void ComplexScalar<ScalarType>::swap(ComplexScalar& c) noexcept {
-        Physica::Core::swap(real, c.real);
-        Physica::Core::swap(imag, c.imag);
+        real.swap(c.real);
+        imag.swap(c.imag);
     }
 
     template<class ScalarType>

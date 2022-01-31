@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -176,11 +176,12 @@ namespace Physica::Core::Internal {
 
     template<class ScalarType>
     void FFTImpl<ScalarType, 1>::swap(FFTImpl& fft) noexcept {
-        std::swap(forward_plan, fft.forward_plan);
-        std::swap(backward_plan, fft.backward_plan);
-        std::swap(buffer, fft.buffer);
-        std::swap(size, fft.size);
-        std::swap(deltaT, fft.deltaT);
+        using std::swap;
+        swap(forward_plan, fft.forward_plan);
+        swap(backward_plan, fft.backward_plan);
+        swap(buffer, fft.buffer);
+        swap(size, fft.size);
+        swap(deltaT, fft.deltaT);
     }
 
     template<class ScalarType>
@@ -334,11 +335,12 @@ namespace Physica::Core::Internal {
 
     template<class ScalarType, size_t Dim>
     void FFTImpl<ScalarType, Dim>::swap(FFTImpl& fft) noexcept {
-        std::swap(forward_plan, fft.forward_plan);
-        std::swap(backward_plan, fft.backward_plan);
-        std::swap(buffer, fft.buffer);
-        std::swap(size, fft.size);
-        std::swap(deltaTs, fft.deltaTs);
+        using std::swap;
+        swap(forward_plan, fft.forward_plan);
+        swap(backward_plan, fft.backward_plan);
+        swap(buffer, fft.buffer);
+        swap(size, fft.size);
+        swap(deltaTs, fft.deltaTs);
     }
 
     template<class ScalarType, size_t Dim>

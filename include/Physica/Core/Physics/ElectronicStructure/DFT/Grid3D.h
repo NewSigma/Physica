@@ -221,11 +221,12 @@ namespace Physica::Core {
 
     template<class T, bool isSigned>
     void Grid3D<T, isSigned>::swap(Grid3D& grid) noexcept {
-        std::swap(lattice, grid.lattice);
-        std::swap(values, grid.values);
-        std::swap(dimX, grid.dimX);
-        std::swap(dimY, grid.dimY);
-        std::swap(dimZ, grid.dimZ);
+        using std::swap;
+        swap(lattice, grid.lattice);
+        swap(values, grid.values);
+        swap(dimX, grid.dimX);
+        swap(dimY, grid.dimY);
+        swap(dimZ, grid.dimZ);
     }
 
     template<class T, bool isSigned>
@@ -261,9 +262,7 @@ namespace Physica::Core {
         else
             return dimX * dimY * dimZ;
     }
-}
 
-namespace std {
     template<class T, bool isSigned>
     inline void swap(Physica::Core::Grid3D<T, isSigned>& grid1,
                      Physica::Core::Grid3D<T, isSigned>& grid2) noexcept {

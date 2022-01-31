@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -65,7 +65,7 @@ namespace Physica::Core::Internal {
         const size_t column = matrix.getColumn();
         assert(r1 < row && r2 < row);
         for (size_t i = 0, temp = 0; i < column; ++i, temp += column)
-            Physica::Core::swap(matrix[temp + r1], matrix[temp + r2]);
+            swap(matrix[temp + r1], matrix[temp + r2]);
     }
 
     template<class Derived>
@@ -77,7 +77,7 @@ namespace Physica::Core::Internal {
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
         for (size_t i = 0; i < row; ++i)
-            Physica::Core::swap(matrix[offset1 + i], matrix[offset2 + i]);
+            matrix[offset1 + i].swap(matrix[offset2 + i]);
     }
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
     template<class Derived>

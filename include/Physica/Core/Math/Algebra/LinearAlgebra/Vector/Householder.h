@@ -65,20 +65,22 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(const RValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
+        using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
-        std::swap(temp, copy[0]);
+        swap(temp, copy[0]);
         const Vector<ScalarType> temp1 = copy * temp;
         mat -= temp1 * (copy.transpose().conjugate() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(LValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& householder) {
+        using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
         Vector<ScalarType> copy = householder;
         ScalarType temp = ScalarType::One();
-        std::swap(temp, copy[0]);
+        swap(temp, copy[0]);
         mat -= Vector<ScalarType>(mat * copy) * (copy.conjugate().transpose() * temp);
     }
 }

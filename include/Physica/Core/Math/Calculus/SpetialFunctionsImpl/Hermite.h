@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {
+        using std::swap;
         if (n == 0)
             return ScalarType::One();
         const ScalarType double_x = ScalarType::Two() * x.getDerived();
@@ -35,7 +36,7 @@ namespace Physica::Core {
         ScalarType float_i = ScalarType(1);
         for (unsigned int i = 1; i != n; ++i) {
             old_H = double_x * H - float_i * old_H * ScalarType::Two();
-            std::swap(old_H, H);
+            swap(old_H, H);
             float_i += ScalarType::One();
         }
         return H;

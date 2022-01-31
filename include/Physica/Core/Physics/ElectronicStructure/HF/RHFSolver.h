@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -211,7 +211,7 @@ namespace Physica::Core::Physics {
     void RHFSolver<BaseSetType>::formDensityMatrix(EDIISBuffer& densityMatrices,
                                                    MatrixType& sameSpinElectronDensity) {
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
-            std::swap(densityMatrices[i], densityMatrices[i + 1]);
+            swap(densityMatrices[i], densityMatrices[i + 1]);
 
         const size_t baseSetSize = getBaseSetSize();
         MatrixType& electronDensity = *densityMatrices.rbegin();
@@ -325,9 +325,9 @@ namespace Physica::Core::Physics {
         }
 
         for (size_t i = 0; i < fockMatrices.getLength() - 1; ++i)
-            std::swap(fockMatrices[i], fockMatrices[i + 1]);
+            swap(fockMatrices[i], fockMatrices[i + 1]);
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
-            std::swap(densityMatrices[i], densityMatrices[i + 1]);
+            swap(densityMatrices[i], densityMatrices[i + 1]);
         *fockMatrices.rbegin() = newFock;
         *densityMatrices.rbegin() = newDensity;
     }
@@ -364,7 +364,7 @@ namespace Physica::Core::Physics {
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
             Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
-            std::swap(energyBuffer[i], energyBuffer[i + 1]);
+            swap(energyBuffer[i], energyBuffer[i + 1]);
 
         const auto& eigenvalues = eigenSolver.getEigenvalues();
         selfConsistentEnergy = ScalarType::Zero();

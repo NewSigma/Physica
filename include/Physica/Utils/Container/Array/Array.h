@@ -206,9 +206,7 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
     };
-}
 
-namespace std {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     inline void swap(Physica::Utils::Array<T, Length, Capacity, Allocator>& array1,
                      Physica::Utils::Array<T, Length, Capacity, Allocator>& array2) noexcept {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -96,15 +96,16 @@ namespace Physica::Core {
     template<class ScalarType, class VectorType>
     template<class Function>
     VectorType Adam<ScalarType, VectorType>::gradient(Function func) {
+        using std::swap;
         const size_t length = params.getLength();
         VectorType result(length);
         const ScalarType y0 = func(std::cref(params));
         for (size_t i = 0; i < length; ++i) {
             ScalarType new_param = params[i] + args[0];
-            std::swap(params[i], new_param);
+            swap(params[i], new_param);
             const ScalarType y1 = func(std::cref(params));
             result[i] = (y1 - y0) / args[0];
-            std::swap(params[i], new_param);
+            swap(params[i], new_param);
         }
         return result;
     }

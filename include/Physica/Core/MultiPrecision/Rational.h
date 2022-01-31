@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -57,8 +57,21 @@ namespace Physica::Core {
         [[nodiscard]] bool isPositive() const { return numerator.isPositive(); }
         [[nodiscard]] bool isNegative() const { return numerator.isNegative(); }
     };
+
+    inline Rational Rational::operator-() const {
+        return Rational(-numerator, denominator);
+    }
+
+    inline void swap(Rational& r1, Rational& r2) noexcept {
+        r1.swap(r2);
+    }
 }
 
-#include "RationalImpl/RationalImpl.h"
+namespace std {
+    template<>
+    inline void swap<Physica::Core::Rational>(Physica::Core::Rational& r1, Physica::Core::Rational& r2) noexcept {
+        r1.swap(r2);
+    }
+}
 
 #endif

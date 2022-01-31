@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -55,9 +55,7 @@ namespace Physica::Core::Internal {
         std::swap(order, storage.order);
         Base::swap(storage);
     }
-}
 
-namespace std {
     template<class Derived>
     inline void swap(Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat1,
                      Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat2) noexcept {

@@ -322,7 +322,7 @@ namespace Physica::Core::Internal {
         }
 
         for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
-            std::swap(densityRecord[i], densityRecord[i + 1]);
+            swap(densityRecord[i], densityRecord[i + 1]);
     }
 
     template<class ScalarType, class XCProvider>
@@ -332,7 +332,7 @@ namespace Physica::Core::Internal {
             const auto& rho_old = densityRecord[densityRecord.getLength() - 2].first.asVector();
             residuals[0].asVector() = rho_new - rho_old;
             for (size_t i = 0; i < residuals.getLength() - 1; ++i)
-                std::swap(residuals[i], residuals[i + 1]);
+                swap(residuals[i], residuals[i + 1]);
         }
         /* Construct equation */ {
             for (size_t i = 1; i < diisMat.getRow(); ++i) {
@@ -601,7 +601,7 @@ namespace Physica::Core::Internal {
         }
 
         for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
-            std::swap(densityRecord[i], densityRecord[i + 1]);
+            swap(densityRecord[i], densityRecord[i + 1]);
     }
 
     template<class ScalarType, class XCProvider>
@@ -611,7 +611,7 @@ namespace Physica::Core::Internal {
             const auto& rho_old = densityRecord[densityRecord.getLength() - 2].asVector();
             residuals[0].asVector() = rho_new - rho_old;
             for (size_t i = 0; i < residuals.getLength() - 1; ++i)
-                std::swap(residuals[i], residuals[i + 1]);
+                swap(residuals[i], residuals[i + 1]);
         }
         /* Construct equation */ {
             for (size_t i = 1; i < diisMat.getRow(); ++i) {

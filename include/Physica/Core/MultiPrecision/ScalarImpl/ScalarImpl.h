@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -109,17 +109,10 @@ namespace Physica::Core {
     inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 == s2);
     }
-    /*!
-     * The following two functions handle swap(s1, s2). Use swap of Scalars whose errorTrack is false by default.
-     */
-    template<ScalarOption option, bool errorTrack>
-    inline void swap(Scalar<option, false>& s1, Scalar<option, errorTrack>& s2) noexcept {
-        s1.swap(s2);
-    }
 
     template<ScalarOption option, bool errorTrack>
-    inline void swap(Scalar<option, true>& s1, Scalar<option, errorTrack>& s2) noexcept {
-        s2.swap(s1);
+    inline void swap(Scalar<option, errorTrack>& s1, Scalar<option, errorTrack>& s2) noexcept {
+        s1.swap(s2);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
     template<bool errorTrack>

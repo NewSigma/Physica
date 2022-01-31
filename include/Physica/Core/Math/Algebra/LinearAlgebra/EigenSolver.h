@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -141,9 +141,9 @@ namespace Physica::Core {
                 if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
                     index_min = j;
             }
-            std::swap(eigenvalues[i], eigenvalues[index_min]);
+            eigenvalues[i].swap(eigenvalues[index_min]);
             if (computeEigenvectors)
-                std::swap(rawEigenvectors[i], rawEigenvectors[index_min]);
+                rawEigenvectors[i].swap(rawEigenvectors[index_min]);
         }
     }
 
@@ -318,12 +318,10 @@ namespace Physica::Core {
 
     template<class MatrixType>
     void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) noexcept {
-        std::swap(eigenvalues, solver.eigenvalues);
-        std::swap(rawEigenvectors, solver.rawEigenvectors);
+        eigenvalues.swap(solver.eigenvalues);
+        rawEigenvectors.swap(solver.rawEigenvectors);
     }
-}
 
-namespace std {
     template<class MatrixType>
     inline void swap(Physica::Core::EigenSolver<MatrixType>& solver1,
                      Physica::Core::EigenSolver<MatrixType>& solver2) noexcept {

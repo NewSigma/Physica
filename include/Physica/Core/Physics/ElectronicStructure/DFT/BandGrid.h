@@ -94,12 +94,10 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& band) noexcept {
-        std::swap(kPoints, band.kPoints);
-        std::swap(electronCount, band.electronCount);
+        swap(kPoints, band.kPoints);
+        swap(electronCount, band.electronCount);
     }
-}
 
-namespace std {
     template<class ScalarType, bool isSpinPolarized>
     inline void swap(Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band1,
                      Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band2) noexcept {

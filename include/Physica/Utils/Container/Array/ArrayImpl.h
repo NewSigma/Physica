@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -88,8 +88,9 @@ namespace Physica::Utils {
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
+        using std::swap;
         for (size_t i = 0; i < Length; ++i)
-            arr[i].swap(array[i]);
+            swap(arr[i], array[i]);
     }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity, class Allocator>

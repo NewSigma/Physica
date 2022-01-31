@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -107,6 +107,14 @@ namespace Physica::Core {
         static inline Integer integerAddImpl(const Integer& i1, const Integer& i2);
         static inline Integer integerSubImpl(const Integer& i1, const Integer& i2);
     };
+}
+
+namespace std {
+    template<>
+    inline void swap<Physica::Core::Integer>(
+            Physica::Core::Integer& i1, Physica::Core::Integer& i2) noexcept {
+        i1.swap(i2);
+    }
 }
 
 #include "IntegerImpl/IntegerImpl.h"

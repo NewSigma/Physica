@@ -138,12 +138,11 @@ namespace Physica::Core {
         const size_t max = exchange ? r : c;
         return (order * 2U - min - 1) * min / 2U + max;
     }
-}
 
-namespace std {
     template<class ScalarType, size_t Order, size_t MaxOrder>
-    inline void swap(Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m1,
-                     Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m2) noexcept {
+    inline void swap(
+            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m1,
+            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m2) noexcept {
         m1.swap(m2);
     }
 }

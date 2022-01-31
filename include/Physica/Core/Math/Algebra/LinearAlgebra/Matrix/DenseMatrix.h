@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -102,8 +102,11 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat);
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    inline void swap(DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m1
-            , DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m2) noexcept { m1.swap(m2); }
+    inline void swap(
+            DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m1,
+            DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& m2) noexcept {
+        m1.swap(m2);
+    }
 }
 
 #include "DenseMatrixImpl/DenseMatrixImpl.h"

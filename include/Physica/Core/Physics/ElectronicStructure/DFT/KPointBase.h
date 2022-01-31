@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KPointBase<ScalarType>::swap(KPointBase& base) noexcept {
-        std::swap(pos, base.pos);
-        std::swap(weight, base.weight);
+        pos.swap(base.pos);
+        weight.swap(base.weight);
     }
 }

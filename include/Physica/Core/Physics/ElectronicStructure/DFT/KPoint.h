@@ -72,15 +72,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KPoint<ScalarType, true>::setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown) {
-        std::swap(eigUp, newEigUp);
-        std::swap(eigDown, newEigDown);
+        eigUp.swap(newEigUp);
+        eigDown.swap(newEigDown);
     }
 
     template<class ScalarType>
     void KPoint<ScalarType, true>::swap(KPoint& kPoint) noexcept {
         Base::swap(kPoint);
-        std::swap(eigUp, kPoint.eigUp);
-        std::swap(eigDown, kPoint.eigDown);
+        eigUp.swap(kPoint.eigUp);
+        eigDown.swap(kPoint.eigDown);
     }
 
     template<class ScalarType>
@@ -124,17 +124,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KPoint<ScalarType, false>::setEigInfo(EigInfo& newEig) {
-        std::swap(eig, newEig);
+        eig.swap(newEig);
     }
 
     template<class ScalarType>
     void KPoint<ScalarType, false>::swap(KPoint& kPoint) noexcept {
         Base::swap(kPoint);
-        std::swap(eig, kPoint.eig);
+        eig.swap(kPoint.eig);
     }
-}
 
-namespace std {
     template<class ScalarType, bool isSpinPolarized>
     inline void swap(Physica::Core::KPoint<ScalarType, isSpinPolarized>& kPoint1,
                      Physica::Core::KPoint<ScalarType, isSpinPolarized>& kPoint2) noexcept {

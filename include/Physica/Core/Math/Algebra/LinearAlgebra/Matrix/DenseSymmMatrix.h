@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -112,9 +112,7 @@ namespace Physica::Core {
         const size_t max = exchange ? r : c;
         return (order * 2U - min - 1) * min / 2U + max;
     }
-}
 
-namespace std {
     template<class ScalarType, size_t Order, size_t MaxOrder>
     inline void swap(Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& m1,
                      Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& m2) noexcept {
