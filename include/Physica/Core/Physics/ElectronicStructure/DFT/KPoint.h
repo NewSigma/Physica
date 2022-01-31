@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "KPointBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
 
@@ -25,36 +26,49 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class KPoint;
 
     template<class ScalarType>
-    class KPoint<ScalarType, true> {
-        using ComplexType = ComplexScalar<ScalarType>;
-        using Vector3D = Vector<ScalarType, 3>;
+    class KPoint<ScalarType, true> : public KPointBase<ScalarType> {
+        using Base = KPointBase<ScalarType>;
+        using typename Base::ComplexType;
+        using typename Base::Vector3D;
+        using typename Base::OccupacyVector;
         using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
 
-        Vector3D pos;
         EigInfo eigUp;
         EigInfo eigDown;
+        OccupacyVector occupacyUp;
+        OccupacyVector occupacyDown;
     public:
         KPoint() = default;
-        KPoint(Vector3D pos_, size_t plainWaveCount);
+        KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight);
         KPoint(const KPoint&) = default;
-        KPoint(KPoint&&) = default;
+        KPoint(KPoint&&) noexcept = default;
         ~KPoint() = default;
         /* Operators */
-        KPoint& operator=(const KPoint&) = default;
-        KPoint& operator=(KPoint&&) = default;
+        KPoint& operator=(KPoint k) noexcept;
         /* Setters */
         void setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown);
         /* Getters */
-        [[nodiscard]] const Vector3D& getPos() { return pos; }
         [[nodiscard]] const EigInfo& getEigUp() const noexcept { return eigUp; }
         [[nodiscard]] const EigInfo& getEigDown() const noexcept { return eigDown; }
+        [[nodiscard]] const OccupacyVector& getOccupacyUp() const noexcept { return occupacyUp; }
+        [[nodiscard]] const OccupacyVector& getOccupacyDown() const noexcept { return occupacyDown; }
         /* Helpers */
         void swap(KPoint& kPoint) noexcept;
     };
 
     template<class ScalarType>
-    KPoint<ScalarType, true>::KPoint(Vector3D pos_, size_t plainWaveCount)
-            : pos(std::move(pos_)), eigUp(plainWaveCount), eigDown(plainWaveCount) {}
+    KPoint<ScalarType, true>::KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight)
+            : Base(std::move(pos_), std::move(weight))
+            , eigUp(plainWaveCount)
+            , eigDown(plainWaveCount)
+            , occupacyUp(plainWaveCount, 0)
+            , occupacyDown(plainWaveCount, 0) {}
+
+    template<class ScalarType>
+    KPoint<ScalarType, true>& KPoint<ScalarType, true>::operator=(KPoint k) noexcept {
+        swap(k);
+        return *this;
+    }
 
     template<class ScalarType>
     void KPoint<ScalarType, true>::setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown) {
@@ -64,40 +78,49 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KPoint<ScalarType, true>::swap(KPoint& kPoint) noexcept {
-        std::swap(pos, kPoint.pos);
+        Base::swap(kPoint);
         std::swap(eigUp, kPoint.eigUp);
         std::swap(eigDown, kPoint.eigDown);
     }
 
     template<class ScalarType>
-    class KPoint<ScalarType, false> {
-        using ComplexType = ComplexScalar<ScalarType>;
-        using Vector3D = Vector<ScalarType, 3>;
+    class KPoint<ScalarType, false> : public KPointBase<ScalarType> {
+        using Base = KPointBase<ScalarType>;
+        using typename Base::ComplexType;
+        using typename Base::Vector3D;
+        using typename Base::OccupacyVector;
         using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
 
-        Vector3D pos;
         EigInfo eig;
+        OccupacyVector occupacy;
     public:
         KPoint() = default;
-        KPoint(Vector3D pos_, size_t plainWaveCount);
+        KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight);
         KPoint(const KPoint&) = default;
-        KPoint(KPoint&&) = default;
+        KPoint(KPoint&&) noexcept = default;
         ~KPoint() = default;
         /* Operators */
-        KPoint& operator=(const KPoint&) = default;
-        KPoint& operator=(KPoint&&) = default;
+        KPoint& operator=(KPoint k) noexcept;
         /* Setters */
         void setEigInfo(EigInfo& newEig);
         /* Getters */
-        [[nodiscard]] const Vector3D& getPos() { return pos; }
         [[nodiscard]] const EigInfo& getEig() const noexcept { return eig; }
+        [[nodiscard]] const OccupacyVector& getOccupacy() const noexcept { return occupacy; }
         /* Helpers */
         void swap(KPoint& kPoint) noexcept;
     };
 
     template<class ScalarType>
-    KPoint<ScalarType, false>::KPoint(Vector3D pos_, size_t plainWaveCount)
-            : pos(std::move(pos_)), eig(plainWaveCount) {}
+    KPoint<ScalarType, false>::KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight)
+            : Base(std::move(pos_), std::move(weight))
+            , eig(plainWaveCount)
+            , occupacy(plainWaveCount, 0) {}
+
+    template<class ScalarType>
+    KPoint<ScalarType, false>& KPoint<ScalarType, false>::operator=(KPoint k) noexcept {
+        swap(k);
+        return *this;
+    }
 
     template<class ScalarType>
     void KPoint<ScalarType, false>::setEigInfo(EigInfo& newEig) {
@@ -106,7 +129,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void KPoint<ScalarType, false>::swap(KPoint& kPoint) noexcept {
-        std::swap(pos, kPoint.pos);
+        Base::swap(kPoint);
         std::swap(eig, kPoint.eig);
     }
 }
