@@ -25,13 +25,14 @@ namespace Physica::Core::Internal {
     class HalfDenseMatrixStorage : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType,
                                                                    Traits<Derived>::SizeAtCompile,
                                                                    Traits<Derived>::MaxSizeAtCompile> {
+        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         using T = typename Traits<Derived>::ScalarType;
         using Base = DenseMatrixStorageHelper<T,
                                               Traits<Derived>::SizeAtCompile,
-                                              Traits<Derived>::MaxSizeAtCompile>;
+                                              MaxSizeAtCompile>;
         size_t order;
     public:
-        HalfDenseMatrixStorage() = default;
+        HalfDenseMatrixStorage() : Base(), order(MaxSizeAtCompile) {}
         HalfDenseMatrixStorage(size_t order_) : Base(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : Base(order_ * (order_ + 1) / 2, t), order(order_) {}
         HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
