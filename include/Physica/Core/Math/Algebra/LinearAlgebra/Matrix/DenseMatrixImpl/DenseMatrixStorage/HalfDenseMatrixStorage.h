@@ -22,14 +22,21 @@
 
 namespace Physica::Core::Internal {
     template<class Derived>
-    class HalfDenseMatrixStorage : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType,
-                                                                   Traits<Derived>::SizeAtCompile,
-                                                                   Traits<Derived>::MaxSizeAtCompile> {
+    class HalfDenseMatrixBase {
+        using ScalarType = typename Traits<Derived>::ScalarType;
+        constexpr static size_t order = Traits<Derived>::RowAtCompile;
+        constexpr static size_t maxOrder = Traits<Derived>::MaxRowAtCompile;
+        constexpr static size_t size = order * (order + 1) / 2;
+        constexpr static size_t maxSize = maxOrder * (maxOrder + 1) / 2;
+    public:
+        using Type = DenseMatrixStorageHelper<ScalarType, size, maxSize>;
+    };
+
+    template<class Derived>
+    class HalfDenseMatrixStorage : public HalfDenseMatrixBase<Derived>::Type {
         constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         using T = typename Traits<Derived>::ScalarType;
-        using Base = DenseMatrixStorageHelper<T,
-                                              Traits<Derived>::SizeAtCompile,
-                                              MaxSizeAtCompile>;
+        using Base = typename HalfDenseMatrixBase<Derived>::Type;
         size_t order;
     public:
         HalfDenseMatrixStorage() : Base(), order(MaxSizeAtCompile) {}
@@ -42,7 +49,7 @@ namespace Physica::Core::Internal {
         using Base::operator[];
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
-        void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); }
+        void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; }
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return order; }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
