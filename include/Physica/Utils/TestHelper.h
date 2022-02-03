@@ -33,7 +33,7 @@ namespace Physica::Utils {
         const ScalarType min = std::numeric_limits<ScalarType>::min();
         const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
         const ScalarType delta = s1 - s2;
-        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / s2);
+        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType::Two());
         return error < ScalarType(precision);
     }
 
