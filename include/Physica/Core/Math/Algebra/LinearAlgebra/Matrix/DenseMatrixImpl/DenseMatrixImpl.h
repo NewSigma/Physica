@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/BadFileFormatException.h"
+
 namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class OtherMatrix>
@@ -127,5 +129,17 @@ namespace Physica::Core {
             }
         }
         return os;
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    std::istream& operator>>(std::istream& is, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat) {
+        const size_t column = mat.getColumn();
+        const size_t row = mat.getRow();
+        for (size_t r = 0; r < row; ++r)
+            for (size_t c = 0; c < column; ++c)
+                is >> mat(r, c);
+        if (!is)
+            throw BadFileFormatException();
+        return is;
     }
 }
