@@ -52,6 +52,7 @@ namespace Physica::Core {
         [[nodiscard]] const EigInfo& getEigDown() const noexcept { return eigDown; }
         [[nodiscard]] const OccupacyVector& getOccupacyUp() const noexcept { return occupacyUp; }
         [[nodiscard]] const OccupacyVector& getOccupacyDown() const noexcept { return occupacyDown; }
+        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         /* Helpers */
         void swap(KPoint& kPoint) noexcept;
     };
@@ -74,6 +75,11 @@ namespace Physica::Core {
     void KPoint<ScalarType, true>::setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown) {
         eigUp.swap(newEigUp);
         eigDown.swap(newEigDown);
+    }
+
+    template<class ScalarType>
+    ScalarType KPoint<ScalarType, true>::getTotalEnergy() const noexcept {
+        return toRealVector(eigUp.getEigenvalues()) * occupacyUp + toRealVector(eigDown.getEigenvalues()) * occupacyDown;
     }
 
     template<class ScalarType>
@@ -106,6 +112,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const EigInfo& getEig() const noexcept { return eig; }
         [[nodiscard]] const OccupacyVector& getOccupacy() const noexcept { return occupacy; }
+        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         /* Helpers */
         void swap(KPoint& kPoint) noexcept;
     };
@@ -125,6 +132,11 @@ namespace Physica::Core {
     template<class ScalarType>
     void KPoint<ScalarType, false>::setEigInfo(EigInfo& newEig) {
         eig.swap(newEig);
+    }
+
+    template<class ScalarType>
+    ScalarType KPoint<ScalarType, false>::getTotalEnergy() const noexcept {
+        return toRealVector(eig.getEigenvalues()) * occupacy;
     }
 
     template<class ScalarType>

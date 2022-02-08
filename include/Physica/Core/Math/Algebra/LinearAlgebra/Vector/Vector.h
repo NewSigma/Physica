@@ -82,6 +82,7 @@ namespace Physica::Core {
     };
 
     namespace Internal {
+        //TODO: extend RValueVector for optimized performance
         template<class VectorType>
         class RealVectorReturnType {
             using ComplexType = typename VectorType::ScalarType;

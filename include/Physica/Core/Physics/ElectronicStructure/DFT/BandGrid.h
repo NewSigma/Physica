@@ -42,6 +42,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] KPoints& getKPoints() { return kPoints; }
         [[nodiscard]] const KPoints& getKPoints() const noexcept { return kPoints; }
+        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         /* Helpers */
         void swap(BandGrid& band) noexcept;
     };
@@ -84,6 +85,15 @@ namespace Physica::Core {
             }
             kx += stepX;
         }
+    }
+
+    template<class ScalarType, bool isSpinPolarized>
+    ScalarType BandGrid<ScalarType, isSpinPolarized>::getTotalEnergy() const noexcept {
+        ScalarType energy = ScalarType::Zero();
+        for (auto ite = kPoints.cbegin(); ite != kPoints.cend(); ++ite)
+            energy += (*ite).getTotalEnergy();
+        energy *= reciprocal(ScalarType(kPoints.getLength()));
+        return energy;
     }
 
     template<class ScalarType, bool isSpinPolarized>
