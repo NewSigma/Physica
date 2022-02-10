@@ -23,8 +23,11 @@
 #include "Grid3D.h"
 
 namespace Physica::Core {
+    /**
+     * \class PWBaseWave is plain wave based wave function
+     */
     template<class ScalarType>
-    class WaveFunction {
+    class PWBaseWave {
         using ComplexType = ComplexScalar<ScalarType>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
         using SignedGrid = Grid3D<ComplexType, true>;
@@ -32,11 +35,11 @@ namespace Physica::Core {
 
         SignedGrid grid;
     public:
-        WaveFunction(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
+        PWBaseWave(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
         /* Operators */
         [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> r) const;
         template<class VectorType>
-        WaveFunction& operator=(const RValueVector<VectorType>& newCoeffs);
+        PWBaseWave& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
         [[nodiscard]] size_t getPlainWaveCount() const noexcept { return grid.getSize(); }
         [[nodiscard]] size_t getDimX() const noexcept { return grid.getDimX(); }
@@ -50,11 +53,11 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    WaveFunction<ScalarType>::WaveFunction(ScalarType cutEnergy, LatticeMatrix reciprocalLattice)
+    PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix reciprocalLattice)
             : grid(SignedGrid::gridFromCutEnergy(cutEnergy, reciprocalLattice)) {}
 
     template<class ScalarType>
-    typename WaveFunction<ScalarType>::ComplexType WaveFunction<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
+    typename PWBaseWave<ScalarType>::ComplexType PWBaseWave<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
         const size_t length = grid.getSize();
         ComplexType result = ComplexType::Zero();
         for (size_t i = 0; i < length; ++i) {
@@ -66,13 +69,13 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class VectorType>
-    WaveFunction<ScalarType>& WaveFunction<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
+    PWBaseWave<ScalarType>& PWBaseWave<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
         grid.asVector() = newCoeffs;
         return *this;
     }
 
     template<class ScalarType>
-    Vector<ScalarType, 3> WaveFunction<ScalarType>::getWaveVector(Dim dim) const noexcept {
+    Vector<ScalarType, 3> PWBaseWave<ScalarType>::getWaveVector(Dim dim) const noexcept {
         auto[n1, n2, n3] = dim;
         const auto& lattice = grid.getLattice();
         return lattice.row(0).asVector() * ScalarType(n1) +
@@ -81,7 +84,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType WaveFunction<ScalarType>::getKinetic(Dim dim) const noexcept {
+    ScalarType PWBaseWave<ScalarType>::getKinetic(Dim dim) const noexcept {
         constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
         return getWaveVector(dim).squaredNorm() * ScalarType(factor);
     }
