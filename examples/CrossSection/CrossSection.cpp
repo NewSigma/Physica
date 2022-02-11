@@ -118,7 +118,7 @@ T calcCrossSection(double energy) {
     return crossSection * square(args.wave_length);
 }
 
-void plotWaveFunction(double energy, double radialNum) {
+void plotPWBaseWave(double energy, double radialNum) {
     const double reducedMass = 83.8 / (83.8 + 1) * PhyConst<SI>::protonMass; //83.8 is the relative atomic mass of Kr
     ProgramArgs args(5.9, 3.57, reducedMass, 5 * 3.57, energy, radialNum);
     auto solver = solveEqu(args);
@@ -173,6 +173,6 @@ int main(int argc, char** argv) {
     chart.axes(Qt::Vertical).first()->setTitleText("cross section/rho^2");
     plot->show();
 
-    plotWaveFunction(0.4764, 4);
+    plotPWBaseWave(0.4764, 4);
     return QApplication::exec();
 }

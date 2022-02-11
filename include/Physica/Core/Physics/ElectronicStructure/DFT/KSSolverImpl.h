@@ -24,7 +24,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Ewald.h"
-#include "WaveFunction.h"
+#include "PWBaseWave.h"
 #include "Grid3D.h"
 
 namespace Physica::Core::Internal {
@@ -42,7 +42,7 @@ namespace Physica::Core::Internal {
         using Vector3D = Vector<ScalarType, 3>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = std::pair<HermiteMatrix, HermiteMatrix>;
-        using KSOrbit = WaveFunction<ScalarType>;
+        using KSOrbit = PWBaseWave<ScalarType>;
         using KSOrbitArray = Utils::Array<KSOrbit>;
         using KSOrbits = std::pair<KSOrbitArray, KSOrbitArray>;
         using MatrixType = DenseMatrix<ComplexType>;
@@ -370,7 +370,7 @@ namespace Physica::Core::Internal {
         using Vector3D = Vector<ScalarType, 3>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = HermiteMatrix;
-        using KSOrbit = WaveFunction<ScalarType>;
+        using KSOrbit = PWBaseWave<ScalarType>;
         using KSOrbitArray = Utils::Array<KSOrbit>;
         using KSOrbits = KSOrbitArray;
         using MatrixType = DenseMatrix<ComplexType>;

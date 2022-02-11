@@ -18,14 +18,14 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Physics/ElectronicStructure/DFT/WaveFunction.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/PWBaseWave.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 
 int main() {
     const ScalarType cutOffE = ScalarType(32);
-    WaveFunction<ScalarType> wave(cutOffE, {0.1, 0.2, 0.3, 0.3, 0.2, 0.1, -0.1, 0.2, 0.5});
+    PWBaseWave<ScalarType> wave(cutOffE, {0.1, 0.2, 0.3, 0.3, 0.2, 0.1, -0.1, 0.2, 0.5});
     size_t dimX = wave.getDimX();
     size_t dimY = wave.getDimY();
     size_t dimZ = wave.getDimZ();
