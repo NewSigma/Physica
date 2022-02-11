@@ -48,6 +48,8 @@ namespace Physica::Core {
         Grid3D() = default;
         template<class MatrixType>
         Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_, const T& = T());
+        template<class MatrixType>
+        Grid3D(const RValueMatrix<MatrixType>& lattice_, Dim dim, const T& = T());
         Grid3D(const Grid3D&) = default;
         Grid3D(Grid3D&&) noexcept = default;
         ~Grid3D() = default;
@@ -96,10 +98,15 @@ namespace Physica::Core {
     template<class T, bool isSigned>
     template<class MatrixType>
     Grid3D<T, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, size_t dimX_, size_t dimY_, size_t dimZ_, const T& t)
+            : Grid3D(lattice_, {dimX_, dimY_, dimZ_}, t) {}
+
+    template<class T, bool isSigned>
+    template<class MatrixType>
+    Grid3D<T, isSigned>::Grid3D(const RValueMatrix<MatrixType>& lattice_, Dim dim, const T& t)
             : lattice(lattice_)
-            , dimX(dimX_)
-            , dimY(dimY_)
-            , dimZ(dimZ_) {
+            , dimX(std::get<0>(dim))
+            , dimY(std::get<1>(dim))
+            , dimZ(std::get<2>(dim)) {
         values.resize(getSize(), t);
     }
 

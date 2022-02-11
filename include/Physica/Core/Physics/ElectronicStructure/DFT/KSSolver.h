@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "BandGrid.h"
 
 namespace Physica::Core {
@@ -31,11 +32,12 @@ namespace Physica::Core {
         constexpr static bool isSpinPolarized = XCProvider::isSpinPolarized;
         using Base = Internal::KSSolverImpl<ScalarType, XCProvider, isSpinPolarized>;
         using typename Base::ComplexType;
+        using typename Base::UnsignedDim;
         using typename Base::CenteredGrid;
 
         CenteredGrid externalPot;
     public:
-        KSSolver(CrystalCell cell, ScalarType cutEnergy, BandGrid<ScalarType, isSpinPolarized> band, size_t gridDimX, size_t gridDimY, size_t gridDimZ);
+        KSSolver(CrystalCell cell, ScalarType cutEnergy, ScalarType gridDimFactor, BandGrid<ScalarType, isSpinPolarized> band);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
         ~KSSolver() = default;
@@ -51,16 +53,15 @@ namespace Physica::Core {
         void initExternalPot();
         /* Getters */
         [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
+        [[nodiscard]] static UnsignedDim getPotGridDim(ScalarType cutEnergy, ScalarType gridDimFactor, const CrystalCell& cell);
     };
 
     template<class ScalarType, class XCProvider>
     KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell,
                                                ScalarType cutEnergy,
-                                               BandGrid<ScalarType, isSpinPolarized> band,
-                                               size_t gridDimX,
-                                               size_t gridDimY,
-                                               size_t gridDimZ)
-            : Base(std::move(cell), std::move(cutEnergy), std::move(band), gridDimX, gridDimY, gridDimZ) {
+                                               ScalarType gridDimFactor,
+                                               BandGrid<ScalarType, isSpinPolarized> band)
+            : Base(std::move(cell), std::move(cutEnergy), std::move(band), getPotGridDim(cutEnergy, gridDimFactor, cell)) {
         initExternalPot();
     }
 
@@ -118,6 +119,23 @@ namespace Physica::Core {
             ++j;
         }
         return all_factors;
+    }
+
+    template<class ScalarType, class XCProvider>
+    typename KSSolver<ScalarType, XCProvider>::UnsignedDim
+    KSSolver<ScalarType, XCProvider>::getPotGridDim(ScalarType cutEnergy, ScalarType gridDimFactor, const CrystalCell& cell) {
+        assert(gridDimFactor >= ScalarType::Two()); //Nyquist theory requests
+        const auto repCell = cell.reciprocal();
+        const auto& lattice = cell.getLattice();
+        const auto& repLattice = repCell.getLattice();
+        auto plainWaveSetDim = Base::UncenteredGrid::dimFromCutEnergy(cutEnergy, repLattice);
+        const ScalarType factor = gridDimFactor / ScalarType(M_PI);
+
+        size_t dimX, dimY, dimZ;
+        dimX = std::get<0>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(0).norm() * lattice.row(0).norm()) * factor).getTrivial());
+        dimY = std::get<1>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(1).norm() * lattice.row(1).norm()) * factor).getTrivial());
+        dimZ = std::get<2>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(2).norm() * lattice.row(2).norm()) * factor).getTrivial());
+        return {dimX, dimY, dimZ};
     }
 }
 

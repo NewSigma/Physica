@@ -74,7 +74,7 @@ namespace Physica::Core::Internal {
         XCProvider xcProvider;
         size_t iteration;
     public:
-        KSSolverImpl(CrystalCell cell_, ScalarType cutEnergy_, BandType band_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
+        KSSolverImpl(CrystalCell cell_, ScalarType cutEnergy_, BandType band_, UnsignedDim potGridDim);
         KSSolverImpl(const KSSolverImpl&) = delete;
         KSSolverImpl(KSSolverImpl&&) noexcept = delete;
         ~KSSolverImpl();
@@ -112,18 +112,16 @@ namespace Physica::Core::Internal {
     KSSolverImpl<ScalarType, XCProvider, true>::KSSolverImpl(CrystalCell cell_,
                                                              ScalarType cutEnergy_,
                                                              BandType band_,
-                                                             size_t gridDimX,
-                                                             size_t gridDimY,
-                                                             size_t gridDimZ)
+                                                             UnsignedDim potGridDim)
             : cell(std::move(cell_))
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
             , band(std::move(band_))
-            , densityRecord(DIISBufferSize, std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
-                                                           UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)))
-            , xcPot(std::make_pair(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ),
-                                   UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ)))
-            , xcProvider(gridDimX * gridDimY * gridDimZ)
+            , densityRecord(DIISBufferSize, std::make_pair(UncenteredGrid(cell_.getLattice(), potGridDim),
+                                                           UncenteredGrid(cell_.getLattice(), potGridDim)))
+            , xcPot(std::make_pair(UncenteredGrid(cell_.getLattice(), potGridDim),
+                                   UncenteredGrid(cell_.getLattice(), potGridDim)))
+            , xcProvider(std::get<0>(potGridDim) * std::get<1>(potGridDim) * std::get<2>(potGridDim))
             , iteration(0) {
         const size_t electronCount = cell.getElectronCount();
         orbits = std::make_pair(KSOrbitArray((electronCount + 1) / 2, KSOrbit(cutEnergy, repCell.getLattice())),
@@ -133,10 +131,10 @@ namespace Physica::Core::Internal {
         h = std::make_pair(HermiteMatrix(plainWaveCount), HermiteMatrix(plainWaveCount));
         eigSolver = std::make_pair(EigenSolver<MatrixType>(plainWaveCount), EigenSolver<MatrixType>(plainWaveCount));
 
-        const Utils::Array<size_t, 3> fftGrid{gridDimX, gridDimY, gridDimZ};
-        const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
-                                                     ScalarType(cell.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
-                                                     ScalarType(cell.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)};
+        const Utils::Array<size_t, 3> fftGrid{std::get<0>(potGridDim), std::get<1>(potGridDim), std::get<2>(potGridDim)};
+        const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(fftGrid[0] - 1),
+                                                     ScalarType(cell.getLattice().row(1).norm()) / ScalarType(fftGrid[1] - 1),
+                                                     ScalarType(cell.getLattice().row(2).norm()) / ScalarType(fftGrid[2] - 1)};
         fft_xc_up = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
         fft_xc_down = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
         fft_hartree = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
@@ -403,7 +401,7 @@ namespace Physica::Core::Internal {
         XCProvider xcProvider;
         size_t iteration;
     public:
-        KSSolverImpl(CrystalCell cell_, ScalarType cutEnergy_, BandType band_, size_t gridDimX_, size_t gridDimY_, size_t gridDimZ_);
+        KSSolverImpl(CrystalCell cell_, ScalarType cutEnergy_, BandType band_, UnsignedDim potGridDim);
         KSSolverImpl(const KSSolverImpl&) = delete;
         KSSolverImpl(KSSolverImpl&&) noexcept = delete;
         ~KSSolverImpl();
@@ -441,16 +439,14 @@ namespace Physica::Core::Internal {
     KSSolverImpl<ScalarType, XCProvider, false>::KSSolverImpl(CrystalCell cell_,
                                                               ScalarType cutEnergy_,
                                                               BandType band_,
-                                                              size_t gridDimX,
-                                                              size_t gridDimY,
-                                                              size_t gridDimZ)
+                                                              UnsignedDim potGridDim)
             : cell(std::move(cell_))
             , repCell(cell_.reciprocal())
             , cutEnergy(std::move(cutEnergy_))
             , band(std::move(band_))
-            , densityRecord(DIISBufferSize, UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ))
-            , xcPot(UncenteredGrid(cell_.getLattice(), gridDimX, gridDimY, gridDimZ))
-            , xcProvider(gridDimX * gridDimY * gridDimZ)
+            , densityRecord(DIISBufferSize, UncenteredGrid(cell_.getLattice(), potGridDim))
+            , xcPot(UncenteredGrid(cell_.getLattice(), potGridDim))
+            , xcProvider(std::get<0>(potGridDim) * std::get<1>(potGridDim) * std::get<2>(potGridDim))
             , iteration(0) {
         const size_t electronCount = cell.getElectronCount();
         orbits = KSOrbitArray(electronCount / 2, KSOrbit(cutEnergy, repCell.getLattice()));
@@ -459,10 +455,10 @@ namespace Physica::Core::Internal {
         h = HermiteMatrix(plainWaveCount);
         eigSolver = EigenSolver<MatrixType>(plainWaveCount);
 
-        const Utils::Array<size_t, 3> fftGrid{gridDimX, gridDimY, gridDimZ};
-        const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(gridDimX - 1),
-                                                     ScalarType(cell.getLattice().row(1).norm()) / ScalarType(gridDimY - 1),
-                                                     ScalarType(cell.getLattice().row(2).norm()) / ScalarType(gridDimZ - 1)};
+        const Utils::Array<size_t, 3> fftGrid{std::get<0>(potGridDim), std::get<1>(potGridDim), std::get<2>(potGridDim)};
+        const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(fftGrid[0] - 1),
+                                                     ScalarType(cell.getLattice().row(1).norm()) / ScalarType(fftGrid[1] - 1),
+                                                     ScalarType(cell.getLattice().row(2).norm()) / ScalarType(fftGrid[2] - 1)};
         fft_xc = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
         fft_hartree = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
 
