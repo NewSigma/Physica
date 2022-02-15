@@ -28,6 +28,8 @@ namespace Physica::Utils {
         Sub,
         Mul,
         Div,
+        More,
+        MoreEq,
         Reciprocal,
         Sqrt,
         Abs,

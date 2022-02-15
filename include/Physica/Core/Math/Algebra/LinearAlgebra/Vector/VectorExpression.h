@@ -221,6 +221,74 @@ namespace Physica::Core {
         typename Base::ScalarType calc(size_t s) const { return v1.calc(s) / v2.calc(s); }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
+    //////////////////////////////////////Compare//////////////////////////////////////
+    template<class VectorType1, class VectorType2>
+    class VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>>;
+        const VectorType1& v1;
+        const VectorType2& v2;
+    public:
+        using typename Base::ScalarType;
+    public:
+        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
+                : v1(v1_.getDerived()), v2(v2_.getDerived()) {
+            assert(v1.getLength() == v2.getLength());
+        }
+
+        ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) > v2.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return v1.getLength(); }
+    };
+
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>>;
+        const VectorType& exp;
+        const AnyScalar& scalar;
+    public:
+        using typename Base::ScalarType;
+    public:
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_) {}
+
+        ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) > scalar); }
+        [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
+
+    template<class VectorType1, class VectorType2>
+    class VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>>;
+        const VectorType1& v1;
+        const VectorType2& v2;
+    public:
+        using typename Base::ScalarType;
+    public:
+        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
+                : v1(v1_.getDerived()), v2(v2_.getDerived()) {
+            assert(v1.getLength() == v2.getLength());
+        }
+
+        ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) >= v2.calc(s)); }
+        [[nodiscard]] size_t getLength() const { return v1.getLength(); }
+    };
+
+    template<class VectorType, class AnyScalar>
+    class VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
+            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>>;
+        const VectorType& exp;
+        const AnyScalar& scalar;
+    public:
+        using typename Base::ScalarType;
+    public:
+        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+                : exp(exp_.getDerived()), scalar(scalar_) {}
+
+        ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) >= scalar); }
+        [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>
@@ -367,6 +435,42 @@ namespace Physica::Core {
     template<class VectorType1, class VectorType2>
     inline VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2> divide(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
         return VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    }
+    //////////////////////////////////////Compare//////////////////////////////////////
+    template<class VectorType1, class VectorType2>
+    inline VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>
+    operator>(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
+        return VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    }
+
+    template<class VectorType1, class VectorType2>
+    inline VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>
+    operator>=(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
+        return VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    }
+
+    template<class VectorType, class ScalarType>
+    inline VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
+    operator>=(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+        return VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+    }
+
+    template<class VectorType1, class VectorType2>
+    inline VectorExpression<Utils::ExpressionType::More, VectorType2, VectorType1>
+    operator<(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
+        return VectorExpression<Utils::ExpressionType::More, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
+    }
+
+    template<class VectorType1, class VectorType2>
+    inline VectorExpression<Utils::ExpressionType::MoreEq, VectorType2, VectorType1>
+    operator<=(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
+        return VectorExpression<Utils::ExpressionType::MoreEq, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
+    }
+
+    template<class VectorType, class ScalarType>
+    inline VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
+    operator<=(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
