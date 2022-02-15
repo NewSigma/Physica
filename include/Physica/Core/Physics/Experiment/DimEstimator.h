@@ -18,11 +18,13 @@
  */
 #pragma once
 
+#include <algorithm>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorExpression.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/LinearFit.h"
+#include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
@@ -34,12 +36,14 @@ namespace Physica::Core {
     class DimEstimator {
         using ScalarType = Scalar<Double, false>;
         using DataMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>;
-        Utils::Array<size_t> intrinsicDim;
+        Vector<ScalarType> intrinsicDim;
         Vector<ScalarType> correlateDim;
     public:
         template<class VectorType>
-        DimEstimator(size_t sampleNum, Utils::Array<size_t> intrinsicDim_, const LValueVector<VectorType>& radius);
+        DimEstimator(size_t sampleNum, const Utils::Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius);
         /* Operations */
+        template<class MatrixType, class VectorType>
+        ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
         template<class MatrixType, class VectorType>
         static ScalarType corrDimen(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
         template<class VectorType>
@@ -51,15 +55,23 @@ namespace Physica::Core {
 
     template<class VectorType>
     DimEstimator::DimEstimator(size_t sampleNum,
-                               Utils::Array<size_t> intrinsicDim_,
+                               const Utils::Array<size_t>& intrinsicDim_,
                                const LValueVector<VectorType>& radius)
-            : intrinsicDim(std::move(intrinsicDim_)) {
+            : intrinsicDim(intrinsicDim_.getLength()) {
         const size_t length = intrinsicDim.getLength();
         correlateDim.resize(length);
-        const size_t maxDim = std::max(intrinsicDim.cbegin(), intrinsicDim.cend());
+        const size_t maxDim = *std::max_element(intrinsicDim_.cbegin(), intrinsicDim_.cend());
         const auto data = DataMatrix::randomMatrix(sampleNum, maxDim);
-        for (size_t i = 0; i < length; ++i)
-            correlateDim[i] = corrDimen(data.leftCols(intrinsicDim[i]), radius);
+        for (size_t i = 0; i < length; ++i) {
+            intrinsicDim[i] = ScalarType(intrinsicDim_[i]);
+            correlateDim[i] = corrDimen(data.leftCols(intrinsicDim_[i]), radius);
+        }
+    }
+
+    template<class MatrixType, class VectorType>
+    typename DimEstimator::ScalarType
+    DimEstimator::intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) {
+        return lagrange(intrinDim, correlateDim, corrDimen(data, radius));
     }
     /**
      * \param data
