@@ -92,9 +92,11 @@ namespace Physica::Utils {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "rdtscp\n\t"
-                    "cpuid\n\t"
                     : "=a" (lo), "=d" (hi)
-                    :: "ebx", "ecx"
+            );
+            __asm__ __volatile__ (
+                    "cpuid\n\t"
+                    ::: "eax", "ebx", "ecx", "edx"
             );
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
@@ -107,7 +109,7 @@ namespace Physica::Utils {
 
         static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
         static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
-        static double toSeconds(int64_t cycles, double cyclesPerSec = localCyclesPerSec);
+        static double toSeconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
         static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = localCyclesPerSec);
         static uint64_t fromSeconds(double seconds, double cyclesPerSec = localCyclesPerSec);
     private:

@@ -129,7 +129,7 @@ namespace Physica::Utils {
      * \return
      *      The time in seconds corresponding to cycles.
      */
-    double Cycler::toSeconds(int64_t cycles, double cyclesPerSec) {
+    double Cycler::toSeconds(uint64_t cycles, double cyclesPerSec) {
         assert(cyclesPerSec > 0);
         if (cyclesPerSec == 0)
             cyclesPerSec = getCyclesPerSec();
