@@ -27,7 +27,8 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     class BandGrid {
-        using KPoints = Utils::Array<KPoint<ScalarType, isSpinPolarized>>;
+        using KPoints = Grid3D<KPoint<ScalarType, isSpinPolarized>, false>;
+        using LatticeMatrix = typename KPoints::LatticeMatrix;
 
         KPoints kPoints;
         size_t electronCount;
@@ -43,8 +44,12 @@ namespace Physica::Core {
         [[nodiscard]] KPoints& getKPoints() { return kPoints; }
         [[nodiscard]] const KPoints& getKPoints() const noexcept { return kPoints; }
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
+        template<class VectorType>
+        [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
         /* Helpers */
         void swap(BandGrid& band) noexcept;
+    private:
+        [[nodiscard]] Vector<ScalarType, 3> gradEnergy(size_t kPointId) const;
     };
 
     template<class ScalarType, bool isSpinPolarized>
@@ -55,13 +60,13 @@ namespace Physica::Core {
                                                     size_t kPointY,
                                                     size_t kPointZ,
                                                     size_t electronCount_)
-            : kPoints(kPointX * kPointY * kPointZ)
+            : kPoints(repLatt, kPointX, kPointY, kPointZ)
             , electronCount(electronCount_) {
-        assert(kPoints.getLength() != 0);
+        assert(kPoints.getSize() != 0);
         size_t kPointID = 0;
         const size_t plainWaveCount = Grid3D<double, true>::sizeFromCutEnergy(cutEnergy, repLatt); //TODO: signed/unsigned character can be moved to father class
         
-        const ScalarType kPointWeight = reciprocal(ScalarType(kPoints.getLength()));
+        const ScalarType kPointWeight = reciprocal(ScalarType(kPoints.getSize()));
         const ScalarType stepX = reciprocal(ScalarType(kPointX));
         const ScalarType stepY = reciprocal(ScalarType(kPointY));
         const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
@@ -92,8 +97,46 @@ namespace Physica::Core {
         ScalarType energy = ScalarType::Zero();
         for (auto ite = kPoints.cbegin(); ite != kPoints.cend(); ++ite)
             energy += (*ite).getTotalEnergy();
-        energy *= reciprocal(ScalarType(kPoints.getLength()));
+        energy *= reciprocal(ScalarType(kPoints.getSize()));
         return energy;
+    }
+    /**
+     * Reference:
+     * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
+     */
+    template<class ScalarType, bool isSpinPolarized>
+    template<class VectorType>
+    VectorType BandGrid<ScalarType, isSpinPolarized>::getDensityOfStates(const LValueVector<VectorType>& atEnergy) const {
+        auto dos = VectorType(atEnergy.getLength());
+        for (size_t i = 0; i < atEnergy.getLength(); ++i) {
+            const ScalarType energy = atEnergy[i];
+            ScalarType density = ScalarType::Zero();
+            for (size_t kPointId = 0; kPointId < kPoints.getSize(); ++i) {
+                const ScalarType energy0 = kPoints[kPointId].getTotalEnergy();
+                const auto gradE = gradEnergy(kPointId);
+                const ScalarType normalizer = gradE[0] * gradE[1] * gradE[2] * ScalarType(0.5);
+
+                ScalarType deltaDensity = ScalarType::Zero();
+                for (int sigma1; sigma1 < 2; ++sigma1) {
+                    for (int sigma2; sigma2 < 2; ++sigma2) {
+                        for (int sigma3; sigma3 < 2; ++sigma3) {
+                            const int sum = sigma1 + sigma2 + sigma3;
+                            ScalarType temp = energy - energy0;
+                            temp -= ScalarType(sigma1 == 0 ? 1 : -1) * gradE(0);
+                            temp -= ScalarType(sigma2 == 0 ? 1 : -2) * gradE(1);
+                            temp -= ScalarType(sigma3 == 0 ? 1 : -3) * gradE(2);
+                            if (temp.isPositive()) {
+                                temp = square(temp);
+                                deltaDensity += (sum % 2 == 0 ? temp : -temp);
+                            }
+                        }
+                    }
+                }
+                density += deltaDensity * normalizer;
+            }
+            dos[i] = density;
+        }
+        return dos;
     }
 
     template<class ScalarType, bool isSpinPolarized>
@@ -112,5 +155,25 @@ namespace Physica::Core {
     inline void swap(Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band1,
                      Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band2) noexcept {
         band1.swap(band2);
+    }
+    /**
+     * \returns Gradient of energy in t-coordinate defined in [1]
+     * 
+     * Reference:
+     * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
+     */
+    template<class ScalarType, bool isSpinPolarized>
+    Vector<ScalarType, 3> BandGrid<ScalarType, isSpinPolarized>::gradEnergy(size_t kPointId) const {
+        auto dimAdd = [](size_t dim, size_t dim_all) { return dim == dim_all - 1 ? 0 : dim + 1; };
+        auto dimSub = [](size_t dim, size_t dim_all) { return dim == 0 ? dim_all - 1 : dim - 1; };
+        const auto[x, y, z] = kPoints.indexToDim(kPointId);
+        const size_t dimX = kPoints.getDimX();
+        const size_t dimY = kPoints.getDimY();
+        const size_t dimZ = kPoints.getDimZ();
+        const ScalarType factor = ScalarType(0.25);
+        const ScalarType gradX = (kPoints(dimAdd(x, dimX), y, z) -  kPoints(dimSub(x, dimX), y, z)) * factor;
+        const ScalarType gradY = (kPoints(x, dimAdd(y, dimY), z) -  kPoints(x, dimSub(y, dimY), z)) * factor;
+        const ScalarType gradZ = (kPoints(x, y, dimAdd(z, dimZ)) -  kPoints(x, y, dimSub(z, dimZ))) * factor;
+        return {gradX, gradY, gradZ};
     }
 }
