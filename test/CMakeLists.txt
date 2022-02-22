@@ -25,12 +25,13 @@ physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/LUDecomposition
 physica_add_test(Vector Core/Math/Algebra/LinearAlgebra/VectorTest.cpp)
 physica_add_test(Polynomial Core/Math/Algebra/Polynomial.cpp)
 ## Calculus
+physica_add_test(ODE Core/Math/Calculus/ODE/ODETest.cpp)
+physica_add_test(StochasticRungeKutta Core/Math/Calculus/ODE/StochasticRungeKutta.cpp)
 physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)
 physica_add_test(Differential Core/Math/Calculus/Differential.cpp)
 physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
 physica_add_test(Interpolation Core/Math/Calculus/Interpolation.cpp)
-physica_add_test(ODE Core/Math/Calculus/ODETest.cpp)
 physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
 ## Optimization
 physica_add_test(Adam Core/Math/Optimization/AdamTest.cpp)

@@ -76,6 +76,7 @@ namespace Physica::Core {
         }
     }
     /**
+     * Apply to wight noise only
      * Defination of RandomFunc:
      * TVector RandomFunc(T x, TVector y);
      * 
