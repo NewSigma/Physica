@@ -38,7 +38,12 @@ namespace Physica::Core {
         typename Gnuplot::VectorType xBuffer{};
         typename Gnuplot::VectorType yBuffer{};
         while (is.good()) {
-            const int ch = is.peek();
+            int ch = is.peek();
+            while (ch == ' ') {
+                is.get();
+                ch = is.peek();
+            }
+
             if (ch == EOF) {
                 if (xBuffer.getLength() != 0) {
                     gnuplot.xDatas.append(std::move(xBuffer));
