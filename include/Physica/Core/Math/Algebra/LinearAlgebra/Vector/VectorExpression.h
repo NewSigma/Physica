@@ -50,6 +50,7 @@ namespace Physica::Core {
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp1::ScalarType, typename Exp2::ScalarType>::Type;
             constexpr static size_t SizeAtCompile = Exp1::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         };
 
         template<Utils::ExpressionType type, class Exp, class AnyScalar>
@@ -58,6 +59,7 @@ namespace Physica::Core {
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
             constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         };
         /**
          * This class implements assignTo() for all \class VectorExpression

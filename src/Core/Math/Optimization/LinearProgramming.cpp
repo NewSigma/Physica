@@ -57,13 +57,13 @@ namespace Physica::Core {
      * Add a restrain to the LinearProgramming, return true if successful, false if failed.
      * Fails when sizes are not compatible.
      */
-    bool LinearProgramming::addRestrain(Vector<> v, RestrainType type) {
+    bool LinearProgramming::addRestrain(Vector<ScalarType> v, RestrainType type) {
         const auto length = target.getLength();
         if(length == 0 || length != v.getLength())
             return false;
         switch(type) {
             case Equal:
-                data.appendRow(Vector<>(-v));
+                data.appendRow(Vector<ScalarType>(-v));
                 data.appendRow(std::move(v));
                 break;
     #pragma GCC diagnostic push
@@ -83,7 +83,7 @@ namespace Physica::Core {
     void LinearProgramming::forceNonNegative(size_t index) {
         if(index == 0 || index >= target.getLength())
             return;
-        MultiScalar copy(target[index]);
+        ScalarType copy(target[index]);
         target << std::move(copy);
         const auto l = data.getRow();
         for(size_t i = 0; i < l; ++i) {
@@ -103,7 +103,7 @@ namespace Physica::Core {
      * of elements.
      * Return true if successful, false if failed.
      */
-    bool LinearProgramming::setTarget(const Vector<>& v) {
+    bool LinearProgramming::setTarget(const Vector<ScalarType>& v) {
         const auto length = target.getLength();
         if(length == 0 || length == v.getLength()) {
             target = v;
@@ -116,7 +116,7 @@ namespace Physica::Core {
      * of elements.
      * Return true if successful, false if failed.
      */
-    bool LinearProgramming::setTarget(Vector<>&& v) {
+    bool LinearProgramming::setTarget(Vector<ScalarType>&& v) {
         const auto length = target.getLength();
         if(length == 0 || length == v.getLength()) {
             target = std::move(v);
@@ -154,16 +154,16 @@ namespace Physica::Core {
                 order[i] = i;
         }
         //Save the old target.
-        Vector<> copyTarget(std::move(target));
+        Vector<ScalarType> copyTarget(std::move(target));
         //Construct the auxiliary problem.
-        target = Vector<>::Zeros(column + 1);
-        target[column] = MultiScalar((SignedMPUnit)-1);
+        target = Vector<ScalarType>::Zeros(column + 1);
+        target[column] = ScalarType(-1);
         for(size_t i = 0; i < row; ++i)
-            data[i] << MultiScalar::One();
+            data[i] << ScalarType::One();
         pivot(minimumIndex, column - 1);
         //Solve the auxiliary problem.
         solveImpl();
-        if(target[0].getPower() >= 0) { //Scalar whose power < 0 is a very small value, approximately equal to zero.
+        if(target[0] <= ScalarType(std::numeric_limits<ScalarType>::min())) {
             state = Infeasiable;
             return;
         }
@@ -188,7 +188,7 @@ namespace Physica::Core {
         memmove(order + tempTermOrder, order + tempTermOrder + 1
                 , (orderLength - tempTermOrder - 1) * sizeof(size_t));
         //Restore the original target.
-        target = Vector<>::Zeros(column);
+        target = Vector<ScalarType>::Zeros(column);
         target[0] = copyTarget[0];
         for(size_t i = 1; i < column; ++i) {
             //Is variable i basic?
@@ -232,7 +232,7 @@ namespace Physica::Core {
         auto& ele = data(basic, nonBasic);
         ele = std::move(temp);
 
-        MultiScalar copy;
+        ScalarType copy;
         for(size_t i = 0; i < dataSize; ++i) {
             if(i == basic)
                 continue;

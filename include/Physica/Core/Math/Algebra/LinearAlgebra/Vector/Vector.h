@@ -24,6 +24,7 @@
 #include "LValueVector.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
+#include "BestPacket.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
@@ -37,6 +38,7 @@ namespace Physica::Core {
             using ScalarType = T;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = MaxLength;
+            using PacketType = typename Internal::BestPacket<T, Length>::Type;
         };
     }
 

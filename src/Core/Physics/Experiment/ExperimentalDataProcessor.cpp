@@ -30,7 +30,7 @@ namespace Physica::Core::Physics {
         return *this;
     }
 
-    void ExperimentalDataProcessor::compensate(const Scalar<MultiPrecision, false>& s) {
+    void ExperimentalDataProcessor::compensate(const ScalarType& s) {
         for(auto& item : data)
             item[0] -= s;
     }
@@ -39,26 +39,25 @@ namespace Physica::Core::Physics {
      */
     void ExperimentalDataProcessor::updateInfo() {
         /* Calc total */ {
-            Scalar<MultiPrecision, false> total(0);
+            ScalarType total(0);
             for(auto& item : data)
                 total += item[0];
             info.total = total;
         }
         const auto column = data.getColumn();
         /* Calc average */
-        info.average = info.total / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column));
+        info.average = info.total / ScalarType(column);
         /* Calc standardDeviation */ {
-            Scalar<MultiPrecision, false> temp(0);
+            ScalarType temp(0);
             for(auto& item : data) {
-                Scalar<MultiPrecision, false> delta = item[0] - info.average;
+                ScalarType delta = item[0] - info.average;
                 temp += square(delta);
             }
-            info.standardDeviation = sqrt(temp
-                                          / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column - 1)));
+            info.standardDeviation = sqrt(temp / ScalarType(column - 1));
         }
         /* Calc averageStandardDeviation */ {
             info.averageStandardDeviation =
-                    info.standardDeviation / Scalar<MultiPrecision, false>(static_cast<SignedMPUnit>(column));
+                    info.standardDeviation / ScalarType(column);
         }
     }
 }
