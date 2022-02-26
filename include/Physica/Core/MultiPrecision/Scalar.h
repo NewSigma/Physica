@@ -49,9 +49,11 @@ namespace Physica::Core {
 
         template<ScalarOption option_, bool errorTrack_>
         class Traits<Scalar<option_, errorTrack_>> {
+            using Helper = typename std::conditional<option_ == Float, float, double>::type;
         public:
             using RealType = Scalar<option_, errorTrack_>;
             using ComplexType = ComplexScalar<Scalar<option_, errorTrack_>>;
+            using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_, false>, Helper>::type;
             static constexpr ScalarOption option = option_;
             static constexpr bool errorTrack = errorTrack_;
             static constexpr bool isComplex = false;
@@ -176,8 +178,6 @@ namespace Physica::Core {
 
         template<>
         class AbstractScalar<Float> {
-        public:
-            using TrivialType = float;
         protected:
             float f;
         public:
@@ -209,8 +209,6 @@ namespace Physica::Core {
 
         template<>
         class AbstractScalar<Double> {
-        public:
-            using TrivialType = double;
         protected:
             double d;
         public:
@@ -245,6 +243,7 @@ namespace Physica::Core {
     class ScalarBase : public Utils::CRTPBase<Derived> {
     public:
         using ScalarType = Derived;
+        using TrivialType = typename Internal::Traits<Derived>::TrivialType;
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
@@ -284,6 +283,33 @@ namespace Physica::Core {
                 return this->getDerived().squaredNorm();
             else
                 return square(this->getDerived());
+        }
+
+        constexpr static int size() { return 1; }
+
+        Derived& load(const TrivialType* p) {
+            this->getDerived() = *p;
+            return this->getDerived();
+        }
+
+        void store(TrivialType* p) const {
+            *p = this->getDerived().getTrivial();
+        }
+
+        Derived& load_partial(int n, const TrivialType* p) {
+            if (n)
+                load(p);
+            return this->getDerived();
+        }
+
+        void store_partial(int n, TrivialType* p) const {
+            if (n)
+                store(p);
+        }
+
+        void insert(int index, TrivialType value) {
+            (void)index;
+            this->getDerived() = ScalarType(value);
         }
     };
 

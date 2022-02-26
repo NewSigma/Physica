@@ -58,6 +58,10 @@ namespace Physica::Core {
         }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return Base::getDerived().template packet<PacketType>(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return Base::getDerived().template packetPartial<PacketType>(index); }
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }

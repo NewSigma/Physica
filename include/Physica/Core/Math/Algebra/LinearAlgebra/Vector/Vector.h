@@ -21,9 +21,10 @@
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
-#include "LValueVector.h"
+#include "ContinuousVector.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
+#include "BestPacket.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {
@@ -46,11 +47,11 @@ namespace Physica::Core {
      * T must be either Scalar or ComplexScalar.
      */
     template<class T, size_t Length, size_t MaxLength>
-    class Vector : public LValueVector<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
+    class Vector : public ContinuousVector<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
-        using Base = LValueVector<Vector<T, Length, MaxLength>>;
+        using Base = ContinuousVector<Vector<T, Length, MaxLength>>;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
     public:
@@ -72,6 +73,7 @@ namespace Physica::Core {
         /* Getters */
         using Storage::getLength;
         /* Helpers */
+        using Storage::swap;
         static Vector Zeros(size_t len);
         static Vector randomVector(size_t len);
         static Vector randomVector(const Vector& v1, const Vector& v2);
@@ -119,6 +121,11 @@ namespace Physica::Core {
         for (size_t i = 0; i < v.getLength(); ++i)
             result[i] = v.calc(i).norm();
         return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    inline void swap(Vector<T, Length, MaxLength>& v1, Vector<T, Length, MaxLength>& v2) noexcept {
+        v1.swap(v2);
     }
 }
 

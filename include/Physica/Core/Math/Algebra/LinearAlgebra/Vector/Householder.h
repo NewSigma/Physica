@@ -67,10 +67,11 @@ namespace Physica::Core {
     void applyHouseholder(const RValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
         using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
-        Vector<ScalarType> copy = householder;
+        using T = Vector<ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        T copy = householder;
         ScalarType temp = ScalarType::One();
         swap(temp, copy[0]);
-        const Vector<ScalarType> temp1 = copy * temp;
+        const T temp1 = copy * temp;
         mat -= temp1 * (copy.transpose().conjugate() * mat).compute();
     }
 
@@ -78,9 +79,12 @@ namespace Physica::Core {
     void applyHouseholder(LValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& householder) {
         using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
-        Vector<ScalarType> copy = householder;
+        using T = Vector<ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        T copy = householder;
         ScalarType temp = ScalarType::One();
         swap(temp, copy[0]);
-        mat -= Vector<ScalarType>(mat * copy) * (copy.conjugate().transpose() * temp);
+        using ProductType = decltype(mat * copy);
+        using T1 = Vector<ScalarType, ProductType::SizeAtCompile, ProductType::MaxSizeAtCompile>;
+        mat -= T1(mat * copy) * (copy.conjugate().transpose() * temp);
     }
 }

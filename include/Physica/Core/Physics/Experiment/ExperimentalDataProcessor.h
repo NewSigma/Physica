@@ -30,17 +30,17 @@ namespace Physica::Core::Physics {
      * Number of data cannot be more than maximum of @typedef MPUnit.
      */
     class ExperimentalDataProcessor {
-        using DataMatrix = DenseMatrix<Scalar<MultiPrecision, false>>;
+        using ScalarType = Scalar<Double, false>;
+        using DataMatrix = DenseMatrix<ScalarType>;
     public:
         struct ExperimentalDataInfo {
-            Scalar<MultiPrecision, false> total;
-            Scalar<MultiPrecision, false> average;
-            Scalar<MultiPrecision, false> standardDeviation;
-            Scalar<MultiPrecision, false> averageStandardDeviation;
+            ScalarType total;
+            ScalarType average;
+            ScalarType standardDeviation;
+            ScalarType averageStandardDeviation;
         };
     private:
         /*
-         * Use Scalar<MultiPrecision, false> because error trace is not necessary.
          * Use column matrix for the convenience of add and remove data.
          *
          * The first row of the matrix contains the measured values.
@@ -57,7 +57,7 @@ namespace Physica::Core::Physics {
         ExperimentalDataProcessor& operator=(const ExperimentalDataProcessor& processor);
         ExperimentalDataProcessor& operator=(ExperimentalDataProcessor&& processor) noexcept;
         /* Operations */
-        void compensate(const Scalar<MultiPrecision, false>& s);
+        void compensate(const ScalarType& s);
         void updateInfo();
         /* Getters */
         const ExperimentalDataInfo& getInfo() noexcept { return info; }

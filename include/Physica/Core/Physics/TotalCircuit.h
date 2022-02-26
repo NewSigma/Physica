@@ -25,6 +25,7 @@
 
 namespace Physica::Core {
     class TotalCircuit {
+        using ScalarType = Scalar<Double, false>;
         /*
          * Save two connection points.
          *
@@ -32,23 +33,23 @@ namespace Physica::Core {
          */
         struct Connection {
         private:
-            MultiScalar* resistance;
+            ScalarType* resistance;
             int pos1, pos2;
         public:
-            inline void setData(MultiScalar* p_scalar, int i1, int i2) {
+            inline void setData(ScalarType* p_scalar, int i1, int i2) {
                 assert(i1 < i2);
                 resistance = p_scalar;
                 pos1 = i1;
                 pos2 = i2;
             }
-            [[nodiscard]] inline MultiScalar* getResistance() { return resistance; }
+            [[nodiscard]] inline ScalarType* getResistance() { return resistance; }
             [[nodiscard]] inline int getPos1() const { return pos1; }
             [[nodiscard]] inline int getPos2() const { return pos2; }
         };
     private:
         //Value of resistances.
-        Utils::FreezingList<MultiScalar> resistances;
-        std::vector<MultiScalar> result;
+        Utils::FreezingList<ScalarType> resistances;
+        std::vector<ScalarType> result;
         //Size of all resistances. Not always equals to resistances.size().
         size_t size;
         //Total number of nodes.
@@ -61,7 +62,7 @@ namespace Physica::Core {
         //Save the first element of order that is not initialized.
         Connection* orderCurrent;
     public:
-        explicit TotalCircuit(std::vector<MultiScalar> v);
+        explicit TotalCircuit(std::vector<ScalarType> v);
         TotalCircuit(const TotalCircuit&) = delete;
         TotalCircuit(TotalCircuit&&) noexcept = delete;
         ~TotalCircuit();
@@ -69,7 +70,7 @@ namespace Physica::Core {
         TotalCircuit& operator=(const TotalCircuit&) = delete;
         TotalCircuit& operator=(TotalCircuit&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const std::vector<MultiScalar>& getResult() const noexcept { return result; }
+        [[nodiscard]] const std::vector<ScalarType>& getResult() const noexcept { return result; }
     private:
         void connect();
         void calculate();

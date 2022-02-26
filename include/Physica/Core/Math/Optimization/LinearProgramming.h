@@ -31,6 +31,7 @@ namespace Physica::Core {
      */
     class LinearProgramming {
     public:
+        using ScalarType = Scalar<Double, false>;
         enum RestrainType {
             Equal,
             GreaterEqual,
@@ -46,8 +47,8 @@ namespace Physica::Core {
         /*
          * target[0] is the constant term, target[n] is the coefficient before the n.th variable.
          */
-        Vector<> target;
-        DenseMatrix<MultiScalar, DenseMatrixOption::Row | DenseMatrixOption::Vector> data;
+        Vector<ScalarType> target;
+        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> data;
         //Refactor: devide into two arrays
         size_t* order;
         LPState state;
@@ -60,18 +61,18 @@ namespace Physica::Core {
         LinearProgramming& operator=(const LinearProgramming& lp);
         LinearProgramming& operator=(LinearProgramming&& lp) noexcept;
         /* Operations */
-        bool addRestrain(Vector<> v, RestrainType type);
+        bool addRestrain(Vector<ScalarType> v, RestrainType type);
         void forceNonNegative(size_t index);
         void solve();
         /* Getters */
-        [[nodiscard]] const Vector<>& getTarget() const { return target; }
-        [[nodiscard]] const DenseMatrix<MultiScalar, DenseMatrixOption::Row | DenseMatrixOption::Vector>& getData() const { return data; }
+        [[nodiscard]] const Vector<ScalarType>& getTarget() const { return target; }
+        [[nodiscard]] const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>& getData() const { return data; }
         [[nodiscard]] const size_t* getOrder() const { return order; }
         [[nodiscard]] size_t getOrderLength() const { return data.getRow() + data.getColumn(); }
         [[nodiscard]] LPState getState() const { return state; }
         /* Setters */
-        bool setTarget(const Vector<>& v);
-        bool setTarget(Vector<>&& v);
+        bool setTarget(const Vector<ScalarType>& v);
+        bool setTarget(Vector<ScalarType>&& v);
     private:
         void initialize();
         void pivot(size_t basic, size_t nonBasic);

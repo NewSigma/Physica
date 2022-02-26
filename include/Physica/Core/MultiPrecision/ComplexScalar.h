@@ -29,6 +29,7 @@ namespace Physica::Core {
         public:
             using RealType = ScalarType;
             using ComplexType = ComplexScalar<ScalarType>;
+            using TrivialType = typename ScalarType::TrivialType;
             static constexpr ScalarOption option = Traits<ScalarType>::option;
             static constexpr bool errorTrack = Traits<ScalarType>::errorTrack;
             static constexpr bool isComplex = true;
