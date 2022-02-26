@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/ContinuousVector.h"
 
 namespace Physica::Core {
     template<class MatrixType> class RowVector;
@@ -31,7 +31,10 @@ namespace Physica::Core {
     namespace Internal {
         template<class MatrixType>
         class Traits<RowVector<MatrixType>> {
+            using VectorType = RowVector<MatrixType>;
+            constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<MatrixType>();
         public:
+            using Base = typename std::conditional<isRowMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
@@ -40,7 +43,10 @@ namespace Physica::Core {
 
         template<class MatrixType>
         class Traits<ColVector<MatrixType>> {
+            using VectorType = ColVector<MatrixType>;
+            constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<MatrixType>();
         public:
+            using Base = typename std::conditional<isColumnMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
@@ -65,9 +71,9 @@ namespace Physica::Core {
      * \class RowVector and \class ColVector is designed to implement \class MatrixBlock, and they can be used indepently.
      */
     template<class MatrixType>
-    class RowVector : public LValueVector<RowVector<MatrixType>> {
+    class RowVector : public Internal::Traits<RowVector<MatrixType>>::Base {
     public:
-        using Base = LValueVector<RowVector<MatrixType>>;
+        using Base = typename Internal::Traits<RowVector<MatrixType>>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
@@ -93,9 +99,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class ColVector : public LValueVector<ColVector<MatrixType>> {
+    class ColVector : public Internal::Traits<ColVector<MatrixType>>::Base {
     public:
-        using Base = LValueVector<ColVector<MatrixType>>;
+        using Base = typename Internal::Traits<ColVector<MatrixType>>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;

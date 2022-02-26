@@ -43,7 +43,6 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using PacketType = typename Internal::Traits<Derived>::PacketType;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
         using ColMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
@@ -59,7 +58,10 @@ namespace Physica::Core {
         }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
-        [[nodiscard]] PacketType packet(size_t index) const { return Base::getDerived().packet(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return Base::getDerived().template packet<PacketType>(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return Base::getDerived().template packetPartial<PacketType>(index); }
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }

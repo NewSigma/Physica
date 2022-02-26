@@ -66,4 +66,21 @@ namespace Physica::Core::Internal {
         using Type = typename PacketHelper<ScalarType, Length>::Type;
         constexpr static size_t Size = PacketHelper<ScalarType, Length>::Size;
     };
+
+    template<class ScalarType>
+    struct EnableSIMDHelper {
+        constexpr static bool value = false;
+    };
+
+    template<ScalarOption option>
+    struct EnableSIMDHelper<Scalar<option, false>> {
+        constexpr static bool value = true;
+    };
+
+    template<class VectorType1, class VectorType2>
+    class EnableSIMD {
+        constexpr static bool same_scalar = std::is_same<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::value;
+    public:
+        constexpr static bool value = same_scalar && EnableSIMDHelper<typename VectorType1::ScalarType>::value;
+    };
 }
