@@ -22,6 +22,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
+    class Xdatcar;
+
     class Poscar {
     public:
         enum PoscarType : bool {
@@ -62,7 +64,20 @@ namespace Physica::Core {
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept;
+        /* Helpers */
+        void swap(Poscar& poscar) noexcept;
     private:
         void readNumOfEachType(std::istream& is);
+        void readAtomPos(std::istream& is);
+
+        friend class Xdatcar;
     };
+}
+
+namespace std {
+    template<>
+    inline void swap<Physica::Core::Poscar>(
+            Physica::Core::Poscar& car1, Physica::Core::Poscar& car2) noexcept {
+        car1.swap(car2);
+    }
 }

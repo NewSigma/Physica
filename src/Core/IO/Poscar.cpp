@@ -60,16 +60,7 @@ namespace Physica::Core {
             else
                 throw BadFileFormatException();
         }
-        /* Read atom pos */ {
-            const size_t atomCount = poscar.getAtomCount();
-            poscar.pos.resize(atomCount, 3);
-            size_t i = 0;
-            for (; i < atomCount - 1; i++) {
-                is >> poscar.pos(i, 0) >> poscar.pos(i, 1) >> poscar.pos(i, 2);
-                is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
-            is >> poscar.pos(i, 0) >> poscar.pos(i, 1) >> poscar.pos(i, 2);
-        }
+        poscar.readAtomPos(is);
         if (!is)
             throw BadFileFormatException();
         return is;
@@ -214,6 +205,13 @@ namespace Physica::Core {
         return result;
     }
 
+    void Poscar::swap(Poscar& poscar) noexcept {
+        lattice.swap(poscar.lattice);
+        pos.swap(poscar.pos);
+        numOfEachType.swap(poscar.numOfEachType);
+        std::swap(type, poscar.type);
+    }
+
     void Poscar::readNumOfEachType(std::istream& is) {
         size_t count = 0;
         /* Get first type count */ {
@@ -234,5 +232,16 @@ namespace Physica::Core {
         } while(is.good());
         is.clear();
         numOfEachType.squeeze();
+    }
+
+    void Poscar::readAtomPos(std::istream& is) {
+        const size_t atomCount = getAtomCount();
+        pos.resize(atomCount, 3);
+        size_t i = 0;
+        for (; i < atomCount - 1; i++) {
+            is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
+            is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
     }
 }
