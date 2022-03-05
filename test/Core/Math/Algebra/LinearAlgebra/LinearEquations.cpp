@@ -31,10 +31,41 @@ int main() {
                 {0.131671000379563, 0.0216969440126965, 0.643819646681362, -0.131016640264434, 9.840637243791538E-1},
                 {-0.0701048797366553, -0.0884307621566726, -0.131016640264434, 0.788769710999288, 1.671684099146560E-1}};
     VectorType answer{0.379822910240522, 0.0329724647167976, 1.55292884169613, 0.507335846409689};
-
-    LinearEquations equ(A);
-    equ.conjugateGradient();
-    if (!vectorNear(equ.getSolution(), answer, 1E-14))
-        return 1;
+    {
+        LinearEquations equ(A);
+        equ.gaussJordanPartial();
+        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+            return 1;
+    }
+    {
+        LinearEquations equ(A);
+        equ.gaussJordanComplete();
+        if (!vectorNear(equ.getSolution(), answer, 1E-13))
+            return 1;
+    }
+    {
+        LinearEquations equ(A);
+        equ.gaussEliminationPartial();
+        if (!vectorNear(equ.getSolution(), answer, 1E-13))
+            return 1;
+    }
+    {
+        LinearEquations equ(A);
+        equ.gaussEliminationComplete();
+        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+            return 1;
+    }
+    {
+        LinearEquations equ(A);
+        equ.lu();
+        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+            return 1;
+    }
+    {
+        LinearEquations equ(A);
+        equ.conjugateGradient();
+        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+            return 1;
+    }
     return 0;
 }

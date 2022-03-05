@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,52 +16,52 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LINEAREQUATIONS_H
-#define PHYSICA_LINEAREQUATIONS_H
+#pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
-    /*!
-     * Declare common parts for template instances of LinearEquations.
-     */
-    class AbstractLinearEquations {
-    public:
-        enum LinearEquationsMethod {
-            GaussJordanPartial,
-            GaussJordanComplete,
-            GaussEliminationPartial,
-            GaussEliminationComplete,
-            LUMethod
-        };
-    };
-    /*!
-     * Solve linear equations.
+    /**
+     * Unfinished:
+     * If the equations do not have the unique solution, the program will throw a divide zero exception and stop.
+     * Change the bias in LU method to solve a family of equations.
+     * 
+     * References:
+     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009
      */
     template<class T = MultiScalar, int type = DenseMatrixOption::Column | DenseMatrixOption::Vector
             , size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
-    class LinearEquations : AbstractLinearEquations{
-        DenseMatrix<T, type, maxRow, maxColumn> matrix;
+    class LinearEquations {
+        using Operation = MatrixOperation<T, type, maxRow, maxColumn>;
+
+        DenseMatrix<T, type, maxRow, maxColumn> working;
     public:
-        explicit LinearEquations(const DenseMatrix<T, type, maxRow, maxColumn>& m);
-        explicit LinearEquations(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        explicit LinearEquations(DenseMatrix<T, type, maxRow, maxColumn> working_);
         LinearEquations(const LinearEquations& l) = default;
-        LinearEquations(LinearEquations&& l) noexcept;
+        LinearEquations(LinearEquations&& l) noexcept = default;
         ~LinearEquations() = default;
         /* Operators */
-        LinearEquations& operator=(const LinearEquations& l) = default;
-        LinearEquations& operator=(LinearEquations&& l) noexcept;
+        LinearEquations& operator=(LinearEquations l) noexcept;
         /* Operations */
-        void solve(LinearEquationsMethod method);
-        void conjugateGradient() const;
-        /* Helpers */
-        [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() noexcept { return std::move(matrix); }
+        void gaussJordanPartial();
+        void gaussJordanComplete();
+        void gaussEliminationPartial();
+        void gaussEliminationComplete();
+        void lu();
+        void conjugateGradient();
         /* Getters */
-        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] auto getSolution() { return matrix.col(matrix.getColumn() - 1); }
+        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
+        [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
+        /* Helpers */
+        void swap(LinearEquations& equ) noexcept;
     };
+
+    template<class T, int type, size_t maxRow, size_t maxColumn>
+    inline void swap(LinearEquations<T, type, maxRow, maxColumn>& equ1, LinearEquations<T, type, maxRow, maxColumn>& equ2) noexcept {
+        equ1.swap(equ2);
+    }
 }
 
 #include "LinearEquationsImpl.h"
-
-#endif

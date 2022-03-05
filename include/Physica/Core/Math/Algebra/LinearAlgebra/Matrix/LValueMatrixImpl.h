@@ -264,39 +264,21 @@ namespace Physica::Core {
     template<class Derived>
     void LValueMatrix<Derived>::rowReduce(size_t r1, size_t r2, size_t elementIndex) {
         Derived& matrix = Base::getDerived();
-        assert(!matrix(r1, elementIndex).isZero());
-        const size_t column = matrix.getColumn();
+        assert(abs(matrix(r1, elementIndex)) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
-        for (size_t i = 0; i < column; ++i)
-            matrix(r1, i) -= matrix(r2, i) * factor;
-        assert(matrix(r2, elementIndex).isZero());
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::rowReduce(size_t r1, size_t r2, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t column = matrix.getColumn();
-        for (size_t i = 0; i < column; ++i)
-            matrix(r1, i) -= matrix(r2, i) * factor;
+        auto row2 = row(r2);
+        row2 -= row(r1).asVector() * factor;
+        matrix(r2, elementIndex) = ScalarType::Zero();
     }
 
     template<class Derived>
     void LValueMatrix<Derived>::columnReduce(size_t c1, size_t c2, size_t elementIndex) {
         Derived& matrix = Base::getDerived();
-        assert(!matrix(elementIndex, c1).isZero());
-        const size_t row = matrix.getRow();
+        assert(abs(matrix(elementIndex, c1)) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
-        for (size_t i = 0; i < row; ++i)
-            matrix(i, c1) -= matrix(i, c2) * factor;
-        assert(matrix(elementIndex, c2).isZero());
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::columnReduce(size_t c1, size_t c2, const ScalarType& factor) {
-        Derived& matrix = Base::getDerived();
-        const size_t row = matrix.getRow();
-        for (size_t i = 0; i < row; ++i)
-            matrix(i, c1) -= matrix(i, c2) * factor;
+        auto col2 = col(c2);
+        col2 -= col(c1).asVector() * factor;
+        matrix(elementIndex, c2) = ScalarType::Zero();
     }
 
     template<class Derived>
@@ -309,32 +291,26 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            columnReduce(v1, v2, factor);
-        else
-            rowReduce(v1, v2, factor);
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::rowMulScalar(size_t r, const ScalarType& factor) {
-        const size_t column = Base::getColumn();
-        for (size_t i = 0; i < column; ++i)
-            (*this)(r, i) *= factor;
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::columnMulScalar(size_t c, const ScalarType& factor) {
-        const size_t row = Base::getRow();
-        for (size_t i = 0; i < row; ++i)
-            (*this)(i, c) *= factor;
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>()) {
+            auto col2 = col(v2);
+            col2 -= col(v1).asVector() * factor;
+        }
+        else {
+            auto row2 = row(v2);
+            row2 -= row(v1).asVector() * factor;
+        }
     }
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
-            columnMulScalar(v, factor);
-        else
-            rowMulScalar(v, factor);
+        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>()) {
+            auto c = col(v);
+            c *= factor;
+        }
+        else {
+            auto r = row(v);
+            r *= factor;
+        }
     }
 
     template<class Derived>

@@ -152,7 +152,7 @@ namespace Physica::Core {
             }
             /* Solve the equations */
             LinearEquations<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> le(std::move(augmentedMatrix));
-            le.solve(AbstractLinearEquations::GaussEliminationPartial);
+            le.gaussEliminationPartial();
             /* Calculate equivalent resistance */
             Connection* p = order;
             ScalarType totalCurrent = ScalarType::Zero();

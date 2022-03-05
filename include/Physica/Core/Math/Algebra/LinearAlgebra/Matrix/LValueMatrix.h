@@ -89,13 +89,9 @@ namespace Physica::Core {
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
-        void rowReduce(size_t r1, size_t r2, const ScalarType& factor);
         void columnReduce(size_t c1, size_t c2, size_t elementIndex);
-        void columnReduce(size_t c1, size_t c2, const ScalarType& factor);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
-        void rowMulScalar(size_t r, const ScalarType& factor);
-        void columnMulScalar(size_t c, const ScalarType& factor);
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
 

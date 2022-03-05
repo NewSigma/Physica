@@ -27,8 +27,7 @@ namespace Physica::Core {
         DenseMatrix<T, type, maxRow, maxColumn> matrix;
         size_t* biasOrder;
     public:
-        explicit PLUDecomposition(const DenseMatrix<T, type, maxRow, maxColumn>& m);
-        explicit PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn>&& m) noexcept;
+        explicit PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn> m);
         PLUDecomposition(const PLUDecomposition& l);
         PLUDecomposition(PLUDecomposition&& l) noexcept;
         ~PLUDecomposition();
