@@ -292,12 +292,12 @@ namespace Physica::Core {
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
         if constexpr (DenseMatrixOption::isColumnMatrix<Derived>()) {
-            auto col2 = col(v2);
-            col2 -= col(v1).asVector() * factor;
+            auto col1 = col(v1);
+            col1 -= col(v2).asVector() * factor;
         }
         else {
-            auto row2 = row(v2);
-            row2 -= row(v1).asVector() * factor;
+            auto row1 = row(v1);
+            row1 -= row(v2).asVector() * factor;
         }
     }
 

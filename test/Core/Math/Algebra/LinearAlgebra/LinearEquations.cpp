@@ -52,7 +52,7 @@ int main() {
     {
         LinearEquations equ(A);
         equ.gaussEliminationComplete();
-        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+        if (!vectorNear(equ.getSolution(), answer, 1E-13))
             return 1;
     }
     {
