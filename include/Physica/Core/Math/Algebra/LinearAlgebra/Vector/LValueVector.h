@@ -36,7 +36,7 @@ namespace Physica::Core {
         ~LValueVector() = default;
         /* Operators */
         LValueVector& operator=(const LValueVector& v);
-        LValueVector& operator=(LValueVector&& v) { return (*this) = v; }
+        LValueVector& operator=(LValueVector&& v) noexcept;
         template<class OtherVector>
         Derived& operator=(const RValueVector<OtherVector>& v);
         template<class AnyScalar>
@@ -71,9 +71,12 @@ namespace Physica::Core {
 
     template<class Derived>
     LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
-        Base::getDerived().resize(v.getLength());
-        v.assignTo(*this);
-        return *this;
+        return Base::getDerived() = v.getDerived();
+    }
+
+    template<class Derived>
+    LValueVector<Derived>& LValueVector<Derived>::operator=(LValueVector&& v) noexcept {
+        return Base::getDerived() = std::move(v.getDerived());
     }
 
     template<class Derived>

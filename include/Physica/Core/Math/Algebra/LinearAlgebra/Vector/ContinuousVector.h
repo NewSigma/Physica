@@ -34,7 +34,10 @@ namespace Physica::Core {
         using ConstPointerType = typename std::add_pointer<typename std::add_const<TrivialType>::type>::type;
         using PointerType = typename std::add_pointer<TrivialType>::type;
     public:
+        ~ContinuousVector() = default;
         /* Operators */
+        ContinuousVector& operator=(const ContinuousVector& v);
+        ContinuousVector& operator=(ContinuousVector&& v) noexcept;
         using Base::operator=;
         /* Operations */
         template<class PacketType>
@@ -45,7 +48,23 @@ namespace Physica::Core {
         void writePacket(size_t index, const PacketType packet);
         template<class PacketType>
         void writePacketPartial(size_t index, const PacketType packet);
+    protected:
+        ContinuousVector() = default;
+        ContinuousVector(const ContinuousVector&) = default;
+        ContinuousVector(ContinuousVector&&) noexcept = default;
     };
+
+    template<class Derived>
+    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const ContinuousVector<Derived>& v) {
+        Base::operator=(v);
+        return *this;
+    }
+
+    template<class Derived>
+    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
+        Base::operator=(std::forward<Base>(v));
+        return *this;
+    }
 
     template<class Derived>
     template<class PacketType>

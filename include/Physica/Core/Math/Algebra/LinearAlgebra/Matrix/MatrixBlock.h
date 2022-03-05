@@ -85,10 +85,12 @@ namespace Physica::Core {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
-        RowVector(const RowVector&) = default;
+        RowVector(const RowVector&) = delete;
         RowVector(RowVector&&) noexcept = delete;
         ~RowVector() = default;
         /* Operators */
+        RowVector& operator=(const RowVector& v) { v.assignTo(*this); return *this; }
+        RowVector& operator=(RowVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < colCount); return mat(row, fromCol + index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
@@ -113,10 +115,12 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
-        ColVector(const ColVector&) = default;
+        ColVector(const ColVector&) = delete;
         ColVector(ColVector&&) noexcept = delete;
         ~ColVector() = default;
         /* Operators */
+        ColVector& operator=(const ColVector& v) { v.assignTo(*this); return *this; }
+        ColVector& operator=(ColVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < rowCount); return mat(fromRow + index, col); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < rowCount); return mat(fromRow + index, col); }

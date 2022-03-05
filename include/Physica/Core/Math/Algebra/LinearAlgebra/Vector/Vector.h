@@ -63,8 +63,7 @@ namespace Physica::Core {
         Vector(Vector&&) noexcept = default;
         ~Vector() = default;
         /* Operators */
-        Vector& operator=(const Vector&) = default;
-        Vector& operator=(Vector&&) noexcept = default;
+        Vector& operator=(Vector v) noexcept;
         using Base::operator=;
         using Storage::operator[];
         /* Operations */
