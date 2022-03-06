@@ -61,33 +61,12 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         };
-        /**
-         * This class implements assignTo() for all \class VectorExpression
-         */
-        template<class Derived>
-        class VectorExpressionHelper : public RValueVector<Derived> {
-        public:
-            using ScalarType = typename Traits<Derived>::ScalarType;
-        private:
-            using Base = RValueVector<Derived>;
-        public:
-            template<class OtherDerived>
-            void assignTo(LValueVector<OtherDerived>& v) const {
-                assert(v.getLength() == getLength());
-                for (size_t i = 0; i < getLength(); ++i)
-                    v[i] = calc(i);
-            }
-
-            [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
-            /* Getters */
-            [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
-        };
     }
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Minus, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Minus, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Minus, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Minus, VectorType>>;
         const VectorType& exp;
     public:
         explicit VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
@@ -102,8 +81,8 @@ namespace Physica::Core {
     //////////////////////////////////////Add//////////////////////////////////////
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType1, VectorType2>>;
     public:
         using typename Base::ScalarType;
     private:
@@ -129,8 +108,8 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
@@ -153,8 +132,8 @@ namespace Physica::Core {
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>;
         const VectorType1& exp1;
         const VectorType2& exp2;
     public:
@@ -177,8 +156,8 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
@@ -199,8 +178,8 @@ namespace Physica::Core {
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>;
     public:
         using typename Base::ScalarType;
     private:
@@ -224,8 +203,8 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
@@ -248,8 +227,8 @@ namespace Physica::Core {
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
@@ -270,8 +249,8 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType1, VectorType2>>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
@@ -294,8 +273,8 @@ namespace Physica::Core {
     //////////////////////////////////////Compare//////////////////////////////////////
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType1, VectorType2>>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
@@ -320,8 +299,8 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
@@ -344,8 +323,8 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType1, VectorType2>>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
@@ -370,8 +349,8 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
@@ -394,8 +373,8 @@ namespace Physica::Core {
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>>;
         const VectorType& exp;
     public:
         VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
@@ -410,8 +389,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Sqrt, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sqrt, VectorType>>;
         const VectorType& exp;
     public:
         VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
@@ -426,8 +405,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Abs, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Abs, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Abs, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Abs, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Abs, VectorType>>;
         const VectorType& v;
     public:
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -442,8 +421,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Square, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Square, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Square, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Square, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Square, VectorType>>;
         const VectorType& v;
     public:
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -458,8 +437,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Ln, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Ln, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Ln, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Ln, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Ln, VectorType>>;
         const VectorType& v;
     public:
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -470,8 +449,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Exp, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Exp, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Exp, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Exp, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Exp, VectorType>>;
         const VectorType& v;
     public:
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -482,8 +461,8 @@ namespace Physica::Core {
 
     template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Pow, VectorType>
-            : public Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>> {
-        using Base = Internal::VectorExpressionHelper<VectorExpression<Utils::ExpressionType::Pow, VectorType>>;
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Pow, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Pow, VectorType>>;
     public:
         using typename Base::ScalarType;
     private:

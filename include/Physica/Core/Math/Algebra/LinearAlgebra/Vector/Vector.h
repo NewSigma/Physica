@@ -77,9 +77,6 @@ namespace Physica::Core {
         static Vector randomVector(size_t len);
         static Vector randomVector(const Vector& v1, const Vector& v2);
         static Vector linspace(T from, T to, size_t count);
-    private:
-        template<class Derived>
-        friend class Internal::VectorExpressionHelper;
     };
 
     namespace Internal {

@@ -64,7 +64,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
         Base::getDerived().resize(m.getRow(), m.getColumn());
-        m.assignTo(*this);
+        m.getDerived().assignTo(*this);
         return Base::getDerived();
     }
     

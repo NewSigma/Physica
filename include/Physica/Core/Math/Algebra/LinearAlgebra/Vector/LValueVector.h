@@ -83,7 +83,7 @@ namespace Physica::Core {
     template<class OtherVector>
     Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v) {
         Base::getDerived().resize(v.getLength());
-        v.assignTo(*this);
+        v.getDerived().assignTo(*this);
         return Base::getDerived();
     }
 

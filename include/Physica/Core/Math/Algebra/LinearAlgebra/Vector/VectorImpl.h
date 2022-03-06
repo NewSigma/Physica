@@ -27,7 +27,7 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
     Vector<T, Length, MaxLength>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
-        v.assignTo(*this);
+        v.getDerived().assignTo(*this);
     }
 
     template<class T, size_t Length, size_t MaxLength>

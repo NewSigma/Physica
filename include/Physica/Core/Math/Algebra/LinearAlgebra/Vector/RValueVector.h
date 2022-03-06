@@ -54,7 +54,8 @@ namespace Physica::Core {
         template<class OtherDerived>
         void assignTo(LValueVector<OtherDerived>& v) const {
             assert(v.getLength() == getLength());
-            Base::getDerived().assignTo(v);
+            for (size_t i = 0; i < getLength(); ++i)
+                v[i] = calc(i);
         }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
@@ -85,78 +86,6 @@ namespace Physica::Core {
         template<class OtherDerived>
         [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
     };
-
-    template<class Derived>
-    typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
-        return sqrt(squaredNorm());
-    }
-
-    template<class Derived>
-    typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
-        auto result = RealType::Zero();
-        for(size_t i = 0; i < getLength(); ++i)
-            result += calc(i).squaredNorm();
-        return result;
-    }
-
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::max() const {
-        assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
-            if (result < temp)
-                result = temp;
-        }
-        return result;
-    }
-
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::min() const {
-        assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
-            if (result > temp)
-                result = temp;
-        }
-        return result;
-    }
-
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::sum() const {
-        assert(getLength() != 0);
-        ScalarType result = ScalarType::Zero();
-        for(size_t i = 0; i < getLength(); ++i)
-            result += calc(i);
-        return result;
-    }
-
-    template<class Derived>
-    template<class OtherDerived>
-    inline CrossProduct<Derived, OtherDerived>
-    RValueVector<Derived>::crossProduct(const RValueVector<OtherDerived>& v) const noexcept {
-        return CrossProduct(*this, v);
-    }
-
-    template<class Derived>
-    template<class OtherDerived>
-    typename RValueVector<Derived>::ScalarType
-    RValueVector<Derived>::angleTo(const RValueVector<OtherDerived>& v) const noexcept {
-        return arccos(Base::getDerived() * v.getDerived() / (norm() * v.norm()));
-    }
-
-    template<class VectorType>
-    std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
-        os << '(';
-        size_t length = v.getLength();
-        if (length > 0) {
-            --length;
-            for (size_t i = 0; i < length; ++i)
-                os << v.calc(i) << ", ";
-            os << v.calc(length);
-        }
-        os << ')';
-        return os;
-    }
 }
+
+#include "RValueVectorImpl.h"

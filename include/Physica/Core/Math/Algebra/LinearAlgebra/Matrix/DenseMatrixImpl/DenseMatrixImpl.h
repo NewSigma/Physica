@@ -25,7 +25,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
-        mat.assignTo(*this);
+        mat.getDerived().assignTo(*this);
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
@@ -33,7 +33,7 @@ namespace Physica::Core {
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const RValueVector<VectorType>& vec)
             : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
-        vec.assignTo(col);
+        vec.getDerived().assignTo(col);
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
