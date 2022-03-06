@@ -6,6 +6,7 @@ include(cmake/Modules/PhysicaCheck.cmake)
 #############################################Settings#############################################
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
+option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(RUN_CHECKS "Run Checks" ON)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_FFTW3 "Use fftw3" OFF)
@@ -89,6 +90,10 @@ endif()
 #Enable Tests
 if(${BUILD_TESTS})
     add_subdirectory(test)
+endif()
+
+if(${BUILD_BENCHMARKS})
+    add_subdirectory(benchmark)
 endif()
 
 if(${PHYSICA_GUI})
