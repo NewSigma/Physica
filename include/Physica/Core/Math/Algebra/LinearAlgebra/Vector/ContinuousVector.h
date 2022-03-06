@@ -52,6 +52,9 @@ namespace Physica::Core {
         ContinuousVector() = default;
         ContinuousVector(const ContinuousVector&) = default;
         ContinuousVector(ContinuousVector&&) noexcept = default;
+    private:
+        PointerType data_ptr(size_t index) { return reinterpret_cast<PointerType>(&(*this)[index]); }
+        ConstPointerType data_ptr(size_t index) const { return reinterpret_cast<ConstPointerType>(&(*this)[index]); }
     };
 
     template<class Derived>
@@ -70,31 +73,43 @@ namespace Physica::Core {
     template<class PacketType>
     PacketType ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + PacketType::size() <= Base::getLength());
-        PacketType packet{};
-        auto* p = reinterpret_cast<ConstPointerType>(&(*this)[index]);
-        packet.load(p);
-        return packet;
+        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
+            PacketType packet{};
+            packet.load(data_ptr(index));
+            return packet;
+        }
+        else
+            return Base::template packet<PacketType>(index);
     }
 
     template<class Derived>
     template<class PacketType>
     PacketType ContinuousVector<Derived>::packetPartial(size_t index) const {
-        PacketType packet{};
-        auto* p = reinterpret_cast<ConstPointerType>(&(*this)[index]);
-        const size_t count = Base::getLength() - index;
-        packet.load_partial(count, p);
-        return packet;
+        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
+            PacketType packet{};
+            const size_t count = Base::getLength() - index;
+            packet.load_partial(count, data_ptr(index));
+            return packet;
+        }
+        else
+            return Base::template packetPartial<PacketType>(index);
     }
 
     template<class Derived>
     template<class PacketType>
     void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        packet.store(reinterpret_cast<PointerType>(&(*this)[index]));
+        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
+            packet.store(data_ptr(index));
+        else
+            Base::template writePacket(index, packet);
     }
 
     template<class Derived>
     template<class PacketType>
     void ContinuousVector<Derived>::writePacketPartial(size_t index, const PacketType packet) {
-        packet.store_partial(Base::getLength() - index, reinterpret_cast<PointerType>(&(*this)[index]));
+        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
+            packet.store_partial(Base::getLength() - index, data_ptr(index));
+        else
+            Base::template writePacketPartial(index, packet);
     }
 }

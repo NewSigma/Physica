@@ -21,6 +21,46 @@
 #include "BestPacket.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T1, class T2, bool enableSIMD>
+        struct AssignImpl {
+            static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+                for (size_t i = 0; i < v1.getLength(); ++i)
+                    v2[i] = v1.calc(i);
+            }
+        };
+
+        template<class T1, class T2>
+        class AssignImpl<T1, T2, true> {
+            constexpr static size_t size1 = T1::SizeAtCompile;
+            constexpr static size_t size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
+        public:
+            using ScalarType = typename T1::ScalarType;
+            using TrivialType = typename ScalarType::TrivialType;
+            using PointerType = typename std::add_pointer<TrivialType>::type;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+            static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+                const size_t length = v1.getLength();
+                if (length != 0) {
+                    size_t i = 0;
+                    const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+                    for (; i < to; i += PacketType::size())
+                        v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
+                    v2.getDerived().writePacketPartial(i, v1.getDerived().template packetPartial<PacketType>(i));
+                }
+            }
+        };
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
+        assert(v.getLength() == getLength());
+        Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(*this, v);
+    }
+
     template<class Derived>
     template<class PacketType>
     PacketType RValueVector<Derived>::packet(size_t index) const {

@@ -52,11 +52,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        void assignTo(LValueVector<OtherDerived>& v) const {
-            assert(v.getLength() == getLength());
-            for (size_t i = 0; i < getLength(); ++i)
-                v[i] = calc(i);
-        }
+        void assignTo(LValueVector<OtherDerived>& v) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         template<class PacketType>

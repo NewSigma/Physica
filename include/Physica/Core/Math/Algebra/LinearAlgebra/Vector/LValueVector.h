@@ -44,8 +44,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueVector<OtherDerived>& v) const;
         [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
         template<class PacketType>
         void writePacket(size_t index, const PacketType packet);
