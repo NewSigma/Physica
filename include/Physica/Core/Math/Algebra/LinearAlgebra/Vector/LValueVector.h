@@ -48,10 +48,6 @@ namespace Physica::Core {
         void assignTo(LValueVector<OtherDerived>& v) const;
         [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
         template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const;
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index) const;
-        template<class PacketType>
         void writePacket(size_t index, const PacketType packet);
         template<class PacketType>
         void writePacketPartial(size_t index, const PacketType packet);

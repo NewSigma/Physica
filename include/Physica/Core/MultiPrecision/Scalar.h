@@ -51,8 +51,9 @@ namespace Physica::Core {
         class Traits<Scalar<option_, errorTrack_>> {
             using Helper = typename std::conditional<option_ == Float, float, double>::type;
         public:
-            using RealType = Scalar<option_, errorTrack_>;
-            using ComplexType = ComplexScalar<Scalar<option_, errorTrack_>>;
+            using ScalarType = Scalar<option_, errorTrack_>;
+            using RealType = ScalarType;
+            using ComplexType = ComplexScalar<ScalarType>;
             using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_, false>, Helper>::type;
             static constexpr ScalarOption option = option_;
             static constexpr bool errorTrack = errorTrack_;

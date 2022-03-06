@@ -61,27 +61,6 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    PacketType LValueVector<Derived>::packet(size_t index) const {
-        PacketType packet{};
-        for (int i = 0; i < PacketType::size(); ++i, ++index)
-            packet.insert(i, (*this)[index].getTrivial());
-        return packet;
-    }
-
-    template<class Derived>
-    template<class PacketType>
-    PacketType LValueVector<Derived>::packetPartial(size_t index) const {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-        PacketType packet{};
-        for (int i = 0; index < Base::getLength(); ++i, ++index)
-            packet.insert(i, (*this)[index].getTrivial());
-        return packet;
-    #pragma GCC diagnostic pop
-    }
-
-    template<class Derived>
-    template<class PacketType>
     void LValueVector<Derived>::writePacket(size_t index, const PacketType packet) {
         using TrivialType = typename ScalarType::TrivialType;
         TrivialType buffer[PacketType::size()];

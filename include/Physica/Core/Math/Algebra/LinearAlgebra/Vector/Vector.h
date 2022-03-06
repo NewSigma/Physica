@@ -24,7 +24,6 @@
 #include "ContinuousVector.h"
 #include "VectorBlock.h"
 #include "VectorExpression.h"
-#include "BestPacket.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 
 namespace Physica::Core {

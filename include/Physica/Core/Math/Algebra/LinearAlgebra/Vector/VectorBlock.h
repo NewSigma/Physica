@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "BestPacket.h"
-
 namespace Physica::Core {
     using Utils::Dynamic;
     /**

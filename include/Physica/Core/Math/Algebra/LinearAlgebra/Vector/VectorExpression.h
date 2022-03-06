@@ -216,11 +216,11 @@ namespace Physica::Core {
         typename Base::ScalarType calc(size_t s) const { return v1.calc(s) * v2.calc(s); }
         template<class PacketType>
         [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) * exp2.template packet<PacketType>(index);
+            return v1.template packet<PacketType>(index) * v2.template packet<PacketType>(index);
         }
         template<class PacketType>
         [[nodiscard]] PacketType packetPartial(size_t index) const {
-            return exp.template packetPartial<PacketType>(index) * exp2.template packetPartial<PacketType>(index);
+            return v1.template packetPartial<PacketType>(index) * v2.template packetPartial<PacketType>(index);
         }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
@@ -413,9 +413,9 @@ namespace Physica::Core {
 
         typename Base::ScalarType calc(size_t s) const { return abs(v.calc(s)); }
         template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return abs(exp.template packet<PacketType>(index)); }
+        [[nodiscard]] PacketType packet(size_t index) const { return abs(v.template packet<PacketType>(index)); }
         template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index) const { return abs(exp.template packetPartial<PacketType>(index)); }
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return abs(v.template packetPartial<PacketType>(index)); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -429,9 +429,9 @@ namespace Physica::Core {
 
         typename Base::ScalarType calc(size_t s) const { return square(v.calc(s)); }
         template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return square(exp.template packet<PacketType>(index)); }
+        [[nodiscard]] PacketType packet(size_t index) const { return square(v.template packet<PacketType>(index)); }
         template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index) const { return square(exp.template packetPartial<PacketType>(index)); }
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return square(v.template packetPartial<PacketType>(index)); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
