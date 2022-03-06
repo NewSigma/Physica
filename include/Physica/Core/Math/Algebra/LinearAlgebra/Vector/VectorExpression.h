@@ -93,6 +93,10 @@ namespace Physica::Core {
         explicit VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return -exp.calc(s); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return -exp.template packet<PacketType>(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return -exp.template packetPartial<PacketType>(index); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
@@ -112,6 +116,14 @@ namespace Physica::Core {
         }
 
         ScalarType calc(size_t s) const { return ScalarType(exp1.calc(s)) + ScalarType(exp2.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp1.template packet<PacketType>(index) + exp2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp1.template packetPartial<PacketType>(index) + exp2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
@@ -128,6 +140,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) + ScalarType(scalar); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) + PacketType(scalar.getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) + PacketType(scalar.getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
@@ -144,6 +164,14 @@ namespace Physica::Core {
         }
 
         typename Base::ScalarType calc(size_t s) const { return exp1.calc(s) - exp2.calc(s); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp1.template packet<PacketType>(index) - exp2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp1.template packetPartial<PacketType>(index) - exp2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return exp1.getLength(); }
     };
 
@@ -158,6 +186,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) - scalar; }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) - PacketType(scalar.getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) - PacketType(scalar.getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
@@ -175,6 +211,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) * ScalarType(scalar); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) * PacketType(scalar.getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) * PacketType(scalar.getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -191,6 +235,14 @@ namespace Physica::Core {
         }
 
         typename Base::ScalarType calc(size_t s) const { return v1.calc(s) * v2.calc(s); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) * exp2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) * exp2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
@@ -205,6 +257,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         typename Base::ScalarType calc(size_t s) const { return exp.calc(s) / scalar; }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) * PacketType(reciprocal(scalar).getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) * PacketType(reciprocal(scalar).getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -221,6 +281,14 @@ namespace Physica::Core {
         }
 
         typename Base::ScalarType calc(size_t s) const { return v1.calc(s) / v2.calc(s); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return v1.template packet<PacketType>(index) / v2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return v1.template packetPartial<PacketType>(index) / v2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
     //////////////////////////////////////Compare//////////////////////////////////////
@@ -239,6 +307,14 @@ namespace Physica::Core {
         }
 
         ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) > v2.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return v1.template packet<PacketType>(index) > v2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return v1.template packetPartial<PacketType>(index) > v2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
@@ -255,6 +331,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) > scalar); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) > PacketType(scalar.getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) > PacketType(scalar.getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -273,6 +357,14 @@ namespace Physica::Core {
         }
 
         ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) >= v2.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return v1.template packet<PacketType>(index) >= v2.template packet<PacketType>(index);
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return v1.template packetPartial<PacketType>(index) >= v2.template packetPartial<PacketType>(index);
+        }
         [[nodiscard]] size_t getLength() const { return v1.getLength(); }
     };
 
@@ -289,6 +381,14 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(scalar_) {}
 
         ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) >= scalar); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            return exp.template packet<PacketType>(index) >= PacketType(scalar.getTrivial());
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            return exp.template packetPartial<PacketType>(index) >= PacketType(scalar.getTrivial());
+        }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
@@ -301,6 +401,10 @@ namespace Physica::Core {
         VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return reciprocal(exp.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return PacketType(1) / exp.template packet<PacketType>(index); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return PacketType(1) / exp.template packetPartial<PacketType>(index); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -313,6 +417,10 @@ namespace Physica::Core {
         VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return sqrt(exp.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return sqrt(exp.template packet<PacketType>(index)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return sqrt(exp.template packetPartial<PacketType>(index)); }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }
     };
 
@@ -325,6 +433,10 @@ namespace Physica::Core {
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return abs(v.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return abs(exp.template packet<PacketType>(index)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return abs(exp.template packetPartial<PacketType>(index)); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -337,6 +449,10 @@ namespace Physica::Core {
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return square(v.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const { return square(exp.template packet<PacketType>(index)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const { return square(exp.template packetPartial<PacketType>(index)); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
