@@ -45,8 +45,8 @@ namespace Physica::Core {
                     size_t i = 0;
                     const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
                     for (; i < to; i += PacketType::size())
-                        v2.writePacket(i, v1.template packet<PacketType>(i));
-                    v2.writePacketPartial(i, v1.template packetPartial<PacketType>(i));
+                        v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
+                    v2.getDerived().writePacketPartial(i, v1.getDerived().template packetPartial<PacketType>(i));
                 }
             }
         };
