@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -62,7 +62,9 @@ namespace Physica::Core {
         ComplexType result = ComplexType::Zero();
         for (size_t i = 0; i < length; ++i) {
             const ScalarType phase = getWaveVector(indexToDim(i)) * r;
-            result += grid[i] * ComplexType(cos(phase), sin(phase));
+            const auto c = cos(phase);
+            const auto s = sqrt(ScalarType::One() - square(c)); //Sign is not necessary to wave functions
+            result += grid[i] * ComplexType(c, s); //Using platform specific sincos() may gain performance improvement
         }
         return result;
     }
