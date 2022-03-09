@@ -106,22 +106,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> cos(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(cos(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> sin(const Vector<T, Length, MaxLength>& v) {
-        Vector<T, Length, MaxLength> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(sin(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> tan(const Vector<T, Length, MaxLength>& v) {
         Vector<T, Length, MaxLength> result(v.getLength());
         size_t i = 0;

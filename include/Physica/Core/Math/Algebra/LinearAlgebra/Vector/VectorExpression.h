@@ -476,6 +476,36 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Sin, VectorType>
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Sin, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sin, VectorType>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        ScalarType calc(size_t i) const { return sin(v.calc(i)); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Cos, VectorType>
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Cos, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Cos, VectorType>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        ScalarType calc(size_t i) const { return cos(v.calc(i)); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
 
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
@@ -605,5 +635,17 @@ namespace Physica::Core {
             const RValueVector<VectorType>& v,
             const ScalarBase<typename VectorType::ScalarType>& s) {
         return VectorExpression<Utils::ExpressionType::Pow, VectorType>(v, s);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Sin, VectorType> sin(
+            const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Sin, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Cos, VectorType> cos(
+            const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Cos, VectorType>(v);
     }
 }
