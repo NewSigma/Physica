@@ -23,7 +23,7 @@ using namespace Physica::Core;
 
 int main() {
     using T = Scalar<Double, false>;
-    using ODE = ODESolver<T, Vector<T>>;
+    using ODE = ODESolver<T>;
     constexpr double stepSize = 0.0001;
     /**
      * y' = y

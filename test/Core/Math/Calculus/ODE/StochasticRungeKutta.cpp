@@ -26,7 +26,7 @@ using namespace Physica::Core;
  */
 int main() {
     using ScalarType = Scalar<Double, false>;
-    using ODE = ODESolver<ScalarType, Vector<ScalarType>>;
+    using ODE = ODESolver<ScalarType>;
     using XVector = Vector<ScalarType, 1>;
     constexpr double stepSize = 0.1;
     constexpr double D = 0.1;

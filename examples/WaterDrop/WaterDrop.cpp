@@ -26,7 +26,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 
 using T = Scalar<Double, false>;
-using ODE = ODESolver<T, Vector<T>>;
+using ODE = ODESolver<T>;
 
 struct WaterDropArgs {
     T radius;

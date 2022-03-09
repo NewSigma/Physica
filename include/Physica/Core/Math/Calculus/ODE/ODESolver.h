@@ -21,20 +21,21 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, class TVector>
+    template<class T>
     class ODESolver {
+        using VectorType = Vector<T>;
     private:
-        TVector x;
+        VectorType x;
         DenseMatrix<T> solution;
         T stepSize;
     public:
-        ODESolver(const T& start, const T& end, const T& stepSize_, const TVector& initial);
+        ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial);
         /* Operations */
         void reset() { x.resize(1); }
         /**
          * \tparam Function
          * A function object like this
-         * TVector func(const T& x, const TVector& y)
+         * VectorType func(const T& x, const VectorType& y)
          */
         template<class Function>
         void rungeKutta4(Function func);
@@ -45,15 +46,15 @@ namespace Physica::Core {
         template<class Function>
         void degenerate_numerov(Function func, const T& tangent);
         /* Getters */
-        const TVector& getX() const noexcept { return x; }
+        const VectorType& getX() const noexcept { return x; }
         const DenseMatrix<T>& getSolution() const noexcept { return solution; }
     private:
         template<class Function>
-        TVector RungeKuttaDy(size_t step, const TVector& dy_dx, Function func);
+        VectorType RungeKuttaDy(size_t step, const VectorType& dy_dx, Function func);
     };
 
-    template<class T, class TVector>
-    ODESolver<T, TVector>::ODESolver(const T& start, const T& end, const T& stepSize_, const TVector& initial)
+    template<class T>
+    ODESolver<T>::ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial)
             : stepSize(stepSize_) {
         assert(start < end);
         const size_t size = static_cast<size_t>(double((end - start) / stepSize));
@@ -63,14 +64,14 @@ namespace Physica::Core {
         solution[0] = initial;
     }
 
-    template<class T, class TVector>
+    template<class T>
     template<class Function>
-    void ODESolver<T, TVector>::rungeKutta4(Function func) {
+    void ODESolver<T>::rungeKutta4(Function func) {
         assert(x.getLength() == 1);
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
-            TVector dy_dx = func(x_i, solution[i]);
+            VectorType dy_dx = func(x_i, solution[i]);
             solution[i + 1] = RungeKuttaDy(i, dy_dx, func);
             x.append(x_i + stepSize);
         }
@@ -78,24 +79,24 @@ namespace Physica::Core {
     /**
      * Apply to wight noise only
      * Defination of RandomFunc:
-     * TVector RandomFunc(T x, TVector y);
+     * VectorType RandomFunc(T x, VectorType y);
      * 
      * Reference:
      * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
      */
-    template<class T, class TVector>
+    template<class T>
     template<class Function, class RandomFunc>
-    void ODESolver<T, TVector>::stochasticRungeKutta2(Function func, RandomFunc random) {
+    void ODESolver<T>::stochasticRungeKutta2(Function func, RandomFunc random) {
         assert(x.getLength() == 1);
         const size_t column_1 = solution.getColumn() - 1;
-        TVector randVec;
+        VectorType randVec;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
-            const TVector& solution_i = solution[i];
+            const VectorType& solution_i = solution[i];
             const T x_i_1 = x_i + stepSize;
             randVec = random(x_i, solution_i);
-            TVector term1 = func(x_i, solution_i);
-            TVector term2 = func(x_i_1, solution_i + stepSize * term1 + randVec);
+            VectorType term1 = func(x_i, solution_i);
+            VectorType term2 = func(x_i_1, solution_i + stepSize * term1 + randVec);
             solution[i + 1] = solution_i + (term1 + term2) * (stepSize / T(2)) + randVec;
             x.append(std::move(x_i_1));
         }
@@ -105,16 +106,16 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:524
      */
-    template<class T, class TVector>
+    template<class T>
     template<class Function>
-    TVector ODESolver<T, TVector>::RungeKuttaDy (
-            size_t step, const TVector& dy_dx, Function func) {
-        const TVector k1 = T(0.5) * stepSize * dy_dx;
+    typename ODESolver<T>::VectorType ODESolver<T>::RungeKuttaDy (
+            size_t step, const VectorType& dy_dx, Function func) {
+        const VectorType k1 = T(0.5) * stepSize * dy_dx;
         const T temp = x[step] + stepSize * T(0.5);
-        const TVector& y = solution[step];
-        const TVector k2 = stepSize * func(temp, y + k1);
-        const TVector k3 = stepSize * func(temp, y + k2 * T(0.5));
-        const TVector k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);
+        const VectorType& y = solution[step];
+        const VectorType k2 = stepSize * func(temp, y + k1);
+        const VectorType k3 = stepSize * func(temp, y + k2 * T(0.5));
+        const VectorType k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);
         return y + (k1 + k2 + k3 + k4) / T(3);
     }
     /**
@@ -131,9 +132,9 @@ namespace Physica::Core {
      * Reference:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:572
      */
-    template<class T, class TVector>
+    template<class T>
     template<class Function>
-    void ODESolver<T, TVector>::verlet(Function func, const T& initial1) {
+    void ODESolver<T>::verlet(Function func, const T& initial1) {
         assert(x.getLength() == 1);
         x.append(x[0] + stepSize);
         solution(0, 1) = initial1;
@@ -160,9 +161,9 @@ namespace Physica::Core {
      * Reference:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:573
      */
-    template<class T, class TVector>
+    template<class T>
     template<class Function>
-    void ODESolver<T, TVector>::degenerate_numerov(Function func, const T& tangent) {
+    void ODESolver<T>::degenerate_numerov(Function func, const T& tangent) {
         assert(x.getLength() == 1);
         const T x0 = x[0];
         x.append(x0 + stepSize);
