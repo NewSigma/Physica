@@ -25,10 +25,10 @@ namespace Physica::AI {
      * \returns polarization rate, the lower the better, minus value means overfitting
      */
     template<class ScalarType>
-    ScalarType polarization(ScalarType train_loss, ScalarType valid_loss) {
+    ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss) {
         const ScalarType total = train_loss + valid_loss;
         const ScalarType delta = train_loss - valid_loss;
-        if (abs(delta) >= total * ScalarType(std::numeric_limits<ScalarType>::epsilon())):
+        if (abs(delta) * ScalarType(std::numeric_limits<ScalarType>::epsilon()) >= total)
             return ScalarType(0);
         return delta / total * ScalarType(2);
     }
