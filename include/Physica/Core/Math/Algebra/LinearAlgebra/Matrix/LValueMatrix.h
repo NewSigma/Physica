@@ -67,8 +67,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const MatrixBlock<Derived> topRows(size_t to) const;
         [[nodiscard]] inline MatrixBlock<Derived> bottomRows(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> bottomRows(size_t from) const;
-        [[nodiscard]] inline MatrixBlock<Derived> leftCols(size_t from);
-        [[nodiscard]] inline const MatrixBlock<Derived> leftCols(size_t from) const;
+        [[nodiscard]] inline MatrixBlock<Derived> leftCols(size_t to);
+        [[nodiscard]] inline const MatrixBlock<Derived> leftCols(size_t to) const;
         [[nodiscard]] inline MatrixBlock<Derived> rightCols(size_t from);
         [[nodiscard]] inline const MatrixBlock<Derived> rightCols(size_t from) const;
         [[nodiscard]] inline MatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol);

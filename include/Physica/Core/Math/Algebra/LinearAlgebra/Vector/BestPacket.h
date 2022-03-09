@@ -20,6 +20,7 @@
 
 #include "Packet.h"
 #include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core::Internal {
     template<class ScalarType, size_t Length>

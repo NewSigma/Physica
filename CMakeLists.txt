@@ -77,7 +77,7 @@ endif()
 
 if(${PHYSICA_TORCH})
     find_package(Torch REQUIRED)
-    include_directories(${Torch_INCLUDE_DIR})
+    include_directories(${TORCH_INCLUDE_DIRS})
 endif()
 #############################################Project##############################################
 include_directories(./include)
@@ -108,4 +108,7 @@ if(${PHYSICA_GUI})
     install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
     #############################################Options##############################################
     target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets)
+    if(${PHYSICA_TORCH})
+        target_link_libraries(Physica PhysicaAI ${TORCH_LIBRARIES})
+    endif()
 endif()

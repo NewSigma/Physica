@@ -128,7 +128,7 @@ namespace Physica::Core {
                 [[nodiscard]] constexpr static ScalarOption getOption() { return MultiPrecision; }
                 [[nodiscard]] int getLength() const noexcept { return length; }
                 [[nodiscard]] int getPower() const noexcept { return power; }
-                [[nodiscard]] int getSize() const noexcept { return abs(length); }
+                [[nodiscard]] int getSize() const noexcept { return std::abs(length); }
                 [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
                 [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
                 [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
@@ -463,8 +463,8 @@ namespace Physica::Core {
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
-        Scalar operator<<(int i) const { return Scalar(f * pow(2, i)); }
-        Scalar operator>>(int i) const { return Scalar(f / pow(2, i)); }
+        Scalar operator<<(int i) const { return Scalar(f * std::pow(2, i)); }
+        Scalar operator>>(int i) const { return Scalar(f / std::pow(2, i)); }
         Scalar operator-() const noexcept { return Scalar(-f); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
@@ -505,8 +505,8 @@ namespace Physica::Core {
         Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
-        Scalar operator<<(int i) const { const float power = pow(2, i); return Scalar(f * power, a * power); }
-        Scalar operator>>(int i) const { const float power = pow(2, i); return Scalar(f / power, a / power); }
+        Scalar operator<<(int i) const { const float power = std::pow(2, i); return Scalar(f * power, a * power); }
+        Scalar operator>>(int i) const { const float power = std::pow(2, i); return Scalar(f / power, a / power); }
         Scalar operator-() const noexcept { return Scalar(-f, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
@@ -553,8 +553,8 @@ namespace Physica::Core {
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
-        Scalar operator<<(int i) const { return Scalar(d * pow(2, i)); }
-        Scalar operator>>(int i) const { return Scalar(d / pow(2, i)); }
+        Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
+        Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
         Scalar operator-() const noexcept { return Scalar(-d); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
@@ -595,8 +595,8 @@ namespace Physica::Core {
         Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
         Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
         Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
-        Scalar operator<<(int i) const { const double power = pow(2, i); return Scalar(d * power, a * power); }
-        Scalar operator>>(int i) const { const double power = pow(2, i); return Scalar(d / power, a / power); }
+        Scalar operator<<(int i) const { const double power = std::pow(2, i); return Scalar(d * power, a * power); }
+        Scalar operator>>(int i) const { const double power = std::pow(2, i); return Scalar(d / power, a / power); }
         Scalar operator-() const noexcept { return Scalar(-d, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
