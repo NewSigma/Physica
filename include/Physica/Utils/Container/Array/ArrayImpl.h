@@ -24,10 +24,11 @@
 namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, ConstLValueReferenceType t) {
+    template<class... Args>
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args... args) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
-            *(arr + i) = t;
+            *(arr + i) = T(args...);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -97,10 +98,11 @@ namespace Physica::Utils {
     __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array() : Base(Capacity) {}
 
     template<class T, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, Capacity) {
+    template<class... Args>
+    __host__ __device__ Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, Args... args) : Base(length_, Capacity) {
         assert(length_ < Capacity);
         for (size_t i = 0; i < length_; ++i)
-            alloc.construct(arr + i, t);
+            alloc.construct(arr + i, args...);
     }
 
     template<class T, size_t Capacity, class Allocator>
@@ -204,9 +206,10 @@ namespace Physica::Utils {
     __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, ConstLValueReferenceType t) : Base(length_, length_), capacity(length_) {
+    template<class... Args>
+    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, Args... args) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
-            alloc.construct(arr + i, t);
+            alloc.construct(arr + i, args...);
     }
 
     template<class T, class Allocator>

@@ -76,7 +76,8 @@ namespace Physica::Utils {
         allocator_type alloc;
     public:
         __host__ __device__ Array() = default;
-        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        template<class... Args>
+        __host__ __device__ explicit Array(size_t length_, Args... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         __host__ __device__ Array(const Array& array);
         __host__ __device__ Array(Array&& array) noexcept;
@@ -122,7 +123,8 @@ namespace Physica::Utils {
         using Base::getDerived;
     public:
         __host__ __device__ Array();
-        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        template<class... Args>
+        __host__ __device__ explicit Array(size_t length_, Args... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         __host__ __device__ Array(const Array& array);
         __host__ __device__ Array(Array&& array) noexcept;
@@ -174,7 +176,8 @@ namespace Physica::Utils {
         size_t capacity;
     public:
         __host__ __device__ Array();
-        __host__ __device__ explicit Array(size_t length_, ConstLValueReferenceType t = T());
+        template<class... Args>
+        __host__ __device__ explicit Array(size_t length_, Args... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         __host__ __device__ Array(const Array& array);
         __host__ __device__ Array(Array&& array) noexcept;

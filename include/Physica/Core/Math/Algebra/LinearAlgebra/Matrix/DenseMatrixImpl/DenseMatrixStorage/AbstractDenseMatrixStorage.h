@@ -199,8 +199,8 @@ namespace Physica::Core::Internal {
         using T = typename Traits<Derived>::ScalarType;
     public:
         AbstractDenseMatrixStorage() = default;
-        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(column, VectorType(row)) {}
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(column, VectorType(row, t)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(column, row) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(column, row, t) {}
         AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -242,8 +242,8 @@ namespace Physica::Core::Internal {
         using T = typename Traits<Derived>::ScalarType;
     public:
         AbstractDenseMatrixStorage() = default;
-        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row, VectorType(column)) {}
-        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, VectorType(column, t)) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column) : Base(row, column) {}
+        AbstractDenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row, column, t) {}
         AbstractDenseMatrixStorage(std::initializer_list<VectorType> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
