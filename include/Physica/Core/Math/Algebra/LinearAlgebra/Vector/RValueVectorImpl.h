@@ -37,8 +37,6 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
         public:
             using ScalarType = typename T1::ScalarType;
-            using TrivialType = typename ScalarType::TrivialType;
-            using PointerType = typename std::add_pointer<TrivialType>::type;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
 
             static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
