@@ -19,6 +19,40 @@
 #pragma once
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T1, class T2, bool enableSIMD>
+        struct InnerDotImpl {
+            using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            static ResultType run(const LValueVector<T1>& v1, const LValueVector<T2>& v2) {
+                auto result = ResultType::Zero();
+                for(size_t i = 0; i < v1.getLength(); ++i)
+                    result += v1[i] * v2[i];
+                return result;
+            }
+        };
+
+        template<class T1, class T2>
+        class InnerDotImpl<T1, T2, true> {
+            constexpr static size_t size1 = T1::SizeAtCompile;
+            constexpr static size_t size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
+        public:
+            using ResultType = typename T1::ScalarType;
+            using PacketType = typename Internal::BestPacket<ResultType, SizeAtCompile>::Type;
+
+            static ResultType run(const LValueVector<T1>& v1, const LValueVector<T2>& v2) {
+                const size_t length = v1.getLength();
+                size_t i = 0;
+                const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+                PacketType buffer(0);
+                for (; i < to; i += PacketType::size())
+                    buffer += (v1.getDerived().template packet<PacketType>(i) * v2.getDerived().template packet<PacketType>(i));
+                buffer += v1.getDerived().template packetPartial<PacketType>(i) * v2.getDerived().template packetPartial<PacketType>(i);
+                return ResultType(horizontal_add(buffer));
+            }
+        };
+    }
+
     template<class Derived>
     LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
         return Base::getDerived() = v.getDerived();
@@ -76,13 +110,8 @@ namespace Physica::Core {
     template<class VectorType1, class VectorType2>
     typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
     operator*(const LValueVector<VectorType1>& v1, const LValueVector<VectorType2>& v2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
-        const auto len = v1.getLength();
-        assert(len == v2.getLength());
-        auto result = ResultType::Zero();
-        for(size_t i = 0; i < len; ++i)
-            result += v1[i] * v2[i];
-        return result;
+        assert(v1.getLength() == v2.getLength());
+        return Internal::InnerDotImpl<VectorType1, VectorType2, false>::run(v1, v2);
     }
 
     template<class Derived, class OtherDerived>
