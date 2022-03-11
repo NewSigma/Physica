@@ -16,22 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include <climits>
+#include <cmath>
+#include "Physica/AI/Metrics.h"
 
 namespace Physica::AI {
-    /**
-     * \returns polarization rate, the lower the better, minus value means overfitting
-     */
-    template<class ScalarType>
-    ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss) {
-        const ScalarType total = train_loss + valid_loss;
-        const ScalarType delta = train_loss - valid_loss;
-        if (abs(delta) * ScalarType(std::numeric_limits<ScalarType>::epsilon()) >= total)
-            return ScalarType(0);
-        return delta / total * ScalarType(2);
+    double mixed_loss(double train_loss, double valid_loss) {
+        return std::max(train_loss, valid_loss) + std::abs(train_loss - valid_loss);
     }
-
-    double mixed_loss(double train_loss, double valid_loss);
 }
