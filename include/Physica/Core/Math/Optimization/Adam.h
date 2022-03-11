@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     /**
@@ -34,13 +35,12 @@ namespace Physica::Core {
         ~Adam() = default;
         /* Operations */
         template<class Function>
-        ScalarType compute(Function func, const VectorType& params_, size_t maxIteration);
+        void compute(Function func, const VectorType& params_, size_t maxIteration);
         /* Getters */
         [[nodiscard]] const VectorType& getParams() const noexcept { return params; }
     private:
         template<class Function>
         [[nodiscard]] VectorType gradient(Function func);
-        [[nodiscard]] bool meetRelativeCriteria(const ScalarType& s1, const ScalarType& s2);
     };
     /**
      * Five args:
@@ -69,13 +69,13 @@ namespace Physica::Core {
      */
     template<class ScalarType, class VectorType>
     template<class Function>
-    ScalarType Adam<ScalarType, VectorType>::compute(Function func, const VectorType& params_, size_t maxIteration) {
+    void Adam<ScalarType, VectorType>::compute(Function func, const VectorType& params_, size_t maxIteration) {
         params = params_;
         VectorType m = VectorType::Zeros(params.getLength());
         VectorType v = VectorType::Zeros(params.getLength());
         ScalarType beta1 = args[1];
         size_t count = 0;
-        ScalarType value = func(std::cref(params));
+        VectorType temp(params.getLength());
         bool stop = false;
         do {
             VectorType g = gradient(func);
@@ -83,14 +83,13 @@ namespace Physica::Core {
             m = m * beta1 + g * beta1_1;
             v = v * args[2] + hadamard(g, g) * ScalarType(ScalarType::One() -  args[2]);
             const ScalarType alpha = args[0] / beta1_1 * sqrt(ScalarType(ScalarType::One() - args[2]));
-            params -= alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
+            temp = params - alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
             beta1 *= args[3];
-            ScalarType temp = func(std::cref(params));
             ++count;
-            stop = (maxIteration != 0 && count > maxIteration) || meetRelativeCriteria(temp, value);
-            value = std::move(temp);
+            const bool meetRelativeCriteria = Utils::vectorNear(params, temp, double(args[5]));
+            stop = (maxIteration != 0 && count > maxIteration) || meetRelativeCriteria;
+            params = temp;
         } while(!stop);
-        return value;
     }
 
     template<class ScalarType, class VectorType>
@@ -108,14 +107,5 @@ namespace Physica::Core {
             swap(params[i], new_param);
         }
         return result;
-    }
-
-    template<class ScalarType, class VectorType>
-    bool Adam<ScalarType, VectorType>::meetRelativeCriteria(const ScalarType& s1, const ScalarType& s2) {
-        const ScalarType abs_s1 = abs(s1);
-        if (abs_s1 < ScalarType::One())
-            return abs(ScalarType(s1 - s2)) < args[5];
-        else
-            return abs((s1 - s2) / s1) < args[5];
     }
 }

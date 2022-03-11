@@ -26,13 +26,9 @@ using T = Scalar<Double, false>;
 
 int main() {
     {
-        Adam<T, Vector<T>> adam(Array<T, 6>({0.001, 0.9, 0.999, 1 - 1E-8, 1E-8, 1E-14}));
-        if (scalarNear(adam.compute(func1<T>, Vector<T>{-1, -2, -5}, 0), T(0), 1E-14))
-            return 1;
-    }
-    {
-        Adam<T, Vector<T>> adam(Array<T, 6>({0.001, 0.9, 0.999, 1 - 1E-8, 1E-8, 1E-14}));
-        if (scalarNear(adam.compute(func2<T>, Vector<T>{1, 3, 2}, 0), T(2.25), 1E-14))
+        Adam<T, Vector<T>> adam(Array<T, 6>({0.001, 0.9, 0.999, 1 - 1E-8, 1E-8, 1E-8}));
+        adam.compute(func1<T>, Vector<T>{-1, -2, -5}, 0);
+        if (!scalarNear(func1<T>(adam.getParams()), T(0), 1E-8))
             return 1;
     }
     return 0;
