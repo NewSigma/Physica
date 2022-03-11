@@ -33,7 +33,14 @@ namespace Physica::Core {
         using ScalarType = typename VectorType::ScalarType;
         const size_t length = x.getLength();
         const ScalarType x_mean = mean(x);
-        return square(x - x_mean).sum() / ScalarType(length);
+        return square(x - x_mean).sum() / ScalarType(length - 1);
+    }
+
+    template<class VectorType>
+    typename VectorType::ScalarType variance(const LValueVector<VectorType>& x, typename VectorType::ScalarType prior_mean) {
+        using ScalarType = typename VectorType::ScalarType;
+        const size_t length = x.getLength();
+        return square(x - prior_mean).sum() / ScalarType(length);
     }
 
     template<class VectorType>
