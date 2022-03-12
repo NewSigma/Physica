@@ -49,6 +49,14 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
+    VectorType normalize(const LValueVector<VectorType>& x) {
+        using ScalarType = typename VectorType::ScalarType;
+        const ScalarType x_mean = mean(x);
+        const ScalarType factor = reciprocal(deviation(x));
+        return VectorType((x - x_mean) * factor);
+    }
+
+    template<class VectorType>
     typename VectorType::ScalarType covariance(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y) {
         assert(x.getLength() == y.getLength());
         using ScalarType = typename VectorType::ScalarType;
@@ -60,20 +68,25 @@ namespace Physica::Core {
     template<class VectorType>
     typename VectorType::ScalarType skew(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
-        VectorType temp = x;
-        const ScalarType factor = reciprocal(deviation(x));
-        temp = (x - mean(x)) * factor;
+        VectorType temp = normalize(x);
         temp = hadamard(square(temp), temp);
-        return mean(temp);
+        const size_t length = x.getLength();
+        const ScalarType factor = ScalarType(length * length) / ScalarType((length - 1) * (length - 2));
+        return mean(temp) * factor;
     }
 
     template<class VectorType>
     typename VectorType::ScalarType kurt(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
-        VectorType temp = x;
-        const ScalarType factor = reciprocal(deviation(x));
-        temp = (x - mean(x)) * factor;
-        temp = square(square(temp));
-        return mean(temp);
+        VectorType temp = normalize(x);
+        temp = square(temp);
+        const ScalarType mean2 = mean(temp);
+        temp = square(temp);
+        const ScalarType mean1 = mean(temp);
+
+        const size_t length = x.getLength();
+        const ScalarType factor2 = ScalarType(length * length * 3) / ScalarType((length - 2) * (length - 3));
+        const ScalarType factor1 = ScalarType(length * length * (length + 1)) / ScalarType((length - 1) * (length - 2) * (length - 3));
+        return factor1 * mean1 - factor2 * mean2;
     }
 }
