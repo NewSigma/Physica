@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,23 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <functional>
-#include "Physica/Core/Math/Calculus/Function/VectorFunction/VectorFunction.h"
-#include "Physica/Core/Math/Calculus/Integrate/IntegrateSolver.h"
+#include "Physica/Utils/TestHelper.h"
+#include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 using namespace Physica::Core;
+using ScalarType = Scalar<Double, false>;
+
+ScalarType func(ScalarType x) {
+    return ScalarType(M_PI_2) * x * sin(ScalarType(M_PI) * x);
+}
 
 int main() {
-    TreeFunction<Double, false> func(1, 2);
-    /* Initialize func */ {
-        func.setConstant(2, 0);
-        func.setConstant(3.14159, 1);
-        auto tree = func.getConstantNode(1) * func.getVariableNode(0) / func.getConstantNode(0) * sin(func.getConstantNode(1) * func.getVariableNode(0));
-        func.setTree(std::make_shared<decltype(tree)>(std::move(tree)));
+    {
+        IntegrateRange<ScalarType, 1> range({-1}, {1});
+        Integrate<Rectangular, ScalarType, 1> rec(range, 0.01);
+        if (!scalarNear(ScalarType::One(), rec.solve(func), 1E-4))
+            return 1;
+
+        Integrate<Ladder, ScalarType, 1> ladder(range, 0.01);
+        if (!scalarNear(ScalarType::One(), ladder.solve(func), 1E-4))
+            return 1;
+
+        Integrate<Simpson, ScalarType, 1> simpson(range, 0.01);
+        if (!scalarNear(ScalarType::One(), simpson.solve(func), 1E-8))
+            return 1;
     }
-    std::function<Scalar<Double, false>(Scalar<Double, false>)> a(func);
-    Integrate<1, Double, false> problem(std::make_shared<TreeFunction<Double, false>>(func), -1, 1);
-    IntegrateSolver<Rectangular, 1, Double, false> solver(0.01);
-    return abs(1 - solver.solve(problem).getTrivial()) > 0.001;
+    {
+        IntegrateRange<ScalarType, 1> range({1E-10}, {1});
+        Integrate<Tanh_Sinh, ScalarType, 1> tanh_sinh(range, 0.001, 3500);
+        if (!scalarNear(ScalarType(23.025850929940456840), tanh_sinh.solve([](ScalarType x) -> ScalarType { return reciprocal(x); }), 1E-7))
+            return 1;
+    }
+    return 0;
 }

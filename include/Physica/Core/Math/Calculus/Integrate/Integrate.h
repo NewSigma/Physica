@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
-
+ * 
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,65 +16,102 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_INTEGRATE_H
-#define PHYSICA_INTEGRATE_H
+#pragma once
 
-#include <memory>
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunction.h"
+#include "IntegrateRange.h"
 
 namespace Physica::Core {
-    /*!
-     * @class AbstractIntegrate contains public members between integrate classes.
+    enum IntegrateMethod {
+        Rectangular,
+        Ladder,
+        Simpson,
+        Tanh_Sinh
+    };
+
+    template<IntegrateMethod Method, class ScalarType, size_t dim>
+    class Integrate;
+    //////////////////////////////////Rectangular//////////////////////////////////
+    template<class ScalarType, size_t dim>
+    class Integrate<Rectangular, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+        using Base = IntegrateRange<ScalarType, dim>;
+    };
+
+    template<class ScalarType>
+    class Integrate<Rectangular, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+        using Base = IntegrateRange<ScalarType, 1>;
+    public:
+        using Base::VectorType;
+    private:
+        ScalarType stepSize;
+    public:
+        explicit Integrate(Base range, ScalarType stepSize);
+        /* Operations */
+        template<class Function>
+        ScalarType solve(Function func) const;
+    };
+    //////////////////////////////////Ladder//////////////////////////////////
+    template<class ScalarType, size_t dim>
+    class Integrate<Ladder, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+        using Base = IntegrateRange<ScalarType, dim>;
+    };
+
+    template<class ScalarType>
+    class Integrate<Ladder, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+        using Base = IntegrateRange<ScalarType, 1>;
+    public:
+        using Base::VectorType;
+    private:
+        ScalarType stepSize;
+    public:
+        explicit Integrate(Base range, ScalarType stepSize);
+        /* Operations */
+        template<class Function>
+        ScalarType solve(Function func) const;
+    };
+    //////////////////////////////////Simpson//////////////////////////////////
+    template<class ScalarType, size_t dim>
+    class Integrate<Simpson, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+        using Base = IntegrateRange<ScalarType, dim>;
+    };
+
+    template<class ScalarType>
+    class Integrate<Simpson, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+        using Base = IntegrateRange<ScalarType, 1>;
+    public:
+        using Base::VectorType;
+    private:
+        ScalarType stepSize;
+    public:
+        explicit Integrate(Base range, ScalarType stepSize);
+        /* Operations */
+        template<class Function>
+        ScalarType solve(Function func) const;
+    };
+    //////////////////////////////////Tanh_Sinh//////////////////////////////////
+    /**
+     * Reference:
+     * [1] Vanherck, Joren Sorée, Bart Magnus, Wim.
+     * Tanh-sinh quadrature for single and multiple integration using floating-point arithmetic. arXiv:2007.15057
      */
-    template<ScalarOption option, bool errorTrack>
-    class AbstractIntegrate {
-    protected:
-        std::shared_ptr<TreeFunction<option, errorTrack>> p_func;
+    template<class ScalarType, size_t dim>
+    class Integrate<Tanh_Sinh, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+        using Base = IntegrateRange<ScalarType, dim>;
+    };
 
-        explicit AbstractIntegrate(std::shared_ptr<TreeFunction<option, errorTrack>>&& p);
+    template<class ScalarType>
+    class Integrate<Tanh_Sinh, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+        using Base = IntegrateRange<ScalarType, 1>;
     public:
-        /* Getters */
-        [[nodiscard]] const TreeFunction<option, errorTrack>& getFunction() const noexcept { return *p_func; }
-    };
-
-    template<size_t dim, ScalarOption option = MultiPrecision, bool errorTrack = true>
-    class Integrate : public AbstractIntegrate<option, errorTrack> {
-        //We consider dimension which is larger than 3 is unsuitable to allocate domain data on stack.
-        static_assert(dim <= 3, "Dimension larger than 3 must be set Dynamic.");
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Integrate<Dynamic, option, errorTrack> : public AbstractIntegrate<option, errorTrack> {
-        typedef AbstractIntegrate<option, errorTrack> Base;
-        Array<Scalar<option, errorTrack>> vector;
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Integrate<1, option, errorTrack> : public AbstractIntegrate<option, errorTrack> {
-        typedef AbstractIntegrate<option, errorTrack> Base;
-        Scalar<option, errorTrack> from, to;
+        using Base::VectorType;
+    private:
+        ScalarType stepSize;
+        uint64_t pointCount;
     public:
-        Integrate(std::shared_ptr<TreeFunction<option, errorTrack>> p
-                  , Scalar<option, errorTrack> from, Scalar<option, errorTrack> to);
-        /* Getters */
-        const Scalar<option, errorTrack>& getFrom() const { return from; }
-        const Scalar<option, errorTrack>& getTo() const { return to; }
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Integrate<2, option, errorTrack> : public AbstractIntegrate<option, errorTrack> {
-        typedef AbstractIntegrate<option, errorTrack> Base;
-        Scalar<option, errorTrack> from1, to1, from2, to2;
-    };
-
-    template<ScalarOption option, bool errorTrack>
-    class Integrate<3, option, errorTrack> : public AbstractIntegrate<option, errorTrack> {
-        typedef AbstractIntegrate<option, errorTrack> Base;
-        Scalar<option, errorTrack> from1, to1, from2, to2, from3, to3;
+        Integrate(Base range, ScalarType stepSize, uint64_t pointCount);
+        /* Operations */
+        template<class Function>
+        ScalarType solve(Function func) const;
     };
 }
 
 #include "IntegrateImpl.h"
-
-#endif
