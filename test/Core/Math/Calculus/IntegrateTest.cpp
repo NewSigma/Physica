@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <random>
 #include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
@@ -45,6 +46,17 @@ int main() {
         IntegrateRange<ScalarType, 1> range({1E-10}, {1});
         Integrate<Tanh_Sinh, ScalarType, 1> tanh_sinh(range, 0.001, 3500);
         if (!scalarNear(ScalarType(23.025850929940456840), tanh_sinh.solve([](ScalarType x) -> ScalarType { return reciprocal(x); }), 1E-7))
+            return 1;
+    }
+    {
+        IntegrateRange<ScalarType, 2> range({0, 0}, {1, 1});
+        Integrate<MonteCarlo, ScalarType, 2> mc(range, 1000);
+        std::mt19937 gen{};
+        ScalarType deviation;
+        const ScalarType answer = 1.317363136305819;
+        ScalarType result = mc.solve_e([](Vector<ScalarType, 2> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
+                                      , gen, deviation);
+        if (abs(answer - result) > ScalarType(3) * deviation)
             return 1;
     }
     return 0;

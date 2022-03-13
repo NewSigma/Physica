@@ -73,8 +73,10 @@ namespace Physica::Core {
         /* Helpers */
         using Storage::swap;
         static Vector Zeros(size_t len);
-        static Vector randomVector(size_t len);
-        static Vector randomVector(const Vector& v1, const Vector& v2);
+        template<class RandomGenerator>
+        static Vector random(size_t len, RandomGenerator& generator);
+        template<class RandomGenerator>
+        static Vector random(const Vector& v1, const Vector& v2, RandomGenerator& generator);
         static Vector linspace(T from, T to, size_t count);
     };
 

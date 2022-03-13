@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include <random>
 /**
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.
@@ -65,20 +66,23 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::randomVector(size_t len) {
+    template<class RandomGenerator>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(size_t len, RandomGenerator& generator) {
         Vector<T, Length, MaxLength> result{};
         result.reserve(len);
+        std::uniform_real_distribution<typename T::TrivialType> dist{};
         for (size_t i = 0; i < len; ++i)
-            result.get_allocator().construct(result.data() + i, randomScalar<T>());
+            result.get_allocator().construct(result.data() + i, dist(generator));
         result.setLength(len);
         return result;
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::randomVector(const Vector& v1, const Vector& v2) {
+    template<class RandomGenerator>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(const Vector& v1, const Vector& v2, RandomGenerator& generator) {
         assert(v1.getLength() == v2.getLength());
-        Vector<T, Length, MaxLength> result = randomVector(v1.getLength());
-        result = v1 + multiply((v2 - v1), result);
+        Vector<T, Length, MaxLength> result = random(v1.getLength(), generator);
+        result = v1 + hadamard((v2 - v1), result);
         return result;
     }
     /**

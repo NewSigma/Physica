@@ -24,8 +24,8 @@
 namespace Physica::Core {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<class ScalarType>
-    Integrate<Rectangular, ScalarType, 1>::Integrate(Base range, ScalarType stepSize)
-            : Base(std::move(range)), stepSize(std::move(stepSize)) {}
+    Integrate<Rectangular, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+            : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
@@ -41,8 +41,8 @@ namespace Physica::Core {
     }
     //////////////////////////////////Ladder//////////////////////////////////
     template<class ScalarType>
-    Integrate<Ladder, ScalarType, 1>::Integrate(Base range, ScalarType stepSize)
-            : Base(std::move(range)), stepSize(std::move(stepSize)) {}
+    Integrate<Ladder, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+            : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
@@ -60,8 +60,8 @@ namespace Physica::Core {
     }
     //////////////////////////////////Simpson//////////////////////////////////
     template<class ScalarType>
-    Integrate<Simpson, ScalarType, 1>::Integrate(Base range, ScalarType stepSize)
-            : Base(std::move(range)), stepSize(std::move(stepSize)) {}
+    Integrate<Simpson, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+            : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
@@ -92,8 +92,8 @@ namespace Physica::Core {
      * \param pointCount Points count on one side of the x-axis. There are same points on both sides.
      */
     template<class ScalarType>
-    Integrate<Tanh_Sinh, ScalarType, 1>::Integrate(Base range, ScalarType stepSize, uint64_t pointCount)
-            : Base(std::move(range)), stepSize(std::move(stepSize)), pointCount(pointCount) {}
+    Integrate<Tanh_Sinh, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_, uint64_t pointCount_)
+            : Base(std::move(range)), stepSize(std::move(stepSize_)), pointCount(pointCount_) {}
 
     template<class ScalarType>
     template<class Function>
@@ -117,5 +117,52 @@ namespace Physica::Core {
         }
         result *= constant1 * stepSize;
         return result;
+    }
+    //////////////////////////////////MonteCarlo//////////////////////////////////
+    template<class ScalarType, size_t dim>
+    Integrate<MonteCarlo, ScalarType, dim>::Integrate(Base range, uint64_t sampleCount_)
+            : Base(std::move(range)), sampleCount(sampleCount_) {}
+
+    template<class ScalarType, size_t dim>
+    template<class Function, class RandomGenerator>
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve(Function func, RandomGenerator& generator) const {
+        ScalarType result = 0;
+        for (uint64_t i = 0; i < sampleCount; ++i) {
+            VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
+            result += func(x);
+        }
+
+        ScalarType factor = reciprocal(ScalarType(sampleCount));
+        for (size_t i = 0; i < Base::from().getLength(); ++i)
+            factor *= Base::to()[i] - Base::from()[i];
+        result *= factor;
+        return result;
+    }
+
+    template<class ScalarType, size_t dim>
+    template<class Function, class RandomGenerator>
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(Function func, RandomGenerator& generator, ScalarType& deviation) const {
+        ScalarType total = 0;
+        ScalarType total_square = 0;
+        for (uint64_t i = 0; i < sampleCount; ++i) {
+            const VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
+            const ScalarType y = func(x);
+            total += y;
+            total_square += square(y);
+        }
+
+        const ScalarType factor = reciprocal(ScalarType(sampleCount));
+        ScalarType variance = total_square * factor - square(total * factor);
+
+        ScalarType factor1 = factor;
+        ScalarType factor2 = reciprocal(ScalarType(sampleCount - 1));
+        for (size_t i = 0; i < Base::from().getLength(); ++i) {
+            const ScalarType delta = Base::to()[i] - Base::from()[i];
+            factor1 *= delta;
+            factor2 *= square(delta);
+        }
+        variance *= factor2;
+        deviation = sqrt(variance);
+        return total * factor1;
     }
 }

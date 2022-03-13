@@ -25,7 +25,8 @@ namespace Physica::Core {
         Rectangular,
         Ladder,
         Simpson,
-        Tanh_Sinh
+        Tanh_Sinh,
+        MonteCarlo
     };
 
     template<IntegrateMethod Method, class ScalarType, size_t dim>
@@ -40,11 +41,11 @@ namespace Physica::Core {
     class Integrate<Rectangular, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
-        using Base::VectorType;
+        using typename Base::VectorType;
     private:
         ScalarType stepSize;
     public:
-        explicit Integrate(Base range, ScalarType stepSize);
+        explicit Integrate(Base range, ScalarType stepSize_);
         /* Operations */
         template<class Function>
         ScalarType solve(Function func) const;
@@ -59,11 +60,11 @@ namespace Physica::Core {
     class Integrate<Ladder, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
-        using Base::VectorType;
+        using typename Base::VectorType;
     private:
         ScalarType stepSize;
     public:
-        explicit Integrate(Base range, ScalarType stepSize);
+        explicit Integrate(Base range, ScalarType stepSize_);
         /* Operations */
         template<class Function>
         ScalarType solve(Function func) const;
@@ -78,11 +79,11 @@ namespace Physica::Core {
     class Integrate<Simpson, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
-        using Base::VectorType;
+        using typename Base::VectorType;
     private:
         ScalarType stepSize;
     public:
-        explicit Integrate(Base range, ScalarType stepSize);
+        explicit Integrate(Base range, ScalarType stepSize_);
         /* Operations */
         template<class Function>
         ScalarType solve(Function func) const;
@@ -102,15 +103,31 @@ namespace Physica::Core {
     class Integrate<Tanh_Sinh, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
-        using Base::VectorType;
+        using typename Base::VectorType;
     private:
         ScalarType stepSize;
         uint64_t pointCount;
     public:
-        Integrate(Base range, ScalarType stepSize, uint64_t pointCount);
+        Integrate(Base range, ScalarType stepSize_, uint64_t pointCount_);
         /* Operations */
         template<class Function>
         ScalarType solve(Function func) const;
+    };
+    //////////////////////////////////MonteCarlo//////////////////////////////////
+    template<class ScalarType, size_t dim>
+    class Integrate<MonteCarlo, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+        using Base = IntegrateRange<ScalarType, dim>;
+    public:
+        using typename Base::VectorType;
+    private:
+        uint64_t sampleCount;
+    public:
+        Integrate(Base range, uint64_t sampleCount_);
+        /* Operations */
+        template<class Function, class RandomGenerator>
+        ScalarType solve(Function func, RandomGenerator& generator) const;
+        template<class Function, class RandomGenerator>
+        ScalarType solve_e(Function func, RandomGenerator& generator, ScalarType& deviation) const;
     };
 }
 
