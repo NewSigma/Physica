@@ -14,3 +14,5 @@ if(${PHYSICA_GUI})
     physica_add_example(SurfacePlot SurfacePlot.cpp)
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
+
+physica_add_example(Ising Ising.cpp)

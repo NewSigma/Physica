@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,42 +16,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_RANDOM_H
-#define PHYSICA_RANDOM_H
+#pragma once
 
+#include <cstdint>
 #include <x86intrin.h>
+#include "Physica/Core/Exception/RdrandException.h"
 
 namespace Physica::Utils {
     class Random {
-        static unsigned char retryLimit;
-        /*!
+    public:
+        static int retryLimit;
+        /**
          * rdrand returns a high quality random number, in rare conditions it may fail and we should retry
          * several times but in extremely rare conditions it can not return anything.
          */
-        static void rdrand(__uint16_t& integer) {
-            for(int i = 0; i < retryLimit; i ++) {
-                if(_rdrand16_step(&integer))
-                    break;
+        static void rdrand(uint16_t& integer) {
+            for(int i = 0; i < retryLimit; ++i) {
+                const int code = _rdrand16_step(&integer);
+                if (code == 1)
+                    return;
             }
-            abort();
+            throw Core::RdrandException();
         }
 
-        static void rdrand(__uint32_t& integer) {
-            for(int i = 0; i < retryLimit; i ++) {
-                if(_rdrand32_step(&integer))
-                    break;
+        static void rdrand(uint32_t& integer) {
+            for(int i = 0; i < retryLimit; ++i) {
+                const int code = _rdrand32_step(&integer);
+                if (code == 1)
+                    return;
             }
-            abort();
+            throw Core::RdrandException();
         }
 
-        static void rdrand(__uint64_t& integer) {
-            for(int i = 0; i < retryLimit; i ++) {
-                if(_rdrand64_step(reinterpret_cast<unsigned long long*>(&integer)))
-                    break;
+        static void rdrand(uint64_t& integer) {
+            for(int i = 0; i < retryLimit; ++i) {
+                const int code = _rdrand64_step(reinterpret_cast<unsigned long long*>(&integer));
+                if (code == 1)
+                    return;
             }
-            abort();
+            throw Core::RdrandException();
         }
     };
 }
-
-#endif

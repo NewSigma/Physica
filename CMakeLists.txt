@@ -36,6 +36,7 @@ ${CMAKE_CXX_FLAGS} \
 ${PHYSICA_SIMD_OPTION} \
 -Wall -Wextra \
 -fPIC \
+-mrdrnd \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
 
 if(${PHYSICA_CUDA})
