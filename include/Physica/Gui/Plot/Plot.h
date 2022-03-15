@@ -38,6 +38,8 @@ namespace Physica::Gui {
         /* Operations */
         template<class VectorType1, class VectorType2>
         QLineSeries& line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        template<class VectorType>
+        QSplineSeries& spline(const Core::LValueVector<VectorType>& y);
         template<class VectorType1, class VectorType2>
         QSplineSeries& spline(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
         template<class VectorType>
@@ -63,6 +65,12 @@ namespace Physica::Gui {
 
         update();
         return *series;
+    }
+
+    template<class VectorType>
+    QSplineSeries& Plot::spline(const Core::LValueVector<VectorType>& y) {
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        return spline(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
     template<class VectorType1, class VectorType2>

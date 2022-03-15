@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Utils/Container/Array/Array.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     template<class VectorType>
@@ -49,11 +49,12 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    VectorType normalize(const LValueVector<VectorType>& x) {
+    Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>
+    normalize(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         const ScalarType x_mean = mean(x);
         const ScalarType factor = reciprocal(deviation(x));
-        return VectorType((x - x_mean) * factor);
+        return (x - x_mean) * factor;
     }
 
     template<class VectorType>
