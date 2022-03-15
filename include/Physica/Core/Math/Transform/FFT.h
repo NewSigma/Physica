@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -152,8 +152,4 @@ namespace Physica::Core {
     }
 }
 
-#ifdef PHYSICA_FFTW3
-    #include "FFTImpl_FFTW3.h"
-#else
-    #include "FFTImpl.h"
-#endif
+#include "FFTImpl.h"
