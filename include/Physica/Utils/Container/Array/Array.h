@@ -37,9 +37,7 @@ namespace Physica::Utils {
      * If \T is a complex type, \T must have its copy and move constructors defined.
      *
      * Optimize:
-     * 1. Use more effective allocate strategy to avoid reallocate.
-     * 2. Use the end pointer of arr instead of length may improve performance.
-     * 3. Initialize array using variable parameters
+     * 1. Use the end pointer of arr instead of length may improve performance.
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length, class Allocator = HostAllocator<T>>
     class Array;
@@ -172,6 +170,7 @@ namespace Physica::Utils {
         using Base::arr;
         using Base::alloc;
         using Base::getDerived;
+        constexpr static size_t MinDeltaSpace = 1024;
     protected:
         size_t capacity;
     public:

@@ -233,14 +233,14 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::append(ConstLValueReferenceType t) {
         if(length == capacity)
-            increase(capacity + 1);
+            increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
         Base::grow(t);
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::append(RValueReferenceType t) {
         if(length == capacity)
-            increase(capacity + 1);
+            increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
         Base::grow(std::move(t));
     }
 
