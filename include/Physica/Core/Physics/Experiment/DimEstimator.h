@@ -82,7 +82,7 @@ namespace Physica::Core {
     DimEstimator::corrDimen(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) {
         const VectorType logCorrIntegral = ln(corrIntegral(data, radius));
         const VectorType logR = ln(radius);
-        return linearFit(logR, logCorrIntegral).first;
+        return LinearFit<VectorType>::fit(logR, logCorrIntegral).first;
     }
     /**
      * Helper function for distinguishing chaos and random noise, refer to [2]

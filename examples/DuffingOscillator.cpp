@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
             x1[i - i_start] = log(side / (1U << i));
             y1[i - i_start] = log(fillPhase(x, p, 1U << i));
         }
-        auto fit = linearFit(x1, y1);
+        auto fit = LinearFit<Vector<T>>::fit(x1, y1);
         std::cout << "Fractal dimention: " << -fit.first.getTrivial() << std::endl;
     }
 
