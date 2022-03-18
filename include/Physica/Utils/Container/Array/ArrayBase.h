@@ -114,12 +114,16 @@ namespace Physica::Utils::Internal {
         __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterator */
         __host__ __device__ Iterator begin() noexcept { return Iterator(data()); }
-        __host__ __device__ Iterator end() noexcept { return Iterator(data() + Base::getDerived().getLength()); }
+        __host__ __device__ ConstIterator begin() const noexcept { return cbegin(); }
         __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(data()); }
+        __host__ __device__ Iterator end() noexcept { return Iterator(data() + Base::getDerived().getLength()); }
+        __host__ __device__ ConstIterator end() const noexcept { return cend(); }
         __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(data() + Base::getDerived().getLength()); }
         __host__ __device__ ReverseIterator rbegin() noexcept { return ReverseIterator(data() + Base::getDerived().getLength() - 1); }
-        __host__ __device__ ReverseIterator rend() noexcept { return ReverseIterator(data() - 1); }
+        __host__ __device__ ConstReverseIterator rbegin() const noexcept { return crbegin(); }
         __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(data() + Base::getDerived().getLength() - 1); }
+        __host__ __device__ ReverseIterator rend() noexcept { return ReverseIterator(data() - 1); }
+        __host__ __device__ ConstReverseIterator rend() const noexcept { return crend(); }
         __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(data() - 1); }
         /* Getters */
         [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
