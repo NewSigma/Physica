@@ -20,7 +20,7 @@
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
-#include "Physica/Core/Math/Statistics/LinearFit.h"
+#include "Physica/Core/Physics/Experiment/DimEstimator.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -28,30 +28,6 @@ using namespace Physica::Gui;
 
 using T = Scalar<Double, false>;
 using ODE = ODESolver<T>;
-
-constexpr double side = 4;
-
-size_t fillPhase(const Vector<T>& x, const Vector<T>& p, int dim) {
-    constexpr double x0 = -2;
-    constexpr double y0 = -2;
-
-    double deltaWidth = side / dim;
-    double deltaHeight = side / dim;
-    size_t fillCount = 0;
-    BoolMatrix boolMat(dim, dim, false);
-
-    for (size_t i = 0; i < x.getLength(); ++i) {
-        int m = floor((x[i].getTrivial() - x0) / deltaWidth);
-        int n = floor((p[i].getTrivial() - y0) / deltaHeight);
-        if (0 <= m && m < dim) {
-            if (0 <= n && n < dim) {
-                fillCount += !boolMat[n][m];
-                boolMat.setValue(n, m, true);
-            }
-        }
-    }
-    return fillCount;
-}
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:11-12
@@ -73,16 +49,12 @@ int main(int argc, char** argv) {
     }
 
     /* Get fractal dimention */ {
-        constexpr unsigned int i_start = 2U;
-        constexpr unsigned int i_end = 10U;
-        Vector<T> x1(i_end - i_start);
-        Vector<T> y1(i_end - i_start);
-        for (unsigned int i = i_start; i < i_end; ++i) {
-            x1[i - i_start] = log(side / (1U << i));
-            y1[i - i_start] = log(fillPhase(x, p, 1U << i));
-        }
-        auto fit = LinearFit<Vector<T>>::fit(x1, y1);
-        std::cout << "Fractal dimention: " << -fit.first.getTrivial() << std::endl;
+        const size_t length = 32;
+        using VectorType = Vector<T>;
+        DenseMatrix<T> trans = solution.transpose();
+        const VectorType r = exp(VectorType::linspace(-4, -1, length));
+        const T dim = DimEstimator::corrDimen(trans, r);
+        std::cout << "Effective dimention: " << dim << std::endl;
     }
 
     QApplication app(argc, argv);
