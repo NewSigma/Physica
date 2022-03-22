@@ -37,6 +37,7 @@ namespace Physica::Core {
         constexpr static double protonMass = 1.6726231E-27;
         constexpr static double neutronMass = 1.6749286E-27;
         constexpr static double vacuumDielectric = 8.854187817E-12;
+        constexpr static double boltzmannK = 1.380649E-23;
         /**
          * The first element is a space holder
          */

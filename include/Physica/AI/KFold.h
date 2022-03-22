@@ -28,8 +28,6 @@ namespace Physica::AI {
     class KFold {
         using ScalarType = Core::Scalar<Core::Double, false>;
         using Metrics = Core::DenseMatrix<ScalarType, Core::DenseMatrixOption::Row | Core::DenseMatrixOption::Vector, 2>;
-        using TrainSet = Dataset;
-        using ValidSet = Dataset;
         
         Dataset set;
         unsigned int numFold;
@@ -39,12 +37,12 @@ namespace Physica::AI {
         ~KFold() = default;
         /* Operations */
         template<class Model>
-        void validation(Model model);
+        void validation(Model& model);
         /* Getters */
         [[nodiscard]] ScalarType getTrainLoss() const { return mean(metrics.row(0)); }
         [[nodiscard]] ScalarType getValidLoss() const { return mean(metrics.row(1)); }
     private:
-        std::pair<TrainSet, ValidSet> cutDataset(unsigned int fold);
+        std::pair<Dataset, Dataset> cutDataset(unsigned int fold);
     };
 
     template<class Dataset>
@@ -53,7 +51,7 @@ namespace Physica::AI {
 
     template<class Dataset>
     template<class Model>
-    void KFold<Dataset>::validation(Model model) {
+    void KFold<Dataset>::validation(Model& model) {
         for (size_t i = 0; i < numFold; ++i) {
             const auto splitted_set = cutDataset(i);
             model.init();
@@ -66,7 +64,7 @@ namespace Physica::AI {
     }
 
     template<class Dataset>
-    std::pair<typename KFold<Dataset>::TrainSet, typename KFold<Dataset>::ValidSet>
+    std::pair<typename KFold<Dataset>::Dataset, typename KFold<Dataset>::Dataset>
     KFold<Dataset>::cutDataset(unsigned int fold) {
         const int64_t fold_size = set.getFeatures().sizes()[0] / numFold;
         auto valid_features = set.getFeatures().slice(0, fold * fold_size, (fold + 1) * fold_size);
@@ -77,7 +75,7 @@ namespace Physica::AI {
         auto train_labels2 = set.getLabels().slice(0, (fold + 1) * fold_size, set.size().value());
         auto train_features = torch::cat({std::move(train_features1), std::move(train_features2)});
         auto train_labels = torch::cat({std::move(train_labels1), std::move(train_labels2)});
-        return std::make_pair(TrainSet(std::move(train_features), std::move(train_labels)),
-                              ValidSet(std::move(valid_features), std::move(valid_labels)));
+        return std::make_pair(Dataset(std::move(train_features), std::move(train_labels)),
+                              Dataset(std::move(valid_features), std::move(valid_labels)));
     }
 }
