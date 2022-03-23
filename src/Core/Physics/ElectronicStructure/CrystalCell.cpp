@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -35,14 +35,14 @@ namespace Physica::Core {
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
         result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const ScalarType volume = abs(lattice.row(0).asVector() * result.row(0));
+        const ScalarType volume = abs(lattice.row(0) * result.row(0).asVector());
         const ScalarType factor = ScalarType(2 * M_PI) / volume;
         result *= factor;
         return ReciprocalCell(std::move(result));
     }
 
     typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {
-        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 
     std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {

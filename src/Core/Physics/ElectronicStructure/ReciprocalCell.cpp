@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -35,6 +35,6 @@ namespace Physica::Core {
     }
 
     typename ReciprocalCell::ScalarType ReciprocalCell::getVolume() const noexcept {
-        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 }

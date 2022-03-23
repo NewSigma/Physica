@@ -26,17 +26,18 @@ using namespace Physica::Core;
 int main() {
     using T = Scalar<Double, false>;
     {
-        const Vector<T> x{2, 3, 4, 5};
+        using VectorType = Vector<T, 4>;
+        const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
-        Vector<T> v(rank);
+        VectorType v(rank);
         const T norm = householder(x, v);
 
-        Vector<T> copy = v;
+        VectorType copy = v;
         const T tau = copy[0];
         const T beta = x[0].isNegative() ? norm : -norm;
         copy[0] = 1;
 
-        Vector<T> result = x - tau * (copy * x) * copy;
+        VectorType result = x - tau * (copy * x) * copy;
         if (abs(T(result[0] - beta) / beta) > T(1E-15))
             return 1;
         for (size_t i = 1; i < rank; ++i)
@@ -45,9 +46,10 @@ int main() {
     }
 
     {
-        const Vector<T> x{2, 3, 4, 5};
+        using VectorType = Vector<T, 4>;
+        const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
-        Vector<T> v(rank);
+        VectorType v(rank);
         const T norm = householder(x, v);
 
         using MatrixType = DenseMatrix<T, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 4>;
@@ -71,11 +73,12 @@ int main() {
     }
     /* Complex test */ {
         using ScalarType = ComplexScalar<T>;
+        using VectorType = Vector<ScalarType, 2>;
         using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 2, 2>;
 
-        const Vector<ScalarType> x{{1, 1}, {3, -5}};
+        const VectorType x{{1, 1}, {3, -5}};
         const size_t rank = x.getLength();
-        Vector<ScalarType> v(rank);
+        VectorType v(rank);
         const T norm = householder(x, v);
 
         const MatrixType m{x, {{-2, 7}, {1, 6}}};
@@ -102,8 +105,9 @@ int main() {
         }
     }
     {
-        const Vector<T> x{0, 0, 0, 0};
-        Vector<T> v(4);
+        using VectorType = Vector<T, 4>;
+        const VectorType x{0, 0, 0, 0};
+        VectorType v(4);
         const T norm = householder(x, v);
         if (!norm.isZero())
             return 1;

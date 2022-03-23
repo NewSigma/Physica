@@ -138,7 +138,7 @@ namespace Physica::Core {
 
     template<class T, bool isSigned>
     typename Grid3D<T, isSigned>::ScalarType Grid3D<T, isSigned>::getVolume() const noexcept {
-        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2));
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 
     template<class T, bool isSigned>

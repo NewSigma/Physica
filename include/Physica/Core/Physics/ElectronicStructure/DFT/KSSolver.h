@@ -110,7 +110,7 @@ namespace Physica::Core {
                 for (size_t ion = 0; ion < atomCount; ++ion) {
                     if (Base::cell.getAtomicNumber(ion) == element) { //We can use searching table method
                         auto r = Base::cell.getPos().row(ion);
-                        const ScalarType phase = g * r;
+                        const ScalarType phase = g * r.asVector();
                         temp += ComplexType(cos(phase), sin(phase));
                     }
                 }

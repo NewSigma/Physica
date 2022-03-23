@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -163,21 +163,21 @@ namespace Physica::Core {
     };
 
     template<class MatrixType1, class MatrixType2>
-    inline typename std::enable_if<MatrixType2::ColumnAtCompile != 1, MatrixProduct<MatrixType1, MatrixType2>>::type
+    inline typename std::enable_if<MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1, MatrixProduct<MatrixType1, MatrixType2>>::type
     operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
 
     template<class VectorType, class MatrixType>
-    inline VectorMatrixProduct<VectorType, MatrixType>
+    inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
     operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) {
         assert(mat.getRow() == 1);
         return VectorMatrixProduct(vec, mat);
     }
 
     template<class MatrixType, class VectorType>
-    inline MatrixVectorProduct<MatrixType, VectorType>
+    inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
         assert(mat.getColumn() == vec.getLength());
         return MatrixVectorProduct(mat, vec);

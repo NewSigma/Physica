@@ -45,6 +45,8 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order, size_t MaxOrder>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<ScalarType, Order, MaxOrder>>
                              , private Internal::HalfDenseMatrixStorage<DenseHermiteMatrix<ScalarType, Order, MaxOrder>> {
+        static_assert(ScalarType::isComplex);
+
         using Storage = Internal::HalfDenseMatrixStorage<DenseHermiteMatrix<ScalarType, Order, MaxOrder>>;
         using RealType = typename ScalarType::RealType;
     public:

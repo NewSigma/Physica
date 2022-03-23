@@ -23,10 +23,10 @@ namespace Physica::Core {
         template<class T1, class T2, bool enableSIMD>
         struct InnerDotImpl {
             using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
-            static ResultType run(const LValueVector<T1>& v1, const LValueVector<T2>& v2) {
+            static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 auto result = ResultType::Zero();
                 for(size_t i = 0; i < v1.getLength(); ++i)
-                    result += v1[i] * v2[i];
+                    result += v1.calc(i) * v2.calc(i);
                 return result;
             }
         };
@@ -40,7 +40,7 @@ namespace Physica::Core {
             using ResultType = typename T1::ScalarType;
             using PacketType = typename Internal::BestPacket<ResultType, SizeAtCompile>::Type;
 
-            static ResultType run(const LValueVector<T1>& v1, const LValueVector<T2>& v2) {
+            static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 const size_t length = v1.getLength();
                 size_t i = 0;
                 const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
@@ -109,7 +109,7 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const LValueVector<VectorType1>& v1, const LValueVector<VectorType2>& v2) {
+    operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
         assert(v1.getLength() == v2.getLength());
         return Internal::InnerDotImpl<VectorType1, VectorType2, false>::run(v1, v2);
     }
