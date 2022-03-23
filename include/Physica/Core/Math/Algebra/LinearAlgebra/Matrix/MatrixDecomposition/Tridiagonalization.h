@@ -44,10 +44,11 @@ namespace Physica::Core {
         static_assert(MatrixType::RowAtCompile > 2 || MatrixType::RowAtCompile == Dynamic,
                       "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         using ScalarType = typename MatrixType::ScalarType;
-        static_assert(!ScalarType::isComplex, "Not implemented"); //The code should after implementing MatrixBlock of RValueMatrix and change WorkingMatrix to HermiteMatrix.
         using RealType = typename ScalarType::RealType;
         using MatrixT = TridiagonalMatrixT<MatrixType>;
-        using WorkingMatrix = DenseSymmMatrix<ScalarType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
+        using SymmMatrix = DenseSymmMatrix<ScalarType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
+        using HermiteMatrix = DenseHermiteMatrix<ScalarType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
+        using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
 
         constexpr static size_t normVectorLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 2);
         constexpr static size_t bufferLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 1);
@@ -90,25 +91,27 @@ namespace Physica::Core {
             auto temp = to_col.tail(i + 1);
 
             ScalarType unit;
-            if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
+            if (temp.calc(0).squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
                 unit = ScalarType::One();
             else
-                unit = temp[0].unit();
+                unit = temp.calc(0).unit();
 
-            const RealType norm = householderInPlace(temp);
+            auto p = buffer.head(order - i - 1);
+            const RealType norm = householder(temp, p);
+            for (size_t j = 0; j < p.getLength(); ++j)
+                working(i, i + j + 1) = p[j].conjugate();
             normBuffer[i] = -norm * unit;
 
             if (!norm.isZero()) {
-                const ScalarType factor = working(i + 1, i);
-                working(i + 1, i) = ScalarType::One();
-                auto p = buffer.head(order - 1 - i);
+                const ScalarType factor = working(i, i + 1);
+                working(i, i + 1) = ScalarType::One();
                 auto corner = working.bottomRightCorner(i + 1);
                 p = factor * (corner * temp);
                 p -= (p.conjugate() * temp * factor * ScalarType(0.5)) * temp;
                 for (size_t r = 0; r < corner.getRow(); ++r)
-                    for (size_t c = 0; c <= r; ++c)
-                        corner(r, c) -= temp[r] * p[c].conjugate() + temp[c].conjugate() * p[r];
-                working(i + 1, i) = factor;
+                    for (size_t c = r; c < corner.getColumn(); ++c)
+                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * p[r];
+                working(i, i + 1) = factor;
             }
         }
     }
@@ -124,6 +127,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class TridiagonalMatrixT : public RValueMatrix<TridiagonalMatrixT<MatrixType>> {
+        using ScalarType = typename MatrixType::ScalarType;
+        using RealType = typename ScalarType::RealType;
+
         const Tridiagonalization<MatrixType>& tri;
     public:
         TridiagonalMatrixT(const Tridiagonalization<MatrixType>& tri_);
@@ -142,19 +148,20 @@ namespace Physica::Core {
     template<class OtherMatrix>
     void TridiagonalMatrixT<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         const size_t order = getRow();
-        target(0, 0) = tri.working(0, 0);
+        target = RealType::Zero();
+        target(0, 0) = tri.working.calc(0, 0);
         target(1, 0) = tri.normBuffer[0];
         size_t i = 1;
         for (; i < order - 2; ++i) {
             target(i - 1, i) = target(i, i - 1).conjugate();
-            target(i, i) = tri.working(i, i);
+            target(i, i) = tri.working.calc(i, i);
             target(i + 1, i) = tri.normBuffer[i];
         }
         target(i - 1, i) = target(i, i - 1).conjugate();
-        target(i, i) = tri.working(i, i);
-        target(i + 1, i) = tri.working(i + 1, i);
+        target(i, i) = tri.working.calc(i, i);
+        target(i + 1, i) = tri.working.calc(i + 1, i);
         ++i;
         target(i - 1, i) = target(i, i - 1).conjugate();
-        target(i, i) = tri.working(i, i);
+        target(i, i) = tri.working.calc(i, i);
     }
 }

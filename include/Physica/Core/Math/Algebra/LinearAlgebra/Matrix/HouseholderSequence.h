@@ -55,7 +55,7 @@ namespace Physica::Core {
          */
         size_t shift;
     public:
-        HouseholderSequence(const LValueMatrix<MatrixType>& source_);
+        HouseholderSequence(const RValueMatrix<MatrixType>& source_);
         /* Operations */
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
@@ -70,7 +70,7 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    HouseholderSequence<MatrixType>::HouseholderSequence(const LValueMatrix<MatrixType>& source_)
+    HouseholderSequence<MatrixType>::HouseholderSequence(const RValueMatrix<MatrixType>& source_)
             : source(source_.getDerived())
             , size(source.getColumn())
             , shift(0) {}

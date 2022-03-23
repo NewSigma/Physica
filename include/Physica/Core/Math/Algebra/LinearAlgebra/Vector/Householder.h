@@ -35,18 +35,19 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class AnyVector, class OtherVector>
-    typename AnyVector::ScalarType::RealType householder(const LValueVector<AnyVector>& source,
+    typename AnyVector::ScalarType::RealType householder(const RValueVector<AnyVector>& source,
                                                          LValueVector<OtherVector>& target) {
         using ScalarType = typename AnyVector::ScalarType;
         using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
 
-        const RealType sourceNorm0 = source[0].squaredNorm();
+        const ScalarType v0 = source.calc(0);
+        const RealType sourceNorm0 = v0.squaredNorm();
         const RealType squaredTailNorm = source.tail(1).squaredNorm();
         if (squaredTailNorm > std::numeric_limits<ScalarType>::min()) {
             const RealType norm = sqrt(squaredTailNorm + sourceNorm0);
-            const ScalarType factor = source[0].unit() * norm;
-            const ScalarType factor1 = source[0] + factor;
+            const ScalarType factor = v0.unit() * norm;
+            const ScalarType factor1 = v0 + factor;
             const ScalarType factor2 = reciprocal(factor1);
 
             target.tail(1) = source.tail(1) * factor2;
