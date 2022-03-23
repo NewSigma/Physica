@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,17 +24,17 @@ namespace Physica::Core {
      * Reference a part of the given vector
      */
     template<class T>
-    class VectorBlock;
+    class RVectorBlock;
 
     template<class Derived>
-    class LValueVector;
+    class RValueVector;
 
     namespace Internal {
         template<class T>
         class Traits;
 
         template<class VectorType>
-        class Traits<VectorBlock<VectorType>> {
+        class Traits<RVectorBlock<VectorType>> {
         public:
             using ScalarType = typename VectorType::ScalarType;
             constexpr static size_t SizeAtCompile = Dynamic;
@@ -44,39 +44,33 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    class VectorBlock : public LValueVector<VectorBlock<VectorType>> {
+    class RVectorBlock : public RValueVector<RVectorBlock<VectorType>> {
     public:
-        using Base = LValueVector<VectorBlock<VectorType>>;
+        using Base = RValueVector<RVectorBlock<VectorType>>;
         using ScalarType = typename VectorType::ScalarType;
     private:
-        VectorType& vec;
+        const VectorType& vec;
         size_t from;
         size_t to;
     public:
-        VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_);
-        VectorBlock(LValueVector<VectorType>& vec_, size_t from_);
-        VectorBlock(const VectorBlock& block) = default;
-        VectorBlock(VectorBlock&&) noexcept = delete;
-        ~VectorBlock() = default;
+        RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_, size_t to_);
+        RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_);
+        RVectorBlock(const RVectorBlock& block) = delete;
+        RVectorBlock(RVectorBlock&&) noexcept = delete;
+        ~RVectorBlock() = default;
         /* Operators */
-        using Base::operator=;
-        VectorBlock& operator=(const VectorBlock& v) { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
-        VectorBlock& operator=(VectorBlock&& v) noexcept { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
-        ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
-        const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
-        /* Operations */
-        void resize([[maybe_unused]] size_t length) const { assert(length == Base::getLength()); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return to - from; }
     };
 
     template<class VectorType>
-    VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_)
+    RVectorBlock<VectorType>::RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_, size_t to_)
             : vec(vec_.getDerived()), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
     }
 
     template<class VectorType>
-    VectorBlock<VectorType>::VectorBlock(LValueVector<VectorType>& vec_, size_t from_) : VectorBlock(vec_, from_, vec_.getLength()) {}
+    RVectorBlock<VectorType>::RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
 }

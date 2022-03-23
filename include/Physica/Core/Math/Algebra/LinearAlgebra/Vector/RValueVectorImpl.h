@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "BestPacket.h"
-
 namespace Physica::Core {
     namespace Internal {
         template<class T1, class T2, bool enableSIMD>

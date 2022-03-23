@@ -19,6 +19,7 @@
 #pragma once
 
 #include "DenseMatrixImpl/DenseMatrixStorage/DenseMatrixStorage.h"
+#include "RMatrixBlock.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
@@ -41,10 +42,42 @@ namespace Physica::Core {
         constexpr static size_t MaxColumnAtCompile = Internal::Traits<Derived>::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
     public:
         /* Operations */
         template<class OtherDerived>
         void assignTo(LValueMatrix<OtherDerived>& target) const;
+        [[nodiscard]] inline RowVector row(size_t r);
+        [[nodiscard]] inline const RowVector row(size_t r) const;
+        [[nodiscard]] inline ColVector col(size_t c);
+        [[nodiscard]] inline const ColVector col(size_t c) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] inline const RMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const RMatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> topRows(size_t to);
+        [[nodiscard]] inline const RMatrixBlock<Derived> topRows(size_t to) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> bottomRows(size_t from);
+        [[nodiscard]] inline const RMatrixBlock<Derived> bottomRows(size_t from) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> leftCols(size_t to);
+        [[nodiscard]] inline const RMatrixBlock<Derived> leftCols(size_t to) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> rightCols(size_t from);
+        [[nodiscard]] inline const RMatrixBlock<Derived> rightCols(size_t from) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol);
+        [[nodiscard]] inline const RMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> topLeftCorner(size_t to);
+        [[nodiscard]] inline const RMatrixBlock<Derived> topLeftCorner(size_t to) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol);
+        [[nodiscard]] inline const RMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol);
+        [[nodiscard]] inline const RMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);
+        [[nodiscard]] inline const RMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> bottomRightCorner(size_t from);
+        [[nodiscard]] inline const RMatrixBlock<Derived> bottomRightCorner(size_t from) const;
+        [[nodiscard]] inline RMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const RMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }

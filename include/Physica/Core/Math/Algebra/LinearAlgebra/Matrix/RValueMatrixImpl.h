@@ -25,7 +25,169 @@ namespace Physica::Core {
     template<class OtherDerived>
     void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
         assert(getRow() == target.getRow() && getColumn() == target.getColumn());
-        Base::getDerived().assignTo(target);
+        for (size_t i = 0; i < target.getMaxMajor(); ++i)
+            for (size_t j = 0; j < target.getMaxMinor(); ++j)
+                target.getElementFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
+    }
+
+    template<class Derived>
+    inline typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) {
+        return RowVector(Base::getDerived(), r, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline const typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) const {
+        return RowVector(Base::getConstCastDerived(), r, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline typename RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) {
+        return ColVector(Base::getDerived(), 0, getRow(), c);
+    }
+
+    template<class Derived>
+    inline const typename RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) const {
+        return ColVector(Base::getConstCastDerived(), 0, getRow(), c);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) {
+        return RMatrixBlock<Derived>(Base::getDerived(), fromRow, rowCount, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, rowCount, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::topRows(size_t to) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, to, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::topRows(size_t to) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, to, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRows(size_t from) {
+        return RMatrixBlock<Derived>(Base::getDerived(), from, getRow() - from, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRows(size_t from) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), from, getRow() - from, 0, getColumn());
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::leftCols(size_t to) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, getRow(), 0, to);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::leftCols(size_t to) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, getRow(), 0, to);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::rightCols(size_t from) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, getRow(), from, getColumn() - from);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::rightCols(size_t from) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, getRow(), from, getColumn() - from);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, toRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, toRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topLeftCorner(size_t to) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, to, 0, to);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topLeftCorner(size_t to) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, to, 0, to);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) {
+        return RMatrixBlock<Derived>(Base::getDerived(), 0, toRow, fromCol, getRow() - fromCol);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived>
+    RValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), 0, toRow, fromCol, getRow() - fromCol);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived>
+    RValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) {
+        return RMatrixBlock<Derived>(Base::getDerived(), fromRow, getRow() - fromRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived>
+    RValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, getRow() - fromRow, 0, toCol);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived>
+    RValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) {
+        return RMatrixBlock<Derived>(Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived>
+    RValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRightCorner(size_t from) {
+        return RMatrixBlock<Derived>(Base::getDerived(), from, getRow() - from, from, getColumn() - from);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRightCorner(size_t from) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), from, getRow() - from, from, getColumn() - from);
+    }
+
+    template<class Derived>
+    inline RMatrixBlock<Derived> RValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) {
+        return RMatrixBlock<Derived>(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline const RMatrixBlock<Derived> RValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
+        return RMatrixBlock<Derived>(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>

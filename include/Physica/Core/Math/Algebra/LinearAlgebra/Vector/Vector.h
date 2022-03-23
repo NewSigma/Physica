@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,6 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
 #include "ContinuousVector.h"
-#include "VectorBlock.h"
 #include "VectorExpression.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
 

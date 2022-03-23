@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.h"
-#include "MatrixBlock.h"
+#include "LMatrixBlock.h"
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
@@ -38,8 +38,8 @@ namespace Physica::Core {
     public:
         using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
-        using RowVector = MatrixBlock<Derived, 1, Dynamic>;
-        using ColVector = MatrixBlock<Derived, Dynamic, 1>;
+        using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
         constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption; //It is declared here because MatrixOption makes no sence to a RValueMatrix
         constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<Derived>();
         constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<Derived>();
@@ -59,32 +59,32 @@ namespace Physica::Core {
         [[nodiscard]] inline const RowVector row(size_t r) const;
         [[nodiscard]] inline ColVector col(size_t c);
         [[nodiscard]] inline const ColVector col(size_t c) const;
-        [[nodiscard]] inline MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
-        [[nodiscard]] inline const MatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
-        [[nodiscard]] inline MatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
-        [[nodiscard]] inline const MatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
-        [[nodiscard]] inline MatrixBlock<Derived> topRows(size_t to);
-        [[nodiscard]] inline const MatrixBlock<Derived> topRows(size_t to) const;
-        [[nodiscard]] inline MatrixBlock<Derived> bottomRows(size_t from);
-        [[nodiscard]] inline const MatrixBlock<Derived> bottomRows(size_t from) const;
-        [[nodiscard]] inline MatrixBlock<Derived> leftCols(size_t to);
-        [[nodiscard]] inline const MatrixBlock<Derived> leftCols(size_t to) const;
-        [[nodiscard]] inline MatrixBlock<Derived> rightCols(size_t from);
-        [[nodiscard]] inline const MatrixBlock<Derived> rightCols(size_t from) const;
-        [[nodiscard]] inline MatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol);
-        [[nodiscard]] inline const MatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol) const;
-        [[nodiscard]] inline MatrixBlock<Derived> topLeftCorner(size_t to);
-        [[nodiscard]] inline const MatrixBlock<Derived> topLeftCorner(size_t to) const;
-        [[nodiscard]] inline MatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol);
-        [[nodiscard]] inline const MatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol) const;
-        [[nodiscard]] inline MatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol);
-        [[nodiscard]] inline const MatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol) const;
-        [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);
-        [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
-        [[nodiscard]] inline MatrixBlock<Derived> bottomRightCorner(size_t from);
-        [[nodiscard]] inline const MatrixBlock<Derived> bottomRightCorner(size_t from) const;
-        [[nodiscard]] inline MatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
-        [[nodiscard]] inline const MatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] inline const LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> topRows(size_t to);
+        [[nodiscard]] inline const LMatrixBlock<Derived> topRows(size_t to) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> bottomRows(size_t from);
+        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRows(size_t from) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> leftCols(size_t to);
+        [[nodiscard]] inline const LMatrixBlock<Derived> leftCols(size_t to) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> rightCols(size_t from);
+        [[nodiscard]] inline const LMatrixBlock<Derived> rightCols(size_t from) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol);
+        [[nodiscard]] inline const LMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> topLeftCorner(size_t to);
+        [[nodiscard]] inline const LMatrixBlock<Derived> topLeftCorner(size_t to) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol);
+        [[nodiscard]] inline const LMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol);
+        [[nodiscard]] inline const LMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);
+        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> bottomRightCorner(size_t from);
+        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRightCorner(size_t from) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
 
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
         ScalarType determinate() const;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,17 +21,14 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/ContinuousVector.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class RowVector;
-
-    template<class MatrixType> class ColVector;
-
-    template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic>
-    class MatrixBlock;
+    template<class MatrixType> class RowLVector;
+    template<class MatrixType> class ColLVector;
+    template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class LMatrixBlock;
 
     namespace Internal {
         template<class MatrixType>
-        class Traits<RowVector<MatrixType>> {
-            using VectorType = RowVector<MatrixType>;
+        class Traits<RowLVector<MatrixType>> {
+            using VectorType = RowLVector<MatrixType>;
             constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<MatrixType>();
         public:
             using Base = typename std::conditional<isRowMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
@@ -42,8 +39,8 @@ namespace Physica::Core {
         };
 
         template<class MatrixType>
-        class Traits<ColVector<MatrixType>> {
-            using VectorType = ColVector<MatrixType>;
+        class Traits<ColLVector<MatrixType>> {
+            using VectorType = ColLVector<MatrixType>;
             constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<MatrixType>();
         public:
             using Base = typename std::conditional<isColumnMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
@@ -54,7 +51,7 @@ namespace Physica::Core {
         };
 
         template<class MatrixType, size_t Row, size_t Column>
-        class Traits<MatrixBlock<MatrixType, Row, Column>> {
+        class Traits<LMatrixBlock<MatrixType, Row, Column>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static int MatrixOption = MatrixType::MatrixOption;
@@ -68,12 +65,12 @@ namespace Physica::Core {
         };
     }
     /**
-     * \class RowVector and \class ColVector is designed to implement \class MatrixBlock, and they can be used indepently.
+     * \class RowLVector and \class ColLVector is designed to implement \class LMatrixBlock, and they can be used indepently.
      */
     template<class MatrixType>
-    class RowVector : public Internal::Traits<RowVector<MatrixType>>::Base {
+    class RowLVector : public Internal::Traits<RowLVector<MatrixType>>::Base {
     public:
-        using Base = typename Internal::Traits<RowVector<MatrixType>>::Base;
+        using Base = typename Internal::Traits<RowLVector<MatrixType>>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
@@ -81,16 +78,16 @@ namespace Physica::Core {
         size_t fromCol;
         size_t colCount;
     public:
-        RowVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
+        RowLVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
-        RowVector(const RowVector&) = delete;
-        RowVector(RowVector&&) noexcept = delete;
-        ~RowVector() = default;
+        RowLVector(const RowLVector&) = delete;
+        RowLVector(RowLVector&&) noexcept = delete;
+        ~RowLVector() = default;
         /* Operators */
-        RowVector& operator=(const RowVector& v) { v.assignTo(*this); return *this; }
-        RowVector& operator=(RowVector&& v) noexcept { return operator=(std::cref(v)); }
+        RowLVector& operator=(const RowLVector& v) { v.assignTo(*this); return *this; }
+        RowLVector& operator=(RowLVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < colCount); return mat(row, fromCol + index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
@@ -101,9 +98,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class ColVector : public Internal::Traits<ColVector<MatrixType>>::Base {
+    class ColLVector : public Internal::Traits<ColLVector<MatrixType>>::Base {
     public:
-        using Base = typename Internal::Traits<ColVector<MatrixType>>::Base;
+        using Base = typename Internal::Traits<ColLVector<MatrixType>>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
@@ -111,16 +108,16 @@ namespace Physica::Core {
         size_t rowCount;
         size_t col;
     public:
-        ColVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {
+        ColLVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
-        ColVector(const ColVector&) = delete;
-        ColVector(ColVector&&) noexcept = delete;
-        ~ColVector() = default;
+        ColLVector(const ColLVector&) = delete;
+        ColLVector(ColLVector&&) noexcept = delete;
+        ~ColLVector() = default;
         /* Operators */
-        ColVector& operator=(const ColVector& v) { v.assignTo(*this); return *this; }
-        ColVector& operator=(ColVector&& v) noexcept { return operator=(std::cref(v)); }
+        ColLVector& operator=(const ColLVector& v) { v.assignTo(*this); return *this; }
+        ColLVector& operator=(ColLVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < rowCount); return mat(fromRow + index, col); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < rowCount); return mat(fromRow + index, col); }
@@ -131,17 +128,17 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class MatrixBlock<MatrixType, 1, Dynamic> : public LValueMatrix<MatrixBlock<MatrixType, 1, Dynamic>>
-                                              , public RowVector<MatrixType> {
+    class LMatrixBlock<MatrixType, 1, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>
+                                              , public RowLVector<MatrixType> {
     public:
-        using Base = LValueMatrix<MatrixBlock<MatrixType, 1, Dynamic>>;
-        using VectorBase = RowVector<MatrixType>;
+        using Base = LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>;
+        using VectorBase = RowLVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        MatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
-        MatrixBlock(const MatrixBlock&) = default;
-        MatrixBlock(MatrixBlock&&) noexcept = delete;
-        ~MatrixBlock() = default;
+        LMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
+        LMatrixBlock(const LMatrixBlock&) = delete;
+        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;
         using VectorBase::operator=;
@@ -168,17 +165,17 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class MatrixBlock<MatrixType, Dynamic, 1> : public LValueMatrix<MatrixBlock<MatrixType, Dynamic, 1>>
-                                              , public ColVector<MatrixType> {
+    class LMatrixBlock<MatrixType, Dynamic, 1> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>
+                                              , public ColLVector<MatrixType> {
     public:
-        using Base = LValueMatrix<MatrixBlock<MatrixType, Dynamic, 1>>;
-        using VectorBase = ColVector<MatrixType>;
+        using Base = LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>;
+        using VectorBase = ColLVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        MatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
-        MatrixBlock(const MatrixBlock&) = default;
-        MatrixBlock(MatrixBlock&&) noexcept = delete;
-        ~MatrixBlock() = default;
+        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
+        LMatrixBlock(const LMatrixBlock&) = delete;
+        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;
         using VectorBase::operator=;
@@ -205,9 +202,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class MatrixBlock<MatrixType, Dynamic, Dynamic> : public LValueMatrix<MatrixBlock<MatrixType, Dynamic, Dynamic>> {
+    class LMatrixBlock<MatrixType, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, Dynamic>> {
     public:
-        using Base = LValueMatrix<MatrixBlock<MatrixType, Dynamic, Dynamic>>;
+        using Base = LValueMatrix<LMatrixBlock<MatrixType, Dynamic, Dynamic>>;
         using typename Base::ScalarType;
     private:
         MatrixType& mat;
@@ -216,14 +213,14 @@ namespace Physica::Core {
         size_t fromCol;
         size_t colCount;
     public:
-        MatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        MatrixBlock(const MatrixBlock&) = default;
-        MatrixBlock(MatrixBlock&&) noexcept = delete;
-        ~MatrixBlock() = default;
+        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        LMatrixBlock(const LMatrixBlock&) = delete;
+        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;
-        MatrixBlock& operator=(const MatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
-        MatrixBlock& operator=(MatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
+        LMatrixBlock& operator=(const LMatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
+        LMatrixBlock& operator=(LMatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */
@@ -234,7 +231,7 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    MatrixBlock<MatrixType, Dynamic, Dynamic>::MatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+    LMatrixBlock<MatrixType, Dynamic, Dynamic>::LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(mat_)
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -245,16 +242,16 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    typename MatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
-    MatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) {
+    typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
+    LMatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
         return mat(row + fromRow, col + fromCol);
     }
 
     template<class MatrixType>
-    const typename MatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
-    MatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) const {
+    const typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
+    LMatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
         return mat(row + fromRow, col + fromCol);

@@ -20,6 +20,8 @@
 
 #include "Physica/Utils/Template/CRTPBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
+#include "BestPacket.h"
+#include "RVectorBlock.h"
 
 namespace Physica::Core {
     template<class VectorType> class TransposeVector;
@@ -71,6 +73,12 @@ namespace Physica::Core {
         [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         template<class OtherDerived>
         [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
+        RVectorBlock<Derived> head(size_t to) { return RVectorBlock<Derived>(Base::getDerived(), 0, to); }
+        const RVectorBlock<Derived> head(size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
+        RVectorBlock<Derived> tail(size_t from) { return RVectorBlock<Derived>(Base::getDerived(), from); }
+        const RVectorBlock<Derived> tail(size_t from) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from); }
+        RVectorBlock<Derived> segment(size_t from, size_t to) { return RVectorBlock<Derived>(Base::getDerived(), from, to); }
+        const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
     };
 }
 
