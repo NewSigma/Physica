@@ -19,7 +19,8 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "RegressionDataset.h"
+#include "Physica/AI/RegressionDataset.h"
+#include "Physica/AI/Model.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
@@ -36,8 +37,8 @@ namespace Physica::AI {
         KFold(Dataset set_, unsigned int numFold);
         ~KFold() = default;
         /* Operations */
-        template<class Model>
-        void validation(Model& model);
+        template<class ModelType>
+        void validate(Model<ModelType>& model);
         /* Getters */
         [[nodiscard]] ScalarType getTrainLoss() const { return mean(metrics.row(0)); }
         [[nodiscard]] ScalarType getValidLoss() const { return mean(metrics.row(1)); }
@@ -50,8 +51,9 @@ namespace Physica::AI {
             : set(std::move(set_)), numFold(numFold_), metrics(2, numFold_) {}
 
     template<class Dataset>
-    template<class Model>
-    void KFold<Dataset>::validation(Model& model) {
+    template<class ModelType>
+    void KFold<Dataset>::validate(Model<ModelType>& model) {
+        static_assert(std::is_same<Dataset, typename ModelType::DataSet>::value, "Type of datasets do not match");
         for (size_t i = 0; i < numFold; ++i) {
             const auto splitted_set = cutDataset(i);
             model.init();
@@ -64,8 +66,7 @@ namespace Physica::AI {
     }
 
     template<class Dataset>
-    std::pair<typename KFold<Dataset>::Dataset, typename KFold<Dataset>::Dataset>
-    KFold<Dataset>::cutDataset(unsigned int fold) {
+    std::pair<Dataset, Dataset> KFold<Dataset>::cutDataset(unsigned int fold) {
         const int64_t fold_size = set.getFeatures().sizes()[0] / numFold;
         auto valid_features = set.getFeatures().slice(0, fold * fold_size, (fold + 1) * fold_size);
         auto valid_labels = set.getLabels().slice(0, fold * fold_size, (fold + 1) * fold_size);

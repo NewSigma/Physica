@@ -1,5 +1,9 @@
 include(../cmake/Modules/PhysicaAddExample.cmake)
 
+if(${PHYSICA_TORCH})
+    physica_add_example(Regression AI/Regression.cpp)
+endif()
+
 if(${PHYSICA_CUDA})
     physica_add_example(CheckGPU CheckGPU.cu)
 endif()
