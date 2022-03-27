@@ -206,16 +206,6 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class Derived>
-    Derived reciprocal(const RValueMatrix<Derived>& m) {
-        const auto length = m.getLength();
-        Derived result();
-        for(size_t i = 0; i < length; ++i)
-            result.init(reciprocal(m[i]), i);
-        result.setLength(length);
-        return result;
-    }
-
-    template<class Derived>
     Derived sqrt(const RValueMatrix<Derived>& m) {
         const auto length = m.getLength();
         Derived result();

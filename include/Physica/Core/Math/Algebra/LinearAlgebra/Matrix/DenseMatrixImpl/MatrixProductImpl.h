@@ -23,10 +23,10 @@ namespace Physica::Core {
     template<class OtherDerived>
     void MatrixProduct<MatrixType1, MatrixType2>::assignTo(LValueMatrix<OtherDerived>& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<MatrixType1, MatrixType2>::Major;
-        constexpr static bool isDynamic = defaultMajor == Dynamic;
+        constexpr static bool isAnyMajor = defaultMajor == DenseMatrixOption::AnyMajor;
         using TargetType = LValueMatrix<OtherDerived>;
 
-        if constexpr (isDynamic) {
+        if constexpr (isAnyMajor) {
             for (size_t i = 0; i < target.getMaxMajor(); ++i)
                 for (size_t j = 0; j < target.getMaxMinor(); ++j)
                     target.getElementFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),

@@ -30,11 +30,11 @@ namespace Physica::Core {
             constexpr static bool RowMajor = DenseMatrixOption::isRowMatrix<MatrixType1>();
             constexpr static int Major = SameMajor ? (RowMajor ? int(DenseMatrixOption::Column)
                                                                : int(DenseMatrixOption::Row))
-                                                   : Dynamic;
+                                                   : int(DenseMatrixOption::AnyMajor);
             constexpr static int Storage = (DenseMatrixOption::isElementMatrix<MatrixType1>() && DenseMatrixOption::isElementMatrix<MatrixType2>())
                                          ? DenseMatrixOption::Element
                                          : DenseMatrixOption::Vector;
-            constexpr static int MatrixOption = (Major == Dynamic ? DenseMatrixOption::Column : Major) | Storage;
+            constexpr static int MatrixOption = (Major == DenseMatrixOption::AnyMajor ? DenseMatrixOption::Column : Major) | Storage;
         };
 
         template<class MatrixType1, class MatrixType2>
