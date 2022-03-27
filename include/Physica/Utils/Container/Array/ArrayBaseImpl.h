@@ -33,6 +33,18 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Pointer, class Derived, class Allocator>
+    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
+    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator+(difference_type n) const {
+        return ContainerIterator(p + n);
+    }
+
+    template<class Pointer, class Derived, class Allocator>
+    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
+    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator-(difference_type n) const {
+        return ContainerIterator(p - n);
+    }
+
+    template<class Pointer, class Derived, class Allocator>
     __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
     ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++() {
         ++p;
@@ -43,6 +55,13 @@ namespace Physica::Utils::Internal {
     __host__ __device__ const ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
     ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++(int) {
         return ContainerIterator(p++);
+    }
+
+    template<class Pointer, class Derived, class Allocator>
+    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
+    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator--() {
+        --p;
+        return *this;
     }
 
     template<class Pointer, class Derived, class Allocator>

@@ -23,6 +23,7 @@
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QAreaSeries>
+#include <QtCharts/QBoxPlotSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 #include "ContourSeries.h"
@@ -53,6 +54,13 @@ namespace Physica::Gui {
                                            const Core::LValueMatrix<MatrixType>& y,
                                            const Core::LValueMatrix<MatrixType>& z,
                                            Utils::Array<double> levels);
+        template<class VectorType>
+        QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
+    private:
+        template<class VectorType>
+        QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);
+        template<class VectorType>
+        double findMedian(const Core::LValueVector<VectorType>& sorted_v, size_t from, size_t to);
     };
 
     template<class VectorType1, class VectorType2>
@@ -171,5 +179,48 @@ namespace Physica::Gui {
         series->attachTo(*chart());
         update();
         return *series;
+    }
+
+    template<class VectorType>
+    QBoxPlotSeries& Plot::boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data) {
+        assert(x.getLength() == data.getLength());
+        QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            auto* set = setFromVector(data[i]);
+            set->setX(double(std::move(x[i])));
+            series->append(set);
+        }
+        chart()->addSeries(series);
+
+        update();
+        return *series;
+    }
+
+    template<class VectorType>
+    QBoxSet* Plot::setFromVector(const Core::LValueVector<VectorType>& v) {
+        using BufferType = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        BufferType buffer = v;
+        std::sort(buffer.begin(), buffer.end());
+        auto* result = new QBoxSet();
+        const size_t count = v.getLength();
+        result->setValue(QBoxSet::LowerExtreme, double(*buffer.begin()));
+        result->setValue(QBoxSet::UpperExtreme, double(*buffer.rbegin()));
+        result->setValue(QBoxSet::Median, findMedian(buffer, 0, count));
+        result->setValue(QBoxSet::LowerQuartile, findMedian(buffer, 0, count / 2));
+        result->setValue(QBoxSet::UpperQuartile, findMedian(buffer, count / 2 + (count % 2), count));
+        return result;
+    }
+
+    template<class VectorType>
+    double Plot::findMedian(const Core::LValueVector<VectorType>& sorted_v, size_t from, size_t to) {
+        size_t count = to - from;
+        if (count % 2) {
+            return double(sorted_v[count / 2 + from]);
+        }
+        else {
+            auto right = sorted_v[count / 2 + from];
+            auto left = sorted_v[count / 2 - 1 + from];
+            return double((right + left) * 0.5);
+        }
     }
 }

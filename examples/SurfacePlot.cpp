@@ -49,5 +49,5 @@ int main(int argc, char **argv) {
     }
     plot3d->show();
 
-    return app.exec();
+    return QApplication::exec();
 }

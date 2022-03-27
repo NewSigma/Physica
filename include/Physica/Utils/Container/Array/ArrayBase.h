@@ -47,11 +47,18 @@ namespace Physica::Utils::Internal {
         ~ContainerIterator() = default;
         /* Operators */
         __host__ __device__ ContainerIterator& operator=(const ContainerIterator& ite);
-        __host__ __device__ difference_type operator-(const ContainerIterator& ite) { return p - ite.p; }
+        __host__ __device__ [[nodiscard]] ContainerIterator operator+(difference_type n) const;
+        __host__ __device__ [[nodiscard]] ContainerIterator operator-(difference_type n) const;
+        __host__ __device__ [[nodiscard]] bool operator<(const ContainerIterator& ite) const { return p < ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator>(const ContainerIterator& ite) const { return p > ite.p; }
+        __host__ __device__ [[nodiscard]] bool operator<=(const ContainerIterator& ite) const { return !(p > ite.p); }
+        __host__ __device__ [[nodiscard]] bool operator>=(const ContainerIterator& ite) const { return !(p < ite.p); }
+        __host__ __device__ [[nodiscard]] difference_type operator-(const ContainerIterator& ite) const { return p - ite.p; }
         __host__ __device__ [[nodiscard]] bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
         __host__ __device__ [[nodiscard]] bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
         __host__ __device__ ContainerIterator& operator++();
         __host__ __device__ const ContainerIterator operator++(int);
+        __host__ __device__ ContainerIterator& operator--();
         __host__ __device__ [[nodiscard]] reference operator*() const { return *p; }
     private:
         __host__ __device__ explicit ContainerIterator(pointer p) : p(p) {}
