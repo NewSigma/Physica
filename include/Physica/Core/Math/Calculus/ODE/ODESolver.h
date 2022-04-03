@@ -23,8 +23,9 @@
 namespace Physica::Core {
     template<class T>
     class ODESolver {
+    protected:
         using VectorType = Vector<T>;
-    private:
+
         VectorType x;
         DenseMatrix<T> solution;
         T stepSize;
@@ -39,8 +40,6 @@ namespace Physica::Core {
          */
         template<class Function>
         void rungeKutta4(Function func);
-        template<class Function, class RandomFunc>
-        void stochasticRungeKutta2(Function func, RandomFunc random);
         template<class Function>
         void verlet(Function func, const T& initial1);
         template<class Function>
@@ -74,31 +73,6 @@ namespace Physica::Core {
             VectorType dy_dx = func(x_i, solution[i]);
             solution[i + 1] = RungeKuttaDy(i, dy_dx, func);
             x.append(x_i + stepSize);
-        }
-    }
-    /**
-     * Apply to wight noise only
-     * Defination of RandomFunc:
-     * VectorType RandomFunc(T x, VectorType y);
-     * 
-     * Reference:
-     * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
-     */
-    template<class T>
-    template<class Function, class RandomFunc>
-    void ODESolver<T>::stochasticRungeKutta2(Function func, RandomFunc random) {
-        assert(x.getLength() == 1);
-        const size_t column_1 = solution.getColumn() - 1;
-        VectorType randVec;
-        for (size_t i = 0; i < column_1; ++i) {
-            const T& x_i = x[i];
-            const VectorType& solution_i = solution[i];
-            const T x_i_1 = x_i + stepSize;
-            randVec = random(x_i, solution_i);
-            VectorType term1 = func(x_i, solution_i);
-            VectorType term2 = func(x_i_1, solution_i + stepSize * term1 + randVec);
-            solution[i + 1] = solution_i + (term1 + term2) * (stepSize / T(2)) + randVec;
-            x.append(std::move(x_i_1));
         }
     }
     /**

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <random>
-#include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
+#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 
 using namespace Physica::Core;
 /**
@@ -26,7 +26,6 @@ using namespace Physica::Core;
  */
 int main() {
     using ScalarType = Scalar<Double, false>;
-    using ODE = ODESolver<ScalarType>;
     using XVector = Vector<ScalarType, 1>;
     constexpr double stepSize = 0.1;
     constexpr double D = 0.1;
@@ -41,9 +40,9 @@ int main() {
         std::mt19937 gen{i};
         std::normal_distribution phi{};
 
-        ODE solver(0, t_max, stepSize, {1});
-        solver.stochasticRungeKutta2([](ScalarType t, const XVector& x) -> XVector { (void)t; return {-ScalarType(lambda) * x[0]}; },
-                                    [&](ScalarType t, const XVector& x) -> XVector { (void)t; (void)x; return {ScalarType(lambda) * sqrt(2 * stepSize * D) * phi(gen)}; });
+        SRK2<ScalarType> solver(0, t_max, stepSize, {1});
+        solver.solve([](ScalarType t, const XVector& x) -> XVector { (void)t; return {-ScalarType(lambda) * x[0]}; },
+                    [&](ScalarType t, const XVector& x) -> XVector { (void)t; (void)x; return {ScalarType(lambda) * sqrt(2 * stepSize * D) * phi(gen)}; });
         x += solver.getSolution().row(0);
     }
     x *= reciprocal(ScalarType(iteration));
