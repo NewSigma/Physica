@@ -47,7 +47,6 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class Function, class RandomFunc>
     void SRK2<ScalarType>::solve(Function func, RandomFunc random) {
-        assert(Base::x.getLength() == 1);
         const size_t column_1 = Base::solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             ScalarType temp = Base::x[i];

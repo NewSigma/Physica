@@ -47,6 +47,7 @@ namespace Physica::Core {
         /* Getters */
         const VectorType& getX() const noexcept { return x; }
         const DenseMatrix<T>& getSolution() const noexcept { return solution; }
+        [[nodiscard]] static size_t getNumStep(T start, T end, T stepSize);
     private:
         template<class Function>
         VectorType RungeKuttaDy(size_t step, const VectorType& dy_dx, Function func);
@@ -56,7 +57,7 @@ namespace Physica::Core {
     ODESolver<T>::ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial)
             : stepSize(stepSize_) {
         assert(start < end);
-        const size_t size = static_cast<size_t>(double((end - start) / stepSize));
+        const size_t size = getNumStep(start, end, stepSize);
         x.reserve(size);
         x.append(start);
         solution.resize(initial.getLength(), size);
@@ -168,5 +169,10 @@ namespace Physica::Core {
             solution(0, i + 1) = w_i / factor;
             x.append(x_i);
         }
+    }
+
+    template<class T>
+    size_t ODESolver<T>::getNumStep(T start, T end, T stepSize) {
+        return static_cast<size_t>(double((end - start) / stepSize));
     }
 }
