@@ -59,7 +59,8 @@ namespace Physica::Core {
         assert(start < end);
         const size_t size = getNumStep(start, end, stepSize);
         x.reserve(size);
-        x.append(start);
+        x.setLength(size);
+        x[0] = start;
         solution.resize(initial.getLength(), size);
         solution[0] = initial;
     }
@@ -67,13 +68,12 @@ namespace Physica::Core {
     template<class T>
     template<class Function>
     void ODESolver<T>::rungeKutta4(Function func) {
-        assert(x.getLength() == 1);
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
             VectorType dy_dx = func(x_i, solution[i]);
             solution[i + 1] = RungeKuttaDy(i, dy_dx, func);
-            x.append(x_i + stepSize);
+            x[i + 1] = x_i + stepSize;
         }
     }
     /**
@@ -110,8 +110,7 @@ namespace Physica::Core {
     template<class T>
     template<class Function>
     void ODESolver<T>::verlet(Function func, const T& initial1) {
-        assert(x.getLength() == 1);
-        x.append(x[0] + stepSize);
+        x[1] = x[0] + stepSize;
         solution(0, 1) = initial1;
         const T stepSize_2 = square(stepSize);
         const size_t column_1 = solution.getColumn() - 1;
@@ -119,7 +118,7 @@ namespace Physica::Core {
             const T& x_i = x[i];
             const T& y_i = solution(0, i);
             solution(0, i + 1) = -solution(0, i - 1) + y_i * T(2) + func(x_i, y_i) * stepSize_2;
-            x.append(x_i + stepSize);
+            x[i + 1] = x_i + stepSize;
         }
     }
     /**
@@ -139,9 +138,8 @@ namespace Physica::Core {
     template<class T>
     template<class Function>
     void ODESolver<T>::degenerate_numerov(Function func, const T& tangent) {
-        assert(x.getLength() == 1);
         const T x0 = x[0];
-        x.append(x0 + stepSize);
+        x[1] = x0 + stepSize;
         const T stepSize_2 = square(stepSize);
         const T stepSize_2_12 = stepSize_2 * T(1.0 / 12);
         /* Get y(stepSize) */ {
@@ -167,7 +165,7 @@ namespace Physica::Core {
             x_i += stepSize;
             const T factor = T(1) - stepSize_2_12 * func(x_i);
             solution(0, i + 1) = w_i / factor;
-            x.append(x_i);
+            x[i + 1] = x_i;
         }
     }
 

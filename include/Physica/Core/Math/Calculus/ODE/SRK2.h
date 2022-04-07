@@ -52,7 +52,7 @@ namespace Physica::Core {
             ScalarType temp = Base::x[i];
             Base::solution[i + 1] = Base::solution[i];
             step(Base::stepSize, temp, Base::solution[i + 1], func, random);
-            Base::x.append(temp);
+            Base::x[i + 1] = temp;
         }
     }
 
