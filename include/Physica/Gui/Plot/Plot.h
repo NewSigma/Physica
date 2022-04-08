@@ -49,6 +49,10 @@ namespace Physica::Gui {
         QScatterSeries& scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
         template<class VectorType>
         QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool dencity = false);
+        template<class VectorType>
+        QAreaSeries& area(const Core::LValueVector<VectorType>& x,
+                          const Core::LValueVector<VectorType>& lower,
+                          const Core::LValueVector<VectorType>& upper);
         template<class MatrixType>
         ContourSeries<MatrixType>& contour(const Core::LValueMatrix<MatrixType>& x,
                                            const Core::LValueMatrix<MatrixType>& y,
@@ -166,6 +170,25 @@ namespace Physica::Gui {
 
         chart()->addSeries(series);
 
+        update();
+        return *series;
+    }
+
+    template<class VectorType>
+    QAreaSeries& Plot::area(const Core::LValueVector<VectorType>& x,
+                            const Core::LValueVector<VectorType>& lower,
+                            const Core::LValueVector<VectorType>& upper) {
+        assert(x.getLength() == lower.getLength() && x.getLength() == upper.getLength());
+
+        QLineSeries* upper_series = new QLineSeries();
+        QLineSeries* lower_series = new QLineSeries();
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            const double x_i = double(x[i]);
+            *lower_series << QPointF(x_i, double(lower[i]));
+            *upper_series << QPointF(x_i, double(upper[i]));
+        }
+        QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
+        chart()->addSeries(series);
         update();
         return *series;
     }

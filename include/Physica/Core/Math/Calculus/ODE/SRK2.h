@@ -41,7 +41,7 @@ namespace Physica::Core {
         void solve(Function func, RandomFunc random);
 
         template<class Function, class RandomFunc>
-        static void step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random);
+        static inline void step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random);
     };
 
     template<class ScalarType>
@@ -58,7 +58,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class Function, class RandomFunc>
-    void SRK2<ScalarType>::step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random) {
+    inline void SRK2<ScalarType>::step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random) {
         const VectorType randVec = random(x, sol);
         VectorType term1 = func(x, sol);
         x += stepSize;
