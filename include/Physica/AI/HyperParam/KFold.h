@@ -40,8 +40,8 @@ namespace Physica::AI {
         template<class ModelType>
         void validate(Model<ModelType>& model);
         /* Getters */
-        [[nodiscard]] ScalarType getTrainLoss() const { return mean(metrics.row(0)); }
-        [[nodiscard]] ScalarType getValidLoss() const { return mean(metrics.row(1)); }
+        [[nodiscard]] double getTrainLoss() const { return double(mean(metrics.row(0))); }
+        [[nodiscard]] double getValidLoss() const { return double(mean(metrics.row(1))); }
     private:
         std::pair<Dataset, Dataset> cutDataset(unsigned int fold);
     };

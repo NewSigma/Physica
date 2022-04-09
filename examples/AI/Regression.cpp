@@ -40,12 +40,20 @@ namespace Physica::AI::Internal {
 }
 
 struct NetOptions : public ParamSet<NetOptions> {
-    size_t numEpoch;
+    unsigned int numEpoch;
+    int64_t layer_dim1;
+    int64_t layer_dim2;
     double lr;
+    unsigned int step;
     double gamma;
 
     friend std::ostream& operator<<(std::ostream& os, const NetOptions& options) {
-        os << ' ' << options.numEpoch << ' ' << options.lr << ' ' << options.gamma << std::endl;
+        os << ' ' << options.numEpoch
+           << ' ' << options.layer_dim1
+           << ' ' << options.layer_dim2
+           << ' ' << options.lr
+           << ' ' << options.step
+           << ' ' << options.gamma << std::endl;
         return os;
     }
 
@@ -53,13 +61,22 @@ struct NetOptions : public ParamSet<NetOptions> {
     static NetOptions randomSet(RandomGenerator& gen) {
         NetOptions options{};
         {
-            int arr[3]{300, 400, 500};
-            std::uniform_int_distribution dist(0, 2);
-            options.numEpoch = arr[dist(gen)];
+            int64_t arr[]{16, 32, 64, 128, 256};
+            std::uniform_int_distribution dist(0, 4);
+            options.layer_dim1 = arr[dist(gen)];
+            options.layer_dim2 = arr[dist(gen)];
+        }
+        {
+            std::uniform_int_distribution dist(300, 700);
+            options.numEpoch = dist(gen);
         }
         {
             std::uniform_real_distribution<double> dist(-2, 1);
             options.lr = std::pow(10.0, dist(gen));
+        }
+        {
+            std::uniform_int_distribution dist(1, 20);
+            options.step = dist(gen);
         }
         {
             std::uniform_real_distribution<double> dist(0.9, 1);
@@ -71,15 +88,23 @@ struct NetOptions : public ParamSet<NetOptions> {
 
 class Net : public Model<Net> {
     using Base = Model<Net>;
-    torch::nn::Linear fc1{nullptr}, fc2{nullptr}, fc3{nullptr};
+    torch::nn::Linear fc1, fc2, fc3;
+    int inputs;
+    int outputs;
 public:
-    Net(int inputs, int outputs) {
-        fc1 = register_module("fc1", torch::nn::Linear(inputs, 256));
-        fc2 = register_module("fc2", torch::nn::Linear(256, 256));
-        fc3 = register_module("fc3", torch::nn::Linear(256, outputs));
-    }
+    Net(int inputs_, int outputs_) : fc1(nullptr), fc2(nullptr), fc3(nullptr), inputs(inputs_), outputs(outputs_) {}
 
     void init() {
+        if (fc1.is_empty()) {
+            fc1 = register_module("fc1", torch::nn::Linear(inputs, active_params.layer_dim1));
+            fc2 = register_module("fc2", torch::nn::Linear(active_params.layer_dim1, active_params.layer_dim2));
+            fc3 = register_module("fc3", torch::nn::Linear(active_params.layer_dim2, outputs));
+        }
+        else {
+            *fc1 = torch::nn::LinearImpl(inputs, active_params.layer_dim1);
+            *fc2 = torch::nn::LinearImpl(active_params.layer_dim1, active_params.layer_dim2);
+            *fc3 = torch::nn::LinearImpl(active_params.layer_dim2, outputs);
+        }
         fc1->weight.set_requires_grad(false).normal_(0, 0.01).set_requires_grad(true);
         fc2->weight.set_requires_grad(false).normal_(0, 0.01).set_requires_grad(true);
         fc3->weight.set_requires_grad(false).normal_(0, 0.01).set_requires_grad(true);
@@ -93,6 +118,8 @@ public:
     }
 
     void train(const RegressionDataset& dataset) {
+        if (fc1.is_empty())
+            init();
         torch::data::DataLoaderOptions loader_option{};
         loader_option.batch_size() = 32;
         loader_option.enforce_ordering() = false;
@@ -103,9 +130,9 @@ public:
         adam_option.set_lr(active_params.lr);
         torch::optim::Adam optimizer(parameters(), std::move(adam_option));
 
-        torch::optim::StepLR scheduler(optimizer, 1, active_params.gamma);
+        torch::optim::StepLR scheduler(optimizer, active_params.step, active_params.gamma);
 
-        for (size_t epoch = 1; epoch <= active_params.numEpoch; ++epoch) {
+        for (unsigned int epoch = 1; epoch <= active_params.numEpoch; ++epoch) {
             for (auto& batch : *data_loader) {
                 optimizer.zero_grad();
                 torch::Tensor prediction = forward(batch.data);
@@ -149,11 +176,7 @@ int main() {
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    NetOptions options{};
-    options.numEpoch = 300;
-    options.lr = 0.0212307;
-    options.gamma = 0.95067;
-    RandomSearch<Net> searcher(options, 0.158414);
+    RandomSearch<Net> searcher{};
     searcher.search(10, *net, kFold, gen);
     std::cout << searcher.getParams() << std::endl;
     std::cout << searcher.getScore() << std::endl;
