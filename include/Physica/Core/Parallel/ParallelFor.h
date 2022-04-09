@@ -33,7 +33,7 @@ namespace Physica::Core::Parallel {
         unsigned int to = maxLoopPerCore;
         std::vector<std::future<void>> result{};
         result.reserve(core);
-        for (unsigned int i = 0; i < core; ++i) {
+        for (unsigned int _ = 0; _ < core; ++_) {
             result.push_back(ThreadPool::getInstance().schedule(
                 [=](unsigned int from_, unsigned int to_) -> void {
                     for (unsigned int i = from_; i < to_; ++i)
