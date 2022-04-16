@@ -29,9 +29,9 @@ namespace Physica::Core {
      * Reference:
      * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
      */
-    template<class ScalarType>
-    class SRK2 : public ODESolver<ScalarType> {
-        using Base = ODESolver<ScalarType>;
+    template<class ScalarType, size_t Dim>
+    class SRK2 : public ODESolver<ScalarType, Dim> {
+        using Base = ODESolver<ScalarType, Dim>;
         using typename Base::VectorType;
     public:
         using Base::Base;
@@ -44,9 +44,9 @@ namespace Physica::Core {
         static inline void step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random);
     };
 
-    template<class ScalarType>
+    template<class ScalarType, size_t Dim>
     template<class Function, class RandomFunc>
-    void SRK2<ScalarType>::solve(Function func, RandomFunc random) {
+    void SRK2<ScalarType, Dim>::solve(Function func, RandomFunc random) {
         const size_t column_1 = Base::solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             ScalarType temp = Base::x[i];
@@ -56,9 +56,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
+    template<class ScalarType, size_t Dim>
     template<class Function, class RandomFunc>
-    inline void SRK2<ScalarType>::step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random) {
+    inline void SRK2<ScalarType, Dim>::step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random) {
+        using FunctionResult = typename std::invoke_result<Function, ScalarType, VectorType>::type;
+        using RandFunctionResult = typename std::invoke_result<RandomFunc, ScalarType, VectorType>::type;
+        static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
+        static_assert(RandFunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const VectorType randVec = random(x, sol);
         VectorType term1 = func(x, sol);
         x += stepSize;

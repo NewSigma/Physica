@@ -40,7 +40,7 @@ int main() {
         std::mt19937 gen{i};
         std::normal_distribution phi{};
 
-        SRK2<ScalarType> solver(0, t_max, stepSize, {1});
+        SRK2<ScalarType, 1> solver(0, t_max, stepSize, {1});
         solver.solve([](ScalarType t, const XVector& x) -> XVector { (void)t; return {-ScalarType(lambda) * x[0]}; },
                     [&](ScalarType t, const XVector& x) -> XVector { (void)t; (void)x; return {ScalarType(lambda) * sqrt(2 * stepSize * D) * phi(gen)}; });
         x += solver.getSolution().row(0);

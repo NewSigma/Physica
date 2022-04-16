@@ -26,7 +26,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 
 using T = Scalar<Double, false>;
-using ODE = ODESolver<T>;
+using ODE = ODESolver<T, 2>;
 
 struct WaterDropArgs {
     T radius;
@@ -78,13 +78,13 @@ T WaterDropSolver::solve() {
     return bisection([&](const T& lambda) { //We use bisection method by experience and without any prove
                setLambda(lambda);
                solver.reset();
-               solver.rungeKutta4([&](const T& r, const Vector<T>& v) {
+               solver.rungeKutta4([&](const T& r, const Vector<T, 2>& v) -> Vector<T, 2> {
                        const T momentum = v[1];
                        const T momentum_2_1 = momentum * momentum + T(1);
                        const T sqrt_momentum_2_1 = sqrt(momentum_2_1);
                        const T term1 = (momentum_2_1 * sqrt_momentum_2_1 * (const1 * v[0] + const3));
                        const T term2 = momentum_2_1 * momentum / r;
-                       return Vector<T>{momentum, term1 - term2};
+                       return {momentum, term1 - term2};
                    });
                return getMinTangent();
            }, T(0), T(-1.1), T(1.1)); //1.1 is selected by experience

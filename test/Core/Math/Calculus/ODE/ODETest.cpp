@@ -23,15 +23,14 @@ using namespace Physica::Core;
 
 int main() {
     using T = Scalar<Double, false>;
-    using ODE = ODESolver<T>;
     constexpr double stepSize = 0.0001;
     /**
      * y' = y
      * y[0] = 1
      */
     {
-        ODE solver(0, 3, stepSize, {1});
-        solver.rungeKutta4([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return y; });
+        ODESolver<T, 1> solver(0, 3, stepSize, {1});
+        solver.rungeKutta4([](T x, const Vector<T, 1>& y) -> Vector<T, 1> { (void)x; return y; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
@@ -46,8 +45,8 @@ int main() {
      * y[0] = 0  y'[0] = 1
      */
     {
-        ODE solver(0, 3, stepSize, {0, 1});
-        solver.rungeKutta4([](T x, const Vector<T>& y) -> Vector<T> { (void)x; return Vector<T>{y[1], -y[0]}; });
+        ODESolver<T, 2> solver(0, 3, stepSize, {0, 1});
+        solver.rungeKutta4([](T x, const Vector<T, 2>& y) -> Vector<T, 2> { (void)x; return {y[1], -y[0]}; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
@@ -66,7 +65,7 @@ int main() {
      * y[0] = 1
      */
     {
-        ODE solver(0, 3, stepSize, {1});
+        ODESolver<T, 2> solver(0, 3, stepSize, {1});
         solver.verlet([](T x, const T& y) -> T { (void)x; return y; }, {exp(stepSize)});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
@@ -82,7 +81,7 @@ int main() {
      * y[0] = 0  y'[0] = 1
      */
     {
-        ODE solver(0, 3, stepSize, {0});
+        ODESolver<T, 2> solver(0, 3, stepSize, {0});
         solver.degenerate_numerov([](T x) -> T { (void)x; return -1; }, {1});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
@@ -103,7 +102,7 @@ int main() {
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:20
      */
     {
-        ODE solver(0, 2, stepSize, {0});
+        ODESolver<T, 2> solver(0, 2, stepSize, {0});
         solver.degenerate_numerov([](T x) -> T { return square(x) - T(3); }, {1});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();

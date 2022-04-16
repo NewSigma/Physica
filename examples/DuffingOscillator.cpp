@@ -27,14 +27,14 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 
 using T = Scalar<Double, false>;
-using ODE = ODESolver<T>;
+using ODE = ODESolver<T, 2>;
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:11-12
  */
 int main(int argc, char** argv) {
     ODE solver(0, 200, 0.01, {0.5, 0});
-    solver.rungeKutta4([](const T& t, const Vector<T>& x) { return Vector<T>{x[1], -x[1] * T(0.1) + (T(0.5) - T(2) * x[0] * x[0]) * x[0] + T(2) * cos(T(2.4) * t)}; });
+    solver.rungeKutta4([](const T& t, const Vector<T, 2>& x) { return Vector<T, 2>{x[1], -x[1] * T(0.1) + (T(0.5) - T(2) * x[0] * x[0]) * x[0] + T(2) * cos(T(2.4) * t)}; });
     const auto& t = solver.getX();
     const auto& solution = solver.getSolution();
 
