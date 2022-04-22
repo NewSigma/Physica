@@ -56,6 +56,15 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::reverse() const {
+        const size_t length = this->getLength();
+        Vector<T, Length, MaxLength> result(length);
+        for (size_t i = 0; i < length; ++i)
+            result[i] = (*this)[length - i - 1];
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::Zeros(size_t len) {
         Vector<T, Length, MaxLength> result{};
         result.reserve(len);

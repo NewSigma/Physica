@@ -69,6 +69,7 @@ namespace Physica::Core {
         void toUnit();
         /* Getters */
         using Storage::getLength;
+        [[nodiscard]] Vector reverse() const;
         /* Helpers */
         using Storage::swap;
         static Vector Zeros(size_t len);
