@@ -124,6 +124,9 @@ namespace Physica::Core {
     inline void swap(Vector<T, Length, MaxLength>& v1, Vector<T, Length, MaxLength>& v2) noexcept {
         v1.swap(v2);
     }
+
+    template<class T, size_t Length, size_t MaxLength>
+    std::istream& operator>>(std::istream& is, Vector<T, Length, MaxLength>& v);
 }
 
 #include "VectorImpl.h"

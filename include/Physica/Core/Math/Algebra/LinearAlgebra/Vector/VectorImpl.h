@@ -108,6 +108,13 @@ namespace Physica::Core {
         }
         return result;
     }
+
+    template<class T, size_t Length, size_t MaxLength>
+    std::istream& operator>>(std::istream& is, Vector<T, Length, MaxLength>& v) {
+        for (size_t i = 0; i < v.getLength(); ++i)
+            is >> v[i];
+        return is;
+    }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     //Optimize: the following functions may be speed up using expression templates.
     template<class T, size_t Length, size_t MaxLength>
