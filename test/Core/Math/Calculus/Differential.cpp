@@ -36,8 +36,11 @@ int main() {
             return 1;
 
         result = Differential<ScalarType>::doublePoint(func, ScalarType(3), ScalarType(1E-5));
-        std::cout << result << std::endl;
         if (!scalarNear(result, answer, 1E-10))
+            return 1;
+
+        result = Differential<ScalarType>::ridders(func, ScalarType(3), ScalarType(1.55));
+        if (!scalarNear(result, answer, 1E-15))
             return 1;
     }
     return 0;

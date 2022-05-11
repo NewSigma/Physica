@@ -64,6 +64,7 @@ namespace Physica::Core {
                         public DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn> {
         using Base = LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
         using Storage = DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>;
+        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
     public:
         using ColMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
