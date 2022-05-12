@@ -34,7 +34,7 @@ namespace Physica::Core {
         };
     }
     /**
-     * Decomposite symmetric matrix A like A = QTQ^H
+     * Decomposite hermite matrix A like A = QTQ^H
      * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.426-428
@@ -48,21 +48,22 @@ namespace Physica::Core {
         using MatrixT = TridiagonalMatrixT<MatrixType>;
         using SymmMatrix = DenseSymmMatrix<ScalarType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
         using HermiteMatrix = DenseHermiteMatrix<ScalarType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
 
         constexpr static size_t normVectorLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 2);
         constexpr static size_t bufferLength = MatrixType::RowAtCompile == Dynamic ? Dynamic : (MatrixType::RowAtCompile - 1);
         using HouseholderNorm = Vector<ScalarType, normVectorLength, normVectorLength>;
         using BufferVector = Vector<ScalarType, bufferLength, bufferLength>;
+    public:
+        using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
     private:
         WorkingMatrix working;
         HouseholderNorm normBuffer;
         BufferVector buffer;
     public:
         Tridiagonalization(size_t size);
-        Tridiagonalization(const LValueMatrix<MatrixType>& source);
+        Tridiagonalization(const RValueMatrix<MatrixType>& source);
         /* Operations */
-        void compute(const LValueMatrix<MatrixType>& source);
+        void compute(const RValueMatrix<MatrixType>& source);
         /* Getters */
         [[nodiscard]] MatrixT getMatrixT() const noexcept { return MatrixT(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
@@ -77,13 +78,13 @@ namespace Physica::Core {
             , buffer(size - 1) {}
 
     template<class MatrixType>
-    Tridiagonalization<MatrixType>::Tridiagonalization(const LValueMatrix<MatrixType>& source)
+    Tridiagonalization<MatrixType>::Tridiagonalization(const RValueMatrix<MatrixType>& source)
             : Tridiagonalization(source.getRow()) {
         compute(source);
     }
 
     template<class MatrixType>
-    void Tridiagonalization<MatrixType>::compute(const LValueMatrix<MatrixType>& source) {
+    void Tridiagonalization<MatrixType>::compute(const RValueMatrix<MatrixType>& source) {
         const size_t order = source.getRow();
         working = source;
         for (size_t i = 0; i < order - 2; ++i) {

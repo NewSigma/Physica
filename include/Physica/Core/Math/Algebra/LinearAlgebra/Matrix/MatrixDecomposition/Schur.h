@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Hessenburg.h"
+#include "AbstractSchur.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
@@ -29,13 +30,12 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class MatrixType>
-    class Schur {
+    class Schur : public AbstractSchur {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
         using WorkingMatrix = typename MatrixType::ColMatrix;
-        constexpr static size_t matItePerCol = 40; //Reference to Eigen
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
@@ -49,8 +49,6 @@ namespace Physica::Core {
         [[nodiscard]] const WorkingMatrix& getMatrixT() const noexcept { return matrixT; }
         [[nodiscard]] const WorkingMatrix& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
     private:
-        template<class AnyMatrix>
-        static size_t activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper);
         void splitOffTwoRows(size_t index);
         void francisQR(size_t lower, size_t sub_order);
         void specialHessenburg(size_t lower, size_t sub_order);
@@ -75,7 +73,7 @@ namespace Physica::Core {
             return;
         }
         const RealType inv_factor = reciprocal(factor);
-        const MatrixType normalized = source * inv_factor; //Referenced from eigen, guess to avoid overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
+        const MatrixType normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
         const Hessenburg hess(normalized);
         matrixT = hess.getMatrixH();
 
@@ -83,7 +81,7 @@ namespace Physica::Core {
         size_t upper = order - 1;
         size_t iter = 0;
         size_t total_iter = 0;
-        const size_t max_iter = matItePerCol * order;
+        const size_t max_iter = AbstractSchur::maxItePerCol * order;
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowLower(matrixT, upper);
             if (lower == upper) {
@@ -120,27 +118,6 @@ namespace Physica::Core {
             WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
             matrixU = std::move(temp);
         }
-    }
-    /**
-     * We should process columns whose index is less or equal than \param upper
-     * 
-     * \returns We should process columns whose index is greater or equal to the return index
-     */
-    template<class MatrixType>
-    template<class AnyMatrix>
-    size_t Schur<MatrixType>::activeWindowLower(LValueMatrix<AnyMatrix>& __restrict mat, size_t upper) {
-        assert(upper < mat.getRow());
-        size_t lower = upper;
-        size_t lower_1 = upper - 1;
-        for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
-            RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
-            temp = std::max(abs(temp * RealType(std::numeric_limits<ScalarType>::epsilon())), RealType(std::numeric_limits<ScalarType>::min()));
-            if (abs(mat(lower, lower_1)) < temp) {
-                mat(lower, lower_1) = ScalarType::Zero();
-                break;
-            }
-        }
-        return lower;
     }
     /**
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.

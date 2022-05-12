@@ -320,6 +320,7 @@ namespace Physica::Core {
     void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) noexcept {
         eigenvalues.swap(solver.eigenvalues);
         rawEigenvectors.swap(solver.rawEigenvectors);
+        std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
     template<class MatrixType>
