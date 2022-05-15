@@ -290,12 +290,13 @@ namespace Physica::Core::Internal {
             const auto& orbits_up = orbits.first;
             const auto& orbits_down = orbits.second;
             const auto[dimX, dimY, dimZ] = getDim();
-            const size_t numOrbit = numOrbitToSolve();
-            const size_t numOccupiedUp = (numOrbit + 1) / 2;
-            const size_t numOccupiedDown = numOrbit / 2;
+            const size_t numOccupiedUp = numOrbitToSolve();
+            const size_t numOccupiedDown = numOccupiedUp - (cell.getElectronCount() % 2 != 0);
 
             auto& density_up = densityRecord[0].first;
             auto& density_down = densityRecord[0].second;
+            ScalarType total_density_up = 0;
+            ScalarType total_density_down = 0;
             for (size_t i = 0; i < dimX; ++i) {
                 for (size_t j = 0; j < dimY; ++j) {
                     for (size_t k = 0; k < dimZ; ++k) {
@@ -304,17 +305,19 @@ namespace Physica::Core::Internal {
                         for (size_t index = 0; index < numOccupiedUp; ++index)
                             rho_up += orbits_up[index](pos).squaredNorm();
                         density_up(i, j, k) = rho_up;
+                        total_density_up += rho_up;
 
                         auto rho_down = ScalarType::Zero();
                         for (size_t index = 0; index < numOccupiedDown; ++index)
                             rho_down += orbits_down[index](pos).squaredNorm();
                         density_down(i, j, k) = rho_down;
+                        total_density_down += rho_down;
                     }
                 }
             }
             const ScalarType inv_volume = reciprocal(cell.getVolume());
-            density_up.asVector() *= inv_volume;
-            density_down.asVector() *= inv_volume;
+            density_up.asVector() *= ScalarType(numOccupiedUp * density_up.asVector().getLength()) / total_density_up * inv_volume;
+            density_down.asVector() *= ScalarType(numOccupiedDown * density_up.asVector().getLength()) / total_density_down * inv_volume;
         }
         /* Change format */ {
             auto& rho = densityRecord[0].first.asVector();
@@ -584,9 +587,10 @@ namespace Physica::Core::Internal {
     void KSSolverImpl<ScalarType, XCProvider, false>::updateDensity() {
         /* Get density */ {
             const auto[dimX, dimY, dimZ] = getDim();
-            const size_t numOccupied = numOrbitToSolve() / 2;
+            const size_t numOccupied = numOrbitToSolve();
 
             auto& density = densityRecord[0];
+            ScalarType total_density = 0;
             for (size_t i = 0; i < dimX; ++i) {
                 for (size_t j = 0; j < dimY; ++j) {
                     for (size_t k = 0; k < dimZ; ++k) {
@@ -594,12 +598,14 @@ namespace Physica::Core::Internal {
                         auto rho = ScalarType::Zero();
                         for (size_t index = 0; index < numOccupied; ++index)
                             rho += orbits[index](pos).squaredNorm();
-                        density(i, j, k) = rho * ScalarType::Two();
+                        const ScalarType temp = rho * ScalarType::Two();
+                        density(i, j, k) = temp;
+                        total_density += temp;
                     }
                 }
             }
             const ScalarType inv_volume = reciprocal(cell.getVolume());
-            density.asVector() *= inv_volume;
+            density.asVector() *= ScalarType(2 * numOccupied * density.asVector().getLength()) / total_density * inv_volume;
         }
 
         for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
