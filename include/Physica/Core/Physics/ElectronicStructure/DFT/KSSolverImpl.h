@@ -23,8 +23,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
+#include "AbstractKSSolver.h"
 #include "Ewald.h"
-#include "PWBaseWave.h"
 #include "Grid3D.h"
 
 namespace Physica::Core::Internal {
@@ -34,30 +34,30 @@ namespace Physica::Core::Internal {
     template<class ScalarType, class XCProvider, bool isSpinPolarized> class KSSolverImpl;
 
     template<class ScalarType, class XCProvider>
-    class KSSolverImpl<ScalarType, XCProvider, true> {
+    class KSSolverImpl<ScalarType, XCProvider, true> : public AbstractKSSolver<ScalarType> {
         static_assert(XCProvider::isSpinPolarized == true);
+        using Base = AbstractKSSolver<ScalarType>;
     protected:
-        using ComplexType = ComplexScalar<ScalarType>;
+        using typename Base::ComplexType;
+        using typename Base::Vector3D;
+        using typename Base::HermiteMatrix;
+        using typename Base::KSOrbit;
+        using typename Base::KSOrbitArray;
+        using typename Base::MatrixType;
+        using typename Base::UncenteredGrid;
+        using typename Base::UnsignedDim;
+        using typename Base::CenteredGrid;
+        using typename Base::SignedDim;
+        using Base::DIISBufferSize;
+        using typename Base::DIISBuffer;
+        using typename Base::DIISMatrix;
         using BandType = BandGrid<ScalarType, true>;
-        using Vector3D = Vector<ScalarType, 3>;
-        using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = std::pair<HermiteMatrix, HermiteMatrix>;
-        using KSOrbit = PWBaseWave<ScalarType>;
-        using KSOrbitArray = Utils::Array<KSOrbit>;
         using KSOrbits = std::pair<KSOrbitArray, KSOrbitArray>;
-        using MatrixType = DenseMatrix<ComplexType>;
         using EigenSolverType = std::pair<EigenSolver<MatrixType>, EigenSolver<MatrixType>>;
-        using UncenteredGrid = Grid3D<ScalarType, false>;
-        using UnsignedDim = typename UncenteredGrid::Dim;
         using DensityType = std::pair<UncenteredGrid, UncenteredGrid>;
         using PotType = std::pair<UncenteredGrid, UncenteredGrid>;
-        using CenteredGrid = Grid3D<ComplexType, true>;
-        using SignedDim = typename CenteredGrid::Dim;
-
-        constexpr static size_t DIISBufferSize = 3;
         using DensityRecord = Utils::Array<DensityType, DIISBufferSize>;
-        using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
-        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
@@ -287,22 +287,26 @@ namespace Physica::Core::Internal {
     template<class ScalarType, class XCProvider>
     void KSSolverImpl<ScalarType, XCProvider, true>::updateDensity() {
         /* Get density */ {
+            const auto& orbits_up = orbits.first;
+            const auto& orbits_down = orbits.second;
+            const auto[dimX, dimY, dimZ] = getDim();
+            const size_t numOrbit = numOrbitToSolve();
+            const size_t numOccupiedUp = (numOrbit + 1) / 2;
+            const size_t numOccupiedDown = numOrbit / 2;
+
             auto& density_up = densityRecord[0].first;
             auto& density_down = densityRecord[0].second;
-            auto& orbits_up = orbits.first;
-            auto& orbits_down = orbits.second;
-            auto[dimX, dimY, dimZ] = getDim();
             for (size_t i = 0; i < dimX; ++i) {
                 for (size_t j = 0; j < dimY; ++j) {
                     for (size_t k = 0; k < dimZ; ++k) {
                         const auto pos = dimToPos({i, j, k});
                         auto rho_up = ScalarType::Zero();
-                        for (size_t index = 0; index < orbits_up.getLength(); ++index)
+                        for (size_t index = 0; index < numOccupiedUp; ++index)
                             rho_up += orbits_up[index](pos).squaredNorm();
                         density_up(i, j, k) = rho_up;
 
                         auto rho_down = ScalarType::Zero();
-                        for (size_t index = 0; index < orbits_down.getLength(); ++index)
+                        for (size_t index = 0; index < numOccupiedDown; ++index)
                             rho_down += orbits_down[index](pos).squaredNorm();
                         density_down(i, j, k) = rho_down;
                     }
@@ -362,30 +366,30 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType, class XCProvider>
-    class KSSolverImpl<ScalarType, XCProvider, false> {
+    class KSSolverImpl<ScalarType, XCProvider, false> : public AbstractKSSolver<ScalarType> {
         static_assert(XCProvider::isSpinPolarized == false);
+        using Base = AbstractKSSolver<ScalarType>;
     protected:
-        using ComplexType = ComplexScalar<ScalarType>;
+        using typename Base::ComplexType;
+        using typename Base::Vector3D;
+        using typename Base::HermiteMatrix;
+        using typename Base::KSOrbit;
+        using typename Base::KSOrbitArray;
+        using typename Base::MatrixType;
+        using typename Base::UncenteredGrid;
+        using typename Base::UnsignedDim;
+        using typename Base::CenteredGrid;
+        using typename Base::SignedDim;
+        using Base::DIISBufferSize;
+        using typename Base::DIISBuffer;
+        using typename Base::DIISMatrix;
         using BandType = BandGrid<ScalarType, false>;
-        using Vector3D = Vector<ScalarType, 3>;
-        using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using Hamilton = HermiteMatrix;
-        using KSOrbit = PWBaseWave<ScalarType>;
-        using KSOrbitArray = Utils::Array<KSOrbit>;
         using KSOrbits = KSOrbitArray;
-        using MatrixType = DenseMatrix<ComplexType>;
         using EigenSolverType = EigenSolver<MatrixType>;
-        using UncenteredGrid = Grid3D<ScalarType, false>;
-        using UnsignedDim = typename UncenteredGrid::Dim;
         using DensityType = UncenteredGrid;
         using PotType = UncenteredGrid;
-        using CenteredGrid = Grid3D<ComplexType, true>;
-        using SignedDim = typename CenteredGrid::Dim;
-
-        constexpr static size_t DIISBufferSize = 3;
         using DensityRecord = Utils::Array<DensityType, DIISBufferSize>;
-        using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
-        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
 
         CrystalCell cell;
         ReciprocalCell repCell;
@@ -449,6 +453,7 @@ namespace Physica::Core::Internal {
             , xcProvider(std::get<0>(potGridDim) * std::get<1>(potGridDim) * std::get<2>(potGridDim))
             , iteration(0) {
         const size_t electronCount = cell.getElectronCount();
+        assert(electronCount % 2 == 0);
         orbits = KSOrbitArray(electronCount / 2, KSOrbit(cutEnergy, repCell.getLattice()));
 
         const size_t plainWaveCount = getPlainWaveCount();
@@ -578,16 +583,17 @@ namespace Physica::Core::Internal {
     template<class ScalarType, class XCProvider>
     void KSSolverImpl<ScalarType, XCProvider, false>::updateDensity() {
         /* Get density */ {
+            const auto[dimX, dimY, dimZ] = getDim();
+            const size_t numOccupied = numOrbitToSolve() / 2;
+
             auto& density = densityRecord[0];
-            auto& orbits_up = orbits;
-            auto[dimX, dimY, dimZ] = getDim();
             for (size_t i = 0; i < dimX; ++i) {
                 for (size_t j = 0; j < dimY; ++j) {
                     for (size_t k = 0; k < dimZ; ++k) {
                         const auto pos = dimToPos({i, j, k});
                         auto rho = ScalarType::Zero();
-                        for (size_t index = 0; index < orbits_up.getLength(); ++index)
-                            rho += orbits_up[index](pos).squaredNorm();
+                        for (size_t index = 0; index < numOccupied; ++index)
+                            rho += orbits[index](pos).squaredNorm();
                         density(i, j, k) = rho * ScalarType::Two();
                     }
                 }
