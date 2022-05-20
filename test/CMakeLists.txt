@@ -28,6 +28,7 @@ physica_add_test(SymmEigenSolver Core/Math/Algebra/LinearAlgebra/SymmEigenSolver
 physica_add_test(Polynomial Core/Math/Algebra/Polynomial.cpp)
 ## Calculus
 physica_add_test(ODE Core/Math/Calculus/ODE/ODETest.cpp)
+physica_add_test(PoissonFEM Core/Math/Calculus/PDE/FEM/PoissonFEM.cpp)
 physica_add_test(SRK2 Core/Math/Calculus/ODE/SRK2.cpp)
 physica_add_test(Chebyshev Core/Math/Calculus/ChebyshevTest.cpp)
 physica_add_test(Differential Core/Math/Calculus/Differential.cpp)

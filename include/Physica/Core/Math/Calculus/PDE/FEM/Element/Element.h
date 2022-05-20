@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,53 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ELEMENT_H
-#define PHYSICA_ELEMENT_H
+#pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "AbstractElement.h"
 
 namespace Physica::Core {
-    template<size_t dim, class Scalar>
-    class Element;
-
-    template<class Scalar>
-    class Element<2, Scalar> : public AbstractElement<2> {
+    template<class Derived>
+    class Element : public Utils::CRTPBase<Derived> {
+        using Base = Utils::CRTPBase<Derived>;
     public:
-        typedef DenseMatrix<Scalar, DenseMatrixOption::ElementColumn> Matrix;
-        /**
-         * There are only 4 shape functions. This enum is designed for performance when using switch.
-         */
-        enum ShapeIndex {
-            Shape1, Shape2, Shape3, Shape4
-        }
+        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
+        constexpr static unsigned int Order = Internal::Traits<Derived>::Order;
+        constexpr static unsigned int DegreeOfFreedom = Internal::Traits<Derived>::DegreeOfFreedom;
+        using VectorType = Vector<ScalarType, Dim>;
+        using MatrixType = typename Internal::Traits<Derived>::MatrixType;
+    protected:
+        Utils::Array<size_t, DegreeOfFreedom> nodes;
     public:
-        explicit Element(size_t nodesCount);
-        ~Element();
-        /* Operations */
-        //Optimize: The following functions are frequantly used. Remove the virtual if possible.
-        /**
-         * \return
-         * The determinate of jacobi matrix.
-         * \param s1
-         * Coordinate in bi-unit element.
-         * \param s2
-         * Coordinate in bi-unit element.
-         */
-        virtual Scalar determinate(const Poing<2>& p) final { return jacobi(p).inverse(); };
-        /**
-         * \return
-         * The derivative of the \param shapeIndex.th shape function with respect to \param s1 at (s1, s2).
-         */
-        virtual Scalar shapePartialS1(size_t shapeIndex, const Poing<2>& p) = 0;
-        /**
-         * \return
-         * The derivative of the \param shapeIndex.th shape function with respect to \param s2 at (s1, s2).
-         */
-        virtual Scalar shapePartialS2(size_t shapeIndex, const Poing<2>& p) = 0;
-        virtual Matrix jacobi(const Poing<2>& p) = 0;
-        virtual Matrix inverseJacobi(const Poing<2>& p) final { return jacobi(p).inverse(); }
+        /* Getters */
+        [[nodiscard]] MatrixType jacobi(VectorType localPos) const { return Base::getDerived().jacobi(localPos); }
+        [[nodiscard]] MatrixType inv_jacobi(VectorType globalPos) const { return Base::getDerived().jacobi(globalPos); }
+        [[nodiscard]] bool contains(const VectorType& point) const { return Base::getDerived().contains(point); }
+        [[nodiscard]] const Utils::Array<size_t, DegreeOfFreedom>& getNodes() const { return nodes; }
+        [[nodiscard]] VectorType getNodePos(size_t localNode) const { return Base::getDerived().getNodePos(localNode); }
+        [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const { return Base::getDerived().toLocalPos(globalPos); }
+        [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const { return Base::getDerived().toLocalPos(localPos); }
+        [[nodiscard]] constexpr static size_t getNumNodes() { return DegreeOfFreedom; }
+    protected:
+        void swap_base(Element& elem);
     };
-}
 
-#endif
+    template<class Derived>
+    void Element<Derived>::swap_base(Element& elem) {
+        swap(nodes, elem.nodes);
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ABSTRACTELEMENT_H
-#define PHYSICA_ABSTRACTELEMENT_H
+#pragma once
 
 #include <cstddef>
 #include "Physica/Core/Math/Geometry/Point.h"
@@ -54,5 +53,3 @@ namespace Physica::Core {
         delete[] nodes;
     }
 }
-
-#endif

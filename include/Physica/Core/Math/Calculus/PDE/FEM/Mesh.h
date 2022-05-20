@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,40 +16,61 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_MESH_H
-#define PHYSICA_MESH_H
+#pragma once
 
-#include <cstddef>
-#include "Physica/Core/Math/Calculus/PDE/FEM/Element/Element.h"
 #include "Physica/Core/Math/Geometry/Point.h"
+#include "Element/Rectangle4P.h"
 
 namespace Physica::Core {
-    template<int dim>
-    class Mesh {
-        /**
-         * Number of all elements in FEM.
-         */
-        size_t elementCount;
-        /**
-         * Number of all nodes in FEM.
-         */
-        size_t nodeCount;
-        /**
-         * A array whose length is elementCount, stores elements.
-         */
-        Element<dim>* elements;
-        Point<dim>* nodes;
-    public:
-        Mesh();
-        Mesh(const Mesh<dim>&) = delete;
-        Mesh(Mesh<dim>&&) noexcept = delete;
-        ~Mesh();
-        /* Operators */
-        Mesh& operator=(const Mesh<dim>&) = delete;
-        Mesh& operator=(Mesh<dim>&&) = delete;
+    enum class NodeType : char {
+        Free,
+        Dirichlet
     };
+
+    template<class T>
+    class Mesh {
+    public:
+        using ElementType = T;
+        using ScalarType = typename ElementType::ScalarType;
+        using VectorType = typename ElementType::VectorType;
+    private:
+        Utils::Array<ElementType> elements;
+        Vector<ScalarType> coeffs;
+        Utils::Array<NodeType> nodeTypes;
+    public:
+        Mesh(size_t numElement, size_t numNode);
+        Mesh(const Mesh&) = default;
+        Mesh(Mesh&&) noexcept = default;
+        ~Mesh() = default;
+        /* Operators */
+        Mesh& operator=(Mesh mesh) noexcept;
+        [[nodiscard]] ScalarType operator()(VectorType p) const;
+        template<class Detector, class Conditioner>
+        void addDirichletBoundary(Detector detector, Conditioner conditioner);
+        /* Getters */
+        [[nodiscard]] size_t getNumElems() const { return elements.getLength(); }
+        [[nodiscard]] size_t getNumNodes() const { return coeffs.getLength(); }
+        [[nodiscard]] const Utils::Array<ElementType>& getElements() const { return elements; }
+        [[nodiscard]] Vector<ScalarType>& getCoeffs() { return coeffs; }
+        [[nodiscard]] const Vector<ScalarType>& getCoeffs() const { return coeffs; }
+        [[nodiscard]] const Utils::Array<NodeType>& getNodeTypes() const { return nodeTypes; }
+        [[nodiscard]] size_t getNumFreeNodes() const;
+        /* Setters */
+        void setElem(ElementType elem, size_t index);
+        /* Helpers */
+        void swap(Mesh& mesh) noexcept;
+    };
+
+    template<class ScalarType>
+    Mesh<Rectangle4P<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
+                                            Vector<ScalarType, 2> topRight,
+                                            size_t numElementX,
+                                            size_t numElementY);
+
+    template<class T>
+    inline void swap(Mesh<T>& mesh1, Mesh<T>& mesh2) noexcept {
+        mesh1.swap(mesh2);
+    }
 }
 
 #include "MeshImpl.h"
-
-#endif

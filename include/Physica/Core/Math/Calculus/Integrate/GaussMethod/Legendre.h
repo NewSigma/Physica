@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,20 +18,25 @@
  */
 #pragma once
 
-#include "Element.h"
-
 namespace Physica::Core {
-    template<class Scalar>
-    class Square4P : public Element<2, Scalar> {
-    public:
-        ~Square4P() = default;
-        /* Operations */
-        Scalar shapePartialS1(ShapeIndex shapeIndex, const Poing<2>& p) override final;
-        Scalar shapePartialS2(ShapeIndex shapeIndex, const Poing<2>& p) override final;
-        Matrix jacobi(const Poing<2>& p) override final;
-    protected:
-        Square4P() : Element(4) {}
-    };
-}
+    template<class ScalarType, unsigned int Dim, unsigned int Order>
+    class GaussLegendre;
 
-#include "Square4PImpl.h"
+    template<class ScalarType, unsigned int Dim>
+    class GaussLegendre<ScalarType, Dim, 1> {
+        using VectorType = Vector<ScalarType, Dim>;
+        constexpr static unsigned int Factor = 1U << Dim;
+    public:
+        template<class Functor>
+        static ScalarType run(Functor func);
+    };
+    /**
+     * \param func
+     * ScalarType Functor(VectorType)
+     */
+    template<class ScalarType, unsigned int Dim>
+    template<class Functor>
+    ScalarType GaussLegendre<ScalarType, Dim, 1>::run(Functor func) {
+        return func(VectorType(Dim, 0)) * Factor;
+    }
+}
