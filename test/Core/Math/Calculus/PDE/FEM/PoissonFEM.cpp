@@ -63,7 +63,6 @@ int main() {
             rmes += square(theory_solution({x, y}) - model({x, y}));
     }
     rmes = sqrt(rmes / ScalarType(xs.getLength() * ys.getLength()));
-    std::cout << rmes << std::endl;
     const bool isTrueAnswer = scalarNear(rmes, ScalarType::Zero(), error * 10);
     return !isTrueAnswer;
 }

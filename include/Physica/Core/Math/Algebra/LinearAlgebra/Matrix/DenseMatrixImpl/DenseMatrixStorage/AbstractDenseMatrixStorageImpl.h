@@ -162,7 +162,7 @@ namespace Physica::Core::Internal {
     template<class Derived>
     void AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Column | DenseMatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
         Derived& matrix = getDerived();
-        const size_t row = matrix.getRow();
+        [[maybe_unused]] const size_t row = matrix.getRow();
         assert(r1 < row && r2 < row);
         for (auto& columnVector : matrix)
             columnVector[r1].swap(columnVector[r2]);
