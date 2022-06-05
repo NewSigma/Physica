@@ -38,7 +38,6 @@ physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
 physica_add_test(Interpolation Core/Math/Calculus/Interpolation.cpp)
 physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
 ## Optimization
-physica_add_test(Adam Core/Math/Optimization/AdamTest.cpp)
 physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradientTest.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
 physica_add_test(QuadraticProgramming Core/Math/Optimization/QuadraticProgramming.cpp)
@@ -51,13 +50,15 @@ physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 # Parallel
 physica_add_test(ThreadPool Core/Parallel/ThreadPoolTest.cpp)
 # Physics
-physica_add_test(DimEstimator Core/Physics/DimEstimator.cpp)
 physica_add_test(Ewald Core/Physics/Ewald.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
-physica_add_test(KSSolver Core/Physics/KSSolver.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
 physica_add_test(PWBaseWave Core/Physics/PWBaseWave.cpp)
 # Logger
 physica_add_test(Logger Logger/LoggerTest.cpp)
 # Utils
 physica_add_test(DirStack Utils/DirStackTest.cpp)
+
+if(NOT ${DEBUG_MODE})
+    include(SlowTests.cmake)
+endif()
