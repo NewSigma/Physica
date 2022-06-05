@@ -11,6 +11,7 @@ physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
 ### Equation Solver
 physica_add_test(ElementaryEquation Core/Math/Algebra/EquationSolver/ElementaryEquation.cpp)
 ### Linear Algebra
+physica_add_test(Bidiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Bidiagonalization.cpp)
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecompositionTest.cpp)

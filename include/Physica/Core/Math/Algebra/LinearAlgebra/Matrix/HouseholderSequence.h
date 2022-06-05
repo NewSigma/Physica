@@ -79,10 +79,10 @@ namespace Physica::Core {
     template<class OtherMatrix>
     void HouseholderSequence<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         target.toUnitMatrix();
-        for (size_t i = shift; i < size; ++i) {
-            auto block = target.rightCols(i);
-            auto col = source.col(i - shift);
-            applyHouseholder(block, col.tail(i));
+        for (size_t i = 0; i < size; ++i) {
+            auto block = target.rightCols(i + shift);
+            auto col = source.col(i);
+            applyHouseholder(block, col.tail(i + shift));
         }
     }
 

@@ -121,7 +121,7 @@ namespace Physica::Core {
     HouseholderSequence<typename Tridiagonalization<MatrixType>::WorkingMatrix>
     Tridiagonalization<MatrixType>::getMatrixQ() const noexcept {
         HouseholderSequence result(working);
-        result.setSize(working.getRow() - 1);
+        result.setSize(working.getRow() - 2);
         result.setShift(1);
         return result;
     }
