@@ -16,6 +16,7 @@ physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposi
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecompositionTest.cpp)
 physica_add_test(Schur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SchurTest.cpp)
+physica_add_test(SVD Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SVD.cpp)
 physica_add_test(Tridiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Tridiagonalization.cpp)
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)

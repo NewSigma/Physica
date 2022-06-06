@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Hessenburg.h"
-#include "AbstractSchur.h"
+#include "Decouplable.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
@@ -30,7 +30,7 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class MatrixType>
-    class Schur : public AbstractSchur {
+    class Schur : public Decouplable {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
@@ -81,9 +81,9 @@ namespace Physica::Core {
         size_t upper = order - 1;
         size_t iter = 0;
         size_t total_iter = 0;
-        const size_t max_iter = AbstractSchur::maxItePerCol * order;
+        const size_t max_iter = Decouplable::maxItePerCol * order;
         while (1 <= upper && upper < order) {
-            const size_t lower = activeWindowLower(matrixT, upper);
+            const size_t lower = activeWindowDownDiag(matrixT, upper);
             if (lower == upper) {
                 upper -= 1;
                 iter = 0;

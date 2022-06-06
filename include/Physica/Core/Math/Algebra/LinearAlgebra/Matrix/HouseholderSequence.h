@@ -22,11 +22,11 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class HouseholderSequence;
+    template<class MatrixType, bool ColWiseRead> class HouseholderSequence;
 
     namespace Internal {
-        template<class MatrixType>
-        class Traits<HouseholderSequence<MatrixType>> {
+        template<class MatrixType, bool ColWiseRead>
+        class Traits<HouseholderSequence<MatrixType, ColWiseRead>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t RowAtCompile = Dynamic;
@@ -40,11 +40,14 @@ namespace Physica::Core {
     /**
      * Construct using a lower triangular matrix, echo column represents a householder transformation
      * 
+     * \tparam ColWiseRead
+     * Read data from columns of source, otherwise read from rows
+     * 
      * Reference:
      * [1] Eigen https://eigen.tuxfamily.org/
      */
-    template<class MatrixType>
-    class HouseholderSequence : public RValueMatrix<HouseholderSequence<MatrixType>> {
+    template<class MatrixType, bool ColWiseRead = true>
+    class HouseholderSequence : public RValueMatrix<HouseholderSequence<MatrixType, ColWiseRead>> {
         const MatrixType& source;
         /**
          * Number of householder transformation in this sequence
@@ -60,7 +63,7 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getColumn(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getRow(); }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
@@ -69,31 +72,40 @@ namespace Physica::Core {
         inline void setShift(size_t shift_);
     };
 
-    template<class MatrixType>
-    HouseholderSequence<MatrixType>::HouseholderSequence(const RValueMatrix<MatrixType>& source_)
+    template<class MatrixType, bool ColWiseRead>
+    HouseholderSequence<MatrixType, ColWiseRead>::HouseholderSequence(const RValueMatrix<MatrixType>& source_)
             : source(source_.getDerived())
             , size(source.getColumn())
             , shift(0) {}
 
-    template<class MatrixType>
+    template<class MatrixType, bool ColWiseRead>
     template<class OtherMatrix>
-    void HouseholderSequence<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+    void HouseholderSequence<MatrixType, ColWiseRead>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         target.toUnitMatrix();
+        const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getColumn());
+        assert(shift1 < target.getRow());
+
         for (size_t i = 0; i < size; ++i) {
-            auto block = target.rightCols(i + shift);
-            auto col = source.col(i);
-            applyHouseholder(block, col.tail(i + shift));
+            auto block = target.rightCols(i + shift1);
+            if constexpr (ColWiseRead) {
+                auto col = source.col(i);
+                applyHouseholder(block, col.tail(i + shift));
+            }
+            else {
+                auto row = source.row(i);
+                applyHouseholder(block, row.tail(i + shift));
+            }
         }
     }
 
-    template<class MatrixType>
-    inline void HouseholderSequence<MatrixType>::setSize(size_t size_) {
+    template<class MatrixType, bool ColWiseRead>
+    inline void HouseholderSequence<MatrixType, ColWiseRead>::setSize(size_t size_) {
         assert(size_ <= source.getColumn());
         size = size_;
     }
 
-    template<class MatrixType>
-    inline void HouseholderSequence<MatrixType>::setShift(size_t shift_) {
+    template<class MatrixType, bool ColWiseRead>
+    inline void HouseholderSequence<MatrixType, ColWiseRead>::setShift(size_t shift_) {
         shift = shift_;
     }
 }

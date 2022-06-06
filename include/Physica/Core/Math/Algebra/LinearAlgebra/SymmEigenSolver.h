@@ -27,7 +27,7 @@ namespace Physica::Core {
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      */
     template<class MatrixType>
-    class SymmEigenSolver : public AbstractSchur {
+    class SymmEigenSolver : public Decouplable {
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
         constexpr static bool isComplex = ScalarType::isComplex;
@@ -66,7 +66,6 @@ namespace Physica::Core {
         /* Helpers */
         void swap(SymmEigenSolver& solver) noexcept;
     private:
-        static size_t activeWindowLower(WorkingMatrix& mat, size_t upper);
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
     };
 
@@ -117,9 +116,9 @@ namespace Physica::Core {
         size_t upper = order - 1;
         size_t iter = 0;
         size_t total_iter = 0;
-        const size_t max_iter = AbstractSchur::maxItePerCol * order;
+        const size_t max_iter = Decouplable::maxItePerCol * order;
         while (1 <= upper && upper < order) {
-            const size_t lower = AbstractSchur::activeWindowLower(working, upper);
+            const size_t lower = Decouplable::activeWindowDownDiag(working, upper);
             if (lower == upper) {
                 upper -= 1;
                 iter = 0;
@@ -160,14 +159,16 @@ namespace Physica::Core {
         std::swap(eigenvectors, solver.eigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
-
+    /**
+     * Use wilkinson shift
+     */
     template<class MatrixType>
     void SymmEigenSolver<MatrixType>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
         auto subBlock = working.block(lower, sub_order, lower, sub_order);
         const RealType factor = (subBlock(sub_order - 2, sub_order - 2).getReal() - subBlock(sub_order - 1, sub_order - 1).getReal()) * 0.5;
         const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
         const RealType factor3 = sqrt(square(factor) + factor2);
-        const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3));
+        const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
         
         Vector<ScalarType, 2> buffer{subBlock(0, 0) - shift, subBlock(1, 0)};
         auto givens_vec = givens(buffer, 0, 1);

@@ -66,7 +66,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] BiDiagMatrixB<MatrixType> getMatrixB() const noexcept { return BiDiagMatrixB(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixU() const;
-        [[nodiscard]] HouseholderSequence<Transpose<WorkingMatrix>> getMatrixV() const;
+        [[nodiscard]] HouseholderSequence<WorkingMatrix, false> getMatrixV() const;
         /* Helpers */
         void swap(Bidiagonalization& obj) noexcept;
     private:
@@ -138,9 +138,9 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    HouseholderSequence<Transpose<typename Bidiagonalization<MatrixType>::WorkingMatrix>>
+    HouseholderSequence<typename Bidiagonalization<MatrixType>::WorkingMatrix, false>
     Bidiagonalization<MatrixType>::getMatrixV() const {
-        HouseholderSequence result(working.transpose());
+        HouseholderSequence<WorkingMatrix, false> result(working);
         result.setSize(working.getColumn() - 2);
         result.setShift(1);
         return result;
