@@ -71,6 +71,7 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source);
+        void sort();
         /* Getters */
         [[nodiscard]] const SingularValueVector& getSingulars() const noexcept { return singulars; }
         [[nodiscard]] const LSingularMatrix& getMatrixU() const noexcept { return lSingularMat; }
@@ -162,6 +163,21 @@ namespace Physica::Core {
             singulars[i] = working(i, i);
         if (row < col)
             lSingularMat.swap(rSingularMat);
+    }
+
+    template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::sort() {
+        const size_t order = singulars.getLength();
+        for (size_t i = 0; i < order - 1; ++i) {
+            size_t index_min = i;
+            for (size_t j = i + 1; j < order; ++j) {
+                if (abs(singulars[j].getReal()) < abs(singulars[index_min].getReal()))
+                    index_min = j;
+            }
+            singulars[i].swap(singulars[index_min]);
+            lSingularMat[i].swap(lSingularMat[index_min]);
+            rSingularMat[i].swap(rSingularMat[index_min]);
+        }
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
