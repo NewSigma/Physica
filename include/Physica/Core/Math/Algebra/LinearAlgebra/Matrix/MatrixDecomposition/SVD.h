@@ -80,6 +80,8 @@ namespace Physica::Core {
     private:
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);
+        void leftGivens(LMatrixBlock<WorkingMatrix>& subBlock, Vector<ScalarType, 2>& buffer, size_t i);
+        void rightGivens(LMatrixBlock<WorkingMatrix>& subBlock, Vector<ScalarType, 2>& buffer, size_t i);
     };
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
@@ -155,7 +157,7 @@ namespace Physica::Core {
                 throw BadConvergenceException();
             pass:;
         }
-        std::cout << total_iter << std::endl;
+
         for (size_t i = 0; i < order; ++i)
             singulars[i] = working(i, i);
         if (row < col)
@@ -176,23 +178,16 @@ namespace Physica::Core {
         const ScalarType shift = computeShift(lower, sub_order);
 
         Vector<ScalarType, 2> buffer{square(subBlock(0, 0)) - shift, subBlock(0, 0) * subBlock(0, 1)};
-        for (size_t i = 0; i < sub_order - 1; ++i) {
-            auto givens_vec = givens(buffer, 0, 1);
-            givens_vec[1].toOpposite();
-            applyGivens(subBlock, givens_vec, i, i + 1);
-            applyGivens(rSingularMat, givens_vec, i, i + 1);
+        rightGivens(subBlock, buffer, 0);
+        for (size_t i = 0; i < sub_order - 2; ++i) {
+            leftGivens(subBlock, buffer, i);
 
-            buffer[0] = subBlock(i, i);
-            buffer[1] = subBlock(i + 1, i);
-            givens_vec = givens(buffer, 0, 1);
-            applyGivens(givens_vec, subBlock, i, i + 1);
-            givens_vec[1].toOpposite();
-            applyGivens(lSingularMat, givens_vec, i, i + 1);
-            if (i < sub_order - 2) {
-                buffer[0] = subBlock(i, i + 1);
-                buffer[1] = subBlock(i, i + 2);
-            }
+            buffer[0] = subBlock(i, i + 1);
+            buffer[1] = subBlock(i, i + 2);
+            rightGivens(subBlock, buffer, i + 1);
+            subBlock(i, i + 2) = 0;
         }
+        leftGivens(subBlock, buffer, sub_order - 2);
     }
     /**
      * Use wilkinson shift
@@ -216,6 +211,31 @@ namespace Physica::Core {
         const RealType factor3 = sqrt(square(factor) + factor2);
         const ScalarType shift = a2 - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3));
         return shift;
+    }
+
+    template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::leftGivens(
+            LMatrixBlock<WorkingMatrix>& subBlock,
+            Vector<ScalarType, 2>& buffer,
+            size_t i) {
+        buffer[0] = subBlock(i, i);
+        buffer[1] = subBlock(i + 1, i);
+        buffer = givens(buffer, 0, 1);
+        applyGivens(buffer, subBlock, i, i + 1);
+        subBlock(i + 1, i) = 0;
+        buffer[1].toOpposite();
+        applyGivens(lSingularMat, buffer, i, i + 1);
+    }
+
+    template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::rightGivens(
+            LMatrixBlock<WorkingMatrix>& subBlock,
+            Vector<ScalarType, 2>& buffer,
+            size_t i) {
+        buffer = givens(buffer, 0, 1);
+        buffer[1].toOpposite();
+        applyGivens(subBlock, buffer, i, i + 1);
+        applyGivens(rSingularMat, buffer, i, i + 1);
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>

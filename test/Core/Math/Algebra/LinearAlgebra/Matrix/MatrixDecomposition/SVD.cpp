@@ -42,7 +42,7 @@ bool doTest(const MatrixType& source, double tolerance) {
 int main() {
     {
         const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
-        if (!doTest(mat, 1E-7))
+        if (!doTest(mat, 1E-15))
             return 1;
     }
     return 0;
