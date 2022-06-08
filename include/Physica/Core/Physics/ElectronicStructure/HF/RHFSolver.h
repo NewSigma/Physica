@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
 
 namespace Physica::Core::Physics {

@@ -134,20 +134,27 @@ namespace Physica::Core {
         size_t total_iter = 0;
         const size_t max_iter = Decouplable::maxItePerCol * order;
         while (1 <= upper && upper < order) {
-            const size_t lower = Base::activeWindowUpDiag(working, upper);
+            size_t lower = Base::activeWindowUpDiag(working, upper);
+            for (size_t i = lower; i <= upper; ++i) {
+                if (abs(working(i, i)) <= ScalarType(std::numeric_limits<ScalarType>::epsilon() * 10)) { //TODO: absolute criteria is unrelirable, use relative criteria instead 
+                    working(i, i) = ScalarType::Zero();
+                    working(i, i + (i + 1 < order)) = ScalarType::Zero();
+                    if (i < upper - 1) {
+                        lower = i + 1;
+                        break;
+                    }
+                    if (i == upper - 1) {
+                        upper -= 1;
+                        goto pass;
+                    }
+                }
+            }
+
             if (lower == upper) {
                 upper -= 1;
                 iter = 0;
             }
             else {
-                for (size_t i = lower; i <= upper; ++i) {
-                    if (abs(working(i, i)) <= ScalarType(std::numeric_limits<ScalarType>::epsilon())) {
-                        working(i, i) = ScalarType::Zero();
-                        working(i, i + 1) = ScalarType::Zero();
-                        goto pass;
-                    }
-                }
-
                 const size_t sub_order = upper - lower + 1;
                 stepSVD(lower, sub_order);
                 ++iter;

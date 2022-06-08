@@ -13,10 +13,12 @@ physica_add_test(ElementaryEquation Core/Math/Algebra/EquationSolver/ElementaryE
 ### Linear Algebra
 physica_add_test(Bidiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Bidiagonalization.cpp)
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
+physica_add_test(EigenSolver Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.cpp)
 physica_add_test(Hessenburg Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/HessenburgTest.cpp)
 physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecompositionTest.cpp)
 physica_add_test(Schur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SchurTest.cpp)
 physica_add_test(SVD Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SVD.cpp)
+physica_add_test(SymmEigenSolver Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SymmEigenSolver.cpp)
 physica_add_test(Tridiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Tridiagonalization.cpp)
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)
@@ -24,9 +26,7 @@ physica_add_test(MatrixProduct Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProd
 physica_add_test(Givens Core/Math/Algebra/LinearAlgebra/Vector/GivensTest.cpp)
 physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/Vector/HouseHolderTest.cpp)
 physica_add_test(Vector Core/Math/Algebra/LinearAlgebra/Vector/VectorTest.cpp)
-physica_add_test(EigenSolver Core/Math/Algebra/LinearAlgebra/EigenSolver.cpp)
 physica_add_test(LinearEquations Core/Math/Algebra/LinearAlgebra/LinearEquations.cpp)
-physica_add_test(SymmEigenSolver Core/Math/Algebra/LinearAlgebra/SymmEigenSolver.cpp)
 physica_add_test(Polynomial Core/Math/Algebra/Polynomial.cpp)
 ## Calculus
 physica_add_test(ODE Core/Math/Calculus/ODE/ODETest.cpp)

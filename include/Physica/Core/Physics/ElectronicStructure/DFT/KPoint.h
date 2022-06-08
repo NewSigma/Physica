@@ -20,7 +20,7 @@
 
 #include "KPointBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
 
 namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class KPoint;

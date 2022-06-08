@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "AbstractKSSolver.h"

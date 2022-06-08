@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Matrix/MatrixDecomposition/Tridiagonalization.h"
-#include "Matrix/MatrixDecomposition/Schur.h"
+#include "Tridiagonalization.h"
+#include "Schur.h"
 
 namespace Physica::Core {
     /**

@@ -19,7 +19,7 @@
 #include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
 
 using namespace Physica::Core;
 

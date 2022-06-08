@@ -31,7 +31,6 @@ bool doTest(const MatrixType& source, double tolerance) {
     MatrixType V = svd.getMatrixV();
     auto v = svd.getSingulars();
     MatrixType A(source.getRow(), source.getColumn());
-    std::cout << U << std::endl;
     A = ScalarType::Zero();
     for (size_t i = 0; i < v.getLength(); ++i)
         A += U.col(i) * V.col(i).asVector().transpose() * v[i];
