@@ -29,6 +29,18 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
+    typename VectorType::ScalarType mean_stable(const LValueVector<VectorType>& x) {
+        using ScalarType = typename VectorType::ScalarType;
+        ScalarType result = 0;
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            const ScalarType factor1 = ScalarType(i);
+            const ScalarType factor2 = reciprocal(ScalarType(i));
+            result = (factor1 * result + x[i])* factor2;
+        }
+        return result;
+    }
+
+    template<class VectorType>
     typename VectorType::ScalarType variance(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         const size_t length = x.getLength();
@@ -42,10 +54,31 @@ namespace Physica::Core {
         const size_t length = x.getLength();
         return square(x - prior_mean).sum() / ScalarType(length);
     }
+    /**
+     * Stable if large dataset is used, prior version is not provided because they behave similarly at large dataset.
+     */
+    template<class VectorType>
+    typename VectorType::ScalarType variance_stable(const LValueVector<VectorType>& x) {
+        using ScalarType = typename VectorType::ScalarType;
+        ScalarType result = 0;
+        ScalarType mean = 0;
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            const ScalarType factor1 = ScalarType(i);
+            const ScalarType factor2 = reciprocal(ScalarType(i));
+            result = (result + square(mean - x[i]) * factor2) * (factor1 * factor2);
+            mean = (factor1 * mean + x[i])* factor2;
+        }
+        return result;
+    }
 
     template<class VectorType>
-    typename VectorType::ScalarType deviation(const LValueVector<VectorType>& x) {
+    inline typename VectorType::ScalarType deviation(const LValueVector<VectorType>& x) {
         return sqrt(variance(x));
+    }
+
+    template<class VectorType>
+    inline typename VectorType::ScalarType deviation_stable(const LValueVector<VectorType>& x) {
+        return sqrt(variance_stable(x));
     }
 
     template<class VectorType>
