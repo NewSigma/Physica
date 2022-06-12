@@ -27,6 +27,7 @@ namespace Physica::Core {
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class AnyVector1, class AnyVector2> class CrossProduct;
+    template<class VectorType> class FormatedVector;
 
     namespace Internal {
         template<class T> class Traits;
@@ -57,6 +58,7 @@ namespace Physica::Core {
         void assignTo(LValueVector<OtherDerived>& v) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] FormatedVector<Derived> format() const;
         template<class PacketType>
         [[nodiscard]] PacketType packet(size_t index) const;
         template<class PacketType>

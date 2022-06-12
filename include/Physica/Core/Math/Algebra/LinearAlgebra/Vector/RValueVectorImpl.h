@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "FormatedVector.h"
+
 namespace Physica::Core {
     namespace Internal {
         template<class T1, class T2, bool enableSIMD>
@@ -55,6 +57,11 @@ namespace Physica::Core {
     void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
         assert(v.getLength() == getLength());
         Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(*this, v);
+    }
+
+    template<class Derived>
+    FormatedVector<Derived> RValueVector<Derived>::format() const {
+        return FormatedVector<Derived>(*this);
     }
 
     template<class Derived>
@@ -140,15 +147,9 @@ namespace Physica::Core {
 
     template<class VectorType>
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
-        os << '(';
         size_t length = v.getLength();
-        if (length > 0) {
-            --length;
-            for (size_t i = 0; i < length; ++i)
-                os << v.calc(i) << ", ";
-            os << v.calc(length);
-        }
-        os << ')';
+        for (size_t i = 0; i < length; ++i)
+            os << v.calc(i);
         return os;
     }
 }

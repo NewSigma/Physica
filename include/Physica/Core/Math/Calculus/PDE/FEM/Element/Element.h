@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "AbstractElement.h"
 
 namespace Physica::Core {
     template<class Derived>
