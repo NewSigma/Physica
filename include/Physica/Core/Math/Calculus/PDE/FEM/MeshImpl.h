@@ -128,7 +128,7 @@ namespace Physica::Core {
                 size_t nodeBottomRight = nodeBottomLeft + 1;
                 size_t nodeTopLeft = nodeBottomLeft + numNodeX;
                 size_t nodeTopRight = nodeBottomRight + numNodeX;
-                mesh.setElem(Rectangle4P<ScalarType>(p, p + diagnal, nodeBottomLeft, nodeBottomRight, nodeTopLeft, nodeTopRight),
+                mesh.setElem(Rectangle4P<ScalarType>(p, p + diagnal, nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft),
                              nextElem++);
                 p[0] += xPerElem;
             }

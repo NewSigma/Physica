@@ -24,13 +24,13 @@ namespace Physica::Core {
                                          VectorType topRight_,
                                          size_t nodeBottomLeft,
                                          size_t nodeBottomRight,
-                                         size_t nodeTopLeft,
-                                         size_t nodeTopRight)
+                                         size_t nodeTopRight,
+                                         size_t nodeTopLeft)
             : bottomLeft(bottomLeft_), topRight(topRight_) {
         Base::nodes[0] = nodeBottomLeft;
         Base::nodes[1] = nodeBottomRight;
-        Base::nodes[2] = nodeTopLeft;
-        Base::nodes[3] = nodeTopRight;
+        Base::nodes[2] = nodeTopRight;
+        Base::nodes[3] = nodeTopLeft;
     }
 
     template<class ScalarType>

@@ -46,8 +46,8 @@ namespace Physica::Core {
         enum {
             BottomLeft = 0,
             BottomRight = 1,
-            TopLeft = 2,
-            TopRight = 3
+            TopRight = 2,
+            TopLeft = 3
         };
 
         VectorType bottomLeft;
@@ -58,8 +58,8 @@ namespace Physica::Core {
                     VectorType topRight_,
                     size_t nodeBottomLeft,
                     size_t nodeBottomRight,
-                    size_t nodeTopLeft,
-                    size_t nodeTopRight);
+                    size_t nodeTopRight,
+                    size_t nodeTopLeft);
         ~Rectangle4P() = default;
         /* Operators */
         Rectangle4P& operator=(Rectangle4P elem) noexcept;
