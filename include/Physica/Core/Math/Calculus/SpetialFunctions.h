@@ -74,6 +74,9 @@ namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> gammaQ(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x);
 
+    template<class ScalarType>
+    ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step);
+
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> erf(const Scalar<option, errorTrack>& x);
 

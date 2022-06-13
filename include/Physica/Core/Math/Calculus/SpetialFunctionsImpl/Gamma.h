@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
+#include "Physica/Core/Math/Calculus/Differential.h"
+
 namespace Physica::Core {
     /**
      * Return the logarithm of gamma(s). s must be positive.
@@ -159,6 +163,11 @@ namespace Physica::Core {
         assert(a.isPositive() && !x.isNegative());
         using T = Scalar<option, errorTrack>;
         return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
+    }
+
+    template<class ScalarType>
+    ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step) {
+        return Differential<ScalarType>::ridders(lnGamma<ScalarType::option, ScalarType::errorTrack>, x.getDerived(), step);
     }
 
     template<ScalarOption option, bool errorTrack>

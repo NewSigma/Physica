@@ -63,6 +63,20 @@ void testGammaPQ() {
     }
 }
 
+void testBiGamma() {
+    using T = Scalar<Double, false>;
+    constexpr static int count = 2;
+    constexpr static double x[count]{13.7, 0.3};
+    constexpr static double step[count]{1E-1, 1E-1};
+    constexpr static double result[count]{2.5804557238996526, -3.5025242222001330};
+
+    for (int i = 0; i < count; ++i) {
+        auto temp = bigamma(T(x[i]), T(step[i]));
+        if (!scalarNear(temp, T(result[i]), 1E-13))
+            exit(EXIT_FAILURE);
+    }
+}
+
 void testBesselJ() {
     using T = Scalar<Double, false>;
     constexpr static int count = 2;
@@ -210,6 +224,7 @@ void testHermiteH() {
 int main() {
     testLnGamma();
     testGammaPQ();
+    testBiGamma();
     testBesselJ();
     testBesselY();
     testBesselJn_Yn_dJn_dYn();
