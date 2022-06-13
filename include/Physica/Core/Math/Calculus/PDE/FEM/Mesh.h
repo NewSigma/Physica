@@ -55,6 +55,7 @@ namespace Physica::Core {
         [[nodiscard]] const Vector<ScalarType>& getCoeffs() const { return coeffs; }
         [[nodiscard]] const Utils::Array<NodeType>& getNodeTypes() const { return nodeTypes; }
         [[nodiscard]] size_t getNumFreeNodes() const;
+        [[nodiscard]] Utils::Array<VectorType> getNodes() const;
         /* Setters */
         void setElem(ElementType elem, size_t index);
         /* Helpers */

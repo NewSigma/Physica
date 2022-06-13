@@ -43,6 +43,8 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, class OtherIntegrator>
         void solve(Functor func);
+        /* Getters */
+        [[nodiscard]] const MeshType& getMesh() const noexcept { return mesh; }
     private:
         /* Operations */
         void makeMaps();

@@ -41,8 +41,8 @@ namespace Physica::Core {
     template<class VectorType>
     FormatedVector<VectorType>::FormatedVector(const RValueVector<VectorType>& data_)
             : data(data_)
-            , prefix('(')
-            , suffix(')')
+            , prefix("(")
+            , suffix(")")
             , separator(", ") {}
 
     template<class VectorType>

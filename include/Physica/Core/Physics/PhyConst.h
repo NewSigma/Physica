@@ -48,6 +48,7 @@ namespace Physica::Core {
     class PhyConst<AU> {
     private:
         constexpr static double hartreeInEv = 27.211652;
+        constexpr static double rydbergInEv = hartreeInEv * 0.5;
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
     public:
         constexpr static double planck = M_PI * 2;

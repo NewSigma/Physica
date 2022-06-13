@@ -88,6 +88,19 @@ namespace Physica::Core {
     }
 
     template<class T>
+    Utils::Array<typename Mesh<T>::VectorType> Mesh<T>::getNodes() const {
+        Utils::Array<typename Mesh<T>::VectorType> result(getNumNodes());
+        for (const auto& element : elements) {
+            size_t local_index = 0;
+            for (size_t node : element.getNodes()) {
+                result[node] = element.getNodePos(local_index);
+                ++local_index;
+            }
+        }
+        return result;
+    }
+
+    template<class T>
     void Mesh<T>::swap(Mesh& mesh) noexcept {
         elements.swap(mesh.elements);
         coeffs.swap(mesh.coeffs);
