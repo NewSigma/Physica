@@ -51,12 +51,24 @@ int main() {
     {
         IntegrateRange<ScalarType, 2> range({0, 0}, {1, 1});
         Integrate<MonteCarlo, ScalarType, 2> mc(range, 1000);
-        std::mt19937 gen{};
-        ScalarType deviation;
+
         const ScalarType answer = 1.317363136305819;
-        ScalarType result = mc.solve_e([](Vector<ScalarType, 2> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
-                                      , gen, deviation);
-        if (abs(answer - result) > ScalarType(3) * deviation)
+        ScalarType result1;
+        {
+            std::mt19937 gen{};
+         result1 = mc.solve([](Vector<ScalarType, 2> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
+                            , gen);
+        }
+        ScalarType result2, deviation;
+        {
+            std::mt19937 gen{};
+            result2 = mc.solve_e([](Vector<ScalarType, 2> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
+                                 , gen, deviation);
+        }
+        if (!scalarNear(result1, result2, 1E-16))
+            return 1;
+        const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
+        if (!isGoodResult || abs(answer - result2) > ScalarType(3) * deviation)
             return 1;
     }
     return 0;

@@ -28,15 +28,19 @@ namespace Physica::Core {
         return x.getDerived().sum() / ScalarType(x.getLength());
     }
 
+    template<class ScalarType>
+    inline void toNextMean(ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        mean = (factor1 * mean + sample) * factor2;
+    }
+
     template<class VectorType>
     typename VectorType::ScalarType mean_stable(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         ScalarType result = 0;
-        for (size_t i = 0; i < x.getLength(); ++i) {
-            const ScalarType factor1 = ScalarType(i);
-            const ScalarType factor2 = reciprocal(ScalarType(i));
-            result = (factor1 * result + x[i])* factor2;
-        }
+        for (size_t i = 0; i < x.getLength(); ++i)
+            result = next_mean(result, i, x[i]);
         return result;
     }
 
@@ -54,6 +58,14 @@ namespace Physica::Core {
         const size_t length = x.getLength();
         return square(x - prior_mean).sum() / ScalarType(length);
     }
+
+    template<class ScalarType>
+    inline void toNextVariance(ScalarType& var, ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        toNextMean(mean, lastNumSample, sample);
+    }
     /**
      * Stable if large dataset is used, prior version is not provided because they behave similarly at large dataset.
      */
@@ -62,12 +74,8 @@ namespace Physica::Core {
         using ScalarType = typename VectorType::ScalarType;
         ScalarType result = 0;
         ScalarType mean = 0;
-        for (size_t i = 0; i < x.getLength(); ++i) {
-            const ScalarType factor1 = ScalarType(i);
-            const ScalarType factor2 = reciprocal(ScalarType(i));
-            result = (result + square(mean - x[i]) * factor2) * (factor1 * factor2);
-            mean = (factor1 * mean + x[i])* factor2;
-        }
+        for (size_t i = 0; i < x.getLength(); ++i)
+            toNextVariance(result, mean, i, x[i]);
         return result;
     }
 

@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
 /*!
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
@@ -129,10 +131,10 @@ namespace Physica::Core {
         ScalarType result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
-            result += func(x);
+            toNextMean(result, i, func(x));
         }
 
-        ScalarType factor = reciprocal(ScalarType(sampleCount));
+        ScalarType factor = 1;
         for (size_t i = 0; i < Base::from().getLength(); ++i)
             factor *= Base::to()[i] - Base::from()[i];
         result *= factor;
@@ -142,20 +144,16 @@ namespace Physica::Core {
     template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator>
     ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(Function func, RandomGenerator& generator, ScalarType& deviation) const {
-        ScalarType total = 0;
-        ScalarType total_square = 0;
+        ScalarType mean = 0;
+        ScalarType variance = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             const VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
             const ScalarType y = func(x);
-            total += y;
-            total_square += square(y);
+            toNextVariance(variance, mean, i, y);
         }
 
-        const ScalarType factor = reciprocal(ScalarType(sampleCount));
-        ScalarType variance = total_square * factor - square(total * factor);
-
-        ScalarType factor1 = factor;
-        ScalarType factor2 = reciprocal(ScalarType(sampleCount - 1));
+        ScalarType factor1 = 1;
+        ScalarType factor2 = 1;
         for (size_t i = 0; i < Base::from().getLength(); ++i) {
             const ScalarType delta = Base::to()[i] - Base::from()[i];
             factor1 *= delta;
@@ -163,6 +161,6 @@ namespace Physica::Core {
         }
         variance *= factor2;
         deviation = sqrt(variance);
-        return total * factor1;
+        return mean * factor1;
     }
 }
