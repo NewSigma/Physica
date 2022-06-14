@@ -187,7 +187,7 @@ namespace Physica::Core::Physics {
             for (size_t j = i; j < baseSetSize; ++j) {
                 ScalarType temp = ScalarType::Zero();
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
-                    temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).getVector())
+                    temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).v())
                             * ScalarType(molecular.getAtomicNumber(k));
                 singleHamilton(i, j) = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
             }

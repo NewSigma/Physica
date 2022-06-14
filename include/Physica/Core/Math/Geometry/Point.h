@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -32,12 +32,12 @@ namespace Physica::Core {
         static constexpr size_t length = dim;
         using VectorType = Vector<ScalarType, dim>;
     private:
-        VectorType v;
+        VectorType vec;
     public:
         Point() = default;
         template<class Derived>
-        Point(const LValueVector<Derived>& v_) : v(v_) {}
-        Point(std::initializer_list<ScalarType> list) : v(std::move(list)) {}
+        Point(const LValueVector<Derived>& vec_) : vec(vec_) {}
+        Point(std::initializer_list<ScalarType> list) : vec(std::move(list)) {}
         Point(const Point& p) = default;
         Point(Point&& p) noexcept = default;
         ~Point() = default;
@@ -45,23 +45,23 @@ namespace Physica::Core {
         Point& operator=(const Point& p) = default;
         Point& operator=(Point&& p) noexcept = default;
         /* Getters */
-        VectorType& getVector() noexcept { return v; }
-        const VectorType& getVector() const noexcept { return v; }
-        const ScalarType& getX() const { return v[0]; }
-        const ScalarType& getY() const { return v[1]; }
-        const ScalarType& getZ() const { return v[2]; }
-        const ScalarType& getW() const { return v[3]; }
+        VectorType& v() noexcept { return vec; }
+        const VectorType& v() const noexcept { return vec; }
+        const ScalarType& x() const { return vec[0]; }
+        const ScalarType& y() const { return vec[1]; }
+        const ScalarType& z() const { return vec[2]; }
+        const ScalarType& w() const { return vec[3]; }
         ScalarType dist(const Point& p) const;
     };
 
     template<size_t dim, class ScalarType>
     std::ostream& operator<<(std::ostream& os, const Point<dim, ScalarType>& p) {
-        return os << p.getVector();
+        return os << p.v().format().setPrefix("(").setSeparator(", ").setSuffix(")");
     }
 
     template<size_t dim, class ScalarType>
     ScalarType Point<dim, ScalarType>::dist(const Point<dim, ScalarType>& p) const {
-        return (v - p.v).norm();
+        return (vec - p.vec).norm();
     }
 
     typedef Point<1> Point1D;
