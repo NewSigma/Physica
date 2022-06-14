@@ -35,11 +35,11 @@ namespace Physica::Core {
     typename Mesh<T>::ScalarType Mesh<T>::operator()(VectorType p) const {
         for (const auto& elem : elements) {
             if (elem.contains(p)) {
-                const auto& localNodes = elem.getNodes();
+                const auto& globalNodes = elem.getGlobalNodes();
                 const VectorType localPos = elem.toLocalPos(p);
                 ScalarType result = 0;
                 for (size_t i = 0; i < ElementType::getNumNodes(); ++i) {
-                    const size_t globalNode = localNodes[i];
+                    const size_t globalNode = globalNodes[i];
                     result += coeffs[globalNode] * ElementType::baseFunc(i, localPos);
                 }
                 return result;
@@ -66,7 +66,7 @@ namespace Physica::Core {
                 const VectorType pos = elem.getNodePos(i);
                 const bool isOnBound = detector(pos);
                 if (isOnBound) {
-                    const size_t node = elem.getNodes()[i];
+                    const size_t node = elem.getGlobalNodes()[i];
                     coeffs[node] = conditioner(pos);
                     nodeTypes[node] = NodeType::Dirichlet;
                 }
@@ -108,14 +108,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Mesh<Rectangle4P<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
+    Mesh<Rectangle1<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
                                             Vector<ScalarType, 2> topRight,
                                             size_t numElementX,
                                             size_t numElementY) {
         using VectorType = Vector<ScalarType, 2>;
         const size_t numNodeX = numElementX + 1;
         const size_t numNodeY = numElementY + 1;
-        Mesh<Rectangle4P<ScalarType>> mesh(numElementX * numElementY, numNodeX * numNodeY);
+        Mesh<Rectangle1<ScalarType>> mesh(numElementX * numElementY, numNodeX * numNodeY);
         const ScalarType xPerElem = (topRight[0] - bottomLeft[0]) / ScalarType(numElementX);
         const ScalarType yPerElem = (topRight[1] - bottomLeft[1]) / ScalarType(numElementY);
         const VectorType diagnal{xPerElem, yPerElem};
@@ -128,7 +128,7 @@ namespace Physica::Core {
                 size_t nodeBottomRight = nodeBottomLeft + 1;
                 size_t nodeTopLeft = nodeBottomLeft + numNodeX;
                 size_t nodeTopRight = nodeBottomRight + numNodeX;
-                mesh.setElem(Rectangle4P<ScalarType>(p, p + diagnal, nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft),
+                mesh.setElem(Rectangle1<ScalarType>(p, p + diagnal, {nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft}),
                              nextElem++);
                 p[0] += xPerElem;
             }

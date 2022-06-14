@@ -29,26 +29,32 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
         constexpr static unsigned int Order = Internal::Traits<Derived>::Order;
         constexpr static unsigned int DegreeOfFreedom = Internal::Traits<Derived>::DegreeOfFreedom;
+        using IndexArray = Utils::Array<size_t, DegreeOfFreedom>;
         using VectorType = Vector<ScalarType, Dim>;
         using MatrixType = typename Internal::Traits<Derived>::MatrixType;
     protected:
-        Utils::Array<size_t, DegreeOfFreedom> nodes;
+        IndexArray globalNodes;
     public:
         /* Getters */
         [[nodiscard]] MatrixType jacobi(VectorType localPos) const { return Base::getDerived().jacobi(localPos); }
-        [[nodiscard]] MatrixType inv_jacobi(VectorType globalPos) const { return Base::getDerived().jacobi(globalPos); }
+        [[nodiscard]] MatrixType inv_jacobi(VectorType globalPos) const { return Base::getDerived().inv_jacobi(globalPos); }
         [[nodiscard]] bool contains(const VectorType& point) const { return Base::getDerived().contains(point); }
-        [[nodiscard]] const Utils::Array<size_t, DegreeOfFreedom>& getNodes() const { return nodes; }
+        [[nodiscard]] const IndexArray& getGlobalNodes() const { return globalNodes; }
         [[nodiscard]] VectorType getNodePos(size_t localNode) const { return Base::getDerived().getNodePos(localNode); }
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const { return Base::getDerived().toLocalPos(globalPos); }
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const { return Base::getDerived().toLocalPos(localPos); }
         [[nodiscard]] constexpr static size_t getNumNodes() { return DegreeOfFreedom; }
     protected:
-        void swap_base(Element& elem);
+        Element() = default;
+        Element(IndexArray globalNodes_);
+        void swap(Element& elem) noexcept;
     };
 
     template<class Derived>
-    void Element<Derived>::swap_base(Element& elem) {
-        swap(nodes, elem.nodes);
+    Element<Derived>::Element(IndexArray globalNodes_) : globalNodes(std::move(globalNodes_)) {}
+
+    template<class Derived>
+    void Element<Derived>::swap(Element& elem) noexcept {
+        globalNodes.swap(elem.globalNodes);
     }
 }

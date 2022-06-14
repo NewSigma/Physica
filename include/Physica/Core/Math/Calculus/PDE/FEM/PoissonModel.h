@@ -74,7 +74,7 @@ namespace Physica::Core {
         const auto& nodeTypes = mesh.getNodeTypes();
         const auto& coeffs = mesh.getCoeffs();
         for (const auto& elem : mesh.getElements()) {
-            const auto& nodes = elem.getNodes();
+            const auto& nodes = elem.getGlobalNodes();
             for (size_t i = 0; i < ElementType::getNumNodes(); ++i) {
                 const size_t trialNode = nodes[i];
                 const bool isValidTrialNode = nodeTypes[trialNode] == NodeType::Free;

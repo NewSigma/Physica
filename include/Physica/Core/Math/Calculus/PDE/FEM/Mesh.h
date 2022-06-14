@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Geometry/Point.h"
-#include "Element/Rectangle4P.h"
+#include "Element/Rectangle1.h"
 
 namespace Physica::Core {
     enum class NodeType : char {
@@ -63,7 +63,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    Mesh<Rectangle4P<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
+    Mesh<Rectangle1<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
                                             Vector<ScalarType, 2> topRight,
                                             size_t numElementX,
                                             size_t numElementY);

@@ -20,37 +20,29 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    Rectangle4P<ScalarType>::Rectangle4P(VectorType bottomLeft_,
-                                         VectorType topRight_,
-                                         size_t nodeBottomLeft,
-                                         size_t nodeBottomRight,
-                                         size_t nodeTopRight,
-                                         size_t nodeTopLeft)
-            : bottomLeft(bottomLeft_), topRight(topRight_) {
-        Base::nodes[0] = nodeBottomLeft;
-        Base::nodes[1] = nodeBottomRight;
-        Base::nodes[2] = nodeTopRight;
-        Base::nodes[3] = nodeTopLeft;
-    }
+    Rectangle1<ScalarType>::Rectangle1(VectorType bottomLeft_,
+                                       VectorType topRight_,
+                                       IndexArray globalNodes)
+            : Base(std::move(globalNodes)), bottomLeft(bottomLeft_), topRight(topRight_) {}
 
     template<class ScalarType>
-    Rectangle4P<ScalarType>& Rectangle4P<ScalarType>::operator=(Rectangle4P<ScalarType> elem) noexcept {
+    Rectangle1<ScalarType>& Rectangle1<ScalarType>::operator=(Rectangle1<ScalarType> elem) noexcept {
         swap(elem);
         return *this;
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::MatrixType Rectangle4P<ScalarType>::jacobi([[maybe_unused]] VectorType localPos) const {
+    typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{(topRight[0] - bottomLeft[0]) * 0.5, 0, 0, (topRight[1] - bottomLeft[1]) * 0.5};
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::MatrixType Rectangle4P<ScalarType>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
+    typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
         return MatrixType{ScalarType::Two() / (topRight[0] - bottomLeft[0]), 0, 0, ScalarType::Two() / (topRight[1] - bottomLeft[1])};
     }
 
     template<class ScalarType>
-    bool Rectangle4P<ScalarType>::contains(const VectorType& point) const {
+    bool Rectangle1<ScalarType>::contains(const VectorType& point) const {
         return bottomLeft[0] <= point[0]
             && point[0] <= topRight[0]
             && bottomLeft[1] <= point[1]
@@ -58,7 +50,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::VectorType Rectangle4P<ScalarType>::getNodePos(size_t localNode) const {
+    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::getNodePos(size_t localNode) const {
         switch (localNode) {
             case BottomLeft:
                 return bottomLeft;
@@ -73,24 +65,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::VectorType Rectangle4P<ScalarType>::toLocalPos(VectorType globalPos) const {
+    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toLocalPos(VectorType globalPos) const {
         return divide(ScalarType(2) * globalPos - bottomLeft - topRight, topRight - bottomLeft);
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::VectorType Rectangle4P<ScalarType>::toGlobalPos(VectorType localPos) const {
+    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
         return (bottomLeft + topRight + hadamard(bottomLeft - topRight, localPos)) * ScalarType(0.5);
     }
 
     template<class ScalarType>
-    void Rectangle4P<ScalarType>::swap(Rectangle4P& elem) noexcept {
-        Base::swap_base(elem);
+    void Rectangle1<ScalarType>::swap(Rectangle1& elem) noexcept {
+        Base::swap(elem);
         bottomLeft.swap(elem.bottomLeft);
         topRight.swap(elem.topRight);
     }
 
     template<class ScalarType>
-    ScalarType Rectangle4P<ScalarType>::baseFunc(size_t localNode, VectorType p) {
+    ScalarType Rectangle1<ScalarType>::baseFunc(size_t localNode, VectorType p) {
         switch (localNode) {
             case BottomLeft:
                 return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * ScalarType(0.25);
@@ -105,7 +97,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Rectangle4P<ScalarType>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
+    ScalarType Rectangle1<ScalarType>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
         switch (localNode) {
             case BottomLeft:
             case TopLeft:
@@ -118,7 +110,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Rectangle4P<ScalarType>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
+    ScalarType Rectangle1<ScalarType>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
         switch (localNode) {
             case BottomLeft:
             case BottomRight:
@@ -131,7 +123,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename Rectangle4P<ScalarType>::VectorType Rectangle4P<ScalarType>::grad(size_t localNode, VectorType p) {
+    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
 }

@@ -21,14 +21,14 @@
 #include "Element.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class Rectangle4P;
+    template<class ScalarType> class Rectangle1;
 
     namespace Internal {
         template<class T>
-        class Traits<Rectangle4P<T>> {
+        class Traits<Rectangle1<T>> {
+            constexpr static unsigned int NumPoint = 4;
         public:
             constexpr static unsigned int Dim = 2;
-            constexpr static unsigned int NumPoint = 4;
             constexpr static unsigned int Order = 1;
             constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
             using ScalarType = T;
@@ -37,11 +37,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    class Rectangle4P : public Element<Rectangle4P<ScalarType>> {
+    class Rectangle1 : public Element<Rectangle1<ScalarType>> {
     public:
-        using Base = Element<Rectangle4P<ScalarType>>;
+        using Base = Element<Rectangle1<ScalarType>>;
         using typename Base::VectorType;
-        using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 2, 2>;
+        using typename Base::MatrixType;
+        using typename Base::IndexArray;
     private:
         enum {
             BottomLeft = 0,
@@ -53,16 +54,11 @@ namespace Physica::Core {
         VectorType bottomLeft;
         VectorType topRight;
     public:
-        Rectangle4P() = default;
-        Rectangle4P(VectorType bottomLeft_,
-                    VectorType topRight_,
-                    size_t nodeBottomLeft,
-                    size_t nodeBottomRight,
-                    size_t nodeTopRight,
-                    size_t nodeTopLeft);
-        ~Rectangle4P() = default;
+        Rectangle1() = default;
+        Rectangle1(VectorType bottomLeft_, VectorType topRight_, IndexArray globalNodes);
+        ~Rectangle1() = default;
         /* Operators */
-        Rectangle4P& operator=(Rectangle4P elem) noexcept;
+        Rectangle1& operator=(Rectangle1 elem) noexcept;
         /* Getters */
         [[nodiscard]] MatrixType jacobi([[maybe_unused]] VectorType localPos) const;
         [[nodiscard]] MatrixType inv_jacobi([[maybe_unused]] VectorType globalPos) const;
@@ -71,7 +67,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
         /* Helpers */
-        void swap(Rectangle4P& elem) noexcept;
+        void swap(Rectangle1& elem) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);
@@ -80,4 +76,4 @@ namespace Physica::Core {
     };
 }
 
-#include "Rectangle4PImpl.h"
+#include "Rectangle1Impl.h"
