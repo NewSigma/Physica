@@ -126,4 +126,35 @@ namespace Physica::Core {
     typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
+
+    template<class ScalarType>
+    Mesh<Rectangle1<ScalarType>> Rectangle1<ScalarType>::rectangle(VectorType bottomLeft,
+                                                                   VectorType topRight,
+                                                                   size_t numElementX,
+                                                                   size_t numElementY) {
+        using VectorType = Vector<ScalarType, 2>;
+        const size_t numNodeX = numElementX + 1;
+        const size_t numNodeY = numElementY + 1;
+        Mesh<Rectangle1<ScalarType>> mesh(numElementX * numElementY, numNodeX * numNodeY);
+        const ScalarType xPerElem = (topRight[0] - bottomLeft[0]) / ScalarType(numElementX);
+        const ScalarType yPerElem = (topRight[1] - bottomLeft[1]) / ScalarType(numElementY);
+        const VectorType diagnal{xPerElem, yPerElem};
+
+        VectorType p = bottomLeft;
+        size_t nextElem = 0;
+        for (size_t y = 0; y < numElementY; ++y) {
+            for (size_t x = 0; x < numElementX; ++x) {
+                size_t nodeBottomLeft = numNodeX * y + x;
+                size_t nodeBottomRight = nodeBottomLeft + 1;
+                size_t nodeTopLeft = nodeBottomLeft + numNodeX;
+                size_t nodeTopRight = nodeBottomRight + numNodeX;
+                mesh.setElem(Rectangle1<ScalarType>(p, p + diagnal, {nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft}),
+                             nextElem++);
+                p[0] += xPerElem;
+            }
+            p[1] += yPerElem;
+            p[0] = bottomLeft[0];
+        }
+        return mesh;
+    }
 }

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Geometry/Point.h"
-#include "Element/Rectangle1.h"
 
 namespace Physica::Core {
     enum class NodeType : char {
@@ -61,12 +60,6 @@ namespace Physica::Core {
         /* Helpers */
         void swap(Mesh& mesh) noexcept;
     };
-
-    template<class ScalarType>
-    Mesh<Rectangle1<ScalarType>> rectangle(Vector<ScalarType, 2> bottomLeft,
-                                            Vector<ScalarType, 2> topRight,
-                                            size_t numElementX,
-                                            size_t numElementY);
 
     template<class T>
     inline void swap(Mesh<T>& mesh1, Mesh<T>& mesh2) noexcept {

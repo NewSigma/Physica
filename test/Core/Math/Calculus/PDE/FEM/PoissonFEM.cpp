@@ -18,6 +18,7 @@
  */
 #include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/PoissonModel.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
@@ -44,7 +45,7 @@ ScalarType theory_solution(VectorType p) {
 }
 
 int main() {
-    auto mesh = rectangle<ScalarType>({0, 0}, {width, height}, 20, 10);
+    auto mesh = Rectangle1<ScalarType>::rectangle({0, 0}, {width, height}, 20, 10);
     mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType::Zero(), 1E-5)
                                                       || scalarNear(p[0], ScalarType(width), 1E-5)
                                                       || scalarNear(p[1], ScalarType::Zero(), 1E-5)

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Element.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/Mesh.h"
 
 namespace Physica::Core {
     template<class ScalarType> class Rectangle1;
@@ -26,10 +27,10 @@ namespace Physica::Core {
     namespace Internal {
         template<class T>
         class Traits<Rectangle1<T>> {
-            constexpr static unsigned int NumPoint = 4;
         public:
             constexpr static unsigned int Dim = 2;
             constexpr static unsigned int Order = 1;
+            constexpr static unsigned int NumPoint = 4;
             constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
             using ScalarType = T;
             using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, Dim, Dim>;
@@ -73,6 +74,10 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static ScalarType dBase_ds(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static VectorType grad(size_t localNode, [[maybe_unused]] VectorType p);
+        [[nodiscard]] static Mesh<Rectangle1<ScalarType>> rectangle(VectorType bottomLeft,
+                                                                    VectorType topRight,
+                                                                    size_t numElementX,
+                                                                    size_t numElementY);
     };
 }
 
