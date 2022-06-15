@@ -128,6 +128,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class Functor>
+    ScalarType Rectangle1<ScalarType>::integral(Functor func) {
+        constexpr static unsigned int Factor = 1U << Base::Dim;
+        return func(VectorType{0, 0}) * Factor;
+    }
+
+    template<class ScalarType>
     Mesh<Rectangle1<ScalarType>> Rectangle1<ScalarType>::rectangle(VectorType bottomLeft,
                                                                    VectorType topRight,
                                                                    size_t numElementX,

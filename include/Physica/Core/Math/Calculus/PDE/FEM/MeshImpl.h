@@ -92,7 +92,7 @@ namespace Physica::Core {
         Utils::Array<typename Mesh<T>::VectorType> result(getNumNodes());
         for (const auto& element : elements) {
             size_t local_index = 0;
-            for (size_t node : element.getNodes()) {
+            for (size_t node : element.getGlobalNodes()) {
                 result[node] = element.getNodePos(local_index);
                 ++local_index;
             }

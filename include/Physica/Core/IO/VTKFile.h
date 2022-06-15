@@ -63,7 +63,7 @@ namespace Physica::Core {
             os << "POLYGONS " << numElems << ' ' << arraySize << '\n';
             for (const auto& element : mesh.getElements()) {
                 os << nodePerElem;
-                for (size_t node : element.getNodes())
+                for (size_t node : element.getGlobalNodes())
                     os << ' ' << node;
                 os << '\n';
             }

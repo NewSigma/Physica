@@ -23,6 +23,7 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType, 2>;
+using ElementType = Rectangle1<ScalarType>;
 
 constexpr double width = 2;
 constexpr double height = 1;
@@ -44,8 +45,15 @@ ScalarType theory_solution(VectorType p) {
     return result * factor - p[0] * (p[0] - width);
 }
 
+struct ElementIntegratorPacker {
+    template<class Functor>
+    static ScalarType run(Functor func) {
+        return ElementType::integral(std::move(func));
+    }
+};
+
 int main() {
-    auto mesh = Rectangle1<ScalarType>::rectangle({0, 0}, {width, height}, 20, 10);
+    auto mesh = ElementType::rectangle({0, 0}, {width, height}, 20, 10);
     mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType::Zero(), 1E-5)
                                                       || scalarNear(p[0], ScalarType(width), 1E-5)
                                                       || scalarNear(p[1], ScalarType::Zero(), 1E-5)
@@ -54,7 +62,7 @@ int main() {
 
     PoissonModel model(std::move(mesh));
     auto func = []([[maybe_unused]] VectorType p) { return ScalarType(-2); };
-    model.solve<decltype(func), typename decltype(model)::Integrator>(func);
+    model.solve<decltype(func), ElementIntegratorPacker>(func);
 
     const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
     const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);

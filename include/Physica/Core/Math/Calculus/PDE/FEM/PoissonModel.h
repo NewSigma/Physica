@@ -20,7 +20,6 @@
 
 #include "FEMSolver.h"
 #include "Mesh.h"
-#include "Physica/Core/Math/Calculus/Integrate/GaussMethod/Legendre.h"
 
 namespace Physica::Core {
     template<class MeshType>
@@ -28,7 +27,6 @@ namespace Physica::Core {
     public:
         using ScalarType = typename MeshType::ScalarType;
         using ElementType = typename MeshType::ElementType;
-        using Integrator = GaussLegendre<ScalarType, 2, ElementType::Order>;
     private:
         using Base = FEMSolver<ScalarType>;
         using VectorType = typename ElementType::VectorType;
@@ -41,7 +39,7 @@ namespace Physica::Core {
         /* Operators */
         [[nodiscard]] ScalarType operator()(VectorType p) const { return mesh(p); }
         /* Operations */
-        template<class Functor, class OtherIntegrator>
+        template<class Functor, class Integrator>
         void solve(Functor func);
         /* Getters */
         [[nodiscard]] const MeshType& getMesh() const noexcept { return mesh; }
@@ -67,7 +65,7 @@ namespace Physica::Core {
      * ScalarType Functor(VectorType)
      */
     template<class MeshType>
-    template<class Functor, class OtherIntegrator>
+    template<class Functor, class Integrator>
     void PoissonModel<MeshType>::solve(Functor func) {
         Base::clear();
 
@@ -83,7 +81,7 @@ namespace Physica::Core {
 
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const ScalarType integral = Integrator::run(
+                        const ScalarType integral = ElementType::integral(
                                 [=, &elem](VectorType p) {
                                     const auto inv_jacobi = elem.inv_jacobi(p);
                                     const VectorType g1 = inv_jacobi.transpose() * elem.grad(i, p);
@@ -104,7 +102,7 @@ namespace Physica::Core {
                         }
                     }
 
-                    Base::b[row] -= OtherIntegrator::run([&, i](VectorType p) {
+                    Base::b[row] -= Integrator::run([&, i](VectorType p) {
                                         return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * func(elem.toGlobalPos(p));
                                     });
                 }
