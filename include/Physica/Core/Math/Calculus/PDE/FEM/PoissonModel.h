@@ -34,8 +34,8 @@ namespace Physica::Core {
         using VectorType = typename ElementType::VectorType;
 
         MeshType mesh;
-        Utils::Array<size_t> map_x_node;
-        Utils::Array<size_t> map_node_x;
+        Utils::Array<size_t> map_var_node;
+        Utils::Array<size_t> map_node_var;
     public:
         PoissonModel(MeshType mesh_);
         /* Operators */
@@ -50,16 +50,16 @@ namespace Physica::Core {
         void makeMaps();
         void postSolve();
         /* Getters */
-        [[nodiscard]] size_t xToNode(size_t x) const { return map_x_node[x]; }
-        [[nodiscard]] size_t nodeToX(size_t node) const;
+        [[nodiscard]] size_t varToNode(size_t x) const { return map_var_node[x]; }
+        [[nodiscard]] size_t nodeToVar(size_t node) const;
     };
 
     template<class MeshType>
     PoissonModel<MeshType>::PoissonModel(MeshType mesh_) : Base(), mesh(std::move(mesh_)) {
         const size_t n = mesh.getNumFreeNodes();
         Base::resize(n);
-        map_x_node.resize(n);
-        map_node_x.resize(mesh.getNumNodes());
+        map_var_node.resize(n);
+        map_node_var.resize(mesh.getNumNodes());
         makeMaps();
     }
     /**
@@ -76,10 +76,10 @@ namespace Physica::Core {
         for (const auto& elem : mesh.getElements()) {
             const auto& nodes = elem.getGlobalNodes();
             for (size_t i = 0; i < ElementType::getNumNodes(); ++i) {
-                const size_t trialNode = nodes[i];
-                const bool isValidTrialNode = nodeTypes[trialNode] == NodeType::Free;
-                if (isValidTrialNode) {
-                    const size_t row = nodeToX(trialNode);
+                const size_t node = nodes[i];
+                const bool isFree = nodeTypes[node] == NodeType::Free;
+                if (isFree) {
+                    const size_t row = nodeToVar(node);
 
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
@@ -93,7 +93,7 @@ namespace Physica::Core {
 
                         switch (nodeTypes[baseNode]) {
                             case NodeType::Free: {
-                                const size_t col = nodeToX(baseNode);
+                                const size_t col = nodeToVar(baseNode);
                                 Base::A(row, col) += integral;
                                 break;
                             }
@@ -121,8 +121,8 @@ namespace Physica::Core {
         for (size_t i = 0; i < nodeTypes.getLength(); ++i) {
             const bool isFreeNode = nodeTypes[i] == NodeType::Free;
             if (isFreeNode) {
-                map_x_node[next_x] = i;
-                map_node_x[i] = next_x;
+                map_var_node[next_x] = i;
+                map_node_var[i] = next_x;
                 ++next_x;
             }
         }
@@ -131,14 +131,14 @@ namespace Physica::Core {
     template<class MeshType>
     void PoissonModel<MeshType>::postSolve() {
         auto& coeffs = mesh.getCoeffs();
-        for (size_t i = 0; i < map_x_node.getLength(); ++i) {
-            coeffs[map_x_node[i]] = Base::x[i];
+        for (size_t i = 0; i < map_var_node.getLength(); ++i) {
+            coeffs[map_var_node[i]] = Base::x[i];
         }
     }
 
     template<class MeshType>
-    size_t PoissonModel<MeshType>::nodeToX(size_t node) const {
+    size_t PoissonModel<MeshType>::nodeToVar(size_t node) const {
         assert(mesh.getNodeTypes()[node] == NodeType::Free);
-        return map_node_x[node];
+        return map_node_var[node];
     }
 }

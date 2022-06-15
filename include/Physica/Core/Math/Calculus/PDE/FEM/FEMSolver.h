@@ -57,7 +57,6 @@ namespace Physica::Core {
     template<class ScalarType>
     void FEMSolver<ScalarType>::clear() {
         A = ScalarType::Zero();
-        x = ScalarType::Zero();
         b = ScalarType::Zero();
     }
 
