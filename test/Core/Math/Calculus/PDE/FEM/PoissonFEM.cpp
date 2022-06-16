@@ -53,7 +53,7 @@ struct ElementIntegratorPacker {
 };
 
 int main() {
-    auto mesh = ElementType::rectangle({0, 0}, {width, height}, 20, 10);
+    auto mesh = ElementType::rectangle({0, 0}, {width, height}, 21, 21);
     mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType::Zero(), 1E-5)
                                                       || scalarNear(p[0], ScalarType(width), 1E-5)
                                                       || scalarNear(p[1], ScalarType::Zero(), 1E-5)
@@ -66,12 +66,14 @@ int main() {
 
     const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
     const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
-    ScalarType rmes = 0;
+    ScalarType max_relative_error = 0;
     for (auto x : xs) {
-        for (auto y : ys)
-            rmes += square(theory_solution({x, y}) - model({x, y}));
+        for (auto y : ys) {
+            const ScalarType theory = theory_solution({x, y});
+            const ScalarType simulation = model({x, y});
+            if (!scalarNear(theory, simulation, 1E-2))
+                return 1;
+        }
     }
-    rmes = sqrt(rmes / ScalarType(xs.getLength() * ys.getLength()));
-    const bool isTrueAnswer = scalarNear(rmes, ScalarType::Zero(), error * 10);
-    return !isTrueAnswer;
+    return 0;
 }

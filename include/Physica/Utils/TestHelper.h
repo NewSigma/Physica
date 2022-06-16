@@ -26,17 +26,23 @@
 
 namespace Physica::Utils {
     template<class ScalarType>
-    bool scalarNear(const Physica::Core::ScalarBase<ScalarType>& scalar1,
-                    const Physica::Core::ScalarBase<ScalarType>& scalar2,
-                    double precision) {
-        assert(precision > 0);
+    ScalarType relativeError(const Physica::Core::ScalarBase<ScalarType>& scalar1,
+                             const Physica::Core::ScalarBase<ScalarType>& scalar2) {
         const auto& s1 = scalar1.getDerived();
         const auto& s2 = scalar2.getDerived();
         const ScalarType min = std::numeric_limits<ScalarType>::min();
         const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
         const ScalarType delta = s1 - s2;
         const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType::Two());
-        return error < ScalarType(precision);
+        return error;
+    }
+
+    template<class ScalarType>
+    bool scalarNear(const Physica::Core::ScalarBase<ScalarType>& scalar1,
+                    const Physica::Core::ScalarBase<ScalarType>& scalar2,
+                    double precision) {
+        assert(precision > 0);
+        return relativeError(scalar1, scalar2) < ScalarType(precision);
     }
 
     template<class ScalarType>
