@@ -27,6 +27,7 @@ namespace Physica::Core {
      */
     template<size_t dim, class ScalarType>
     class GeoBase {
+    public:
         using PointType = Point<dim, ScalarType>;
         using VectorType = typename PointType::VectorType;
     public:

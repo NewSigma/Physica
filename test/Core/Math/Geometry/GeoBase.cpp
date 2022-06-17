@@ -17,20 +17,36 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Utils/TestHelper.h"
-#include "Physica/Core/Math/Geometry/GeoBase.h"
+#include "Physica/Core/Math/Geometry/GeoBase2D.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Float, false>;
-using GeoBase2D = GeoBase<2, ScalarType>;
 
 int main() {
     constexpr float epsilon = std::numeric_limits<float>::epsilon();
-    if (!scalarNear(GeoBase2D::distToSegment({-1, -1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({-1, -1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
         return 1;
-    if (!scalarNear(GeoBase2D::distToSegment({2, 1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({2, 1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
         return 1;
-    if (!scalarNear(GeoBase2D::distToSegment({1, -1}, {0, 0}, {1, 0}), ScalarType::One(), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({1, -1}, {0, 0}, {1, 0}), ScalarType::One(), epsilon))
         return 1;
+    {
+        using VectorType = Vector<ScalarType, 2>;
+        using Triangle = Array<VectorType, 3>;
+        {
+            Triangle poly{{0.57, 0}, {0.67, 0}, {0.57, 0.05}};
+            bool flag1 = GeoBase2D<ScalarType>::pointOnPoly(VectorType{0, 0.3}, poly);
+            bool flag2 = GeoBase2D<ScalarType>::pointOnPoly(VectorType{0.62, 0.01}, poly);
+            if (flag1 || !flag2)
+                return 1;
+        }
+        {
+            Triangle poly{{0.095, 0}, {0.095, 0.047}, {0, 0.047}};
+            bool flag1 = GeoBase2D<ScalarType>::pointOnPoly(VectorType{0.36, 0}, poly);
+            if (flag1)
+                return 1;
+        }
+    }
     return 0;
 }
