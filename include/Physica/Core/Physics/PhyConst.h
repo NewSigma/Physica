@@ -25,18 +25,24 @@ namespace Physica::Core {
     };
 
     template<UnitSystem unitSystem = SI> class PhyConst;
-
+    /**
+     * Physical constants are from [1]
+     * Relative atom mass are from internet
+     * 
+     * Reference:
+     * [1] Physical constants, SI (NIST 2018) http://physics.nist.gov/constants
+     */
     template<>
     class PhyConst<SI> {
     public:
-        constexpr static double planck = 6.6260755E-34;
-        constexpr static double reducedPlanck = 1.05457266E-34;
-        constexpr static double electroMass = 9.10938215E-31;
+        constexpr static double planck = 6.62607015E-34;
+        constexpr static double reducedPlanck = planck / (2 * M_PI);
+        constexpr static double electroMass = 9.1093837015E-31;
         constexpr static double unitCharge = 1.602176634E-19;
-        constexpr static double bohrRadius = 5.2917721067E-11;
-        constexpr static double protonMass = 1.6726231E-27;
-        constexpr static double neutronMass = 1.6749286E-27;
-        constexpr static double vacuumDielectric = 8.854187817E-12;
+        constexpr static double bohrRadius = 5.29177210903E-11;
+        constexpr static double protonMass = 1.67262192369E-27;
+        constexpr static double neutronMass = 1.67492749804E-27;
+        constexpr static double vacuumDielectric = 8.8541878128E-12;
         constexpr static double boltzmannK = 1.380649E-23;
         /**
          * The first element is a space holder
@@ -47,7 +53,7 @@ namespace Physica::Core {
     template<>
     class PhyConst<AU> {
     private:
-        constexpr static double hartreeInEv = 27.211652;
+        constexpr static double hartreeInEv = 27.211386245988;
         constexpr static double rydbergInEv = hartreeInEv * 0.5;
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
     public:
