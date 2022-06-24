@@ -31,7 +31,7 @@ void VASPTest() {
     CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {14});
     const auto repCell = cell.reciprocal();
     const auto ewald = Ewald<ScalarType>::energyIonIon(cell, repCell, {4});
-    if (!scalarNear(ewald, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-7))
+    if (!scalarNear(ewald, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-5))
         exit(EXIT_FAILURE);
 }
 
