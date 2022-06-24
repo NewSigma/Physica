@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,87 +18,196 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "BandGrid.h"
+#include "PWBaseWave.h"
+#include "Ewald.h"
+#include "Grid3D.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class ScalarType, class XCProvider, bool isSpinPolarized> class KSSolverImpl;
-    }
-
     template<class ScalarType, class XCProvider>
-    class KSSolver : private Internal::KSSolverImpl<ScalarType, XCProvider, XCProvider::isSpinPolarized> {
-        constexpr static bool isSpinPolarized = XCProvider::isSpinPolarized;
-        using Base = Internal::KSSolverImpl<ScalarType, XCProvider, isSpinPolarized>;
-        using typename Base::ComplexType;
-        using typename Base::UnsignedDim;
-        using typename Base::CenteredGrid;
-
-        CenteredGrid externalPot;
+    class KSSolver {
     public:
-        KSSolver(CrystalCell cell, ScalarType cutEnergy, ScalarType gridDimFactor, BandGrid<ScalarType, isSpinPolarized> band);
+        constexpr static bool isSpinPolarized = XCProvider::isSpinPolarized;
+        constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
+        using ComplexType = ComplexScalar<ScalarType>;
+        using Vector3D = Vector<ScalarType, 3>;
+        using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
+        using KSOrbit = PWBaseWave<ScalarType>;
+        using KSOrbitArray = Utils::Array<KSOrbit>;
+        using MatrixType = DenseMatrix<ComplexType>;
+        using UncenteredGrid = Grid3D<ScalarType, false>;
+        using UnsignedDim = typename UncenteredGrid::Dim;
+        using CenteredGrid = Grid3D<ComplexType, true>;
+        using SignedDim = typename CenteredGrid::Dim;
+        using BandType = BandGrid<ScalarType, isSpinPolarized>;
+        using KSOrbits = Utils::Array<KSOrbitArray, NumSpin>;
+        using Hamilton = Utils::Array<HermiteMatrix, NumSpin>;
+        using EigenSolverType = Utils::Array<EigenSolver<MatrixType>, NumSpin>;
+        using DensityType = Utils::Array<UncenteredGrid, NumSpin>;
+        using PotType = Utils::Array<UncenteredGrid, NumSpin>;
+        using FFTxc = Utils::Array<FFT<ScalarType, 3>, NumSpin>;
+
+        constexpr static size_t DIISBufferSize = 3;
+        using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
+        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+        using DensityRecord = Utils::Array<DensityType, DIISBufferSize>;
+    protected:
+        CrystalCell cell;
+        ReciprocalCell repCell;
+        ScalarType cutEnergy;
+        size_t iteration;
+
+        KSOrbits orbits;
+        Hamilton h;
+        BandType band;
+
+        EigenSolverType eigSolver;
+        DensityRecord densityRecord;
+        CenteredGrid externalPot;
+        PotType xcPot;
+        XCProvider xcProvider;
+        FFTxc fft_xc;
+        FFT<ScalarType, 3>* fft_hartree;
+    public:
+        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType gridDimFactor, BandType band_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
-        ~KSSolver() = default;
+        ~KSSolver();
         /* Operators */
         KSSolver& operator=(const KSSolver& base) = delete;
         KSSolver& operator=(KSSolver&& base) noexcept = delete;
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
         /* Getters */
-        [[nodiscard]] const BandGrid<ScalarType, isSpinPolarized>& getBand() const noexcept { return Base::band; }
-    private:
+        [[nodiscard]] size_t getPlainWaveCount() const noexcept { return orbits[0][0].getPlainWaveCount(); }
+        [[nodiscard]] const BandType& getBand() const noexcept { return band; }
+    protected:
         /* Operations */
+        Utils::Array<CenteredGrid> makeStructureFactor(ScalarType factorCutoff);
+        UnsignedDim makePotGridDim(ScalarType gridDimFactor);
         void initExternalPot();
+        void initDensity();
+        void assembleH(Vector3D k, const CenteredGrid& externalPot);
+        void fillPotential(const CenteredGrid& externalPot);
+        void updateOrbits();
+        void updateDensity();
+        void preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat);
+        void DIISExtrapolation(DIISMatrix& diisMat);
         /* Getters */
-        [[nodiscard]] Utils::Array<CenteredGrid> getStructureFactor(ScalarType factorCutoff);
-        [[nodiscard]] static UnsignedDim getPotGridDim(ScalarType cutEnergy, ScalarType gridDimFactor, const CrystalCell& cell);
+        [[nodiscard]] size_t numOrbitToSolve() const { return (cell.getElectronCount() + 1) / 2; }
+        [[nodiscard]] SignedDim indexToSignedDim(size_t index) const noexcept { return orbits[0][0].indexToDim(index); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(SignedDim dim) const noexcept { return orbits[0][0].getWaveVector(dim); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return orbits[0][0].getWaveVector(index); }
+        [[nodiscard]] DensityType& currentDensity() { return *densityRecord.rbegin(); }
+        [[nodiscard]] size_t getDimX() const noexcept { return xcPot[0].getDimX(); }
+        [[nodiscard]] size_t getDimY() const noexcept { return xcPot[0].getDimY(); }
+        [[nodiscard]] size_t getDimZ() const noexcept { return xcPot[0].getDimZ(); }
+        [[nodiscard]] auto getDim() const noexcept { return xcPot[0].getDim(); }
+        [[nodiscard]] auto dimToPos(UnsignedDim dim) const noexcept { return xcPot[0].dimToPos(dim); }
+        [[nodiscard]] size_t getSize() const noexcept { return xcProvider.getBufferSize(); }
+        /* Static members */
+        [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
     };
 
     template<class ScalarType, class XCProvider>
-    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell,
-                                               ScalarType cutEnergy,
-                                               ScalarType gridDimFactor,
-                                               BandGrid<ScalarType, isSpinPolarized> band)
-            : Base(std::move(cell), std::move(cutEnergy), std::move(band), getPotGridDim(cutEnergy, gridDimFactor, cell)) {
+    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType gridDimFactor, BandType band_)
+            : cell(std::move(cell_))
+            , cutEnergy(cutEnergy_)
+            , iteration(0)
+            , band(std::move(band_)) {
+        repCell = cell.reciprocal();
+        /* Allocate orbits */ {
+            const size_t electronCount = cell.getElectronCount();
+            orbits[0] = KSOrbitArray((electronCount + 1) / 2, cutEnergy, repCell.getLattice());
+            if constexpr (isSpinPolarized)
+                orbits[1] = KSOrbitArray(electronCount / 2, cutEnergy, repCell.getLattice());
+        }
+        /* Matrix related */ {
+            const size_t plainWaveCount = getPlainWaveCount();
+            h = Hamilton(NumSpin, plainWaveCount);
+            eigSolver = EigenSolverType(NumSpin, plainWaveCount);
+        }
+        /* Mesh grid related */ {
+            auto potGridDim = makePotGridDim(gridDimFactor);
+            densityRecord = DensityRecord(DIISBufferSize, NumSpin, cell.getLattice(), potGridDim);
+            xcProvider = XCProvider(std::get<0>(potGridDim) * std::get<1>(potGridDim) * std::get<2>(potGridDim));
+            xcPot = PotType(NumSpin, cell.getLattice(), potGridDim);
+            /* Allocate fft */ {
+                const Utils::Array<size_t, 3> fftGrid{std::get<0>(potGridDim), std::get<1>(potGridDim), std::get<2>(potGridDim)};
+                const Utils::Array<ScalarType, 3> fftDeltaTs{ScalarType(cell.getLattice().row(0).norm()) / ScalarType(fftGrid[0] - 1),
+                                                            ScalarType(cell.getLattice().row(1).norm()) / ScalarType(fftGrid[1] - 1),
+                                                            ScalarType(cell.getLattice().row(2).norm()) / ScalarType(fftGrid[2] - 1)};
+                fft_xc = FFTxc(NumSpin, fftGrid, fftDeltaTs);
+                fft_hartree = new FFT<ScalarType, 3>(fftGrid, fftDeltaTs);
+            }
+        }
+        initDensity();
         initExternalPot();
     }
 
     template<class ScalarType, class XCProvider>
-    bool KSSolver<ScalarType, XCProvider>::solve(const ScalarType& criteria, size_t maxIte) {
-        return Base::solve(criteria, maxIte, externalPot);
+    KSSolver<ScalarType, XCProvider>::~KSSolver() {
+        delete fft_hartree;
     }
 
     template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::initExternalPot() {
-        const ScalarType factorCutoff = Base::cutEnergy * 8;
-        externalPot = CenteredGrid::gridFromCutEnergy(factorCutoff, Base::repCell.getLattice());
-        const Utils::Array<CenteredGrid> all_factors = getStructureFactor(factorCutoff);
-        const ScalarType factor1 = ScalarType(-4 * M_PI) / Base::cell.getVolume();
-        const std::unordered_set<uint16_t> species = Base::cell.getSpecies();
+    bool KSSolver<ScalarType, XCProvider>::solve(const ScalarType& criteria, size_t maxIte) {
+        auto densityResiduals = DIISBuffer(DIISBufferSize - 1, UncenteredGrid(cell.getLattice(), getDimX(), getDimY(), getDimZ()));
+        auto diisMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
+        diisMat(0, 0) = ScalarType::Zero();
 
-        externalPot.asVector() = ScalarType::Zero();
-        const size_t gridSize = externalPot.getSize();
+        for (auto& kPoint : band.getKPoints()) {
+            iteration = 0;
+            while (true) {
+                assembleH(kPoint.getPos(), externalPot);
+                eigSolver[0].compute(h[0], true);
+                eigSolver[0].sort();
+                if constexpr (isSpinPolarized) {
+                    eigSolver[1].compute(h[1], true);
+                    eigSolver[1].sort();
+                }
+                updateOrbits();
+                updateDensity();
 
-        size_t j = 0;
-        for (uint16_t element : species) {
-            const CenteredGrid& factors = all_factors[j];
-            for (size_t i = 0; i < gridSize; ++i)
-                externalPot[i] += factor1 * Base::getCharge(element) * factors[i] / factors.indexToPos(i).squaredNorm();
-            ++j;
+                if (iteration != 0) {
+                    const auto& delta_rho = (*densityResiduals.crbegin()).asVector();
+                    const auto& rho = currentDensity()[0].asVector();
+                    const ScalarType error = abs(divide(delta_rho, rho)).max();
+                    const bool isConverged = error < criteria;
+                    if (isConverged)
+                        break;
+                }
+
+                preDIIS(densityResiduals, diisMat);
+                const bool doDIIS = iteration != 0 && iteration % DIISBufferSize == 0;
+                if (doDIIS)
+                    DIISExtrapolation(diisMat);
+
+                if (++iteration == maxIte)
+                    throw BadConvergenceException();
+            };
+            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolver[0].getEigenvalues()));
+            if constexpr (isSpinPolarized)
+                kPoint.setBandEnergy(SpinState::Down, toRealVector(eigSolver[1].getEigenvalues()));
         }
-        externalPot(0, 0, 0) = ComplexType::Zero();
+        return true;
     }
 
     template<class ScalarType, class XCProvider>
     Utils::Array<typename KSSolver<ScalarType, XCProvider>::CenteredGrid>
-    KSSolver<ScalarType, XCProvider>::getStructureFactor(ScalarType factorCutoff) {
-        const std::unordered_set<uint16_t> species = Base::cell.getSpecies();
-        const auto& lattice = Base::repCell.getLattice();
+    KSSolver<ScalarType, XCProvider>::makeStructureFactor(ScalarType factorCutoff) {
+        const std::unordered_set<uint16_t> species = cell.getSpecies();
+        const auto& lattice = repCell.getLattice();
         auto all_factors = Utils::Array<CenteredGrid>(species.size(), CenteredGrid::gridFromCutEnergy(factorCutoff, lattice));
         const size_t factors_size = all_factors[0].getSize();
-        const size_t atomCount = Base::cell.getAtomCount();
+        const size_t atomCount = cell.getAtomCount();
 
         Vector<ScalarType, 3> g;
         size_t j = 0;
@@ -108,8 +217,8 @@ namespace Physica::Core {
                 g = factors.indexToPos(i);
                 auto temp = ComplexType::Zero();
                 for (size_t ion = 0; ion < atomCount; ++ion) {
-                    if (Base::cell.getAtomicNumber(ion) == element) { //We can use searching table method
-                        auto r = Base::cell.getPos().row(ion);
+                    if (cell.getAtomicNumber(ion) == element) { //We can use searching table method
+                        auto r = cell.getPos().row(ion);
                         const ScalarType phase = g * r.asVector();
                         temp += ComplexType(cos(phase), sin(phase));
                     }
@@ -122,13 +231,231 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initExternalPot() {
+        const ScalarType factorCutoff = cutEnergy * 8;
+        externalPot = CenteredGrid::gridFromCutEnergy(factorCutoff, repCell.getLattice());
+        const Utils::Array<CenteredGrid> all_factors = makeStructureFactor(factorCutoff);
+        const ScalarType factor1 = ScalarType(-4 * M_PI) / cell.getVolume();
+        const std::unordered_set<uint16_t> species = cell.getSpecies();
+
+        externalPot.asVector() = ScalarType::Zero();
+        const size_t gridSize = externalPot.getSize();
+
+        size_t j = 0;
+        for (uint16_t element : species) {
+            const CenteredGrid& factors = all_factors[j];
+            for (size_t i = 0; i < gridSize; ++i)
+                externalPot[i] += factor1 * getCharge(element) * factors[i] / factors.indexToPos(i).squaredNorm();
+            ++j;
+        }
+        externalPot(0, 0, 0) = ComplexType::Zero();
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initDensity() {
+        const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
+        auto& pair1 = currentDensity();
+        auto& rho1 = pair1[0].asVector();
+        rho1 = averageDensity;
+        auto& pair2 = densityRecord[densityRecord.getLength() - 2];
+        auto& rho2 = pair2[0].asVector();
+        rho2 = ScalarType::Zero();
+        if constexpr (isSpinPolarized) {
+            auto& zeta1 = pair1[1].asVector();
+            zeta1 = ScalarType::Zero();
+            auto& zeta2 = pair2[1].asVector();
+            zeta2 = ScalarType::Zero();
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::assembleH(Vector3D k, const CenteredGrid& externalPot) {
+        auto& h_up = h[0];
+        auto& h_down = h[1];
+        h_up = ScalarType::Zero();
+        if constexpr (isSpinPolarized)
+            h_down = ScalarType::Zero();
+        /* fill kinetic */ {
+            const size_t order = h_up.getRow();
+            for (size_t i = 0; i < order; ++i) {
+                const ScalarType temp = ScalarType((k + getWaveVector(i)).squaredNorm()) * ScalarType(0.5);
+                h_up(i, i) += temp;
+                if constexpr (isSpinPolarized)
+                    h_down(i, i) += temp;
+            }
+        }
+        fillPotential(externalPot);
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::fillPotential(const CenteredGrid& externalPot) {
+        using VectorType = Vector<ScalarType, 3>;
+        xcProvider.fill(currentDensity(), xcPot);
+        fft_xc[0].transform(xcPot[0].asVector());
+        if constexpr (isSpinPolarized)
+            fft_xc[1].transform(xcPot[1].asVector());
+        fft_hartree->transform(currentDensity()[0].asVector());
+
+        const ScalarType factor = reciprocal(ScalarType(2 * M_PI));
+        const auto fft_nomalizer = reciprocal(ScalarType(getSize()));
+        const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
+
+        const size_t order = h[0].getRow();
+        for (size_t i = 0; i < order; ++i) {
+            const auto dim1 = indexToSignedDim(i);
+            auto[x1, y1, z1] = dim1;
+            const VectorType k1 = getWaveVector(dim1);
+            for (size_t j = i; j < order; ++j) {
+                const auto dim2 = indexToSignedDim(j);
+                auto[x2, y2, z2] = dim2;
+                const VectorType k2 = getWaveVector(dim2);
+                const VectorType deltaK = k1 - k2;
+                const VectorType k = deltaK * factor;
+
+                ComplexType hartree;
+                if (i == j)
+                    hartree = ComplexType::Zero();
+                else
+                    hartree = fft_hartree->getFreqIntense(k) * factor1 / deltaK.squaredNorm();
+                const ComplexType external = externalPot(x1 - x2, y1 - y2, z1 - z2);
+
+                const ComplexType xc_up = fft_xc[0].getFreqIntense(k) * fft_nomalizer;
+                h[0](i, j) += xc_up + hartree + external;
+                if constexpr (isSpinPolarized) {
+                    const ComplexType xc_down = fft_xc[1].getFreqIntense(k) * fft_nomalizer;
+                    h[1](i, j) += xc_down + hartree + external;
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::updateOrbits() {
+        {
+            auto& eigSolverUp = eigSolver[0];
+            auto& orbits_up = orbits[0];
+            const size_t orbitCount = orbits_up.getLength();
+            for (size_t i = 0; i < orbitCount; ++i)
+                orbits_up[i] = eigSolverUp.getRawEigenvectors().col(i);
+        }
+        if constexpr (isSpinPolarized) {
+            auto& eigSolverDown = eigSolver[1];
+            auto& orbits_down = orbits[1];
+            const size_t orbitCount = orbits_down.getLength();
+            for (size_t i = 0; i < orbitCount; ++i)
+                orbits_down[i] = eigSolverDown.getRawEigenvectors().col(i);
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::updateDensity() {
+        const auto[dimX, dimY, dimZ] = getDim();
+        const ScalarType inv_volume = reciprocal(cell.getVolume());
+
+        const size_t numOccupiedUp = numOrbitToSolve();
+        const auto& orbits_up = orbits[0];
+        auto& density_up = densityRecord[0][0];
+        ScalarType total_density_up = 0;
+
+        if constexpr (isSpinPolarized) {
+            const auto& orbits_down = orbits[1];
+            const size_t numOccupiedDown = numOccupiedUp - (cell.getElectronCount() % 2 != 0);
+            auto& density_down = densityRecord[0][1];
+            ScalarType total_density_down = 0;
+
+            for (size_t i = 0; i < dimX; ++i) {
+                for (size_t j = 0; j < dimY; ++j) {
+                    for (size_t k = 0; k < dimZ; ++k) {
+                        const auto pos = dimToPos({i, j, k});
+                        auto rho_up = ScalarType::Zero();
+                        for (size_t index = 0; index < numOccupiedUp; ++index)
+                            rho_up += orbits_up[index](pos).squaredNorm();
+                        density_up(i, j, k) = rho_up;
+                        total_density_up += rho_up;
+
+                        auto rho_down = ScalarType::Zero();
+                        for (size_t index = 0; index < numOccupiedDown; ++index)
+                            rho_down += orbits_down[index](pos).squaredNorm();
+                        density_down(i, j, k) = rho_down;
+                        total_density_down += rho_down;
+                    }
+                }
+            }
+            density_up.asVector() *= ScalarType(numOccupiedUp * density_up.asVector().getLength()) / total_density_up * inv_volume;
+            density_down.asVector() *= ScalarType(numOccupiedDown * density_up.asVector().getLength()) / total_density_down * inv_volume;
+            /* Change format */ {
+                auto& rho = density_up.asVector();
+                auto& zeta = density_down.asVector();
+                rho += zeta;
+                zeta = divide(rho - zeta * ScalarType::Two(), rho);
+            }
+        }
+        else {
+            for (size_t i = 0; i < dimX; ++i) {
+                for (size_t j = 0; j < dimY; ++j) {
+                    for (size_t k = 0; k < dimZ; ++k) {
+                        const auto pos = dimToPos({i, j, k});
+                        auto rho_up = ScalarType::Zero();
+                        for (size_t index = 0; index < numOccupiedUp; ++index)
+                            rho_up += orbits_up[index](pos).squaredNorm();
+                        const ScalarType temp = rho_up * ScalarType::Two();
+                        density_up(i, j, k) = temp;
+                        total_density_up += temp;
+                    }
+                }
+            }
+            density_up.asVector() *= ScalarType(2 * numOccupiedUp * density_up.asVector().getLength()) / total_density_up * inv_volume;
+        }
+
+        for (size_t i = 0; i < densityRecord.getLength() - 1; ++i)
+            swap(densityRecord[i], densityRecord[i + 1]);
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::preDIIS(DIISBuffer& residuals, DIISMatrix& diisMat) {
+        /* Update residuals */ {
+            const auto& rho_new = currentDensity()[0].asVector();
+            const auto& rho_old = densityRecord[densityRecord.getLength() - 2][0].asVector();
+            residuals[0].asVector() = rho_new - rho_old;
+            for (size_t i = 0; i < residuals.getLength() - 1; ++i)
+                swap(residuals[i], residuals[i + 1]);
+        }
+        /* Construct equation */ {
+            for (size_t i = 1; i < diisMat.getRow(); ++i) {
+                for (size_t j = i; j < diisMat.getColumn(); ++j) {
+                    ScalarType temp = residuals[i - 1].asVector() * residuals[j - 1].asVector();
+                    diisMat(i, j) = temp;
+                    diisMat(j, i) = temp;
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::DIISExtrapolation(DIISMatrix& diisMat) {
+        Vector<ScalarType, DIISBufferSize> x{};
+        /* Solve linear equation */ {
+            auto b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
+            b[0] = -ScalarType::One();
+            const DIISMatrix inv_A = diisMat.inverse();
+            x = inv_A * b;
+        }
+
+        auto& new_rho = currentDensity()[0].asVector();
+        new_rho = ScalarType::Zero();
+        for (size_t i = 1; i < x.getLength(); ++i) {
+            const auto& rho = densityRecord[i - 1][0].asVector();
+            new_rho += rho * x[i];
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
     typename KSSolver<ScalarType, XCProvider>::UnsignedDim
-    KSSolver<ScalarType, XCProvider>::getPotGridDim(ScalarType cutEnergy, ScalarType gridDimFactor, const CrystalCell& cell) {
+    KSSolver<ScalarType, XCProvider>::makePotGridDim(ScalarType gridDimFactor) {
         assert(gridDimFactor >= ScalarType::Two()); //Nyquist theory requests
-        const auto repCell = cell.reciprocal();
         const auto& lattice = cell.getLattice();
         const auto& repLattice = repCell.getLattice();
-        auto plainWaveSetDim = Base::UncenteredGrid::dimFromCutEnergy(cutEnergy, repLattice);
+        auto plainWaveSetDim = UncenteredGrid::dimFromCutEnergy(cutEnergy, repLattice);
         const ScalarType factor = gridDimFactor / ScalarType(M_PI);
 
         size_t dimX, dimY, dimZ;
@@ -138,5 +465,3 @@ namespace Physica::Core {
         return {dimX, dimY, dimZ};
     }
 }
-
-#include "KSSolverImpl.h"

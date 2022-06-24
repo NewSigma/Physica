@@ -38,6 +38,7 @@ namespace Physica::Core::Internal {
         int size;
         RealType deltaT;
     public:
+        FFTImpl();
         FFTImpl(size_t size_, const RealType& deltaT_);
         FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_);
         FFTImpl(const FFTImpl& fft);
@@ -60,6 +61,9 @@ namespace Physica::Core::Internal {
         void transform();
         void invTransform();
     };
+
+    template<class ScalarType>
+    FFTImpl<ScalarType, 1>::FFTImpl() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), size(0), deltaT() {}
 
     template<class ScalarType>
     FFTImpl<ScalarType, 1>::FFTImpl(size_t size_, const RealType& deltaT_)
@@ -218,6 +222,7 @@ namespace Physica::Core::Internal {
         Utils::Array<int, Dim> size;
         Utils::Array<RealType, Dim> deltaTs;
     public:
+        FFTImpl();
         FFTImpl(const Utils::Array<size_t, Dim>& size_,
                 Utils::Array<RealType, Dim> deltaTs_);
         FFTImpl(const Vector<ScalarType>& data,
@@ -251,6 +256,9 @@ namespace Physica::Core::Internal {
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
         [[nodiscard]] Utils::Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
     };
+
+    template<class ScalarType, size_t Dim>
+    FFTImpl<ScalarType, Dim>::FFTImpl() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), size(Dim, 0), deltaTs() {}
 
     template<class ScalarType, size_t Dim>
     FFTImpl<ScalarType, Dim>::FFTImpl(

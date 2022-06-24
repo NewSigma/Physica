@@ -35,8 +35,9 @@ namespace Physica::Core {
             using Grid = Grid3D<ScalarType, false>;
         public:
             constexpr static bool isSpinPolarized = polarized;
-            using DensityType = typename std::conditional<isSpinPolarized, std::pair<Grid, Grid>, Grid>::type;
-            using PotType = typename std::conditional<isSpinPolarized, std::pair<Grid, Grid>, Grid>::type;
+            constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
+            using DensityType = Utils::Array<Grid, NumSpin>;
+            using PotType = Utils::Array<Grid, NumSpin>;
         };
     }
 
@@ -53,17 +54,19 @@ namespace Physica::Core {
         Vector<ScalarType> buffer2;
         Vector<ScalarType> buffer3;
     public:
+        LDA() = default;
         LDA(size_t bufferSize);
-        LDA(const LDA&) = delete;
-        LDA(LDA&&) = delete;
+        LDA(const LDA&) = default;
+        LDA(LDA&&) = default;
         ~LDA() = default;
         /* Operators */
-        LDA& operator=(const LDA&) = delete;
-        LDA& operator=(LDA&&) = delete;
+        LDA& operator=(LDA lda) noexcept;
         /* Operations */
         void fill(const DensityType& density, PotType& xc);
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
+        /* Helpers */
+        void swap(LDA& lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);
@@ -76,9 +79,15 @@ namespace Physica::Core {
                                                         , buffer3(bufferSize) {}
 
     template<class ScalarType, LDAType type>
+    LDA<ScalarType, type, true>& LDA<ScalarType, type, true>::operator=(LDA lda) noexcept {
+        swap(lda);
+        return *this;
+    }
+
+    template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, true>::fill(const DensityType& density, PotType& xc) {
-        [[maybe_unused]] const auto& rho = density.first.asVector();
-        [[maybe_unused]] const auto& zeta = density.second.asVector();
+        [[maybe_unused]] const auto& rho = density[0].asVector();
+        [[maybe_unused]] const auto& zeta = density[1].asVector();
         assert(rho.getLength() == getBufferSize());
         assert(zeta.getLength() == getBufferSize());
         fillExchange(density, xc);
@@ -94,10 +103,10 @@ namespace Physica::Core {
         constexpr double factor1 = -0.93052573634910002500;
         constexpr double factor_f = 1.9236610509315363198;
         constexpr double factor_df = -2.5648814012420484263;
-        const auto& rho = density.first.asVector();
-        const auto& zeta = density.second.asVector();
-        auto& xc_up = xc.first.asVector();
-        auto& xc_down = xc.second.asVector();
+        const auto& rho = density[0].asVector();
+        const auto& zeta = density[1].asVector();
+        auto& xc_up = xc[0].asVector();
+        auto& xc_down = xc[1].asVector();
         auto& buffer5 = xc_up;
         auto& buffer6 = xc_down;
 
@@ -129,8 +138,8 @@ namespace Physica::Core {
      */
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, true>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
-        auto& xc_up = xc.first.asVector();
-        auto& xc_down = xc.second.asVector();
+        auto& xc_up = xc[0].asVector();
+        auto& xc_down = xc[1].asVector();
         switch(type) {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;
@@ -139,6 +148,14 @@ namespace Physica::Core {
             xc_up += buffer;
             xc_down += buffer;
         }
+    }
+
+    template<class ScalarType, LDAType type>
+    void LDA<ScalarType, type, true>::swap(LDA& lda) noexcept {
+        buffer.swap(lda.buffer);
+        buffer1.swap(lda.buffer1);
+        buffer2.swap(lda.buffer2);
+        buffer3.swap(lda.buffer3);
     }
 
     template<class ScalarType, LDAType type>
@@ -151,17 +168,19 @@ namespace Physica::Core {
     private:
         Vector<ScalarType> buffer;
     public:
+        LDA() = default;
         LDA(size_t bufferSize);
-        LDA(const LDA&) = delete;
-        LDA(LDA&&) = delete;
+        LDA(const LDA&) = default;
+        LDA(LDA&&) = default;
         ~LDA() = default;
         /* Operators */
-        LDA& operator=(const LDA&) = delete;
-        LDA& operator=(LDA&&) = delete;
+        LDA& operator=(LDA lda) noexcept;
         /* Operations */
         void fill(const DensityType& density, PotType& xc);
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
+        /* Helpers */
+        void swap(LDA& lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);
@@ -171,8 +190,14 @@ namespace Physica::Core {
     LDA<ScalarType, type, false>::LDA(size_t bufferSize) : buffer(bufferSize) {}
 
     template<class ScalarType, LDAType type>
+    LDA<ScalarType, type, false>& LDA<ScalarType, type, false>::operator=(LDA lda) noexcept {
+        swap(lda);
+        return *this;
+    }
+
+    template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, false>::fill(const DensityType& density, PotType& xc) {
-        [[maybe_unused]] const auto& rho = density.asVector();
+        [[maybe_unused]] const auto& rho = density[0].asVector();
         assert(rho.getLength() == getBufferSize());
         fillExchange(density, xc);
         addCorreclation(density, xc);
@@ -184,8 +209,8 @@ namespace Physica::Core {
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, false>::fillExchange(const DensityType& density, PotType& xc) {
         constexpr double factor0 = -0.73855876638202240588;
-        const auto& rho = density.asVector();
-        auto& V = xc.asVector();
+        const auto& rho = density[0].asVector();
+        auto& V = xc[0].asVector();
 
         buffer = pow(rho, ScalarType(1.0 / 3));
         V = ScalarType(4.0 / 3 * factor0) * buffer;
@@ -196,7 +221,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, false>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
-        auto& V = xc.asVector();
+        auto& V = xc[0].asVector();
         switch(type) {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;
@@ -204,5 +229,10 @@ namespace Physica::Core {
             buffer = ScalarType(factor1) * ln(ScalarType::One() + ScalarType(factor2) * buffer);
             V += buffer;
         }
+    }
+
+    template<class ScalarType, LDAType type>
+    void LDA<ScalarType, type, false>::swap(LDA& lda) noexcept {
+        buffer.swap(lda.buffer);
     }
 }

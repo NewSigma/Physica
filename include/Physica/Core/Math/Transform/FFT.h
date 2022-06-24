@@ -37,6 +37,7 @@ namespace Physica::Core {
     private:
         Impl impl;
     public:
+        FFT() = default;
         FFT(size_t size_, const RealType& deltaT);
         FFT(const Vector<ScalarType>& data, const RealType& deltaT);
         FFT(const FFT&) = default;
@@ -95,6 +96,7 @@ namespace Physica::Core {
     private:
         Impl impl;
     public:
+        FFT() = default;
         FFT(Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
         FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
         FFT(const FFT&) = default;

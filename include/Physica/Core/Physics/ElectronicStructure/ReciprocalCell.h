@@ -27,6 +27,7 @@ namespace Physica::Core {
 
         LatticeMatrix lattice;
     public:
+        ReciprocalCell() = default;
         ReciprocalCell(LatticeMatrix lattice_);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept;
