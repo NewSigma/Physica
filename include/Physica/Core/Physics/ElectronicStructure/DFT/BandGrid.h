@@ -27,14 +27,14 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     class BandGrid {
-        using KPoints = Grid3D<KPoint<ScalarType, isSpinPolarized>, false>;
+        using KPoints = Grid3D<KPoint<ScalarType, 0, isSpinPolarized>, false>;
         using LatticeMatrix = typename KPoints::LatticeMatrix;
 
         KPoints kPoints;
         size_t electronCount;
     public:
         template<class MatrixType>
-        BandGrid(ScalarType cutEnergy, const LValueMatrix<MatrixType>& repLatt, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_);
+        BandGrid(const LValueMatrix<MatrixType>& repLatt, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_);
         BandGrid(const BandGrid&) = default;
         BandGrid(BandGrid&&) noexcept = default;
         ~BandGrid() = default;
@@ -54,8 +54,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     template<class MatrixType>
-    BandGrid<ScalarType, isSpinPolarized>::BandGrid(ScalarType cutEnergy,
-                                                    const LValueMatrix<MatrixType>& repLatt,
+    BandGrid<ScalarType, isSpinPolarized>::BandGrid(const LValueMatrix<MatrixType>& repLatt,
                                                     size_t kPointX,
                                                     size_t kPointY,
                                                     size_t kPointZ,
@@ -64,12 +63,12 @@ namespace Physica::Core {
             , electronCount(electronCount_) {
         assert(kPoints.getSize() != 0);
         size_t kPointID = 0;
-        const size_t plainWaveCount = Grid3D<double, true>::sizeFromCutEnergy(cutEnergy, repLatt); //TODO: signed/unsigned character can be moved to father class
-        
+
         const ScalarType kPointWeight = reciprocal(ScalarType(kPoints.getSize()));
         const ScalarType stepX = reciprocal(ScalarType(kPointX));
         const ScalarType stepY = reciprocal(ScalarType(kPointY));
         const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
+        const size_t numBand = (electronCount + 1) / 2;
 
         Vector<ScalarType, 3> k{};
         ScalarType& kx = k[0];
@@ -82,7 +81,7 @@ namespace Physica::Core {
             for (size_t y = 1; y <= kPointY; ++y) {
                 kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPoints[kPointID] = KPoint<ScalarType, isSpinPolarized>(k, plainWaveCount, kPointWeight);
+                    kPoints[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
                     kz += stepZ;
                     ++kPointID;
                 }
@@ -95,9 +94,11 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized>
     ScalarType BandGrid<ScalarType, isSpinPolarized>::getTotalEnergy() const noexcept {
         ScalarType energy = ScalarType::Zero();
-        for (auto ite = kPoints.cbegin(); ite != kPoints.cend(); ++ite)
-            energy += (*ite).getTotalEnergy();
-        energy *= reciprocal(ScalarType(kPoints.getSize()));
+        for (const auto& kPoint : kPoints) {
+            const ScalarType energyUp = kPoint.getBandEnergy(SpinState::Up).sum();
+            const ScalarType energyDown = kPoint.getBandEnergy(SpinState::Down).head(electronCount / 2).sum();
+            energy += (energyUp + energyDown) * kPoint.getWeight();
+        }
         return energy;
     }
     /**

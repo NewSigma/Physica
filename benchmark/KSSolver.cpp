@@ -34,7 +34,7 @@ int main() {
     CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14});
     ScalarType cutEnergy(0.8);
     {
-        BandGrid<ScalarType, false> grid(cutEnergy, Si.reciprocal().getLattice(), 1, 1, 1, 14);
+        BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(Si, cutEnergy, 50, std::move(grid));
         const auto from = Cycler::tic();
         solver.solve(1E-3, 100);

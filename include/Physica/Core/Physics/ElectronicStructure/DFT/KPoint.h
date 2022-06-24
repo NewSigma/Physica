@@ -18,136 +18,69 @@
  */
 #pragma once
 
-#include "KPointBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.h"
+#include "Spin.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool isSpinPolarized> class KPoint;
-
-    template<class ScalarType>
-    class KPoint<ScalarType, true> : public KPointBase<ScalarType> {
-        using Base = KPointBase<ScalarType>;
-        using typename Base::ComplexType;
-        using typename Base::Vector3D;
-        using typename Base::OccupacyVector;
-        using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
-
-        EigInfo eigUp;
-        EigInfo eigDown;
-        OccupacyVector occupacyUp;
-        OccupacyVector occupacyDown;
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    class KPoint {
+    public:
+        constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
+        using ComplexType = ComplexScalar<ScalarType>;
+        using Vector3D = Vector<ScalarType, 3>;
+        using BandEnergy = Vector<ScalarType, NumBand>;
+        using BandEnergyPair = std::pair<BandEnergy, BandEnergy>;
+    private:
+        Vector3D pos;
+        ScalarType weight;
+        Utils::Array<BandEnergy, NumSpin> bandE;
     public:
         KPoint() = default;
-        KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight);
+        KPoint(Vector3D pos_, ScalarType weight_, size_t numBand);
         KPoint(const KPoint&) = default;
         KPoint(KPoint&&) noexcept = default;
         ~KPoint() = default;
         /* Operators */
         KPoint& operator=(KPoint k) noexcept;
-        /* Setters */
-        void setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown);
         /* Getters */
-        [[nodiscard]] const EigInfo& getEigUp() const noexcept { return eigUp; }
-        [[nodiscard]] const EigInfo& getEigDown() const noexcept { return eigDown; }
-        [[nodiscard]] const OccupacyVector& getOccupacyUp() const noexcept { return occupacyUp; }
-        [[nodiscard]] const OccupacyVector& getOccupacyDown() const noexcept { return occupacyDown; }
-        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
+        [[nodiscard]] const Vector3D& getPos() const noexcept { return pos; }
+        [[nodiscard]] const ScalarType& getWeight() const noexcept { return weight; }
+        [[nodiscard]] inline const BandEnergy& getBandEnergy(SpinState spin) const noexcept;
+        /* Setters */
+        template<class VectorType>
+        void setBandEnergy(SpinState spin, const RValueVector<VectorType>& v);
         /* Helpers */
         void swap(KPoint& kPoint) noexcept;
     };
 
-    template<class ScalarType>
-    KPoint<ScalarType, true>::KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight)
-            : Base(std::move(pos_), std::move(weight))
-            , eigUp(plainWaveCount)
-            , eigDown(plainWaveCount)
-            , occupacyUp(plainWaveCount, 0)
-            , occupacyDown(plainWaveCount, 0) {}
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    KPoint<ScalarType, NumBand, isSpinPolarized>::KPoint(Vector3D pos_, ScalarType weight_, size_t numBand)
+            : pos(std::move(pos_)), weight(std::move(weight_)), bandE(NumSpin, numBand) {}
 
-    template<class ScalarType>
-    KPoint<ScalarType, true>& KPoint<ScalarType, true>::operator=(KPoint k) noexcept {
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    KPoint<ScalarType, NumBand, isSpinPolarized>& KPoint<ScalarType, NumBand, isSpinPolarized>::operator=(KPoint k) noexcept {
         swap(k);
         return *this;
     }
 
-    template<class ScalarType>
-    void KPoint<ScalarType, true>::setEigInfo(EigInfo& newEigUp, EigInfo& newEigDown) {
-        eigUp.swap(newEigUp);
-        eigDown.swap(newEigDown);
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    inline const typename KPoint<ScalarType, NumBand, isSpinPolarized>::BandEnergy&
+    KPoint<ScalarType, NumBand, isSpinPolarized>::getBandEnergy(SpinState spin) const noexcept {
+        return bandE[isSpinPolarized ? int(spin) : 0];
     }
 
-    template<class ScalarType>
-    ScalarType KPoint<ScalarType, true>::getTotalEnergy() const noexcept {
-        return toRealVector(eigUp.getEigenvalues()) * occupacyUp + toRealVector(eigDown.getEigenvalues()) * occupacyDown;
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    template<class VectorType>
+    void KPoint<ScalarType, NumBand, isSpinPolarized>::setBandEnergy(SpinState spin, const RValueVector<VectorType>& v) {
+        BandEnergy& energy = bandE[isSpinPolarized ? int(spin) : 0];
+        const size_t length = energy.getLength();
+        for (size_t i = 0; i < length; ++i)
+            energy[i] = v.calc(i);
     }
 
-    template<class ScalarType>
-    void KPoint<ScalarType, true>::swap(KPoint& kPoint) noexcept {
-        Base::swap(kPoint);
-        eigUp.swap(kPoint.eigUp);
-        eigDown.swap(kPoint.eigDown);
-    }
-
-    template<class ScalarType>
-    class KPoint<ScalarType, false> : public KPointBase<ScalarType> {
-        using Base = KPointBase<ScalarType>;
-        using typename Base::ComplexType;
-        using typename Base::Vector3D;
-        using typename Base::OccupacyVector;
-        using EigInfo = EigenSolver<DenseMatrix<ComplexType>>;
-
-        EigInfo eig;
-        OccupacyVector occupacy;
-    public:
-        KPoint() = default;
-        KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight);
-        KPoint(const KPoint&) = default;
-        KPoint(KPoint&&) noexcept = default;
-        ~KPoint() = default;
-        /* Operators */
-        KPoint& operator=(KPoint k) noexcept;
-        /* Setters */
-        void setEigInfo(EigInfo& newEig);
-        /* Getters */
-        [[nodiscard]] const EigInfo& getEig() const noexcept { return eig; }
-        [[nodiscard]] const OccupacyVector& getOccupacy() const noexcept { return occupacy; }
-        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
-        /* Helpers */
-        void swap(KPoint& kPoint) noexcept;
-    };
-
-    template<class ScalarType>
-    KPoint<ScalarType, false>::KPoint(Vector3D pos_, size_t plainWaveCount, ScalarType weight)
-            : Base(std::move(pos_), std::move(weight))
-            , eig(plainWaveCount)
-            , occupacy(plainWaveCount, 0) {}
-
-    template<class ScalarType>
-    KPoint<ScalarType, false>& KPoint<ScalarType, false>::operator=(KPoint k) noexcept {
-        swap(k);
-        return *this;
-    }
-
-    template<class ScalarType>
-    void KPoint<ScalarType, false>::setEigInfo(EigInfo& newEig) {
-        eig.swap(newEig);
-    }
-
-    template<class ScalarType>
-    ScalarType KPoint<ScalarType, false>::getTotalEnergy() const noexcept {
-        return toRealVector(eig.getEigenvalues()) * occupacy;
-    }
-
-    template<class ScalarType>
-    void KPoint<ScalarType, false>::swap(KPoint& kPoint) noexcept {
-        Base::swap(kPoint);
-        eig.swap(kPoint.eig);
-    }
-
-    template<class ScalarType, bool isSpinPolarized>
-    inline void swap(Physica::Core::KPoint<ScalarType, isSpinPolarized>& kPoint1,
-                     Physica::Core::KPoint<ScalarType, isSpinPolarized>& kPoint2) noexcept {
-        kPoint1.swap(kPoint2);
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    void KPoint<ScalarType, NumBand, isSpinPolarized>::swap(KPoint& kPoint) noexcept {
+        pos.swap(kPoint.pos);
+        weight.swap(kPoint.weight);
+        bandE.swap(kPoint.bandE);
     }
 }

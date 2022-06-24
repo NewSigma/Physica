@@ -61,7 +61,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(IntType x, IntType y, IntType z) const;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
+        auto begin() const noexcept { return cbegin(); }
         auto end() noexcept { return values.end(); }
+        auto end() const noexcept { return cend(); }
         auto cbegin() const noexcept { return values.cbegin(); }
         auto cend() const noexcept { return values.cend(); }
         auto rbegin() noexcept { return values.rbegin(); }

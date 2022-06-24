@@ -36,11 +36,11 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    typename VectorType::ScalarType mean_stable(const LValueVector<VectorType>& x) {
+    typename VectorType::ScalarType mean_stable(const RValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         ScalarType result = 0;
         for (size_t i = 0; i < x.getLength(); ++i)
-            result = next_mean(result, i, x[i]);
+            toNextMean(result, i, x.calc(i));
         return result;
     }
 

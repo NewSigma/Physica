@@ -187,7 +187,8 @@ namespace Physica::Core::Internal {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            kPoint.setEigInfo(eigSolverUp, eigSolverDown);
+            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolverUp.getEigenvalues()));
+            kPoint.setBandEnergy(SpinState::Down, toRealVector(eigSolverDown.getEigenvalues()));
         }
         return true;
     }
@@ -512,7 +513,7 @@ namespace Physica::Core::Internal {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            kPoint.setEigInfo(eigSolver);
+            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolver.getEigenvalues()));
         }
         return true;
     }

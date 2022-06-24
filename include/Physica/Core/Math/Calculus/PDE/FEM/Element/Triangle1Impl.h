@@ -92,7 +92,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType Triangle1<ScalarType>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
-        int temp;
+        int temp = 0;
         switch (localNode) {
             case 0:
                 temp = -1;
@@ -108,7 +108,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType Triangle1<ScalarType>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
-        int temp;
+        int temp = 0;
         switch (localNode) {
             case 0:
                 temp = -1;
