@@ -138,7 +138,7 @@ namespace Physica::Core::Internal {
     inline void FFTImpl<ScalarType, 1>::invTransform(const Vector<ComplexType>& data) {
         [[maybe_unused]] const size_t expectedSize = isComplex ? size : size / 2 + 1;
         assert(data.getLength() == expectedSize);
-        for (int i = 0; i < expectedSize; ++i) {
+        for (size_t i = 0; i < expectedSize; ++i) {
             const auto& complex = data[i];
             buffer[i][0] = double(complex.getReal());
             buffer[i][1] = double(complex.getImag());

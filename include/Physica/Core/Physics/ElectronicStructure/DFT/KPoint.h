@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Spin.h"
+#include "SpinPair.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t NumBand, bool isSpinPolarized>

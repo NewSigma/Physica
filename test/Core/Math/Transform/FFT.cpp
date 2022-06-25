@@ -28,13 +28,15 @@ int main() {
     /* 1D real */ {
         const size_t N = 100;
         const double t_max = 2;
+        constexpr double freq1 = 3;
+        constexpr double freq2 = 4;
         
         Vector<RealType> data(N);
         {
             const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
-                data[i] = sin(RealType(2 * M_PI * 3) * x) + sin(RealType(2 * M_PI * 4) * x) * 2;
+                data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
         FFT<RealType> fft(data, RealType(t_max / N));
@@ -46,10 +48,12 @@ int main() {
             if (!scalarNear(power, power_fft, 1E-15))
                 return 1;
         }
-        const RealType freq1_power = fft.getFreqIntense(3).norm();
-        const RealType freq2_power = fft.getFreqIntense(4).norm();
-        if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
-            return 1;
+        /* Test freq */ {
+            const RealType freq1_power = fft.getFreqIntense(freq1).norm();
+            const RealType freq2_power = fft.getFreqIntense(freq2).norm();
+            if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
+                return 1;
+        }
     }
     /* 2d real */ {
         const size_t N1 = 50;

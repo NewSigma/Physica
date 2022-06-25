@@ -47,12 +47,12 @@ namespace Physica::Core {
         using CenteredGrid = Grid3D<ComplexType, true>;
         using SignedDim = typename CenteredGrid::Dim;
         using BandType = BandGrid<ScalarType, isSpinPolarized>;
-        using KSOrbits = Utils::Array<KSOrbitArray, NumSpin>;
-        using Hamilton = Utils::Array<HermiteMatrix, NumSpin>;
-        using EigenSolverType = Utils::Array<EigenSolver<MatrixType>, NumSpin>;
+        using KSOrbits = SpinPair<KSOrbitArray, isSpinPolarized>;
+        using Hamilton = SpinPair<HermiteMatrix, isSpinPolarized>;
+        using EigenSolverType = SpinPair<EigenSolver<MatrixType>, isSpinPolarized>;
         using DensityType = Utils::Array<UncenteredGrid, NumSpin>;
-        using PotType = Utils::Array<UncenteredGrid, NumSpin>;
-        using FFTxc = Utils::Array<FFT<ScalarType, 3>, NumSpin>;
+        using PotType = SpinPair<UncenteredGrid, isSpinPolarized>;
+        using FFTxc = SpinPair<FFT<ScalarType, 3>, isSpinPolarized>;
 
         constexpr static size_t DIISBufferSize = 3;
         using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
@@ -86,7 +86,7 @@ namespace Physica::Core {
         /* Operations */
         bool solve(const ScalarType& criteria, size_t maxIte);
         /* Getters */
-        [[nodiscard]] size_t getPlainWaveCount() const noexcept { return orbits[0][0].getPlainWaveCount(); }
+        [[nodiscard]] size_t getPlainWaveCount() const noexcept { return orbits[SpinState::Up][0].getPlainWaveCount(); }
         [[nodiscard]] const BandType& getBand() const noexcept { return band; }
     protected:
         /* Operations */
@@ -102,16 +102,16 @@ namespace Physica::Core {
         void DIISExtrapolation(DIISMatrix& diisMat);
         /* Getters */
         [[nodiscard]] size_t numOrbitToSolve() const { return (cell.getElectronCount() + 1) / 2; }
-        [[nodiscard]] SignedDim indexToSignedDim(size_t index) const noexcept { return orbits[0][0].indexToDim(index); }
-        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(SignedDim dim) const noexcept { return orbits[0][0].getWaveVector(dim); }
-        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return orbits[0][0].getWaveVector(index); }
+        [[nodiscard]] SignedDim indexToSignedDim(size_t index) const noexcept { return orbits[SpinState::Up][0].indexToDim(index); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(SignedDim dim) const noexcept { return orbits[SpinState::Up][0].getWaveVector(dim); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return orbits[SpinState::Up][0].getWaveVector(index); }
         [[nodiscard]] DensityType& currentDensity() { return *densityRecord.rbegin(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return xcPot[0].getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return xcPot[0].getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return xcPot[0].getDimZ(); }
-        [[nodiscard]] auto getDim() const noexcept { return xcPot[0].getDim(); }
-        [[nodiscard]] auto dimToPos(UnsignedDim dim) const noexcept { return xcPot[0].dimToPos(dim); }
-        [[nodiscard]] size_t getSize() const noexcept { return xcProvider.getBufferSize(); }
+        [[nodiscard]] size_t getDimX() const noexcept { return xcPot[SpinState::Up].getDimX(); }
+        [[nodiscard]] size_t getDimY() const noexcept { return xcPot[SpinState::Up].getDimY(); }
+        [[nodiscard]] size_t getDimZ() const noexcept { return xcPot[SpinState::Up].getDimZ(); }
+        [[nodiscard]] auto getDim() const noexcept { return xcPot[SpinState::Up].getDim(); }
+        [[nodiscard]] auto dimToPos(UnsignedDim dim) const noexcept { return xcPot[SpinState::Up].dimToPos(dim); }
+        [[nodiscard]] size_t getDensitySize() const noexcept { return xcProvider.getBufferSize(); }
         /* Static members */
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
     };
@@ -125,9 +125,9 @@ namespace Physica::Core {
         repCell = cell.reciprocal();
         /* Allocate orbits */ {
             const size_t electronCount = cell.getElectronCount();
-            orbits[0] = KSOrbitArray((electronCount + 1) / 2, cutEnergy, repCell.getLattice());
+            orbits[SpinState::Up] = KSOrbitArray((electronCount + 1) / 2, cutEnergy, repCell.getLattice());
             if constexpr (isSpinPolarized)
-                orbits[1] = KSOrbitArray(electronCount / 2, cutEnergy, repCell.getLattice());
+                orbits[SpinState::Down] = KSOrbitArray(electronCount / 2, cutEnergy, repCell.getLattice());
         }
         /* Matrix related */ {
             const size_t plainWaveCount = getPlainWaveCount();
@@ -167,11 +167,11 @@ namespace Physica::Core {
             iteration = 0;
             while (true) {
                 assembleH(kPoint.getPos(), externalPot);
-                eigSolver[0].compute(h[0], true);
-                eigSolver[0].sort();
+                eigSolver[SpinState::Up].compute(h[SpinState::Up], true);
+                eigSolver[SpinState::Up].sort();
                 if constexpr (isSpinPolarized) {
-                    eigSolver[1].compute(h[1], true);
-                    eigSolver[1].sort();
+                    eigSolver[SpinState::Down].compute(h[SpinState::Down], true);
+                    eigSolver[SpinState::Down].sort();
                 }
                 updateOrbits();
                 updateDensity();
@@ -193,9 +193,9 @@ namespace Physica::Core {
                 if (++iteration == maxIte)
                     throw BadConvergenceException();
             };
-            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolver[0].getEigenvalues()));
+            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolver[SpinState::Up].getEigenvalues()));
             if constexpr (isSpinPolarized)
-                kPoint.setBandEnergy(SpinState::Down, toRealVector(eigSolver[1].getEigenvalues()));
+                kPoint.setBandEnergy(SpinState::Down, toRealVector(eigSolver[SpinState::Down].getEigenvalues()));
         }
         return true;
     }
@@ -254,34 +254,33 @@ namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::initDensity() {
         const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
-        auto& pair1 = currentDensity();
-        auto& rho1 = pair1[0].asVector();
+        auto& density = currentDensity();
+        auto& rho1 = density[0].asVector();
         rho1 = averageDensity;
-        auto& pair2 = densityRecord[densityRecord.getLength() - 2];
-        auto& rho2 = pair2[0].asVector();
+        auto& last_density = densityRecord[densityRecord.getLength() - 2];
+        auto& rho2 = last_density[0].asVector();
         rho2 = ScalarType::Zero();
         if constexpr (isSpinPolarized) {
-            auto& zeta1 = pair1[1].asVector();
+            auto& zeta1 = density[1].asVector();
             zeta1 = ScalarType::Zero();
-            auto& zeta2 = pair2[1].asVector();
+            auto& zeta2 = last_density[1].asVector();
             zeta2 = ScalarType::Zero();
         }
     }
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::assembleH(Vector3D k, const CenteredGrid& externalPot) {
-        auto& h_up = h[0];
-        auto& h_down = h[1];
+        auto& h_up = h[SpinState::Up];
         h_up = ScalarType::Zero();
         if constexpr (isSpinPolarized)
-            h_down = ScalarType::Zero();
+            h[SpinState::Down] = ScalarType::Zero();
         /* fill kinetic */ {
             const size_t order = h_up.getRow();
             for (size_t i = 0; i < order; ++i) {
                 const ScalarType temp = ScalarType((k + getWaveVector(i)).squaredNorm()) * ScalarType(0.5);
                 h_up(i, i) += temp;
                 if constexpr (isSpinPolarized)
-                    h_down(i, i) += temp;
+                    h[SpinState::Down](i, i) += temp;
             }
         }
         fillPotential(externalPot);
@@ -291,39 +290,39 @@ namespace Physica::Core {
     void KSSolver<ScalarType, XCProvider>::fillPotential(const CenteredGrid& externalPot) {
         using VectorType = Vector<ScalarType, 3>;
         xcProvider.fill(currentDensity(), xcPot);
-        fft_xc[0].transform(xcPot[0].asVector());
+        fft_xc[SpinState::Up].transform(xcPot[SpinState::Up].asVector());
         if constexpr (isSpinPolarized)
-            fft_xc[1].transform(xcPot[1].asVector());
+            fft_xc[SpinState::Down].transform(xcPot[SpinState::Down].asVector());
         fft_hartree->transform(currentDensity()[0].asVector());
 
         const ScalarType factor = reciprocal(ScalarType(2 * M_PI));
-        const auto fft_nomalizer = reciprocal(ScalarType(getSize()));
+        const auto fft_nomalizer = reciprocal(ScalarType(getDensitySize()));
         const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
 
-        const size_t order = h[0].getRow();
-        for (size_t i = 0; i < order; ++i) {
+        const size_t numPW = getPlainWaveCount();
+        for (size_t i = 0; i < numPW; ++i) {
             const auto dim1 = indexToSignedDim(i);
             auto[x1, y1, z1] = dim1;
             const VectorType k1 = getWaveVector(dim1);
-            for (size_t j = i; j < order; ++j) {
+            for (size_t j = i; j < numPW; ++j) {
                 const auto dim2 = indexToSignedDim(j);
                 auto[x2, y2, z2] = dim2;
                 const VectorType k2 = getWaveVector(dim2);
                 const VectorType deltaK = k1 - k2;
-                const VectorType k = deltaK * factor;
+                const VectorType freq = deltaK * factor;
 
                 ComplexType hartree;
                 if (i == j)
                     hartree = ComplexType::Zero();
                 else
-                    hartree = fft_hartree->getFreqIntense(k) * factor1 / deltaK.squaredNorm();
+                    hartree = fft_hartree->getFreqIntense(freq) * factor1 / deltaK.squaredNorm();
                 const ComplexType external = externalPot(x1 - x2, y1 - y2, z1 - z2);
 
-                const ComplexType xc_up = fft_xc[0].getFreqIntense(k) * fft_nomalizer;
-                h[0](i, j) += xc_up + hartree + external;
+                const ComplexType xc_up = fft_xc[SpinState::Up].getFreqIntense(freq) * fft_nomalizer;
+                h[SpinState::Up](i, j) += xc_up + hartree + external;
                 if constexpr (isSpinPolarized) {
-                    const ComplexType xc_down = fft_xc[1].getFreqIntense(k) * fft_nomalizer;
-                    h[1](i, j) += xc_down + hartree + external;
+                    const ComplexType xc_down = fft_xc[SpinState::Down].getFreqIntense(freq) * fft_nomalizer;
+                    h[SpinState::Down](i, j) += xc_down + hartree + external;
                 }
             }
         }
@@ -332,15 +331,15 @@ namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::updateOrbits() {
         {
-            auto& eigSolverUp = eigSolver[0];
-            auto& orbits_up = orbits[0];
+            auto& eigSolverUp = eigSolver[SpinState::Up];
+            auto& orbits_up = orbits[SpinState::Up];
             const size_t orbitCount = orbits_up.getLength();
             for (size_t i = 0; i < orbitCount; ++i)
                 orbits_up[i] = eigSolverUp.getRawEigenvectors().col(i);
         }
         if constexpr (isSpinPolarized) {
-            auto& eigSolverDown = eigSolver[1];
-            auto& orbits_down = orbits[1];
+            auto& eigSolverDown = eigSolver[SpinState::Down];
+            auto& orbits_down = orbits[SpinState::Down];
             const size_t orbitCount = orbits_down.getLength();
             for (size_t i = 0; i < orbitCount; ++i)
                 orbits_down[i] = eigSolverDown.getRawEigenvectors().col(i);
@@ -353,12 +352,12 @@ namespace Physica::Core {
         const ScalarType inv_volume = reciprocal(cell.getVolume());
 
         const size_t numOccupiedUp = numOrbitToSolve();
-        const auto& orbits_up = orbits[0];
+        const auto& orbits_up = orbits[SpinState::Up];
         auto& density_up = densityRecord[0][0];
         ScalarType total_density_up = 0;
 
         if constexpr (isSpinPolarized) {
-            const auto& orbits_down = orbits[1];
+            const auto& orbits_down = orbits[SpinState::Down];
             const size_t numOccupiedDown = numOccupiedUp - (cell.getElectronCount() % 2 != 0);
             auto& density_down = densityRecord[0][1];
             ScalarType total_density_down = 0;
@@ -455,13 +454,13 @@ namespace Physica::Core {
         assert(gridDimFactor >= ScalarType::Two()); //Nyquist theory requests
         const auto& lattice = cell.getLattice();
         const auto& repLattice = repCell.getLattice();
-        auto plainWaveSetDim = UncenteredGrid::dimFromCutEnergy(cutEnergy, repLattice);
-        const ScalarType factor = gridDimFactor / ScalarType(M_PI);
+        const auto[pwDimX, pwDimY, pwDimZ] = UncenteredGrid::dimFromCutEnergy(cutEnergy, repLattice);
+        const ScalarType factor = gridDimFactor / ScalarType(2 * M_PI);
 
-        size_t dimX, dimY, dimZ;
-        dimX = std::get<0>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(0).norm() * lattice.row(0).norm()) * factor).getTrivial());
-        dimY = std::get<1>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(1).norm() * lattice.row(1).norm()) * factor).getTrivial());
-        dimZ = std::get<2>(plainWaveSetDim) * size_t((ScalarType(repLattice.row(2).norm() * lattice.row(2).norm()) * factor).getTrivial());
-        return {dimX, dimY, dimZ};
+        size_t potDimX, potDimY, potDimZ;
+        potDimX = size_t((ScalarType(repLattice.row(0).norm() * lattice.row(0).norm()) * factor * pwDimX).getTrivial());
+        potDimY = size_t((ScalarType(repLattice.row(1).norm() * lattice.row(1).norm()) * factor * pwDimY).getTrivial());
+        potDimZ = size_t((ScalarType(repLattice.row(2).norm() * lattice.row(2).norm()) * factor * pwDimZ).getTrivial());
+        return {potDimX, potDimY, potDimZ};
     }
 }
