@@ -88,8 +88,8 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
-        __host__ __device__ void resize([[maybe_unused]] size_t size) { assert(size == Length); }
-        void resize(size_t size, const T& t);
+        template<class... Args>
+        __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
@@ -197,8 +197,8 @@ namespace Physica::Utils {
         void append(const Array& t);
         void append(Array&& t);
         void reserve(size_t size);
-        void resize(size_t size);
-        void resize(size_t size, const T& t);
+        template<class... Args>
+        void resize(size_t size, Args... args);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);

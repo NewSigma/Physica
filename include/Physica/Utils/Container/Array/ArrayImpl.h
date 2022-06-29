@@ -81,13 +81,6 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    void Array<T, Length, Capacity, Allocator>::resize(size_t size, const T& t) {
-        assert(size == getLength());
-        for (size_t i = 0; i < size; ++i)
-            (*this)[i] = t;
-    }
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
     void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
         using std::swap;
         for (size_t i = 0; i < Length; ++i)
@@ -274,7 +267,8 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::resize(size_t size) {
+    template<class... Args>
+    void Array<T, Dynamic, Dynamic, Allocator>::resize(size_t size, Args... args) {
         if (capacity < size)
             reserve(size);
 
@@ -286,24 +280,7 @@ namespace Physica::Utils {
         }
         else {
             for (; length < size; ++length)
-                alloc.construct(arr + length);
-        }
-    }
-
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::resize(size_t size, const T& t) {
-        if (capacity < size)
-            reserve(size);
-
-        if (length > size) {
-            if constexpr (!std::is_trivial<T>::value)
-                for (size_t i = size; i < length; ++i)
-                    (arr + i)->~T();
-            length = size;
-        }
-        else {
-            for (; length < size; ++length)
-                alloc.construct(arr + length, t);
+                alloc.construct(arr + length, std::forward<Args>(args)...);
         }
     }
 
