@@ -62,6 +62,7 @@ namespace Physica::Core {
         /* Operations */
         using Storage::resize;
         /* Getters */
+        using Storage::getOrder;
         using Storage::getRow;
         using Storage::getColumn;
         /* Helpers */

@@ -2,15 +2,21 @@ include(CTest)
 include(../cmake/Modules/PhysicaAddTest.cmake)
 
 message(STATUS "Configuring tests.")
-include_directories(./)
-# IO
+
+#AI
+if(${PHYSICA_TORCH})
+    physica_add_test(AP AI/AP.cpp)
+endif()
+
+#Core
+## IO
 physica_add_test(Poscar Core/IO/Poscar.cpp)
 physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
-# Math
-## Algebra
-### Equation Solver
+## Math
+### Algebra
+#### Equation Solver
 physica_add_test(ElementaryEquation Core/Math/Algebra/EquationSolver/ElementaryEquation.cpp)
-### Linear Algebra
+#### Linear Algebra
 physica_add_test(Bidiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Bidiagonalization.cpp)
 physica_add_test(Cholesky Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/CholeskyTest.cpp)
 physica_add_test(EigenSolver Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/EigenSolver.cpp)
@@ -28,7 +34,7 @@ physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/Vector/HouseHolderT
 physica_add_test(Vector Core/Math/Algebra/LinearAlgebra/Vector/VectorTest.cpp)
 physica_add_test(LinearEquations Core/Math/Algebra/LinearAlgebra/LinearEquations.cpp)
 physica_add_test(Polynomial Core/Math/Algebra/Polynomial.cpp)
-## Calculus
+### Calculus
 physica_add_test(ODE Core/Math/Calculus/ODE/ODETest.cpp)
 physica_add_test(PoissonFEM Core/Math/Calculus/PDE/FEM/PoissonFEM.cpp)
 physica_add_test(SRK2 Core/Math/Calculus/ODE/SRK2.cpp)
@@ -38,21 +44,21 @@ physica_add_test(Function Core/Math/Calculus/FunctionTest.cpp)
 physica_add_test(Integrate Core/Math/Calculus/IntegrateTest.cpp)
 physica_add_test(Interpolation Core/Math/Calculus/Interpolation.cpp)
 physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
-## Geometry
+### Geometry
 physica_add_test(GeoBase Core/Math/Geometry/GeoBase.cpp)
-## Optimization
+### Optimization
 physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradientTest.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
 physica_add_test(QuadraticProgramming Core/Math/Optimization/QuadraticProgramming.cpp)
-## Transform
+### Transform
 physica_add_test(FFT Core/Math/Transform/FFT.cpp)
-# MultiPrecision
+## MultiPrecision
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Integer Core/MultiPrecision/IntegerTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
-# Parallel
+## Parallel
 physica_add_test(ThreadPool Core/Parallel/ThreadPoolTest.cpp)
-# Physics
+## Physics
 physica_add_test(Ewald Core/Physics/Ewald.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)

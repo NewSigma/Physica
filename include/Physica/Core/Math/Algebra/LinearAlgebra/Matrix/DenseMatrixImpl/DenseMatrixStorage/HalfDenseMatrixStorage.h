@@ -49,7 +49,7 @@ namespace Physica::Core::Internal {
         using Base::operator[];
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
-        void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; }
+        void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return order; }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }

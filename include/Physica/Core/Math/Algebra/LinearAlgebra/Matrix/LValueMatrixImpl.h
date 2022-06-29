@@ -361,17 +361,17 @@ namespace Physica::Core {
     typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::min() const {
         ScalarType result;
         if constexpr (isColumnMatrix) {
-            result = col(0).max();
+            result = col(0).min();
             for (size_t i = 1; i < Base::getColumn(); ++i) {
-                ScalarType temp = col(i).max();
+                ScalarType temp = col(i).min();
                 if (temp < result)
                     result = temp;
             }
         }
         else {
-            result = row(0).max();
+            result = row(0).min();
             for (size_t i = 1; i < Base::getRow(); ++i) {
-                ScalarType temp = row(i).max();
+                ScalarType temp = row(i).min();
                 if (temp < result)
                     result = temp;
             }
