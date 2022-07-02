@@ -116,7 +116,7 @@ namespace Physica::Core::Internal {
         const size_t offset1 = r1 * column;
         const size_t offset2 = r2 * column;
         for (size_t i = 0; i < column; ++i)
-            swap(matrix[offset1 + i], matrix[offset2 + i]);
+            matrix[offset1 + i].swap(matrix[offset2 + i]);
     }
 
     template<class Derived>

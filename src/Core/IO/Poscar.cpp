@@ -152,6 +152,18 @@ namespace Physica::Core {
             num /= (x * y * z);
     }
 
+    void Poscar::toDirect() {
+        assert(type == Cartesian);
+        using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 3, 3>;
+        const MatrixType inv = lattice.inverse();
+        pos *= inv;
+    }
+
+    void Poscar::toCartesian() {
+        assert(type == Direct);
+        pos *= lattice;
+    }
+
     Poscar::CrystalSystem Poscar::getCrystalSystem(double precision) const noexcept {
         using namespace Utils;
         const ScalarType norm_list[3]{lattice.row(0).squaredNorm(),
