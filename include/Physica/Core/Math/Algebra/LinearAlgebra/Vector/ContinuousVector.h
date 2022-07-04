@@ -55,6 +55,9 @@ namespace Physica::Core {
     private:
         PointerType data_ptr(size_t index) { return reinterpret_cast<PointerType>(&(*this)[index]); }
         ConstPointerType data_ptr(size_t index) const { return reinterpret_cast<ConstPointerType>(&(*this)[index]); }
+        /* Friends */
+        template<class T>
+        friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
     };
 
     template<class Derived>
@@ -111,5 +114,12 @@ namespace Physica::Core {
             packet.store_partial(Base::getLength() - index, data_ptr(index));
         else
             Base::template writePacketPartial(index, packet);
+    }
+
+    template<class Derived>
+    std::ostream& operator<<(std::ostream& os, const ContinuousVector<Derived>& v) {
+        using ScalarType = typename Derived::ScalarType;
+        os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
+        return os;
     }
 }

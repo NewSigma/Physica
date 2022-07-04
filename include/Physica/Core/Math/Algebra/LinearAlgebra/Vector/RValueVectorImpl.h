@@ -147,9 +147,7 @@ namespace Physica::Core {
 
     template<class VectorType>
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
-        size_t length = v.getLength();
-        for (size_t i = 0; i < length; ++i)
-            os << v.calc(i);
+        os << v.getDerived();
         return os;
     }
 }

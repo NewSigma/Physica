@@ -82,6 +82,9 @@ namespace Physica::Core {
         RVectorBlock<Derived> segment(size_t from, size_t to) { return RVectorBlock<Derived>(Base::getDerived(), from, to); }
         const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
     };
+
+    template<class VectorType>
+    std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v);
 }
 
 #include "RValueVectorImpl.h"
