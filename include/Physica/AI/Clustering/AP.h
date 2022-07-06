@@ -42,6 +42,7 @@ namespace Physica::AI {
         unsigned int maxIteration;
         std::unordered_set<size_t> exemplars{};
     public:
+        AP(size_t size, ScalarType mixing, unsigned numConverge_, unsigned int maxIteration_);
         AP(const SimilarMatrix& similarity, ScalarType mixing, unsigned numConverge_, unsigned int maxIteration_);
         ~AP() = default;
         /* Operations */
@@ -52,14 +53,18 @@ namespace Physica::AI {
     };
 
     template<class ScalarType>
-    AP<ScalarType>::AP(const SimilarMatrix& similarity, ScalarType mixing_, unsigned int numConverge_, unsigned int maxIteration_)
+    AP<ScalarType>::AP(size_t size, ScalarType mixing_, unsigned int numConverge_, unsigned int maxIteration_)
             : mixing(mixing_)
             , numConverge(numConverge_)
             , maxIteration(maxIteration_) {
-        assert(mixing.isPositive() && mixing <= ScalarType::One());
-        const size_t order = similarity.getOrder();
-        responsibility.resize(order, order);
-        availabilities.resize(order, order);
+        assert((mixing.isZero() || mixing.isPositive()) && mixing < ScalarType::One());
+        responsibility.resize(size, size);
+        availabilities.resize(size, size);
+    }
+
+    template<class ScalarType>
+    AP<ScalarType>::AP(const SimilarMatrix& similarity, ScalarType mixing_, unsigned int numConverge_, unsigned int maxIteration_)
+            : AP(similarity.getOrder(), mixing_, numConverge_, maxIteration_) {
         compute(similarity);
     }
 
@@ -96,7 +101,7 @@ namespace Physica::AI {
                     for (size_t i = 0; i < order; ++i) {
                         if (i == r || i == c)
                             continue;
-                        temp = std::max(ScalarType::Zero(), responsibility(i, c));
+                        temp += std::max(ScalarType::Zero(), responsibility(i, c));
                     }
                     const ScalarType update = isDiag ? temp : std::min(ScalarType::Zero(), responsibility(c, c) + temp);
                     availabilities(r, c) = availabilities(r, c) * mixing + update * mixing2;
