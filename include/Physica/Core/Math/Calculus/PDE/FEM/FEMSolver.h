@@ -25,11 +25,11 @@ namespace Physica::Core {
     class FEMSolver {
         using VectorType = Vector<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType>;
-    protected:
+    public:
         MatrixType A;
         VectorType x;
         VectorType b;
-    protected:
+    public:
         FEMSolver() = default;
         FEMSolver(size_t n);
         /* Operations */

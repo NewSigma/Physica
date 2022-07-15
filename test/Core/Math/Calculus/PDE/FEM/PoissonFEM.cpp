@@ -63,9 +63,9 @@ int main() {
                                                         || scalarNear(p[1], ScalarType(height), 1E-5); },
                                 []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
-        PoissonModel model(std::move(mesh));
         auto func = []([[maybe_unused]] VectorType p) { return ScalarType(-2); };
-        model.solve<decltype(func), ElementIntegratorPacker<ElementType>>(func);
+        PoissonModel model(std::move(mesh), func);
+        model.solve<ElementIntegratorPacker<ElementType>>();
 
         const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
         const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
@@ -88,9 +88,9 @@ int main() {
                                                         || scalarNear(p[1], ScalarType(height), 1E-5); },
                                 []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
-        PoissonModel model(std::move(mesh));
         auto func = []([[maybe_unused]] VectorType p) { return ScalarType(-2); };
-        model.solve<decltype(func), ElementIntegratorPacker<ElementType>>(func);
+        PoissonModel model(std::move(mesh), func);
+        model.solve<ElementIntegratorPacker<ElementType>>();
 
         const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
         const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
