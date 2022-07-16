@@ -43,9 +43,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const MeshType& getMesh() const noexcept { return mesh; }
     protected:
-        /* Operations */
-        void updateMesh();
+        void solverToMesh();
         /* Getters */
+        [[nodiscard]] size_t getDegreeOfFreedom() const { return map_var_node.getLength(); }
         [[nodiscard]] size_t varToNode(size_t x) const { return map_var_node[x]; }
         [[nodiscard]] size_t nodeToVar(size_t node) const;
     private:
@@ -60,6 +60,14 @@ namespace Physica::Core {
         map_var_node.resize(n);
         map_node_var.resize(mesh.getNumNodes());
         makeMaps();
+    }
+
+    template<class MeshType>
+    void AbstractModel<MeshType>::solverToMesh() {
+        auto& coeffs = mesh.getCoeffs();
+        for (size_t i = 0; i < getDegreeOfFreedom(); ++i) {
+            coeffs[varToNode(i)] = solver.x[i];
+        }
     }
 
     template<class MeshType>
@@ -79,14 +87,6 @@ namespace Physica::Core {
                 map_node_var[i] = next_x;
                 ++next_x;
             }
-        }
-    }
-
-    template<class MeshType>
-    void AbstractModel<MeshType>::updateMesh() {
-        auto& coeffs = mesh.getCoeffs();
-        for (size_t i = 0; i < map_var_node.getLength(); ++i) {
-            coeffs[map_var_node[i]] = solver.x[i];
         }
     }
 }

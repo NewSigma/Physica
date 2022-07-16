@@ -62,7 +62,7 @@ namespace Physica::Core {
 
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const ScalarType integral = ElementType::integral(
+                        const ScalarType integral = ElementType::gauss_integral(
                                 [=, &elem](VectorType p) {
                                     const auto inv_jacobi = elem.inv_jacobi(p);
                                     const VectorType g1 = inv_jacobi.transpose() * elem.grad(i, p);
@@ -90,6 +90,6 @@ namespace Physica::Core {
             }
         }
         solver.solve();
-        Base::updateMesh();
+        Base::solverToMesh();
     }
 }

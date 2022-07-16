@@ -129,7 +129,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class Functor>
-    ScalarType Triangle1<ScalarType>::integral(Functor func) {
+    ScalarType Triangle1<ScalarType>::gauss_integral(Functor func) {
         constexpr static double factor = 0.577350269189626;
         constexpr static double factor1 = (1 - factor) * 0.25;
         constexpr static double factor2 = (1 + factor) * 0.5;

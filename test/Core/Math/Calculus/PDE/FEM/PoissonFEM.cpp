@@ -49,7 +49,7 @@ template<class ElementType>
 struct ElementIntegratorPacker {
     template<class Functor>
     static ScalarType run(Functor func) {
-        return ElementType::integral(std::move(func));
+        return ElementType::gauss_integral(std::move(func));
     }
 };
 
