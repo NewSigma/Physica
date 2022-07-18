@@ -130,8 +130,11 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class Functor>
     ScalarType Rectangle1<ScalarType>::gauss_integral(Functor func) {
-        constexpr static unsigned int Factor = 1U << Base::Dim;
-        return func(VectorType{0, 0}) * Factor;
+        constexpr static double factor = 0.577350269189626;
+        return func(VectorType{factor, factor}) +
+               func(VectorType{-factor, factor}) +
+               func(VectorType{factor, -factor}) +
+               func(VectorType{-factor, -factor});
     }
 
     template<class ScalarType>
