@@ -104,7 +104,7 @@ namespace Physica::Core {
      * Using Kirchoff equations to calculate the equivalent resistance.
      */
     void TotalCircuit::calculate() {
-        using DataMatrix = DenseMatrix<Scalar<Double, false>, DenseMatrixOption::Row | DenseMatrixOption::Vector>;
+        using DataMatrix = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
         /*
          * Assume the voltage at node[0] is 0 and voltage at node[1] is 1.
          * We will have to solve a (nodesCount - 2) rank linear Equations to get the other voltages.
@@ -151,7 +151,7 @@ namespace Physica::Core {
                 }
             }
             /* Solve the equations */
-            LinearEquations<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> le(std::move(augmentedMatrix));
+            LinearEquations<ScalarType, MatrixOption::Row | MatrixOption::Vector> le(std::move(augmentedMatrix));
             le.gaussEliminationPartial();
             /* Calculate equivalent resistance */
             Connection* p = order;

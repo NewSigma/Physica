@@ -54,19 +54,19 @@ bool hessTest(const MatrixType& source, double tolerance) {
 int main() {
     using RealType = Scalar<Double, false>;
     {
-        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 4, 4>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 4, 4>;
         const MatrixType mat{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
         if (!hessTest(mat, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!hessTest(mat, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 8, 8>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 8, 8>;
         const MatrixType mat{{2.5, 0, 0.866025, 0, 0.481812, 0, 0.318105, 0},
                             {0, 10.5, 0, 4.97494, 0, 3.06186, 0, 2.12934},
                             {0.866025, 0, 25.5, 0, 14.1869, 0, 9.36654, 0},
@@ -79,7 +79,7 @@ int main() {
             return 1;
     }
     /* Complex case */ {
-        using MatrixType = DenseMatrix<ComplexScalar<RealType>, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
         if (!hessTest(mat, 1E-12))
             return 1;

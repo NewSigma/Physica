@@ -245,7 +245,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     typename Schur<MatrixType>::ComplexType Schur<MatrixType>::complexShift(size_t upper, size_t iter) {
-        using Matrix2D = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 2, 2>;
+        using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
             return abs(matrixT(upper, upper - 1).getReal()) + abs(matrixT(upper - 1, upper - 2).getReal());

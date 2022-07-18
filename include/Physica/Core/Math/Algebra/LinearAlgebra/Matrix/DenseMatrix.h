@@ -27,7 +27,7 @@
 #include "MatrixDecomposition/LUDecomposition.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar, int option = DenseMatrixOption::Column | DenseMatrixOption::Vector
+    template<class T = MultiScalar, int option = MatrixOption::Column | MatrixOption::Vector
             , size_t Row = Dynamic, size_t Column = Dynamic, size_t MaxRow = Row, size_t MaxColumn = Column>
     class DenseMatrix;
 
@@ -39,7 +39,7 @@ namespace Physica::Core {
         class Traits<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>> {
         public:
             using ScalarType = T;
-            constexpr static int MatrixOption = option;
+            constexpr static int Option = option;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
@@ -57,7 +57,7 @@ namespace Physica::Core {
      * or dynamic matrix, whose size is dynamically changed.
      * 
      * \tparam option
-     * option is combinations of \enum DenseMatrixOption
+     * option is combinations of \enum MatrixOption
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class DenseMatrix : public LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>,
@@ -66,8 +66,8 @@ namespace Physica::Core {
         using Storage = DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>;
         static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
     public:
-        using ColMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
-        using RowMatrix = DenseMatrix<T, DenseMatrixOption::getStorage<DenseMatrix>() | DenseMatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
+        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
+        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
         using RealMatrix = DenseMatrix<typename T::RealType, option, Row, Column, MaxRow, MaxColumn>;
     public:
         using Storage::Storage;

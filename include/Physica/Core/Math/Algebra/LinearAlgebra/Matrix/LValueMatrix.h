@@ -40,9 +40,9 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
-        constexpr static int MatrixOption = Internal::Traits<Derived>::MatrixOption; //It is declared here because MatrixOption makes no sence to a RValueMatrix
-        constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<Derived>();
-        constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<Derived>();
+        constexpr static int Option = Internal::Traits<Derived>::Option; //It is declared here because MatrixOption makes no sence to a RValueMatrix
+        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
     public:
         ~LValueMatrix() = default;
         /* Operators */

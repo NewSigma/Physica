@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 #include "BestPacket.h"
 #include "RVectorBlock.h"
 
@@ -48,8 +48,8 @@ namespace Physica::Core {
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
-        using ColMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
-        using RowMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile>;
+        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
+        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile>;
     private:
         using RealType = typename ScalarType::RealType;
     public:

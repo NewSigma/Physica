@@ -23,7 +23,7 @@ namespace Physica::Core {
     template<class OtherDerived>
     void MatrixProduct<MatrixType1, MatrixType2>::assignTo(LValueMatrix<OtherDerived>& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<MatrixType1, MatrixType2>::Major;
-        constexpr static bool isAnyMajor = defaultMajor == DenseMatrixOption::AnyMajor;
+        constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<OtherDerived>;
 
         if constexpr (isAnyMajor) {
@@ -33,8 +33,8 @@ namespace Physica::Core {
                                                                  TargetType::columnFromMajorMinor(i, j));
         }
         else {
-            for (size_t i = 0; i < (defaultMajor == DenseMatrixOption::Column ? getColumn() : getRow()); ++i) {
-                for (size_t j = 0; j < (defaultMajor == DenseMatrixOption::Column ?  getRow() : getColumn()); ++j) {
+            for (size_t i = 0; i < (defaultMajor == MatrixOption::Column ? getColumn() : getRow()); ++i) {
+                for (size_t j = 0; j < (defaultMajor == MatrixOption::Column ?  getRow() : getColumn()); ++j) {
                     const size_t r = DefaultType::rowFromMajorMinor(i, j);
                     const size_t c = DefaultType::columnFromMajorMinor(i, j);
                     target(r, c) = calc(r, c);

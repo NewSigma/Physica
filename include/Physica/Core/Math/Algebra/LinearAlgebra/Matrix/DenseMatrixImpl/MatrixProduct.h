@@ -26,15 +26,15 @@ namespace Physica::Core {
     namespace Internal {
         template<class MatrixType1, class MatrixType2>
         struct ProductOption {
-            constexpr static bool SameMajor = DenseMatrixOption::isSameMajor<MatrixType1, MatrixType2>();
-            constexpr static bool RowMajor = DenseMatrixOption::isRowMatrix<MatrixType1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(DenseMatrixOption::Column)
-                                                               : int(DenseMatrixOption::Row))
-                                                   : int(DenseMatrixOption::AnyMajor);
-            constexpr static int Storage = (DenseMatrixOption::isElementMatrix<MatrixType1>() && DenseMatrixOption::isElementMatrix<MatrixType2>())
-                                         ? DenseMatrixOption::Element
-                                         : DenseMatrixOption::Vector;
-            constexpr static int MatrixOption = (Major == DenseMatrixOption::AnyMajor ? DenseMatrixOption::Column : Major) | Storage;
+            constexpr static bool SameMajor = MatrixOption::isSameMajor<MatrixType1, MatrixType2>();
+            constexpr static bool RowMajor = MatrixOption::isRowMatrix<MatrixType1>();
+            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Column)
+                                                               : int(MatrixOption::Row))
+                                                   : int(MatrixOption::AnyMajor);
+            constexpr static int Storage = (MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>())
+                                         ? MatrixOption::Element
+                                         : MatrixOption::Vector;
+            constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Column : Major) | Storage;
         };
 
         template<class MatrixType1, class MatrixType2>
@@ -84,7 +84,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>;
         using typename Base::ScalarType;
         using DefaultType = DenseMatrix<ScalarType,
-                                        Internal::ProductOption<MatrixType1, MatrixType2>::MatrixOption,
+                                        Internal::ProductOption<MatrixType1, MatrixType2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColumnAtCompile,
                                         Base::MaxRowAtCompile,

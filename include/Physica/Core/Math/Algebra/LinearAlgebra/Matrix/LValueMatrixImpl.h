@@ -283,7 +283,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             columnReduce(v1, v2, elementIndex);
         else
             rowReduce(v1, v2, elementIndex);
@@ -291,7 +291,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>()) {
             auto col1 = col(v1);
             col1 -= col(v2).asVector() * factor;
         }
@@ -303,7 +303,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>()) {
             auto c = col(v);
             c *= factor;
         }
@@ -315,7 +315,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             Base::getDerived().columnSwap(v1, v2);
         else
             Base::getDerived().rowSwap(v1, v2);
@@ -397,7 +397,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline size_t LValueMatrix<Derived>::getMaxMajor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             return Base::getColumn();
         else
             return Base::getRow();
@@ -405,7 +405,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline size_t LValueMatrix<Derived>::getMaxMinor() const noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             return Base::getRow();
         else
             return Base::getColumn();
@@ -414,7 +414,7 @@ namespace Physica::Core {
     template<class Derived>
     typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
         size_t r, c;
-        if constexpr(DenseMatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
             c = major;
             r = minor;
         }
@@ -429,7 +429,7 @@ namespace Physica::Core {
     template<class Derived>
     const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) const {
         size_t r, c;
-        if constexpr(DenseMatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
             c = major;
             r = minor;
         }
@@ -452,7 +452,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline size_t LValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             return minor;
         else
             return major;
@@ -460,7 +460,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline size_t LValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (DenseMatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
             return major;
         else
             return minor;

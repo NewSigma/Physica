@@ -33,7 +33,7 @@ namespace Physica::Core {
             constexpr static unsigned int NumPoint = 3;
             constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
             using ScalarType = T;
-            using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, Dim, Dim>;
+            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
         };
     }
 

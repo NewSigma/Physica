@@ -23,7 +23,7 @@
 namespace Physica::Core {
     class ReciprocalCell {
         using ScalarType = Scalar<Float, false>;
-        using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
+        using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
 
         LatticeMatrix lattice;
     public:

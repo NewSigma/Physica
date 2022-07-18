@@ -28,7 +28,7 @@ namespace Physica::AI {
     template<class Dataset>
     class KFold {
         using ScalarType = Core::Scalar<Core::Double, false>;
-        using Metrics = Core::DenseMatrix<ScalarType, Core::DenseMatrixOption::Row | Core::DenseMatrixOption::Vector, 2>;
+        using Metrics = Core::DenseMatrix<ScalarType, Core::MatrixOption::Row | Core::MatrixOption::Vector, 2>;
         
         Dataset set;
         unsigned int numFold;

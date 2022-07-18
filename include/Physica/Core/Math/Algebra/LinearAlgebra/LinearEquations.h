@@ -31,7 +31,7 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009
      */
-    template<class T = MultiScalar, int type = DenseMatrixOption::Column | DenseMatrixOption::Vector
+    template<class T = MultiScalar, int type = MatrixOption::Column | MatrixOption::Vector
             , size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
     class LinearEquations {
         using Operation = MatrixOperation<T, type, maxRow, maxColumn>;

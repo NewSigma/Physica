@@ -32,7 +32,7 @@ namespace Physica::AI {
      */
     template<class ScalarType>
     class AP {
-        using MatrixType = Core::DenseMatrix<ScalarType, Core::DenseMatrixOption::Row | Core::DenseMatrixOption::Vector>;
+        using MatrixType = Core::DenseMatrix<ScalarType, Core::MatrixOption::Row | Core::MatrixOption::Vector>;
         using SimilarMatrix = Core::DenseSymmMatrix<ScalarType>;
     private:
         MatrixType responsibility;

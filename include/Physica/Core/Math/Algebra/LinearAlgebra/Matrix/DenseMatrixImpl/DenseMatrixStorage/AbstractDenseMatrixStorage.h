@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 #include "Physica/Utils/Template/CRTPBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
@@ -96,12 +96,12 @@ namespace Physica::Core::Internal {
     class AbstractDenseMatrixStorage;
 
     template<class Derived>
-    class AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Column | DenseMatrixOption::Element>
+    class AbstractDenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>
             : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (DenseMatrixOption::Column | DenseMatrixOption::Element)
+        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Column | MatrixOption::Element)
                       , "Invalid Derived type.");
 
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
@@ -140,12 +140,12 @@ namespace Physica::Core::Internal {
     };
 
     template<class Derived>
-    class AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Row | DenseMatrixOption::Element>
+    class AbstractDenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>
             : public DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (DenseMatrixOption::Row | DenseMatrixOption::Element)
+        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Row | MatrixOption::Element)
                       , "Invalid Derived type.");
 
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
@@ -181,12 +181,12 @@ namespace Physica::Core::Internal {
     };
 
     template<class Derived>
-    class AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Column | DenseMatrixOption::Vector>
+    class AbstractDenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>
             : public DenseMatrixStorageHelper<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>
                                              , Traits<Derived>::ColumnAtCompile
                                              , Traits<Derived>::MaxColumnAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (DenseMatrixOption::Column | DenseMatrixOption::Vector)
+        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Column | MatrixOption::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
@@ -224,12 +224,12 @@ namespace Physica::Core::Internal {
     };
 
     template<class Derived>
-    class AbstractDenseMatrixStorage<Derived, DenseMatrixOption::Row | DenseMatrixOption::Vector>
+    class AbstractDenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>
             : public DenseMatrixStorageHelper<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>
                                              , Traits<Derived>::RowAtCompile
                                              , Traits<Derived>::MaxRowAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (DenseMatrixOption::Row | DenseMatrixOption::Vector)
+        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Row | MatrixOption::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;

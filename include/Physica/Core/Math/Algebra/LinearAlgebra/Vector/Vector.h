@@ -23,7 +23,7 @@
 #include "Physica/Utils/Container/Array/Array.h"
 #include "ContinuousVector.h"
 #include "VectorExpression.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixOption.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length>

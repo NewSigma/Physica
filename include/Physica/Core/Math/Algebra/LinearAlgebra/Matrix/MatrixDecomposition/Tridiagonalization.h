@@ -30,7 +30,7 @@ namespace Physica::Core {
         class Traits<TridiagonalMatrixT<MatrixType>> : public Traits<MatrixType> {
         private:
             using Base = Traits<MatrixType>;
-            using Base::MatrixOption;
+            using Base::Option;
         };
     }
     /**

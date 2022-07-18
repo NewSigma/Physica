@@ -38,7 +38,7 @@ namespace Physica::Core {
     class EqualityQuadraticProgramming {
         DenseSymmMatrix<ScalarType, Dynamic> objectiveMatG;
         Vector<ScalarType, Dynamic> objectiveVecC;
-        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> constraints;
+        DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> constraints;
         Vector<ScalarType, Dynamic> x;
         Vector<ScalarType, Dynamic> multipliers;
     public:
@@ -96,7 +96,7 @@ namespace Physica::Core {
         }
 
         const size_t problemSize = degreeOfFreedom + constraints.getRow();
-        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> equationMatA(problemSize, problemSize);
+        DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> equationMatA(problemSize, problemSize);
         /* Assemble matrix */ {
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
@@ -112,7 +112,7 @@ namespace Physica::Core {
             else
                 equationMatA = objectiveMatG;
         }
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
         const Vector<ScalarType> solution = inv_equationMatA * equationVecB;
         x -= solution.head(degreeOfFreedom);
         if (haveConstraints)

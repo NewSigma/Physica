@@ -48,7 +48,7 @@ namespace Physica::Core {
          * target[0] is the constant term, target[n] is the coefficient before the n.th variable.
          */
         Vector<ScalarType> target;
-        DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> data;
+        DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> data;
         //Refactor: devide into two arrays
         size_t* order;
         LPState state;
@@ -66,7 +66,7 @@ namespace Physica::Core {
         void solve();
         /* Getters */
         [[nodiscard]] const Vector<ScalarType>& getTarget() const { return target; }
-        [[nodiscard]] const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>& getData() const { return data; }
+        [[nodiscard]] const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>& getData() const { return data; }
         [[nodiscard]] const size_t* getOrder() const { return order; }
         [[nodiscard]] size_t getOrderLength() const { return data.getRow() + data.getColumn(); }
         [[nodiscard]] LPState getState() const { return state; }

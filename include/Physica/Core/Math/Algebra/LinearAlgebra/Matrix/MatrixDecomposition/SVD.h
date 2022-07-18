@@ -40,17 +40,17 @@ namespace Physica::Core {
                                                                 ? ColumnAtCompile
                                                                 : RowAtCompile;
         using WorkingMatrix = DenseMatrix<RealType,
-                                          DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                          MatrixOption::Column | MatrixOption::Vector,
                                           RowAtCompile,
                                           ColumnAtCompile>;
     public:
         using SingularValueVector = Vector<RealType, NumSingularValue>;
         using LSingularMatrix = DenseMatrix<RealType,
-                                            DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                            MatrixOption::Column | MatrixOption::Vector,
                                             RowAtCompile,
                                             RowAtCompile>;
         using RSingularMatrix = DenseMatrix<RealType,
-                                            DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                            MatrixOption::Column | MatrixOption::Vector,
                                             ColumnAtCompile,
                                             ColumnAtCompile>;
     private:

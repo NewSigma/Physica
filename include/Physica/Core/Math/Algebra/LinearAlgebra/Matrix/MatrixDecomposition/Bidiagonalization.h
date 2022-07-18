@@ -28,7 +28,7 @@ namespace Physica::Core {
         class Traits<BiDiagMatrixB<MatrixType>> : public Traits<MatrixType> {
         private:
             using Base = Traits<MatrixType>;
-            using Base::MatrixOption;
+            using Base::Option;
         };
     }
     /**

@@ -61,7 +61,7 @@ int main() {
     using RealType = Scalar<Double, false>;
     using ComplexType = ComplexScalar<RealType>;
     {
-        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-0.590316, -2.19514, -2.37463},
                              {-1.25006, -0.297493, 1.40349},
                              {0.517063, -0.956614, -0.920775}};
@@ -74,7 +74,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 5, 5>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 5, 5>;
         const MatrixType mat1{{0.200743, 0.151314, 0.152894, 0.934051, 0.487404},
                               {0.819659, 0.434558, 0.829935, 0.837801, 0.699088},
                               {0.432202, 0.744724, 0.823444, 0.149924, 0.72579},
@@ -91,7 +91,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<ComplexType, DenseMatrixOption::Column | DenseMatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};

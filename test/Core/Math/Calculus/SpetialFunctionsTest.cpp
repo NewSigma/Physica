@@ -171,7 +171,7 @@ void testSphericalHarmomicY() {
 void testHamonicRotator() {
     constexpr double epsilon = 1E-9;
     using T = Scalar<Double, false>;
-    using Matrix = DenseMatrix<T, DenseMatrixOption::Row | DenseMatrixOption::Element>;
+    using Matrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
     Matrix rotation(3, {0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
     HamonicRotator rotator(rotation);
 

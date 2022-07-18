@@ -29,7 +29,7 @@ namespace Physica::Core {
      *
      * It is recommended that store elements to store a small matrix.
      */
-    class DenseMatrixOption {
+    class MatrixOption {
     public:
         enum {
             Column = 0b000,
@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         template<class Matrix>
         constexpr static bool isColumnMatrix() {
-            return isAnyMajor<Matrix>() || !(Internal::Traits<Matrix>::MatrixOption & Row);
+            return isAnyMajor<Matrix>() || !(Internal::Traits<Matrix>::Option & Row);
         }
 
         template<class Matrix>
@@ -51,7 +51,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         constexpr static bool isAnyMajor() {
-            return Internal::Traits<Matrix>::MatrixOption & AnyMajor;
+            return Internal::Traits<Matrix>::Option & AnyMajor;
         }
 
         template<class Matrix>
@@ -60,7 +60,7 @@ namespace Physica::Core {
         }
 
         template<class Matrix>
-        constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::MatrixOption & Element; }
+        constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::Option & Element; }
 
         template<class Matrix>
         constexpr static bool isVectorMatrix() { return !isElementMatrix<Matrix>(); }
@@ -71,6 +71,6 @@ namespace Physica::Core {
         template<class Matrix1, class Matrix2>
         constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
     private:
-        DenseMatrixOption();
+        MatrixOption();
     };
 }

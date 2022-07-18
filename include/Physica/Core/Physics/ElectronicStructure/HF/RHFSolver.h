@@ -41,7 +41,7 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     class RHFSolver {
         using ScalarType = typename Internal::Traits<BaseSetType>::ScalarType;
-        using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Vector>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
@@ -50,7 +50,7 @@ namespace Physica::Core::Physics {
         using EDIISBuffer = Utils::Array<MatrixType, EDIISBufferSize>;
         using DIISBuffer = Utils::Array<MatrixType, DIISBufferSize - 1>;
         using MatrixBuffer = Utils::Array<MatrixType, MatrixBufferSize>;
-        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+        using DIISMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
     public:
         using WaveType = MatrixType;
     private:
@@ -307,8 +307,8 @@ namespace Physica::Core::Physics {
             }
         }
 
-        auto equalityConstraint = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 1, Dynamic>(1, problemDim + 1, ScalarType::One());
-        auto inequalityConstraint = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>(problemDim, problemDim + 1, ScalarType::Zero());
+        auto equalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 1, Dynamic>(1, problemDim + 1, ScalarType::One());
+        auto inequalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>(problemDim, problemDim + 1, ScalarType::Zero());
         auto block = inequalityConstraint.leftCols(problemDim);
         block.toUnitMatrix();
         auto initial = Vector<ScalarType>(problemDim, ScalarType::Zero());

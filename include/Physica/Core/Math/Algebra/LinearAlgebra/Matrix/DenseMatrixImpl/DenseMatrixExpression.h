@@ -33,14 +33,14 @@ namespace Physica::Core {
     namespace Internal {
         template<Utils::ExpressionType type, class T1, class T2, class ResultType>
         class Traits<DenseMatrixExpression<type, T1, T2, ResultType>> {
-            constexpr static bool SameMajor = DenseMatrixOption::isSameMajor<T1, T2>();
-            constexpr static bool RowMajor = DenseMatrixOption::isRowMatrix<T1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(DenseMatrixOption::Column)
-                                                               : int(DenseMatrixOption::Row))
-                                                   : int(DenseMatrixOption::AnyMajor);
-            constexpr static int Storage = (DenseMatrixOption::isElementMatrix<T1>() && DenseMatrixOption::isElementMatrix<T2>())
-                                         ? DenseMatrixOption::Element
-                                         : DenseMatrixOption::Vector;
+            constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
+            constexpr static bool RowMajor = MatrixOption::isRowMatrix<T1>();
+            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Column)
+                                                               : int(MatrixOption::Row))
+                                                   : int(MatrixOption::AnyMajor);
+            constexpr static int Storage = (MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>())
+                                         ? MatrixOption::Element
+                                         : MatrixOption::Vector;
         public:
             using ScalarType = ResultType;
             constexpr static size_t RowAtCompile = T1::RowAtCompile;

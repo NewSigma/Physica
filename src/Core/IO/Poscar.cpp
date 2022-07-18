@@ -154,7 +154,7 @@ namespace Physica::Core {
 
     void Poscar::toDirect() {
         assert(type == Cartesian);
-        using MatrixType = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, 3, 3>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 3, 3>;
         const MatrixType inv = lattice.inverse();
         pos *= inv;
     }

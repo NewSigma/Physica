@@ -29,7 +29,7 @@ namespace Physica::Core {
         template<class MatrixType>
         class Traits<RowLVector<MatrixType>> {
             using VectorType = RowLVector<MatrixType>;
-            constexpr static bool isRowMatrix = DenseMatrixOption::isRowMatrix<MatrixType>();
+            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
         public:
             using Base = typename std::conditional<isRowMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
@@ -41,7 +41,7 @@ namespace Physica::Core {
         template<class MatrixType>
         class Traits<ColLVector<MatrixType>> {
             using VectorType = ColLVector<MatrixType>;
-            constexpr static bool isColumnMatrix = DenseMatrixOption::isColumnMatrix<MatrixType>();
+            constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
         public:
             using Base = typename std::conditional<isColumnMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
@@ -54,7 +54,7 @@ namespace Physica::Core {
         class Traits<LMatrixBlock<MatrixType, Row, Column>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int MatrixOption = MatrixType::MatrixOption;
+            constexpr static int Option = MatrixType::Option;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = Row;

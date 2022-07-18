@@ -37,7 +37,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class QuadraticProgramming {
-        using ConstraintMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>;
+        using ConstraintMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
 
         DenseSymmMatrix<ScalarType, Dynamic> objectiveMatG;
         Vector<ScalarType, Dynamic> objectiveVecC;

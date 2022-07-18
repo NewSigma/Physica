@@ -35,7 +35,7 @@ namespace Physica::Core {
      */
     class DimEstimator {
         using ScalarType = Scalar<Double, false>;
-        using DataMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector>;
+        using DataMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
         Vector<ScalarType> intrinsicDim;
         Vector<ScalarType> correlateDim;
     public:

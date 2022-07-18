@@ -25,7 +25,7 @@ int main() {
     using ScalarType = Scalar<Double, false>;
     {
         using VectorType = Vector<ScalarType, 3>;
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 3, 3> G{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 3, 3> G{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
         const VectorType c{0, 0, 0};
         const DenseMatrix<ScalarType> constraints{};
         const VectorType answer{0, 0, 0};
@@ -37,9 +37,9 @@ int main() {
     }
     {
         using VectorType = Vector<ScalarType, 3>;
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 3, 3> G{{6, 2, 1}, {2, 5, 2}, {1, 2, 4}};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 3, 3> G{{6, 2, 1}, {2, 5, 2}, {1, 2, 4}};
         const VectorType c{-8, -3, -3};
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 2, 4> constraints{{1, 0, 1, 3}, {0, 1, 1, 0}};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 2, 4> constraints{{1, 0, 1, 3}, {0, 1, 1, 0}};
         const VectorType answer{2, -1, 1};
 
         const VectorType initial{1, 1, 1};

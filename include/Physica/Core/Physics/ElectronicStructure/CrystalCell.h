@@ -28,8 +28,8 @@ namespace Physica::Core {
     class CrystalCell {
     public:
         using ScalarType = Scalar<Float, false>;
-        using LatticeMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, 3, 3>;
-        using PositionMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Element, Dynamic, 3>;
+        using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
+        using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 3>;
     private:
         LatticeMatrix lattice;
         PositionMatrix pos;

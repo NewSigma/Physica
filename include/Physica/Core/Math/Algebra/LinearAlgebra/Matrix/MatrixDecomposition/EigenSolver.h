@@ -34,14 +34,14 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
         using RawEigenvectorType = DenseMatrix<ScalarType,
-                                               DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                               MatrixOption::Column | MatrixOption::Vector,
                                                MatrixType::RowAtCompile,
                                                MatrixType::RowAtCompile>;
         using WorkingMatrix = typename Schur<MatrixType>::WorkingMatrix;
     public:
         using EigenvalueVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
         using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
-                                              DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                              MatrixOption::Column | MatrixOption::Vector,
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
     private:

@@ -31,7 +31,7 @@ namespace Physica::Core {
         class Traits<DenseSymmMatrix<T, Order, MaxOrder>> {
         public:
             using ScalarType = T;
-            constexpr static int MatrixOption = DenseMatrixOption::AnyMajor | DenseMatrixOption::Element;
+            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
             constexpr static size_t RowAtCompile = Order;
             constexpr static size_t ColumnAtCompile = Order;
             constexpr static size_t MaxRowAtCompile = MaxOrder;

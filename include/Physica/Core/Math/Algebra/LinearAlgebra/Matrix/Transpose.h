@@ -31,11 +31,11 @@ namespace Physica::Core {
         template<class MatrixType>
         class Traits<Transpose<MatrixType>> {
         private:
-            constexpr static int major = DenseMatrixOption::isColumnMatrix<MatrixType>() ? DenseMatrixOption::Row : DenseMatrixOption::Column;
-            constexpr static int storage = DenseMatrixOption::getStorage<MatrixType>();
+            constexpr static int major = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Column;
+            constexpr static int storage = MatrixOption::getStorage<MatrixType>();
         public:
             using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int MatrixOption = major | storage;
+            constexpr static int Option = major | storage;
             constexpr static size_t RowAtCompile = MatrixType::ColumnAtCompile;
             constexpr static size_t ColumnAtCompile = MatrixType::RowAtCompile;
             constexpr static size_t MaxRowAtCompile = MatrixType::MaxColumnAtCompile;
@@ -48,7 +48,7 @@ namespace Physica::Core {
         class Traits<TransposeVector<VectorType>> {
         public:
             using ScalarType = typename VectorType::ScalarType;
-            constexpr static int MatrixOption = DenseMatrixOption::Row | DenseMatrixOption::Vector;
+            constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
             constexpr static size_t RowAtCompile = 1;
             constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t MaxRowAtCompile = 1;

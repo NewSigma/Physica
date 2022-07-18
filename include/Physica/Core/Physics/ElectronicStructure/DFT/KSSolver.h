@@ -56,7 +56,7 @@ namespace Physica::Core {
 
         constexpr static size_t DIISBufferSize = 3;
         using DIISBuffer = Utils::Array<UncenteredGrid, DIISBufferSize - 1>;
-        using DIISMatrix = DenseMatrix<ScalarType, DenseMatrixOption::Column | DenseMatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+        using DIISMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
         using DensityRecord = Utils::Array<DensityType, DIISBufferSize>;
     protected:
         CrystalCell cell;

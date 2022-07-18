@@ -25,10 +25,10 @@ int main() {
     using ScalarType = Scalar<Double, false>;
     {
         using VectorType = Vector<ScalarType, 2>;
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 2, 2> G{{2, 0}, {0, 2}};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 2, 2> G{{2, 0}, {0, 2}};
         const VectorType c{-2, -5};
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector> equality{};
-        const DenseMatrix<ScalarType, DenseMatrixOption::Row | DenseMatrixOption::Vector, 5, 3> inequality{{1, -2, -2}, {-1, -2, -6}, {-1, 2, -2}, {1, 0, 0}, {0, 1, 0}};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> equality{};
+        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 5, 3> inequality{{1, -2, -2}, {-1, -2, -6}, {-1, 2, -2}, {1, 0, 0}, {0, 1, 0}};
         const VectorType answer{1.4, 1.7};
 
         const VectorType initial{2, 0};

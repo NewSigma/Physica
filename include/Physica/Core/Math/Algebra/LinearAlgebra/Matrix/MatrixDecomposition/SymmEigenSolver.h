@@ -35,11 +35,11 @@ namespace Physica::Core {
     public:
         using EigenvalueVector = Vector<RealType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
         using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
-                                              DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                              MatrixOption::Column | MatrixOption::Vector,
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
         using WorkingMatrix = DenseMatrix<ScalarType,
-                                          DenseMatrixOption::Column | DenseMatrixOption::Vector,
+                                          MatrixOption::Column | MatrixOption::Vector,
                                           MatrixType::RowAtCompile,
                                           MatrixType::RowAtCompile>; //Optimize: Use tridiagonal matrix is better
     private:

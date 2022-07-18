@@ -49,7 +49,7 @@ namespace Physica::Core {
         const size_t order = getRow();
         const size_t order_1 = order - 1;
         MatrixType copy = matrix;
-        if constexpr (DenseMatrixOption::isSameMajor<MatrixType, OtherMatrix>()) {
+        if constexpr (MatrixOption::isSameMajor<MatrixType, OtherMatrix>()) {
             inverse.getDerived().toUnitMatrix();
             for (size_t i = 0; i < order_1; ++i) {
                 size_t k = i;
