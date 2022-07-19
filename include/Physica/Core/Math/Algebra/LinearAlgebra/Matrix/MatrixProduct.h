@@ -180,7 +180,7 @@ namespace Physica::Core {
     inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
         assert(mat.getColumn() == vec.getLength());
-        return MatrixVectorProduct(mat, vec);
+        return MatrixVectorProduct(mat.getDerived(), vec.getDerived());
     }
 }
 

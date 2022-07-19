@@ -65,14 +65,14 @@ namespace Physica::Utils {
     }
 
     template<class MatrixType, class MatrixType2>
-    bool matrixNear(const Physica::Core::LValueMatrix<MatrixType>& m1,
-                    const Physica::Core::LValueMatrix<MatrixType2>& m2,
+    bool matrixNear(const Physica::Core::RValueMatrix<MatrixType>& m1,
+                    const Physica::Core::RValueMatrix<MatrixType2>& m2,
                     double precision) {
         assert(m1.getRow() == m2.getRow());
         assert(m1.getColumn() == m2.getColumn());
         for (size_t i = 0; i < m1.getColumn(); ++i)
             for (size_t j = 0; j < m1.getRow(); ++j)
-                if (!scalarNear(m1(j, i), m2(j, i), precision))
+                if (!scalarNear(m1.calc(j, i), m2.calc(j, i), precision))
                     return false;
         return true;
     }

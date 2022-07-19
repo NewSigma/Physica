@@ -59,6 +59,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] inline size_t getRow() const noexcept;
         [[nodiscard]] inline size_t getColumn() const noexcept;
+        [[nodiscard]] const Utils::Array<ScalarType>& getElements() const { return elements; }
+        [[nodiscard]] const Utils::Array<size_t>& getMinorIndexes() const { return minorIndexes; }
+        [[nodiscard]] const Utils::Array<size_t>& getMajorStarts() const { return majorStarts; }
         [[nodiscard]] inline size_t getMaxMajor() const noexcept;
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }
@@ -77,16 +80,16 @@ namespace Physica::Core {
             : Base()
             , elements()
             , minorIndexes()
-            , majorStarts((MatrixOption::isColumnMatrix<This>() ? col : row) + 1, 0)
-            , maxMinor(MatrixOption::isColumnMatrix<This>() ? row : col) {}
+            , majorStarts(MatrixOption::selectMajor<This>(row, col) + 1, 0)
+            , maxMinor(MatrixOption::selectMinor<This>(row, col)) {}
 
     template<class ScalarType, int option>
     void SparseMatrix<ScalarType, option>::insert(ScalarType x, size_t row, size_t col) {
         assert(!x.isZero());
         assert(row < getRow());
         assert(col < getColumn());
-        const size_t major = MatrixOption::isColumnMatrix<This>() ? col : row;
-        const size_t minor = MatrixOption::isColumnMatrix<This>() ? row : col;
+        const size_t major = MatrixOption::selectMajor<This>(row, col);
+        const size_t minor = MatrixOption::selectMinor<This>(row, col);
         /* Search existing element */ {
             const size_t from = majorStarts[major];
             const size_t to = majorStarts[major + 1];
@@ -115,8 +118,8 @@ namespace Physica::Core {
     ScalarType SparseMatrix<ScalarType, option>::calc(size_t row, size_t col) const {
         assert(row < getRow());
         assert(col < getColumn());
-        const size_t major = MatrixOption::isColumnMatrix<This>() ? col : row;
-        const size_t minor = MatrixOption::isColumnMatrix<This>() ? row : col;
+        const size_t major = MatrixOption::selectMajor<This>(row, col);
+        const size_t minor = MatrixOption::selectMinor<This>(row, col);
         const size_t from = majorStarts[major];
         const size_t to = majorStarts[major + 1];
         size_t index = 0;
@@ -148,3 +151,5 @@ namespace Physica::Core {
         return maxMinor;
     }
 }
+
+#include "SparseMatrixImpl/SparseMatrixProduct.h"

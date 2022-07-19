@@ -70,6 +70,16 @@ namespace Physica::Core {
 
         template<class Matrix1, class Matrix2>
         constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
+
+        template<class Matrix>
+        [[nodiscard]] static size_t selectMajor(size_t row, size_t col) {
+            return isColumnMatrix<Matrix>() ? col : row;
+        }
+
+        template<class Matrix>
+        [[nodiscard]] static size_t selectMinor(size_t row, size_t col) {
+            return isColumnMatrix<Matrix>() ? row : col;
+        }
     private:
         MatrixOption();
     };
