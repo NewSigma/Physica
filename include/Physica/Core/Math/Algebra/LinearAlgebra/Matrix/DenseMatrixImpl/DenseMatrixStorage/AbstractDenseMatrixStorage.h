@@ -101,7 +101,7 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Column | MatrixOption::Element)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Element)
                       , "Invalid Derived type.");
 
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
@@ -145,7 +145,7 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::SizeAtCompile
                                              , Traits<Derived>::MaxSizeAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Row | MatrixOption::Element)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Element)
                       , "Invalid Derived type.");
 
         using Base = DenseMatrixStorageHelper<typename Traits<Derived>::ScalarType
@@ -186,7 +186,7 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::ColumnAtCompile
                                              , Traits<Derived>::MaxColumnAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Column | MatrixOption::Vector)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
@@ -229,7 +229,7 @@ namespace Physica::Core::Internal {
                                              , Traits<Derived>::RowAtCompile
                                              , Traits<Derived>::MaxRowAtCompile>
             , public Utils::CRTPBase<Derived> {
-        static_assert(Traits<Derived>::MatrixOption == (MatrixOption::Row | MatrixOption::Vector)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Vector)
                       , "Invalid Derived type.");
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;

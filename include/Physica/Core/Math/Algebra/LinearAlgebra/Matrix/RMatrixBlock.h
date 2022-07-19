@@ -49,7 +49,7 @@ namespace Physica::Core {
         class Traits<RMatrixBlock<MatrixType, Row, Column>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int MatrixOption = MatrixType::MatrixOption;
+            constexpr static int Option = MatrixType::MatrixOption;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = Row;

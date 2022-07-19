@@ -28,7 +28,7 @@ namespace Physica::Core {
         class Traits<Cholesky<MatrixType>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int MatrixOption = MatrixType::MatrixOption;
+            constexpr static int Option = MatrixType::MatrixOption;
             constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
             constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;

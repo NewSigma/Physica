@@ -21,7 +21,7 @@
 #include <memory>
 #include "LValueMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
-#include "DenseMatrixImpl/MatrixProduct.h"
+#include "MatrixProduct.h"
 #include "InverseMatrix.h"
 #include "Transpose.h"
 #include "MatrixDecomposition/LUDecomposition.h"

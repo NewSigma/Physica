@@ -28,7 +28,7 @@ namespace Physica::Core {
      * Optimize: May be DenseMatrixStorage take only one
      * template argument class T and move implementation to Internal?
      */
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class DenseMatrixStorage;
 
     namespace Internal {
@@ -37,11 +37,11 @@ namespace Physica::Core {
         template<class T>
         class Traits;
 
-        template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-        class Traits<DenseMatrixStorage<T, type, Row, Column, MaxRow, MaxColumn>> {
+        template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+        class Traits<DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>> {
         public:
             using ScalarType = T;
-            constexpr static int MatrixOption = type;
+            constexpr static int Option = option;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
