@@ -51,8 +51,6 @@ namespace Physica::Utils::Internal {
         __host__ __device__ inline void grow(RValueReferenceType t);
         void removeAt(size_t index);
         __host__ __device__ void clear() noexcept;
-        void insert(ConstLValueReferenceType t, size_t index);
-        void insert(RValueReferenceType t, size_t index);
         /* Setters */
         /**
          * Low level api. Designed for performance.

@@ -225,15 +225,15 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::append(ConstLValueReferenceType t) {
-        if(length == capacity)
-            increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
+        if (length == capacity)
+            doubleSpace();
         Base::grow(t);
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::append(RValueReferenceType t) {
-        if(length == capacity)
-            increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
+        if (length == capacity)
+            doubleSpace();
         Base::grow(std::move(t));
     }
 
@@ -257,6 +257,16 @@ namespace Physica::Utils {
         length = new_length;
         t.arr = nullptr;
         t.length = 0;
+    }
+
+    template<class T, class Allocator>
+    template<class... Args>
+    void Array<T, Dynamic, Dynamic, Allocator>::insert(size_t index, Args... args) {
+        if (length == capacity)
+            doubleSpace();
+        memmove(arr + index + 1, arr + index, length - index);
+        alloc.construct(arr + index, std::forward<Args>(args)...);
+        Base::setLength(length + 1);
     }
 
     template<class T, class Allocator>

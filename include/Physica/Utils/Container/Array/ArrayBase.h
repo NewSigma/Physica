@@ -133,6 +133,9 @@ namespace Physica::Utils::Internal {
         __host__ __device__ ConstReverseIterator rend() const noexcept { return crend(); }
         __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(data() - 1); }
         /* Getters */
+        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return Base::getDerived().size(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
         [[nodiscard]] __host__ __device__ PointerType data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }

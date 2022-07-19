@@ -196,6 +196,8 @@ namespace Physica::Utils {
         void append(RValueReferenceType t);
         void append(const Array& t);
         void append(Array&& t);
+        template<class... Args>
+        void insert(size_t index, Args... args);
         void reserve(size_t size);
         template<class... Args>
         void resize(size_t size, Args... args);
@@ -207,6 +209,8 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+    private:
+        void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>

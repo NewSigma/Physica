@@ -126,22 +126,6 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    void DynamicArrayBase<Derived, Allocator>::insert(ConstLValueReferenceType t, size_t index) {
-        assert(length < Base::getCapacity());
-        memmove(arr + index + 1, arr + index, length - index);
-        alloc.construct(arr + index, t);
-        Base::setLength(length + 1);
-    }
-
-    template<class Derived, class Allocator>
-    void DynamicArrayBase<Derived, Allocator>::insert(RValueReferenceType t, size_t index) {
-        assert(length < Base::getCapacity());
-        memmove(arr + index + 1, arr + index, length - index);
-        alloc.construct(arr + index, std::move(t));
-        Base::setLength(length + 1);
-    }
-
-    template<class Derived, class Allocator>
     __host__ __device__ void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) noexcept {
         std::swap(arr, array.arr);
         std::swap(length, array.length);
