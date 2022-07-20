@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct.h"
+
 namespace Physica::Core {
     template<class T, int option, class VectorType>
     class MatrixVectorProduct<SparseMatrix<T, option>, VectorType>

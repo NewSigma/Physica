@@ -24,10 +24,11 @@ namespace Physica::Core {
         static_assert(std::is_convertible<MatrixType&, RValueMatrix<MatrixType>&>::value, "[Error]: Type 'MatrixType' must be a matrix");
         static_assert(std::is_convertible<VectorType&, LValueVector<VectorType>&>::value, "[Error]: Type 'VectorType' must be a lvector");
         using ScalarType  = typename MatrixType::ScalarType;
-    private:
+    public:
         MatrixType A;
         VectorType b;
     public:
+        IterateSolver() = default;
         IterateSolver(MatrixType A_, VectorType b_);
         IterateSolver(const IterateSolver&) = default;
         IterateSolver(IterateSolver&&) noexcept = default;

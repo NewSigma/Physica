@@ -18,9 +18,10 @@
  */
 #pragma once
 
-#include "FEMSolver.h"
 #include "Mesh.h"
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 
 namespace Physica::Core {
     template<class MeshType>
@@ -30,9 +31,10 @@ namespace Physica::Core {
     protected:
         using ElementType = typename MeshType::ElementType;
         using VectorType = typename ElementType::VectorType;
+        using SolverType = IterateSolver<SparseMatrix<ScalarType>, Vector<ScalarType>>;
 
         MeshType mesh;
-        FEMSolver<ScalarType> solver;
+        SolverType solver;
     private:
         Utils::Array<size_t> map_var_node;
         Utils::Array<size_t> map_node_var;
@@ -56,7 +58,8 @@ namespace Physica::Core {
     template<class MeshType>
     AbstractModel<MeshType>::AbstractModel(MeshType mesh_) : mesh(std::move(mesh_)), solver() {
         const size_t n = mesh.getNumFreeNodes();
-        solver.resize(n);
+        solver.A = SparseMatrix<ScalarType>(n, n);
+        solver.b.resize(n);
         map_var_node.resize(n);
         map_node_var.resize(mesh.getNumNodes());
         makeMaps();
@@ -66,7 +69,7 @@ namespace Physica::Core {
     void AbstractModel<MeshType>::solverToMesh() {
         auto& coeffs = mesh.getCoeffs();
         for (size_t i = 0; i < getDegreeOfFreedom(); ++i) {
-            coeffs[varToNode(i)] = solver.x[i];
+            coeffs[varToNode(i)] = solver.getSolution()[i];
         }
     }
 

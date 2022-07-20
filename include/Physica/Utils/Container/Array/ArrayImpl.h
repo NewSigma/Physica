@@ -262,9 +262,10 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     template<class... Args>
     void Array<T, Dynamic, Dynamic, Allocator>::insert(size_t index, Args... args) {
+        assert(index <= length);
         if (length == capacity)
             doubleSpace();
-        memmove(arr + index + 1, arr + index, length - index);
+        memmove(arr + index + 1, arr + index, (length - index) * sizeof(T));
         alloc.construct(arr + index, std::forward<Args>(args)...);
         Base::setLength(length + 1);
     }

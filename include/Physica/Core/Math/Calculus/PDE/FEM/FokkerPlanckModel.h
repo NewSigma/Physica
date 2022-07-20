@@ -71,7 +71,8 @@ namespace Physica::Core {
     template<class MeshType, class Functor>
     template<class Integrator>
     void FokkerPlanckModel<MeshType, Functor>::setInitialCond(Functor initial) {
-        solver.clear();
+        solver.A.clear();
+        solver.b = ScalarType::Zero();
         const auto& nodeTypes = mesh.getNodeTypes();
         const auto& coeffs = mesh.getCoeffs();
         for (const auto& elem : mesh.getElements()) {
@@ -92,7 +93,8 @@ namespace Physica::Core {
                         switch (nodeTypes[baseNode]) {
                             case NodeType::Free: {
                                 const size_t col = Base::nodeToVar(baseNode);
-                                solver.A(row, col) += integral;
+                                const ScalarType value = solver.A.calc(row, col) + integral;
+                                solver.A.insert(value, row, col);
                                 break;
                             }
                             case NodeType::Dirichlet: {
@@ -109,9 +111,9 @@ namespace Physica::Core {
             }
         }
         solver.solve();
-        for (auto& xi : solver.x)
-            if (xi.isNegative())
-                xi = ScalarType::Zero();
+        for (auto& x : solver.b)
+            if (x.isNegative())
+                x = ScalarType::Zero();
         Base::solverToMesh();
     }
 
@@ -168,7 +170,7 @@ namespace Physica::Core {
         auto& coeffs = mesh.getCoeffs();
         for (size_t i = 0; i < Base::getDegreeOfFreedom(); ++i) {
             const size_t index = Base::varToNode(i);
-            coeffs[index] += solver.x[i] * stepSize;
+            coeffs[index] += solver.getSolution()[i] * stepSize;
         }
     }
 }

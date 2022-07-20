@@ -25,21 +25,33 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 
 int main() {
-    SparseMatrix<ScalarType> mat(3, 3);
-    mat.insert(1, 0, 1);
-    mat.insert(1, 1, 0);
-    mat.insert(1, 1, 2);
-    mat.insert(1, 2, 1);
     {
-        DenseMatrix<ScalarType> answer{{0, 1, 0}, {1, 0, 1}, {0, 1, 0}};
-        if (!matrixNear(mat, answer, 1E-16))
-            return 1;
+        SparseMatrix<ScalarType> mat(3, 3);
+        mat.insert(1, 0, 1);
+        mat.insert(1, 1, 0);
+        mat.insert(1, 1, 2);
+        mat.insert(1, 2, 1);
+        {
+            DenseMatrix<ScalarType> answer{{0, 1, 0}, {1, 0, 1}, {0, 1, 0}};
+            if (!matrixNear(mat, answer, 1E-16))
+                return 1;
+        }
+        {
+            Vector<ScalarType> v{1, 1, 1};
+            Vector<ScalarType> result = mat * v;
+            Vector<ScalarType> answer{1, 2, 1};
+            if (!vectorNear(result, answer, 1E-16))
+                return 1;
+        }
     }
     {
-        Vector<ScalarType> v{1, 1, 1};
-        Vector<ScalarType> result = mat * v;
-        Vector<ScalarType> answer{1, 2, 1};
-        if (!vectorNear(result, answer, 1E-16))
+        SparseMatrix<ScalarType> mat(4, 4);
+        mat.insert(1, 0, 0);
+        mat.insert(4, 1, 1);
+        mat.insert(2, 1, 0);
+        mat.insert(3, 0, 1);
+        DenseMatrix<ScalarType> answer{{1, 2, 0, 0}, {3, 4, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
+        if (!matrixNear(mat, answer, 1E-15))
             return 1;
     }
     return 0;

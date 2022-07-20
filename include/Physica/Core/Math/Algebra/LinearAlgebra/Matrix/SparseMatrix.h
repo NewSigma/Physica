@@ -55,6 +55,7 @@ namespace Physica::Core {
         SparseMatrix(size_t row, size_t col);
         /* Operations */
         void insert(ScalarType x, size_t row, size_t col);
+        void clear();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] inline size_t getRow() const noexcept;
@@ -85,14 +86,14 @@ namespace Physica::Core {
 
     template<class ScalarType, int option>
     void SparseMatrix<ScalarType, option>::insert(ScalarType x, size_t row, size_t col) {
-        assert(!x.isZero());
+        //TODO: Inserting 0 element is useless
         assert(row < getRow());
         assert(col < getColumn());
         const size_t major = MatrixOption::selectMajor<This>(row, col);
         const size_t minor = MatrixOption::selectMinor<This>(row, col);
+        const size_t from = majorStarts[major];
+        const size_t to = majorStarts[major + 1];
         /* Search existing element */ {
-            const size_t from = majorStarts[major];
-            const size_t to = majorStarts[major + 1];
             size_t index = 0;
             for (size_t i = from; i < to && index <= minor; ++i) {
                 index = minorIndexes[i];
@@ -104,14 +105,22 @@ namespace Physica::Core {
         }
 
         /* If not exist */ {
-            for (size_t i = major + 1; i < majorStarts.getLength(); ++i)
-                ++majorStarts[i];
-            size_t insert_to = majorStarts[major];
-            while (insert_to < minorIndexes.getLength() && minorIndexes[insert_to] < minor)
+            size_t insert_to = from;
+            while (insert_to < to && minorIndexes[insert_to] < minor)
                 ++insert_to;
             elements.insert(insert_to, x);
             minorIndexes.insert(insert_to, minor);
+            for (size_t i = major + 1; i < majorStarts.getLength(); ++i)
+                ++majorStarts[i];
         }
+    }
+
+    template<class ScalarType, int option>
+    void SparseMatrix<ScalarType, option>::clear() {
+        elements.resize(0);
+        minorIndexes.resize(0);
+        for (auto& i : majorStarts)
+            i = 0;
     }
 
     template<class ScalarType, int option>
