@@ -17,20 +17,21 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Utils/TestHelper.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 
 using namespace Physica::Utils;
 using namespace Physica::Core;
 
 int main() {
     using ScalarType = Scalar<Double, false>;
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 5>;
     using VectorType = Vector<ScalarType, 4>;
-    MatrixType A{{0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553, 4.316511702487202E-1},
-                {-0.000696013585639699, 0.816492585748236, 0.0216969440126965, -0.0884307621566726, 1.548712563601895E-2},
-                {0.131671000379563, 0.0216969440126965, 0.643819646681362, -0.131016640264434, 9.840637243791538E-1},
-                {-0.0701048797366553, -0.0884307621566726, -0.131016640264434, 0.788769710999288, 1.671684099146560E-1}};
-    VectorType answer{0.379822910240522, 0.0329724647167976, 1.55292884169613, 0.507335846409689};
+    const DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 5> A
+            {{0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553, 4.316511702487202E-1},
+            {-0.000696013585639699, 0.816492585748236, 0.0216969440126965, -0.0884307621566726, 1.548712563601895E-2},
+            {0.131671000379563, 0.0216969440126965, 0.643819646681362, -0.131016640264434, 9.840637243791538E-1},
+            {-0.0701048797366553, -0.0884307621566726, -0.131016640264434, 0.788769710999288, 1.671684099146560E-1}};
+    const VectorType answer{0.379822910240522, 0.0329724647167976, 1.55292884169613, 0.507335846409689};
     {
         LinearEquations equ(A);
         equ.gaussJordanPartial();
@@ -56,15 +57,12 @@ int main() {
             return 1;
     }
     {
-        LinearEquations equ(A);
-        equ.lu();
-        if (!vectorNear(equ.getSolution(), answer, 1E-14))
-            return 1;
-    }
-    {
-        LinearEquations equ(A);
-        equ.conjugateGradient();
-        if (!vectorNear(equ.getSolution(), answer, 1E-14))
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 4>;
+        MatrixType mat = A.leftCols(4);
+        VectorType b = A.col(4);
+        IterateSolver solver(std::move(mat), std::move(b));
+        solver.solve();
+        if (!vectorNear(solver.getSolution(), answer, 1E-14))
             return 1;
     }
     return 0;

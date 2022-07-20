@@ -18,7 +18,7 @@
  */
 #include <cassert>
 #include "Physica/Core/Physics/TotalCircuit.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
 
 namespace Physica::Core {
     /*!

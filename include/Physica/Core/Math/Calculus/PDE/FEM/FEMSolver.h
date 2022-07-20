@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -43,15 +44,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void FEMSolver<ScalarType>::solve() {
-        const size_t n = x.getLength();
-        MatrixType mat(n, n + 1);
-        auto block = mat.leftCols(n);
-        block = A;
-        auto col = mat.col(n);
-        col = b;
-        LinearEquations equ(std::move(mat));
-        equ.conjugateGradient();
-        x = equ.getSolution();
+        IterateSolver solver(A, b);
+        solver.solve();
+        x = solver.getSolution();
     }
 
     template<class ScalarType>

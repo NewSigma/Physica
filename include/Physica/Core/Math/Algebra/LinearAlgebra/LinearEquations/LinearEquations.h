@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Matrix/MatrixOperation.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOperation.h"
 
 namespace Physica::Core {
     /**
@@ -50,7 +50,6 @@ namespace Physica::Core {
         void gaussEliminationPartial();
         void gaussEliminationComplete();
         void lu();
-        void conjugateGradient();
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }

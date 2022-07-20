@@ -19,7 +19,7 @@
 #pragma once
 
 #include <iostream>
-#include "Matrix/MatrixDecomposition/PLUDecomposition.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
 
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
@@ -105,37 +105,6 @@ namespace Physica::Core {
             col -= top.col(i).asVector() * working(i, rank);
         }
         working(0, rank) /= working(0, 0);
-    }
-    /**
-     * Pertinent for large-scale problem, coefficient matrix must be symmetric and positive definite
-     * 
-     * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.112
-     */
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::conjugateGradient() {
-        using VectorType = Vector<T, maxRow>;
-        
-        const size_t row = working.getRow();
-        const size_t column = working.getColumn();
-        const auto mat_A = working.leftCols(column - 1);
-        VectorType x = VectorType::Zeros(row);
-        VectorType residual = -working.col(column - 1).asVector();
-        VectorType p = working.col(column - 1);
-
-        T squaredNorm = residual.squaredNorm();
-        while(squaredNorm > std::numeric_limits<T>::epsilon()) {
-            const VectorType temp = mat_A * p;
-            const T step = squaredNorm / (p * temp);
-            x += step * p;
-            residual += step * temp;
-            const T next_squaredNorm = residual.squaredNorm();
-            const T beta = next_squaredNorm / squaredNorm;
-            squaredNorm = next_squaredNorm;
-            p = beta * p - residual;
-        }
-        auto result = working.col(column - 1);
-        result = x;
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
