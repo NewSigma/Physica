@@ -138,23 +138,29 @@ namespace Physica::Core {
                                     const VectorType global_grad_i = inv_jacobi.transpose() * elem.grad(i, p);
                                     const VectorType global_grad_j = inv_jacobi.transpose() * elem.grad(j, p);
 
-                                    const ScalarType term1 = ScalarType::One() - square(globalPos[0]);
-                                    const ScalarType term2 = ScalarType::One() - square(globalPos[1]);
-                                    const ScalarType term3 = term1 * sqrt(term1);
+                                    
+                                    const ScalarType cos_eta = cos(globalPos[1]);
+                                    const bool flag = cos_eta < std::numeric_limits<ScalarType>::epsilon(); //Avoid divide by zero
+                                    if (flag)
+                                        return ScalarType::Zero();
 
-                                    const bool flag = term2 < std::numeric_limits<ScalarType>::epsilon(); //Avoid divide by zero
+                                    const ScalarType cos_xi = cos(globalPos[0]);
+                                    const ScalarType sin_eta = sin(globalPos[1]);
+                                    const ScalarType tan_xi = sin(globalPos[0]) / cos_xi;
+                                    const ScalarType tan_eta = sin_eta / cos_eta;
+                                    const VectorType phase_pos{tan_xi, tan_eta};
+
                                     const ScalarType u_i = elem.baseFunc(i, p);
-                                    const ScalarType result1 = flag ? ScalarType::Zero()
-                                                                    : (-globalPos[1] / term2 * term3 * (u_i * global_grad_j[0]));
+                                    const ScalarType result1 = -tan_eta / mass * square(cos_xi) * u_i * global_grad_j[0];
 
-                                    const ScalarType diffuseD = diffuse(globalPos);
-                                    const ScalarType d_diffuseD = d_diffuse(globalPos);
-                                    const ScalarType result2 = (force(globalPos) + (diffuseD - 1) * d_diffuseD) * sqrt(term2) * ((term2 * global_grad_i[1] - ScalarType(3) * globalPos[1] * u_i) * elem.baseFunc(j, p));
+                                    const ScalarType diffuseD = diffuse(phase_pos);
+                                    const ScalarType d_diffuseD = d_diffuse(phase_pos);
+                                    const ScalarType squared_cos_eta = square(cos_eta);
+                                    const ScalarType temp = -cos_eta * sin_eta * u_i * 2 + squared_cos_eta * global_grad_i[1];
+                                    const ScalarType result2 = (force(phase_pos) + (diffuseD - 1) * d_diffuseD) * (temp * elem.baseFunc(j, p));
 
-                                    const ScalarType squaredTerm2 = square(term2);
-                                    const ScalarType result3 = ScalarType(3) * diffuseD * (globalPos[1] * squaredTerm2) * (u_i * global_grad_j[1]);
-                                    const ScalarType result4 = -diffuseD * squaredTerm2 * term2 * (global_grad_i[1] * global_grad_j[1]);
-                                    return (result1 + result2 + result3 + result4) * abs(elem.jacobi(p).determinate());
+                                    const ScalarType result3 = -(diffuseD * squared_cos_eta) * (temp * global_grad_j[1]);
+                                    return (result1 + result2 + result3) * abs(elem.jacobi(p).determinate());
                                 });
                         solver.b[row] += integral * mesh.getCoeffs()[baseNode];
                     }

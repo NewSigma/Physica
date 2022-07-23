@@ -45,27 +45,26 @@ struct Integrator {
 };
 
 ScalarType force(VectorType pos) {
-    constexpr double gammaY = 1;
-    const ScalarType temp1 = -square(pos[0]) + 1;
-    const ScalarType temp2 = -square(pos[1]) + 1;
-    if (temp1 < std::numeric_limits<ScalarType>::epsilon() || temp2 < std::numeric_limits<ScalarType>::epsilon())
-        return ScalarType::Zero();
-    const ScalarType x = pos[0] / sqrt(temp1);
-    const ScalarType p = pos[1] / sqrt(temp2);
-    return -x / (ScalarType(1) + square(x)) - p / (ScalarType(1) + square(p)) * gammaY;
+    const ScalarType x = pos[0];
+    const ScalarType p = pos[1];
+    ScalarType result = 0;
+    if (std::isfinite(x.getTrivial()))
+        result -= x;
+    result -= p;
+    return result;
 }
 
 ScalarType diffuseD(VectorType pos) {
-    return reciprocal(square(pos[1]) + 1) + 1;
+    return ScalarType(1);
 }
 
 ScalarType d_diffuseD(VectorType pos) {
-    return ScalarType(-2) * pos[1] / (square(square(pos[1]) + 1));
+    return ScalarType(0);
 }
 
 ScalarType initial(VectorType pos) {
-    if (scalarNear(pos.norm(), ScalarType(0), 1E-15))
-        return ScalarType(1);
+    if (scalarNear(pos.norm(), ScalarType(0), 1E-14))
+        return ScalarType(10);
     return ScalarType(0);
 }
 /**
@@ -74,15 +73,15 @@ ScalarType initial(VectorType pos) {
  */
 int main() {
     using ElementType = Rectangle1<ScalarType>;
-    auto mesh = ElementType::rectangle({-1, -1}, {1, 1}, 41, 41);
+    auto mesh = ElementType::rectangle({-M_PI_2, -M_PI_2}, {M_PI_2, M_PI_2}, 101, 101);
     mesh.addDirichletBoundary([](VectorType p) { return scalarNear(abs(p[0]), ScalarType(1), 1E-15)
                                                      || scalarNear(abs(p[1]), ScalarType(1), 1E-15); },
                               []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
-    FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 0.01, 1);
+    FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-6, 1);
     model.setInitialCond<InitialIntegrator>(initial);
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 100; ++i)
         model.step<Integrator>();
 
     VTKFile vtk(model.getMesh(), "");
