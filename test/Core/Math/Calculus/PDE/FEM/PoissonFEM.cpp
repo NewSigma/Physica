@@ -69,7 +69,6 @@ int main() {
 
         const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
         const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
-        ScalarType max_relative_error = 0;
         for (auto x : xs) {
             for (auto y : ys) {
                 const ScalarType theory = theory_solution({x, y});
@@ -94,7 +93,6 @@ int main() {
 
         const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
         const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
-        ScalarType max_relative_error = 0;
         for (auto x : xs) {
             for (auto y : ys) {
                 const ScalarType theory = theory_solution({x, y});

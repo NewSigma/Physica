@@ -71,7 +71,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
-        return (bottomLeft + topRight + hadamard(bottomLeft - topRight, localPos)) * ScalarType(0.5);
+        return (bottomLeft + topRight - hadamard(topRight - bottomLeft, localPos)) * ScalarType(0.5);
     }
 
     template<class ScalarType>
