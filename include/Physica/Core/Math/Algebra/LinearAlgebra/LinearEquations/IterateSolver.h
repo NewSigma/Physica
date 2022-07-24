@@ -19,11 +19,14 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType>
+    template<class RMatrix, class LVector>
     class IterateSolver {
+    public:
+        using MatrixType = RMatrix;
+        using VectorType = LVector;
+        using ScalarType = typename MatrixType::ScalarType;
         static_assert(std::is_convertible<MatrixType&, RValueMatrix<MatrixType>&>::value, "[Error]: Type 'MatrixType' must be a matrix");
         static_assert(std::is_convertible<VectorType&, LValueVector<VectorType>&>::value, "[Error]: Type 'VectorType' must be a lvector");
-        using ScalarType  = typename MatrixType::ScalarType;
     public:
         MatrixType A;
         VectorType b;

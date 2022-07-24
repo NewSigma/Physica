@@ -29,6 +29,7 @@ namespace Physica::Core {
         using typename Base::ElementType;
     private:
         using typename Base::VectorType;
+        using BufferType = typename Base::SolverType::VectorType;
         using Base::mesh;
         using Base::solver;
 
@@ -37,6 +38,7 @@ namespace Physica::Core {
         Functor d_diffuse;
         ScalarType stepSize;
         ScalarType mass;
+        BufferType buffer1;
     public:
         FokkerPlanckModel(MeshType mesh,
                           Functor func_,
@@ -45,13 +47,12 @@ namespace Physica::Core {
                           ScalarType stepSize_,
                           ScalarType mass_);
         /* Operations */
-        template<class Integrator>
         void setInitialCond(Functor initial);
-        template<class Integrator>
         void step();
     private:
-        void solverToMesh();
-        void updateMesh();
+        void spaceStep();
+        void meshToBuffer(BufferType& buffer);
+        void bufferToMesh(const BufferType& buffer);
     };
 
     template<class MeshType, class Functor>
@@ -66,10 +67,11 @@ namespace Physica::Core {
             , diffuse(std::move(diffuse_))
             , d_diffuse(std::move(d_diffuse_))
             , stepSize(stepSize_)
-            , mass(mass_) {}
+            , mass(mass_) {
+        buffer1.resize(Base::getDegreeOfFreedom());
+    }
 
     template<class MeshType, class Functor>
-    template<class Integrator>
     void FokkerPlanckModel<MeshType, Functor>::setInitialCond(Functor initial) {
         solver.A.clear();
         solver.b = ScalarType::Zero();
@@ -104,22 +106,31 @@ namespace Physica::Core {
                         }
                     }
 
-                    solver.b[row] += Integrator::run([&, i](VectorType p) {
-                                         return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(elem.toGlobalPos(p));
+                    solver.b[row] += ElementType::gauss_integral([&, i](VectorType p) -> ScalarType {
+                                         const VectorType globalPos = elem.toGlobalPos(p);
+                                         const VectorType phase{tan(globalPos[0]), tan(globalPos[1])};
+                                         if (std::isfinite(double(phase[0])) && std::isfinite(double(phase[1])))
+                                            return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(phase);
+                                         else
+                                            return 0;
                                      });
                 }
             }
         }
         solver.solve();
-        for (auto& x : solver.b)
-            if (x.isNegative())
-                x = ScalarType::Zero();
         Base::solverToMesh();
     }
 
     template<class MeshType, class Functor>
-    template<class Integrator>
     void FokkerPlanckModel<MeshType, Functor>::step() {
+        meshToBuffer(buffer1);
+        spaceStep();
+        buffer1 += solver.b * stepSize;
+        bufferToMesh(buffer1);
+    }
+
+    template<class MeshType, class Functor>
+    void FokkerPlanckModel<MeshType, Functor>::spaceStep() {
         solver.b = ScalarType::Zero();
         const auto& nodeTypes = mesh.getNodeTypes();
         for (const auto& elem : mesh.getElements()) {
@@ -131,14 +142,13 @@ namespace Physica::Core {
                     const size_t row = Base::nodeToVar(node);
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const ScalarType integral = Integrator::run(
+                        const ScalarType integral = ElementType::gauss_integral(
                                 [=, &elem](VectorType p) {
                                     const VectorType globalPos = elem.toGlobalPos(p);
                                     const auto inv_jacobi = elem.inv_jacobi(p);
                                     const VectorType global_grad_i = inv_jacobi.transpose() * elem.grad(i, p);
                                     const VectorType global_grad_j = inv_jacobi.transpose() * elem.grad(j, p);
 
-                                    
                                     const ScalarType cos_eta = cos(globalPos[1]);
                                     const bool flag = cos_eta < std::numeric_limits<ScalarType>::epsilon(); //Avoid divide by zero
                                     if (flag)
@@ -168,15 +178,23 @@ namespace Physica::Core {
             }
         }
         solver.solve();
-        updateMesh();
     }
 
     template<class MeshType, class Functor>
-    void FokkerPlanckModel<MeshType, Functor>::updateMesh() {
+    void FokkerPlanckModel<MeshType, Functor>::meshToBuffer(BufferType& buffer) {
         auto& coeffs = mesh.getCoeffs();
         for (size_t i = 0; i < Base::getDegreeOfFreedom(); ++i) {
             const size_t index = Base::varToNode(i);
-            coeffs[index] += solver.getSolution()[i] * stepSize;
+            buffer[i] = coeffs[index];
+        }
+    }
+
+    template<class MeshType, class Functor>
+    void FokkerPlanckModel<MeshType, Functor>::bufferToMesh(const BufferType& buffer) {
+        auto& coeffs = mesh.getCoeffs();
+        for (size_t i = 0; i < Base::getDegreeOfFreedom(); ++i) {
+            const size_t index = Base::varToNode(i);
+            coeffs[index] = buffer[i];
         }
     }
 }
