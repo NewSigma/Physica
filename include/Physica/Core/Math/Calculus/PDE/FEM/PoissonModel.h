@@ -63,13 +63,13 @@ namespace Physica::Core {
 
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const ScalarType integral = ElementType::gauss_integral(
-                                [=, &elem](VectorType p) {
-                                    const auto inv_jacobi = elem.inv_jacobi(p);
-                                    const VectorType g1 = inv_jacobi.transpose() * elem.grad(i, p);
-                                    const VectorType g2 = inv_jacobi.transpose() * elem.grad(j, p);
-                                    return abs(elem.jacobi(p).determinate()) * (g1 * g2);
-                                });
+                        const auto func = [=, &elem](VectorType p) {
+                            const auto inv_jacobi = elem.inv_jacobi(p);
+                            const VectorType g1 = inv_jacobi.transpose() * elem.grad(i, p);
+                            const VectorType g2 = inv_jacobi.transpose() * elem.grad(j, p);
+                            return abs(elem.jacobi(p).determinate()) * (g1 * g2);
+                        };
+                        const ScalarType integral = ElementType::template gauss_integral<decltype(func), -1>(func);
 
                         switch (nodeTypes[baseNode]) {
                             case NodeType::Free: {

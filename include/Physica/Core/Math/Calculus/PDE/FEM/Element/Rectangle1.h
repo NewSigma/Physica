@@ -74,8 +74,6 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static ScalarType dBase_ds(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static VectorType grad(size_t localNode, [[maybe_unused]] VectorType p);
-        template<class Functor>
-        [[nodiscard]] static ScalarType gauss_integral(Functor func);
         [[nodiscard]] static Mesh<Rectangle1<ScalarType>> rectangle(VectorType bottomLeft,
                                                                     VectorType topRight,
                                                                     size_t numElementX,

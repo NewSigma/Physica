@@ -19,6 +19,28 @@
 #pragma once
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class ScalarType, class Functor, int DeltaOrder>
+        struct GaussIntegral<Rectangle1<ScalarType>, Functor, DeltaOrder> {
+            using VectorType = typename Rectangle1<ScalarType>::VectorType;
+            static ScalarType run(Functor func) {
+                constexpr static double factor = 0.577350269189626;
+                return func(VectorType{factor, factor}) +
+                       func(VectorType{-factor, factor}) +
+                       func(VectorType{factor, -factor}) +
+                       func(VectorType{-factor, -factor});
+            }
+        };
+
+        template<class ScalarType, class Functor>
+        struct GaussIntegral<Rectangle1<ScalarType>, Functor, -1> {
+            using VectorType = typename Rectangle1<ScalarType>::VectorType;
+            static ScalarType run(Functor func) {
+                return func(VectorType{0, 0}) * 4;
+            }
+        };
+    }
+
     template<class ScalarType>
     Rectangle1<ScalarType>::Rectangle1(VectorType bottomLeft_,
                                        VectorType topRight_,
@@ -125,16 +147,6 @@ namespace Physica::Core {
     template<class ScalarType>
     typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
-    }
-
-    template<class ScalarType>
-    template<class Functor>
-    ScalarType Rectangle1<ScalarType>::gauss_integral(Functor func) {
-        constexpr static double factor = 0.577350269189626;
-        return func(VectorType{factor, factor}) +
-               func(VectorType{-factor, factor}) +
-               func(VectorType{factor, -factor}) +
-               func(VectorType{-factor, -factor});
     }
 
     template<class ScalarType>

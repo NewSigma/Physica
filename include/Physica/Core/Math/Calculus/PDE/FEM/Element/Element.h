@@ -21,6 +21,11 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class ElementType, class Functor, int DeltaOrder>
+        struct GaussIntegral;
+    }
+
     template<class Derived>
     class Element : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
@@ -44,6 +49,9 @@ namespace Physica::Core {
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const { return Base::getDerived().toLocalPos(globalPos); }
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const { return Base::getDerived().toLocalPos(localPos); }
         [[nodiscard]] constexpr static size_t getNumNodes() { return DegreeOfFreedom; }
+        /* Static members */
+        template<class Functor, int DeltaOrder = 0>
+        [[nodiscard]] static ScalarType gauss_integral(Functor func);
     protected:
         Element() = default;
         Element(IndexArray globalNodes_);
@@ -52,6 +60,12 @@ namespace Physica::Core {
 
     template<class Derived>
     Element<Derived>::Element(IndexArray globalNodes_) : globalNodes(std::move(globalNodes_)) {}
+
+    template<class Derived>
+    template<class Functor, int DeltaOrder>
+    typename Element<Derived>::ScalarType Element<Derived>::gauss_integral(Functor func) {
+        return Internal::GaussIntegral<Derived, Functor, DeltaOrder>::run(func);
+    }
 
     template<class Derived>
     void Element<Derived>::swap(Element& elem) noexcept {
