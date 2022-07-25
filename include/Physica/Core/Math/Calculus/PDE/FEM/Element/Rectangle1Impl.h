@@ -22,21 +22,48 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, class Functor, int DeltaOrder>
         struct GaussIntegral<Rectangle1<ScalarType>, Functor, DeltaOrder> {
-            using VectorType = typename Rectangle1<ScalarType>::VectorType;
             static ScalarType run(Functor func) {
                 constexpr static double factor = 0.577350269189626;
-                return func(VectorType{factor, factor}) +
-                       func(VectorType{-factor, factor}) +
-                       func(VectorType{factor, -factor}) +
-                       func(VectorType{-factor, -factor});
+                return func({factor, factor}) +
+                       func({-factor, factor}) +
+                       func({factor, -factor}) +
+                       func({-factor, -factor});
             }
         };
 
         template<class ScalarType, class Functor>
         struct GaussIntegral<Rectangle1<ScalarType>, Functor, -1> {
-            using VectorType = typename Rectangle1<ScalarType>::VectorType;
             static ScalarType run(Functor func) {
-                return func(VectorType{0, 0}) * 4;
+                return func({0, 0}) * 4;
+            }
+        };
+
+        template<class ScalarType, class Functor>
+        struct GaussIntegral<Rectangle1<ScalarType>, Functor, 1> {
+            static ScalarType run(Functor func) {
+                constexpr double x = 0.774596669241483;
+                constexpr double weight1 = 0.5555555555555556;
+                constexpr double weight2 = 0.8888888888888889;
+                ScalarType result = 0;
+                result += (func({-x, -x}) + func({x, -x}) + func({-x, x}) + func({x, x})) * (weight1 * weight1);
+                result += (func({x, 0}) + func({-x, 0}) + func({0, x}) + func({0, -x})) * (weight1 * weight2);
+                result += func({0, 0}) * (weight2 * weight2);
+                return result;
+            }
+        };
+
+        template<class ScalarType, class Functor>
+        struct GaussIntegral<Rectangle1<ScalarType>, Functor, 2> {
+            static ScalarType run(Functor func) {
+                constexpr double x1 = 0.861136311594053;
+                constexpr double x2 = 0.339981043584856;
+                constexpr double weight1 = 0.347854845137454;
+                constexpr double weight2 = 0.652145154862546;
+                ScalarType result = 0;
+                result += (func({-x1, -x1}) + func({x1, -x1}) + func({-x1, x1}) + func({x1, x1})) * (weight1 * weight1);
+                result += (func({-x1, -x2}) + func({-x1, x2}) + func({-x2, -x1}) + func({-x2, x1}) + func({x2, -x1}) + func({x2, x1}) + func({x1, -x2}) + func({x1, x2})) * (weight1 * weight2);
+                result += (func({-x2, -x2}) + func({x2, -x2}) + func({-x2, x2}) + func({x2, x2})) * (weight2 * weight2);
+                return result;
             }
         };
     }

@@ -24,14 +24,13 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, class Functor, int DeltaOrder>
         struct GaussIntegral<Triangle1<ScalarType>, Functor, DeltaOrder> {
-            using VectorType = typename Rectangle1<ScalarType>::VectorType;
             static ScalarType run(Functor func) {
                 constexpr static double factor = 0.577350269189626;
                 constexpr static double factor1 = (1 - factor) * 0.25;
                 constexpr static double factor2 = (1 + factor) * 0.5;
                 constexpr static double factor3 = (1 + factor) * 0.25;
                 constexpr static double factor4 = (1 - factor) * 0.5;
-                return func(VectorType{factor1, factor2}) * factor1 + func(VectorType{factor3, factor4}) * factor3;
+                return func({factor1, factor2}) * factor1 + func({factor3, factor4}) * factor3;
             }
         };
     }
