@@ -47,7 +47,7 @@ namespace Physica::Core {
                << vtk.title << '\n'
                << "ASCII\n";
         }
-        /* Node pos */ {
+        /* Geometry */ {
             os << "DATASET POLYDATA\n"
                << "POINTS " << numGlobalNode << " float\n";
             const auto nodes = mesh.getNodes();
@@ -56,8 +56,6 @@ namespace Physica::Core {
                 os << node.format().setPrefix("").setSeparator(" ").setSuffix(suffix);
             }
 
-        }
-        /* Element pos */ {
             constexpr size_t nodePerElem = ElementType::getNumNodes();
             const size_t arraySize = (nodePerElem + 1) * numElems;
             os << "POLYGONS " << numElems << ' ' << arraySize << '\n';
@@ -68,7 +66,7 @@ namespace Physica::Core {
                 os << '\n';
             }
         }
-        /* Node data */ {
+        /* Data */ {
             const auto& coeffs = mesh.getCoeffs();
             os << "POINT_DATA " << numGlobalNode << '\n';
             os << "SCALARS fieldName double 1\n"

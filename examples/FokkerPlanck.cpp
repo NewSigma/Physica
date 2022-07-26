@@ -30,18 +30,14 @@ using VectorType = Vector<ScalarType, 2>;
 ScalarType force(VectorType pos) {
     const ScalarType x = pos[0];
     const ScalarType p = pos[1];
-    ScalarType result = 0;
-    if (std::isfinite(x.getTrivial()))
-        result -= x;
-    result -= p * 0.1;
-    return result;
+    return -x - p * 0.1;
 }
 
-ScalarType diffuseD(VectorType pos) {
+ScalarType diffuseD([[maybe_unused]] VectorType pos) {
     return ScalarType(0.1);
 }
 
-ScalarType d_diffuseD(VectorType pos) {
+ScalarType d_diffuseD([[maybe_unused]] VectorType pos) {
     return ScalarType(0);
 }
 
@@ -57,23 +53,26 @@ ScalarType initial(VectorType pos) {
 /**
  * Reference:
  * [1] Spencer B F, Bergman L A. On the numerical solution of the Fokker-Planck equation for nonlinear stochastic systems[J]. Nonlinear Dynamics, 1993, 4(4):357-372.
- * [2] Andreas, Dechant, Shalom, et al. Heavy-tailed phase-space distributions beyond Boltzmann-Gibbs: Confined laser-cooled atoms in a nonthermal state[J]. Physical Review E, 2016, 94(2):022151.
  */
 int main() {
     using ElementType = Rectangle1<ScalarType>;
-    auto mesh = ElementType::rectangle({-M_PI_2, -M_PI_2}, {M_PI_2, M_PI_2}, 501, 501);
-    mesh.addDirichletBoundary([](VectorType p) { return scalarNear(abs(p[0]), ScalarType(1), 1E-15)
-                                                     || scalarNear(abs(p[1]), ScalarType(1), 1E-15); },
+    auto mesh = ElementType::rectangle({-10, -10}, {10, 10}, 201, 201);
+    mesh.addDirichletBoundary([](VectorType p) { return scalarNear(abs(p[0]), ScalarType(10), 1E-12)
+                                                     || scalarNear(abs(p[1]), ScalarType(10), 1E-12); },
                               []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
     FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-3, 1);
     model.setInitialCond(initial);
 
-    for (int i = 0; i < 125; ++i)
+    char buffer[32];
+    for (int i = 0; i < 7500; ++i) {
         model.step();
-
-    VTKFile vtk(model.getMesh(), "");
-    std::ofstream fout("a.vtk");
-    fout << vtk;
+        if (i % 50 == 0) {
+            sprintf(buffer, "out_%d.vtk", i / 50);
+            VTKFile vtk(model.getMesh(), "");
+            std::ofstream fout(buffer);
+            fout << vtk;
+        }
+    }
     return 0;
 }

@@ -37,19 +37,22 @@ namespace Physica::Core {
         Functor diffuse;
         Functor d_diffuse;
         ScalarType stepSize;
-        ScalarType mass;
+        ScalarType rep_mass;
+        SparseMatrix<ScalarType> stiff;
         BufferType buffer1;
+        BufferType buffer2;
     public:
         FokkerPlanckModel(MeshType mesh,
                           Functor func_,
                           Functor diffuse_,
                           Functor d_diffuse_,
                           ScalarType stepSize_,
-                          ScalarType mass_);
+                          ScalarType mass);
         /* Operations */
         void setInitialCond(Functor initial);
         void step();
     private:
+        void makeStiff();
         void spaceStep();
         void meshToBuffer(BufferType& buffer);
         void bufferToMesh(const BufferType& buffer);
@@ -61,14 +64,18 @@ namespace Physica::Core {
                                                             Functor diffuse_,
                                                             Functor d_diffuse_,
                                                             ScalarType stepSize_,
-                                                            ScalarType mass_)
+                                                            ScalarType mass)
             : Base(std::move(mesh))
             , force(std::move(force_))
             , diffuse(std::move(diffuse_))
             , d_diffuse(std::move(d_diffuse_))
             , stepSize(stepSize_)
-            , mass(mass_) {
+            , rep_mass(reciprocal(mass)) {
+        const size_t n = Base::getDegreeOfFreedom();
+        stiff = SparseMatrix<ScalarType>(n, n);
         buffer1.resize(Base::getDegreeOfFreedom());
+        buffer2.resize(Base::getDegreeOfFreedom());
+        makeStiff();
     }
 
     template<class MeshType, class Functor>
@@ -106,14 +113,11 @@ namespace Physica::Core {
                         }
                     }
 
-                    solver.b[row] += ElementType::gauss_integral([&, i](VectorType p) -> ScalarType {
-                                         const VectorType globalPos = elem.toGlobalPos(p);
-                                         const VectorType phase{tan(globalPos[0]), tan(globalPos[1])};
-                                         if (std::isfinite(double(phase[0])) && std::isfinite(double(phase[1])))
-                                            return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(phase);
-                                         else
-                                            return 0;
-                                     });
+                    const auto func = [&, i](VectorType p) -> ScalarType {
+                        const VectorType globalPos = elem.toGlobalPos(p);
+                        return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(globalPos);
+                    };
+                    solver.b[row] += ElementType::template gauss_integral<decltype(func), 0>(func);
                 }
             }
         }
@@ -124,14 +128,16 @@ namespace Physica::Core {
     template<class MeshType, class Functor>
     void FokkerPlanckModel<MeshType, Functor>::step() {
         meshToBuffer(buffer1);
+        buffer2 = buffer1;
         spaceStep();
-        buffer1 += solver.b * stepSize;
-        bufferToMesh(buffer1);
+        buffer1 += solver.b * (stepSize * 0.5);
+        spaceStep();
+        buffer2 += solver.b * stepSize;
+        bufferToMesh(buffer2);
     }
 
     template<class MeshType, class Functor>
-    void FokkerPlanckModel<MeshType, Functor>::spaceStep() {
-        solver.b = ScalarType::Zero();
+    void FokkerPlanckModel<MeshType, Functor>::makeStiff() {
         const auto& nodeTypes = mesh.getNodeTypes();
         for (const auto& elem : mesh.getElements()) {
             const auto& nodes = elem.getGlobalNodes();
@@ -142,41 +148,35 @@ namespace Physica::Core {
                     const size_t row = Base::nodeToVar(node);
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const ScalarType integral = ElementType::gauss_integral(
-                                [=, &elem](VectorType p) {
-                                    const VectorType globalPos = elem.toGlobalPos(p);
-                                    const auto inv_jacobi = elem.inv_jacobi(p);
-                                    const VectorType global_grad_i = inv_jacobi.transpose() * elem.grad(i, p);
-                                    const VectorType global_grad_j = inv_jacobi.transpose() * elem.grad(j, p);
+                        const auto func = [=, &elem](VectorType p) {
+                            const VectorType globalPos = elem.toGlobalPos(p);
+                            const auto inv_jacobi = elem.inv_jacobi(p);
+                            const VectorType global_grad_i = inv_jacobi.transpose() * elem.grad(i, p);
+                            const VectorType global_grad_j = inv_jacobi.transpose() * elem.grad(j, p);
 
-                                    const ScalarType cos_eta = cos(globalPos[1]);
-                                    const bool flag = cos_eta < std::numeric_limits<ScalarType>::epsilon(); //Avoid divide by zero
-                                    if (flag)
-                                        return ScalarType::Zero();
+                            const ScalarType u_i = elem.baseFunc(i, p);
+                            const ScalarType result1 = -globalPos[1] * rep_mass * u_i * global_grad_j[0];
 
-                                    const ScalarType cos_xi = cos(globalPos[0]);
-                                    const ScalarType sin_eta = sin(globalPos[1]);
-                                    const ScalarType tan_xi = sin(globalPos[0]) / cos_xi;
-                                    const ScalarType tan_eta = sin_eta / cos_eta;
-                                    const VectorType phase_pos{tan_xi, tan_eta};
+                            const ScalarType diffuseD = diffuse(globalPos);
+                            const ScalarType d_diffuseD = d_diffuse(globalPos);
+                            const ScalarType result2 = (force(globalPos) + (diffuseD - 1) * d_diffuseD) * (elem.baseFunc(j, p) * global_grad_i[1]);
 
-                                    const ScalarType u_i = elem.baseFunc(i, p);
-                                    const ScalarType result1 = -tan_eta / mass * square(cos_xi) * u_i * global_grad_j[0];
-
-                                    const ScalarType diffuseD = diffuse(phase_pos);
-                                    const ScalarType d_diffuseD = d_diffuse(phase_pos);
-                                    const ScalarType squared_cos_eta = square(cos_eta);
-                                    const ScalarType temp = -cos_eta * sin_eta * u_i * 2 + squared_cos_eta * global_grad_i[1];
-                                    const ScalarType result2 = (force(phase_pos) + (diffuseD - 1) * d_diffuseD) * (temp * elem.baseFunc(j, p));
-
-                                    const ScalarType result3 = -(diffuseD * squared_cos_eta) * (temp * global_grad_j[1]);
-                                    return (result1 + result2 + result3) * abs(elem.jacobi(p).determinate());
-                                });
-                        solver.b[row] += integral * mesh.getCoeffs()[baseNode];
+                            const ScalarType result3 = -diffuseD * (global_grad_i[1] * global_grad_j[1]);
+                            return (result1 + result2 + result3) * abs(elem.jacobi(p).determinate());
+                        };
+                        const ScalarType integral = ElementType::template gauss_integral<decltype(func), 0>(func);
+                        const size_t col = Base::nodeToVar(baseNode);
+                        const ScalarType value = stiff.calc(row, col) + integral;
+                        stiff.insert(value, row, col);
                     }
                 }
             }
         }
+    }
+
+    template<class MeshType, class Functor>
+    void FokkerPlanckModel<MeshType, Functor>::spaceStep() {
+        solver.b = stiff * buffer1;
         solver.solve();
     }
 
