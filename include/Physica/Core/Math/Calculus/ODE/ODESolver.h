@@ -34,11 +34,6 @@ namespace Physica::Core {
         ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial);
         /* Operations */
         void reset() { x.resize(1); }
-        /**
-         * \tparam Function
-         * A function object like this
-         * VectorType func(const T& x, const VectorType& y)
-         */
         template<class Function>
         void rungeKutta4(Function func);
         template<class Function>
@@ -65,7 +60,11 @@ namespace Physica::Core {
         solution.resize(initial.getLength(), size);
         solution[0] = initial;
     }
-
+    /**
+     * \tparam Function
+     * A function object like this
+     * VectorType func(const T& x, const VectorType& y)
+     */
     template<class T, size_t Dim>
     template<class Function>
     void ODESolver<T, Dim>::rungeKutta4(Function func) {
