@@ -44,7 +44,7 @@ int main() {
 
         /* Parseval theorem */ {
             const RealType power = square(data).sum();
-            const RealType power_fft = square(intense).sum() / RealType(fft.getDeltaT() * fft.getDeltaT() * (intense.getLength() - 1));
+            const RealType power_fft = square(intense).sum() / RealType(intense.getLength() - 1);
             if (!scalarNear(power, power_fft, 1E-15))
                 return 1;
         }
@@ -54,6 +54,34 @@ int main() {
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
                 return 1;
         }
+    }
+    /* 1d complex */ {
+        const size_t N = 100;
+        const double t_max = 2;
+        constexpr double freq1 = 3;
+        constexpr double freq2 = 4;
+        
+        Vector<ComplexType> data(N);
+        {
+            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N + 1);
+            for (size_t i = 0; i < N; ++i) {
+                const auto& x = v_x[i];
+                data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
+            }
+        }
+        FFT<ComplexType> fft(data, RealType(t_max / N));
+        Vector<ComplexType> trans(N);
+        for (size_t i = 0; i < N; ++i) {
+            ComplexType temp(0);
+            for (size_t j = 0; j < N; ++j) {
+                RealType phase = 2 * M_PI * j * i / N;
+                temp += data[j] * ComplexType(cos(phase), -sin(phase));
+            }
+            trans[i] = temp;
+        }
+        fft.invTransform(fft.getRawFreqs());
+        if (!vectorNear(data, fft.getRawFreqs(), 1E-14))
+            return 1;
     }
     /* 2d real */ {
         const size_t N1 = 50;

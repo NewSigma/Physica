@@ -216,8 +216,8 @@ namespace Physica::Core {
     ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator/(
             const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImagine();
-        const auto divisor = s * reciprocal(square(real) + square(imagine));
+        const auto& imagine = c.getImag();
+        const auto divisor = s.getDerived() * reciprocal(square(real) + square(imagine));
         return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(real * divisor, -imagine * divisor);
     }
 }

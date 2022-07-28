@@ -52,6 +52,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return impl.getSize(); }
         [[nodiscard]] const RealType& getDeltaT() const noexcept { return impl.getDeltaT(); }
+        [[nodiscard]] ComplexType getRawFreq(size_t index) const { return impl.getRawFreq(index); }
+        [[nodiscard]] Vector<ComplexType> getRawFreqs() const { return impl.getRawFreqs(); }
         [[nodiscard]] ComplexType getComponent(ssize_t index) const { return impl.getComponent(index); }
         [[nodiscard]] Vector<ComplexType> getComponents() const { return impl.getComponents(); }
         [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(impl.getDeltaT() * impl.getSize()); }

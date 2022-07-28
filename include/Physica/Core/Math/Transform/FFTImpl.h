@@ -53,6 +53,8 @@ namespace Physica::Core::Internal {
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] const RealType& getDeltaT() const noexcept { return deltaT; }
+        [[nodiscard]] ComplexType getRawFreq(size_t index) const;
+        [[nodiscard]] Vector<ComplexType> getRawFreqs() const;
         [[nodiscard]] ComplexType getComponent(ssize_t index) const;
         [[nodiscard]] Vector<ComplexType> getComponents() const;
         /* Helpers */
@@ -147,6 +149,29 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
+    typename FFTImpl<ScalarType, 1>::ComplexType FFTImpl<ScalarType, 1>::getRawFreq(size_t index) const {
+        assert(index < static_cast<size_t>(size));
+        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1]));
+    }
+    
+    template<class ScalarType>
+    Vector<typename FFTImpl<ScalarType, 1>::ComplexType> FFTImpl<ScalarType, 1>::getRawFreqs() const {
+        if constexpr (isComplex) {
+            Vector<ComplexType> result = Vector<ComplexType>(size);
+            for (ssize_t i = 0; i < size; ++i)
+                result[i] = getRawFreq(i);
+            return result;
+        }
+        else {
+            const int result_size = size / 2 + 1;
+            Vector<ComplexType> result = Vector<ComplexType>(result_size);
+            for (ssize_t i = 0; i < result_size; ++i)
+                result[i] = getComponent(i);
+            return result;
+        }
+    }
+
+    template<class ScalarType>
     typename FFTImpl<ScalarType, 1>::ComplexType FFTImpl<ScalarType, 1>::getComponent(ssize_t index) const {
         assert(index <= size / 2);
         assert(-size / 2 <= index);
@@ -156,7 +181,7 @@ namespace Physica::Core::Internal {
         }
         else
             assert(index >= 0);
-        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1])) * deltaT;
+        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1]));
     }
 
     template<class ScalarType>
