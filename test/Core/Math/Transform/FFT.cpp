@@ -54,6 +54,11 @@ int main() {
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
                 return 1;
         }
+        /* Test inv */ {
+            fft.invTransform(fft.getFreqs());
+            if (!vectorNear(data, fft.getDatas(), 1E-14))
+                return 1;
+        }
     }
     /* 1d complex */ {
         const size_t N = 100;
@@ -79,8 +84,8 @@ int main() {
             }
             trans[i] = temp;
         }
-        fft.invTransform(fft.getRawFreqs());
-        if (!vectorNear(data, fft.getRawFreqs(), 1E-14))
+        fft.invTransform(fft.getFreqs());
+        if (!vectorNear(data, fft.getDatas(), 1E-14))
             return 1;
     }
     /* 2d real */ {

@@ -18,57 +18,14 @@
  */
 #pragma once
 
-#include <fftw3.h>
-
-namespace Physica::Core::Internal {
+namespace Physica::Core {
     template<class ScalarType, size_t Dim> class FFTImpl;
 
     template<class ScalarType>
-    class FFTImpl<ScalarType, 1> {
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
-        static constexpr bool isComplex = ScalarType::isComplex;
-    private:
-        fftw_plan forward_plan;
-        fftw_plan backward_plan;
-        union {
-            double* real_buffer;
-            fftw_complex* buffer;
-        };
-        int size;
-        RealType deltaT;
-    public:
-        FFTImpl();
-        FFTImpl(size_t size_, const RealType& deltaT_);
-        FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_);
-        FFTImpl(const FFTImpl& fft);
-        FFTImpl(FFTImpl&& fft) noexcept;
-        ~FFTImpl();
-        /* Operators */
-        FFTImpl& operator=(const FFTImpl&) = delete;
-        FFTImpl& operator=(FFTImpl&&) noexcept = delete;
-        /* Operations */
-        void transform(const Vector<ScalarType>& data);
-        void invTransform(const Vector<ComplexType>& data);
-        /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return size; }
-        [[nodiscard]] const RealType& getDeltaT() const noexcept { return deltaT; }
-        [[nodiscard]] ComplexType getRawFreq(size_t index) const;
-        [[nodiscard]] Vector<ComplexType> getRawFreqs() const;
-        [[nodiscard]] ComplexType getComponent(ssize_t index) const;
-        [[nodiscard]] Vector<ComplexType> getComponents() const;
-        /* Helpers */
-        void swap(FFTImpl& fft) noexcept;
-    private:
-        void transform();
-        void invTransform();
-    };
+    FFT<ScalarType, 1>::FFT() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), size(0), deltaT() {}
 
     template<class ScalarType>
-    FFTImpl<ScalarType, 1>::FFTImpl() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), size(0), deltaT() {}
-
-    template<class ScalarType>
-    FFTImpl<ScalarType, 1>::FFTImpl(size_t size_, const RealType& deltaT_)
+    FFT<ScalarType, 1>::FFT(size_t size_, const RealType& deltaT_)
             : size(static_cast<int>(size_))
             , deltaT(deltaT_) {
         assert(size_ <= INT_MAX);
@@ -86,13 +43,13 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType, 1>::FFTImpl(const Vector<ScalarType>& data_, const RealType& deltaT_)
-            : FFTImpl(data_.getLength(), deltaT_) {
+    FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data_, const RealType& deltaT_)
+            : FFT(data_.getLength(), deltaT_) {
         transform(data_);
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType, 1>::FFTImpl(const FFTImpl& fft)
+    FFT<ScalarType, 1>::FFT(const FFT& fft)
             : buffer(fftw_malloc(fft.size * sizeof(fftw_complex)))
             , size(fft.size)
             , deltaT(fft.deltaT) {
@@ -101,7 +58,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType, 1>::FFTImpl(FFTImpl&& fft) noexcept
+    FFT<ScalarType, 1>::FFT(FFT&& fft) noexcept
             : forward_plan(fft.forward_plan)
             , backward_plan(fft.backward_plan)
             , buffer(fft.buffer)
@@ -113,14 +70,20 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    FFTImpl<ScalarType, 1>::~FFTImpl() {
+    FFT<ScalarType, 1>::~FFT() {
         fftw_destroy_plan(forward_plan);
         fftw_destroy_plan(backward_plan);
         fftw_free(buffer);
     }
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType, 1>::transform(const Vector<ScalarType>& data) {
+    FFT<ScalarType, 1>& FFT<ScalarType, 1>::operator=(FFT<ScalarType, 1> fft) noexcept {
+        swap(fft);
+        return *this;
+    }
+
+    template<class ScalarType>
+    inline void FFT<ScalarType, 1>::transform(const Vector<ScalarType>& data) {
         assert(data.getLength() == static_cast<size_t>(size));
         if constexpr (isComplex) {
             for (int i = 0; i < size; ++i) {
@@ -137,7 +100,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType, 1>::invTransform(const Vector<ComplexType>& data) {
+    inline void FFT<ScalarType, 1>::invTransform(const Vector<ComplexType>& data) {
         [[maybe_unused]] const size_t expectedSize = isComplex ? size : size / 2 + 1;
         assert(data.getLength() == expectedSize);
         for (size_t i = 0; i < expectedSize; ++i) {
@@ -149,30 +112,46 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    typename FFTImpl<ScalarType, 1>::ComplexType FFTImpl<ScalarType, 1>::getRawFreq(size_t index) const {
-        assert(index < static_cast<size_t>(size));
-        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1]));
-    }
-    
-    template<class ScalarType>
-    Vector<typename FFTImpl<ScalarType, 1>::ComplexType> FFTImpl<ScalarType, 1>::getRawFreqs() const {
-        if constexpr (isComplex) {
-            Vector<ComplexType> result = Vector<ComplexType>(size);
-            for (ssize_t i = 0; i < size; ++i)
-                result[i] = getRawFreq(i);
-            return result;
-        }
-        else {
-            const int result_size = size / 2 + 1;
-            Vector<ComplexType> result = Vector<ComplexType>(result_size);
-            for (ssize_t i = 0; i < result_size; ++i)
-                result[i] = getComponent(i);
-            return result;
-        }
+    int FFT<ScalarType, 1>::getFreqSize() const noexcept {
+        if constexpr (isComplex)
+            return size;
+        else
+            return size / 2 + 1;
     }
 
     template<class ScalarType>
-    typename FFTImpl<ScalarType, 1>::ComplexType FFTImpl<ScalarType, 1>::getComponent(ssize_t index) const {
+    typename FFT<ScalarType, 1>::ComplexType FFT<ScalarType, 1>::getFreq(size_t index) const {
+        assert(index < static_cast<size_t>(size));
+        return ComplexType(RealType(buffer[index][0]), RealType(buffer[index][1]));
+    }
+
+    template<class ScalarType>
+    Vector<ScalarType> FFT<ScalarType, 1>::getDatas() const {
+        Vector<ScalarType> result = Vector<ScalarType>(size);
+        for (ssize_t i = 0; i < size; ++i) {
+            if constexpr (isComplex)
+                result[i] = ComplexType(buffer[i][0], buffer[i][1]);
+            else
+                result[i] = RealType(real_buffer[i]);
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    Vector<typename FFT<ScalarType, 1>::ComplexType> FFT<ScalarType, 1>::getFreqs() const {
+        const int result_size = getFreqSize();
+        Vector<ComplexType> result = Vector<ComplexType>(result_size);
+        for (int i = 0; i < result_size; ++i) {
+            if constexpr (isComplex)
+                result[i] = getFreq(i);
+            else
+                result[i] = getComponent(i);
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    typename FFT<ScalarType, 1>::ComplexType FFT<ScalarType, 1>::getComponent(ssize_t index) const {
         assert(index <= size / 2);
         assert(-size / 2 <= index);
         if constexpr (isComplex) {
@@ -185,7 +164,7 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    Vector<typename FFTImpl<ScalarType, 1>::ComplexType> FFTImpl<ScalarType, 1>::getComponents() const {
+    Vector<typename FFT<ScalarType, 1>::ComplexType> FFT<ScalarType, 1>::getComponents() const {
         if constexpr (isComplex) {
             const int result_size = size + 1;
             Vector<ComplexType> result = Vector<ComplexType>(result_size);
@@ -204,7 +183,22 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    void FFTImpl<ScalarType, 1>::swap(FFTImpl& fft) noexcept {
+    typename FFT<ScalarType, 1>::ComplexType FFT<ScalarType, 1>::getFreqIntense(const RealType& freq) const noexcept {
+        const double float_index = double(getDeltaT() * freq * RealType(getSize()));
+        double round_helper;
+        if constexpr (isComplex) {
+            round_helper = freq.isPositive() ? 0.5 : -0.5;
+        }
+        else {
+            assert(!freq.isNegative());
+            round_helper = 0.5;
+        }
+        const ssize_t index = static_cast<ssize_t>(float_index + round_helper);
+        return getComponent(index);
+    }
+
+    template<class ScalarType>
+    void FFT<ScalarType, 1>::swap(FFT& fft) noexcept {
         using std::swap;
         swap(forward_plan, fft.forward_plan);
         swap(backward_plan, fft.backward_plan);
@@ -214,12 +208,12 @@ namespace Physica::Core::Internal {
     }
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType, 1>::transform() {
+    inline void FFT<ScalarType, 1>::transform() {
         fftw_execute(forward_plan);
     }
 
     template<class ScalarType>
-    inline void FFTImpl<ScalarType, 1>::invTransform() {
+    inline void FFT<ScalarType, 1>::invTransform() {
         fftw_execute(backward_plan);
         const double factor = 1.0 / size;
         for (int i = 0; i < size; ++i) {
