@@ -16,25 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <fstream>
 #include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/FokkerPlanckModel.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
-#include <fstream>
 #include "Physica/Core/IO/VTKFile.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType, 2>;
 
+constexpr double gammaY = 0.1;
+constexpr double diffuseD_ = 0.1;
+constexpr double massM = 1;
+
 ScalarType force(VectorType pos) {
     const ScalarType x = pos[0];
     const ScalarType p = pos[1];
-    return -x - p * 0.1;
+    return -x - p * gammaY;
 }
 
 ScalarType diffuseD([[maybe_unused]] VectorType pos) {
-    return ScalarType(0.1);
+    return ScalarType(diffuseD_);
 }
 
 ScalarType d_diffuseD([[maybe_unused]] VectorType pos) {
@@ -50,6 +54,12 @@ ScalarType initial(VectorType pos) {
     const ScalarType temp = exp(-(square(pos[0] - x0) + square(pos[1] - p0)) * square_sigma_2);
     return temp * factor;
 }
+
+ScalarType theory_stationary(VectorType pos) {
+    const ScalarType a = ScalarType(gammaY / (diffuseD_ * 2));
+    const ScalarType factor = a * std::sqrt(massM) / M_PI;
+    return exp(-a * (square(pos[0]) * massM + square(pos[1]))) * factor;
+}
 /**
  * Reference:
  * [1] Spencer B F, Bergman L A. On the numerical solution of the Fokker-Planck equation for nonlinear stochastic systems[J]. Nonlinear Dynamics, 1993, 4(4):357-372.
@@ -61,18 +71,13 @@ int main() {
                                                      || scalarNear(abs(p[1]), ScalarType(10), 1E-12); },
                               []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
-    FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-3, 1);
+    FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-3, massM);
     model.setInitialCond(initial);
 
-    char buffer[32];
-    for (int i = 0; i < 7500; ++i) {
+    for (int i = 0; i < 100000; ++i)
         model.step();
-        if (i % 50 == 0) {
-            sprintf(buffer, "out_%d.vtk", i / 50);
-            VTKFile vtk(model.getMesh(), "");
-            std::ofstream fout(buffer);
-            fout << vtk;
-        }
-    }
+
+    if (!scalarNear(model({0, 0}), theory_stationary({0, 0}), 1E-3))
+        return 1;
     return 0;
 }

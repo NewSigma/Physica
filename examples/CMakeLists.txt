@@ -19,5 +19,4 @@ if(${PHYSICA_GUI})
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
 
-physica_add_example(FokkerPlanck FokkerPlanck.cpp)
 physica_add_example(Ising Ising.cpp)
