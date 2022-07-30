@@ -24,7 +24,7 @@
 namespace Physica::Core {
     class Xdatcar;
 
-    class Poscar {
+    class Poscar final {
     public:
         enum PoscarType : bool {
             Direct,
@@ -51,6 +51,7 @@ namespace Physica::Core {
         PoscarType type;
     public:
         Poscar();
+        Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, PoscarType type_);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
         friend std::istream& operator>>(std::istream& is, Poscar& poscar);
@@ -65,12 +66,13 @@ namespace Physica::Core {
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
-        [[nodiscard]] size_t getAtomCount() const noexcept;
+        [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         /* Helpers */
         void swap(Poscar& poscar) noexcept;
     private:
         void readNumOfEachType(std::istream& is);
         void readAtomPos(std::istream& is);
+        size_t sumNumOfEachType() const;
 
         friend class Xdatcar;
     };

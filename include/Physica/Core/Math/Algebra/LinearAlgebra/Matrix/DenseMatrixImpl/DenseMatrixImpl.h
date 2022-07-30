@@ -116,16 +116,12 @@ namespace Physica::Core {
             }
         }
         /* Output */ {
-            for (size_t c = 0; c < column; ++c) {
-                os.width(width);
-                os << mat(0, c) << ' ';
-            }
-            for (size_t r = 1; r < row; ++r) {
-                os << '\n';
+            for (size_t r = 0; r < row; ++r) {
                 for (size_t c = 0; c < column; ++c) {
                     os.width(width);
                     os << mat(r, c) << ' ';
                 }
+                os << '\n';
             }
         }
         return os;

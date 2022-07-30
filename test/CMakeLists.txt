@@ -9,6 +9,8 @@ if(${PHYSICA_TORCH})
 endif()
 
 #Core
+## Interface
+physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 ## IO
 physica_add_test(Poscar Core/IO/Poscar.cpp)
 physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)

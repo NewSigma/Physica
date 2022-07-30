@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include <cassert>
 #include <unistd.h>
 #include <sstream>
 #include <fstream>
 #include <fcntl.h>
 #include "Physica/Core/Interface/VaspWarpper.h"
+#include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Utils/Unix/UnixHelper.h"
 
 namespace Physica::Core {
@@ -35,37 +37,15 @@ namespace Physica::Core {
                              std::string pathToVasp_,
                              std::string workingDir,
                              std::string logFilePath_,
-                             const Poscar& poscar)
+                             Poscar poscar_)
             : Base([this]() { this->run(); })
             , pathToVasp(std::move(pathToVasp_))
             , vaspWorkingDir(std::move(workingDir))
             , logFilePath(std::move(logFilePath_))
-            , core(core_) {
-        std::ofstream fout((std::string(workingDir) + std::string("/POSCAR")).c_str(), std::ios_base::out | std::ios_base::trunc);
+            , core(core_)
+            , poscar(std::move(poscar_)) {
+        std::ofstream fout((vaspWorkingDir + std::string("/POSCAR")).c_str(), std::ios_base::out | std::ios_base::trunc);
         fout << poscar;
-    }
-    /**
-     * \param poscarId
-     * The id of poscar to be calculated.
-     * \param groupNum
-     * The number of current group. Equals to groupId + 1.
-     */
-    VaspWarpper::VaspWarpper(size_t core_, size_t poscarId)
-            : SubProcess([this]() { this->run(); })
-            , vaspWorkingDir()
-            , logFilePath()
-            , core(core_) {
-        std::ostringstream ostr{};
-        ostr << "runvasp/" << poscarId;
-        vaspWorkingDir = ostr.str();
-        ostr.str("");
-        ostr << "tmpdata/output_" << poscarId;
-        logFilePath = ostr.str();
-        /* Move POSCAR */ {
-            auto fromPoscar = Utils::makePath("POSCAR_%ld", poscarId);
-            auto toPoscar = Utils::makePath("runvasp/%ld/POSCAR", poscarId);
-            rename(fromPoscar.get(), toPoscar.get());
-        }
     }
 
     VaspWarpper::VaspWarpper(VaspWarpper&& vasp) noexcept
@@ -134,10 +114,50 @@ namespace Physica::Core {
         return (press_x + press_y + press_z) / 3.0f;
     }
 
+    Vector<typename VaspWarpper::ScalarType> VaspWarpper::getForce() const {
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
+
+        std::ifstream fin((vaspWorkingDir + std::string("/OUTCAR")).c_str());
+        std::cout << (vaspWorkingDir + std::string("/OUTCAR")) << std::endl;
+        if (fin) {
+            fin.seekg(0, std::ios::end);
+            const auto size = fin.tellg();
+            fin.seekg(0, std::ios::beg);
+            Utils::Array<char> buffer(size);
+            std::string str{};
+            Vector<ScalarType> force(3 * poscar.getAtomCount());
+            do {
+                fin.getline(buffer.data(), size);
+                str = buffer.data();
+                const bool success = str.find("TOTAL-FORCE") != std::string::npos;
+                if (success) {
+                    fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    MatrixType pos_force(poscar.getAtomCount(), 6);
+                    fin >> pos_force;
+                    size_t index = 0;
+                    for (size_t r = 0; r < pos_force.getRow(); ++r) {
+                        for (size_t c = 3; c < pos_force.getColumn(); ++c) {
+                            force[index] = pos_force(r, c);
+                            ++index;
+                        }
+                    }
+                    break;
+                }
+            } while(bool(fin));
+
+            if (!fin)
+                throw BadFileFormatException();
+            return force;
+        }
+        else
+            throw IOException();
+    }
+
     void VaspWarpper::swap(VaspWarpper& vasp) noexcept {
         pathToVasp.swap(vasp.pathToVasp);
         vaspWorkingDir.swap(vasp.vaspWorkingDir);
         logFilePath.swap(vasp.logFilePath);
         std::swap(core, vasp.core);
+        poscar.swap(vasp.poscar);
     }
 }

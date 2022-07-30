@@ -25,7 +25,7 @@
 namespace Physica::Core {
     class ReciprocalCell;
 
-    class CrystalCell {
+    class CrystalCell final {
     public:
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
@@ -40,6 +40,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] const Utils::Array<uint16_t>& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;

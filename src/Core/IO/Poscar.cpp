@@ -28,6 +28,14 @@ namespace Physica::Core {
                      , numOfEachType()
                      , type(Direct) {}
 
+    Poscar::Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, PoscarType type_)
+            : lattice(std::move(lattice_))
+            , pos(std::move(pos_))
+            , numOfEachType(std::move(numOfEachType_))
+            , type(type_) {
+        assert(getAtomCount() == sumNumOfEachType());
+    }
+
     std::ostream& operator<<(std::ostream& os, const Poscar& poscar) {
         os << '\n';
         os << 1.0 << '\n';
@@ -210,13 +218,6 @@ namespace Physica::Core {
         return Triclinic;
     }
 
-    size_t Poscar::getAtomCount() const noexcept {
-        size_t result = 0;
-        for (size_t i = 0; i < numOfEachType.getLength(); ++i)
-            result += numOfEachType[i];
-        return result;
-    }
-
     void Poscar::swap(Poscar& poscar) noexcept {
         lattice.swap(poscar.lattice);
         pos.swap(poscar.pos);
@@ -247,7 +248,7 @@ namespace Physica::Core {
     }
 
     void Poscar::readAtomPos(std::istream& is) {
-        const size_t atomCount = getAtomCount();
+        const size_t atomCount = sumNumOfEachType();
         pos.resize(atomCount, 3);
         size_t i = 0;
         for (; i < atomCount - 1; i++) {
@@ -255,5 +256,12 @@ namespace Physica::Core {
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
+    }
+
+    size_t Poscar::sumNumOfEachType() const {
+        size_t result = 0;
+        for (size_t num : numOfEachType)
+            result += num;
+        return result;
     }
 }

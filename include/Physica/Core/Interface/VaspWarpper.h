@@ -24,16 +24,18 @@
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    class VaspWarpper : public Utils::SubProcess {
+    class VaspWarpper final : public Utils::SubProcess {
         using Base = Utils::SubProcess;
+        using ScalarType = Scalar<Double, false>;
     private:
         std::string pathToVasp;
         std::string vaspWorkingDir;
         std::string logFilePath;
         size_t core;
+        Poscar poscar;
     public:
         VaspWarpper();
-        VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, const Poscar& poscar);
+        VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, Poscar poscar_);
         VaspWarpper(const VaspWarpper&) = delete;
         VaspWarpper(VaspWarpper&& vasp) noexcept;
         ~VaspWarpper() = default;
@@ -43,10 +45,10 @@ namespace Physica::Core {
         [[nodiscard]] const std::string& getWorkingDir() const noexcept { return vaspWorkingDir; }
         [[nodiscard]] float getEnergy() const;
         [[nodiscard]] float getPress() const;
+        [[nodiscard]] Vector<ScalarType> getForce() const;
         /* Helpers */
         void swap(VaspWarpper& vasp) noexcept;
     private:
-        VaspWarpper(size_t core_, size_t poscarId);
         void run() const;
     };
 }
