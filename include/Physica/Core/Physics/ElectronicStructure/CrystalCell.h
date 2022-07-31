@@ -47,5 +47,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getVolume() const noexcept;
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
+        [[nodiscard]] CrystalCell unitToSuper(unsigned int x, unsigned int y, unsigned int z) const;
     };
 }
