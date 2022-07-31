@@ -17,9 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <unordered_set>
+#include <algorithm>
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
@@ -34,6 +37,18 @@ namespace Physica::Core {
             , numOfEachType(std::move(numOfEachType_))
             , type(type_) {
         assert(getAtomCount() == sumNumOfEachType());
+    }
+
+    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getLattice())), type(Direct) {
+        std::unordered_set<uint16_t> set{};
+        for (uint16_t elem : cell.getAtomicNumbers())
+            set.insert(elem);
+        numOfEachType.resize(set.size());
+        size_t index = 0;
+        for (uint16_t elem : set) {
+            numOfEachType[index] = std::count(cell.getAtomicNumbers().cbegin(), cell.getAtomicNumbers().cend(), elem);
+            ++index;
+        }
     }
 
     std::ostream& operator<<(std::ostream& os, const Poscar& poscar) {

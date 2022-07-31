@@ -23,6 +23,7 @@
 
 namespace Physica::Core {
     class Xdatcar;
+    class CrystalCell;
 
     class Poscar final {
     public:
@@ -52,6 +53,7 @@ namespace Physica::Core {
     public:
         Poscar();
         Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, PoscarType type_);
+        Poscar(CrystalCell cell);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
         friend std::istream& operator>>(std::istream& is, Poscar& poscar);
