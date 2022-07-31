@@ -49,13 +49,18 @@ namespace Physica::Core {
          */
         constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
     };
-
+    /**
+     * Hartree atomic units
+     */
     template<>
     class PhyConst<AU> {
     private:
         constexpr static double hartreeInEv = 27.211386245988;
         constexpr static double rydbergInEv = hartreeInEv * 0.5;
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
+        constexpr static double jouleInHartree = 1 / (PhyConst<SI>::unitCharge * hartreeInEv);
+        constexpr static double timeInSecond = PhyConst<SI>::reducedPlanck * jouleInHartree;
+        constexpr static double temperatureInK = PhyConst<SI>::boltzmannK * jouleInHartree;
     public:
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
@@ -64,10 +69,15 @@ namespace Physica::Core {
         constexpr static double bohrRadius = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
+        constexpr static double boltzmannK = 1;
 
         [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
         [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
         [[nodiscard]] constexpr static double bohrToAngstorm(double bohr) { return bohr * bohrInAngstorm; }
         [[nodiscard]] constexpr static double angstormToBohr(double angstorm) { return angstorm * (1.0 / bohrInAngstorm); }
+        [[nodiscard]] constexpr static double timeToSecond(double atomic_time) { return atomic_time * timeInSecond; }
+        [[nodiscard]] constexpr static double secondToTime(double second) { return second / timeInSecond; }
+        [[nodiscard]] constexpr static double temperatureToK(double atomic_tem) { return atomic_tem * temperatureInK; }
+        [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
     };
 }
