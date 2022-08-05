@@ -67,8 +67,9 @@ namespace Physica::Core {
             , temperatureT(std::move(temperatureT_))
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
+        fft = FFT<ScalarType, 1>(numReplica, 1);
+
         const size_t dof = Dim * cell.getAtomCount();
-        fft = FFT<ScalarType, 1>(dof, 1);
         phasePosX.resize(2 * dof, numReplica);
         buffer.resize(2, fft.getFreqSize());
 

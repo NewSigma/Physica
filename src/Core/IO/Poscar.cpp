@@ -39,7 +39,7 @@ namespace Physica::Core {
         assert(getAtomCount() == sumNumOfEachType());
     }
 
-    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getLattice())), type(Direct) {
+    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getPos())), type(Direct) {
         std::unordered_set<uint16_t> set{};
         for (uint16_t elem : cell.getAtomicNumbers())
             set.insert(elem);
@@ -54,13 +54,12 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const Poscar& poscar) {
         os << '\n';
         os << 1.0 << '\n';
-        os << poscar.lattice << '\n';
+        os << poscar.lattice;
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
             os << '\t' << poscar.numOfEachType[i];
         os << '\n';
         os << ((poscar.type == Poscar::Direct) ? "Direct\n" : "Cartesian\n");
         os << poscar.pos;
-        os << '\n';
         return os;
     }
 
