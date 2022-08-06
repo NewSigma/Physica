@@ -43,11 +43,14 @@ namespace Physica::Core {
         std::unordered_set<uint16_t> set{};
         for (uint16_t elem : cell.getAtomicNumbers())
             set.insert(elem);
-        numOfEachType.resize(set.size());
+        numOfEachType.resize(set.size(), 0);
         size_t index = 0;
-        for (uint16_t elem : set) {
-            numOfEachType[index] = std::count(cell.getAtomicNumbers().cbegin(), cell.getAtomicNumbers().cend(), elem);
-            ++index;
+        uint16_t temp = cell.getAtomicNumbers()[0];
+        for (uint16_t elem : cell.getAtomicNumbers()) {
+            const bool same = temp == elem;
+            index += !same;
+            numOfEachType[index] += 1;
+            temp = elem;
         }
     }
 
@@ -56,7 +59,7 @@ namespace Physica::Core {
         os << 1.0 << '\n';
         os << poscar.lattice;
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
-            os << '\t' << poscar.numOfEachType[i];
+            os << ' ' << poscar.numOfEachType[i];
         os << '\n';
         os << ((poscar.type == Poscar::Direct) ? "Direct\n" : "Cartesian\n");
         os << poscar.pos;
