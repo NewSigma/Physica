@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {
     /**
@@ -51,6 +52,7 @@ namespace Physica::Core {
         void step(RandomGenerator gen, ForceCalculator force);
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
+        [[nodiscard]] typename CrystalCell::PositionMatrix getPos() const;
     private:
         void toNormalRepr(size_t atomId);
         void toBeadRepr(size_t atomId);
@@ -105,13 +107,13 @@ namespace Physica::Core {
         matA(1, 1) = ScalarType(1);
         for (size_t i = 0; i < cell.getAtomCount(); ++i) {
             const auto atomicNum = cell.getAtomicNumber(i);
-            const auto mass = PhyConst<SI>::relativeAtomMass[atomicNum];
+            const auto mass = PhyConst<AU>::atomMass(atomicNum);
             const ScalarType factor = ScalarType(mass) * square(omegaW);
 
             toNormalRepr(i);
             matA(1, 0) = reciprocal(ScalarType(mass)) * timeStep;
             for (size_t j = 0; j < buffer.getColumn(); ++j) {
-                auto col = buffer.col(i);
+                auto col = buffer.col(j);
                 const ScalarType phase = 2 * M_PI * j / getNumReplica();
                 matA(0, 1) = factor * ComplexScalar<ScalarType>(cos(phase), -sin(phase)) - factor;
                 temp = matA * col;
@@ -122,6 +124,22 @@ namespace Physica::Core {
 
         forceStep(std::cref(force));
         thermostatStep(std::ref(gen));
+    }
+
+    template<class ScalarType>
+    typename CrystalCell::PositionMatrix RPMD<ScalarType>::getPos() const {
+        using PositionMatrix = typename CrystalCell::PositionMatrix;
+        using ScalarType_ = typename PositionMatrix::ScalarType;
+
+        PositionMatrix result = cell.getPos();
+        result = ScalarType_::Zero();
+        const size_t dof = Dim * cell.getAtomCount();
+        size_t index = dof;
+        for (auto& elem : result) {
+            elem = ScalarType_(mean(phasePosX.row(index)));
+            ++index;
+        }
+        return result;
     }
 
     template<class ScalarType>
@@ -169,7 +187,7 @@ namespace Physica::Core {
         std::normal_distribution<> dist{};
         for (size_t i = 0; i < cell.getAtomCount(); ++i) {
             const auto atomicNum = cell.getAtomicNumber(i);
-            const auto mass = PhyConst<SI>::relativeAtomMass[atomicNum];
+            const auto mass = PhyConst<AU>::atomMass(atomicNum);
             const ScalarType factor = sqrt(repBeta * mass);
             toNormalRepr(i);
             for (size_t j = 0; j < buffer.getColumn(); ++j) {

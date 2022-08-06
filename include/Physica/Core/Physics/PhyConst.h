@@ -44,10 +44,14 @@ namespace Physica::Core {
         constexpr static double neutronMass = 1.67492749804E-27;
         constexpr static double vacuumDielectric = 8.8541878128E-12;
         constexpr static double boltzmannK = 1.380649E-23;
+        constexpr static double avogadroNa = 6.02214076E23;
         /**
          * The first element is a space holder
          */
+        constexpr static double relativeMassInKg = 1E-3 / avogadroNa;
         constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
+    
+        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * relativeMassInKg; }
     };
     /**
      * Hartree atomic units
@@ -79,5 +83,6 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double secondToTime(double second) { return second / timeInSecond; }
         [[nodiscard]] constexpr static double temperatureToK(double atomic_tem) { return atomic_tem * temperatureInK; }
         [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
+        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electroMass; }
     };
 }
