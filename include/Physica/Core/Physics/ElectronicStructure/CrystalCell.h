@@ -37,6 +37,8 @@ namespace Physica::Core {
     public:
         CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_);
         CrystalCell(Poscar poscar);
+        /* Operations */
+        void scale(ScalarType factor);
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
@@ -48,5 +50,8 @@ namespace Physica::Core {
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
         [[nodiscard]] CrystalCell unitToSuper(unsigned int x, unsigned int y, unsigned int z) const;
+        /* Helpers */
+        void toDirect(PositionMatrix& obj) const;
+        void toCartesian(PositionMatrix& obj) const;
     };
 }

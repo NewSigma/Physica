@@ -61,8 +61,6 @@ namespace Physica::Core {
         void standrizeLattice();
         void extendInZ(ScalarType factor);
         void superToUnit(size_t x, size_t y, size_t z);
-        void toDirect();
-        void toCartesian();
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }

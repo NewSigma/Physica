@@ -168,7 +168,10 @@ namespace Physica::Core {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
-
+    /**
+     * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally column vectors.
+     * To compute row vector * matrix, users should converted it to matrix^T * column vector.
+     */
     template<class VectorType, class MatrixType>
     inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
     operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) {

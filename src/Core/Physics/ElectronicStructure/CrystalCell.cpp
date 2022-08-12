@@ -30,6 +30,11 @@ namespace Physica::Core {
 
     CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()) {}
 
+    void CrystalCell::scale(ScalarType factor) {
+        assert(factor.isPositive());
+        lattice *= factor;
+    }
+
     ReciprocalCell CrystalCell::reciprocal() const noexcept {
         LatticeMatrix result{};
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
@@ -89,5 +94,15 @@ namespace Physica::Core {
             }
         }
         return CrystalCell(std::move(new_lattice), std::move(new_pos), std::move(new_atomic));
+    }
+
+    void CrystalCell::toDirect(PositionMatrix& obj) const {
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 3, 3>;
+        const MatrixType inv = lattice.inverse();
+        obj *= inv;
+    }
+
+    void CrystalCell::toCartesian(PositionMatrix& obj) const {
+        obj *= lattice;
     }
 }
