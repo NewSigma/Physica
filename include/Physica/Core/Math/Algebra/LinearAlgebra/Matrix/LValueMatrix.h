@@ -126,7 +126,10 @@ namespace Physica::Core {
     template<class MatrixType, ScalarOption option, bool errorTrack>
     inline void operator-=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m - s; }
     template<class Derived, class OtherDerived>
-    inline void operator*=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1 * m2; }
+    inline void operator*=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) {
+        Derived temp = m1 * m2;
+        temp.swap(m1.getDerived());
+    }
     template<class MatrixType, ScalarOption option, bool errorTrack>
     inline void operator*=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m * s; }
 }
