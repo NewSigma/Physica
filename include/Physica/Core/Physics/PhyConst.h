@@ -64,7 +64,7 @@ namespace Physica::Core {
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
         constexpr static double jouleInHartree = 1 / (PhyConst<SI>::unitCharge * hartreeInEv);
         constexpr static double timeInSecond = PhyConst<SI>::reducedPlanck * jouleInHartree;
-        constexpr static double temperatureInK = PhyConst<SI>::boltzmannK * jouleInHartree;
+        constexpr static double temperatureInK = 1 / (PhyConst<SI>::boltzmannK * jouleInHartree);
     public:
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
