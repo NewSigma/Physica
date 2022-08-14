@@ -32,6 +32,11 @@ namespace Physica::Core {
 
     CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()), type(poscar.getType()) {}
 
+    CrystalCell& CrystalCell::operator=(CrystalCell cell) noexcept {
+        swap(cell);
+        return *this;
+    }
+
     void CrystalCell::scale(ScalarType factor) {
         assert(factor.isPositive());
         lattice *= factor;
@@ -108,5 +113,12 @@ namespace Physica::Core {
     void CrystalCell::toCartesian(PositionMatrix& obj) const {
         assert(type == Type::Direct);
         obj *= lattice;
+    }
+
+    void CrystalCell::swap(CrystalCell& cell) noexcept {
+        lattice.swap(cell.lattice);
+        pos.swap(cell.pos);
+        atomicNumbers.swap(cell.atomicNumbers);
+        std::swap(type, cell.type);
     }
 }

@@ -43,6 +43,11 @@ namespace Physica::Core {
     public:
         CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_, Type type_);
         CrystalCell(Poscar poscar);
+        CrystalCell(const CrystalCell&) = default;
+        CrystalCell(CrystalCell&&) noexcept = default;
+        ~CrystalCell() = default;
+        /* Operators */
+        CrystalCell& operator=(CrystalCell cell) noexcept;
         /* Operations */
         void scale(ScalarType factor);
         /* Getters */
@@ -60,5 +65,6 @@ namespace Physica::Core {
         /* Helpers */
         void toDirect(PositionMatrix& obj) const;
         void toCartesian(PositionMatrix& obj) const;
+        void swap(CrystalCell& cell) noexcept;
     };
 }
