@@ -19,7 +19,7 @@
 #pragma once
 
 #include <iosfwd>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 
 namespace Physica::Core {
     class Xdatcar;
@@ -27,11 +27,6 @@ namespace Physica::Core {
 
     class Poscar final {
     public:
-        enum PoscarType : bool {
-            Direct,
-            Cartesian
-        };
-
         enum CrystalSystem : char {
             Triclinic,
             Monoclinic,
@@ -45,14 +40,15 @@ namespace Physica::Core {
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 3>;
+        using Type = typename CrystalCell::Type;
     private:
         LatticeMatrix lattice;
         PositionMatrix pos;
         Utils::Array<size_t> numOfEachType;
-        PoscarType type;
+        Type type;
     public:
         Poscar();
-        Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, PoscarType type_);
+        Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, Type type_);
         Poscar(CrystalCell cell);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
@@ -65,6 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
+        [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         /* Helpers */

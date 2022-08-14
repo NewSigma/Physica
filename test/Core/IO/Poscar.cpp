@@ -85,7 +85,7 @@ int main() {
             0.7021261874138659,  0.9803177844871507,  0.9573706719037773,
             0.3512600170478342,  0.6392493670479714,  0.1141244566914832
         };
-        const CrystalCell unit{std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}};
+        const CrystalCell unit(std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct);
         Poscar poscar(unit);
         const auto& numOfEachType = poscar.getNumOfEachType();
         if (numOfEachType[0] != 8 || numOfEachType[1] != 4)

@@ -19,16 +19,18 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
+#include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_)
+    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_, Type type_)
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
-            , atomicNumbers(std::move(atomicNumbers_)) {
+            , atomicNumbers(std::move(atomicNumbers_))
+            , type(type_) {
         assert(pos.getRow() == atomicNumbers.getLength());
     }
 
-    CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()) {}
+    CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()), type(poscar.getType()) {}
 
     void CrystalCell::scale(ScalarType factor) {
         assert(factor.isPositive());
@@ -93,16 +95,18 @@ namespace Physica::Core {
                 }
             }
         }
-        return CrystalCell(std::move(new_lattice), std::move(new_pos), std::move(new_atomic));
+        return CrystalCell(std::move(new_lattice), std::move(new_pos), std::move(new_atomic), type);
     }
 
     void CrystalCell::toDirect(PositionMatrix& obj) const {
+        assert(type == Type::Cartesian);
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 3, 3>;
         const MatrixType inv = lattice.inverse();
         obj *= inv;
     }
 
     void CrystalCell::toCartesian(PositionMatrix& obj) const {
+        assert(type == Type::Direct);
         obj *= lattice;
     }
 }

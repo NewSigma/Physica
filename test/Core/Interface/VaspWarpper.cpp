@@ -41,7 +41,7 @@ int main() {
                                         0.297330000, 0.406950000, 0.941480000,
                                         0.734410000, 0.424230000, 0.428290000,
                                         0.456810000, 0.939370000, 0.176470000};
-    VaspWarpper vasp(1, "", ".", "", Poscar(std::move(lattice), std::move(pos), {2, 6}, Poscar::Direct));
+    VaspWarpper vasp(1, "", ".", "", Poscar(std::move(lattice), std::move(pos), {2, 6}, CrystalCell::Type::Direct));
     const auto force = vasp.getForce();
     const Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
     if (!vectorNear(force, answer, 1E-16))

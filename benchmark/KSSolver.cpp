@@ -31,7 +31,7 @@ using ComplexType = ComplexScalar<ScalarType>;
 int main() {
     using namespace Physica::Utils;
     Cycler::init();
-    CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14});
+    CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14}, CrystalCell::Type::Direct);
     ScalarType cutEnergy(0.8);
     {
         BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14);

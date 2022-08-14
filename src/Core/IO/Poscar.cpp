@@ -22,16 +22,15 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     Poscar::Poscar() : lattice(LatticeMatrix::unitMatrix(3))
                      , pos()
                      , numOfEachType()
-                     , type(Direct) {}
+                     , type(CrystalCell::Type::Direct) {}
 
-    Poscar::Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, PoscarType type_)
+    Poscar::Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, Type type_)
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
             , numOfEachType(std::move(numOfEachType_))
@@ -39,7 +38,7 @@ namespace Physica::Core {
         assert(getAtomCount() == sumNumOfEachType());
     }
 
-    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getPos())), type(Direct) {
+    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getPos())), type(Type::Direct) {
         std::unordered_set<uint16_t> set{};
         for (uint16_t elem : cell.getAtomicNumbers())
             set.insert(elem);
@@ -61,7 +60,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
             os << ' ' << poscar.numOfEachType[i];
         os << '\n';
-        os << ((poscar.type == Poscar::Direct) ? "Direct\n" : "Cartesian\n");
+        os << ((poscar.type == Poscar::Type::Direct) ? "Direct\n" : "Cartesian\n");
         os << poscar.pos;
         return os;
     }
@@ -79,9 +78,9 @@ namespace Physica::Core {
             const int ch = std::tolower(is.get());
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (ch == 'd')
-                poscar.type = Poscar::Direct;
+                poscar.type = Poscar::Type::Direct;
             else if (ch == 'c')
-                poscar.type = Poscar::Cartesian;
+                poscar.type = Poscar::Type::Cartesian;
             else
                 throw BadFileFormatException();
         }
@@ -116,7 +115,7 @@ namespace Physica::Core {
      * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
      */
     void Poscar::extendInZ(ScalarType factor) {
-        assert(type == Direct);
+        assert(type == Type::Direct);
         assert(lattice(0, 2).isZero());
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;

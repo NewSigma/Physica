@@ -163,7 +163,7 @@ namespace Physica::Core {
             ++index;
         }
         cell.toDirect(pos);
-        return CrystalCell(cell.getLattice(), std::move(pos), cell.getAtomicNumbers());
+        return CrystalCell(cell.getLattice(), std::move(pos), cell.getAtomicNumbers(), CrystalCell::Type::Direct);
     }
 
     template<class ScalarType>

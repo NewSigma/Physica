@@ -26,7 +26,7 @@ int main() {
     using PositionMatrix = typename CrystalCell::PositionMatrix;
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
-    const CrystalCell cell(lattice, pos, {1, 1, 8});
+    const CrystalCell cell(lattice, pos, {1, 1, 8}, CrystalCell::Type::Direct);
 
     const LatticeMatrix answer_lattice{3, 0, 0, 4, 6, 0, 4, 5, 6};
     const PositionMatrix answer_pos{

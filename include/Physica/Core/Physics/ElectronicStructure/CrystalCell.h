@@ -20,22 +20,28 @@
 
 #include <unordered_set>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
     class ReciprocalCell;
+    class Poscar;
 
     class CrystalCell final {
     public:
         using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 3>;
+
+        enum class Type : bool {
+            Direct,
+            Cartesian
+        };
     private:
         LatticeMatrix lattice;
         PositionMatrix pos;
         Utils::Array<uint16_t> atomicNumbers;
+        Type type;
     public:
-        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_);
+        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_, Type type_);
         CrystalCell(Poscar poscar);
         /* Operations */
         void scale(ScalarType factor);
@@ -43,6 +49,7 @@ namespace Physica::Core {
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] const Utils::Array<uint16_t>& getAtomicNumbers() const noexcept { return atomicNumbers; }
+        [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
