@@ -29,6 +29,11 @@ namespace Physica::Core {
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
+
+        enum class Type : bool {
+            Direct,
+            Cartesian
+        };
     protected:
         LatticeMatrix lattice;
         PositionMatrix pos;

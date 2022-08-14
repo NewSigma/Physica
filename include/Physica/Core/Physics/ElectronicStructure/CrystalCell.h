@@ -30,11 +30,6 @@ namespace Physica::Core {
         using Base = PeriodicCell<Scalar<Float, false>, 3>;
         using ScalarType = Scalar<Float, false>;
         using AtomicArray = Utils::Array<uint16_t>;
-
-        enum class Type : bool {
-            Direct,
-            Cartesian
-        };
     private:
         AtomicArray atomicNumbers;
         Type type;

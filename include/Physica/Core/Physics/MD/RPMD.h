@@ -19,9 +19,9 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "MDCell.h"
 
 namespace Physica::Core {
     /**
@@ -36,7 +36,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
     private:
         FFT<ScalarType, 1> fft;
-        CrystalCell cell;
+        MDCell cell;
         PhasePosType phasePosX;
         BufferType buffer;
         ScalarType temperatureT;
@@ -46,18 +46,18 @@ namespace Physica::Core {
         ScalarType repBeta;
         ScalarType omegaW;
     public:
-        RPMD(CrystalCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
+        RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
         /* Operations */
         template<class RandomGenerator, class ForceCalculator>
         void step(RandomGenerator gen, ForceCalculator force);
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
-        [[nodiscard]] size_t getDOF() const noexcept { return Dim * cell.getAtomCount(); }
-        [[nodiscard]] typename CrystalCell::PositionMatrix getPos() const;
+        [[nodiscard]] size_t getDOF() const noexcept { return Dim * cell.getNumParticle(); }
+        [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
     private:
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
-        CrystalCell phaseToCell(size_t replica) const;
+        MDCell phaseToCell(size_t replica) const;
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator gen);
         template<class ForceCalculator>
@@ -66,12 +66,12 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    RPMD<ScalarType>::RPMD(CrystalCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_)
+    RPMD<ScalarType>::RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_)
             : cell(std::move(cell_))
             , temperatureT(std::move(temperatureT_))
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
-        using PositionMatrix = typename CrystalCell::PositionMatrix;
+        using PositionMatrix = typename MDCell::PositionMatrix;
         fft = FFT<ScalarType, 1>(numReplica, 1);
 
         const size_t dof = getDOF();
@@ -83,9 +83,7 @@ namespace Physica::Core {
 
         /* Fill pos */ {
             size_t index = dof;
-            PositionMatrix pos = cell.getPos();
-            cell.toCartesian(pos);
-            for (auto elem : pos) {
+            for (auto elem : cell.getPos()) {
                 phasePosX(index, 0) = elem;
                 ++index;
             }
@@ -110,8 +108,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename CrystalCell::PositionMatrix RPMD<ScalarType>::getPos() const {
-        using PositionMatrix = typename CrystalCell::PositionMatrix;
+    typename MDCell::PositionMatrix RPMD<ScalarType>::getPos() const {
+        using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
 
         PositionMatrix result = cell.getPos();
@@ -122,7 +120,6 @@ namespace Physica::Core {
             elem = ScalarType_(mean(phasePosX.row(index)));
             ++index;
         }
-        cell.toDirect(result);
         return result;
     }
 
@@ -151,19 +148,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    CrystalCell RPMD<ScalarType>::phaseToCell(size_t replica) const {
-        using PositionMatrix = typename CrystalCell::PositionMatrix;
+    MDCell RPMD<ScalarType>::phaseToCell(size_t replica) const {
+        using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
 
-        PositionMatrix pos(cell.getAtomCount(), 3);
+        PositionMatrix pos(cell.getNumParticle(), 3);
         auto phase = phasePosX.col(replica);
-        size_t index = Dim * cell.getAtomCount();
+        size_t index = Dim * cell.getNumParticle();
         for (auto& elem : pos) {
             elem = ScalarType_(phase[index]);
             ++index;
         }
-        cell.toDirect(pos);
-        return CrystalCell(cell.getLattice(), std::move(pos), cell.getAtomicNumbers(), CrystalCell::Type::Direct);
+        return MDCell(cell.getLattice(), std::move(pos), cell.getMassVec());
     }
 
     template<class ScalarType>
@@ -172,8 +168,7 @@ namespace Physica::Core {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
-            const auto atomicNum = cell.getAtomicNumber(i / Dim);
-            const auto mass = PhyConst<AU>::atomMass(atomicNum);
+            const auto mass = cell.getMass(i / Dim);
             const ScalarType factor = sqrt(repBeta * mass);
             toNormalRepr(i);
             for (size_t j = 0; j < buffer.getColumn(); ++j) {
@@ -200,7 +195,6 @@ namespace Physica::Core {
             auto phasePos = phasePosX.col(i);
             auto momentum = phasePos.head(dof);
             auto temp = phaseToCell(i);
-            temp.scale(PhyConst<AU>::bohrToAngstorm(1));
             momentum += force(std::move(temp)) * (timeStep * 0.5);
         }
     }
@@ -216,8 +210,7 @@ namespace Physica::Core {
         matA(0, 0) = ScalarType(1);
         matA(1, 1) = ScalarType(1);
         for (size_t i = 0; i < dof; ++i) {
-            const auto atomicNum = cell.getAtomicNumber(i / Dim);
-            const auto mass = PhyConst<AU>::atomMass(atomicNum);
+            const auto mass = cell.getMass(i / Dim);
             const ScalarType factor = ScalarType(mass) * square(omegaW) * timeStep;
 
             toNormalRepr(i);
