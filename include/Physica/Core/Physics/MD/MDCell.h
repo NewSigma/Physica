@@ -18,18 +18,23 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/CrystalCell.h"
+#include "Physica/Core/Physics/PeriodicCell.h"
 
 namespace Physica::Core {
-    class MDCell final : PeriodicCell<Scalar<Float, false>, 3> {
+    class CrystalCell;
+
+    class MDCell final : public PeriodicCell<Scalar<Float, false>, 3> {
     public:
-        using Base = PeriodicCell<Scalar<Float, false>, 3>;
+        using ScalarType = Scalar<Float, false>;
+        using Base = PeriodicCell<ScalarType, 3>;
         using MassVector = Vector<ScalarType>;
     private:
         MassVector massVec;
     public:
         MDCell(CrystalCell cell);
-        MDCell(Base cell, MassVector massVec_);
+        MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
+        /* Operations */
+        void scale(ScalarType factor);
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const { return pos.getRow(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }

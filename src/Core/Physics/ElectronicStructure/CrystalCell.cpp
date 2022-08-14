@@ -18,7 +18,6 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
@@ -39,17 +38,6 @@ namespace Physica::Core {
     void CrystalCell::scale(ScalarType factor) {
         assert(factor.isPositive());
         lattice *= factor;
-    }
-
-    ReciprocalCell CrystalCell::reciprocal() const noexcept {
-        LatticeMatrix result{};
-        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
-        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
-        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const ScalarType volume = abs(lattice.row(0) * result.row(0).asVector());
-        const ScalarType factor = ScalarType(2 * M_PI) / volume;
-        result *= factor;
-        return ReciprocalCell(std::move(result));
     }
 
     typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {

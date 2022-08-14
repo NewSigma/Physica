@@ -20,6 +20,7 @@
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "ReciprocalCell.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
@@ -48,6 +49,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] ReciprocalCell reciprocal() const;
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
     };
@@ -66,6 +68,18 @@ namespace Physica::Core {
     PeriodicCell<ScalarType, Dim>& PeriodicCell<ScalarType, Dim>::operator=(PeriodicCell cell) noexcept {
         swap(cell);
         return *this;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    ReciprocalCell PeriodicCell<ScalarType, Dim>::reciprocal() const {
+        LatticeMatrix result{};
+        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
+        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
+        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
+        const ScalarType volume = abs(lattice.row(0) * result.row(0).asVector());
+        const ScalarType factor = ScalarType(2 * M_PI) / volume;
+        result *= factor;
+        return ReciprocalCell(std::move(result));
     }
 
     template<class ScalarType, unsigned int Dim>

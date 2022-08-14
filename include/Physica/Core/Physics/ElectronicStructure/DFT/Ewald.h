@@ -20,7 +20,6 @@
 
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronicStructure/ReciprocalCell.h"
 #include "Grid3D.h"
 
 namespace Physica::Core {

@@ -118,7 +118,7 @@ namespace Physica::Core {
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;
 
-        const ScalarType inv_factor = reciprocal(factor);
+        const ScalarType inv_factor = Core::reciprocal(factor);
 
         auto col = pos.col(2);
         for (size_t i = 0; i < col.getLength(); ++i) {
@@ -134,9 +134,9 @@ namespace Physica::Core {
     void Poscar::superToUnit(size_t x, size_t y, size_t z) {
         assert(x > 0 && y > 0 && z > 0);
         assert(pos.getRow() % (x * y * z) == 0);
-        const ScalarType inv_x = reciprocal(ScalarType(x));
-        const ScalarType inv_y = reciprocal(ScalarType(y));
-        const ScalarType inv_z = reciprocal(ScalarType(z));
+        const ScalarType inv_x = Core::reciprocal(ScalarType(x));
+        const ScalarType inv_y = Core::reciprocal(ScalarType(y));
+        const ScalarType inv_z = Core::reciprocal(ScalarType(z));
 
         auto rowX = lattice.row(0);
         rowX *= inv_x;

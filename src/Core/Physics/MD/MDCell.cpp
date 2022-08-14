@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
     MDCell::MDCell(CrystalCell cell) : Base(std::move(cell)) {
@@ -26,7 +28,13 @@ namespace Physica::Core {
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
     }
-    MDCell::MDCell(Base cell, MassVector massVec_)
-            : Base(std::move(cell))
-            , massVec(std::move(massVec_))
+    MDCell::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
+            : Base(std::move(lattice), std::move(pos))
+            , massVec(std::move(massVec_)) {}
+
+    void MDCell::scale(ScalarType factor) {
+        assert(factor.isPositive());
+        lattice *= factor;
+        pos *= factor;
+    }
 }
