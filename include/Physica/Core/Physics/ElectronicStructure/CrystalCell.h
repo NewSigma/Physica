@@ -19,29 +19,27 @@
 #pragma once
 
 #include <unordered_set>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Physics/PeriodicCell.h"
 
 namespace Physica::Core {
     class ReciprocalCell;
     class Poscar;
 
-    class CrystalCell final {
+    class CrystalCell final : public PeriodicCell<Scalar<Float, false>, 3> {
     public:
+        using Base = PeriodicCell<Scalar<Float, false>, 3>;
         using ScalarType = Scalar<Float, false>;
-        using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
-        using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 3>;
+        using AtomicArray = Utils::Array<uint16_t>;
 
         enum class Type : bool {
             Direct,
             Cartesian
         };
     private:
-        LatticeMatrix lattice;
-        PositionMatrix pos;
-        Utils::Array<uint16_t> atomicNumbers;
+        AtomicArray atomicNumbers;
         Type type;
     public:
-        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_, Type type_);
+        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, AtomicArray atomicNumbers_, Type type_);
         CrystalCell(Poscar poscar);
         CrystalCell(const CrystalCell&) = default;
         CrystalCell(CrystalCell&&) noexcept = default;
@@ -51,11 +49,9 @@ namespace Physica::Core {
         /* Operations */
         void scale(ScalarType factor);
         /* Getters */
-        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
-        [[nodiscard]] const Utils::Array<uint16_t>& getAtomicNumbers() const noexcept { return atomicNumbers; }
+        [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }
-        [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
+        [[nodiscard]] size_t getAtomCount() const noexcept { return Base::pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] ReciprocalCell reciprocal() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;

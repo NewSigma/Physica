@@ -22,15 +22,14 @@
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<uint16_t> atomicNumbers_, Type type_)
-            : lattice(std::move(lattice_))
-            , pos(std::move(pos_))
+    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, AtomicArray atomicNumbers_, Type type_)
+            : Base(std::move(lattice_), std::move(pos_))
             , atomicNumbers(std::move(atomicNumbers_))
             , type(type_) {
         assert(pos.getRow() == atomicNumbers.getLength());
     }
 
-    CrystalCell::CrystalCell(Poscar poscar) : lattice(poscar.getLattice()), pos(poscar.getPos()), type(poscar.getType()) {}
+    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)), type(poscar.getType()) {}
 
     CrystalCell& CrystalCell::operator=(CrystalCell cell) noexcept {
         swap(cell);
@@ -84,7 +83,7 @@ namespace Physica::Core {
             row3 = lattice.row(2).asVector() * ScalarType(z);
         }
         PositionMatrix new_pos(numAtom, 3);
-        Utils::Array<uint16_t> new_atomic(numAtom);
+        AtomicArray new_atomic(numAtom);
         size_t index = 0;
         for (size_t atom = 0; atom < getAtomCount(); ++atom) {
             const auto atomic = atomicNumbers[atom];
@@ -116,8 +115,7 @@ namespace Physica::Core {
     }
 
     void CrystalCell::swap(CrystalCell& cell) noexcept {
-        lattice.swap(cell.lattice);
-        pos.swap(cell.pos);
+        Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
         std::swap(type, cell.type);
     }

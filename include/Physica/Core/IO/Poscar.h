@@ -25,7 +25,7 @@ namespace Physica::Core {
     class Xdatcar;
     class CrystalCell;
 
-    class Poscar final {
+    class Poscar final : public PeriodicCell<typename CrystalCell::ScalarType, 3> {
     public:
         enum CrystalSystem : char {
             Triclinic,
@@ -37,13 +37,10 @@ namespace Physica::Core {
             Cubic
         };
 
-        using ScalarType = Scalar<Float, false>;
-        using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
-        using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 3>;
+        using Base = PeriodicCell<typename CrystalCell::ScalarType, 3>;
+        using ScalarType = typename CrystalCell::ScalarType;
         using Type = typename CrystalCell::Type;
     private:
-        LatticeMatrix lattice;
-        PositionMatrix pos;
         Utils::Array<size_t> numOfEachType;
         Type type;
     public:
@@ -58,8 +55,6 @@ namespace Physica::Core {
         void extendInZ(ScalarType factor);
         void superToUnit(size_t x, size_t y, size_t z);
         /* Getters */
-        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;

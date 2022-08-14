@@ -25,20 +25,18 @@
 #include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
-    Poscar::Poscar() : lattice(LatticeMatrix::unitMatrix(3))
-                     , pos()
+    Poscar::Poscar() : Base()
                      , numOfEachType()
                      , type(CrystalCell::Type::Direct) {}
 
     Poscar::Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, Type type_)
-            : lattice(std::move(lattice_))
-            , pos(std::move(pos_))
+            : Base(std::move(lattice_), std::move(pos_))
             , numOfEachType(std::move(numOfEachType_))
             , type(type_) {
         assert(getAtomCount() == sumNumOfEachType());
     }
 
-    Poscar::Poscar(CrystalCell cell) : lattice(std::move(cell.getLattice())), pos(std::move(cell.getPos())), type(Type::Direct) {
+    Poscar::Poscar(CrystalCell cell) : Base(std::move(cell)), type(cell.getType()) {
         std::unordered_set<uint16_t> set{};
         for (uint16_t elem : cell.getAtomicNumbers())
             set.insert(elem);
