@@ -20,6 +20,7 @@
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "ReciprocalCell.h"
 
 namespace Physica::Core {

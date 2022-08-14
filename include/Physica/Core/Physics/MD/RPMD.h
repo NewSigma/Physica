@@ -71,7 +71,6 @@ namespace Physica::Core {
             , temperatureT(std::move(temperatureT_))
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
-        using PositionMatrix = typename MDCell::PositionMatrix;
         fft = FFT<ScalarType, 1>(numReplica, 1);
 
         const size_t dof = getDOF();

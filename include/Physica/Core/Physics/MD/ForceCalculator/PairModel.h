@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PairFunctor>
@@ -34,9 +34,9 @@ namespace Physica::Core {
         PairFunctor functor;
     public:
         PairModel(ScalarType cutoff_, PairFunctor functor_);
-        [[nodiscard]] Vector<ScalarType> operator()(CrystalCell cell) const;
+        [[nodiscard]] Vector<ScalarType> operator()(MDCell cell) const;
     private:
-        Utils::Array<ssize_t, 3> estimateRange(const CrystalCell& cell) const;
+        Utils::Array<ssize_t, 3> estimateRange(const MDCell& cell) const;
     };
 
     template<class ScalarType, class PairFunctor>
@@ -45,9 +45,8 @@ namespace Physica::Core {
             , functor(std::move(functor_)) {}
 
     template<class ScalarType, class PairFunctor>
-    Vector<ScalarType> PairModel<ScalarType, PairFunctor>::operator()(CrystalCell cell) const {
+    Vector<ScalarType> PairModel<ScalarType, PairFunctor>::operator()(MDCell cell) const {
         using VectorType = Vector<ScalarType, Dim>;
-        assert(cell.getType() == CrystalCell::Type::Cartesian);
 
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
@@ -55,13 +54,13 @@ namespace Physica::Core {
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
         const auto range = estimateRange(cell);
-        const size_t numAtom = cell.getAtomCount();
+        const size_t numParticle = cell.getNumParticle();
 
-        Vector<ScalarType> force(Dim * numAtom, 0);
-        for (size_t i = 0; i < numAtom; ++i) {
+        Vector<ScalarType> force(Dim * numParticle, 0);
+        for (size_t i = 0; i < numParticle; ++i) {
             auto force_i = force.segment(3 * i, 3 * i + 3);
             auto center = pos.row(i);
-            for (size_t j = i; j < numAtom; ++j) {
+            for (size_t j = i; j < numParticle; ++j) {
                 auto force_j = force.segment(3 * j, 3 * j + 3);
                 auto v = pos.row(j);
                 for (ssize_t x = -range[0]; x <= range[0]; ++x) {
@@ -88,7 +87,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PairFunctor>
-    Utils::Array<ssize_t, 3> PairModel<ScalarType, PairFunctor>::estimateRange(const CrystalCell& cell) const {
+    Utils::Array<ssize_t, 3> PairModel<ScalarType, PairFunctor>::estimateRange(const MDCell& cell) const {
         ssize_t max_x, max_y, max_z;
         /* Estimate range */ {
             const ReciprocalCell reciprocal = cell.reciprocal();
