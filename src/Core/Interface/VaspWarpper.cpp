@@ -118,7 +118,6 @@ namespace Physica::Core {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
 
         std::ifstream fin((vaspWorkingDir + std::string("/OUTCAR")).c_str());
-        std::cout << (vaspWorkingDir + std::string("/OUTCAR")) << std::endl;
         if (fin) {
             fin.seekg(0, std::ios::end);
             const auto size = fin.tellg();

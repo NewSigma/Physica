@@ -52,15 +52,17 @@ namespace Physica::Core {
         void step(RandomGenerator gen, ForceCalculator force);
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
+        [[nodiscard]] size_t getDOF() const noexcept { return Dim * cell.getAtomCount(); }
         [[nodiscard]] typename CrystalCell::PositionMatrix getPos() const;
     private:
-        void toNormalRepr(size_t atomId);
-        void toBeadRepr(size_t atomId);
+        void toNormalRepr(size_t posID);
+        void toBeadRepr(size_t posID);
         CrystalCell phaseToCell(size_t replica) const;
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator gen);
         template<class ForceCalculator>
         void forceStep(ForceCalculator force);
+        void dynamicStep();
     };
 
     template<class ScalarType>
@@ -69,26 +71,30 @@ namespace Physica::Core {
             , temperatureT(std::move(temperatureT_))
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
+        using PositionMatrix = typename CrystalCell::PositionMatrix;
         fft = FFT<ScalarType, 1>(numReplica, 1);
 
-        const size_t dof = Dim * cell.getAtomCount();
+        const size_t dof = getDOF();
         phasePosX.resize(2 * dof, numReplica);
         buffer.resize(2, fft.getFreqSize());
 
         auto momentum = phasePosX.topRows(dof);
         momentum = ScalarType::Zero();
 
-        size_t index = dof;
-        for (auto elem : cell.getPos()) {
-            phasePosX(index, 0) = elem;
-            ++index;
+        /* Fill pos */ {
+            size_t index = dof;
+            PositionMatrix pos = cell.getPos();
+            cell.toCartesian(pos);
+            for (auto elem : pos) {
+                phasePosX(index, 0) = elem;
+                ++index;
+            }
+            for (size_t i = 1; i < getNumReplica(); ++i) {
+                auto phasePos = phasePosX.col(i);
+                auto pos = phasePos.tail(dof);
+                pos = phasePosX.col(0).tail(dof);
+            }
         }
-        for (size_t i = 1; i < getNumReplica(); ++i) {
-            auto phasePos = phasePosX.col(i);
-            auto pos = phasePos.tail(dof);
-            pos = phasePosX.col(0).tail(dof);
-        }
-
         repBeta = temperatureT * PhyConst<AU>::boltzmannK * numReplica;
         omegaW = repBeta / PhyConst<AU>::reducedPlanck;
     }
@@ -96,32 +102,9 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class RandomGenerator, class ForceCalculator>
     void RPMD<ScalarType>::step(RandomGenerator gen, ForceCalculator force) {
-        using MatrixType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Element, 2, 2>;
-        using VectorType = Vector<ComplexScalar<ScalarType>, 2>;
         thermostatStep(std::ref(gen));
         forceStep(std::cref(force));
-
-        MatrixType matA(2, 2);
-        VectorType temp{};
-        matA(0, 0) = ScalarType(1);
-        matA(1, 1) = ScalarType(1);
-        for (size_t i = 0; i < cell.getAtomCount(); ++i) {
-            const auto atomicNum = cell.getAtomicNumber(i);
-            const auto mass = PhyConst<AU>::atomMass(atomicNum);
-            const ScalarType factor = ScalarType(mass) * square(omegaW);
-
-            toNormalRepr(i);
-            matA(1, 0) = reciprocal(ScalarType(mass)) * timeStep;
-            for (size_t j = 0; j < buffer.getColumn(); ++j) {
-                auto col = buffer.col(j);
-                const ScalarType phase = 2 * M_PI * j / getNumReplica();
-                matA(0, 1) = factor * ComplexScalar<ScalarType>(cos(phase), -sin(phase)) - factor;
-                temp = matA * col;
-                col = temp;
-            }
-            toBeadRepr(i);
-        }
-
+        dynamicStep();
         forceStep(std::cref(force));
         thermostatStep(std::ref(gen));
     }
@@ -133,36 +116,37 @@ namespace Physica::Core {
 
         PositionMatrix result = cell.getPos();
         result = ScalarType_::Zero();
-        const size_t dof = Dim * cell.getAtomCount();
+        const size_t dof = getDOF();
         size_t index = dof;
         for (auto& elem : result) {
             elem = ScalarType_(mean(phasePosX.row(index)));
             ++index;
         }
+        cell.toDirect(result);
         return result;
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::toNormalRepr(size_t atomId) {
-        fft.transform(phasePosX.row(atomId));
+    void RPMD<ScalarType>::toNormalRepr(size_t posID) {
+        assert(posID < getDOF());
+        fft.transform(phasePosX.row(posID));
         auto momentum = buffer.row(0);
         momentum = fft.getFreqs();
 
-        const size_t dof = Dim * cell.getAtomCount();
-        fft.transform(phasePosX.row(atomId + dof));
+        fft.transform(phasePosX.row(posID + getDOF()));
         auto pos = buffer.row(1);
         pos = fft.getFreqs();
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::toBeadRepr(size_t atomId) {
+    void RPMD<ScalarType>::toBeadRepr(size_t posID) {
+        assert(posID < getDOF());
         fft.invTransform(buffer.row(0));
-        auto momentum = phasePosX.row(atomId);
+        auto momentum = phasePosX.row(posID);
         momentum = fft.getDatas();
 
-        const size_t dof = Dim * cell.getAtomCount();
         fft.invTransform(buffer.row(1));
-        auto pos = phasePosX.row(atomId + dof);
+        auto pos = phasePosX.row(posID + getDOF());
         pos = fft.getDatas();
     }
 
@@ -178,6 +162,7 @@ namespace Physica::Core {
             elem = ScalarType_(phase[index]);
             ++index;
         }
+        cell.toDirect(pos);
         return CrystalCell(cell.getLattice(), std::move(pos), cell.getAtomicNumbers());
     }
 
@@ -185,21 +170,22 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void RPMD<ScalarType>::thermostatStep(RandomGenerator gen) {
         std::normal_distribution<> dist{};
-        for (size_t i = 0; i < cell.getAtomCount(); ++i) {
-            const auto atomicNum = cell.getAtomicNumber(i);
+        const size_t dof = getDOF();
+        for (size_t i = 0; i < dof; ++i) {
+            const auto atomicNum = cell.getAtomicNumber(i / Dim);
             const auto mass = PhyConst<AU>::atomMass(atomicNum);
             const ScalarType factor = sqrt(repBeta * mass);
             toNormalRepr(i);
             for (size_t j = 0; j < buffer.getColumn(); ++j) {
-                ComplexScalar<ScalarType> viscosityY{};
+                ScalarType viscosityY{};
                 if (j == 0)
                     viscosityY = reciprocal(thermostatTime);
                 else {
-                    const ScalarType phase = 2 * M_PI * j / getNumReplica();
-                    viscosityY = sqrt(ComplexScalar<ScalarType>(ScalarType(1) - cos(phase), -sin(phase))) * (omegaW * 2);
+                    const ScalarType phase = M_PI * j / getNumReplica();
+                    viscosityY = sin(phase) * (omegaW * 2);
                 }
-                const auto c1 = exp(-viscosityY * (timeStep * 0.5));
-                const auto c2 = sqrt(ScalarType(1) - square(c1));
+                const ScalarType c1 = exp(-viscosityY * (timeStep * 0.5));
+                const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
                 buffer(0, j) = c1 * buffer(0, j) + factor * c2 * ComplexScalar<ScalarType>(dist(gen.get()), dist(gen.get()));
             }
             toBeadRepr(i);
@@ -209,11 +195,41 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class ForceCalculator>
     void RPMD<ScalarType>::forceStep(ForceCalculator force) {
-        const size_t dof = Dim * cell.getAtomCount();
+        const size_t dof = getDOF();
         for (size_t i = 0; i < getNumReplica(); ++i) {
             auto phasePos = phasePosX.col(i);
             auto momentum = phasePos.head(dof);
-            momentum -= force(std::move(phaseToCell(i))) * (timeStep * 0.5);
+            auto temp = phaseToCell(i);
+            temp.scale(PhyConst<AU>::bohrToAngstorm(1));
+            momentum += force(std::move(temp)) * (timeStep * 0.5);
+        }
+    }
+
+    template<class ScalarType>
+    void RPMD<ScalarType>::dynamicStep() {
+        using MatrixType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Element, 2, 2>;
+        using VectorType = Vector<ComplexScalar<ScalarType>, 2>;
+        const size_t dof = getDOF();
+
+        MatrixType matA(2, 2);
+        VectorType temp{};
+        matA(0, 0) = ScalarType(1);
+        matA(1, 1) = ScalarType(1);
+        for (size_t i = 0; i < dof; ++i) {
+            const auto atomicNum = cell.getAtomicNumber(i / Dim);
+            const auto mass = PhyConst<AU>::atomMass(atomicNum);
+            const ScalarType factor = ScalarType(mass) * square(omegaW) * timeStep;
+
+            toNormalRepr(i);
+            matA(1, 0) = timeStep / ScalarType(mass);
+            for (size_t j = 0; j < buffer.getColumn(); ++j) {
+                auto col = buffer.col(j);
+                const ScalarType phase = 2 * M_PI * j / getNumReplica();
+                matA(0, 1) = factor * ComplexScalar<ScalarType>(cos(phase) - 1, -sin(phase));
+                temp = matA * col;
+                col = temp;
+            }
+            toBeadRepr(i);
         }
     }
 }
