@@ -36,12 +36,16 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        constexpr static int Option = Internal::Traits<Derived>::Option; //It is declared here because MatrixOption makes no sence to a RValueMatrix
         constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
         constexpr static size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
         constexpr static size_t MaxColumnAtCompile = Internal::Traits<Derived>::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+
+        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
         using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
     public:
@@ -82,29 +86,16 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
+        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType trace() const;
         [[nodiscard]] Transpose<Derived> transpose() const noexcept;
         [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
+        [[nodiscard]] ScalarType sum() const { return Base::getDerived().sum(); }
+        /* Static members */
+        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
-
-    template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
-        assert(getRow() == getColumn());
-        ScalarType result = ScalarType::Zero();
-        for (size_t i = 0; i < getRow(); ++i)
-            result += calc(i, i);
-        return result;
-    }
-
-    template<class Derived>
-    Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
-        return Transpose<Derived>(this->getDerived());
-    }
-
-    template<class Derived>
-    Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
-        return Conjugate<Derived>(this->getDerived());
-    }
 
     template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);

@@ -71,8 +71,8 @@ namespace Physica::Core {
     template<class Derived>
     template<ScalarOption option, bool errorTrack>
     Derived& LValueMatrix<Derived>::operator=(const Scalar<option, errorTrack>& s) {
-        for (size_t i = 0; i < getMaxMajor(); ++i)
-            for (size_t j = 0; j < getMaxMinor(); ++j)
+        for (size_t i = 0; i < Base::getMaxMajor(); ++i)
+            for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                 getElementFromMajorMinor(i, j) = s;
         return Base::getDerived();
     }
@@ -396,22 +396,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline size_t LValueMatrix<Derived>::getMaxMajor() const noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return Base::getColumn();
-        else
-            return Base::getRow();
-    }
-
-    template<class Derived>
-    inline size_t LValueMatrix<Derived>::getMaxMinor() const noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return Base::getRow();
-        else
-            return Base::getColumn();
-    }
-
-    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
         size_t r, c;
         if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
@@ -448,21 +432,5 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
                 getElementFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
-    }
-
-    template<class Derived>
-    inline size_t LValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return minor;
-        else
-            return major;
-    }
-
-    template<class Derived>
-    inline size_t LValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return major;
-        else
-            return minor;
     }
 }

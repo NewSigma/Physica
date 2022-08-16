@@ -34,15 +34,14 @@ namespace Physica::Core {
         template<Utils::ExpressionType type, class T1, class T2, class ResultType>
         class Traits<DenseMatrixExpression<type, T1, T2, ResultType>> {
             constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
-            constexpr static bool RowMajor = MatrixOption::isRowMatrix<T1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Column)
-                                                               : int(MatrixOption::Row))
+            constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
                                                    : int(MatrixOption::AnyMajor);
-            constexpr static int Storage = (MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>())
-                                         ? MatrixOption::Element
-                                         : MatrixOption::Vector;
+            constexpr static bool SameStorage = MatrixOption::isSameStorage<T1, T2>();
+            constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T1>()
+                                                       : int(MatrixOption::AnyStorage);
         public:
             using ScalarType = ResultType;
+            constexpr static int Option = Major | Storage;
             constexpr static size_t RowAtCompile = T1::RowAtCompile;
             constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
@@ -73,6 +72,13 @@ namespace Physica::Core {
             /* Getters */
             [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
             [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+            [[nodiscard]] ScalarType sum() const {
+                ScalarType result = 0;
+                for (size_t major = 0; major < MatrixOption::selectMajor<Derived>(getRow(), getColumn()); ++major)
+                    for (size_t minor = 0; minor < MatrixOption::selectMinor<Derived>(getRow(), getColumn()); ++minor)
+                        result += calc(Base::rowFromMajorMinor(major, minor), Base::columnFromMajorMinor(major, minor));
+                return result;
+            }
         };
     }
     //////////////////////////////////////Minus//////////////////////////////////////

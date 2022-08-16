@@ -38,11 +38,10 @@ namespace Physica::Core {
     public:
         using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
+        using Base::isColumnMatrix;
+        using Base::isRowMatrix;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
-        constexpr static int Option = Internal::Traits<Derived>::Option; //It is declared here because MatrixOption makes no sence to a RValueMatrix
-        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
     public:
         ~LValueMatrix() = default;
         /* Operators */
@@ -102,15 +101,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
-        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
-        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
         /* Setters */
         void toUnitMatrix();
-        /* Static members */
-        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     protected:
         LValueMatrix() = default;
         LValueMatrix(const LValueMatrix&) = default;

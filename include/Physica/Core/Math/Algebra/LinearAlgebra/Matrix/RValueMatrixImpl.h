@@ -191,6 +191,57 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline size_t RValueMatrix<Derived>::getMaxMajor() const noexcept {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+            return getColumn();
+        else
+            return getRow();
+    }
+
+    template<class Derived>
+    inline size_t RValueMatrix<Derived>::getMaxMinor() const noexcept {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+            return getRow();
+        else
+            return getColumn();
+    }
+
+    template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
+        assert(getRow() == getColumn());
+        ScalarType result = ScalarType::Zero();
+        for (size_t i = 0; i < getRow(); ++i)
+            result += calc(i, i);
+        return result;
+    }
+
+    template<class Derived>
+    Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
+        return Transpose<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
+    Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
+        return Conjugate<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
+    inline size_t RValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+            return minor;
+        else
+            return major;
+    }
+
+    template<class Derived>
+    inline size_t RValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
+        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+            return major;
+        else
+            return minor;
+    }
+
+    template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m) {
         const auto row = m.getRow();
         const auto column = m.getColumn();
