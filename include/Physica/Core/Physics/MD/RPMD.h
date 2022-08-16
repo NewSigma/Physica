@@ -54,6 +54,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * cell.getNumParticle(); }
         [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
+        [[nodiscard]] typename MDCell::PositionMatrix getMomentum() const;
+        template<class ForceCalculator>
+        [[nodiscard]] ScalarType computeKinetic(ForceCalculator force) const;
     private:
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
@@ -109,10 +112,9 @@ namespace Physica::Core {
     template<class ScalarType>
     typename MDCell::PositionMatrix RPMD<ScalarType>::getPos() const {
         using PositionMatrix = typename MDCell::PositionMatrix;
-        using ScalarType_ = typename PositionMatrix::ScalarType;
+        using ScalarType_ = typename MDCell::ScalarType;
 
-        PositionMatrix result = cell.getPos();
-        result = ScalarType_::Zero();
+        PositionMatrix result(cell.getNumParticle(), 3, 0);
         const size_t dof = getDOF();
         size_t index = dof;
         for (auto& elem : result) {
@@ -120,6 +122,38 @@ namespace Physica::Core {
             ++index;
         }
         return result;
+    }
+
+    template<class ScalarType>
+    typename MDCell::PositionMatrix RPMD<ScalarType>::getMomentum() const {
+        using PositionMatrix = typename MDCell::PositionMatrix;
+        using ScalarType_ = typename MDCell::ScalarType;
+
+        PositionMatrix result(cell.getNumParticle(), 3, 0);
+        size_t index = 0;
+        for (auto& elem : result) {
+            elem = ScalarType_(mean(phasePosX.row(index)));
+            ++index;
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class ForceCalculator>
+    ScalarType RPMD<ScalarType>::computeKinetic(ForceCalculator force) const {
+        const size_t dof = getDOF();
+        Vector<ScalarType> averaged_pos(dof, 0);
+        for (size_t i = 0; i < dof; ++i)
+            averaged_pos[i] = mean(phasePosX.row(dof + i));
+
+        ScalarType kinetic = repBeta * dof;
+        for (size_t i = 0; i < getNumReplica(); ++i) {
+            auto col = phasePosX.col(i);
+            auto pos = col.tail(dof);
+            kinetic += (averaged_pos - pos) * force(phaseToCell(i));
+        }
+        kinetic /= ScalarType(2 * getNumReplica());
+        return kinetic;
     }
 
     template<class ScalarType>
@@ -193,31 +227,35 @@ namespace Physica::Core {
         for (size_t i = 0; i < getNumReplica(); ++i) {
             auto phasePos = phasePosX.col(i);
             auto momentum = phasePos.head(dof);
-            auto temp = phaseToCell(i);
-            momentum += force(std::move(temp)) * (timeStep * 0.5);
+            momentum += force(phaseToCell(i)) * (timeStep * 0.5);
         }
     }
 
     template<class ScalarType>
     void RPMD<ScalarType>::dynamicStep() {
-        using MatrixType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Element, 2, 2>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using VectorType = Vector<ComplexScalar<ScalarType>, 2>;
         const size_t dof = getDOF();
 
         MatrixType matA(2, 2);
         VectorType temp{};
-        matA(0, 0) = ScalarType(1);
-        matA(1, 1) = ScalarType(1);
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
-            const ScalarType factor = ScalarType(mass) * square(omegaW) * timeStep;
-
             toNormalRepr(i);
-            matA(1, 0) = timeStep / ScalarType(mass);
-            for (size_t j = 0; j < buffer.getColumn(); ++j) {
+            /* Translational mode */ {
+                buffer(1, 0) += buffer(0, 0) * timeStep / mass;
+            }
+            for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 auto col = buffer.col(j);
-                const ScalarType phase = 2 * M_PI * j / getNumReplica();
-                matA(0, 1) = factor * ComplexScalar<ScalarType>(cos(phase) - 1, -sin(phase));
+                const ScalarType omegaK = omegaW * sin(ScalarType(M_PI * j / getNumReplica())) * 2;
+                const ScalarType factor = ScalarType(mass) * square(omegaK);
+                const ScalarType phase = omegaK * timeStep;
+                const ScalarType cosine = cos(phase);
+                const ScalarType sine = sin(phase);
+                matA(0, 0) = cosine;
+                matA(0, 1) = -factor * sine;
+                matA(1, 0) = sine / factor;
+                matA(1, 1) = cosine;
                 temp = matA * col;
                 col = temp;
             }

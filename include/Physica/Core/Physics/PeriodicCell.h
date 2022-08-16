@@ -31,6 +31,7 @@ namespace Physica::Core {
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
+        using MomentumMatrix = PositionMatrix;
 
         enum class Type : bool {
             Direct,

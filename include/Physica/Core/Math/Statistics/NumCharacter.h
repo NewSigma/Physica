@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    typename VectorType::ScalarType mean(const LValueVector<VectorType>& x) {
+    typename VectorType::ScalarType mean(const RValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         return x.getDerived().sum() / ScalarType(x.getLength());
     }
