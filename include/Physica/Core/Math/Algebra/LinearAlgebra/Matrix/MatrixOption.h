@@ -32,11 +32,12 @@ namespace Physica::Core {
     class MatrixOption {
     public:
         enum {
-            Column = 0b000,
-            Row = 0b001,
-            AnyMajor = 0b010,
-            Vector = 0b000,
-            Element = 0b100
+            Column = 0b0000,
+            Row = 0b0001,
+            AnyMajor = 0b0010,
+            Vector = 0b0000,
+            Element = 0b0100,
+            AnyStorage = 0b1000
         };
     public:
         template<class Matrix>
@@ -60,13 +61,24 @@ namespace Physica::Core {
         }
 
         template<class Matrix>
-        constexpr static bool isElementMatrix() { return Internal::Traits<Matrix>::Option & Element; }
+        constexpr static bool isElementMatrix() {
+            return isAnyStorage<Matrix>() || Internal::Traits<Matrix>::Option & Element;
+        }
 
         template<class Matrix>
-        constexpr static bool isVectorMatrix() { return !isElementMatrix<Matrix>(); }
+        constexpr static bool isVectorMatrix() {
+            return isAnyStorage<Matrix>() || !isElementMatrix<Matrix>();
+        }
 
         template<class Matrix>
-        constexpr static int getStorage() { return isElementMatrix<Matrix>() ? Element : Vector; }
+        constexpr static bool isAnyStorage() {
+            return Internal::Traits<Matrix>::Option & AnyStorage;
+        }
+
+        template<class Matrix>
+        constexpr static int getStorage() {
+            return isAnyStorage<Matrix>() ? AnyStorage : (isElementMatrix<Matrix>() ? Element : Vector);
+        }
 
         template<class Matrix1, class Matrix2>
         constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
