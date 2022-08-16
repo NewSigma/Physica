@@ -57,7 +57,7 @@ namespace Physica::Core {
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
     protected:
-        [[nodiscard]] InvLatticeMatrix makeInvLattice() const { return lattice.inverse(); }
+        [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect();
         void toCartesian();
     };

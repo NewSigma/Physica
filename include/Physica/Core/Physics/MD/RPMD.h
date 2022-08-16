@@ -62,6 +62,7 @@ namespace Physica::Core {
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
         MDCell phaseToCell(size_t replica) const;
+        void cellToPhase(const MDCell& md_cell, size_t replica);
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator& gen);
         template<class ForceCalculator>
@@ -189,12 +190,22 @@ namespace Physica::Core {
 
         PositionMatrix pos(cell.getNumParticle(), 3);
         auto phase = phasePosX.col(replica);
-        size_t index = Dim * cell.getNumParticle();
+        size_t index = getDOF();
         for (auto& elem : pos) {
             elem = ScalarType_(phase[index]);
             ++index;
         }
         return MDCell(cell.getLattice(), std::move(pos), cell.getMassVec());
+    }
+
+    template<class ScalarType>
+    void RPMD<ScalarType>::cellToPhase(const MDCell& md_cell, size_t replica) {
+        auto phase = phasePosX.col(replica);
+        size_t index = getDOF();
+        for (auto elem : md_cell.getPos()) {
+            phase[index] = elem;
+            ++index;
+        }
     }
 
     template<class ScalarType>
@@ -260,6 +271,12 @@ namespace Physica::Core {
                 col = temp;
             }
             toBeadRepr(i);
+        }
+
+        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+            auto cell = phaseToCell(replica);
+            cell.checkPeriodic();
+            cellToPhase(cell, replica);
         }
     }
 }

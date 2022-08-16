@@ -29,16 +29,21 @@ namespace Physica::Core {
         using Base = PeriodicCell<ScalarType, 3>;
         using MassVector = Vector<ScalarType>;
     private:
+        using typename Base::InvLatticeMatrix;
         MassVector massVec;
+        InvLatticeMatrix invLattice;
     public:
         MDCell(CrystalCell cell);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
         void scale(ScalarType factor);
+        void checkPeriodic();
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const { return pos.getRow(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Base::Type::Cartesian; }
+    private:
+        void toDirect();
     };
 }

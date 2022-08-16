@@ -19,22 +19,41 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include <iostream>
 
 namespace Physica::Core {
-    MDCell::MDCell(CrystalCell cell) : Base(std::move(cell)) {
+    MDCell::MDCell(CrystalCell cell)
+            : Base(std::move(cell))
+            , invLattice(Base::makeInvLattice()) {
         massVec.resize(getNumParticle());
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const auto atomicNum = cell.getAtomicNumber(i);
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
     }
+
     MDCell::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
             : Base(std::move(lattice), std::move(pos))
-            , massVec(std::move(massVec_)) {}
+            , massVec(std::move(massVec_))
+            , invLattice(Base::makeInvLattice()) {}
 
     void MDCell::scale(ScalarType factor) {
         assert(factor.isPositive());
         lattice *= factor;
         pos *= factor;
+    }
+
+    void MDCell::checkPeriodic() {
+        toDirect();
+        for (auto& elem : pos) {
+            const int integer = float(elem);
+            elem -= ScalarType(integer - elem.isNegative());
+            assert(ScalarType::Zero() <= elem && elem <= ScalarType::One());
+        }
+        Base::toCartesian();
+    }
+
+    void MDCell::toDirect() {
+        pos *= invLattice;
     }
 }
