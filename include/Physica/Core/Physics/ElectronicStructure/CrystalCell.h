@@ -52,8 +52,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getElectronCount() const;
         [[nodiscard]] CrystalCell unitToSuper(unsigned int x, unsigned int y, unsigned int z) const;
         /* Helpers */
-        void toDirect(PositionMatrix& obj) const;
-        void toCartesian(PositionMatrix& obj) const;
         void swap(CrystalCell& cell) noexcept;
     };
 }

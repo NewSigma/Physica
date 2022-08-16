@@ -38,6 +38,8 @@ namespace Physica::Core {
             Cartesian
         };
     protected:
+        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
+
         LatticeMatrix lattice;
         PositionMatrix pos;
     public:
@@ -54,6 +56,10 @@ namespace Physica::Core {
         [[nodiscard]] ReciprocalCell reciprocal() const;
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
+    protected:
+        [[nodiscard]] InvLatticeMatrix makeInvLattice() const { return lattice.inverse(); }
+        void toDirect();
+        void toCartesian();
     };
 
     template<class ScalarType, unsigned int Dim>
@@ -88,5 +94,15 @@ namespace Physica::Core {
     void PeriodicCell<ScalarType, Dim>::swap(PeriodicCell& cell) noexcept {
         lattice.swap(cell.lattice);
         pos.swap(cell.pos);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toDirect() {
+        pos *= makeInvLattice();
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toCartesian() {
+        pos *= lattice;
     }
 }

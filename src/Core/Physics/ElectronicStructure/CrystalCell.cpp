@@ -90,18 +90,6 @@ namespace Physica::Core {
         return CrystalCell(std::move(new_lattice), std::move(new_pos), std::move(new_atomic), type);
     }
 
-    void CrystalCell::toDirect(PositionMatrix& obj) const {
-        assert(type == Type::Cartesian);
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 3, 3>;
-        const MatrixType inv = lattice.inverse();
-        obj *= inv;
-    }
-
-    void CrystalCell::toCartesian(PositionMatrix& obj) const {
-        assert(type == Type::Direct);
-        obj *= lattice;
-    }
-
     void CrystalCell::swap(CrystalCell& cell) noexcept {
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
