@@ -28,10 +28,13 @@ namespace Physica::Core::Parallel {
     class ThreadExecutor {
         using FutureType = std::future<void>;
     public:
+        /* Operations */
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args... args);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        /* Getters */
+        [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getThreadCount(); }
     };
 
     template<class Functor, class... Args>

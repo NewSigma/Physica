@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "MDCell.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 namespace Physica::Core {
     /**
@@ -48,8 +49,8 @@ namespace Physica::Core {
     public:
         RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
         /* Operations */
-        template<class RandomGenerator, class ForceCalculator>
-        void step(RandomGenerator gen, ForceCalculator force);
+        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
+        void step(RandomGenerator& gen, const ForceCalculator& force);
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * cell.getNumParticle(); }
@@ -62,9 +63,9 @@ namespace Physica::Core {
         void toBeadRepr(size_t posID);
         MDCell phaseToCell(size_t replica) const;
         template<class RandomGenerator>
-        void thermostatStep(RandomGenerator gen);
+        void thermostatStep(RandomGenerator& gen);
         template<class ForceCalculator>
-        void forceStep(ForceCalculator force);
+        void forceStep(const ForceCalculator& force, unsigned int replica);
         void dynamicStep();
     };
 
@@ -100,13 +101,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class RandomGenerator, class ForceCalculator>
-    void RPMD<ScalarType>::step(RandomGenerator gen, ForceCalculator force) {
-        thermostatStep(std::ref(gen));
-        forceStep(std::cref(force));
+    template<class RandomGenerator, class ForceCalculator, class Executor>
+    void RPMD<ScalarType>::step(RandomGenerator& gen, const ForceCalculator& force) {
+        thermostatStep(gen);
+        auto kernel = [&](unsigned int replica) { forceStep(force, replica); };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         dynamicStep();
-        forceStep(std::cref(force));
-        thermostatStep(std::ref(gen));
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        thermostatStep(gen);
     }
 
     template<class ScalarType>
@@ -197,7 +199,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class RandomGenerator>
-    void RPMD<ScalarType>::thermostatStep(RandomGenerator gen) {
+    void RPMD<ScalarType>::thermostatStep(RandomGenerator& gen) {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
@@ -214,7 +216,7 @@ namespace Physica::Core {
                 }
                 const ScalarType c1 = exp(-viscosityY * (timeStep * 0.5));
                 const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
-                buffer(0, j) = c1 * buffer(0, j) + factor * c2 * ComplexScalar<ScalarType>(dist(gen.get()), dist(gen.get()));
+                buffer(0, j) = c1 * buffer(0, j) + factor * c2 * ComplexScalar<ScalarType>(dist(gen), dist(gen));
             }
             toBeadRepr(i);
         }
@@ -222,13 +224,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class ForceCalculator>
-    void RPMD<ScalarType>::forceStep(ForceCalculator force) {
+    void RPMD<ScalarType>::forceStep(const ForceCalculator& force, unsigned int replica) {
         const size_t dof = getDOF();
-        for (size_t i = 0; i < getNumReplica(); ++i) {
-            auto phasePos = phasePosX.col(i);
-            auto momentum = phasePos.head(dof);
-            momentum += force(phaseToCell(i)) * (timeStep * 0.5);
-        }
+        auto phasePos = phasePosX.col(replica);
+        auto momentum = phasePos.head(dof);
+        momentum += force(phaseToCell(replica)) * (timeStep * 0.5);
     }
 
     template<class ScalarType>

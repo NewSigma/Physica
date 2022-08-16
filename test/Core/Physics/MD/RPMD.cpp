@@ -20,16 +20,19 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
 #include "Physica/Utils/Random.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
+using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
-constexpr double thermostatTime = 20;
+constexpr double thermostatTime = 1;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
+constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 ScalarType force(ScalarType r) {
     constexpr double alpha = 1.713;
@@ -72,7 +75,7 @@ RPMD<ScalarType> makeSystem() {
     std::uniform_real_distribution dist{};
     for (auto& elem : pos)
         elem = dist(gen);
-    typename MDCell::MassVector massVec(numMolecular, PhyConst<AU>::atomMass(1) * 2);
+    typename MDCell::MassVector massVec(numMolecular, mass);
     MDCell cell(std::move(lattice), std::move(pos), std::move(massVec));
 
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
@@ -85,18 +88,28 @@ RPMD<ScalarType> makeSystem() {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    RPMD<ScalarType> rpmd = makeSystem();
-    std::mt19937 gen{};
-    PairModel pair(ScalarType(pair_cutoff), force);
-    for (unsigned int i = 0; i < 1000; ++i)
-        rpmd.step(std::ref(gen), pair);
+    constexpr double answer = 64.3;
+    constexpr double error = 0.1;
+    ScalarType kinetic = 0;
 
-    ScalarType mean_kinetic = 0;
-    for (unsigned int i = 0; i < 1000; ++i) {
-        rpmd.step(std::ref(gen), pair);
-        toNextMean(mean_kinetic, i, rpmd.computeKinetic());
+    ThreadPool::initThreadPool(4);
+    ThreadPool& pool = ThreadPool::getInstance();
+    {
+        std::mt19937::result_type seed;
+        Physica::Utils::Random::rdrand(seed);
+        std::mt19937 gen(seed);
+        PairModel pair(ScalarType(pair_cutoff), force);
+
+        RPMD<ScalarType> rpmd = makeSystem();
+        for (unsigned int i = 0; i < 1000; ++i)
+            rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+        kinetic = rpmd.computeKinetic(pair);
     }
-    const double kineticPerMolecule = PhyConst<AU>::temperatureToK(double(mean_kinetic / numMolecular));
-    std::cout << kineticPerMolecule << std::endl;
+    pool.shouldExit();
+    ThreadPool::deInitThreadPool();
+
+    std::cout << PhyConst<AU>::temperatureToK(double(kinetic) / numMolecular) << std::endl;
+    if (std::abs(PhyConst<AU>::temperatureToK(double(kinetic) / numMolecular) - answer) > error)
+        return 1;
     return 0;
 }

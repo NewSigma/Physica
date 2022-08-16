@@ -26,10 +26,13 @@ namespace Physica::Core::Parallel {
     class SequentialExecutor {
         using FutureType = DummyFuture;
     public:
+        /* Operations */
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args... args);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core);
+        /* Getters */
+        [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
     };
 
     template<class Functor, class... Args>
