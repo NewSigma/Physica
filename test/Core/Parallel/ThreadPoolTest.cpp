@@ -17,19 +17,32 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Parallel/ParallelFor.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
+using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
+using ScalarType = Scalar<Double, false>;
+using MatrixType = DenseMatrix<ScalarType>;
+using VectorType = Vector<ScalarType>;
 
 void func([[maybe_unused]] size_t i) {
     printf("Thread ID: %ld\n", ThreadPool::getThreadInfo().id);
 }
 
 int main() {
+    const MatrixType A = MatrixType::randomMatrix(4);
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
-    parallel_for(func, 20, 4);
+
+    VectorType result_seq(4);
+    VectorType result_par(4);
+    auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).asVector().sum(); };
+    SequentialExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
+    ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4);
+
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
-    return 0;
+    return result_seq != result_par;
 }

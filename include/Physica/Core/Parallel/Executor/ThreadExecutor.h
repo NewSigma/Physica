@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,40 @@
  */
 #pragma once
 
-#include <vector>
+#include <type_traits>
+#include <future>
 #include <cassert>
-#include <cstdlib>
-#include "ThreadPool.h"
+#include "Physica/Core/Parallel/FutureGroup.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core::Parallel {
+    class ThreadExecutor {
+        using FutureType = std::future<void>;
+    public:
+        template<class Functor, class... Args>
+        static FutureType schedule(Functor func, Args... args);
+        template<class Functor>
+        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+    };
+
+    template<class Functor, class... Args>
+    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args... args) {
+        return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
+    }
+
     template<class Functor>
-    std::vector<std::future<void>> parallel_for(Functor func, unsigned int loopCount, unsigned int core) {
+    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
+            Functor func, unsigned int loopCount, unsigned int core) {
+        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+        static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
         assert(core > 0);
         const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
         unsigned int from = 0; 
         unsigned int to = maxLoopPerCore;
-        std::vector<std::future<void>> result{};
-        result.reserve(core);
+        FutureGroup<FutureType> result(core);
         for (unsigned int _ = 0; _ < core; ++_) {
-            result.push_back(ThreadPool::getInstance().schedule(
+            result.append(ThreadPool::getInstance().schedule(
                 [=](unsigned int from_, unsigned int to_) -> void {
                     for (unsigned int i = from_; i < to_; ++i)
                         func(i);
