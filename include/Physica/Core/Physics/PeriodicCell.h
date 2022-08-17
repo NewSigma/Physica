@@ -58,7 +58,8 @@ namespace Physica::Core {
         void swap(PeriodicCell& cell) noexcept;
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
-        void toDirect();
+        void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
+        static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
         void toCartesian();
     };
 
@@ -97,8 +98,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toDirect() {
-        pos *= makeInvLattice();
+    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
+        target *= invLattice;
     }
 
     template<class ScalarType, unsigned int Dim>

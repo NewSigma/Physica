@@ -68,10 +68,10 @@ ScalarType force(ScalarType r) {
     return result;
 }
 
-RPMD<ScalarType> makeSystem() {
+template<class RandomGenerator>
+RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
     typename MDCell::LatticeMatrix lattice = MDCell::LatticeMatrix::unitMatrix(3);
     typename MDCell::PositionMatrix pos(numMolecular, 3);
-    std::mt19937 gen{};
     std::uniform_real_distribution dist{};
     for (auto& elem : pos)
         elem = dist(gen);
@@ -90,7 +90,8 @@ RPMD<ScalarType> makeSystem() {
 int main() {
     constexpr double answer = 64.3;
     constexpr double error = 0.1;
-    ScalarType kinetic = 0;
+    ScalarType mean = 0;
+    ScalarType var = 0;
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
@@ -100,16 +101,18 @@ int main() {
         std::mt19937 gen(seed);
         PairModel pair(ScalarType(pair_cutoff), force);
 
-        RPMD<ScalarType> rpmd = makeSystem();
-        for (unsigned int i = 0; i < 1000; ++i)
-            rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
-        kinetic = rpmd.computeKinetic(pair);
+        for (unsigned int i = 0; i < 6; ++i) {
+            RPMD<ScalarType> rpmd = makeSystem(gen);
+            for (unsigned int i = 0; i < 100; ++i)
+                rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+            toNextVariance(var, mean, i, rpmd.computeKinetic(pair));
+        }
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
 
-    std::cout << PhyConst<AU>::temperatureToK(double(kinetic) / numMolecular) << std::endl;
-    if (std::abs(PhyConst<AU>::temperatureToK(double(kinetic) / numMolecular) - answer) > error)
+    std::cout << PhyConst<AU>::temperatureToK(double(mean) / numMolecular) << ' ' << (PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular) << std::endl;
+    if (std::abs(PhyConst<AU>::temperatureToK(double(mean) / numMolecular) - answer) > error)
         return 1;
     return 0;
 }

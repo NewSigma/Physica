@@ -23,11 +23,11 @@
 namespace Physica::Core {
     class CrystalCell;
 
-    class MDCell final : public PeriodicCell<Scalar<Float, false>, 3> {
+    class MDCell : public PeriodicCell<Scalar<Float, false>, 3> {
+        using ScalarType_ = Scalar<Float, false>;
     public:
-        using ScalarType = Scalar<Float, false>;
-        using Base = PeriodicCell<ScalarType, 3>;
-        using MassVector = Vector<ScalarType>;
+        using Base = PeriodicCell<ScalarType_, 3>;
+        using MassVector = Vector<ScalarType_>;
     private:
         using typename Base::InvLatticeMatrix;
         MassVector massVec;
@@ -36,14 +36,15 @@ namespace Physica::Core {
         MDCell(CrystalCell cell);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
-        void scale(ScalarType factor);
-        void checkPeriodic();
+        void scale(ScalarType_ factor);
+        void normalizeCell();
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const { return pos.getRow(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
-        [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
+        [[nodiscard]] ScalarType_ getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Base::Type::Cartesian; }
-    private:
-        void toDirect();
+    protected:
+        void toDirect() { Base::toDirect(invLattice); }
+        void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
     };
 }
