@@ -152,10 +152,12 @@ namespace Physica::Core {
             averaged_pos[i] = mean(phasePosX.row(dof + i));
 
         ScalarType kinetic = repBeta * dof;
-        for (size_t i = 0; i < getNumReplica(); ++i) {
-            auto col = phasePosX.col(i);
+        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+            auto col = phasePosX.col(replica);
             auto pos = col.tail(dof);
-            kinetic += (averaged_pos - pos) * force(phaseToCell(i));
+            MDCell cell = phaseToCell(replica);
+            cell.normalizeCell();
+            kinetic += (averaged_pos - pos) * force(std::move(cell));
         }
         kinetic /= ScalarType(2 * getNumReplica());
         return kinetic;
