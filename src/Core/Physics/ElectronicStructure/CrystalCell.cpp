@@ -40,6 +40,18 @@ namespace Physica::Core {
         lattice *= factor;
     }
 
+    void CrystalCell::toDirect() {
+        assert(type == Type::Cartesian);
+        Base::toDirect(Base::makeInvLattice());
+        type = Type::Direct;
+    }
+
+    void CrystalCell::toCartesian() {
+        assert(type = Type::Direct);
+        Base::toCartesian();
+        type = Type::Cartesian;
+    }
+
     typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {
         return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }

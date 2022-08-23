@@ -68,6 +68,7 @@ physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
 physica_add_test(PWBaseWave Core/Physics/PWBaseWave.cpp)
 ### MD
+physica_add_test(MDCell Core/Physics/MD/MDCell.cpp)
 physica_add_test(RPMD Core/Physics/MD/RPMD.cpp)
 # Logger
 physica_add_test(Logger Logger/LoggerTest.cpp)

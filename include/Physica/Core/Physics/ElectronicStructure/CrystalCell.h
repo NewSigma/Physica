@@ -42,6 +42,8 @@ namespace Physica::Core {
         CrystalCell& operator=(CrystalCell cell) noexcept;
         /* Operations */
         void scale(ScalarType factor);
+        void toDirect();
+        void toCartesian();
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }

@@ -1,0 +1,42 @@
+/*
+ * Copyright 2022 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include "Physica/Utils/TestHelper.h"
+#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
+
+using namespace Physica::Core;
+
+int main() {
+    using LatticeMatrix = typename MDCell::LatticeMatrix;
+    using PositionMatrix = typename MDCell::PositionMatrix;
+    const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
+    const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
+
+    const CrystalCell cell1(lattice, pos, {1, 1, 1, 1, 2, 2, 2, 2}, CrystalCell::Type::Direct);
+    CrystalCell cell2 = cell1;
+    cell2.toCartesian();
+
+    const MDCell md1(cell1);
+    const MDCell md2(cell2);
+    if (!matrixNear(md1.getLattice(), md2.getLattice(), 1E-15))
+        return 1;
+    if (!matrixNear(md1.getPos(), md2.getPos(), 1E-15))
+        return 1;
+    return 0;
+}

@@ -23,8 +23,11 @@
 
 namespace Physica::Core {
     MDCell::MDCell(CrystalCell cell)
-            : Base(std::move(cell))
-            , invLattice(Base::makeInvLattice()) {
+            : invLattice(Base::makeInvLattice()) {
+        if (cell.getType() == Type::Direct)
+            cell.toCartesian();
+        Base::operator=(std::move(cell));
+
         massVec.resize(getNumParticle());
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const auto atomicNum = cell.getAtomicNumber(i);
