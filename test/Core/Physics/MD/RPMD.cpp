@@ -88,7 +88,7 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    constexpr double answer = 64.3;
+    constexpr double answer = 61.8;
     constexpr double error = 0.1;
     ScalarType mean = 0;
     ScalarType var = 0;
@@ -111,8 +111,10 @@ int main() {
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
 
-    std::cout << PhyConst<AU>::temperatureToK(double(mean) / numMolecular) << ' ' << (PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular) << std::endl;
-    if (std::abs(PhyConst<AU>::temperatureToK(double(mean) / numMolecular) - answer) > error)
+    const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
+    const ScalarType delta = abs(energyPerMol - answer);
+    std::cout << energyPerMol << ' ' << PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular << std::endl;
+    if (delta > error)
         return 1;
     return 0;
 }

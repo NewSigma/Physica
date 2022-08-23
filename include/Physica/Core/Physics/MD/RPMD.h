@@ -19,16 +19,20 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "MDCell.h"
+#include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "MDCell.h"
 
 namespace Physica::Core {
     /**
+     * Note: A factor of 1/P is missing in the RHS of Eq. (9) in [3].
+     *  
      * Reference:
      * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
      * [2] G. Bussi and M. Parrinello, Phys. Rev. E 75, 056707 (2007).
+     * [3] Yamamoto, Takeshi M, J. Chem. Phys. 2005, 123(10):104101.
      */
     template<class ScalarType>
     class RPMD final : private MDCell {
@@ -47,6 +51,9 @@ namespace Physica::Core {
         ScalarType omegaW;
     public:
         RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
+        /* Operators */
+        template<class T> friend std::ostream& operator<<(std::ostream& os, const RPMD<T>& rpmd);
+        template<class T> friend std::istream& operator>>(std::istream& is, RPMD<T>& rpmd);
         /* Operations */
         template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         void step(RandomGenerator& gen, const ForceCalculator& force);
@@ -61,9 +68,9 @@ namespace Physica::Core {
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
         MDCell phaseToCell(size_t replica) const;
-        void cellToPhase(const MDCell& md_cell, size_t replica);
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator& gen);
+        void thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         template<class ForceCalculator>
         void forceStep(const ForceCalculator& force, unsigned int replica);
         void dynamicStep();
@@ -100,6 +107,18 @@ namespace Physica::Core {
         }
         repBeta = temperatureT * PhyConst<AU>::boltzmannK * numReplica;
         omegaW = repBeta / PhyConst<AU>::reducedPlanck;
+    }
+
+    template<class ScalarType>
+    std::ostream& operator<<(std::ostream& os, const RPMD<ScalarType>& rpmd) {
+        os << rpmd.phasePosX;
+        return os;
+    }
+
+    template<class ScalarType>
+    std::istream& operator>>(std::istream& is, RPMD<ScalarType>& rpmd) {
+        is >> rpmd.phasePosX;
+        return is;
     }
 
     template<class ScalarType>
@@ -203,16 +222,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::cellToPhase(const MDCell& md_cell, size_t replica) {
-        auto phase = phasePosX.col(replica);
-        size_t index = getDOF();
-        for (auto elem : md_cell.getPos()) {
-            phase[index] = elem;
-            ++index;
-        }
-    }
-
-    template<class ScalarType>
     template<class RandomGenerator>
     void RPMD<ScalarType>::thermostatStep(RandomGenerator& gen) {
         std::normal_distribution<> dist{};
@@ -220,21 +229,27 @@ namespace Physica::Core {
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = MDCell::getMass(i / Dim);
             const ScalarType factor = sqrt(repBeta * mass);
+            const ScalarType maxOmegaK = omegaW * 2;
             toNormalRepr(i);
-            for (size_t j = 0; j < buffer.getColumn(); ++j) {
-                ScalarType viscosityY{};
-                if (j == 0)
-                    viscosityY = Core::reciprocal(thermostatTime);
-                else {
-                    const ScalarType phase = M_PI * j / getNumReplica();
-                    viscosityY = sin(phase) * (omegaW * 2);
-                }
-                const ScalarType c1 = exp(-viscosityY * (timeStep * 0.5));
-                const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
-                buffer(0, j) = c1 * buffer(0, j) + factor * c2 * ComplexScalar<ScalarType>(dist(gen), dist(gen));
+            /* Translational mode */ {
+                const ScalarType viscosityY = Core::reciprocal(thermostatTime);
+                thermostatImpl(0, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
+            }
+            for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                const ScalarType phase = M_PI * j / getNumReplica();
+                const ScalarType viscosityY = sin(phase) * maxOmegaK;
+                const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
+                thermostatImpl(j, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
             }
             toBeadRepr(i);
         }
+    }
+
+    template<class ScalarType>
+    void RPMD<ScalarType>::thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random) {
+        const ScalarType c1 = exp(-viscosityY * (timeStep * 0.5));
+        const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
+        buffer(0, mode_index) = c1 * buffer(0, mode_index) + factor * c2 * random;
     }
 
     template<class ScalarType>
