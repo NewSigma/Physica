@@ -26,7 +26,7 @@ namespace Physica::Core {
             static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 auto result = ResultType::Zero();
                 for(size_t i = 0; i < v1.getLength(); ++i)
-                    result += v1.calc(i) * v2.calc(i);
+                    result += ResultType(v1.calc(i)) * ResultType(v2.calc(i));
                 return result;
             }
         };

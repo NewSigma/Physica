@@ -191,6 +191,21 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+        size_t r, c;
+        if constexpr(isColumnMatrix) {
+            c = major;
+            r = minor;
+        }
+        else {
+            r = major;
+            c = minor;
+        }
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return calc(r, c);
+    }
+
+    template<class Derived>
     inline size_t RValueMatrix<Derived>::getMaxMajor() const noexcept {
         if constexpr (MatrixOption::isColumnMatrix<Derived>())
             return getColumn();
@@ -223,6 +238,11 @@ namespace Physica::Core {
     template<class Derived>
     Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
         return Conjugate<Derived>(this->getDerived());
+    }
+
+    template<class Derived>
+    Flatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
+        return Flatten<Derived>(this->getDerived());
     }
 
     template<class Derived>
