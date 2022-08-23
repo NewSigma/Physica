@@ -50,6 +50,7 @@ namespace Physica::Core {
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile>;
+        constexpr static bool isComplex = ScalarType::isComplex;
     private:
         using RealType = typename ScalarType::RealType;
     public:
@@ -82,6 +83,10 @@ namespace Physica::Core {
         RVectorBlock<Derived> segment(size_t from, size_t to) { return RVectorBlock<Derived>(Base::getDerived(), from, to); }
         const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
     };
+
+    template<class VectorType1, class VectorType2>
+    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
+    operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2);
 
     template<class VectorType>
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v);
