@@ -31,6 +31,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
     private:
         ScalarType cutoff;
+        ScalarType squared_cutoff;
         PairFunctor functor;
     public:
         PairModel(ScalarType cutoff_, PairFunctor functor_);
@@ -42,7 +43,9 @@ namespace Physica::Core {
     template<class ScalarType, class PairFunctor>
     PairModel<ScalarType, PairFunctor>::PairModel(ScalarType cutoff_, PairFunctor functor_)
             : cutoff(std::move(cutoff_))
-            , functor(std::move(functor_)) {}
+            , functor(std::move(functor_)) {
+        squared_cutoff = square(cutoff);
+    }
 
     template<class ScalarType, class PairFunctor>
     Vector<ScalarType> PairModel<ScalarType, PairFunctor>::operator()(MDCell cell) const {
@@ -57,6 +60,7 @@ namespace Physica::Core {
         const size_t numParticle = cell.getNumParticle();
 
         Vector<ScalarType> force(Dim * numParticle, 0);
+        VectorType v1, v2, v3, r;
         for (size_t i = 0; i < numParticle; ++i) {
             auto force_i = force.segment(3 * i, 3 * i + 3);
             auto center = pos.row(i);
@@ -64,17 +68,19 @@ namespace Physica::Core {
                 auto force_j = force.segment(3 * j, 3 * j + 3);
                 auto v = pos.row(j);
                 for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                    const VectorType v1 = v + ScalarType(x) * a1.asVector();
+                    v1 = v + ScalarType(x) * a1.asVector();
                     for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                        const VectorType v2 = v1 + ScalarType(y) * a2.asVector();
+                        v2 = v1 + ScalarType(y) * a2.asVector();
                         for (ssize_t z = -range[2]; z <= range[2]; ++z) {
-                            const VectorType v3 = v2 + ScalarType(z) * a3.asVector();
-                            const VectorType r = v3 - center;
-                            const ScalarType dist = r.norm();
-                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < dist;
-                            if (isNotSelf && dist < cutoff) {
+                            v3 = v2 + ScalarType(z) * a3.asVector();
+                            r = v3 - center;
+                            const ScalarType r2 = r.squaredNorm();
+                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            if (isNotSelf && r2 < squared_cutoff) {
+                                const ScalarType dist = sqrt(r2);
                                 const ScalarType f_norm = functor(dist);
-                                const VectorType f = r * (f_norm / dist);
+                                r *= f_norm / dist;
+                                const VectorType& f = r;
                                 force_i -= f;
                                 force_j += f;
                             }
