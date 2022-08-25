@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
 #include "Physica/Utils/Random.h"
@@ -27,7 +28,7 @@ using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
-constexpr double thermostatTime = 1;
+constexpr double thermostatTime = PhyConst<AU>::secondToTime(1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
@@ -99,14 +100,17 @@ int main() {
         std::mt19937::result_type seed;
         Physica::Utils::Random::rdrand(seed);
         std::mt19937 gen(seed);
+        RPMD<ScalarType> rpmd = makeSystem(gen);
         PairModel pair(ScalarType(pair_cutoff), force);
-
-        for (unsigned int i = 0; i < 6; ++i) {
-            RPMD<ScalarType> rpmd = makeSystem(gen);
-            for (unsigned int i = 0; i < 100; ++i)
+        std::ifstream fin("phase");
+        fin >> rpmd;
+        for (unsigned int i = 0; i < 10; ++i) {
+            for (unsigned int _ = 0; _ < 2000; ++_)
                 rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
             toNextVariance(var, mean, i, rpmd.computeKinetic(pair));
         }
+        std::ofstream fout("phase");
+        fout << rpmd;
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();

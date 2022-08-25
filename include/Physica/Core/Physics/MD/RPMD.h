@@ -178,7 +178,7 @@ namespace Physica::Core {
             cell.normalizeCell();
             kinetic += (averaged_pos - pos) * force(std::move(cell));
         }
-        kinetic /= ScalarType(2 * getNumReplica());
+        kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;
     }
 
@@ -228,7 +228,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = MDCell::getMass(i / Dim);
-            const ScalarType factor = sqrt(repBeta * mass);
+            const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
             const ScalarType maxOmegaK = omegaW * 2;
             toNormalRepr(i);
             /* Translational mode */ {
