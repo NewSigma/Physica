@@ -143,24 +143,13 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(Function func, RandomGenerator& generator, ScalarType& deviation) const {
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const {
+        assert(numSequence > 0);
         ScalarType mean = 0;
         ScalarType variance = 0;
-        for (uint64_t i = 0; i < sampleCount; ++i) {
-            const VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
-            const ScalarType y = func(x);
-            toNextVariance(variance, mean, i, y);
-        }
-
-        ScalarType factor1 = 1;
-        ScalarType factor2 = 1;
-        for (size_t i = 0; i < Base::from().getLength(); ++i) {
-            const ScalarType delta = Base::to()[i] - Base::from()[i];
-            factor1 *= delta;
-            factor2 *= square(delta);
-        }
-        variance *= factor2;
-        deviation = sqrt(variance);
-        return mean * factor1;
+        for (unsigned int i = 0; i < numSequence; ++i)
+            toNextVariance(variance, mean, i, solve(func, generator));
+        deviation = sqrt(variance / numSequence);
+        return mean;
     }
 }

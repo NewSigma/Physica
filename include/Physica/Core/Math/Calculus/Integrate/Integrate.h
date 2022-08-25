@@ -127,7 +127,7 @@ namespace Physica::Core {
         template<class Function, class RandomGenerator>
         ScalarType solve(Function func, RandomGenerator& generator) const;
         template<class Function, class RandomGenerator>
-        ScalarType solve_e(Function func, RandomGenerator& generator, ScalarType& deviation) const;
+        ScalarType solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const;
     };
 }
 
