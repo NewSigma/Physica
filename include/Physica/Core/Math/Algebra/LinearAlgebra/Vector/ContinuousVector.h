@@ -58,6 +58,8 @@ namespace Physica::Core {
         /* Friends */
         template<class T>
         friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
+        template<class T>
+        friend std::istream& operator>>(std::istream& is, ContinuousVector<T>& v);
     };
 
     template<class Derived>
@@ -121,5 +123,12 @@ namespace Physica::Core {
         using ScalarType = typename Derived::ScalarType;
         os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
         return os;
+    }
+
+    template<class Derived>
+    std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v) {
+        using ScalarType = typename Derived::ScalarType;
+        is.read(reinterpret_cast<char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
+        return is;
     }
 }
