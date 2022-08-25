@@ -20,12 +20,12 @@
 
 #include <cstdlib>
 #include <memory>
-#include "Physica/Utils/Unix/SubProcess.h"
+#include "Physica/Core/Parallel/SubProcess.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    class VaspWarpper final : public Utils::SubProcess {
-        using Base = Utils::SubProcess;
+    class VaspWarpper final : public Parallel::SubProcess {
+        using Base = Parallel::SubProcess;
         using ScalarType = Scalar<Double, false>;
     private:
         std::string pathToVasp;

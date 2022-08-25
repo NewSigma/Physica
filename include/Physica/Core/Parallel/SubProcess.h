@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "UnixHelper.h"
 #include <functional>
+#include "Physica/Utils/Unix/UnixHelper.h"
 
-namespace Physica::Utils {
+namespace Physica::Core::Parallel {
     class SubProcess {
     private:
         std::function<void()> task;

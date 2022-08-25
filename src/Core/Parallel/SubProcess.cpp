@@ -21,9 +21,9 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
-#include "Physica/Utils/Unix/SubProcess.h"
+#include "Physica/Core/Parallel/SubProcess.h"
 
-namespace Physica::Utils {
+namespace Physica::Core::Parallel {
     SubProcess::SubProcess(SubProcess&& process) noexcept : task(std::move(process.task)), pid(process.pid) {}
 
     SubProcess& SubProcess::operator=(SubProcess process) noexcept {
