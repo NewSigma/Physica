@@ -27,9 +27,10 @@
 #include "Physica/Utils/Unix/UnixHelper.h"
 
 namespace Physica::Core {
+    const char* VaspWarpper::errorMsg = "[Error]: Vasp finished with a non zero exit code";
+
     VaspWarpper::VaspWarpper()
-            : Base([this]() { this->run(); })
-            , vaspWorkingDir()
+            : vaspWorkingDir()
             , logFilePath()
             , core() {}
 
@@ -38,26 +39,23 @@ namespace Physica::Core {
                              std::string workingDir,
                              std::string logFilePath_,
                              Poscar poscar_)
-            : Base([this]() { this->run(); })
-            , pathToVasp(std::move(pathToVasp_))
+            : pathToVasp(std::move(pathToVasp_))
             , vaspWorkingDir(std::move(workingDir))
             , logFilePath(std::move(logFilePath_))
             , core(core_)
             , poscar(std::move(poscar_)) {
         std::ofstream fout((vaspWorkingDir + std::string("/POSCAR")).c_str(), std::ios_base::out | std::ios_base::trunc);
         fout << poscar;
+        execute();
     }
-
-    VaspWarpper::VaspWarpper(VaspWarpper&& vasp) noexcept
-            : SubProcess(std::move(vasp))
-            , pathToVasp(std::move(vasp.pathToVasp))
-            , vaspWorkingDir(std::move(vasp.vaspWorkingDir))
-            , logFilePath(std::move(vasp.logFilePath))
-            , core(vasp.core) {}
 
     VaspWarpper& VaspWarpper::operator=(VaspWarpper vasp) noexcept {
         swap(vasp);
         return *this;
+    }
+
+    void VaspWarpper::execute() {
+        future = Parallel::ProcessExecutor::schedule([=]() { this->run(); });
     }
 
     void VaspWarpper::run() const {
@@ -83,6 +81,7 @@ namespace Physica::Core {
     }
 
     typename VaspWarpper::ScalarType VaspWarpper::getEnergy() const {
+        future.wait(errorMsg);
         const char* tempfile = tmpnam(nullptr);
         const std::string command = std::string("grep energy ") +
                                     vaspWorkingDir +
@@ -99,6 +98,7 @@ namespace Physica::Core {
     }
 
     typename VaspWarpper::ScalarType VaspWarpper::getPress() const {
+        future.wait(errorMsg);
         const char* tempfile = tmpnam(nullptr);
         const std::string command = std::string("grep 'in kB' ") +
                                     vaspWorkingDir +
@@ -117,6 +117,7 @@ namespace Physica::Core {
     Vector<typename VaspWarpper::ScalarType> VaspWarpper::getForce() const {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
 
+        future.wait(errorMsg);
         std::ifstream fin((vaspWorkingDir + std::string("/OUTCAR")).c_str());
         if (fin) {
             fin.seekg(0, std::ios::end);
@@ -158,5 +159,6 @@ namespace Physica::Core {
         logFilePath.swap(vasp.logFilePath);
         std::swap(core, vasp.core);
         poscar.swap(vasp.poscar);
+        future.swap(vasp.future);
     }
 }

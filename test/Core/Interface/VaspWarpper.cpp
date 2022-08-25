@@ -21,30 +21,53 @@
 #include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Float, false>;
 extern const char* outcar;
 
-int main() {
-    {
-        std::ofstream fout("./OUTCAR");
-        fout << outcar;
+namespace Physica::Core {
+    namespace Parallel {
+        struct Test {
+            static ProcessFuture makeDummyFuture() {
+                ProcessFuture future{};
+                future.finished = future.isValid = true;
+                return future;
+            }
+        };
     }
+    struct Test {
+        static VaspWarpper init() {
+            {
+                std::ofstream fout("./OUTCAR");
+                fout << outcar;
+            }
 
-    typename Poscar::LatticeMatrix lattice{3.063970000, 0.000000000, 0.000000000,
-                                           1.355640000, 5.017130000, 0.000000000,
-                                           0.305250000,-1.140470000, 5.195960000};
-    typename Poscar::PositionMatrix pos{0.019030000, 0.733400000, 0.307890000,
-                                        0.885690000, 0.173690000, 0.053420000,
-                                        0.637770000, 0.665250000, 0.810840000,
-                                        0.325570000, 0.191560000, 0.558340000,
-                                        0.042760000, 0.898360000, 0.689770000,
-                                        0.297330000, 0.406950000, 0.941480000,
-                                        0.734410000, 0.424230000, 0.428290000,
-                                        0.456810000, 0.939370000, 0.176470000};
-    VaspWarpper vasp(1, "", ".", "", Poscar(std::move(lattice), std::move(pos), {2, 6}, CrystalCell::Type::Direct));
+            typename Poscar::LatticeMatrix lattice{3.063970000, 0.000000000, 0.000000000,
+                                                  1.355640000, 5.017130000, 0.000000000,
+                                                  0.305250000,-1.140470000, 5.195960000};
+            typename Poscar::PositionMatrix pos{0.019030000, 0.733400000, 0.307890000,
+                                                0.885690000, 0.173690000, 0.053420000,
+                                                0.637770000, 0.665250000, 0.810840000,
+                                                0.325570000, 0.191560000, 0.558340000,
+                                                0.042760000, 0.898360000, 0.689770000,
+                                                0.297330000, 0.406950000, 0.941480000,
+                                                0.734410000, 0.424230000, 0.428290000,
+                                                0.456810000, 0.939370000, 0.176470000};
+            VaspWarpper vasp{};
+            vasp.vaspWorkingDir = ".";
+            vasp.poscar = Poscar(std::move(lattice), std::move(pos), {2, 6}, CrystalCell::Type::Direct);
+            vasp.future = Parallel::Test::makeDummyFuture();
+            return vasp;
+        }
+    };
+}
+
+
+
+int main() {
+    VaspWarpper vasp = Physica::Core::Test::init();
     const auto force = vasp.getForce();
     const Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
-    if (!vectorNear(force, answer, 1E-16))
+    if (!vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()))
         return 1;
     return 0;
 }

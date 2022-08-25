@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdexcept>
+#include <future>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -24,7 +25,9 @@
 #include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Core::Parallel {
-    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), finished(false) {}
+    ProcessFuture::ProcessFuture() : isValid(false) {}
+
+    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), finished(false), isValid(true) {}
 
     ProcessFuture& ProcessFuture::operator=(ProcessFuture future) noexcept {
         swap(future);
@@ -32,6 +35,9 @@ namespace Physica::Core::Parallel {
     }
 
     void ProcessFuture::wait(const char* errorMsg) {
+        if (!isValid)
+            throw std::future_error(std::future_errc::no_state);
+
         if (finished)
             return;
 
@@ -53,5 +59,6 @@ namespace Physica::Core::Parallel {
     void ProcessFuture::swap(ProcessFuture& future) noexcept {
         std::swap(pid, future.pid);
         std::swap(finished, future.finished);
+        std::swap(isValid, future.isValid);
     }
 }

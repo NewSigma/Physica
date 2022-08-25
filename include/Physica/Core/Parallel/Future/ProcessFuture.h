@@ -25,7 +25,9 @@ namespace Physica::Core::Parallel {
     class ProcessFuture {
         pid_t pid;
         bool finished;
+        bool isValid;
     public:
+        ProcessFuture();
         ProcessFuture(pid_t pid_);
         ProcessFuture(const ProcessFuture&) = default;
         ProcessFuture(ProcessFuture&&) noexcept = default;
@@ -36,8 +38,10 @@ namespace Physica::Core::Parallel {
         void wait(const char* errorMsg);
         /* Getters */
         [[nodiscard]] pid_t getPID() const noexcept { return pid; }
-        [[nodiscard]] bool isFinished() const noexcept { return finished; }
+        [[nodiscard]] bool valid() const noexcept { return isValid; }
         /* Helpers */
         void swap(ProcessFuture& future) noexcept;
+
+        friend class Test;
     };
 }

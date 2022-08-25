@@ -34,8 +34,9 @@ namespace Physica::Core::Parallel {
 
     template<class Functor, class... Args>
     typename ProcessExecutor::FutureType ProcessExecutor::schedule(Functor func, Args... args) {
-        using ResultType = typename std::invoke_result<Function, Args...>::type;
+        using ResultType = typename std::invoke_result<Functor, Args...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
+
         SubProcess process([=]() { func(std::forward<Args>(args)...); });
         return process.execute();
     }
@@ -47,6 +48,7 @@ namespace Physica::Core::Parallel {
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
         assert(core > 0);
+
         const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
         unsigned int from = 0; 
         unsigned int to = maxLoopPerCore;

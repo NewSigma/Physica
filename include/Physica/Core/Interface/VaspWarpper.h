@@ -20,27 +20,30 @@
 
 #include <cstdlib>
 #include <memory>
-#include "Physica/Core/Parallel/SubProcess.h"
 #include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
 namespace Physica::Core {
-    class VaspWarpper final : public Parallel::SubProcess {
-        using Base = Parallel::SubProcess;
+    class VaspWarpper final {
         using ScalarType = Scalar<Float, false>;
+        static const char* errorMsg;
     private:
         std::string pathToVasp;
         std::string vaspWorkingDir;
         std::string logFilePath;
         size_t core;
         Poscar poscar;
+        mutable Parallel::ProcessFuture future;
     public:
         VaspWarpper();
         VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, Poscar poscar_);
         VaspWarpper(const VaspWarpper&) = delete;
-        VaspWarpper(VaspWarpper&& vasp) noexcept;
+        VaspWarpper(VaspWarpper&&) noexcept = default;
         ~VaspWarpper() = default;
         /* Operators */
         VaspWarpper& operator=(VaspWarpper vasp) noexcept;
+        /* Operations */
+        void execute();
         /* Getters */
         [[nodiscard]] const std::string& getWorkingDir() const noexcept { return vaspWorkingDir; }
         [[nodiscard]] ScalarType getEnergy() const;
@@ -50,5 +53,7 @@ namespace Physica::Core {
         void swap(VaspWarpper& vasp) noexcept;
     private:
         void run() const;
+
+        friend class Test;
     };
 }
