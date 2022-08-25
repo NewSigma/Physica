@@ -26,8 +26,8 @@
 
 namespace Physica::Utils {
     template<class ScalarType>
-    ScalarType relativeError(const Physica::Core::ScalarBase<ScalarType>& scalar1,
-                             const Physica::Core::ScalarBase<ScalarType>& scalar2) {
+    ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
+        static_assert(Core::is_scalar<ScalarType>::value && !ScalarType::isComplex);
         const auto& s1 = scalar1.getDerived();
         const auto& s2 = scalar2.getDerived();
         const ScalarType min = std::numeric_limits<ScalarType>::min();
@@ -42,7 +42,7 @@ namespace Physica::Utils {
                     const Physica::Core::ScalarBase<ScalarType>& scalar2,
                     double precision) {
         assert(precision > 0);
-        return relativeError(scalar1, scalar2) < ScalarType(precision);
+        return relativeError(scalar1.getDerived(), scalar2.getDerived()) < ScalarType(precision);
     }
 
     template<class ScalarType>
@@ -57,9 +57,10 @@ namespace Physica::Utils {
     bool vectorNear(const Physica::Core::LValueVector<VectorType1>& v1,
                     const Physica::Core::LValueVector<VectorType2>& v2,
                     double precision) {
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         for (size_t i = 0; i < v1.getLength(); ++i)
-            if (!scalarNear(v1[i], v2[i], precision))
+            if (!scalarNear(ScalarType(v1[i]), ScalarType(v2[i]), precision))
                 return false;
         return true;
     }

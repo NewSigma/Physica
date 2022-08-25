@@ -26,7 +26,7 @@
 namespace Physica::Core {
     class VaspWarpper final : public Parallel::SubProcess {
         using Base = Parallel::SubProcess;
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Float, false>;
     private:
         std::string pathToVasp;
         std::string vaspWorkingDir;
@@ -43,8 +43,8 @@ namespace Physica::Core {
         VaspWarpper& operator=(VaspWarpper vasp) noexcept;
         /* Getters */
         [[nodiscard]] const std::string& getWorkingDir() const noexcept { return vaspWorkingDir; }
-        [[nodiscard]] float getEnergy() const;
-        [[nodiscard]] float getPress() const;
+        [[nodiscard]] ScalarType getEnergy() const;
+        [[nodiscard]] ScalarType getPress() const;
         [[nodiscard]] Vector<ScalarType> getForce() const;
         /* Helpers */
         void swap(VaspWarpper& vasp) noexcept;

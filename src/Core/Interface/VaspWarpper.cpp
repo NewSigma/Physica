@@ -82,14 +82,14 @@ namespace Physica::Core {
         _exit(EXIT_FAILURE);
     }
 
-    float VaspWarpper::getEnergy() const {
+    typename VaspWarpper::ScalarType VaspWarpper::getEnergy() const {
         const char* tempfile = tmpnam(nullptr);
         const std::string command = std::string("grep energy ") +
                                     vaspWorkingDir +
                                     std::string("/OUTCAR | tail -n 1 | tr -s ' ' | cut -d ' ' -f 5 >") +
                                     std::string(tempfile);
         [[maybe_unused]] int err = system(command.c_str());
-        float result;
+        ScalarType result;
         /* Read data */ {
             std::ifstream fin(tempfile);
             fin >> result;
@@ -98,14 +98,14 @@ namespace Physica::Core {
         return result;
     }
 
-    float VaspWarpper::getPress() const {
+    typename VaspWarpper::ScalarType VaspWarpper::getPress() const {
         const char* tempfile = tmpnam(nullptr);
         const std::string command = std::string("grep 'in kB' ") +
                                     vaspWorkingDir +
                                     std::string("/OUTCAR | tr -s ' ' | cut -d ' ' -f 4,5,6 >") +
                                     std::string(tempfile);
         [[maybe_unused]] int err = system(command.c_str());
-        float press_x, press_y, press_z;
+        ScalarType press_x, press_y, press_z;
         /* Read data */ {
             std::ifstream fin(tempfile);
             fin >> press_x >> press_y >> press_z;
