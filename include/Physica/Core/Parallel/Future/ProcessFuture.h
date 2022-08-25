@@ -18,9 +18,22 @@
  */
 #pragma once
 
+#include <sys/types.h>
+#include "FutureGroup.h"
+
 namespace Physica::Core::Parallel {
-    class DummyFuture {
+    class ProcessFuture {
+        pid_t pid;
     public:
-        void wait() {}
+        ProcessFuture(pid_t pid_);
+        ProcessFuture(const ProcessFuture&) = default;
+        ProcessFuture(ProcessFuture&&) noexcept = default;
+        ~ProcessFuture() = default;
+        /* Operators */
+        ProcessFuture& operator=(ProcessFuture future) noexcept;
+        /* Operations */
+        pid_t wait(const char* errorMsg);
+        /* Helpers */
+        void swap(ProcessFuture& future) noexcept;
     };
 }

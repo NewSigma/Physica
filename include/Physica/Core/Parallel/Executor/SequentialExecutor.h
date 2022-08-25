@@ -20,7 +20,7 @@
 
 #include <type_traits>
 #include <cassert>
-#include "Physica/Core/Parallel/FutureGroup.h"
+#include "Physica/Core/Parallel/Future/DummyFuture.h"
 
 namespace Physica::Core::Parallel {
     class SequentialExecutor {

@@ -18,26 +18,12 @@
  */
 #pragma once
 
-#include <vector>
-#include "DummyFuture.h"
+#include "FutureGroup.h"
 
 namespace Physica::Core::Parallel {
-    template<class FutureType>
-    class FutureGroup {
-        std::vector<FutureType> futures;
+    class DummyFuture {
     public:
-        FutureGroup(size_t numFuture) {
-            futures.reserve(numFuture);
-        }
-        /* Operations */
-        void wait() {
-            for (auto& future : futures)
-                future.wait();
-        }
-
-        void append(FutureType future) {
-            futures.push_back(std::move(future));
-        }
+        void wait() {}
     };
 
     template<>
