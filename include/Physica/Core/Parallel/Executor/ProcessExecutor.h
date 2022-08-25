@@ -18,32 +18,30 @@
  */
 #pragma once
 
-#include <type_traits>
-#include <future>
-#include <cassert>
-#include "Physica/Core/Parallel/Future/FutureGroup.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Parallel/Future/ProcessFuture.h"
+#include "Physica/Core/Parallel/SubProcess.h"
 
 namespace Physica::Core::Parallel {
-    class ThreadExecutor {
-        using FutureType = std::future<void>;
+    class ProcessExecutor {
+        using FutureType = ProcessFuture;
     public:
         /* Operations */
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args... args);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
-        /* Getters */
-        [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getThreadCount(); }
     };
 
     template<class Functor, class... Args>
-    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args... args) {
-        return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
+    typename ProcessExecutor::FutureType ProcessExecutor::schedule(Functor func, Args... args) {
+        using ResultType = typename std::invoke_result<Function, Args...>::type;
+        static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
+        SubProcess process([=]() { func(std::forward<Args>(args)...); });
+        return process.execute();
     }
 
     template<class Functor>
-    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
+    FutureGroup<typename ProcessExecutor::FutureType> ProcessExecutor::parallel_for(
             Functor func, unsigned int loopCount, unsigned int core) {
         using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
@@ -54,11 +52,11 @@ namespace Physica::Core::Parallel {
         unsigned int to = maxLoopPerCore;
         FutureGroup<FutureType> result(core);
         for (unsigned int _ = 0; _ < core; ++_) {
-            result.append(ThreadPool::getInstance().schedule(
-                [=]() -> void {
-                    for (unsigned int i = from; i < to; ++i)
-                        func(i);
-                }));
+            SubProcess process([=]() {
+                                   for (unsigned int i = from; i < to; ++i)
+                                       func(i);
+                               });
+            result.append(process.execute());
             from += maxLoopPerCore;
             const unsigned int next_to = to + maxLoopPerCore;
             to = next_to > loopCount ? loopCount : next_to;

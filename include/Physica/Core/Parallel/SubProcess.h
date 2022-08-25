@@ -20,6 +20,7 @@
 
 #include <functional>
 #include "Physica/Utils/Unix/UnixHelper.h"
+#include "Physica/Core/Parallel/Future/ProcessFuture.h"
 
 namespace Physica::Core::Parallel {
     class SubProcess {
@@ -35,8 +36,7 @@ namespace Physica::Core::Parallel {
         /* Operators */
         SubProcess& operator=(SubProcess process) noexcept;
         /* Operations */
-        void execute();
-        pid_t wait(const char* errorMsg);
+        ProcessFuture execute();
         /* Getters */
         [[nodiscard]] pid_t getPid() const noexcept { return pid; }
         /* Helpers */

@@ -31,7 +31,7 @@ namespace Physica::Core::Parallel {
         return *this;
     }
 
-    void SubProcess::execute() {
+    ProcessFuture SubProcess::execute() {
         pid = fork();
         if (pid == -1) {
             std::cerr << "[Error]: Failed to fork process.\n";
@@ -42,25 +42,7 @@ namespace Physica::Core::Parallel {
             task();
             _exit(EXIT_SUCCESS);
         }
-    }
-
-    pid_t SubProcess::wait(const char* errorMsg) {
-        int status;
-        pid_t endPid = waitpid(pid, &status, 0);
-        pid = -1;
-        if (endPid <= 0) {
-            fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
-            exit(EXIT_FAILURE);
-        }
-
-        int error = -1;
-        if (WIFEXITED(status))
-            error = WEXITSTATUS(status);
-        if (error != 0) {
-            fprintf(stderr, "%s\n", errorMsg);
-            exit(EXIT_FAILURE);
-        }
-        return endPid;
+        return ProcessFuture(pid);
     }
 
     void SubProcess::swap(SubProcess& process) noexcept {

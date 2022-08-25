@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <stdexcept>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
