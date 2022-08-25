@@ -24,31 +24,34 @@
 #include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Core::Parallel {
-    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_) {}
+    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), finished(false) {}
 
     ProcessFuture& ProcessFuture::operator=(ProcessFuture future) noexcept {
         swap(future);
         return *this;
     }
 
-    pid_t ProcessFuture::wait(const char* errorMsg) {
+    void ProcessFuture::wait(const char* errorMsg) {
+        if (finished)
+            return;
+
         int status;
         pid_t endPid = waitpid(pid, &status, 0);
-        pid = -1;
         if (endPid <= 0) {
             fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
             throw SyscallException();
         }
+        finished = true;
 
         int error = -1;
         if (WIFEXITED(status))
             error = WEXITSTATUS(status);
         if (error != 0)
             throw std::runtime_error(errorMsg);
-        return endPid;
     }
 
     void ProcessFuture::swap(ProcessFuture& future) noexcept {
         std::swap(pid, future.pid);
+        std::swap(finished, future.finished);
     }
 }
