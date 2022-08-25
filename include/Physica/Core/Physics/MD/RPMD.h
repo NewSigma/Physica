@@ -37,11 +37,13 @@ namespace Physica::Core {
     template<class ScalarType>
     class RPMD final : private MDCell {
         using PhasePosType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
         constexpr static unsigned int Dim = 3;
     private:
         FFT<ScalarType, 1> fft;
         PhasePosType phasePosX;
+        ForceMatrix forceBuffer;
         BufferType buffer;
         ScalarType temperatureT;
         ScalarType thermostatTime;
@@ -71,8 +73,7 @@ namespace Physica::Core {
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator& gen);
         void thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
-        template<class ForceCalculator>
-        void forceStep(const ForceCalculator& force, unsigned int replica);
+        void forceStep();
         void dynamicStep();
         void normalizeCentroid();
         bool checkCentroid() const;
@@ -88,6 +89,7 @@ namespace Physica::Core {
 
         const size_t dof = getDOF();
         phasePosX.resize(2 * dof, numReplica);
+        forceBuffer.resize(dof, numReplica);
         buffer.resize(2, fft.getFreqSize());
 
         auto momentum = phasePosX.topRows(dof);
@@ -125,12 +127,19 @@ namespace Physica::Core {
     template<class RandomGenerator, class ForceCalculator, class Executor>
     void RPMD<ScalarType>::step(RandomGenerator& gen, const ForceCalculator& force) {
         thermostatStep(gen);
-        auto kernel = [&](unsigned int replica) { forceStep(force, replica); };
+        auto kernel = [&](unsigned int replica) {
+            MDCell cell = phaseToCell(replica);
+            cell.normalizeCell();
+            auto saveTo = forceBuffer.col(replica);
+            saveTo = force(std::move(cell));
+        };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        forceStep();
         dynamicStep();
         normalizeCentroid();
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         thermostatStep(gen);
+        forceStep();
     }
 
     template<class ScalarType>
@@ -253,14 +262,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class ForceCalculator>
-    void RPMD<ScalarType>::forceStep(const ForceCalculator& force, unsigned int replica) {
+    void RPMD<ScalarType>::forceStep() {
         const size_t dof = getDOF();
-        auto phasePos = phasePosX.col(replica);
-        auto momentum = phasePos.head(dof);
-        MDCell cell = phaseToCell(replica);
-        cell.normalizeCell();
-        momentum += force(std::move(cell)) * (timeStep * 0.5);
+        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+            auto phasePos = phasePosX.col(replica);
+            auto momentum = phasePos.head(dof);
+            momentum += forceBuffer.col(replica).asVector() * (timeStep * 0.5);
+        }
     }
 
     template<class ScalarType>
