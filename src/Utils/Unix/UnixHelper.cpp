@@ -194,7 +194,7 @@ namespace Physica::Utils {
         }
         closedir(fromDir);
     }
-    //TODO runProcess(void (*childProcessFunc)(void), const char* errorMsg)
+
     void mkdirCheck(const char* path, mode_t mode) {
         int err = mkdir(path, mode);
         if (err != 0) {

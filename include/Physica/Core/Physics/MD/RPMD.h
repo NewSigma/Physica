@@ -64,6 +64,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
         [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
         [[nodiscard]] typename MDCell::PositionMatrix getMomentum() const;
+        [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
         template<class ForceCalculator>
         [[nodiscard]] ScalarType computeKinetic(ForceCalculator force) const;
     private:

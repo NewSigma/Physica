@@ -18,12 +18,16 @@
  */
 #pragma once
 
+#include <unistd.h>
+#include <cassert>
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
 
 namespace Physica::Core::Parallel {
     class ProcessExecutor {
         using FutureType = ProcessFuture;
+    public:
+        static int nice_incr;
     public:
         /* Operations */
         template<class Functor, class... Args>
@@ -37,7 +41,7 @@ namespace Physica::Core::Parallel {
         using ResultType = typename std::invoke_result<Functor, Args...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
 
-        SubProcess process([=]() { func(std::forward<Args>(args)...); });
+        SubProcess process([=]() { nice(nice_incr); func(std::forward<Args>(args)...); });
         return process.execute();
     }
 
