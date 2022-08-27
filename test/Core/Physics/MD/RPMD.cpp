@@ -16,12 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
-#include "Physica/Utils/Random.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Utils/Random.h"
+#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
@@ -89,36 +88,35 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    constexpr double answer = 61.8;
-    constexpr double error = 0.1;
     ScalarType mean = 0;
     ScalarType var = 0;
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        std::mt19937::result_type seed;
-        Physica::Utils::Random::rdrand(seed);
-        std::mt19937 gen(seed);
+        std::mt19937 gen(3438603950906262893);
         RPMD<ScalarType> rpmd = makeSystem(gen);
         PairModel pair(ScalarType(pair_cutoff), force);
-        std::ifstream fin("phase");
-        fin >> rpmd;
-        for (unsigned int i = 0; i < 10; ++i) {
-            for (unsigned int _ = 0; _ < 2000; ++_)
-                rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
-            toNextVariance(var, mean, i, rpmd.computeKinetic(pair));
+        for (unsigned int i = 0; i < 6; ++i) {
+            ScalarType temp = 0;
+            for (unsigned int j = 0; j < 6; ++j) {
+                for (unsigned int _ = 0; _ < 2000; ++_)
+                    rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+                toNextMean(temp, j, rpmd.computeKinetic(pair));
+            }
+            toNextVariance(var, mean, i, temp);
         }
-        std::ofstream fout("phase");
-        fout << rpmd;
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
 
+    constexpr double answer = 61.8;
     const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
+    if (!scalarNear(energyPerMol, ScalarType(answer), 0.1))
+        return 1;
     const ScalarType delta = abs(energyPerMol - answer);
-    std::cout << energyPerMol << ' ' << PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular << std::endl;
-    if (delta > error)
+    const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
+    if (delta > deviation)
         return 1;
     return 0;
 }
