@@ -139,8 +139,8 @@ namespace Physica::Core {
         dynamicStep();
         normalizeCentroid();
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
-        thermostatStep(gen);
         forceStep();
+        thermostatStep(gen);
     }
 
     template<class ScalarType>
