@@ -22,11 +22,11 @@
 #include <iostream>
 
 namespace Physica::Core {
-    MDCell::MDCell(CrystalCell cell)
-            : invLattice(Base::makeInvLattice()) {
+    MDCell::MDCell(CrystalCell cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(std::move(cell));
+        invLattice = Base::makeInvLattice();
 
         massVec.resize(getNumParticle());
         for (size_t i = 0; i < getNumParticle(); ++i) {

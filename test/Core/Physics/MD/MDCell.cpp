@@ -22,6 +22,14 @@
 
 using namespace Physica::Core;
 
+bool isMDCellNear(const MDCell& cell1, const MDCell& cell2, double precision) {
+    if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))
+        return false;
+    if (!matrixNear(cell1.getPos(), cell2.getPos(), precision))
+        return false;
+    return true;
+}
+
 int main() {
     using LatticeMatrix = typename MDCell::LatticeMatrix;
     using PositionMatrix = typename MDCell::PositionMatrix;
@@ -32,11 +40,13 @@ int main() {
     CrystalCell cell2 = cell1;
     cell2.toCartesian();
 
-    const MDCell md1(cell1);
-    const MDCell md2(cell2);
-    if (!matrixNear(md1.getLattice(), md2.getLattice(), 1E-15))
+    MDCell md1(cell1);
+    MDCell md2(cell2);
+    if (!isMDCellNear(md1, md2, 1E-15))
         return 1;
-    if (!matrixNear(md1.getPos(), md2.getPos(), 1E-15))
+
+    md1.normalizeCell();
+    if (!isMDCellNear(md1, md2, 1E-6))
         return 1;
     return 0;
 }
