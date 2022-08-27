@@ -62,11 +62,14 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
+        [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
         [[nodiscard]] typename MDCell::PositionMatrix getMomentum() const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
         template<class ForceCalculator>
         [[nodiscard]] ScalarType computeKinetic(ForceCalculator force) const;
+        /* Setters */
+        void setTemperature(ScalarType temperature);
     private:
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
@@ -83,7 +86,6 @@ namespace Physica::Core {
     template<class ScalarType>
     RPMD<ScalarType>::RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_)
             : MDCell(std::move(cell_))
-            , temperatureT(std::move(temperatureT_))
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
         fft = FFT<ScalarType, 1>(numReplica, 1);
@@ -108,8 +110,7 @@ namespace Physica::Core {
                 pos = phasePosX.col(0).tail(dof);
             }
         }
-        repBeta = temperatureT * PhyConst<AU>::boltzmannK * numReplica;
-        omegaW = repBeta / PhyConst<AU>::reducedPlanck;
+        setTemperature(temperatureT_);
     }
 
     template<class ScalarType>
@@ -190,6 +191,13 @@ namespace Physica::Core {
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;
+    }
+
+    template<class ScalarType>
+    void RPMD<ScalarType>::setTemperature(ScalarType temperature) {
+        temperatureT = temperature;
+        repBeta = temperatureT * PhyConst<AU>::boltzmannK * getNumReplica();
+        omegaW = repBeta / PhyConst<AU>::reducedPlanck;
     }
 
     template<class ScalarType>
