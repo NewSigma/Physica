@@ -50,15 +50,13 @@ namespace Physica::Core {
         ScalarType omegaW;
     public:
         RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
-        /* Operators */
-        template<class T> friend std::ostream& operator<<(std::ostream& os, const RPMD<T>& rpmd);
-        template<class T> friend std::istream& operator>>(std::istream& is, RPMD<T>& rpmd);
         /* Operations */
         template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         void nvt_step(RandomGenerator& gen, const ForceCalculator& force);
         template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         void nve_step(const ForceCalculator& force);
         /* Getters */
+        [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
@@ -110,18 +108,6 @@ namespace Physica::Core {
             }
         }
         setTemperature(temperatureT_);
-    }
-
-    template<class ScalarType>
-    std::ostream& operator<<(std::ostream& os, const RPMD<ScalarType>& rpmd) {
-        os << rpmd.phasePosX;
-        return os;
-    }
-
-    template<class ScalarType>
-    std::istream& operator>>(std::istream& is, RPMD<ScalarType>& rpmd) {
-        is >> rpmd.phasePosX;
-        return is;
     }
 
     template<class ScalarType>
