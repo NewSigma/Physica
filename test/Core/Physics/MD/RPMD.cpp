@@ -101,7 +101,7 @@ int main() {
             ScalarType temp = 0;
             for (unsigned int j = 0; j < 6; ++j) {
                 for (unsigned int _ = 0; _ < 2000; ++_)
-                    rpmd.step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+                    rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
                 toNextMean(temp, j, rpmd.computeKinetic(pair));
             }
             toNextVariance(var, mean, i, temp);

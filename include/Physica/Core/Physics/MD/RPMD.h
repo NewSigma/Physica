@@ -27,12 +27,9 @@
 
 namespace Physica::Core {
     /**
-     * Note: A factor of 1/P is missing in the RHS of Eq. (9) in [3].
-     *  
      * Reference:
      * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
-     * [2] G. Bussi and M. Parrinello, Phys. Rev. E 75, 056707 (2007).
-     * [3] Yamamoto, Takeshi M, J. Chem. Phys. 2005, 123(10):104101.
+     * [2] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      */
     template<class ScalarType>
     class RPMD final : private MDCell {
@@ -58,7 +55,9 @@ namespace Physica::Core {
         template<class T> friend std::istream& operator>>(std::istream& is, RPMD<T>& rpmd);
         /* Operations */
         template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        void step(RandomGenerator& gen, const ForceCalculator& force);
+        void nvt_step(RandomGenerator& gen, const ForceCalculator& force);
+        template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
+        void nve_step(const ForceCalculator& force);
         /* Getters */
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
@@ -127,8 +126,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class RandomGenerator, class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::step(RandomGenerator& gen, const ForceCalculator& force) {
+    void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceCalculator& force) {
         thermostatStep(gen);
+        nve_step<ForceCalculator, Executor>(force);
+        thermostatStep(gen);
+    }
+
+    template<class ScalarType>
+    template<class ForceCalculator, class Executor>
+    void RPMD<ScalarType>::nve_step(const ForceCalculator& force) {
         auto kernel = [&](unsigned int replica) {
             MDCell cell = phaseToCell(replica);
             cell.normalizeCell();
@@ -141,7 +147,6 @@ namespace Physica::Core {
         normalizeCentroid();
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         forceStep();
-        thermostatStep(gen);
     }
 
     template<class ScalarType>
@@ -195,6 +200,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RPMD<ScalarType>::setTemperature(ScalarType temperature) {
+        assert(!temperature.isNegative());
         temperatureT = temperature;
         repBeta = temperatureT * PhyConst<AU>::boltzmannK * getNumReplica();
         omegaW = repBeta / PhyConst<AU>::reducedPlanck;
