@@ -30,6 +30,7 @@ namespace Physica::Core {
      * Reference:
      * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
      * [2] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
+     * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. Journal of Chemical Physics, 2014, 140(23):5106.
      */
     template<class ScalarType>
     class RPMD final : private MDCell {
@@ -239,7 +240,6 @@ namespace Physica::Core {
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = MDCell::getMass(i / Dim);
             const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
-            const ScalarType maxOmegaK = omegaW * 2;
             toNormalRepr(i);
             /* Translational mode */ {
                 const ScalarType viscosityY = Core::reciprocal(thermostatTime);
@@ -247,7 +247,7 @@ namespace Physica::Core {
             }
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / getNumReplica();
-                const ScalarType viscosityY = sin(phase) * maxOmegaK;
+                const ScalarType viscosityY = sin(phase) * omegaW;
                 const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
                 thermostatImpl(j, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
             }
