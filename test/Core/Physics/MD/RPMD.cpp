@@ -34,6 +34,47 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
+bool testDriftMomentum(const RPMD<ScalarType>& rpmd, double precision) {
+    for (int i = 0; i < 3; ++i) {
+        ScalarType sum = 0;
+        for (size_t j = i; j < rpmd.getDOF(); j += 3)
+            sum += rpmd.getPhasePos().row(j).asVector().sum();
+        if (!scalarNear(sum, ScalarType::Zero(), precision))
+            return false;
+    }
+    return true;
+}
+
+ScalarType pot_functor(ScalarType r) {
+    constexpr double alpha = 1.713;
+    constexpr double beta = 1.5671;
+    constexpr double gamma = 0.00993;
+    constexpr double cutoff = 8.32;
+    constexpr double c6 = 12.14;
+    constexpr double c8 = 215.2;
+    constexpr double c9 = 143.1;
+    constexpr double c10 = 4813.9;
+
+    const ScalarType r2 = square(r);
+    ScalarType result = exp(-r2 * gamma - r * beta + alpha);
+    const ScalarType rep_r = reciprocal(r);
+    const ScalarType rep_r2 = square(rep_r);
+    const ScalarType rep_r4 = square(rep_r2);
+    const ScalarType rep_r6 = rep_r4 * rep_r2;
+    const ScalarType rep_r8 = square(rep_r4);
+    const ScalarType rep_r9 = rep_r8 * rep_r;
+    const ScalarType rep_r10 = rep_r6 * rep_r4;
+    const ScalarType g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
+
+    if (r < cutoff) {
+        const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
+        result -= g * f_cutoff;
+    }
+    else
+        result -= g;
+    return result;
+}
+
 ScalarType force(ScalarType r) {
     constexpr double alpha = 1.713;
     constexpr double beta = 1.5671;
@@ -96,7 +137,11 @@ int main() {
     {
         std::mt19937 gen(3438603950906262893);
         RPMD<ScalarType> rpmd = makeSystem(gen);
-        PairModel pair(ScalarType(pair_cutoff), force);
+        rpmd.initMomentum(gen);
+        if (!testDriftMomentum(rpmd, 1E-12))
+            return 1;
+
+        PairModel pair(ScalarType(pair_cutoff), force, pot_functor);
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             for (unsigned int j = 0; j < 6; ++j) {

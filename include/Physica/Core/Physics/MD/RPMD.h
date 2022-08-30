@@ -30,7 +30,8 @@ namespace Physica::Core {
      * Reference:
      * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
      * [2] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
-     * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. Journal of Chemical Physics, 2014, 140(23):5106.
+     * [3] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. Journal of Chemical Physics, 2014, 140(23):5106.
+     * [4] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
      */
     template<class ScalarType>
     class RPMD final : private MDCell {
@@ -56,22 +57,37 @@ namespace Physica::Core {
         void nvt_step(RandomGenerator& gen, const ForceCalculator& force);
         template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         void nve_step(const ForceCalculator& force);
+        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
+        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceCalculator& force);
+        template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
+        void nve_step_for(ScalarType duration, const ForceCalculator& force);
+        template<class RandomGenerator>
+        void initMomentum(RandomGenerator& gen);
+        void scaleVelocity();
         /* Getters */
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
+        [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
+        [[nodiscard]] MDCell phaseToCell(size_t replica) const;
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
         [[nodiscard]] typename MDCell::PositionMatrix getMomentum() const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
+
+        [[nodiscard]] ScalarType getClassicalKinetic() const;
+        template<class ForceModel>
+        [[nodiscard]] ScalarType getClassicalPotentialEnergy(ForceModel model) const;
+        template<class ForceModel>
+        [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
         template<class ForceCalculator>
         [[nodiscard]] ScalarType computeKinetic(ForceCalculator force) const;
+        [[nodiscard]] ScalarType estimateTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
     private:
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
-        MDCell phaseToCell(size_t replica) const;
         template<class RandomGenerator>
         void thermostatStep(RandomGenerator& gen);
         void thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
@@ -137,6 +153,71 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class RandomGenerator, class ForceCalculator, class Executor>
+    void RPMD<ScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceCalculator& force) {
+        uint64_t step = double(duration / timeStep) + 0.5;
+        for (uint64_t _ = 0; _ < step; ++_)
+            nvt_step<RandomGenerator, ForceCalculator, Executor>(gen, force);
+    }
+
+    template<class ScalarType>
+    template<class ForceCalculator, class Executor>
+    void RPMD<ScalarType>::nve_step_for(ScalarType duration, const ForceCalculator& force) {
+        uint64_t step = double(duration / timeStep) + 0.5;
+        for (uint64_t _ = 0; _ < step; ++_)
+            nve_step<ForceCalculator, Executor>(force);
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    void RPMD<ScalarType>::initMomentum(RandomGenerator& gen) {
+        std::normal_distribution<> dist{};
+        const size_t dof = getDOF();
+        Vector<ScalarType, 3> driftMomentum(3, 0);
+        for (size_t i = 0; i < dof; ++i) {
+            const auto mass = MDCell::getMass(i / Dim);
+            const size_t direction = i % Dim;
+            const ScalarType factor = sqrt(repBeta * mass);
+            for (size_t j = 0; j < getNumReplica(); ++j) {
+                const ScalarType temp = factor * dist(gen);
+                phasePosX(i, j) = temp;
+                driftMomentum[direction] += temp;
+            }
+        }
+        driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+
+        for (size_t i = 0; i < dof; ++i) {
+            auto row = phasePosX.row(i);
+            row -= driftMomentum[i % 3];
+        }
+    }
+
+    template<class ScalarType>
+    void RPMD<ScalarType>::scaleVelocity() {
+        const ScalarType temperatureNow = estimateTemperature();
+        assert(temperatureNow.isPositive());
+        const size_t dof = getDOF();
+        const ScalarType factor = sqrt(temperatureT / temperatureNow);
+        auto momentum = phasePosX.topRows(dof);
+        momentum *= factor;
+    }
+
+    template<class ScalarType>
+    MDCell RPMD<ScalarType>::phaseToCell(size_t replica) const {
+        using PositionMatrix = typename MDCell::PositionMatrix;
+        using ScalarType_ = typename PositionMatrix::ScalarType;
+
+        PositionMatrix pos(MDCell::getNumParticle(), 3);
+        auto phase = phasePosX.col(replica);
+        size_t index = getDOF();
+        for (auto& elem : pos) {
+            elem = ScalarType_(phase[index]);
+            ++index;
+        }
+        return MDCell(MDCell::getLattice(), std::move(pos), MDCell::getMassVec());
+    }
+
+    template<class ScalarType>
     typename MDCell::PositionMatrix RPMD<ScalarType>::getPos() const {
         using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
@@ -166,6 +247,33 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType RPMD<ScalarType>::getClassicalKinetic() const {
+        const size_t dof = getDOF();
+        ScalarType classical_kinetic = 0;
+        for (size_t i = 0; i < dof; ++i) {
+            const auto mass = MDCell::getMass(i / Dim);
+            auto p = phasePosX.row(i);
+            classical_kinetic += square(p.asVector()).sum() / (mass * 2);
+        }
+        return classical_kinetic;
+    }
+
+    template<class ScalarType>
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType>::getClassicalPotentialEnergy(ForceModel model) const {
+        ScalarType result = 0;
+        for (size_t i = 0; i < getNumReplica(); ++i)
+            result += model.potentialEnergy(phaseToCell(i));
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType>::getClassicalInternalEnergy(ForceModel model) const {
+        return getClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model);
+    }
+
+    template<class ScalarType>
     template<class ForceCalculator>
     ScalarType RPMD<ScalarType>::computeKinetic(ForceCalculator force) const {
         const size_t dof = getDOF();
@@ -183,6 +291,11 @@ namespace Physica::Core {
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;
+    }
+
+    template<class ScalarType>
+    ScalarType RPMD<ScalarType>::estimateTemperature() const {
+        return getClassicalKinetic() * (2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica());
     }
 
     template<class ScalarType>
@@ -215,21 +328,6 @@ namespace Physica::Core {
         fft.invTransform(buffer.row(1));
         auto pos = phasePosX.row(posID + getDOF());
         pos = fft.getDatas();
-    }
-
-    template<class ScalarType>
-    MDCell RPMD<ScalarType>::phaseToCell(size_t replica) const {
-        using PositionMatrix = typename MDCell::PositionMatrix;
-        using ScalarType_ = typename PositionMatrix::ScalarType;
-
-        PositionMatrix pos(MDCell::getNumParticle(), 3);
-        auto phase = phasePosX.col(replica);
-        size_t index = getDOF();
-        for (auto& elem : pos) {
-            elem = ScalarType_(phase[index]);
-            ++index;
-        }
-        return MDCell(MDCell::getLattice(), std::move(pos), MDCell::getMassVec());
     }
 
     template<class ScalarType>
