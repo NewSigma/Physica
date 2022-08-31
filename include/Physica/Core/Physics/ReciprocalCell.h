@@ -19,10 +19,11 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 
 namespace Physica::Core {
+    template<class ScalarType>
     class ReciprocalCell {
-        using ScalarType = Scalar<Float, false>;
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 3, 3>;
 
         LatticeMatrix lattice;
@@ -34,4 +35,26 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getMinNorm() const noexcept;
         [[nodiscard]] ScalarType getVolume() const noexcept;
     };
+
+    template<class ScalarType>
+    ReciprocalCell<ScalarType>::ReciprocalCell(LatticeMatrix lattice_) : lattice(std::move(lattice_)) {}
+
+    template<class ScalarType>
+    const typename ReciprocalCell<ScalarType>::LatticeMatrix& ReciprocalCell<ScalarType>::getLattice() const noexcept {
+        return lattice;
+    }
+
+    template<class ScalarType>
+    ScalarType ReciprocalCell<ScalarType>::getMinNorm() const noexcept {
+        const ScalarType norm1 = lattice.row(0).norm();
+        const ScalarType norm2 = lattice.row(1).norm();
+        const ScalarType norm3 = lattice.row(2).norm();
+        return norm1 > norm2 ? (norm2 > norm3 ? norm3 : norm2)
+                             : (norm1 > norm3 ? norm3 : norm1);
+    }
+
+    template<class ScalarType>
+    ScalarType ReciprocalCell<ScalarType>::getVolume() const noexcept {
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
+    }
 }

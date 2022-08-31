@@ -25,7 +25,7 @@ namespace Physica::Core {
     MDCell::MDCell(CrystalCell cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
-        Base::operator=(std::move(cell));
+        Base::operator=(Base(cell.getLattice(), cell.getPos()));
         invLattice = Base::makeInvLattice();
 
         massVec.resize(getNumParticle());

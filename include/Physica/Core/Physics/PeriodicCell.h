@@ -24,19 +24,23 @@
 #include "ReciprocalCell.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        class PeriodicCellImpl {
+        public:
+            enum class Type : bool {
+                Direct,
+                Cartesian
+            };
+        };
+    }
     template<class ScalarType, unsigned int Dim>
-    class PeriodicCell {
+    class PeriodicCell : public Internal::PeriodicCellImpl {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(Dim == 2 || Dim == 3, "[Error]: Unsupported dimention");
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
-
-        enum class Type : bool {
-            Direct,
-            Cartesian
-        };
     protected:
         using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
 
@@ -53,7 +57,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
-        [[nodiscard]] ReciprocalCell reciprocal() const;
+        [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const;
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
     protected:
@@ -80,7 +84,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    ReciprocalCell PeriodicCell<ScalarType, Dim>::reciprocal() const {
+    ReciprocalCell<ScalarType> PeriodicCell<ScalarType, Dim>::reciprocal() const {
         LatticeMatrix result{};
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
@@ -88,7 +92,7 @@ namespace Physica::Core {
         const ScalarType volume = abs(lattice.row(0) * result.row(0).asVector());
         const ScalarType factor = ScalarType(2 * M_PI) / volume;
         result *= factor;
-        return ReciprocalCell(std::move(result));
+        return ReciprocalCell<ScalarType>(std::move(result));
     }
 
     template<class ScalarType, unsigned int Dim>

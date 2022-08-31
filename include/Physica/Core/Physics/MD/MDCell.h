@@ -23,8 +23,8 @@
 namespace Physica::Core {
     class CrystalCell;
 
-    class MDCell : public PeriodicCell<Scalar<Float, false>, 3> {
-        using ScalarType_ = Scalar<Float, false>;
+    class MDCell : public PeriodicCell<Scalar<Double, false>, 3> {
+        using ScalarType_ = Scalar<Double, false>;
     public:
         using Base = PeriodicCell<ScalarType_, 3>;
         using MassVector = Vector<ScalarType_>;
