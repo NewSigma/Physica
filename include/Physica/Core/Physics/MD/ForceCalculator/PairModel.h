@@ -143,9 +143,9 @@ namespace Physica::Core {
             const ReciprocalCell reciprocal = cell.reciprocal();
             const auto& lattice = reciprocal.getLattice();
             const ScalarType factor = cutoff * (1 / (2 * M_PI));
-            max_x = static_cast<ssize_t>(double(factor * lattice.row(0).norm()));
-            max_y = static_cast<ssize_t>(double(factor * lattice.row(1).norm()));
-            max_z = static_cast<ssize_t>(double(factor * lattice.row(2).norm()));
+            max_x = static_cast<ssize_t>(double(factor * lattice.row(0).norm()) + 1);
+            max_y = static_cast<ssize_t>(double(factor * lattice.row(1).norm()) + 1);
+            max_z = static_cast<ssize_t>(double(factor * lattice.row(2).norm()) + 1);
         }
         return Utils::Array<ssize_t, 3>{max_x, max_y, max_z};
     }
