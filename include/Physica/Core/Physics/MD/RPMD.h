@@ -64,6 +64,7 @@ namespace Physica::Core {
         void nve_step_for(ScalarType duration, const ForceCalculator& force);
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
+        void removeDrift();
         void scaleVelocity();
         template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceCalculator& force, double precision);
@@ -197,6 +198,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void RPMD<ScalarType>::removeDrift() {
+        const size_t dof = getDOF();
+        Vector<ScalarType, 3> driftMomentum(3, 0);
+        for (size_t i = 0; i < dof; ++i) {
+            const size_t direction = i % Dim;
+            for (size_t j = 0; j < getNumReplica(); ++j)
+                driftMomentum[direction] += phasePosX(i, j);
+        }
+        driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+
+        for (size_t i = 0; i < dof; ++i) {
+            auto row = phasePosX.row(i);
+            row -= driftMomentum[i % 3];
+        }
+    }
+
+    template<class ScalarType>
     void RPMD<ScalarType>::scaleVelocity() {
         const ScalarType temperatureNow = estimateTemperature();
         assert(temperatureNow.isPositive());
@@ -294,7 +312,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < dof; ++i) {
             const ScalarType mass = MDCell::getMass(i / Dim);
             for (size_t j = 0; j < getNumReplica(); ++j)
-                result += mass * square(omegaW * (pos(i, j) - pos(i, j + 1))) * 0.5;
+                result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
         }
         return result;
     }

@@ -32,6 +32,7 @@ namespace Physica::Core {
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;
+        ScalarType pot_shift;
         PairFunctor force_functor;
         PairFunctor pot_functor;
     public:
@@ -48,6 +49,7 @@ namespace Physica::Core {
             , force_functor(std::move(functor_))
             , pot_functor(std::move(pot_functor_)) {
         squared_cutoff = square(cutoff);
+        pot_shift = pot_functor(cutoff);
     }
 
     template<class ScalarType, class PairFunctor>
@@ -124,7 +126,7 @@ namespace Physica::Core {
                             const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                             if (isNotSelf && r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                result += pot_functor(dist);
+                                result += pot_functor(dist) - pot_shift;
                             }
                         }
                     }
