@@ -23,6 +23,7 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Utils/TestHelper.h"
 #include "MDCell.h"
 
 namespace Physica::Core {
@@ -64,6 +65,8 @@ namespace Physica::Core {
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
+        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
+        [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceCalculator& force, double precision);
         /* Getters */
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
@@ -78,6 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getClassicalKinetic() const;
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalPotentialEnergy(ForceModel model) const;
+        [[nodiscard]] ScalarType getClassicalElastic() const;
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
         template<class ForceCalculator>
@@ -203,6 +207,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class RandomGenerator, class ForceCalculator, class Executor>
+    bool RPMD<ScalarType>::isStableNVT(size_t numStep, RandomGenerator& gen, const ForceCalculator& force, double precision) {
+        ScalarType kinetic = 0;
+        ScalarType squared_kinetic = 0;
+        for (size_t i = 0; i < numStep; ++i) {
+            nvt_step<RandomGenerator, ForceCalculator, Executor>(gen, force);
+            const ScalarType temp = getClassicalKinetic();
+            toNextMean(kinetic, i, temp);
+            toNextMean(squared_kinetic, i, square(temp));
+        }
+        const ScalarType factor = ScalarType(getDOF() * getNumReplica()) / ScalarType(getDOF() * getNumReplica() + 2);
+        return Utils::scalarNear(square(kinetic), factor * squared_kinetic, precision);
+    }
+
+    template<class ScalarType>
     MDCell RPMD<ScalarType>::phaseToCell(size_t replica) const {
         using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
@@ -268,9 +287,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType RPMD<ScalarType>::getClassicalElastic() const {
+        const size_t dof = getDOF();
+        auto pos = phasePosX.bottomRows(dof);
+        ScalarType result = 0;
+        for (size_t i = 0; i < dof; ++i) {
+            const ScalarType mass = MDCell::getMass(i / Dim);
+            for (size_t j = 0; j < getNumReplica(); ++j)
+                result += mass * square(omegaW * (pos(i, j) - pos(i, j + 1))) * 0.5;
+        }
+        return result;
+    }
+
+    template<class ScalarType>
     template<class ForceModel>
     ScalarType RPMD<ScalarType>::getClassicalInternalEnergy(ForceModel model) const {
-        return getClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model);
+        return getClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model) + getClassicalElastic();
     }
 
     template<class ScalarType>
