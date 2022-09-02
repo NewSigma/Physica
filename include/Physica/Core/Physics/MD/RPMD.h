@@ -33,6 +33,7 @@ namespace Physica::Core {
      * [2] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      * [3] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. Journal of Chemical Physics, 2014, 140(23):5106.
      * [4] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
+     * [5] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. The Journal of Chemical Physics, 2016, 145(2):1291-1301.
      */
     template<class ScalarType>
     class RPMD final : private MDCell {
@@ -94,10 +95,10 @@ namespace Physica::Core {
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
         template<class RandomGenerator>
-        void thermostatStep(RandomGenerator& gen);
-        void thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
-        void forceStep();
-        void dynamicStep();
+        void thermostatStep(RandomGenerator& gen, ScalarType deltaT);
+        void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
+        void forceStep(ScalarType deltaT);
+        void dynamicStep(ScalarType deltaT);
         void normalizeCentroid();
         bool checkCentroid() const;
     };
@@ -135,9 +136,19 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class RandomGenerator, class ForceCalculator, class Executor>
     void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceCalculator& force) {
-        thermostatStep(gen);
-        nve_step<ForceCalculator, Executor>(force);
-        thermostatStep(gen);
+        auto kernel = [&](unsigned int replica) {
+            MDCell cell = phaseToCell(replica);
+            cell.normalizeCell();
+            auto saveTo = forceBuffer.col(replica);
+            saveTo = force(std::move(cell));
+        };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        forceStep(timeStep * 0.5);
+        dynamicStep(timeStep * 0.5);
+        thermostatStep(gen, timeStep);
+        dynamicStep(timeStep * 0.5);
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType>
@@ -150,11 +161,11 @@ namespace Physica::Core {
             saveTo = force(std::move(cell));
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
-        forceStep();
-        dynamicStep();
+        forceStep(timeStep * 0.5);
+        dynamicStep(timeStep);
         normalizeCentroid();
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
-        forceStep();
+        forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType>
@@ -382,7 +393,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class RandomGenerator>
-    void RPMD<ScalarType>::thermostatStep(RandomGenerator& gen) {
+    void RPMD<ScalarType>::thermostatStep(RandomGenerator& gen, ScalarType deltaT) {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
@@ -391,37 +402,37 @@ namespace Physica::Core {
             toNormalRepr(i);
             /* Translational mode */ {
                 const ScalarType viscosityY = Core::reciprocal(thermostatTime);
-                thermostatImpl(0, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
+                thermostatImpl(0, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
             }
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / getNumReplica();
                 const ScalarType viscosityY = sin(phase) * omegaW;
                 const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
-                thermostatImpl(j, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                thermostatImpl(j, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
             }
             toBeadRepr(i);
         }
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::thermostatImpl(size_t mode_index, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random) {
-        const ScalarType c1 = exp(-viscosityY * (timeStep * 0.5));
+    void RPMD<ScalarType>::thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random) {
+        const ScalarType c1 = exp(-viscosityY * deltaT);
         const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
         buffer(0, mode_index) = c1 * buffer(0, mode_index) + factor * c2 * random;
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::forceStep() {
+    void RPMD<ScalarType>::forceStep(ScalarType deltaT) {
         const size_t dof = getDOF();
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
             auto phasePos = phasePosX.col(replica);
             auto momentum = phasePos.head(dof);
-            momentum += forceBuffer.col(replica).asVector() * (timeStep * 0.5);
+            momentum += forceBuffer.col(replica).asVector() * deltaT;
         }
     }
 
     template<class ScalarType>
-    void RPMD<ScalarType>::dynamicStep() {
+    void RPMD<ScalarType>::dynamicStep(ScalarType deltaT) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using VectorType = Vector<ComplexScalar<ScalarType>, 2>;
         const size_t dof = getDOF();
@@ -432,13 +443,13 @@ namespace Physica::Core {
             const auto mass = MDCell::getMass(i / Dim);
             toNormalRepr(i);
             /* Translational mode */ {
-                buffer(1, 0) += buffer(0, 0) * timeStep / mass;
+                buffer(1, 0) += buffer(0, 0) * deltaT / mass;
             }
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 auto col = buffer.col(j);
                 const ScalarType omegaK = omegaW * sin(ScalarType(M_PI * j / getNumReplica())) * 2;
                 const ScalarType factor = ScalarType(mass) * omegaK;
-                const ScalarType phase = omegaK * timeStep;
+                const ScalarType phase = omegaK * deltaT;
                 const ScalarType cosine = cos(phase);
                 const ScalarType sine = sin(phase);
                 matA(0, 0) = cosine;
