@@ -24,7 +24,9 @@
 #include "Physica/Core/Parallel/SubProcess.h"
 
 namespace Physica::Core::Parallel {
-    SubProcess::SubProcess(SubProcess&& process) noexcept : task(std::move(process.task)), pid(process.pid) {}
+    SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}
+
+    SubProcess::SubProcess(std::function<void()> task_, int nice_incr_) : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}
 
     SubProcess& SubProcess::operator=(SubProcess process) noexcept {
         swap(process);
@@ -39,6 +41,12 @@ namespace Physica::Core::Parallel {
         }
         else if (pid == 0) {
             prctl(PR_SET_PDEATHSIG, SIGTERM);
+            /* Set nice */ {
+                errno = 0;
+                const int code = nice(nice_incr);
+                if (code == -1 && errno != 0)
+                    perror("[Warning]: Failed to process priority");
+            }
             task();
             _exit(EXIT_SUCCESS);
         }
@@ -48,5 +56,6 @@ namespace Physica::Core::Parallel {
     void SubProcess::swap(SubProcess& process) noexcept {
         task.swap(process.task);
         std::swap(pid, process.pid);
+        std::swap(nice_incr, process.nice_incr);
     }
 }

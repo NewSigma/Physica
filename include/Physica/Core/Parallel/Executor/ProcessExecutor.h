@@ -41,7 +41,7 @@ namespace Physica::Core::Parallel {
         using ResultType = typename std::invoke_result<Functor, Args...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
 
-        SubProcess process([=]() { nice(nice_incr); func(std::forward<Args>(args)...); });
+        SubProcess process([=]() { func(std::forward<Args>(args)...); }, nice_incr);
         return process.execute();
     }
 
@@ -61,7 +61,7 @@ namespace Physica::Core::Parallel {
             SubProcess process([=]() {
                                    for (unsigned int i = from; i < to; ++i)
                                        func(i);
-                               });
+                               }, nice_incr);
             result.append(process.execute());
             from += maxLoopPerCore;
             const unsigned int next_to = to + maxLoopPerCore;

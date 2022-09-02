@@ -27,11 +27,12 @@ namespace Physica::Core::Parallel {
     private:
         std::function<void()> task;
         pid_t pid;
+        int nice_incr;
     public:
-        SubProcess() : task(), pid(-1) {}
-        SubProcess(std::function<void()> _task) : task(std::move(_task)), pid(-1) {}
+        SubProcess();
+        SubProcess(std::function<void()> task_, int nice_incr_);
         SubProcess(const SubProcess&) = delete;
-        SubProcess(SubProcess&& process) noexcept;
+        SubProcess(SubProcess&& process) noexcept = default;
         ~SubProcess() = default;
         /* Operators */
         SubProcess& operator=(SubProcess process) noexcept;
