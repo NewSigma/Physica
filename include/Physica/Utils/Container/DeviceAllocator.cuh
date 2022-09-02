@@ -108,12 +108,11 @@ namespace Physica::Utils {
     __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
     #ifdef __CUDA__ARCH__
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
-        return thrust::device_ptr(p);
     #else
         T* p;
         cudaMalloc(&p, n * sizeof(T));
-        return pointer(p);
     #endif
+        return pointer(p);
     }
 
     template<class T>
