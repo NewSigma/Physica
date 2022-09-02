@@ -36,6 +36,7 @@ namespace Physica::Core {
         constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
         using ComplexType = ComplexScalar<ScalarType>;
         using Vector3D = Vector<ScalarType, 3>;
+        using RepCellType = ReciprocalCell<typename CrystalCell::ScalarType>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
         using KSOrbit = PWBaseWave<ScalarType>;
         using KSOrbitArray = Utils::Array<KSOrbit>;
@@ -58,7 +59,7 @@ namespace Physica::Core {
         using DensityRecord = Utils::Array<DensityType, DIISBufferSize>;
     protected:
         CrystalCell cell;
-        ReciprocalCell repCell;
+        RepCellType repCell;
         ScalarType cutEnergy;
         size_t iteration;
 

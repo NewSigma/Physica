@@ -47,7 +47,7 @@ namespace Physica::Core {
     }
 
     void CrystalCell::toCartesian() {
-        assert(type = Type::Direct);
+        assert(type == Type::Direct);
         Base::toCartesian();
         type = Type::Cartesian;
     }

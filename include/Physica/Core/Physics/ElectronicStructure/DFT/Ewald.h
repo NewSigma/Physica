@@ -31,10 +31,11 @@ namespace Physica::Core {
     template<class ScalarType>
     class Ewald {
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+        using RepCellType = ReciprocalCell<typename LatticeMatrix::ScalarType>;
         using UnsignedGrid = Grid3D<ScalarType, false>;
         using Vector3D = Vector<ScalarType, 3>;
     public:
-        static ScalarType energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges);
+        static ScalarType energyIonIon(const CrystalCell& cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
@@ -50,7 +51,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(const CrystalCell& cell, const ReciprocalCell& repCell, const Utils::Array<int16_t>& charges) {
+    ScalarType Ewald<ScalarType>::energyIonIon(const CrystalCell& cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges) {
         const size_t ionCount = cell.getPos().getRow();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         //The following param chosen is referenced from VASP

@@ -31,12 +31,12 @@ bool isMDCellNear(const MDCell& cell1, const MDCell& cell2, double precision) {
 }
 
 int main() {
-    using LatticeMatrix = typename MDCell::LatticeMatrix;
-    using PositionMatrix = typename MDCell::PositionMatrix;
+    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+    using PositionMatrix = typename CrystalCell::PositionMatrix;
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
 
-    const CrystalCell cell1(lattice, pos, {1, 1, 1, 1, 2, 2, 2, 2}, CrystalCell::Type::Direct);
+    const CrystalCell cell1(lattice, pos, {1, 1, 2}, CrystalCell::Type::Direct);
     CrystalCell cell2 = cell1;
     cell2.toCartesian();
 
