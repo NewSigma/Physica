@@ -27,7 +27,7 @@ using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
-constexpr double thermostatTime = PhyConst<AU>::secondToTime(1E-15);
+constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
@@ -142,11 +142,14 @@ int main() {
             return 1;
 
         PairModel pair(ScalarType(pair_cutoff), force, pot_functor);
+        rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(100 * 1E-12), gen, pair);
+
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            for (unsigned int j = 0; j < 6; ++j) {
-                for (unsigned int _ = 0; _ < 2000; ++_)
-                    rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+            rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
+
+            for (unsigned int j = 0; j < 100; ++j) {
+                rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
                 toNextMean(temp, j, rpmd.computeKinetic(pair));
             }
             toNextVariance(var, mean, i, temp);
