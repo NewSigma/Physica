@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
@@ -142,7 +143,7 @@ int main() {
 
         PairModel pair(ScalarType(pair_cutoff), force, pot_functor);
         rpmd.updateForce(pair);
-        rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(100 * 1E-12), gen, pair);
+        rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
