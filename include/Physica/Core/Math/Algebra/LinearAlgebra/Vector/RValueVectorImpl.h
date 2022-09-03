@@ -202,6 +202,16 @@ namespace Physica::Core {
         return Internal::InnerDotImpl<VectorType1, VectorType2, false>::run(v1, v2); //TODO: We disabled SIMD because it did not enhance performance as expected
     }
 
+    template<class VectorType1, class VectorType2>
+    bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+        assert(v1.getLength() == v2.getLength());
+        for (size_t i = 0; i < v1.getLength(); ++i)
+            if (!scalarNear(ScalarType(v1.calc(i)), ScalarType(v2.calc(i)), precision))
+                return false;
+        return true;
+    }
+
     template<class VectorType>
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
         os << v.getDerived();

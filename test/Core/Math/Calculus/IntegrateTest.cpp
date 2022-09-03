@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <random>
-#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 using namespace Physica::Core;

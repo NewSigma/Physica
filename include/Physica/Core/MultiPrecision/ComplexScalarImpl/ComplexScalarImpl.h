@@ -115,6 +115,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    bool scalarNear(const ComplexScalar<ScalarType>& s1,
+                    const ComplexScalar<ScalarType>& s2,
+                    double precision) {
+        assert(precision > 0);
+        return scalarNear((s1 - s2).norm(), typename ScalarType::RealType(0), precision);
+    }
+
+    template<class ScalarType>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<ScalarType>& c) {
         const auto& imagine = c.getImag();
         return os << std::setprecision(10) << double(c.getReal())

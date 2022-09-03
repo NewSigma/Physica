@@ -21,7 +21,6 @@
 #include <fstream>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;

@@ -20,7 +20,6 @@
 #include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
-#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;

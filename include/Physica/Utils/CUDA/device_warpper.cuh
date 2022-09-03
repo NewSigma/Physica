@@ -23,5 +23,5 @@ namespace Physica::Utils {
      * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
      */
     template<class T>
-    class device_value;
+    class device_warpper;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 
 using namespace Physica::Core;

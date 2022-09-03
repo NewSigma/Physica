@@ -18,7 +18,6 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
-#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;

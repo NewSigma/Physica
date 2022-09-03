@@ -317,6 +317,12 @@ namespace Physica::Core {
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
 
+    template<class ScalarType> ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2);
+    template<class ScalarType>
+    bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarType>& scalar2, double precision);
+    template<ScalarOption option, bool errorTrack>
+    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s);
+    /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
     public:
@@ -620,9 +626,6 @@ namespace Physica::Core {
     inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
-    /* Output */
-    template<ScalarOption option, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

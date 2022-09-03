@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <cmath>
+
 namespace Physica::Core {
     enum UnitSystem {
         SI,

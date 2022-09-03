@@ -76,6 +76,10 @@ namespace Physica::Core {
         void setReal(const ScalarType& s) { real = s; }
         void setImag(const ScalarType& s) { imag = s; }
     };
+
+    template<class ScalarType>
+    bool scalarNear(const ComplexScalar<ScalarType>& s1, const ComplexScalar<ScalarType>& s2, double precision);
+
     template<class ScalarType>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<ScalarType>& c);
 

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     /**
@@ -86,7 +85,7 @@ namespace Physica::Core {
             temp = params - alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
             beta1 *= args[3];
             ++count;
-            const bool meetRelativeCriteria = Utils::vectorNear(params, temp, double(args[5]));
+            const bool meetRelativeCriteria = vectorNear(params, temp, double(args[5]));
             stop = (maxIteration != 0 && count > maxIteration) || meetRelativeCriteria;
             params = temp;
         } while(!stop);

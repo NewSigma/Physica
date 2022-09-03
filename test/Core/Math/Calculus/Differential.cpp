@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"

@@ -18,7 +18,6 @@
  */
 #include <fstream>
 #include "Physica/Core/Interface/VaspWarpper.h"
-#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float, false>;

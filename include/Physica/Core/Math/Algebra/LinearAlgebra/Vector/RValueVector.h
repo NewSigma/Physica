@@ -19,6 +19,8 @@
 #pragma once
 
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 #include "BestPacket.h"
 #include "RVectorBlock.h"
@@ -87,6 +89,9 @@ namespace Physica::Core {
     template<class VectorType1, class VectorType2>
     typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
     operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2);
+
+    template<class VectorType1, class VectorType2>
+    bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
 
     template<class VectorType>
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v);

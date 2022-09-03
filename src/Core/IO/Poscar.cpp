@@ -22,7 +22,6 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
-#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     Poscar::Poscar() : Base()

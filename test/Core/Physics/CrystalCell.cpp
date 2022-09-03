@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Utils/TestHelper.h"
 
 using namespace Physica::Core;
 

@@ -55,6 +55,26 @@ namespace Physica::Core {
         }
     }
     //////////////////////////////////////////////Global//////////////////////////////////////////////
+    template<class ScalarType>
+    ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
+        static_assert(Core::is_scalar<ScalarType>::value && !ScalarType::isComplex);
+        const auto& s1 = scalar1.getDerived();
+        const auto& s2 = scalar2.getDerived();
+        const ScalarType min = std::numeric_limits<ScalarType>::min();
+        const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
+        const ScalarType delta = s1 - s2;
+        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType::Two());
+        return error;
+    }
+
+    template<class ScalarType>
+    bool scalarNear(const ScalarBase<ScalarType>& scalar1,
+                    const ScalarBase<ScalarType>& scalar2,
+                    double precision) {
+        assert(precision > 0);
+        return relativeError(scalar1.getDerived(), scalar2.getDerived()) < ScalarType(precision);
+    }
+
     template<ScalarOption option, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.

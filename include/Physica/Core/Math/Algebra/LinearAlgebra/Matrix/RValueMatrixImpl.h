@@ -261,6 +261,17 @@ namespace Physica::Core {
             return minor;
     }
 
+    template<class MatrixType, class MatrixType2>
+    bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision) {
+        assert(m1.getRow() == m2.getRow());
+        assert(m1.getColumn() == m2.getColumn());
+        for (size_t i = 0; i < m1.getColumn(); ++i)
+            for (size_t j = 0; j < m1.getRow(); ++j)
+                if (!scalarNear(m1.calc(j, i), m2.calc(j, i), precision))
+                    return false;
+        return true;
+    }
+
     template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m) {
         const auto row = m.getRow();

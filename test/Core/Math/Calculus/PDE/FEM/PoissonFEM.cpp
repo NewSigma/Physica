@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Utils/TestHelper.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/PoissonModel.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Triangle1.h"

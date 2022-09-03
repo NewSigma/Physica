@@ -100,6 +100,9 @@ namespace Physica::Core {
         [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
 
+    template<class MatrixType, class MatrixType2>
+    bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision);
+
     template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////

@@ -23,7 +23,6 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Utils/TestHelper.h"
 #include "MDCell.h"
 
 namespace Physica::Core {
@@ -247,7 +246,7 @@ namespace Physica::Core {
             toNextMean(squared_kinetic, i, square(temp));
         }
         const ScalarType factor = ScalarType(getDOF() * getNumReplica()) / ScalarType(getDOF() * getNumReplica() + 2);
-        return Utils::scalarNear(square(kinetic), factor * squared_kinetic, precision);
+        return scalarNear(square(kinetic), factor * squared_kinetic, precision);
     }
 
     template<class ScalarType>
