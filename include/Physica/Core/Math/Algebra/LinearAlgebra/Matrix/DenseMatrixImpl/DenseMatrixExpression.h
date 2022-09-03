@@ -58,12 +58,13 @@ namespace Physica::Core {
         public:
             template<class OtherDerived>
             void assignTo(LValueMatrix<OtherDerived>& m) const {
+                using ScalarType_ = typename OtherDerived::ScalarType;
                 assert(getRow() == m.getRow() && getColumn() == m.getColumn());
                 for (size_t i = 0; i < m.getMaxMajor(); ++i) {
                     for (size_t j = 0; j < m.getMaxMinor(); ++j) {
                         const size_t r = LValueMatrix<OtherDerived>::rowFromMajorMinor(i, j);
                         const size_t c = LValueMatrix<OtherDerived>::columnFromMajorMinor(i, j);
-                        m(r, c) = calc(r, c);
+                        m(r, c) = ScalarType_(calc(r, c));
                     }
                 }       
             }

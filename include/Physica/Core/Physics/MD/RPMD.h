@@ -55,6 +55,8 @@ namespace Physica::Core {
     public:
         RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
         /* Operations */
+        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        void updateForce(const ForceModel& model);
         template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
         void nvt_step(RandomGenerator& gen, const ForceCalculator& force);
         template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
@@ -134,37 +136,35 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class RandomGenerator, class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceCalculator& force) {
+    template<class ForceModel, class Executor>
+    void RPMD<ScalarType>::updateForce(const ForceModel& model) {
         auto kernel = [&](unsigned int replica) {
             MDCell cell = phaseToCell(replica);
             cell.normalizeCell();
             auto saveTo = forceBuffer.col(replica);
-            saveTo = force(std::move(cell));
+            saveTo = model(std::move(cell));
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator, class ForceCalculator, class Executor>
+    void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceCalculator& force) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep * 0.5);
         thermostatStep(gen, timeStep);
         dynamicStep(timeStep * 0.5);
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        updateForce<ForceCalculator, Executor>(force);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType>
     template<class ForceCalculator, class Executor>
     void RPMD<ScalarType>::nve_step(const ForceCalculator& force) {
-        auto kernel = [&](unsigned int replica) {
-            MDCell cell = phaseToCell(replica);
-            cell.normalizeCell();
-            auto saveTo = forceBuffer.col(replica);
-            saveTo = force(std::move(cell));
-        };
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep);
         normalizeCentroid();
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        updateForce<ForceCalculator, Executor>(force);
         forceStep(timeStep * 0.5);
     }
 
