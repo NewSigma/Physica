@@ -23,6 +23,7 @@ namespace Physica::Core {
                                         , fin(std::move(fin_))
                                         , stepNum(0)
                                         , init(false) {}
+
     Xdatcar& Xdatcar::operator=(Xdatcar xdatcar) noexcept {
         swap(xdatcar);
         return *this;
@@ -46,13 +47,8 @@ namespace Physica::Core {
 
     void Xdatcar::swap(Xdatcar& xdatcar) noexcept {
         data.swap(xdatcar.data);
-    }
-}
-
-namespace std {
-    template<>
-    inline void swap<Physica::Core::Xdatcar>(
-            Physica::Core::Xdatcar& car1, Physica::Core::Xdatcar& car2) noexcept {
-        car1.swap(car2);
+        fin.swap(xdatcar.fin);
+        std::swap(stepNum, xdatcar.stepNum);
+        std::swap(init, xdatcar.init);
     }
 }

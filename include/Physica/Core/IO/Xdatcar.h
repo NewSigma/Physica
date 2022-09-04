@@ -19,6 +19,7 @@
 #pragma once
 
 #include <fstream>
+#include <utility>
 #include "Poscar.h"
 
 namespace Physica::Core {
@@ -30,7 +31,7 @@ namespace Physica::Core {
     public:
         Xdatcar(std::ifstream fin_);
         Xdatcar(const Xdatcar&) = default;
-        Xdatcar(Xdatcar&&) = default;
+        Xdatcar(Xdatcar&&) noexcept = default;
         ~Xdatcar() = default;
         /* Operators */
         Xdatcar& operator=(Xdatcar xdatcar) noexcept;
