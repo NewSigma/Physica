@@ -53,7 +53,7 @@ namespace Physica::Core {
         /* Operations */
         void standrizeLattice();
         void extendInZ(ScalarType factor);
-        void superToUnit(size_t x, size_t y, size_t z);
+        void superToUnit(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] Type getType() const noexcept { return type; }

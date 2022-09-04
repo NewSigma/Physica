@@ -44,6 +44,7 @@ namespace Physica::Core {
         void scale(ScalarType factor);
         void toDirect();
         void toCartesian();
+        void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }
@@ -52,7 +53,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getVolume() const noexcept;
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
-        [[nodiscard]] CrystalCell unitToSuper(unsigned int x, unsigned int y, unsigned int z) const;
         /* Helpers */
         void swap(CrystalCell& cell) noexcept;
     };

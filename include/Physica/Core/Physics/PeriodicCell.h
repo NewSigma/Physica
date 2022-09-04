@@ -57,14 +57,22 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
         [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const;
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
+        /* Static members */
+        static void unitToSuper(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
+        static void superToUnit(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
         static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
         void toCartesian();
+        void scale_direct(ScalarType factor);
+        void scalr_cartesian(ScalarType factor);
+        void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
+        void superToUnit(unsigned int x, unsigned int y, unsigned int z);
     };
 
     template<class ScalarType, unsigned int Dim>
@@ -102,6 +110,60 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::unitToSuper(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
+        assert(x > 0 && y > 0 && z > 0);
+        const size_t numParticle = target.getRow();
+        const size_t newNumParticle = x * y * z * target.getRow();
+        PositionMatrix new_pos(newNumParticle, 3);
+        size_t index = 0;
+        for (size_t i = 0; i < numParticle; ++i) {
+            for (unsigned int z_ = 0; z_ < z; ++z_) {
+                for (unsigned int y_ = 0; y_ < y; ++y_) {
+                    for (unsigned int x_ = 0; x_ < x; ++x_) {
+                        new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
+                        new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
+                        new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
+                        ++index;
+                    }
+                }
+            }
+        }
+        target.swap(new_pos);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::superToUnit(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
+        assert(x > 0 && y > 0 && z > 0);
+        assert(target.getRow() % (x * y * z) == 0);
+
+        auto colX = target.col(0);
+        colX *= ScalarType(x);
+        auto colY = target.col(1);
+        colY *= ScalarType(y);
+        auto colZ = target.col(2);
+        colZ *= ScalarType(z);
+
+        const size_t numParticle = target.getRow();
+        const size_t newNumParticle = numParticle / (x * y * z);
+        PositionMatrix new_pos(newNumParticle, 3);
+        size_t toFill = 0;
+        size_t toCheck = 0;
+        const ScalarType one = ScalarType::One();
+        for (; toFill < newNumParticle; ++toFill) {
+            for (; toCheck < numParticle; ++toCheck) {
+                auto rowToCheck = target.row(toCheck);
+                if (rowToCheck[0] <= one && rowToCheck[1] <= one && rowToCheck[2] <= one) {
+                    auto rowToFill = new_pos.row(toFill);
+                    rowToFill = rowToCheck.asVector();
+                    ++toCheck;
+                    break;
+                }
+            }
+        }
+        target.swap(new_pos);
+    }
+
+    template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
         target *= invLattice;
     }
@@ -109,5 +171,44 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::toCartesian() {
         pos *= lattice;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::scale_direct(ScalarType factor) {
+        assert(factor.isPositive());
+        lattice *= factor;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::scalr_cartesian(ScalarType factor) {
+        assert(factor.isPositive());
+        lattice *= factor;
+        pos *= factor;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+        unitToSuper(pos, x, y, z);
+        auto rowX = lattice.row(0);
+        rowX *= ScalarType(x);
+        auto rowY = lattice.row(1);
+        rowY *= ScalarType(y);
+        auto rowZ = lattice.row(2);
+        rowZ *= ScalarType(z);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::superToUnit(unsigned int x, unsigned int y, unsigned int z) {
+        superToUnit(pos, x, y, z);
+        const ScalarType inv_x = Core::reciprocal(ScalarType(x));
+        const ScalarType inv_y = Core::reciprocal(ScalarType(y));
+        const ScalarType inv_z = Core::reciprocal(ScalarType(z));
+
+        auto rowX = lattice.row(0);
+        rowX *= inv_x;
+        auto rowY = lattice.row(1);
+        rowY *= inv_y;
+        auto rowZ = lattice.row(2);
+        rowZ *= inv_z;
     }
 }

@@ -39,7 +39,6 @@ namespace Physica::Core {
         void scale(ScalarType_ factor);
         void normalizeCell();
         /* Getters */
-        [[nodiscard]] size_t getNumParticle() const { return pos.getRow(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType_ getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Base::Type::Cartesian; }

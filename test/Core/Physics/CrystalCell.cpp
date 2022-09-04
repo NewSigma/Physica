@@ -49,7 +49,8 @@ int main() {
         0.8333333333333333, 0.7500000000000000, 0.5000000000000000
     };
     const Physica::Utils::Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
-    const CrystalCell supercell = cell.unitToSuper(3, 2, 1);
+    CrystalCell supercell = cell;
+    supercell.unitToSuper(3, 2, 1);
     if (!matrixNear(answer_lattice, supercell.getLattice(), 1E-15))
         return 1;
     if (!matrixNear(answer_pos, supercell.getPos(), 1E-15))

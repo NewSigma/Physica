@@ -36,8 +36,7 @@ namespace Physica::Core {
     }
 
     void CrystalCell::scale(ScalarType factor) {
-        assert(factor.isPositive());
-        lattice *= factor;
+        Base::scale_direct(factor);
     }
 
     void CrystalCell::toDirect() {
@@ -50,6 +49,26 @@ namespace Physica::Core {
         assert(type == Type::Direct);
         Base::toCartesian();
         type = Type::Cartesian;
+    }
+
+    void CrystalCell::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+        const size_t numAtom = getAtomCount();
+        Base::unitToSuper(x, y, z);
+        const size_t newNumAtom = getAtomCount();
+        AtomicArray new_atomic(newNumAtom);
+        size_t index = 0;
+        for (size_t atom = 0; atom < numAtom; ++atom) {
+            const auto atomic = atomicNumbers[atom];
+            for (unsigned int z_ = 0; z_ < z; ++z_) {
+                for (unsigned int y_ = 0; y_ < y; ++y_) {
+                    for (unsigned int x_ = 0; x_ < x; ++x_) {
+                        new_atomic[index] = atomic;
+                        ++index;
+                    }
+                }
+            }
+        }
+        atomicNumbers.swap(new_atomic);
     }
 
     typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {
@@ -68,38 +87,6 @@ namespace Physica::Core {
         for (size_t i = 0; i < getAtomCount(); ++i)
             result += getAtomicNumber(i);
         return result;
-    }
-
-    CrystalCell CrystalCell::unitToSuper(unsigned int x, unsigned int y, unsigned int z) const {
-        assert(x > 0 && y > 0 && z > 0);
-        const size_t numAtom = x * y * z * getAtomCount();
-        LatticeMatrix new_lattice{};
-        {
-            auto row1 = new_lattice.row(0);
-            row1 = lattice.row(0).asVector() * ScalarType(x);
-            auto row2 = new_lattice.row(1);
-            row2 = lattice.row(1).asVector() * ScalarType(y);
-            auto row3 = new_lattice.row(2);
-            row3 = lattice.row(2).asVector() * ScalarType(z);
-        }
-        PositionMatrix new_pos(numAtom, 3);
-        AtomicArray new_atomic(numAtom);
-        size_t index = 0;
-        for (size_t atom = 0; atom < getAtomCount(); ++atom) {
-            const auto atomic = atomicNumbers[atom];
-            for (unsigned int z_ = 0; z_ < z; ++z_) {
-                for (unsigned int y_ = 0; y_ < y; ++y_) {
-                    for (unsigned int x_ = 0; x_ < x; ++x_) {
-                        new_pos(index, 0) = (pos(atom, 0) + ScalarType(x_)) / ScalarType(x);
-                        new_pos(index, 1) = (pos(atom, 1) + ScalarType(y_)) / ScalarType(y);
-                        new_pos(index, 2) = (pos(atom, 2) + ScalarType(z_)) / ScalarType(z);
-                        new_atomic[index] = atomic;
-                        ++index;
-                    }
-                }
-            }
-        }
-        return CrystalCell(std::move(new_lattice), std::move(new_pos), std::move(new_atomic), type);
     }
 
     void CrystalCell::swap(CrystalCell& cell) noexcept {

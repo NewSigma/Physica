@@ -41,9 +41,7 @@ namespace Physica::Core {
             , invLattice(Base::makeInvLattice()) {}
 
     void MDCell::scale(ScalarType_ factor) {
-        assert(factor.isPositive());
-        lattice *= factor;
-        pos *= factor;
+        Base::scalr_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }
 
