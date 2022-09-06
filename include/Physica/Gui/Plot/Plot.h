@@ -37,6 +37,8 @@ namespace Physica::Gui {
         Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
                 , const MultiScalar& end, QWidget* parent = nullptr);
         /* Operations */
+        template<class VectorType>
+        QLineSeries& line(const Core::LValueVector<VectorType>& y);
         template<class VectorType1, class VectorType2>
         QLineSeries& line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
         template<class VectorType>
@@ -66,6 +68,12 @@ namespace Physica::Gui {
         template<class VectorType>
         double findMedian(const Core::LValueVector<VectorType>& sorted_v, size_t from, size_t to);
     };
+
+    template<class VectorType>
+    QLineSeries& Plot::line(const Core::LValueVector<VectorType>& y) {
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        return line(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
+    }
 
     template<class VectorType1, class VectorType2>
     QLineSeries& Plot::line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
