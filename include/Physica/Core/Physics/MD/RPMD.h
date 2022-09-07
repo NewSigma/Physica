@@ -107,10 +107,9 @@ namespace Physica::Core {
     template<class ScalarType>
     RPMD<ScalarType>::RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_)
             : MDCell(std::move(cell_))
+            , fft(numReplica, 1)
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
-        fft = FFT<ScalarType, 1>(numReplica, 1);
-
         const size_t dof = getDOF();
         phasePosX.resize(2 * dof, numReplica);
         forceBuffer.resize(dof, numReplica);

@@ -44,10 +44,10 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<ScalarType, Order, MaxOrder>>
-                             , private Internal::HalfDenseMatrixStorage<DenseHermiteMatrix<ScalarType, Order, MaxOrder>> {
+                             , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
         static_assert(ScalarType::isComplex);
 
-        using Storage = Internal::HalfDenseMatrixStorage<DenseHermiteMatrix<ScalarType, Order, MaxOrder>>;
+        using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
         using RealType = typename ScalarType::RealType;
     public:
         using ColMatrix = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
@@ -60,7 +60,8 @@ namespace Physica::Core {
         /* Operators */
         DenseHermiteMatrix& operator=(DenseHermiteMatrix m) noexcept;
         DenseHermiteMatrix& operator=(RealType r);
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t column);
+        [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
+        [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         /* Operations */
         using Storage::resize;
@@ -71,8 +72,6 @@ namespace Physica::Core {
         void swap(DenseHermiteMatrix& m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseHermiteMatrix unitMatrix(size_t order);
-    private:
-        [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
     };
     /**
      * Save the upper triangle part of \param mat
@@ -108,14 +107,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
-    ScalarType& DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t column) {
-        assert(row <= column);
-        return Storage::operator[](accessingIndex(row, column));
+    ScalarType& DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t col) {
+        assert(row <= column); //Optimize: possible to make use of this condition
+        const size_t index = Storage::accessingIndex(row, col);
+        return Storage::operator[](index);
+    }
+
+    template<class ScalarType, size_t Order, size_t MaxOrder>
+    const ScalarType& DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t col) const {
+        const size_t index = Storage::accessingIndex(row, col);
+        return Storage::operator[](index);
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     ScalarType DenseHermiteMatrix<ScalarType, Order, MaxOrder>::calc(size_t row, size_t col) const {
-        const size_t index = accessingIndex(row, col);
+        const size_t index = Storage::accessingIndex(row, col);
         return col >= row ? Storage::operator[](index) : Storage::operator[](index).conjugate();
     }
 
@@ -129,16 +135,6 @@ namespace Physica::Core {
         DenseHermiteMatrix<ScalarType, Order, MaxOrder> result(order);
         result.toUnitMatrix();
         return result;
-    }
-
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    size_t DenseHermiteMatrix<ScalarType, Order, MaxOrder>::accessingIndex(size_t r, size_t c) const noexcept {
-        const size_t order = Storage::getOrder();
-        assert(r < order && c < order);
-        const bool exchange = c < r;
-        const size_t min = exchange ? c : r;
-        const size_t max = exchange ? r : c;
-        return (order * 2U - min - 1) * min / 2U + max;
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>

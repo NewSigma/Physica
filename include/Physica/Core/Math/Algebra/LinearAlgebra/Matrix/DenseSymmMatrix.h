@@ -43,9 +43,9 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>
-                          , private Internal::HalfDenseMatrixStorage<DenseSymmMatrix<ScalarType, Order, MaxOrder>> {
+                          , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
         using Base = LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>;
-        using Storage = Internal::HalfDenseMatrixStorage<DenseSymmMatrix<ScalarType, Order, MaxOrder>>;
+        using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
     public:
         using ColMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
         using RowMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
@@ -57,8 +57,8 @@ namespace Physica::Core {
         /* Operators */
         DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         using Base::operator=;
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Storage::operator[](accessingIndex(row, column)); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Storage::operator[](accessingIndex(row, column)); }
+        [[nodiscard]] ScalarType& operator()(size_t row, size_t column);
+        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const;
         /* Operations */
         using Storage::resize;
         /* Getters */
@@ -69,8 +69,6 @@ namespace Physica::Core {
         void swap(DenseSymmMatrix& m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
-    private:
-        [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
@@ -93,6 +91,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
+    ScalarType& DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t column) {
+        const size_t index = Storage::accessingIndex(row, column);
+        return Storage::operator[](index);
+    }
+
+    template<class ScalarType, size_t Order, size_t MaxOrder>
+    const ScalarType& DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t column) const {
+        const size_t index = Storage::accessingIndex(row, column);
+        return Storage::operator[](index);
+    }
+
+    template<class ScalarType, size_t Order, size_t MaxOrder>
     void DenseSymmMatrix<ScalarType, Order, MaxOrder>::swap(DenseSymmMatrix& m) noexcept {
         Storage::swap(m);
     }
@@ -102,16 +112,6 @@ namespace Physica::Core {
         DenseSymmMatrix<ScalarType, Order, MaxOrder> result(order);
         result.toUnitMatrix();
         return result;
-    }
-
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    size_t DenseSymmMatrix<ScalarType, Order, MaxOrder>::accessingIndex(size_t r, size_t c) const noexcept {
-        const size_t order = Storage::getOrder();
-        assert(r < order && c < order);
-        const bool exchange = c < r;
-        const size_t min = exchange ? c : r;
-        const size_t max = exchange ? r : c;
-        return (order * 2U - min - 1) * min / 2U + max;
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>

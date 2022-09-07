@@ -21,25 +21,23 @@
 #include "AbstractDenseMatrixStorage.h"
 
 namespace Physica::Core::Internal {
-    template<class Derived>
-    class HalfDenseMatrixBase {
-        using ScalarType = typename Traits<Derived>::ScalarType;
-        constexpr static size_t order = Traits<Derived>::RowAtCompile;
-        constexpr static size_t maxOrder = Traits<Derived>::MaxRowAtCompile;
-        constexpr static size_t size = order * (order + 1) / 2;
-        constexpr static size_t maxSize = maxOrder * (maxOrder + 1) / 2;
+    template<class T, size_t Order, size_t MaxOrder> class HalfDenseMatrixStorage;
+
+    template<class T, size_t Order, size_t MaxOrder>
+    class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
+        constexpr static size_t Size = Order * (Order + 1) / 2;
+        constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
     public:
-        using Type = DenseMatrixStorageHelper<ScalarType, size, maxSize>;
+        using Base = DenseMatrixStorageHelper<T, Size, MaxSize>;
     };
 
-    template<class Derived>
-    class HalfDenseMatrixStorage : public HalfDenseMatrixBase<Derived>::Type {
-        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
-        using T = typename Traits<Derived>::ScalarType;
-        using Base = typename HalfDenseMatrixBase<Derived>::Type;
+    template<class T, size_t Order, size_t MaxOrder>
+    class HalfDenseMatrixStorage : public Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>>::Base {
+        using This = HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using Base = typename Traits<This>::Base;
         size_t order;
     public:
-        HalfDenseMatrixStorage() : Base(), order(MaxSizeAtCompile) {}
+        HalfDenseMatrixStorage() : Base(), order(MaxOrder) {}
         HalfDenseMatrixStorage(size_t order_) : Base(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : Base(order_ * (order_ + 1) / 2, t), order(order_) {}
         HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
@@ -51,22 +49,34 @@ namespace Physica::Core::Internal {
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
         void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
         /* Getters */
+        using Base::getLength;
         [[nodiscard]] size_t getOrder() const noexcept { return order; }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }
-
+        /* Helpers */
+        [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
         void swap(HalfDenseMatrixStorage& storage) noexcept;
     };
 
-    template<class Derived>
-    void HalfDenseMatrixStorage<Derived>::swap(HalfDenseMatrixStorage<Derived>& storage) noexcept {
+    template<class T, size_t Order, size_t MaxOrder>
+    void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& storage) noexcept {
         std::swap(order, storage.order);
         Base::swap(storage);
     }
 
-    template<class Derived>
-    inline void swap(Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat1,
-                     Physica::Core::Internal::HalfDenseMatrixStorage<Derived>& mat2) noexcept {
+    template<class ScalarType, size_t Order, size_t MaxOrder>
+    size_t HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>::accessingIndex(size_t r, size_t c) const noexcept {
+        const size_t order = getOrder();
+        assert(r < order && c < order);
+        const bool exchange = c < r;
+        const size_t min = exchange ? c : r;
+        const size_t max = exchange ? r : c;
+        return (order * 2U - min - 1) * min / 2U + max;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    inline void swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& mat1,
+                     HalfDenseMatrixStorage<T, Order, MaxOrder>& mat2) noexcept {
         mat1.swap(mat2);
     }
 }
