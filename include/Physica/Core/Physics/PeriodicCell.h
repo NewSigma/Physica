@@ -117,9 +117,9 @@ namespace Physica::Core {
         PositionMatrix new_pos(newNumParticle, 3);
         size_t index = 0;
         for (size_t i = 0; i < numParticle; ++i) {
-            for (unsigned int z_ = 0; z_ < z; ++z_) {
+            for (unsigned int x_ = 0; x_ < x; ++x_) {
                 for (unsigned int y_ = 0; y_ < y; ++y_) {
-                    for (unsigned int x_ = 0; x_ < x; ++x_) {
+                    for (unsigned int z_ = 0; z_ < z; ++z_) {
                         new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
                         new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
                         new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
