@@ -108,7 +108,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     ScalarType& DenseHermiteMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t col) {
-        assert(row <= column); //Optimize: possible to make use of this condition
+        assert(row <= col); //Optimize: possible to make use of this condition
         const size_t index = Storage::accessingIndex(row, col);
         return Storage::operator[](index);
     }

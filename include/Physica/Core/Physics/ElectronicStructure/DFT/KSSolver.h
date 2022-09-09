@@ -292,11 +292,15 @@ namespace Physica::Core {
         fft_xc[SpinState::Up].transform(xcPot[SpinState::Up].asVector());
         if constexpr (isSpinPolarized)
             fft_xc[SpinState::Down].transform(xcPot[SpinState::Down].asVector());
+        Vector<ComplexType> kSpaceXC_up = fft_xc[SpinState::Up].getKSpace();
+        Vector<ComplexType> kSpaceXC_down{};
+        if constexpr (isSpinPolarized)
+            kSpaceXC_down = fft_xc[SpinState::Up].getKSpace();
         fft_hartree->transform(currentDensity()[0].asVector());
+        const Vector<ComplexType> kSpaceDencity = fft_hartree->getKSpace();
 
         const ScalarType factor = reciprocal(ScalarType(2 * M_PI));
-        const auto fft_nomalizer = reciprocal(ScalarType(getDensitySize()));
-        const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume() * fft_nomalizer;
+        const ScalarType factor1 = ScalarType(4 * M_PI) / cell.getVolume();
 
         const size_t numPW = getPlainWaveCount();
         for (size_t i = 0; i < numPW; ++i) {
@@ -309,18 +313,21 @@ namespace Physica::Core {
                 const VectorType k2 = getWaveVector(dim2);
                 const VectorType deltaK = k1 - k2;
                 const VectorType freq = deltaK * factor;
+                const size_t offset = size_t(double(freq[0] / fft_hartree->getKSpaceDelta(0))) * fft_hartree->getKSpaceSize(1) * fft_hartree->getKSpaceSize(2)
+                                    + size_t(double(freq[1] / fft_hartree->getKSpaceDelta(1))) * fft_hartree->getKSpaceSize(2)
+                                    + size_t(double(freq[2] / fft_hartree->getKSpaceDelta(2)));
 
                 ComplexType hartree;
                 if (i == j)
                     hartree = ComplexType::Zero();
                 else
-                    hartree = fft_hartree->getFreqIntense(freq) * factor1 / deltaK.squaredNorm();
+                    hartree = kSpaceDencity[offset] * factor1 / deltaK.squaredNorm();
                 const ComplexType external = externalPot(x1 - x2, y1 - y2, z1 - z2);
 
-                const ComplexType xc_up = fft_xc[SpinState::Up].getFreqIntense(freq) * fft_nomalizer;
+                const ComplexType xc_up = kSpaceXC_up[offset];
                 h[SpinState::Up](i, j) += xc_up + hartree + external;
                 if constexpr (isSpinPolarized) {
-                    const ComplexType xc_down = fft_xc[SpinState::Down].getFreqIntense(freq) * fft_nomalizer;
+                    const ComplexType xc_down = kSpaceXC_down[offset];
                     h[SpinState::Down](i, j) += xc_down + hartree + external;
                 }
             }

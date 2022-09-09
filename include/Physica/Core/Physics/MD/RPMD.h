@@ -113,7 +113,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         phasePosX.resize(2 * dof, numReplica);
         forceBuffer.resize(dof, numReplica);
-        buffer.resize(2, fft.getFreqSize());
+        buffer.resize(2, fft.getKSpaceSize());
 
         auto momentum = phasePosX.topRows(dof);
         momentum = ScalarType::Zero();
@@ -370,11 +370,11 @@ namespace Physica::Core {
         assert(posID < getDOF());
         fft.transform(phasePosX.row(posID));
         auto momentum = buffer.row(0);
-        momentum = fft.getFreqs();
+        momentum = fft.getKSpace();
 
         fft.transform(phasePosX.row(posID + getDOF()));
         auto pos = buffer.row(1);
-        pos = fft.getFreqs();
+        pos = fft.getKSpace();
     }
 
     template<class ScalarType>
@@ -382,11 +382,11 @@ namespace Physica::Core {
         assert(posID < getDOF());
         fft.invTransform(buffer.row(0));
         auto momentum = phasePosX.row(posID);
-        momentum = fft.getDatas();
+        momentum = fft.getRSpace();
 
         fft.invTransform(buffer.row(1));
         auto pos = phasePosX.row(posID + getDOF());
-        pos = fft.getDatas();
+        pos = fft.getRSpace();
     }
 
     template<class ScalarType>

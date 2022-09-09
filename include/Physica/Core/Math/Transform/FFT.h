@@ -24,8 +24,9 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Dim = 1> class FFT;
-    template<class ScalarType, size_t Dim> class FFTImpl;
-
+    /**
+     * A FFT transform a vector in r-space to a vector in k-space.
+     */
     template<class ScalarType>
     class FFT<ScalarType, 1> {
         using RealType = typename ScalarType::RealType;
@@ -38,12 +39,12 @@ namespace Physica::Core {
             double* real_buffer;
             fftw_complex* buffer;
         };
-        int size;
-        RealType deltaT;
+        int rSpaceSize;
+        RealType rSpaceDelta;
     public:
         FFT();
-        FFT(size_t size_, const RealType& deltaT);
-        FFT(const Vector<ScalarType>& data, const RealType& deltaT);
+        FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_);
+        FFT(const Vector<ScalarType>& data, const RealType& rSpaceDelta_);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT();
@@ -53,88 +54,77 @@ namespace Physica::Core {
         void transform(const Vector<ScalarType>& data);
         void invTransform(const Vector<ComplexType>& data);
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return size; }
-        [[nodiscard]] int getFreqSize() const noexcept;
-        [[nodiscard]] const RealType& getDeltaT() const noexcept { return deltaT; }
-        [[nodiscard]] ComplexType getFreq(size_t index) const;
-        [[nodiscard]] Vector<ScalarType> getDatas() const;
-        [[nodiscard]] Vector<ComplexType> getFreqs() const;
-        [[nodiscard]] ComplexType getComponent(ssize_t index) const;
-        [[nodiscard]] Vector<ComplexType> getComponents() const;
-        [[nodiscard]] RealType getDeltaFreq() const noexcept { return reciprocal(getDeltaT() * getSize()); }
-        [[nodiscard]] ComplexType getFreqIntense(const RealType& freq) const noexcept;
+        [[nodiscard]] constexpr static size_t getDimen() { return 1; }
+        [[nodiscard]] int getRSpaceSize() const noexcept { return rSpaceSize; }
+        [[nodiscard]] int getKSpaceSize() const noexcept {return rSizeToKSize(getRSpaceSize()); }
+        [[nodiscard]] const RealType& getRSpaceDelta() const noexcept { return rSpaceDelta; }
+        [[nodiscard]] RealType getKSpaceDelta() const noexcept { return reciprocal(getRSpaceDelta() * getRSpaceSize()); }
+        [[nodiscard]] Vector<ScalarType> getRSpace() const;
+        [[nodiscard]] Vector<ComplexType> getKSpace() const;
         /* Helpers */
         void swap(FFT& fft) noexcept;
+        /* Static members */
+        [[nodiscard]] inline static int rSizeToKSize(int size_data) noexcept;
     private:
+        void initializePlan();
         void transform();
         void invTransform();
     };
 
     template<class ScalarType, size_t Dim>
     class FFT {
-        using Impl = FFTImpl<ScalarType, Dim>;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
         static constexpr bool isComplex = ScalarType::isComplex;
     private:
-        Impl impl;
+        fftw_plan forward_plan;
+        fftw_plan backward_plan;
+        union {
+            double* real_buffer;
+            fftw_complex* buffer;
+        };
+        Utils::Array<int, Dim> rSpaceSize;
+        Utils::Array<int, Dim> kSpaceSize;
+        Utils::Array<RealType, Dim> rSpaceDelta;
     public:
-        FFT() = default;
-        FFT(Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
-        FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs);
-        FFT(const FFT&) = default;
-        FFT(FFT&&) noexcept = default;
-        ~FFT() = default;
+        FFT();
+        FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, Utils::Array<RealType, Dim> rSpaceDelta_);
+        FFT(const Vector<ScalarType>& data, const Utils::Array<size_t, Dim>& rSpaceSize_, Utils::Array<RealType, Dim> rSpaceDelta_);
+        FFT(const FFT&);
+        FFT(FFT&&) noexcept;
+        ~FFT();
         /* Operators */
         FFT& operator=(FFT fft) noexcept;
-        ComplexType operator()(size_t i) { return impl(i); }
         /* Operations */
-        void transform(const Vector<ScalarType>& data) { impl.transform(data); }
-        void invTransform(const Vector<ComplexType>& data) { impl.invTransform(data); }
+        void transform(const Vector<ScalarType>& data);
+        void invTransform(const Vector<ComplexType>& data);
         /* Getters */
-        [[nodiscard]] size_t getSize(size_t dim) const noexcept { return impl.getSize(dim); }
-        [[nodiscard]] const RealType& getDeltaT(size_t dim) const noexcept { return impl.getDeltaT(dim); }
-        [[nodiscard]] ComplexType getComponent(Utils::Array<ssize_t, Dim> indexes) const { return impl.getComponent(indexes); }
-        [[nodiscard]] Vector<ComplexType> getComponents() const { return impl.getComponents(); }
-        [[nodiscard]] RealType getDeltaFreq(size_t dim) const noexcept { return reciprocal(impl.getDeltaT(dim) * impl.getSize(dim)); }
-        [[nodiscard]] ComplexType getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept;
+        [[nodiscard]] size_t getDimen() const noexcept { return rSpaceSize.getLength(); }
+        [[nodiscard]] const Utils::Array<int, Dim>& getRSpaceSize() const noexcept { return rSpaceSize; }
+        [[nodiscard]] int getRSpaceSize(size_t dim) const noexcept { return rSpaceSize[dim]; }
+        [[nodiscard]] const Utils::Array<int, Dim>& getKSpaceSize() const noexcept { return kSpaceSize; }
+        [[nodiscard]] int getKSpaceSize(size_t dim) const noexcept { return kSpaceSize[dim]; }
+        [[nodiscard]] const Utils::Array<RealType, Dim>& getRSpaceDelta() const noexcept { return rSpaceDelta; }
+        [[nodiscard]] RealType getRSpaceDelta(size_t dim) const noexcept { return rSpaceDelta[dim]; }
+        [[nodiscard]] RealType getKSpaceDelta(size_t dim) const noexcept { return reciprocal(getRSpaceDelta(dim) * getRSpaceSize(dim)); }
+        [[nodiscard]] Vector<ScalarType> getRSpace() const;
+        [[nodiscard]] Vector<ComplexType> getKSpace() const;
         /* Helpers */
-        void swap(FFT& fft) noexcept { impl.swap(fft.impl); }
+        void swap(FFT& fft) noexcept;
+    private:
+        static bool checkSize(const Utils::Array<size_t, Dim>& rSpaceSize);
+        Utils::Array<int, Dim> makeKSpaceSize() const;
+        fftw_plan forwardPlan();
+        fftw_plan backwardPlan();
+        void transform();
+        void invTransform();
+        size_t totalRSpaceSize(size_t from_dim) const;
+        size_t totalKSpaceSize(size_t from_dim) const;
+        void normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const;
+        [[nodiscard]] RealType mulDeltas() const;
+        [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
+        [[nodiscard]] Utils::Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
     };
-
-    template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT(Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs)
-            : impl(size, deltaTs) {}
-
-    template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT(const Vector<ScalarType>& data, Utils::Array<size_t, Dim> size, Utils::Array<RealType, Dim> deltaTs)
-            : impl(data, size, deltaTs) {}
-
-    template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>& FFT<ScalarType, Dim>::operator=(FFT<ScalarType, Dim> fft) noexcept {
-        swap(fft);
-        return *this;
-    }
-
-    template<class ScalarType, size_t Dim>
-    typename FFT<ScalarType, Dim>::ComplexType FFT<ScalarType, Dim>::getFreqIntense(Utils::Array<RealType, Dim> freq) const noexcept {
-        Utils::Array<ssize_t, Dim> indexes{};
-        for (size_t i = 0; i < Dim; ++i) {
-            RealType f = freq[i];
-            double round_helper;
-            if constexpr (isComplex) {
-                round_helper = f.isPositive() ? 0.5 : -0.5;
-            }
-            else {
-                if (i == freq.getLength() - 1)
-                    f.toAbs();
-                round_helper = 0.5;
-            }
-            const double float_index = double(getDeltaT(i) * f * RealType(getSize(i)));
-            indexes[i] = static_cast<ssize_t>(float_index + round_helper);
-        }
-        return getComponent(indexes);
-    }
 }
 
 #include "FFTImpl.h"

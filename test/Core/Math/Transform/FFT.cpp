@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Transform/FFT.h"
 
 using namespace Physica::Core;
@@ -39,7 +40,7 @@ int main() {
             }
         }
         FFT<RealType> fft(data, RealType(t_max / N));
-        const Vector<RealType> intense = toNormVector(fft.getComponents());
+        const Vector<RealType> intense = toNormVector(fft.getKSpace());
 
         /* Parseval theorem */ {
             const RealType power = square(data).sum();
@@ -48,14 +49,15 @@ int main() {
                 return 1;
         }
         /* Test freq */ {
-            const RealType freq1_power = fft.getFreqIntense(freq1).norm();
-            const RealType freq2_power = fft.getFreqIntense(freq2).norm();
+            const double kSpaceDelta = double(fft.getKSpaceDelta());
+            const RealType freq1_power = intense[freq1 / kSpaceDelta];
+            const RealType freq2_power = intense[freq2 / kSpaceDelta];
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
                 return 1;
         }
         /* Test inv */ {
-            fft.invTransform(fft.getFreqs());
-            if (!vectorNear(data, fft.getDatas(), 1E-14))
+            fft.invTransform(fft.getKSpace());
+            if (!vectorNear(data, fft.getRSpace(), 1E-14))
                 return 1;
         }
     }
@@ -83,8 +85,8 @@ int main() {
             }
             trans[i] = temp;
         }
-        fft.invTransform(fft.getFreqs());
-        if (!vectorNear(data, fft.getDatas(), 1E-14))
+        fft.invTransform(fft.getKSpace());
+        if (!vectorNear(data, fft.getRSpace(), 1E-14))
             return 1;
     }
     /* 2d real */ {
@@ -92,22 +94,34 @@ int main() {
         const size_t N2 = 100;
         const double deltaX = 0.01;
         const double deltaY = 0.01;
+        constexpr double freq1 = 10;
+        constexpr double freq2 = 5;
 
         Vector<RealType> data(N1 * N2);
         {
             size_t index = 0;
             for (size_t i = 0; i < N1; ++i) {
                 for (size_t j = 0; j < N2; ++j) {
-                    data[index++] = RealType(std::sin(2 * M_PI * 10 * i * deltaX) + 2 * std::cos(2 * M_PI * 5 * j * deltaY));
+                    data[index++] = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
                 }
             }
         }
         FFT<RealType, 2> fft(data, {N1, N2}, {deltaX, deltaY});
-
-        const RealType freq1_power = fft.getFreqIntense({10, 0}).norm();
-        const RealType freq2_power = fft.getFreqIntense({0, 5}).norm();
-        if (!scalarNear(freq2_power / freq1_power, RealType(2), 2E-2))
-            return 1;
+        /* Test freq */ {
+            auto intense = toNormVector(fft.getKSpace());
+            const RealType freq1_power = intense[size_t(freq1 / double(fft.getKSpaceDelta(0))) * fft.getKSpaceSize(1)];
+            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / double(fft.getKSpaceDelta(0)))) * fft.getKSpaceSize(1)];
+            const RealType freq2_power = intense[freq2 / double(fft.getKSpaceDelta(1))];
+            if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
+                return 1;
+            if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
+                return 1;
+        }
+        /* Test inv */ {
+            fft.invTransform(fft.getKSpace());
+            if (!vectorNear(data, fft.getRSpace(), 1E-11))
+                return 1;
+        }
     }
     return 0;
 }
