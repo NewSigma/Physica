@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <memory>
 #include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/IO/Outcar.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
 namespace Physica::Core {
@@ -46,9 +47,8 @@ namespace Physica::Core {
         void execute();
         /* Getters */
         [[nodiscard]] const std::string& getWorkingDir() const noexcept { return vaspWorkingDir; }
-        [[nodiscard]] ScalarType getEnergy() const;
         [[nodiscard]] ScalarType getPress() const;
-        [[nodiscard]] Vector<ScalarType> getForce() const;
+        [[nodiscard]] Outcar getOutcar() const;
         /* Helpers */
         void swap(VaspWarpper& vasp) noexcept;
     private:

@@ -78,23 +78,6 @@ namespace Physica::Core {
         });
     }
 
-    typename VaspWarpper::ScalarType VaspWarpper::getEnergy() const {
-        future.wait(errorMsg);
-        const char* tempfile = tmpnam(nullptr);
-        const std::string command = std::string("grep energy ") +
-                                    vaspWorkingDir +
-                                    std::string("/OUTCAR | tail -n 1 | tr -s ' ' | cut -d ' ' -f 5 >") +
-                                    std::string(tempfile);
-        [[maybe_unused]] int err = system(command.c_str());
-        ScalarType result;
-        /* Read data */ {
-            std::ifstream fin(tempfile);
-            fin >> result;
-        }
-        unlink(tempfile);
-        return result;
-    }
-
     typename VaspWarpper::ScalarType VaspWarpper::getPress() const {
         future.wait(errorMsg);
         const char* tempfile = tmpnam(nullptr);
@@ -112,43 +95,9 @@ namespace Physica::Core {
         return (press_x + press_y + press_z) / 3.0f;
     }
 
-    Vector<typename VaspWarpper::ScalarType> VaspWarpper::getForce() const {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
-
-        future.wait(errorMsg);
-        std::ifstream fin((vaspWorkingDir + std::string("/OUTCAR")).c_str());
-        if (fin) {
-            fin.seekg(0, std::ios::end);
-            const auto size = fin.tellg();
-            fin.seekg(0, std::ios::beg);
-            Utils::Array<char> buffer(size);
-            std::string str{};
-            Vector<ScalarType> force(3 * poscar.getAtomCount());
-            do {
-                fin.getline(buffer.data(), size);
-                str = buffer.data();
-                const bool success = str.find("TOTAL-FORCE") != std::string::npos;
-                if (success) {
-                    fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    MatrixType pos_force(poscar.getAtomCount(), 6);
-                    fin >> pos_force;
-                    size_t index = 0;
-                    for (size_t r = 0; r < pos_force.getRow(); ++r) {
-                        for (size_t c = 3; c < pos_force.getColumn(); ++c) {
-                            force[index] = pos_force(r, c);
-                            ++index;
-                        }
-                    }
-                    break;
-                }
-            } while(bool(fin));
-
-            if (!fin)
-                throw BadFileFormatException();
-            return force;
-        }
-        else
-            throw IOException();
+    Outcar VaspWarpper::getOutcar() const {
+        std::string path = vaspWorkingDir + std::string("/OUTCAR");
+        return Outcar(path.c_str(), poscar.getAtomCount());
     }
 
     void VaspWarpper::swap(VaspWarpper& vasp) noexcept {
