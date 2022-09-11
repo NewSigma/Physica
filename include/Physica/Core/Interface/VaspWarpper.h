@@ -52,8 +52,6 @@ namespace Physica::Core {
         /* Helpers */
         void swap(VaspWarpper& vasp) noexcept;
     private:
-        void run() const;
-
         friend class Test;
     };
 }

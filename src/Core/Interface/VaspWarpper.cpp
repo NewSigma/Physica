@@ -55,29 +55,27 @@ namespace Physica::Core {
     }
 
     void VaspWarpper::execute() {
-        future = Parallel::ProcessExecutor::schedule([=]() { this->run(); });
-    }
-
-    void VaspWarpper::run() const {
-        int standardErr = dup(2);
-        if (!logFilePath.empty()) {
-            int log_fd = open(logFilePath.c_str()
-                    , O_WRONLY | O_TRUNC | O_CREAT
-                    , S_IRUSR | S_IWUSR);
-            dup2(log_fd, 1);
-            dup2(log_fd, 2);
-        }
-        [[maybe_unused]] int err = chdir(vaspWorkingDir.c_str());
-        /* Execute */ {
-            constexpr size_t bufferLength = 21;
-            char coreStr[bufferLength];
-            [[maybe_unused]] int count = sprintf(coreStr, "%ld", core);
-            assert(0 <= count && static_cast<size_t>(count) < bufferLength);
-            execlp("mpirun", "mpirun", "-n", coreStr, pathToVasp.c_str(), nullptr);
-        }
-        dup2(standardErr, 2);
-        perror("[Error]: Failed to execute VASP");
-        _exit(EXIT_FAILURE);
+        future = Parallel::ProcessExecutor::schedule([=]() {
+            int standardErr = dup(STDERR_FILENO);
+            if (!logFilePath.empty()) {
+                int log_fd = open(logFilePath.c_str()
+                        , O_WRONLY | O_TRUNC | O_CREAT
+                        , S_IRUSR | S_IWUSR);
+                dup2(log_fd, STDOUT_FILENO);
+                dup2(log_fd, STDERR_FILENO);
+            }
+            [[maybe_unused]] int err = chdir(vaspWorkingDir.c_str());
+            /* Execute */ {
+                constexpr size_t bufferLength = 21;
+                char coreStr[bufferLength];
+                [[maybe_unused]] int count = sprintf(coreStr, "%ld", core);
+                assert(0 <= count && static_cast<size_t>(count) < bufferLength);
+                execlp("mpirun", "mpirun", "-n", coreStr, pathToVasp.c_str(), nullptr);
+            }
+            dup2(standardErr, 2);
+            perror("[Error]: Failed to execute VASP");
+            _exit(EXIT_FAILURE);
+        });
     }
 
     typename VaspWarpper::ScalarType VaspWarpper::getEnergy() const {
