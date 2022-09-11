@@ -40,7 +40,7 @@ namespace Physica::Core {
         [[nodiscard]] unsigned int getJobCore() const noexcept { return jobCore; }
         [[nodiscard]] const Utils::Array<std::string>& getHostList() const noexcept { return hostList; }
         /* Static members */
-        [[nodiscard]] static const PBSWarpper& getInstance();
+        static const PBSWarpper& getInstance(); // No [[nodiscard]] for initialization in multi-thread mode
     private:
         PBSWarpper();
 

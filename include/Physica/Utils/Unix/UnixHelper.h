@@ -20,14 +20,15 @@
 
 #include <memory>
 #include <dirent.h>
+#include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {
     void statCheck(const char* __restrict file, struct stat* __restrict buf);
     int forceRemoveDir(const char* dirPath);
-    std::unique_ptr<char[]> getPathBuffer();
-    std::unique_ptr<char[]> makePath(const char* format, ...);
+    long getMaxPathLength();
+    Array<char> getPathBuffer();
+    Array<char> makePath(const char* format, ...);
     void ensureNotExist(const char* path);
-    void genRuntimeDir();
     pid_t waitCheck(const char* message);
     void copyFile(const char* from, const char* to);
     void copyFileFromDir(const char* fromDirPath, const char* toDirPath);

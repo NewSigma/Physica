@@ -49,35 +49,38 @@ namespace Physica::Utils {
                 continue;
             }
 
-            sprintf(buffer.get(), "%s/%s", dirPath, filename);
-            statCheck(buffer.get(), &st);
+            sprintf(buffer.data(), "%s/%s", dirPath, filename);
+            statCheck(buffer.data(), &st);
             if (S_ISDIR(st.st_mode)) {
-                if (forceRemoveDir(buffer.get()) != 0)
+                if (forceRemoveDir(buffer.data()) != 0)
                     return 1;
             }
             else {
-                if(unlink(buffer.get()) != 0)
+                if(unlink(buffer.data()) != 0)
                     return 1;
             }
         }
         closedir(dir);
         return rmdir(dirPath);
     }
+
+    long getMaxPathLength() {
+        return pathconf("/", _PC_PATH_MAX);
+    }
     /**
      * @return a array whose length is enough to store path name.
      */
-    std::unique_ptr<char[]> getPathBuffer() {
-        const long maxPathLength = pathconf("/", _PC_PATH_MAX);
-        return std::unique_ptr<char[]>(new char[maxPathLength]);
+    Array<char> getPathBuffer() {
+        return Array<char>(getMaxPathLength());
     }
 
-    std::unique_ptr<char[]> makePath(const char* format, ...) {
-        const long maxPathLength = pathconf("/", _PC_PATH_MAX);
+    Array<char> makePath(const char* format, ...) {
+        const long maxPathLength = getMaxPathLength();
         auto buffer = getPathBuffer();
 
         std::va_list args;
         va_start(args, format);
-        int count = vsnprintf(buffer.get(), maxPathLength, format, args);
+        int count = vsnprintf(buffer.data(), maxPathLength, format, args);
         va_end(args);
         if (count == maxPathLength) {
             std::cerr << "[Error]: Working directory is too deep to execute.\n";
@@ -102,35 +105,6 @@ namespace Physica::Utils {
             forceRemoveDir(path);
         else
             unlink(path);
-    }
-    /**
-     * Generate runtime folder. If it is not empty, rename it by appending date to dirname.
-     */
-    void genRuntimeDir() {
-        struct stat st{};
-        errno = 0;
-        if (stat("runtime", &st) != 0) {
-            if (errno != ENOENT) {
-                perror("[Error]: Failed to fetch stat of runtime.");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else if (S_ISDIR(st.st_mode)) {
-            time_t now = time(nullptr);
-            auto localTime = std::localtime(&now);
-            constexpr size_t length = 29;
-            char buffer[length];
-            [[maybe_unused]] size_t count = strftime(buffer, length, "runtime_%F_%T", localTime); //TODO should be create time rather than rename time
-            assert(count != 0);
-            errno = 0;
-            if (rename("runtime", buffer) != 0) {
-                perror("[Error]: Failed to remove old runtime folder.");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-            unlink("runtime");
-        mkdir("runtime", S_IRWXU);
     }
     /**
      * Wait for child processes. If anything went wrong, print a error message.
@@ -185,11 +159,11 @@ namespace Physica::Utils {
                 continue;
             }
 
-            sprintf(fromFileName.get(), "%s/%s", fromDirPath, filename);
-            statCheck(fromFileName.get(), &st);
+            sprintf(fromFileName.data(), "%s/%s", fromDirPath, filename);
+            statCheck(fromFileName.data(), &st);
             if (S_ISREG(st.st_mode)) {
-                sprintf(toFileName.get(), "%s/%s", toDirPath, filename);
-                copyFile(fromFileName.get(), toFileName.get());
+                sprintf(toFileName.data(), "%s/%s", toDirPath, filename);
+                copyFile(fromFileName.data(), toFileName.data());
             }
         }
         closedir(fromDir);
