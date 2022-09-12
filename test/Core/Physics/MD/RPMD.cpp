@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/ForceCalculator/PairModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 

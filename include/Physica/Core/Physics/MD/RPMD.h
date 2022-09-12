@@ -56,20 +56,20 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel, class Executor = Parallel::SequentialExecutor>
         void updateForce(const ForceModel& model);
-        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        void nvt_step(RandomGenerator& gen, const ForceCalculator& force);
-        template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        void nve_step(const ForceCalculator& force);
-        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceCalculator& force);
-        template<class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        void nve_step_for(ScalarType duration, const ForceCalculator& force);
+        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        void nvt_step(RandomGenerator& gen, const ForceModel& force);
+        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        void nve_step(const ForceModel& force);
+        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force);
+        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        void nve_step_for(ScalarType duration, const ForceModel& force);
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
         void removeDrift();
         void scaleVelocity();
-        template<class RandomGenerator, class ForceCalculator, class Executor = Parallel::SequentialExecutor>
-        [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceCalculator& force, double precision);
+        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
         /* Getters */
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
@@ -87,8 +87,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getClassicalElastic() const;
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
-        template<class ForceCalculator>
-        [[nodiscard]] ScalarType computeKinetic(ForceCalculator force) const;
+        template<class ForceModel>
+        [[nodiscard]] ScalarType computeKinetic(ForceModel force) const;
         [[nodiscard]] ScalarType estimateTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
@@ -146,40 +146,40 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class RandomGenerator, class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceCalculator& force) {
+    template<class RandomGenerator, class ForceModel, class Executor>
+    void RPMD<ScalarType>::nvt_step(RandomGenerator& gen, const ForceModel& force) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep * 0.5);
         thermostatStep(gen, timeStep);
         dynamicStep(timeStep * 0.5);
-        updateForce<ForceCalculator, Executor>(force);
+        updateForce<ForceModel, Executor>(force);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType>
-    template<class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::nve_step(const ForceCalculator& force) {
+    template<class ForceModel, class Executor>
+    void RPMD<ScalarType>::nve_step(const ForceModel& force) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep);
         normalizeCentroid();
-        updateForce<ForceCalculator, Executor>(force);
+        updateForce<ForceModel, Executor>(force);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType>
-    template<class RandomGenerator, class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceCalculator& force) {
+    template<class RandomGenerator, class ForceModel, class Executor>
+    void RPMD<ScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<RandomGenerator, ForceCalculator, Executor>(gen, force);
+            nvt_step<RandomGenerator, ForceModel, Executor>(gen, force);
     }
 
     template<class ScalarType>
-    template<class ForceCalculator, class Executor>
-    void RPMD<ScalarType>::nve_step_for(ScalarType duration, const ForceCalculator& force) {
+    template<class ForceModel, class Executor>
+    void RPMD<ScalarType>::nve_step_for(ScalarType duration, const ForceModel& force) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            nve_step<ForceCalculator, Executor>(force);
+            nve_step<ForceModel, Executor>(force);
     }
 
     template<class ScalarType>
@@ -234,12 +234,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class RandomGenerator, class ForceCalculator, class Executor>
-    bool RPMD<ScalarType>::isStableNVT(size_t numStep, RandomGenerator& gen, const ForceCalculator& force, double precision) {
+    template<class RandomGenerator, class ForceModel, class Executor>
+    bool RPMD<ScalarType>::isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision) {
         ScalarType kinetic = 0;
         ScalarType squared_kinetic = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            nvt_step<RandomGenerator, ForceCalculator, Executor>(gen, force);
+            nvt_step<RandomGenerator, ForceModel, Executor>(gen, force);
             const ScalarType temp = getClassicalKinetic();
             toNextMean(kinetic, i, temp);
             toNextMean(squared_kinetic, i, square(temp));
@@ -333,8 +333,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class ForceCalculator>
-    ScalarType RPMD<ScalarType>::computeKinetic(ForceCalculator force) const {
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType>::computeKinetic(ForceModel force) const {
         const size_t dof = getDOF();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
