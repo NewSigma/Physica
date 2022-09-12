@@ -39,8 +39,8 @@ namespace Physica::Core {
         PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_);
         [[nodiscard]] Vector<ScalarType> operator()(MDCell cell) const;
         [[nodiscard]] ScalarType potentialEnergy(MDCell cell) const;
-    private:
-        Utils::Array<ssize_t, 3> estimateRange(const MDCell& cell) const;
+        /* Static members */
+        [[nodiscard]] static Utils::Array<ssize_t, 3> estimateRange(const MDCell& cell, ScalarType cutoff);
     };
 
     template<class ScalarType, class PairFunctor>
@@ -106,7 +106,7 @@ namespace Physica::Core {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
-        const auto range = estimateRange(cell);
+        const auto range = estimateRange(cell, cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;
@@ -137,7 +137,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PairFunctor>
-    Utils::Array<ssize_t, 3> PairModel<ScalarType, PairFunctor>::estimateRange(const MDCell& cell) const {
+    Utils::Array<ssize_t, 3> PairModel<ScalarType, PairFunctor>::estimateRange(const MDCell& cell, ScalarType cutoff) {
         ssize_t max_x, max_y, max_z;
         /* Estimate range */ {
             const ReciprocalCell reciprocal = cell.reciprocal();
