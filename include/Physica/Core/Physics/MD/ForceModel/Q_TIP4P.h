@@ -36,6 +36,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = PairModelBase<ScalarType>::Dim;
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
         using PositionMatrix = typename MDCell::PositionMatrix;
+        using EwaldType = Ewald<ScalarType, typename MDCell::ScalarType>;
 
         constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
@@ -49,7 +50,7 @@ namespace Physica::Core {
     private:
         HytrogenListType hytrogenList;
         PositionMatrix chargePos;
-        Vector<ScalarType> charges;
+        EwaldType ewald;
         ScalarType cutoff;
         ScalarType stepSize;
     public:
@@ -70,7 +71,7 @@ namespace Physica::Core {
         void swap(Q_TIP4P& model) noexcept;
     private:
         void makeHytrogenList(const MDCell& refer_cell);
-        void makeCharges();
+        Vector<ScalarType> makeCharges() const;
         ScalarType minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
     };
@@ -78,12 +79,11 @@ namespace Physica::Core {
     template<class ScalarType>
     Q_TIP4P<ScalarType>::Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
             : chargePos(refer_cell.getNumParticle(), 3)
-            , charges(refer_cell.getNumParticle())
             , cutoff(std::move(cutoff_))
             , stepSize(std::move(stepSize_)) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         makeHytrogenList(refer_cell);
-        makeCharges();
+        ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
 
     template<class ScalarType>
@@ -96,7 +96,7 @@ namespace Physica::Core {
     Vector<ScalarType> Q_TIP4P<ScalarType>::force(const MDCell& cell) const {
         Vector<ScalarType> result(getNumMolecule() * Dim);
         for (size_t i = 0; i < result.getLength(); ++i) {
-            result[i] = Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
+            result[i] = -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
                 PositionMatrix pos = cell.getPos();
                 *(pos.begin() + i) = x;
                 return potentialEnergy(MDCell(cell.getLattice(), std::move(pos), cell.getMassVec()));
@@ -159,11 +159,7 @@ namespace Physica::Core {
                     selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH1.asVector() - partialCharge).norm());
                     selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH2.asVector() - partialCharge).norm());
                 }
-                using ScalarType_ = typename MDCell::LatticeMatrix::ScalarType;
-                const ScalarType ewald = Ewald<ScalarType>::energyIonIon(PeriodicCell<ScalarType_, 3>(lattice, chargePos),
-                                                                         cell.reciprocal(),
-                                                                         charges);
-                interMoleculeEnergy += ewald - selfCoulomb;
+                interMoleculeEnergy += ewald(pos) - selfCoulomb;
             }
         }
         ScalarType intraMoleculeEnergy = 0;
@@ -212,10 +208,10 @@ namespace Physica::Core {
     template<class ScalarType>
     void Q_TIP4P<ScalarType>::swap(Q_TIP4P& model) noexcept {
         hytrogenList.swap(model.hytrogenList);
-        chargePos.swap(chargePos);
-        charges.swap(charges);
+        chargePos.swap(model.chargePos);
+        ewald.swap(model.ewald);
         cutoff.swap(model.cutoff);
-        stepSize.swap(stepSize);
+        stepSize.swap(model.stepSize);
     }
 
     template<class ScalarType>
@@ -256,16 +252,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Q_TIP4P<ScalarType>::makeCharges() {
+    Vector<ScalarType> Q_TIP4P<ScalarType>::makeCharges() const {
         const size_t numMolecule = getNumMolecule();
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numMolecule;
+        Vector<ScalarType> charges(maxIndexO);
         for (size_t i = 0; i < maxIndexH; ++i)
             charges[i] = ScalarType(-charge * 0.5);
         
         for (size_t i = maxIndexH; i < maxIndexO; ++i)
             charges[i] = ScalarType(charge);
+        return charges;
     }
 
     template<class ScalarType>

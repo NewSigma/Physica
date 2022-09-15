@@ -29,85 +29,83 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] VASP (www.vasp.at)
      */
-    template<class ScalarType>
+    template<class OutScalarType, class PosScalarType = OutScalarType>
     class Ewald {
-        using UnsignedGrid = Grid3D<ScalarType, false>;
-        using Vector3D = Vector<ScalarType, 3>;
+        constexpr static unsigned int Dim = 3;
+        using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
+        using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
+        using Vector3D = Vector<PosScalarType, Dim>;
+
+        LatticeMatrix lattice;
+        ReciprocalCell<PosScalarType> repCell;
+        Vector<OutScalarType> charges;
+        PosScalarType inv_volume;
+        PosScalarType averageCellSize;
+        OutScalarType integralLimit;
+        Utils::Array<int, Dim> realSumRange;
+        Utils::Array<int, Dim> repSumRange;
     public:
-        static ScalarType energyIonIon(CrystalCell cell,
-                                       const ReciprocalCell<typename CrystalCell::ScalarType>& repCell,
-                                       const Utils::Array<int16_t>& charges);
-        static ScalarType energyIonIon(const MDCell& cell,
-                                       const ReciprocalCell<typename MDCell::ScalarType>& repCell,
-                                       const Vector<ScalarType>& charges);
-        template<class ScalarType_>
-        static ScalarType energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
-                                       const ReciprocalCell<ScalarType_>& repCell,
-                                       const Vector<ScalarType>& charges);
+        Ewald() = default;
+        Ewald(LatticeMatrix lattice_, Vector<OutScalarType> charges_);
+        Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<OutScalarType> charges_);
+        Ewald(const Ewald&) = default;
+        Ewald(Ewald&&) noexcept = default;
+        ~Ewald() = default;
+        /* Operators */
+        Ewald& operator=(Ewald ewald) noexcept;
+        [[nodiscard]] OutScalarType operator()(const PositionMatrix& pos) const;
+        /* Operations */
+        void swap(Ewald& ewald) noexcept;
+        /* Getters */
+        [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
     private:
-        template<class LatticeMatrix>
-        [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
-        template<class LatticeMatrix>
-        [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
-                                                ScalarType integralLimit,
-                                                std::tuple<int, int, int> dim,
-                                                const Vector<ScalarType, 3>& deltaPos,
-                                                const ScalarType& averageCellSize);
-        template<class LatticeMatrix>
-        [[nodiscard]] static ScalarType reciprocalSum(const LatticeMatrix& cell,
-                                                      ScalarType integralLimit,
-                                                      std::tuple<int, int, int> dim,
-                                                      const Vector<ScalarType, 3>& deltaPos);
-        [[nodiscard]] static bool isTooClose(ScalarType deltaR, ScalarType averageCellSize);
+        OutScalarType realSum(const Vector3D& deltaPos) const;
+        OutScalarType reciprocalSum(const Vector3D& deltaPos) const;
+        static Utils::Array<int, Dim> getSumRange(const LatticeMatrix& lattice, PosScalarType factor);
     };
 
-    template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(CrystalCell cell,
-                                               const ReciprocalCell<typename CrystalCell::ScalarType>& repCell,
-                                               const Utils::Array<int16_t>& charges) {
-        if (cell.getType() == CrystalCell::Type::Direct)
-            cell.toCartesian();
-        Vector<ScalarType> temp(charges.getLength());
-        for (size_t i = 0; i < charges.getLength(); ++i)
-            temp[i] = ScalarType(charges[i]);
-        return energyIonIon(cell, repCell, temp);
+    template<class OutScalarType, class PosScalarType>
+    Ewald<OutScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, Vector<OutScalarType> charges_)
+            : Ewald(lattice_, ReciprocalCell(lattice_), std::move(charges_)) {}
+
+    template<class OutScalarType, class PosScalarType>
+    Ewald<OutScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<OutScalarType> charges_)
+            : lattice(std::move(lattice_))
+            , repCell(std::move(repCell_))
+            , charges(std::move(charges_)) {
+        const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
+        inv_volume = reciprocal(volume);
+        //The following param chosen is referenced from VASP
+        averageCellSize = cbrt(volume);
+        integralLimit = sqrt(OutScalarType(M_PI)) / averageCellSize;
+        realSumRange = getSumRange(repCell.getLattice(), OutScalarType(2 / M_PI) / integralLimit);
+        repSumRange = getSumRange(lattice, OutScalarType(4 / M_PI) * integralLimit);
     }
 
-    template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(const MDCell& cell,
-                                               const ReciprocalCell<typename MDCell::ScalarType>& repCell,
-                                               const Vector<ScalarType>& charges) {
-        return energyIonIon(cell, repCell, charges);
+    template<class OutScalarType, class PosScalarType>
+    Ewald<OutScalarType, PosScalarType>& Ewald<OutScalarType, PosScalarType>::operator=(Ewald ewald) noexcept {
+        swap(ewald);
+        return *this;
     }
     /**
-     * \param cell must be in cartesian convension
+     * \param pos must be in cartesian convension
      */
-    template<class ScalarType>
-    template<class ScalarType_>
-    ScalarType Ewald<ScalarType>::energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
-                                               const ReciprocalCell<ScalarType_>& repCell,
-                                               const Vector<ScalarType>& charges) {
-        const size_t ionCount = cell.getNumParticle();
-        const ScalarType inv_volume = reciprocal(cell.getVolume());
-        //The following param chosen is referenced from VASP
-        const ScalarType averageCellSize = cbrt(ScalarType(cell.getVolume()));
-        const ScalarType integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
-        const auto realSumDim = getSumDimention(repCell.getLattice(), ScalarType(2 / M_PI) / integralLimit);
-        const auto repSumDim = getSumDimention(cell.getLattice(), ScalarType(4 / M_PI) * integralLimit);
-
+    template<class OutScalarType, class PosScalarType>
+    OutScalarType Ewald<OutScalarType, PosScalarType>::operator()(const PositionMatrix& pos) const {
+        using ScalarType = OutScalarType;
         ScalarType result = ScalarType::Zero();
         ScalarType totalCharge = 0;
         ScalarType totalSquaredCharge = 0;
-        for (size_t ion1 = 0; ion1 < ionCount; ++ion1) {
-            for (size_t ion2 = 0; ion2 < ionCount; ++ion2) { //Optimize: possible to loop from ion2 = ion1
-                const Vector3D deltaPos = cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2);
-                ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize); //Optimize: VASP puts this loop outside, consider its performance
-                sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
+        for (size_t i = 0; i < getNumParticle(); ++i) {
+            for (size_t j = 0; j < getNumParticle(); ++j) { //Optimize: possible to loop from ion2 = ion1
+                const Vector<PosScalarType, Dim> deltaPos = pos.row(i).asVector() - pos.row(j);
+                ScalarType sum = realSum(deltaPos); //Optimize: VASP puts this loop outside, consider its performance
+                sum += ScalarType(4 * M_PI) * reciprocalSum(deltaPos) * inv_volume;
 
-                const ScalarType dotCharge = charges[ion1] * charges[ion2];
+                const ScalarType dotCharge = charges[i] * charges[j];
                 result += sum * dotCharge;
             }
-            const ScalarType charge = charges[ion1];
+            const ScalarType charge = charges[i];
             totalCharge += charge;
             totalSquaredCharge += square(charge);
         }
@@ -117,36 +115,33 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    template<class LatticeMatrix>
-    std::tuple<int, int, int> Ewald<ScalarType>::getSumDimention(const LatticeMatrix& latt, ScalarType factor) {
-        constexpr double roundFactor = 1 - std::numeric_limits<double>::epsilon();
-        static_assert(roundFactor < 1);
-
-        const int dim1 = int((factor * latt.row(0).norm() + roundFactor).getTrivial());
-        const int dim2 = int((factor * latt.row(1).norm() + roundFactor).getTrivial());
-        const int dim3 = int((factor * latt.row(2).norm() + roundFactor).getTrivial());
-        return {dim1, dim2, dim3};
+    template<class OutScalarType, class PosScalarType>
+    void Ewald<OutScalarType, PosScalarType>::swap(Ewald& ewald) noexcept {
+        lattice.swap(ewald.lattice);
+        repCell.swap(ewald.repCell);
+        charges.swap(ewald.charges);
+        inv_volume.swap(ewald.inv_volume);
+        averageCellSize.swap(ewald.averageCellSize);
+        integralLimit.swap(ewald.integralLimit);
+        realSumRange.swap(ewald.realSumRange);
+        repSumRange.swap(ewald.repSumRange);
     }
 
-    template<class ScalarType>
-    template<class LatticeMatrix>
-    ScalarType Ewald<ScalarType>::realSum(const LatticeMatrix& cellLattice,
-                                          ScalarType integralLimit,
-                                          std::tuple<int, int, int> dim,
-                                          const Vector<ScalarType, 3>& deltaPos,
-                                          const ScalarType& averageCellSize) {
+    template<class OutScalarType, class PosScalarType>
+    OutScalarType Ewald<OutScalarType, PosScalarType>::realSum(const Vector3D& deltaPos) const {
+        using ScalarType = OutScalarType;
         ScalarType sum = ScalarType::Zero();
 
-        if (isTooClose(deltaPos.norm(), averageCellSize)) {
-            for (int i = -std::get<0>(dim); i <= std::get<0>(dim); ++i) {
-                for (int j = -std::get<1>(dim); j <= std::get<1>(dim); ++j) {
-                    for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
+        const bool isTooClose = deltaPos.norm() <= averageCellSize * std::numeric_limits<ScalarType>::epsilon();
+        if (isTooClose) {
+            for (int i = -realSumRange[0]; i <= realSumRange[0]; ++i) {
+                for (int j = -realSumRange[1]; j <= realSumRange[1]; ++j) {
+                    for (int k = -realSumRange[2]; k <= realSumRange[2]; ++k) {
                         if (i == 0 && j == 0 && k == 0)
                             continue;
-                        const Vector3D transVector = Vector3D(cellLattice.row(0)) * ScalarType(i)
-                                                   + Vector3D(cellLattice.row(1)) * ScalarType(j)
-                                                   + Vector3D(cellLattice.row(2)) * ScalarType(k);
+                        const Vector3D transVector = Vector3D(lattice.row(0)) * ScalarType(i)
+                                                   + Vector3D(lattice.row(1)) * ScalarType(j)
+                                                   + Vector3D(lattice.row(2)) * ScalarType(k);
                         const ScalarType norm = transVector.norm();
                         sum += erfc(integralLimit * norm) / norm; //Optimize: VASP uses searching table method
                     }
@@ -154,12 +149,12 @@ namespace Physica::Core {
             }
         }
         else {
-            for (int i = -std::get<0>(dim); i <= std::get<0>(dim); ++i) {
-                for (int j = -std::get<1>(dim); j <= std::get<1>(dim); ++j) {
-                    for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
-                        const Vector3D transVector = Vector3D(cellLattice.row(0)) * ScalarType(i)
-                                                   + Vector3D(cellLattice.row(1)) * ScalarType(j)
-                                                   + Vector3D(cellLattice.row(2)) * ScalarType(k);
+            for (int i = -realSumRange[0]; i <= realSumRange[0]; ++i) {
+                for (int j = -realSumRange[1]; j <= realSumRange[1]; ++j) {
+                    for (int k = -realSumRange[2]; k <= realSumRange[2]; ++k) {
+                        const Vector3D transVector = Vector3D(lattice.row(0)) * ScalarType(i)
+                                                   + Vector3D(lattice.row(1)) * ScalarType(j)
+                                                   + Vector3D(lattice.row(2)) * ScalarType(k);
                         const ScalarType norm = (deltaPos - transVector).norm();
                         sum += erfc(integralLimit * norm) / norm;
                     }
@@ -169,16 +164,14 @@ namespace Physica::Core {
         return sum;
     }
 
-    template<class ScalarType>
-    template<class LatticeMatrix>
-    ScalarType Ewald<ScalarType>::reciprocalSum(const LatticeMatrix& repLattice,
-                                                ScalarType integralLimit,
-                                                std::tuple<int, int, int> dim,
-                                                const Vector<ScalarType, 3>& deltaPos) {
+    template<class OutScalarType, class PosScalarType>
+    OutScalarType Ewald<OutScalarType, PosScalarType>::reciprocalSum(const Vector3D& deltaPos) const {
+        using ScalarType = OutScalarType;
+        const auto& repLattice = repCell.getLattice();
         ScalarType sum = ScalarType::Zero();
-        for (int i = -std::get<0>(dim); i <= std::get<0>(dim); ++i) {
-            for (int j = -std::get<1>(dim); j <= std::get<1>(dim); ++j) {
-                for (int k = -std::get<2>(dim); k <= std::get<2>(dim); ++k) {
+        for (int i = -repSumRange[0]; i <= repSumRange[0]; ++i) {
+            for (int j = -repSumRange[1]; j <= repSumRange[1]; ++j) {
+                for (int k = -repSumRange[2]; k <= repSumRange[2]; ++k) {
                     if (i == 0 && j == 0 && k == 0)
                         continue;
                     const Vector3D repVector = Vector3D(repLattice.row(0)) * ScalarType(i)
@@ -193,8 +186,15 @@ namespace Physica::Core {
         return sum;
     }
 
-    template<class ScalarType>
-    bool Ewald<ScalarType>::isTooClose(ScalarType deltaR, ScalarType averageCellSize) {
-        return deltaR <= averageCellSize * std::numeric_limits<ScalarType>::epsilon();
+    template<class OutScalarType, class PosScalarType>
+    Utils::Array<int, Ewald<OutScalarType, PosScalarType>::Dim>
+    Ewald<OutScalarType, PosScalarType>::getSumRange(const LatticeMatrix& lattice, PosScalarType factor) {
+        constexpr double roundFactor = 1 - std::numeric_limits<double>::epsilon();
+        static_assert(roundFactor < 1);
+
+        const int dim1 = int((factor * lattice.row(0).norm() + roundFactor).getTrivial());
+        const int dim2 = int((factor * lattice.row(1).norm() + roundFactor).getTrivial());
+        const int dim3 = int((factor * lattice.row(2).norm() + roundFactor).getTrivial());
+        return {dim1, dim2, dim3};
     }
 }

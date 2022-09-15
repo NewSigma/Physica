@@ -29,7 +29,9 @@ namespace Physica::Core {
         LatticeMatrix lattice;
     public:
         ReciprocalCell() = default;
-        ReciprocalCell(LatticeMatrix lattice_);
+        ReciprocalCell(const LatticeMatrix& real_lattice);
+        /* Operations */
+        void swap(ReciprocalCell& cell) noexcept { lattice.swap(cell.lattice); }
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept;
         [[nodiscard]] ScalarType getMinNorm() const noexcept;
@@ -37,7 +39,14 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ReciprocalCell<ScalarType>::ReciprocalCell(LatticeMatrix lattice_) : lattice(std::move(lattice_)) {}
+    ReciprocalCell<ScalarType>::ReciprocalCell(const LatticeMatrix& real_lattice) {
+        lattice.row(0) = real_lattice.row(1).crossProduct(real_lattice.row(2));
+        lattice.row(1) = real_lattice.row(2).crossProduct(real_lattice.row(0));
+        lattice.row(2) = real_lattice.row(0).crossProduct(real_lattice.row(1));
+        const ScalarType volume = abs(real_lattice.row(0) * lattice.row(0).asVector());
+        const ScalarType factor = ScalarType(2 * M_PI) / volume;
+        lattice *= factor;
+    }
 
     template<class ScalarType>
     const typename ReciprocalCell<ScalarType>::LatticeMatrix& ReciprocalCell<ScalarType>::getLattice() const noexcept {

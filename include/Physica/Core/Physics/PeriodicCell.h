@@ -58,13 +58,14 @@ namespace Physica::Core {
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
-        [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const;
-        [[nodiscard]] ScalarType getVolume() const noexcept;
+        [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const { return ReciprocalCell(lattice); }
+        [[nodiscard]] ScalarType getVolume() const noexcept { return getVolume(lattice); }
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
         /* Static members */
         static void unitToSuper(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         static void superToUnit(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
+        [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
@@ -90,23 +91,6 @@ namespace Physica::Core {
     PeriodicCell<ScalarType, Dim>& PeriodicCell<ScalarType, Dim>::operator=(PeriodicCell cell) noexcept {
         swap(cell);
         return *this;
-    }
-
-    template<class ScalarType, unsigned int Dim>
-    ReciprocalCell<ScalarType> PeriodicCell<ScalarType, Dim>::reciprocal() const {
-        LatticeMatrix result{};
-        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
-        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
-        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const ScalarType volume = abs(lattice.row(0) * result.row(0).asVector());
-        const ScalarType factor = ScalarType(2 * M_PI) / volume;
-        result *= factor;
-        return ReciprocalCell<ScalarType>(std::move(result));
-    }
-
-    template<class ScalarType, unsigned int Dim>
-    ScalarType PeriodicCell<ScalarType, Dim>::getVolume() const noexcept {
-        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -167,6 +151,11 @@ namespace Physica::Core {
             }
         }
         target.swap(new_pos);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    ScalarType PeriodicCell<ScalarType, Dim>::getVolume(const LatticeMatrix& lattice) {
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 
     template<class ScalarType, unsigned int Dim>
