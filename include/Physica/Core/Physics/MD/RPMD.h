@@ -88,7 +88,7 @@ namespace Physica::Core {
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
         template<class ForceModel>
-        [[nodiscard]] ScalarType computeKinetic(ForceModel force) const;
+        [[nodiscard]] ScalarType computeKinetic(ForceModel model) const;
         [[nodiscard]] ScalarType estimateTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
@@ -140,7 +140,7 @@ namespace Physica::Core {
             MDCell cell = phaseToCell(replica);
             cell.normalizeCell();
             auto saveTo = forceBuffer.col(replica);
-            saveTo = model(std::move(cell));
+            saveTo = model.force(std::move(cell));
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
     }
@@ -334,7 +334,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class ForceModel>
-    ScalarType RPMD<ScalarType>::computeKinetic(ForceModel force) const {
+    ScalarType RPMD<ScalarType>::computeKinetic(ForceModel model) const {
         const size_t dof = getDOF();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
@@ -346,7 +346,7 @@ namespace Physica::Core {
             auto pos = col.tail(dof);
             MDCell cell = phaseToCell(replica);
             cell.normalizeCell();
-            kinetic += (averaged_pos - pos) * force(std::move(cell));
+            kinetic += (averaged_pos - pos) * model.force(std::move(cell));
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;

@@ -71,10 +71,6 @@ namespace Physica::Core {
         atomicNumbers.swap(new_atomic);
     }
 
-    typename CrystalCell::ScalarType CrystalCell::getVolume() const noexcept {
-        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
-    }
-
     std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {
         std::unordered_set<uint16_t> set{};
         for (size_t i = 0; i < atomicNumbers.getLength(); ++i)

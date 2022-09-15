@@ -37,8 +37,15 @@ namespace Physica::Core {
         PairFunctor pot_functor;
     public:
         PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_);
-        [[nodiscard]] Vector<ScalarType> operator()(MDCell cell) const;
-        [[nodiscard]] ScalarType potentialEnergy(MDCell cell) const;
+        PairModel(const PairModel&) = default;
+        PairModel(PairModel&&) noexcept = default;
+        ~PairModel() = default;
+        /* Operators */
+        PairModel& operator=(PairModel pair) noexcept;
+        /* Operations */
+        [[nodiscard]] Vector<ScalarType> force(const MDCell& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy(const MDCell& cell) const;
+        void swap(PairModel& pair) noexcept;
     };
 
     template<class ScalarType, class PairFunctor>
@@ -51,7 +58,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PairFunctor>
-    Vector<ScalarType> PairModel<ScalarType, PairFunctor>::operator()(MDCell cell) const {
+    PairModel<ScalarType, PairFunctor>& PairModel<ScalarType, PairFunctor>::operator=(PairModel pair) noexcept {
+        swap(pair);
+        return *this;
+    }
+
+    template<class ScalarType, class PairFunctor>
+    Vector<ScalarType> PairModel<ScalarType, PairFunctor>::force(const MDCell& cell) const {
         using VectorType = Vector<ScalarType, Dim>;
 
         const auto& lattice = cell.getLattice();
@@ -87,7 +100,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PairFunctor>
-    ScalarType PairModel<ScalarType, PairFunctor>::potentialEnergy(MDCell cell) const {
+    ScalarType PairModel<ScalarType, PairFunctor>::potentialEnergy(const MDCell& cell) const {
         using VectorType = Vector<ScalarType, Dim>;
 
         const auto& lattice = cell.getLattice();
@@ -123,5 +136,14 @@ namespace Physica::Core {
             }
         }
         return result;
+    }
+
+    template<class ScalarType, class PairFunctor>
+    void PairModel<ScalarType, PairFunctor>::swap(PairModel& pair) noexcept {
+        cutoff.swap(pair.cutoff);
+        squared_cutoff.swap(squared_cutoff);
+        pot_shift.swap(pot_shift);
+        std::swap(force_functor, force_functor);
+        std::swap(pot_functor, pot_functor);
     }
 }

@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
 #include "Grid3D.h"
 
 namespace Physica::Core {
@@ -35,7 +36,12 @@ namespace Physica::Core {
         using UnsignedGrid = Grid3D<ScalarType, false>;
         using Vector3D = Vector<ScalarType, 3>;
     public:
-        static ScalarType energyIonIon(const CrystalCell& cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges);
+        static ScalarType energyIonIon(CrystalCell cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges);
+        static ScalarType energyIonIon(const MDCell& cell, const RepCellType& repCell, const Vector<ScalarType>& charges);
+        template<class ScalarType_>
+        static ScalarType energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
+                                       const RepCellType& repCell,
+                                       const Vector<ScalarType>& charges);
     private:
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
@@ -51,8 +57,28 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(const CrystalCell& cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges) {
-        const size_t ionCount = cell.getPos().getRow();
+    ScalarType Ewald<ScalarType>::energyIonIon(CrystalCell cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges) {
+        if (cell.getType() == CrystalCell::Type::Direct)
+            cell.toCartesian();
+        Vector<ScalarType> temp(charges.getLength());
+        for (size_t i = 0; i < charges.getLength(); ++i)
+            temp[i] = ScalarType(charges[i]);
+        return energyIonIon(cell, repCell, temp);
+    }
+
+    template<class ScalarType>
+    ScalarType Ewald<ScalarType>::energyIonIon(const MDCell& cell, const RepCellType& repCell, const Vector<ScalarType>& charges) {
+        return energyIonIon(cell, repCell, charges);
+    }
+    /**
+     * \param cell must be in cartesian convension
+     */
+    template<class ScalarType>
+    template<class ScalarType_>
+    ScalarType Ewald<ScalarType>::energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
+                                               const RepCellType& repCell,
+                                               const Vector<ScalarType>& charges) {
+        const size_t ionCount = cell.getNumParticle();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
         //The following param chosen is referenced from VASP
         const ScalarType averageCellSize = cbrt(ScalarType(cell.getVolume()));
@@ -61,26 +87,24 @@ namespace Physica::Core {
         const auto repSumDim = getSumDimention(cell.getLattice(), ScalarType(4 / M_PI) * integralLimit);
 
         ScalarType result = ScalarType::Zero();
-        int totalCharge = 0;
-        unsigned int totalSquaredCharge = 0;
+        ScalarType totalCharge = 0;
+        ScalarType totalSquaredCharge = 0;
         for (size_t ion1 = 0; ion1 < ionCount; ++ion1) {
             for (size_t ion2 = 0; ion2 < ionCount; ++ion2) { //Optimize: possible to loop from ion2 = ion1
-                const Vector3D deltaPos = cell.getLattice() * (cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2));
+                const Vector3D deltaPos = cell.getPos().row(ion1).asVector() - cell.getPos().row(ion2);
                 ScalarType sum = realSum(cell.getLattice(), integralLimit, realSumDim, deltaPos, averageCellSize); //Optimize: VASP puts this loop outside, consider its performance
                 sum += ScalarType(4 * M_PI) * reciprocalSum(repCell.getLattice(), integralLimit, repSumDim, deltaPos) * inv_volume;
 
-                const int charge1 = charges[ion1];
-                const int charge2 = charges[ion2];
-                const ScalarType dotCharge = ScalarType(charge1 * charge2);
+                const ScalarType dotCharge = charges[ion1] * charges[ion2];
                 result += sum * dotCharge;
             }
-            const int charge = charges[ion1];
+            const ScalarType charge = charges[ion1];
             totalCharge += charge;
-            totalSquaredCharge += charge * charge;
+            totalSquaredCharge += square(charge);
         }
         result *= ScalarType(0.5);
-        result -= ScalarType(totalSquaredCharge) * integralLimit / sqrt(ScalarType(M_PI));
-        result -= ScalarType(totalCharge * totalCharge) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
+        result -= totalSquaredCharge * integralLimit / sqrt(ScalarType(M_PI));
+        result -= square(totalCharge) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
         return result;
     }
 

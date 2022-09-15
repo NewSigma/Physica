@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 
-int main() {
+void testHytrogenList() {
     typename CrystalCell::LatticeMatrix lattice{
         4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
         2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
@@ -44,8 +44,12 @@ int main() {
     };
     CrystalCell unit{std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct};
     MDCell cell(std::move(unit));
-    Q_TIP4P<ScalarType> model(cell, 1);
+    Q_TIP4P<ScalarType> model(cell, 1, 1E-4);
     if (!model.checkHytrogenList())
-        return 1;
+        exit(EXIT_FAILURE);
+}
+
+int main() {
+    testHytrogenList();
     return 0;
 }

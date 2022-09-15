@@ -19,9 +19,12 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Math/Calculus/Differential.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModelBase.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
 
 namespace Physica::Core {
     /**
@@ -32,33 +35,55 @@ namespace Physica::Core {
     class Q_TIP4P {
         constexpr static unsigned int Dim = PairModelBase<ScalarType>::Dim;
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
+        using PositionMatrix = typename MDCell::PositionMatrix;
 
+        constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
+        constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double charge = 1.1128;
+        constexpr static double gamma = 0.73612;
+        constexpr static double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.9 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double alphaR = PhyConst<AU>::bohrToAngstorm(2.287);
+        constexpr static double equalR = PhyConst<AU>::angstormToBohr(0.9419);
+        constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
+    private:
         HytrogenListType hytrogenList;
+        PositionMatrix chargePos;
+        Vector<ScalarType> charges;
         ScalarType cutoff;
+        ScalarType stepSize;
     public:
-        Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_);
+        Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_, ScalarType stepSize_);
         Q_TIP4P(const Q_TIP4P&) = default;
         Q_TIP4P(Q_TIP4P&&) noexcept = default;
         ~Q_TIP4P() = default;
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(MDCell cell) const;
+        [[nodiscard]] Vector<ScalarType> force(const MDCell& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy(const MDCell& cell) const;
         /* Getters */
         [[nodiscard]] const HytrogenListType& getHytrogenList() const noexcept { return hytrogenList; }
+        [[nodiscard]] size_t getNumMolecule() const noexcept { return hytrogenList.getLength(); }
         /* Helpers */
         bool checkHytrogenList() const;
         void swap(Q_TIP4P& model) noexcept;
     private:
         void makeHytrogenList(const MDCell& refer_cell);
+        void makeCharges();
         ScalarType minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule);
     };
 
     template<class ScalarType>
-    Q_TIP4P<ScalarType>::Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_) : cutoff(std::move(cutoff_)) {
+    Q_TIP4P<ScalarType>::Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
+            : chargePos(refer_cell.getNumParticle(), 3)
+            , charges(refer_cell.getNumParticle())
+            , cutoff(std::move(cutoff_))
+            , stepSize(std::move(stepSize_)) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         makeHytrogenList(refer_cell);
+        makeCharges();
     }
 
     template<class ScalarType>
@@ -68,16 +93,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::potentialEnergy(MDCell cell) const {
-        using VectorType = Vector<ScalarType, Dim>;
-        constexpr double sigma = PhyConst<AU>::angstormToBohr(3.1589);
-        constexpr double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
-        constexpr double charge = 1.1128;
-        constexpr double gamma = 0.73612;
-        constexpr double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge);
-        constexpr double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
+    Vector<ScalarType> Q_TIP4P<ScalarType>::force(const MDCell& cell) const {
+        Vector<ScalarType> result(getNumMolecule() * Dim);
+        for (size_t i = 0; i < result.getLength(); ++i) {
+            result[i] = Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
+                PositionMatrix pos = cell.getPos();
+                *(pos.begin() + i) = x;
+                return potentialEnergy(MDCell(cell.getLattice(), std::move(pos), cell.getMassVec()));
+            }, cell.getPos().flatten().calc(i), stepSize);
+        }
+        return result;
+    }
 
-        const size_t numMolecule = cell.getNumParticle() / 3;
+    template<class ScalarType>
+    ScalarType Q_TIP4P<ScalarType>::potentialEnergy(const MDCell& cell) const {
+        using VectorType = Vector<ScalarType, Dim>;
+
+        const size_t numMolecule = getNumMolecule();
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
         const auto range = PairModelBase<ScalarType>::estimateRange(cell, cutoff);
@@ -85,64 +117,70 @@ namespace Physica::Core {
 
         ScalarType interMoleculeEnergy = 0;
         /* Inter molecular */ {
+            /* LJ Part */
             PairModelBase<ScalarType>::forParticleInRange(range, lattice,
-                [this, numMolecule, pos, &interMoleculeEnergy](VectorType delta) {
+                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
                     ScalarType energy = 0;
                     VectorType posO1, posH11, posH12;
                     const size_t offset = 2 * numMolecule;
                     for (size_t i = 0; i < numMolecule; ++i) {
                         posO1 = pos.row(offset + i) + delta;
-                        posH11 = pos.row(hytrogenList[i].first) + delta;
-                        posH12 = pos.row(hytrogenList[i].second) + delta;
-                        const VectorType partialCharge1 = posO1 * gamma + (posH11 + posH12) * ((1 - gamma) * 0.5);
-                        for (size_t j = i + 1; j < numMolecule; ++j) {
+                        for (size_t j = i; j < numMolecule; ++j) {
                             auto posO2 = pos.row(offset + j);
-                            auto posH21 = pos.row(hytrogenList[j].first);
-                            auto posH22 = pos.row(hytrogenList[j].second);
-                            /* LJ Part */ {
+                            const ScalarType r2 = (posO1 - posO2).squaredNorm();
+                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            if (isNotSelf && r2 < square(cutoff)) {
                                 constexpr double squared_sigma = sigma * sigma;
-                                const ScalarType rep_r2 = reciprocal((posO1 - posO2).squaredNorm()) * ScalarType(squared_sigma);
+                                const ScalarType rep_r2 = reciprocal(r2) * ScalarType(squared_sigma);
                                 const ScalarType rep_r4 = square(rep_r2);
                                 const ScalarType rep_r6 = rep_r4 * rep_r2;
                                 const ScalarType rep_r12 = square(rep_r6);
                                 energy += (rep_r12 - rep_r6) * epsilonE4;
                             }
-                            /* Coulomb Part */ {
-                                const VectorType partialCharge2 = posO2 * gamma + (posH21 + posH22) * ((1 - gamma) * 0.5);
-                                energy += ScalarType(charge * charge / 4) / ((posH11 - posH21).norm());
-                                energy += ScalarType(-charge * charge / 2) / ((posH11 - partialCharge2).norm());
-                                energy += ScalarType(charge * charge / 4) / ((posH11 - posH22).norm());
-
-                                energy += ScalarType(-charge * charge / 2) / ((partialCharge1 - posH21).norm());
-                                energy += ScalarType(charge * charge) / ((partialCharge1 - partialCharge2).norm());
-                                energy += ScalarType(-charge * charge / 2) / ((partialCharge1 - posH22).norm());
-
-                                energy += ScalarType(charge * charge / 4) / ((posH12 - posH21).norm());
-                                energy += ScalarType(-charge * charge / 2) / ((posH12 - partialCharge2).norm());
-                                energy += ScalarType(charge * charge / 4) / ((posH12 - posH22).norm());
-                            }
                         }
                     }
                     interMoleculeEnergy += energy;
                 });
+            /* Coulomb Part */ {
+                const size_t maxIndexH = 2 * numMolecule;
+                auto posH = chargePos.topRows(maxIndexH);
+                posH = pos.topRows(maxIndexH);
+
+                const ScalarType selfCoulomb = 0;
+                const size_t minIndexO = maxIndexH;
+                const size_t maxIndexO = minIndexO + numMolecule;
+                for (size_t i = minIndexO; i < maxIndexO; ++i) {
+                    auto partialCharge = chargePos.row(i);
+                    auto posO = pos.row(i);
+                    auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
+                    auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
+                    partialCharge = posO * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
+
+                    selfCoulomb += ScalarType(-charge * charge / 2) / ((posH1.asVector() - partialCharge).norm());
+                    selfCoulomb += ScalarType(-charge * charge / 2) / ((posH2.asVector() - partialCharge).norm());
+                }
+                const ScalarType ewald = Ewald<ScalarType>::energyIonIon(PeriodicCell<ScalarType, 3>(lattice, chargePos), cell.reciprocal(), charges);
+                interMoleculeEnergy += ewald - selfCoulomb;
+            }
         }
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecular */ {
             VectorType vecOH1, vecOH2;
+            const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
                 auto posO = pos.row(offset + i);
                 auto posH1 = pos.row(hytrogenList[i].first);
                 auto posH2 = pos.row(hytrogenList[i].second);
 
-                vecOH1 = posH1 - posO;
-                vecOH2 = posH2 - posO;
+                vecOH1 = posH1.asVector() - posO;
+                vecOH2 = posH2.asVector() - posO;
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
                 const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
                 intraMoleculeEnergy += modifiedMorse(r1, numMolecule) + modifiedMorse(r2, numMolecule);
             }
         }
-        return result;
+        return interMoleculeEnergy + intraMoleculeEnergy;
     }
 
     template<class ScalarType>
@@ -171,7 +209,10 @@ namespace Physica::Core {
     template<class ScalarType>
     void Q_TIP4P<ScalarType>::swap(Q_TIP4P& model) noexcept {
         hytrogenList.swap(model.hytrogenList);
+        chargePos.swap(chargePos);
+        charges.swap(charges);
         cutoff.swap(model.cutoff);
+        stepSize.swap(stepSize);
     }
 
     template<class ScalarType>
@@ -182,7 +223,7 @@ namespace Physica::Core {
         const auto& pos = refer_cell.getPos();
         const size_t maxHytrogenId = refer_cell.getNumParticle() - numMolecule;
         ScalarType bondLength1, bondLength2;
-        size_t hytrogenId1, hytrogenId2;
+        size_t hytrogenId1 = 0, hytrogenId2 = 0;
         for (size_t i = 0; i < numMolecule; ++i) {
             bondLength1 = bondLength2 = std::numeric_limits<ScalarType>::max();
 
@@ -212,6 +253,19 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void Q_TIP4P<ScalarType>::makeCharges() {
+        const size_t numMolecule = getNumMolecule();
+        const size_t maxIndexH = 2 * numMolecule;
+        const size_t minIndexO = maxIndexH;
+        const size_t maxIndexO = minIndexO + numMolecule;
+        for (size_t i = 0; i < maxIndexH; ++i)
+            charges[i] = ScalarType(-charge * 0.5);
+        
+        for (size_t i = maxIndexH; i < maxIndexO; ++i)
+            charges[i] = ScalarType(charge);
+    }
+
+    template<class ScalarType>
     ScalarType Q_TIP4P<ScalarType>::minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id) {
         using Vector3D = Vector<ScalarType, 3>;
 
@@ -236,10 +290,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType Q_TIP4P<ScalarType>::modifiedMorse(ScalarType r, size_t numMolecule) {
-        constexpr double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.9 * 1000) / PhyConst<SI>::unitCharge);
-        constexpr double alphaR = PhyConst<AU>::bohrToAngstorm(2.287);
-        constexpr double equalR = PhyConst<AU>::angstormToBohr(0.9419);
-
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;

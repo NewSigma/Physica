@@ -59,6 +59,7 @@ namespace Physica::Core {
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
         [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const;
+        [[nodiscard]] ScalarType getVolume() const noexcept;
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
         /* Static members */
@@ -101,6 +102,11 @@ namespace Physica::Core {
         const ScalarType factor = ScalarType(2 * M_PI) / volume;
         result *= factor;
         return ReciprocalCell<ScalarType>(std::move(result));
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    ScalarType PeriodicCell<ScalarType, Dim>::getVolume() const noexcept {
+        return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
     }
 
     template<class ScalarType, unsigned int Dim>

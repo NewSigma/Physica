@@ -50,7 +50,6 @@ namespace Physica::Core {
         [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return Base::pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
-        [[nodiscard]] ScalarType getVolume() const noexcept;
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
         /* Helpers */
