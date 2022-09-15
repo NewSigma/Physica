@@ -72,7 +72,7 @@ namespace Physica::Core {
         void makeHytrogenList(const MDCell& refer_cell);
         void makeCharges();
         ScalarType minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id);
-        ScalarType modifiedMorse(ScalarType r, size_t numMolecule);
+        ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
     };
 
     template<class ScalarType>
@@ -146,7 +146,7 @@ namespace Physica::Core {
                 auto posH = chargePos.topRows(maxIndexH);
                 posH = pos.topRows(maxIndexH);
 
-                const ScalarType selfCoulomb = 0;
+                ScalarType selfCoulomb = 0;
                 const size_t minIndexO = maxIndexH;
                 const size_t maxIndexO = minIndexO + numMolecule;
                 for (size_t i = minIndexO; i < maxIndexO; ++i) {
@@ -154,12 +154,15 @@ namespace Physica::Core {
                     auto posO = pos.row(i);
                     auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
                     auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
-                    partialCharge = posO * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
+                    partialCharge = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
 
-                    selfCoulomb += ScalarType(-charge * charge / 2) / ((posH1.asVector() - partialCharge).norm());
-                    selfCoulomb += ScalarType(-charge * charge / 2) / ((posH2.asVector() - partialCharge).norm());
+                    selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH1.asVector() - partialCharge).norm());
+                    selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH2.asVector() - partialCharge).norm());
                 }
-                const ScalarType ewald = Ewald<ScalarType>::energyIonIon(PeriodicCell<ScalarType, 3>(lattice, chargePos), cell.reciprocal(), charges);
+                using ScalarType_ = typename MDCell::LatticeMatrix::ScalarType;
+                const ScalarType ewald = Ewald<ScalarType>::energyIonIon(PeriodicCell<ScalarType_, 3>(lattice, chargePos),
+                                                                         cell.reciprocal(),
+                                                                         charges);
                 interMoleculeEnergy += ewald - selfCoulomb;
             }
         }
@@ -289,7 +292,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::modifiedMorse(ScalarType r, size_t numMolecule) {
+    ScalarType Q_TIP4P<ScalarType>::modifiedMorse(ScalarType r, size_t numMolecule) const {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;

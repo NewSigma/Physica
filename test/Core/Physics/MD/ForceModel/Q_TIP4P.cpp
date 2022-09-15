@@ -16,11 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
+using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
+constexpr size_t numReplica = 32;
+constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
+constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
+constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
+constexpr unsigned int numMolecular = 216;
+constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
+constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
+constexpr double cellVolume = ((numMolecular * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+constexpr double initialBond_HO = PhyConst<AU>::angstormToBohr(1);
 
 void testHytrogenList() {
     typename CrystalCell::LatticeMatrix lattice{
@@ -49,7 +63,63 @@ void testHytrogenList() {
         exit(EXIT_FAILURE);
 }
 
+template<class RandomGenerator>
+Vector<Scalar<Float, false>, 3> randomVector(RandomGenerator& gen) {
+    using ScalarType_ = Scalar<Float, false>;
+    std::uniform_real_distribution dist{};
+    const ScalarType_ theta(dist(gen) * M_PI);
+    const ScalarType_ phi(dist(gen) * M_PI * 2);
+    Vector<ScalarType_, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+    result *= ScalarType_(initialBond_HO);
+    return result;
+}
+
+template<class RandomGenerator>
+RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+    const size_t maxIndexH = numMolecular * 2;
+    const size_t maxIndexO = numMolecular * 3;
+    const size_t numAtom = maxIndexO;
+
+    const Scalar<Float, false> latticeFactor(std::cbrt(cellVolume));
+    typename CrystalCell::LatticeMatrix lattice = CrystalCell::LatticeMatrix::unitMatrix(3);
+    lattice *= latticeFactor;
+
+    typename CrystalCell::PositionMatrix pos(numAtom, 3);
+    std::uniform_real_distribution dist{};
+    for (auto elem : pos)
+        elem = latticeFactor * dist(gen);
+
+    typename CrystalCell::AtomicArray atomicNumbers(numAtom);
+    for (size_t i = 0; i < maxIndexH; ++i)
+        atomicNumbers[i] = 1;
+    for (size_t i = maxIndexH; i < maxIndexO; ++i)
+        atomicNumbers[i] = 8;
+
+    CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
+    return RPMD<ScalarType>(MDCell(std::move(cell)), numReplica, temperatureT, thermostatTime, timeStep);
+}
+
+void testMD() {
+    std::mt19937::result_type seed;
+    Physica::Utils::Random::rdrand(seed);
+    std::mt19937 gen(seed);
+
+    auto rpmd = makeSystem(gen);
+    rpmd.initMomentum(gen);
+    Q_TIP4P<ScalarType> model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
+
+    ThreadPool::initThreadPool(4);
+    ThreadPool& pool = ThreadPool::getInstance();
+    {
+        rpmd.updateForce(model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(0.01 * 1E-12), gen, model);
+    }
+    pool.shouldExit();
+    ThreadPool::deInitThreadPool();
+}
+
 int main() {
     testHytrogenList();
+    testMD();
     return 0;
 }

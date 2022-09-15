@@ -35,12 +35,13 @@ namespace Physica::Core {
      * [5] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. The Journal of Chemical Physics, 2016, 145(2):1291-1301.
      */
     template<class ScalarType>
-    class RPMD final : private MDCell {
+    class RPMD final {
         using PhasePosType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
         constexpr static unsigned int Dim = 3;
     private:
+        MDCell cell;
         FFT<ScalarType, 1> fft;
         PhasePosType phasePosX;
         ForceMatrix forceBuffer;
@@ -71,11 +72,12 @@ namespace Physica::Core {
         template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
         /* Getters */
+        [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] MDCell phaseToCell(size_t replica) const;
-        [[nodiscard]] size_t getDOF() const noexcept { return Dim * MDCell::getNumParticle(); }
+        [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] typename MDCell::PositionMatrix getPos() const;
         [[nodiscard]] typename MDCell::PositionMatrix getMomentum() const;
@@ -106,7 +108,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     RPMD<ScalarType>::RPMD(MDCell cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_)
-            : MDCell(std::move(cell_))
+            : cell(std::move(cell_))
             , fft(numReplica, 1)
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
@@ -120,7 +122,7 @@ namespace Physica::Core {
 
         /* Fill pos */ {
             size_t index = dof;
-            for (auto elem : MDCell::getPos()) {
+            for (auto elem : cell.getPos()) {
                 phasePosX(index, 0) = elem;
                 ++index;
             }
@@ -189,7 +191,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         Vector<ScalarType, 3> driftMomentum(3, 0);
         for (size_t i = 0; i < dof; ++i) {
-            const auto mass = MDCell::getMass(i / Dim);
+            const auto mass = cell.getMass(i / Dim);
             const size_t direction = i % Dim;
             const ScalarType factor = sqrt(repBeta * mass);
             for (size_t j = 0; j < getNumReplica(); ++j) {
@@ -253,14 +255,14 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
 
-        PositionMatrix pos(MDCell::getNumParticle(), 3);
+        PositionMatrix pos(getNumParticle(), 3);
         auto phase = phasePosX.col(replica);
         size_t index = getDOF();
         for (auto& elem : pos) {
             elem = ScalarType_(phase[index]);
             ++index;
         }
-        return MDCell(MDCell::getLattice(), std::move(pos), MDCell::getMassVec());
+        return MDCell(cell.getLattice(), std::move(pos), cell.getMassVec());
     }
 
     template<class ScalarType>
@@ -268,7 +270,7 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
 
-        PositionMatrix result(MDCell::getNumParticle(), 3);
+        PositionMatrix result(getNumParticle(), 3);
         const size_t dof = getDOF();
         size_t index = dof;
         for (auto& elem : result) {
@@ -283,7 +285,7 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCell::PositionMatrix;
         using ScalarType_ = typename PositionMatrix::ScalarType;
 
-        PositionMatrix result(MDCell::getNumParticle(), 3, 0);
+        PositionMatrix result(getNumParticle(), 3, 0);
         size_t index = 0;
         for (auto& elem : result) {
             elem = ScalarType_(mean(phasePosX.row(index)));
@@ -297,7 +299,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         ScalarType classical_kinetic = 0;
         for (size_t i = 0; i < dof; ++i) {
-            const auto mass = MDCell::getMass(i / Dim);
+            const auto mass = cell.getMass(i / Dim);
             auto p = phasePosX.row(i);
             classical_kinetic += square(p.asVector()).sum() / (mass * 2);
         }
@@ -319,7 +321,7 @@ namespace Physica::Core {
         auto pos = phasePosX.bottomRows(dof);
         ScalarType result = 0;
         for (size_t i = 0; i < dof; ++i) {
-            const ScalarType mass = MDCell::getMass(i / Dim);
+            const ScalarType mass = cell.getMass(i / Dim);
             for (size_t j = 0; j < getNumReplica(); ++j)
                 result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
         }
@@ -395,7 +397,7 @@ namespace Physica::Core {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
-            const auto mass = MDCell::getMass(i / Dim);
+            const auto mass = cell.getMass(i / Dim);
             const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
             toNormalRepr(i);
             /* Translational mode */ {
@@ -438,7 +440,7 @@ namespace Physica::Core {
         MatrixType matA(2, 2);
         VectorType temp{};
         for (size_t i = 0; i < dof; ++i) {
-            const auto mass = MDCell::getMass(i / Dim);
+            const auto mass = cell.getMass(i / Dim);
             toNormalRepr(i);
             /* Translational mode */ {
                 buffer(1, 0) += buffer(0, 0) * deltaT / mass;
@@ -463,15 +465,16 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RPMD<ScalarType>::normalizeCentroid() {
-        using ScalarType_ = typename PositionMatrix::ScalarType;
+        using ScalarType_ = typename MDCell::ScalarType;
+        using PositionMatrix = typename MDCell::PositionMatrix;
         PositionMatrix centroid = getPos();
-        MDCell::toDirect(centroid);
+        cell.toDirect(centroid);
         size_t index = getDOF();
         for (const auto elem : centroid) {
             const size_t component = index % Dim;
             const size_t atom_start = index - component;
             const int integer = float(elem);
-            const Vector<ScalarType_, 3> delta = ScalarType_(integer - elem.isNegative()) * MDCell::getLattice().row(component).asVector();
+            const Vector<ScalarType_, 3> delta = ScalarType_(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
             for (size_t i = 0; i < 3; ++i) {
                 auto row = phasePosX.row(atom_start + i);
                 row -= delta[i];
@@ -483,10 +486,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     bool RPMD<ScalarType>::checkCentroid() const {
-        using ScalarType_ = typename PositionMatrix::ScalarType;
+        using ScalarType_ = typename MDCell::ScalarType;
+        using PositionMatrix = typename MDCell::PositionMatrix;
         constexpr bool success = true;
         PositionMatrix centroid = getPos();
-        MDCell::toDirect(centroid);
+        cell.toDirect(centroid);
         for (auto& elem : centroid)
             if (!(ScalarType_::Zero() <= elem && elem <= ScalarType_::One()))
                 return !success;

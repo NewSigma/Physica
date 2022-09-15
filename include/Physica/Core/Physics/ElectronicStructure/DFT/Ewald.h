@@ -31,24 +31,29 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class Ewald {
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using RepCellType = ReciprocalCell<typename LatticeMatrix::ScalarType>;
         using UnsignedGrid = Grid3D<ScalarType, false>;
         using Vector3D = Vector<ScalarType, 3>;
     public:
-        static ScalarType energyIonIon(CrystalCell cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges);
-        static ScalarType energyIonIon(const MDCell& cell, const RepCellType& repCell, const Vector<ScalarType>& charges);
+        static ScalarType energyIonIon(CrystalCell cell,
+                                       const ReciprocalCell<typename CrystalCell::ScalarType>& repCell,
+                                       const Utils::Array<int16_t>& charges);
+        static ScalarType energyIonIon(const MDCell& cell,
+                                       const ReciprocalCell<typename MDCell::ScalarType>& repCell,
+                                       const Vector<ScalarType>& charges);
         template<class ScalarType_>
         static ScalarType energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
-                                       const RepCellType& repCell,
+                                       const ReciprocalCell<ScalarType_>& repCell,
                                        const Vector<ScalarType>& charges);
     private:
+        template<class LatticeMatrix>
         [[nodiscard]] static std::tuple<int, int, int> getSumDimention(const LatticeMatrix& latt, ScalarType factor);
+        template<class LatticeMatrix>
         [[nodiscard]] static ScalarType realSum(const LatticeMatrix& cell,
                                                 ScalarType integralLimit,
                                                 std::tuple<int, int, int> dim,
                                                 const Vector<ScalarType, 3>& deltaPos,
                                                 const ScalarType& averageCellSize);
+        template<class LatticeMatrix>
         [[nodiscard]] static ScalarType reciprocalSum(const LatticeMatrix& cell,
                                                       ScalarType integralLimit,
                                                       std::tuple<int, int, int> dim,
@@ -57,7 +62,9 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(CrystalCell cell, const RepCellType& repCell, const Utils::Array<int16_t>& charges) {
+    ScalarType Ewald<ScalarType>::energyIonIon(CrystalCell cell,
+                                               const ReciprocalCell<typename CrystalCell::ScalarType>& repCell,
+                                               const Utils::Array<int16_t>& charges) {
         if (cell.getType() == CrystalCell::Type::Direct)
             cell.toCartesian();
         Vector<ScalarType> temp(charges.getLength());
@@ -67,7 +74,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Ewald<ScalarType>::energyIonIon(const MDCell& cell, const RepCellType& repCell, const Vector<ScalarType>& charges) {
+    ScalarType Ewald<ScalarType>::energyIonIon(const MDCell& cell,
+                                               const ReciprocalCell<typename MDCell::ScalarType>& repCell,
+                                               const Vector<ScalarType>& charges) {
         return energyIonIon(cell, repCell, charges);
     }
     /**
@@ -76,7 +85,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class ScalarType_>
     ScalarType Ewald<ScalarType>::energyIonIon(const PeriodicCell<ScalarType_, 3>& cell,
-                                               const RepCellType& repCell,
+                                               const ReciprocalCell<ScalarType_>& repCell,
                                                const Vector<ScalarType>& charges) {
         const size_t ionCount = cell.getNumParticle();
         const ScalarType inv_volume = reciprocal(cell.getVolume());
@@ -109,6 +118,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class LatticeMatrix>
     std::tuple<int, int, int> Ewald<ScalarType>::getSumDimention(const LatticeMatrix& latt, ScalarType factor) {
         constexpr double roundFactor = 1 - std::numeric_limits<double>::epsilon();
         static_assert(roundFactor < 1);
@@ -120,6 +130,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class LatticeMatrix>
     ScalarType Ewald<ScalarType>::realSum(const LatticeMatrix& cellLattice,
                                           ScalarType integralLimit,
                                           std::tuple<int, int, int> dim,
@@ -159,6 +170,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class LatticeMatrix>
     ScalarType Ewald<ScalarType>::reciprocalSum(const LatticeMatrix& repLattice,
                                                 ScalarType integralLimit,
                                                 std::tuple<int, int, int> dim,

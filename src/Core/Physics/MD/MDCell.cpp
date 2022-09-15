@@ -40,7 +40,7 @@ namespace Physica::Core {
             , massVec(std::move(massVec_))
             , invLattice(Base::makeInvLattice()) {}
 
-    void MDCell::scale(ScalarType_ factor) {
+    void MDCell::scale(ScalarType factor) {
         Base::scalr_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }
@@ -49,8 +49,8 @@ namespace Physica::Core {
         Base::toDirect(invLattice);
         for (auto& elem : pos) {
             const int integer = float(elem);
-            elem -= ScalarType_(integer - elem.isNegative());
-            assert(ScalarType_::Zero() <= elem && elem <= ScalarType_::One());
+            elem -= ScalarType(integer - elem.isNegative());
+            assert(ScalarType::Zero() <= elem && elem <= ScalarType::One());
         }
         Base::toCartesian();
     }

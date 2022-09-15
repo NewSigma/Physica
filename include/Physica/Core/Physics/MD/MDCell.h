@@ -24,10 +24,10 @@ namespace Physica::Core {
     class CrystalCell;
 
     class MDCell : public PeriodicCell<Scalar<Double, false>, 3> {
-        using ScalarType_ = Scalar<Double, false>;
     public:
-        using Base = PeriodicCell<ScalarType_, 3>;
-        using MassVector = Vector<ScalarType_>;
+        using ScalarType = Scalar<Double, false>;
+        using Base = PeriodicCell<ScalarType, 3>;
+        using MassVector = Vector<ScalarType>;
     private:
         using typename Base::InvLatticeMatrix;
         MassVector massVec;
@@ -36,14 +36,14 @@ namespace Physica::Core {
         MDCell(CrystalCell cell);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
-        void scale(ScalarType_ factor);
+        void scale(ScalarType factor);
         void normalizeCell();
+        void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
         /* Getters */
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
-        [[nodiscard]] ScalarType_ getMass(size_t particleID) const { return massVec[particleID]; }
+        [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Base::Type::Cartesian; }
     protected:
         void toDirect() { Base::toDirect(invLattice); }
-        void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
     };
 }

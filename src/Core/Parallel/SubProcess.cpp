@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <sys/prctl.h>
 #include "Physica/Core/Parallel/SubProcess.h"
+#include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Core::Parallel {
     SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}
@@ -35,10 +36,8 @@ namespace Physica::Core::Parallel {
 
     ProcessFuture SubProcess::execute() {
         pid = fork();
-        if (pid == -1) {
-            std::cerr << "[Error]: Failed to fork process.\n";
-            exit(EXIT_FAILURE);
-        }
+        if (pid == -1)
+            throw SyscallException();
         else if (pid == 0) {
             prctl(PR_SET_PDEATHSIG, SIGTERM);
             /* Set nice */ {
