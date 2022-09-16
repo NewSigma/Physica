@@ -42,6 +42,7 @@ namespace Physica::Core {
         PosScalarType inv_volume;
         PosScalarType averageCellSize;
         OutScalarType integralLimit;
+        OutScalarType selfEnergy;
         Utils::Array<int, Dim> realSumRange;
         Utils::Array<int, Dim> repSumRange;
     public:
@@ -78,6 +79,8 @@ namespace Physica::Core {
         //The following param chosen is referenced from VASP
         averageCellSize = cbrt(volume);
         integralLimit = sqrt(OutScalarType(M_PI)) / averageCellSize;
+        selfEnergy = square(charges).sum() * integralLimit / sqrt(OutScalarType(M_PI))
+                   + square(charges.sum()) * OutScalarType(M_PI) / (OutScalarType::Two() * square(integralLimit)) * inv_volume;
         realSumRange = getSumRange(repCell.getLattice(), OutScalarType(2 / M_PI) / integralLimit);
         repSumRange = getSumRange(lattice, OutScalarType(4 / M_PI) * integralLimit);
     }
@@ -94,8 +97,6 @@ namespace Physica::Core {
     OutScalarType Ewald<OutScalarType, PosScalarType>::operator()(const PositionMatrix& pos) const {
         using ScalarType = OutScalarType;
         ScalarType result = ScalarType::Zero();
-        ScalarType totalCharge = 0;
-        ScalarType totalSquaredCharge = 0;
         for (size_t i = 0; i < getNumParticle(); ++i) {
             for (size_t j = 0; j < getNumParticle(); ++j) { //Optimize: possible to loop from ion2 = ion1
                 const Vector<PosScalarType, Dim> deltaPos = pos.row(i).asVector() - pos.row(j);
@@ -105,13 +106,9 @@ namespace Physica::Core {
                 const ScalarType dotCharge = charges[i] * charges[j];
                 result += sum * dotCharge;
             }
-            const ScalarType charge = charges[i];
-            totalCharge += charge;
-            totalSquaredCharge += square(charge);
         }
         result *= ScalarType(0.5);
-        result -= totalSquaredCharge * integralLimit / sqrt(ScalarType(M_PI));
-        result -= square(totalCharge) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
+        result -= selfEnergy;
         return result;
     }
 
@@ -123,6 +120,7 @@ namespace Physica::Core {
         inv_volume.swap(ewald.inv_volume);
         averageCellSize.swap(ewald.averageCellSize);
         integralLimit.swap(ewald.integralLimit);
+        selfEnergy.swap(ewald.selfEnergy);
         realSumRange.swap(ewald.realSumRange);
         repSumRange.swap(ewald.repSumRange);
     }

@@ -94,6 +94,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType estimateTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
+        void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);

@@ -25,6 +25,7 @@ namespace Physica::Core {
 
     class MDCell : public PeriodicCell<Scalar<Double, false>, 3> {
     public:
+        constexpr static unsigned int Dim = 3;
         using ScalarType = Scalar<Double, false>;
         using Base = PeriodicCell<ScalarType, 3>;
         using MassVector = Vector<ScalarType>;

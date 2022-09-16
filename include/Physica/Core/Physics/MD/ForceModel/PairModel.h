@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "PairModelBase.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PairFunctor>
@@ -28,7 +27,7 @@ namespace Physica::Core {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
-        constexpr static unsigned int Dim = PairModelBase<ScalarType>::Dim;
+        constexpr static unsigned int Dim = MDCell::Dim;
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;
@@ -69,11 +68,11 @@ namespace Physica::Core {
 
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = PairModelBase<ScalarType>::estimateRange(cell, cutoff);
+        const auto range = MDCell::estimateRange(lattice, cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         Vector<ScalarType> force(Dim * numParticle, 0);
-        PairModelBase<ScalarType>::forParticleInRange(range, lattice,
+        MDCell::forParticleInRange(range, lattice,
             [this, pos, numParticle, &force](VectorType delta) {
                 VectorType r, from;
                 for (size_t i = 0; i < numParticle; ++i) {
@@ -108,7 +107,7 @@ namespace Physica::Core {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
-        const auto range = PairModelBase<ScalarType>::estimateRange(cell, cutoff);
+        const auto range = MDCell::estimateRange(cell, cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;

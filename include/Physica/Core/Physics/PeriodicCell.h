@@ -41,6 +41,7 @@ namespace Physica::Core {
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
+        using SearchRangeType = Utils::Array<ssize_t, 3>;
     protected:
         using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
 
@@ -66,6 +67,8 @@ namespace Physica::Core {
         static void unitToSuper(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         static void superToUnit(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ScalarType cutoff);
+        template<class Functor> static void forParticleInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
@@ -156,6 +159,42 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     ScalarType PeriodicCell<ScalarType, Dim>::getVolume(const LatticeMatrix& lattice) {
         return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    typename PeriodicCell<ScalarType, Dim>::SearchRangeType
+    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, ScalarType cutoff) {
+        ssize_t max_x, max_y, max_z;
+        /* Estimate range */ {
+            const ReciprocalCell repCell(lattice);
+            const auto& repLatt = repCell.getLattice();
+            const ScalarType factor = cutoff * (1 / (2 * M_PI));
+            max_x = static_cast<ssize_t>(double(factor * repLatt.row(0).norm()) + 1);
+            max_y = static_cast<ssize_t>(double(factor * repLatt.row(1).norm()) + 1);
+            max_z = static_cast<ssize_t>(double(factor * repLatt.row(2).norm()) + 1);
+        }
+        return Utils::Array<ssize_t, 3>{max_x, max_y, max_z};
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    template<class Functor>
+    void PeriodicCell<ScalarType, Dim>::forParticleInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+        using VectorType = Vector<ScalarType, Dim>;
+        auto a1 = lattice.row(0);
+        auto a2 = lattice.row(1);
+        auto a3 = lattice.row(2);
+
+        VectorType v1, v2, v3;
+        for (ssize_t x = -range[0]; x <= range[0]; ++x) {
+            v1 = ScalarType(x) * a1.asVector();
+            for (ssize_t y = -range[1]; y <= range[1]; ++y) {
+                v2 = v1 + ScalarType(y) * a2.asVector();
+                for (ssize_t z = -range[2]; z <= range[2]; ++z) {
+                    v3 = v2 + ScalarType(z) * a3.asVector();
+                    func(v3);
+                }
+            }
+        }
     }
 
     template<class ScalarType, unsigned int Dim>

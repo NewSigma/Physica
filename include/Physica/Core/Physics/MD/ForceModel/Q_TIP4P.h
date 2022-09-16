@@ -23,7 +23,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/MD/ForceModel/PairModelBase.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
 
 namespace Physica::Core {
@@ -33,7 +32,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class Q_TIP4P {
-        constexpr static unsigned int Dim = PairModelBase<ScalarType>::Dim;
+        constexpr static unsigned int Dim = MDCell::Dim;
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
         using PositionMatrix = typename MDCell::PositionMatrix;
         using EwaldType = Ewald<ScalarType, typename MDCell::ScalarType>;
@@ -112,13 +111,13 @@ namespace Physica::Core {
         const size_t numMolecule = getNumMolecule();
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = PairModelBase<ScalarType>::estimateRange(cell, cutoff);
+        const auto range = MDCell::estimateRange(lattice, cutoff);
         const double epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * numMolecule;
 
         ScalarType interMoleculeEnergy = 0;
         /* Inter molecular */ {
             /* LJ Part */
-            PairModelBase<ScalarType>::forParticleInRange(range, lattice,
+            MDCell::forParticleInRange(range, lattice,
                 [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
                     ScalarType energy = 0;
                     VectorType posO1, posH11, posH12;
