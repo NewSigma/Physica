@@ -21,6 +21,128 @@
 #include <cassert>
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class SourceType, class TargetType, size_t Size>
+        struct InverseImpl {
+            static void run(const SourceType& source, TargetType& target) {
+                const size_t order = source.getRow();
+                const size_t order_1 = order - 1;
+                SourceType copy = source;
+                if constexpr (MatrixOption::isSameMajor<SourceType, TargetType>()) {
+                    target.toUnitMatrix();
+                    for (size_t i = 0; i < order_1; ++i) {
+                        size_t k = i;
+                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                            ++k;
+                            assert(k < order);
+                        }
+                        if (k != i) {
+                            copy.majorSwap(k, i);
+                            target.majorSwap(k, i);
+                        }
+                        
+                        for (size_t j = i + 1; j < order; ++j) {
+                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            copy.majorReduce(j, i, factor);
+                            target.majorReduce(j, i, factor);
+                        }
+                    }
+
+                    for (size_t i = order_1; i > 0; --i) {
+                        size_t k = i;
+                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                            --k;
+                            assert(k < order);
+                        }
+                        if (k != i) {
+                            copy.majorSwap(k, i);
+                            target.majorSwap(k, i);
+                        }
+                        
+                        for (size_t j = 0; j < i; ++j) {
+                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            copy.majorReduce(j, i, factor);
+                            target.majorReduce(j, i, factor);
+                        }
+                    }
+                    for (size_t i = 0; i < order; ++i)
+                        target.majorMulScalar(i, reciprocal(copy(i, i)));
+                }
+                else {
+                    auto temp = SourceType::unitMatrix(order);
+                    for (size_t i = 0; i < order_1; ++i) {
+                        size_t k = i;
+                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                            ++k;
+                            assert(k < order);
+                        }
+                        if (k != i) {
+                            copy.majorSwap(k, i);
+                            temp.majorSwap(k, i);
+                        }
+
+                        for (size_t j = i + 1; j < order; ++j) {
+                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            copy.majorReduce(j, i, factor);
+                            temp.majorReduce(j, i, factor);
+                        }
+                    }
+
+                    for (size_t i = order_1; i > 0; --i) {
+                        size_t k = i;
+                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                            --k;
+                            assert(k < order);
+                        }
+                        if (k != i) {
+                            copy.majorSwap(k, i);
+                            target.majorSwap(k, i);
+                        }
+
+                        for (size_t j = 0; j < i; ++j) {
+                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            copy.majorReduce(j, i, factor);
+                            temp.majorReduce(j, i, factor);
+                        }
+                    }
+                    for (size_t i = 0; i < order; ++i)
+                        temp.majorMulScalar(i, reciprocal(copy(i, i)));
+                    target = temp;
+                }
+            }
+        };
+
+        template<class SourceType, class TargetType>
+        struct InverseImpl<SourceType, TargetType, 3> {
+            static void run(const SourceType& source, TargetType& target) {
+                using ScalarType = typename SourceType::ScalarType;
+                const ScalarType repDet = reciprocal(source.determinate());
+                if constexpr (TargetType::isRowMatrix) {
+                    target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
+                    target(0, 1) = -(source(0, 1) * source(2, 2) - source(2, 1) * source(0, 2)) * repDet;
+                    target(0, 2) = (source(0, 1) * source(1, 2) - source(1, 1) * source(0, 2)) * repDet;
+                    target(1, 0) = -(source(1, 0) * source(2, 2) - source(2, 0) * source(1, 2)) * repDet;
+                    target(1, 1) = (source(0, 0) * source(2, 2) - source(2, 0) * source(0, 2)) * repDet;
+                    target(1, 2) = -(source(0, 0) * source(1, 2) - source(1, 0) * source(0, 2)) * repDet;
+                    target(2, 0) = (source(1, 0) * source(2, 1) - source(2, 0) * source(1, 1)) * repDet;
+                    target(2, 1) = -(source(0, 0) * source(2, 1) - source(2, 0) * source(0, 1)) * repDet;
+                    target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
+                }
+                else {
+                    target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
+                    target(1, 0) = -(source(1, 0) * source(2, 2) - source(2, 0) * source(1, 2)) * repDet;
+                    target(2, 0) = (source(1, 0) * source(2, 1) - source(2, 0) * source(1, 1)) * repDet;
+                    target(0, 1) = -(source(0, 1) * source(2, 2) - source(2, 1) * source(0, 2)) * repDet;
+                    target(1, 1) = (source(0, 0) * source(2, 2) - source(2, 0) * source(0, 2)) * repDet;
+                    target(2, 1) = -(source(0, 0) * source(2, 1) - source(2, 0) * source(0, 1)) * repDet;
+                    target(0, 2) = (source(0, 1) * source(1, 2) - source(1, 1) * source(0, 2)) * repDet;
+                    target(1, 2) = -(source(0, 0) * source(1, 2) - source(1, 0) * source(0, 2)) * repDet;
+                    target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
+                }
+            }
+        };
+    }
+
     template<class MatrixType> class InverseMatrix;
 
     namespace Internal {
@@ -36,7 +158,7 @@ namespace Physica::Core {
             assert(matrix.getRow() == matrix.getColumn());
         }
         template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& inverse) const;
+        void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
@@ -45,90 +167,8 @@ namespace Physica::Core {
 
     template<class MatrixType>
     template<class OtherMatrix>
-    void InverseMatrix<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& inverse) const {
-        const size_t order = getRow();
-        const size_t order_1 = order - 1;
-        MatrixType copy = matrix;
-        if constexpr (MatrixOption::isSameMajor<MatrixType, OtherMatrix>()) {
-            inverse.getDerived().toUnitMatrix();
-            for (size_t i = 0; i < order_1; ++i) {
-                size_t k = i;
-                while(copy.getElementFromMajorMinor(k, i).isZero()) {
-                    ++k;
-                    assert(k < order);
-                }
-                if (k != i) {
-                    copy.majorSwap(k, i);
-                    inverse.majorSwap(k, i);
-                }
-                
-                for (size_t j = i + 1; j < order; ++j) {
-                    auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
-                    copy.majorReduce(j, i, factor);
-                    inverse.majorReduce(j, i, factor);
-                }
-            }
-
-            for (size_t i = order_1; i > 0; --i) {
-                size_t k = i;
-                while(copy.getElementFromMajorMinor(k, i).isZero()) {
-                    --k;
-                    assert(k < order);
-                }
-                if (k != i) {
-                    copy.majorSwap(k, i);
-                    inverse.majorSwap(k, i);
-                }
-                
-                for (size_t j = 0; j < i; ++j) {
-                    auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
-                    copy.majorReduce(j, i, factor);
-                    inverse.majorReduce(j, i, factor);
-                }
-            }
-            for (size_t i = 0; i < order; ++i)
-                inverse.majorMulScalar(i, reciprocal(copy(i, i)));
-        }
-        else {
-            auto temp = MatrixType::unitMatrix(order);
-            for (size_t i = 0; i < order_1; ++i) {
-                size_t k = i;
-                while(copy.getElementFromMajorMinor(k, i).isZero()) {
-                    ++k;
-                    assert(k < order);
-                }
-                if (k != i) {
-                    copy.majorSwap(k, i);
-                    temp.majorSwap(k, i);
-                }
-
-                for (size_t j = i + 1; j < order; ++j) {
-                    auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
-                    copy.majorReduce(j, i, factor);
-                    temp.majorReduce(j, i, factor);
-                }
-            }
-
-            for (size_t i = order_1; i > 0; --i) {
-                size_t k = i;
-                while(copy.getElementFromMajorMinor(k, i).isZero()) {
-                    --k;
-                    assert(k < order);
-                }
-                if (k != i) {
-                    copy.majorSwap(k, i);
-                    inverse.majorSwap(k, i);
-                }
-
-                for (size_t j = 0; j < i; ++j) {
-                    auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
-                    copy.majorReduce(j, i, factor);
-                    temp.majorReduce(j, i, factor);
-                }
-            }
-            for (size_t i = 0; i < order; ++i)
-                temp.majorMulScalar(i, reciprocal(copy(i, i)));
-            inverse = temp;
-        }
+    void InverseMatrix<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+        constexpr size_t Size = MatrixType::RowAtCompile == Dynamic ? OtherMatrix::RowAtCompile : MatrixType::RowAtCompile;
+        Internal::InverseImpl<MatrixType, OtherMatrix, Size>::run(matrix, target.getDerived());
     }
 }
