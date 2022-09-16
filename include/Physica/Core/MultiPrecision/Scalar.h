@@ -197,7 +197,7 @@ namespace Physica::Core {
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
             [[nodiscard]] float getTrivial() const noexcept { return f; }
-            [[nodiscard]] bool isZero() const { return f == 0; }
+            [[nodiscard]] bool isZero() const noexcept { return f == 0; }
             [[nodiscard]] bool isPositive() const { return f > 0; }
             [[nodiscard]] bool isNegative() const { return f < 0; }
             [[nodiscard]] bool isInteger() const;
@@ -228,7 +228,7 @@ namespace Physica::Core {
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
             [[nodiscard]] double getTrivial() const noexcept { return d; }
-            [[nodiscard]] bool isZero() const { return d == 0; }
+            [[nodiscard]] bool isZero() const noexcept{ return d == 0; }
             [[nodiscard]] bool isPositive() const { return d > 0; }
             [[nodiscard]] bool isNegative() const { return d < 0; }
             [[nodiscard]] bool isInteger() const;
