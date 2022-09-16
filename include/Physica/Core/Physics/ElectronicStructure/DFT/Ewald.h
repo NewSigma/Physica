@@ -107,15 +107,17 @@ namespace Physica::Core {
         ScalarType rSpaceSum = 0;
         PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, pos, &rSpaceSum](Vector3D delta) {
                 ScalarType sum = 0;
-                for (size_t i = 0; i < getNumParticle(); ++i) {
+                const size_t numParticle = getNumParticle();
+                for (size_t i = 0; i < numParticle; ++i) {
                     const Vector3D pos_i = pos.row(i).asVector() + delta;
-                    for (size_t j = i; j < getNumParticle(); ++j) {
+                    const OutScalarType charge_i = charges[i];
+                    for (size_t j = i; j < numParticle; ++j) {
                         const Vector3D pos_ij = pos_i - pos.row(j).asVector();
                         const ScalarType r2 = pos_ij.squaredNorm();
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                         if (isNotSelf) {
                             const ScalarType r = sqrt(r2);
-                            const ScalarType temp = erfcFromTable(integralLimit * r) / r * (charges[i] * charges[j]); //Optimize: VASP uses searching table method
+                            const ScalarType temp = erfcFromTable(integralLimit * r) / r * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
                         }
                     }
@@ -129,15 +131,18 @@ namespace Physica::Core {
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                 if (isNotGammaPoint) {
                     ScalarType sum = 0;
-                    for (size_t i = 0; i < getNumParticle(); ++i) {
-                        for (size_t j = i; j < getNumParticle(); ++j) {
-                            const ScalarType dot = delta * (pos.row(i).asVector() - pos.row(j).asVector());
-                            const ScalarType temp = cos(dot) * (charges[i] * charges[j]);
+                    const size_t numParticle = getNumParticle();
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        const Vector3D pos_i = pos.row(i).asVector();
+                        const OutScalarType charge_i = charges[i];
+                        for (size_t j = i; j < numParticle; ++j) {
+                            const ScalarType dot = delta * (pos_i - pos.row(j).asVector());
+                            const ScalarType temp = cos(dot) * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
                         }
                     }
-                    const ScalarType factor = reciprocal(squaredNorm * exp(squaredNorm / square(ScalarType::Two() * integralLimit)));
-                    kSpaceSum += sum * factor;
+                    const ScalarType factor = squaredNorm * exp(squaredNorm / square(ScalarType::Two() * integralLimit));
+                    kSpaceSum += sum / factor;
                 }
             });
         kSpaceSum *= ScalarType(4 * M_PI) * inv_volume;
@@ -172,12 +177,12 @@ namespace Physica::Core {
             return 1;
         if (index + 1 >= TableSize)
             return 0;
-        const OutScalarType x1 = TableStep * (index - 1);
         const OutScalarType x2 = TableStep * index;
-        const OutScalarType x3 = TableStep * (index + 1);
+        const OutScalarType x1 = x2 - TableStep;
+        const OutScalarType x3 = x2 + TableStep;
         
         const MatrixType mat{square(x1), x1, 1, square(x2), x2, 1, square(x3), x3, 1};
-        const Vector<OutScalarType, 3> y{erfc_table[index - 1], erfc_table[index], erfc_table[index + 1]};
+        const Vector<OutScalarType, 3> y = erfc_table.segment(index - 1, index + 2);
         const Vector<OutScalarType, 3> coeff = MatrixType(mat.inverse()) * y;
         return (coeff[0] * x + coeff[1]) * x + coeff[2];
     }

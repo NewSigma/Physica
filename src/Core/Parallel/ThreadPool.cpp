@@ -86,15 +86,12 @@ namespace Physica::Core::Parallel {
         const unsigned int random = threadRand(getThreadInfo().randState);
         for (size_t i = 0; i < threadCount; ++i) {
             ThreadData& data = thread_data[(random + i) % threadCount];
-            if (data.queueMutex.try_lock()) {
-                auto& queue = data.queue;
-                if (!queue.empty()) {
-                    std::unique_ptr<Task> task(std::move(queue.front()));
-                    queue.pop();
-                    data.queueMutex.unlock();
-                    return task;
-                }
-                data.queueMutex.unlock();
+            std::unique_lock locker(data.queueMutex);
+            auto& queue = data.queue;
+            if (!queue.empty()) {
+                std::unique_ptr<Task> task(std::move(queue.front()));
+                queue.pop();
+                return task;
             }
         }
         return std::unique_ptr<Task>(nullptr);
