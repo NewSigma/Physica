@@ -30,7 +30,7 @@ constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
-constexpr unsigned int numMolecular = 216;
+constexpr unsigned int numMolecular = 32;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 constexpr double cellVolume = ((numMolecular * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
@@ -100,9 +100,7 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 }
 
 void testMD() {
-    std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
-    std::mt19937 gen(seed);
+    std::mt19937 gen(2420013718159779819);
 
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
@@ -112,7 +110,22 @@ void testMD() {
     ThreadPool& pool = ThreadPool::getInstance();
     {
         rpmd.updateForce(model);
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(0.01 * 1E-12), gen, model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
+        ScalarType bond = 0;
+        for (size_t i = 0; i < 100; ++i) {
+            auto pos = rpmd.getPos();
+            ScalarType temp = 0;
+            for (size_t j = 0; j < numMolecular; ++i) {
+                auto posO = pos.row(2 * numMolecular + j);
+                auto posH1 = pos.row(model.getHytrogenList()[j].first);
+                auto posH2 = pos.row(model.getHytrogenList()[j].second);
+                toNextMean(temp, 2 * j, (posO.asVector() - posH1).norm());
+                toNextMean(temp, 2 * j + 1, (posO.asVector() - posH2).norm());
+            }
+            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
+            toNextMean(bond, i, temp);
+        }
+        std::cout << PhyConst<AU>::bohrToAngstorm(double(bond)) << std::endl;
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
