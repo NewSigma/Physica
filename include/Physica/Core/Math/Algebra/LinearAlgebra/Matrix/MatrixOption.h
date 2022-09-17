@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <cstdlib>
+
 namespace Physica::Core {
     namespace Internal {
         template<class T>
