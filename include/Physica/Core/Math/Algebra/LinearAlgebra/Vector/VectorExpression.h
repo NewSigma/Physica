@@ -133,7 +133,10 @@ namespace Physica::Core {
     template<class VectorType1, class VectorType2>
     class VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>> {
+    public:
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>;
+        using typename Base::ScalarType;
+    private:
         const VectorType1& exp1;
         const VectorType2& exp2;
     public:
@@ -142,7 +145,7 @@ namespace Physica::Core {
             assert(exp1.getLength() == exp2.getLength());
         }
 
-        typename Base::ScalarType calc(size_t s) const { return exp1.calc(s) - exp2.calc(s); }
+        typename Base::ScalarType calc(size_t s) const { return ScalarType(exp1.calc(s)) - ScalarType(exp2.calc(s)); }
         template<class PacketType>
         [[nodiscard]] PacketType packet(size_t index) const {
             return exp1.template packet<PacketType>(index) - exp2.template packet<PacketType>(index);

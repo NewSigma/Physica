@@ -25,8 +25,9 @@ namespace Physica::Core {
         template<class T1, class T2, bool enableSIMD>
         struct AssignImpl {
             static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+                using ScalarType = typename T2::ScalarType;
                 for (size_t i = 0; i < v1.getLength(); ++i)
-                    v2[i] = v1.calc(i);
+                    v2[i] = ScalarType(v1.calc(i));
             }
         };
 

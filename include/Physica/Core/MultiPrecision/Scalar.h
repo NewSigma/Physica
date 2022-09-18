@@ -459,7 +459,7 @@ namespace Physica::Core {
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
         inline Scalar(const Scalar<Float, true>& s);
-        inline explicit Scalar(const Scalar<Double, false>& s);
+        inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */

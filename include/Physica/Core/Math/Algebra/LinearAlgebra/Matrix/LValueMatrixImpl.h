@@ -73,7 +73,7 @@ namespace Physica::Core {
     Derived& LValueMatrix<Derived>::operator=(const Scalar<option, errorTrack>& s) {
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                getElementFromMajorMinor(i, j) = s;
+                getElementFromMajorMinor(i, j) = ScalarType(s);
         return Base::getDerived();
     }
 
@@ -325,12 +325,13 @@ namespace Physica::Core {
     template<class OtherDerived>
     void LValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
         using TargetType = LValueMatrix<OtherDerived>;
+        using T = typename TargetType::ScalarType;
         const size_t max_i = target.getMaxMajor();
         const size_t mat_j = target.getMaxMinor();
         for (size_t i = 0; i < max_i; ++i) {
             for (size_t j = 0; j < mat_j; ++j) {
-                target.getElementFromMajorMinor(i, j) = (*this)(TargetType::rowFromMajorMinor(i, j),
-                                                                TargetType::columnFromMajorMinor(i, j));
+                target.getElementFromMajorMinor(i, j) = T((*this)(TargetType::rowFromMajorMinor(i, j),
+                                                                  TargetType::columnFromMajorMinor(i, j)));
             }
         }
     }

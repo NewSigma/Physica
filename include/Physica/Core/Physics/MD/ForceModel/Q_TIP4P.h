@@ -101,7 +101,7 @@ namespace Physica::Core {
                 PositionMatrix pos = cell.getPos();
                 *(pos.begin() + i) = x;
                 return potentialEnergyWithoutCoulomb(MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec()));
-            }, cell.getPos().flatten().calc(i), stepSize);
+            }, ScalarType(cell.getPos().flatten().calc(i)), stepSize);
         }
         return result + ewald.force(cell.getPos());
     }
