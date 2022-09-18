@@ -61,6 +61,7 @@ namespace Physica::Core {
         ~Ewald() = default;
         /* Operators */
         Ewald& operator=(Ewald ewald) noexcept;
+        [[nodiscard]] Vector<OutScalarType> force(const PositionMatrix& pos) const;
         [[nodiscard]] OutScalarType operator()(const PositionMatrix& pos) const;
         /* Operations */
         void swap(Ewald& ewald) noexcept;
@@ -99,6 +100,55 @@ namespace Physica::Core {
     Ewald<OutScalarType, PosScalarType>& Ewald<OutScalarType, PosScalarType>::operator=(Ewald ewald) noexcept {
         swap(ewald);
         return *this;
+    }
+
+    template<class OutScalarType, class PosScalarType>
+    Vector<OutScalarType> Ewald<OutScalarType, PosScalarType>::force(const PositionMatrix& pos) const {
+        using ScalarType = OutScalarType;
+        const size_t numParticle = getNumParticle();
+        Vector<OutScalarType> result(numParticle * Dim, 0);
+        
+        const OutScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
+        PeriodicCell<PosScalarType, Dim>::forParticleInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor1, &pos, &result](Vector3D delta) {
+                const ScalarType squaredNorm = delta.squaredNorm();
+                const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
+                if (isNotGammaPoint) {
+                    const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
+                    for (size_t i = 0; i < numParticle - 1; ++i) {
+                        auto force_i = result.segment(i * Dim, (i + 1) * Dim);
+                        const ScalarType charge_i = charges[i];
+                        const Vector3D pos_i = pos.row(i).asVector();
+                        for (size_t j = i + 1; j < numParticle; ++j) {
+                            auto force_j = result.segment(j * Dim, (j + 1) * Dim);
+                            const ScalarType dot = delta * (pos_i - pos.row(j).asVector());
+                            const Vector<ScalarType, Dim> f = (sin(dot) * charge_i * charges[j] * factor2) * delta;
+                            force_i += f;
+                            force_j -= f;
+                        }
+                    }
+                }
+            });
+        result *= ScalarType(4 * M_PI) * inv_volume;
+
+        PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &result](Vector3D delta) {
+                const ScalarType factor3 = ScalarType(2) / sqrt(ScalarType(M_PI)) * integralLimit;
+                for (size_t i = 0; i < numParticle; ++i) {
+                    const Vector3D pos_i = pos.row(i).asVector() + delta;
+                    Vector<ScalarType, Dim> sum(Dim, 0);
+                    for (size_t j = 0; j < numParticle; ++j) {
+                        if (j == i)
+                            continue;
+                        const Vector3D pos_ij = pos_i - pos.row(j).asVector();
+                        const ScalarType r2 = pos_ij.squaredNorm();
+                        const ScalarType r = sqrt(r2);
+                        const ScalarType temp = modifiedErfcFromTable(r) + factor3 * exp(-square(integralLimit * r));
+                        sum += (temp / r2 * charges[j]) * pos_ij;
+                    }
+                    auto force_i = result.segment(i * Dim, (i + 1) * Dim);
+                    force_i += charges[i] * sum;
+                }
+            });
+        return result;
     }
     /**
      * \param pos must be in cartesian convension

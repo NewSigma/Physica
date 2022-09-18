@@ -73,6 +73,7 @@ namespace Physica::Core {
         Vector<ScalarType> makeCharges() const;
         ScalarType minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
+        ScalarType potentialEnergyWithoutCoulomb(const MDCell& cell) const;
     };
 
     template<class ScalarType>
@@ -98,87 +99,39 @@ namespace Physica::Core {
             result[i] = -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
                 PositionMatrix pos = cell.getPos();
                 *(pos.begin() + i) = x;
-                return potentialEnergy(MDCell(cell.getLattice(), std::move(pos), cell.getMassVec()));
+                return potentialEnergyWithoutCoulomb(MDCell(cell.getLattice(), std::move(pos), cell.getMassVec()));
             }, cell.getPos().flatten().calc(i), stepSize);
         }
-        return result;
+        return result + ewald.force(cell.getPos());
     }
 
     template<class ScalarType>
     ScalarType Q_TIP4P<ScalarType>::potentialEnergy(const MDCell& cell) const {
-        using VectorType = Vector<ScalarType, Dim>;
-
         const size_t numMolecule = getNumMolecule();
-        const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = MDCell::estimateRange(lattice, cutoff);
-        const double epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * numMolecule;
 
-        ScalarType interMoleculeEnergy = 0;
-        /* Inter molecular */ {
-            /* LJ Part */
-            MDCell::forParticleInRange(range, lattice,
-                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
-                    ScalarType energy = 0;
-                    VectorType posO1, posH11, posH12;
-                    const size_t offset = 2 * numMolecule;
-                    for (size_t i = 0; i < numMolecule; ++i) {
-                        posO1 = pos.row(offset + i) + delta;
-                        for (size_t j = i; j < numMolecule; ++j) {
-                            auto posO2 = pos.row(offset + j);
-                            const ScalarType r2 = (posO1 - posO2).squaredNorm();
-                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                            if (isNotSelf && r2 < square(cutoff)) {
-                                constexpr double squared_sigma = sigma * sigma;
-                                const ScalarType rep_r2 = reciprocal(r2) * ScalarType(squared_sigma);
-                                const ScalarType rep_r4 = square(rep_r2);
-                                const ScalarType rep_r6 = rep_r4 * rep_r2;
-                                const ScalarType rep_r12 = square(rep_r6);
-                                energy += (rep_r12 - rep_r6) * epsilonE4;
-                            }
-                        }
-                    }
-                    interMoleculeEnergy += energy;
-                });
-            /* Coulomb Part */ {
-                const size_t maxIndexH = 2 * numMolecule;
-                auto posH = chargePos.topRows(maxIndexH);
-                posH = pos.topRows(maxIndexH);
+        ScalarType coulomb = 0;
+        /* Coulomb Part */ {
+            const size_t maxIndexH = 2 * numMolecule;
+            auto posH = chargePos.topRows(maxIndexH);
+            posH = pos.topRows(maxIndexH);
 
-                ScalarType selfCoulomb = 0;
-                const size_t minIndexO = maxIndexH;
-                const size_t maxIndexO = minIndexO + numMolecule;
-                for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                    auto partialCharge = chargePos.row(i);
-                    auto posO = pos.row(i);
-                    auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
-                    auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
-                    partialCharge = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
+            ScalarType selfCoulomb = 0;
+            const size_t minIndexO = maxIndexH;
+            const size_t maxIndexO = minIndexO + numMolecule;
+            for (size_t i = minIndexO; i < maxIndexO; ++i) {
+                auto partialCharge = chargePos.row(i);
+                auto posO = pos.row(i);
+                auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
+                auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
+                partialCharge = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
 
-                    selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH1.asVector() - partialCharge).norm());
-                    selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH2.asVector() - partialCharge).norm());
-                }
-                interMoleculeEnergy += ewald(pos) - selfCoulomb;
+                selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH1.asVector() - partialCharge).norm());
+                selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH2.asVector() - partialCharge).norm());
             }
+            coulomb = ewald(pos) - selfCoulomb;
         }
-        ScalarType intraMoleculeEnergy = 0;
-        /* Intra molecular */ {
-            VectorType vecOH1, vecOH2;
-            const size_t offset = 2 * numMolecule;
-            for (size_t i = 0; i < numMolecule; ++i) {
-                auto posO = pos.row(offset + i);
-                auto posH1 = pos.row(hytrogenList[i].first);
-                auto posH2 = pos.row(hytrogenList[i].second);
-
-                vecOH1 = posH1.asVector() - posO;
-                vecOH2 = posH2.asVector() - posO;
-                const ScalarType r1 = vecOH1.norm();
-                const ScalarType r2 = vecOH2.norm();
-                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
-                intraMoleculeEnergy += modifiedMorse(r1, numMolecule) + modifiedMorse(r2, numMolecule);
-            }
-        }
-        return interMoleculeEnergy + intraMoleculeEnergy;
+        return potentialEnergyWithoutCoulomb(cell) + coulomb;
     }
 
     template<class ScalarType>
@@ -295,5 +248,62 @@ namespace Physica::Core {
         const ScalarType delta3 = delta2 * delta;
         const ScalarType delta4 = square(delta2);
         return (delta2 - delta3 + delta4 * (7.0 / 12)) * ((Dr / PhyConst<SI>::avogadroNa) * numMolecule);
+    }
+
+    template<class ScalarType>
+    ScalarType Q_TIP4P<ScalarType>::potentialEnergyWithoutCoulomb(const MDCell& cell) const {
+        using VectorType = Vector<ScalarType, Dim>;
+
+        const size_t numMolecule = getNumMolecule();
+        const auto& lattice = cell.getLattice();
+        const auto& pos = cell.getPos();
+        const auto range = MDCell::estimateRange(lattice, cutoff);
+        const double epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * numMolecule;
+
+        ScalarType interMoleculeEnergy = 0;
+        /* Inter molecular */ {
+            /* LJ Part */
+            MDCell::forParticleInRange(range, lattice,
+                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
+                    ScalarType energy = 0;
+                    VectorType posO1, posH11, posH12;
+                    const size_t offset = 2 * numMolecule;
+                    for (size_t i = 0; i < numMolecule; ++i) {
+                        posO1 = pos.row(offset + i) + delta;
+                        for (size_t j = i; j < numMolecule; ++j) {
+                            auto posO2 = pos.row(offset + j);
+                            const ScalarType r2 = (posO1 - posO2).squaredNorm();
+                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            if (isNotSelf && r2 < square(cutoff)) {
+                                constexpr double squared_sigma = sigma * sigma;
+                                const ScalarType rep_r2 = reciprocal(r2) * ScalarType(squared_sigma);
+                                const ScalarType rep_r4 = square(rep_r2);
+                                const ScalarType rep_r6 = rep_r4 * rep_r2;
+                                const ScalarType rep_r12 = square(rep_r6);
+                                energy += (rep_r12 - rep_r6) * epsilonE4;
+                            }
+                        }
+                    }
+                    interMoleculeEnergy += energy;
+                });
+        }
+        ScalarType intraMoleculeEnergy = 0;
+        /* Intra molecular */ {
+            VectorType vecOH1, vecOH2;
+            const size_t offset = 2 * numMolecule;
+            for (size_t i = 0; i < numMolecule; ++i) {
+                auto posO = pos.row(offset + i);
+                auto posH1 = pos.row(hytrogenList[i].first);
+                auto posH2 = pos.row(hytrogenList[i].second);
+
+                vecOH1 = posH1.asVector() - posO;
+                vecOH2 = posH2.asVector() - posO;
+                const ScalarType r1 = vecOH1.norm();
+                const ScalarType r2 = vecOH2.norm();
+                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
+                intraMoleculeEnergy += modifiedMorse(r1, numMolecule) + modifiedMorse(r2, numMolecule);
+            }
+        }
+        return interMoleculeEnergy + intraMoleculeEnergy;
     }
 }

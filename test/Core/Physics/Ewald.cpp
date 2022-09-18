@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
+#include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
@@ -84,7 +86,48 @@ void madelungTest() {
     }
 }
 
+void forceTest() {
+    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+    using PositionMatrix = typename CrystalCell::PositionMatrix;
+    using ScalarType_ = typename CrystalCell::ScalarType;
+    const LatticeMatrix lattice{
+        4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
+        2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
+        0.2750800827878018,   0.4169789280520980,   18.0000000000000000
+    };
+    const PositionMatrix pos {
+        3.018608093,  1.835086465,  2.232546806, 
+        3.435233593,  2.209633827,  17.07962227, 
+        4.486242294,  3.763740540,  2.207314014,
+        3.108575344,  2.784703970,  0.294100195,
+        4.877948284,  4.089979172,  17.05440140,
+        2.148158073,  3.204983473,  2.224137545, 
+        5.324354172,  4.297039032,  0.992797017,
+        6.498651505,  4.175083160,  17.06279564,
+        5.301470280,  4.300325871,  1.994232059,
+        3.399604082,  3.184972763,  17.29266357,
+        5.658125877,  4.686541080,  17.23267174,
+        3.052176714,  2.816649675,  2.054240227
+    };
+    const Ewald<ScalarType, ScalarType_> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+    const auto force1 = ewald.force(pos);
+    Vector<ScalarType> force2(force1.getLength());
+    /* Force from finite differential */ {
+        for (size_t i = 0; i < force2.getLength(); ++i) {
+            force2[i] = -Differential<ScalarType>::ridders([i, &pos, &ewald](ScalarType x) -> ScalarType {
+                PositionMatrix temp = pos;
+                *(temp.begin() + i) = ScalarType_(x);
+                return ewald(temp);
+            }, pos.flatten().calc(i), 0.3);
+        }
+    }
+
+    if (!vectorNear(force1, force2, 1E-3))
+        exit(EXIT_FAILURE);
+}
+
 int main() {
+    forceTest();
     VASPTest();
     madelungTest();
     return 0;
