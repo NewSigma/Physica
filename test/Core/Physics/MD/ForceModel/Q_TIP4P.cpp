@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <fstream>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -26,6 +27,7 @@
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
+using PosScalarType = Scalar<Double, false>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -57,25 +59,24 @@ void testHytrogenList() {
         0.3512600170478342,  0.6392493670479714,  0.1141244566914832
     };
     CrystalCell unit{std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct};
-    MDCell cell(std::move(unit));
-    Q_TIP4P<ScalarType> model(cell, 1, 1E-4);
+    MDCell<ScalarType, PosScalarType> cell(std::move(unit));
+    Q_TIP4P<ScalarType, PosScalarType> model(cell, 1, 1E-4);
     if (!model.checkHytrogenList())
         exit(EXIT_FAILURE);
 }
 
 template<class RandomGenerator>
-Vector<Scalar<Float, false>, 3> randomVector(RandomGenerator& gen) {
-    using ScalarType_ = Scalar<Float, false>;
+Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
     std::uniform_real_distribution dist{};
-    const ScalarType_ theta(dist(gen) * M_PI);
-    const ScalarType_ phi(dist(gen) * M_PI * 2);
-    Vector<ScalarType_, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= ScalarType_(initialBond_HO);
+    const PosScalarType theta(dist(gen) * M_PI);
+    const PosScalarType phi(dist(gen) * M_PI * 2);
+    Vector<PosScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+    result *= PosScalarType(initialBond_HO);
     return result;
 }
 
 template<class RandomGenerator>
-RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const size_t maxIndexH = numMolecular * 2;
     const size_t maxIndexO = numMolecular * 3;
     const size_t numAtom = maxIndexO;
@@ -96,7 +97,7 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
         atomicNumbers[i] = 8;
 
     CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
-    return RPMD<ScalarType>(MDCell(std::move(cell)), numReplica, temperatureT, thermostatTime, timeStep);
+    return RPMD<ScalarType, PosScalarType>(MDCell<ScalarType, PosScalarType>(std::move(cell)), numReplica, temperatureT, thermostatTime, timeStep);
 }
 
 void testMD() {
@@ -104,12 +105,12 @@ void testMD() {
 
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
-    Q_TIP4P<ScalarType> model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
+    Q_TIP4P<ScalarType, PosScalarType> model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        rpmd.updateForce(model);
+        rpmd.updateForce<decltype(model), ThreadExecutor>(model);
         rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
         ScalarType bond = 0;
         for (size_t i = 0; i < 100; ++i) {
@@ -126,6 +127,8 @@ void testMD() {
             toNextMean(bond, i, temp);
         }
         std::cout << PhyConst<AU>::bohrToAngstorm(double(bond)) << std::endl;
+        std::ofstream fout("phase");
+        fout << rpmd.getPhasePos();
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();

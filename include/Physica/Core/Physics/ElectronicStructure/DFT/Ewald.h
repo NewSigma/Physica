@@ -37,8 +37,10 @@ namespace Physica::Core {
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
         using SearchRangeType = typename PeriodicCell<PosScalarType, Dim>::SearchRangeType;
         using Vector3D = Vector<PosScalarType, Dim>;
-        constexpr static size_t TableSize = 4608;
-        constexpr static double TableStep = 0.001;
+        constexpr static size_t ErfcTableSize = 4096 + 512;
+        constexpr static double ErfcTableStep = 0.001;
+        constexpr static size_t ExpTableSize = 8192 + 64;
+        constexpr static double ExpTableStep = 0.001;
         constexpr static double SumPrec = 4; // Refer to [2]
     private:
         LatticeMatrix lattice;
@@ -51,7 +53,11 @@ namespace Physica::Core {
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
         Vector<ScalarType> erfc_table;
-        ScalarType step;
+        Vector<ScalarType> exp_table;
+        ScalarType erfcStep;
+        ScalarType repErfcStep;
+        ScalarType expStep;
+        ScalarType repExpStep;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -68,8 +74,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
     private:
-        void makeModifiedErfcTable();
-        ScalarType modifiedErfcFromTable(ScalarType x) const;
+        void makeTables();
+        inline ScalarType calcFromTable(
+                const Vector<ScalarType>& table,
+                ScalarType step,
+                ScalarType repStep,
+                ScalarType x) const;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -81,7 +91,8 @@ namespace Physica::Core {
             : lattice(std::move(lattice_))
             , repCell(std::move(repCell_))
             , charges(std::move(charges_))
-            , erfc_table(TableSize) {
+            , erfc_table(ErfcTableSize)
+            , exp_table(ExpTableSize) {
         const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(ScalarType(volume));
         {
@@ -93,7 +104,7 @@ namespace Physica::Core {
         sumSquaredCharges = square(charges).sum();
         selfEnergy = sumSquaredCharges * integralLimit / sqrt(ScalarType(M_PI))
                    + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
-        makeModifiedErfcTable();
+        makeTables();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -130,7 +141,6 @@ namespace Physica::Core {
         result *= ScalarType(4 * M_PI) * inv_volume;
 
         PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &result](Vector3D delta) {
-                const ScalarType factor3 = ScalarType(2) / sqrt(ScalarType(M_PI)) * integralLimit;
                 for (size_t i = 0; i < numParticle; ++i) {
                     const Vector3D pos_i = pos.row(i).asVector() + delta;
                     Vector<ScalarType, Dim> sum(Dim, 0);
@@ -140,8 +150,10 @@ namespace Physica::Core {
                         const Vector3D pos_ij = pos_i - pos.row(j).asVector();
                         const ScalarType r2 = ScalarType(pos_ij.squaredNorm());
                         const ScalarType r = sqrt(r2);
-                        const ScalarType temp = modifiedErfcFromTable(r) + factor3 * exp(-square(integralLimit * r));
-                        sum += (temp / r2 * charges[j]) * pos_ij;
+                        const ScalarType temp1 = calcFromTable(exp_table, expStep, repExpStep, r2);
+                        const ScalarType temp2 = calcFromTable(erfc_table, erfcStep, repErfcStep, r);
+                        const ScalarType temp3 = (temp1 + temp2) * (charges[j] / r2);
+                        sum += temp3 * pos_ij;
                     }
                     auto force_i = result.segment(i * Dim, (i + 1) * Dim);
                     force_i += charges[i] * sum;
@@ -167,7 +179,7 @@ namespace Physica::Core {
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                         if (isNotSelf) {
                             const ScalarType r = sqrt(r2);
-                            const ScalarType temp = modifiedErfcFromTable(r) * (charge_i * charges[j]);
+                            const ScalarType temp = calcFromTable(erfc_table, erfcStep, repErfcStep, r) * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
                         }
                     }
@@ -213,28 +225,40 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void Ewald<ScalarType, PosScalarType>::makeModifiedErfcTable() {
+    void Ewald<ScalarType, PosScalarType>::makeTables() {
         for (size_t i = 0; i < erfc_table.getLength(); ++i) {
-            ScalarType x = ScalarType(i * TableStep);
+            ScalarType x = ScalarType(i * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
-        step = ScalarType(TableStep) / integralLimit;
+        erfcStep = ScalarType(ErfcTableStep) / integralLimit;
+        repErfcStep = reciprocal(erfcStep);
+
+        for (size_t i = 0; i < exp_table.getLength(); ++i) {
+            ScalarType x = ScalarType(i * ExpTableStep);
+            exp_table[i] = exp(-x) * (ScalarType(2) / sqrt(ScalarType(M_PI)) * integralLimit);
+        }
+        expStep = ScalarType(ExpTableStep) / square(integralLimit);
+        repExpStep = reciprocal(expStep);
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType Ewald<ScalarType, PosScalarType>::modifiedErfcFromTable(ScalarType x) const {
+    ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(
+            const Vector<ScalarType>& table,
+            ScalarType step,
+            ScalarType repStep,
+            ScalarType x) const {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
-        const size_t index = double(x / step + 0.5);
+        const size_t index = double(x * repStep + 0.5);
         if (index == 0)
             return 1;
-        if (index + 1 >= TableSize)
+        if (index + 1 >= table.getLength())
             return 0;
         const ScalarType x2 = step * index;
         const ScalarType x1 = x2 - step;
         const ScalarType x3 = x2 + step;
         
         const MatrixType mat{square(x1), x1, 1, square(x2), x2, 1, square(x3), x3, 1};
-        const Vector<ScalarType, 3> y = erfc_table.segment(index - 1, index + 2);
+        const Vector<ScalarType, 3> y = table.segment(index - 1, index + 2);
         const Vector<ScalarType, 3> coeff = MatrixType(mat.inverse()) * y;
         return ((coeff[0] * x + coeff[1]) * x + coeff[2]);
     }
