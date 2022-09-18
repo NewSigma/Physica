@@ -25,6 +25,7 @@
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
+using PosScalarType = ScalarType;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -34,7 +35,7 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-bool testDriftMomentum(const RPMD<ScalarType>& rpmd, double precision) {
+bool testDriftMomentum(const RPMD<ScalarType, PosScalarType>& rpmd, double precision) {
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
@@ -110,19 +111,20 @@ ScalarType force(ScalarType r) {
 }
 
 template<class RandomGenerator>
-RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
-    typename MDCell::LatticeMatrix lattice = MDCell::LatticeMatrix::unitMatrix(3);
-    typename MDCell::PositionMatrix pos(numMolecular, 3);
+RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+    typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
     for (auto& elem : pos)
         elem = dist(gen);
-    typename MDCell::MassVector massVec(numMolecular, mass);
-    MDCell cell(std::move(lattice), std::move(pos), std::move(massVec));
+    typename MDCellType::MassVector massVec(numMolecular, mass);
+    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType>(std::move(cell), numReplica, temperatureT, thermostatTime, timeStep);
+    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, temperatureT, thermostatTime, timeStep);
 }
 /**
  * Reference:
@@ -136,12 +138,12 @@ int main() {
     ThreadPool& pool = ThreadPool::getInstance();
     {
         std::mt19937 gen(3438603950906262893);
-        RPMD<ScalarType> rpmd = makeSystem(gen);
+        auto rpmd = makeSystem(gen);
         rpmd.initMomentum(gen);
         if (!testDriftMomentum(rpmd, 1E-12))
             return 1;
 
-        PairModel pair(ScalarType(pair_cutoff), force, pot_functor);
+        PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
         rpmd.updateForce<decltype(pair), ThreadExecutor>(pair);
         rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
 

@@ -30,12 +30,13 @@ namespace Physica::Core {
      * Reference:
      * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
      */
-    template<class ScalarType>
+    template<class ScalarType, class PosScalarType>
     class Q_TIP4P {
-        constexpr static unsigned int Dim = MDCell::Dim;
+        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        constexpr static unsigned int Dim = MDCellType::Dim;
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
-        using PositionMatrix = typename MDCell::PositionMatrix;
-        using EwaldType = Ewald<ScalarType, typename MDCell::ScalarType>;
+        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using EwaldType = Ewald<ScalarType, PosScalarType>;
 
         constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
@@ -53,15 +54,15 @@ namespace Physica::Core {
         ScalarType cutoff;
         ScalarType stepSize;
     public:
-        Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_, ScalarType stepSize_);
+        Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_);
         Q_TIP4P(const Q_TIP4P&) = default;
         Q_TIP4P(Q_TIP4P&&) noexcept = default;
         ~Q_TIP4P() = default;
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
-        [[nodiscard]] Vector<ScalarType> force(const MDCell& cell) const;
-        [[nodiscard]] ScalarType potentialEnergy(const MDCell& cell) const;
+        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] const HytrogenListType& getHytrogenList() const noexcept { return hytrogenList; }
         [[nodiscard]] size_t getNumMolecule() const noexcept { return hytrogenList.getLength(); }
@@ -69,15 +70,15 @@ namespace Physica::Core {
         bool checkHytrogenList() const;
         void swap(Q_TIP4P& model) noexcept;
     private:
-        void makeHytrogenList(const MDCell& refer_cell);
+        void makeHytrogenList(const MDCellType& refer_cell);
         Vector<ScalarType> makeCharges() const;
-        ScalarType minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id);
+        ScalarType minSquaredDist(const MDCellType& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
-        ScalarType potentialEnergyWithoutCoulomb(const MDCell& cell) const;
+        ScalarType potentialEnergyWithoutCoulomb(const MDCellType& cell) const;
     };
 
-    template<class ScalarType>
-    Q_TIP4P<ScalarType>::Q_TIP4P(const MDCell& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
+    template<class ScalarType, class PosScalarType>
+    Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
             : chargePos(refer_cell.getNumParticle(), 3)
             , cutoff(std::move(cutoff_))
             , stepSize(std::move(stepSize_)) {
@@ -86,27 +87,27 @@ namespace Physica::Core {
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
 
-    template<class ScalarType>
-    Q_TIP4P<ScalarType>& Q_TIP4P<ScalarType>::operator=(Q_TIP4P model) noexcept {
+    template<class ScalarType, class PosScalarType>
+    Q_TIP4P<ScalarType, PosScalarType>& Q_TIP4P<ScalarType, PosScalarType>::operator=(Q_TIP4P model) noexcept {
         swap(model);
         return *this;
     }
 
-    template<class ScalarType>
-    Vector<ScalarType> Q_TIP4P<ScalarType>::force(const MDCell& cell) const {
+    template<class ScalarType, class PosScalarType>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         Vector<ScalarType> result(getNumMolecule() * Dim);
         for (size_t i = 0; i < result.getLength(); ++i) {
             result[i] = -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
                 PositionMatrix pos = cell.getPos();
                 *(pos.begin() + i) = x;
-                return potentialEnergyWithoutCoulomb(MDCell(cell.getLattice(), std::move(pos), cell.getMassVec()));
+                return potentialEnergyWithoutCoulomb(MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec()));
             }, cell.getPos().flatten().calc(i), stepSize);
         }
         return result + ewald.force(cell.getPos());
     }
 
-    template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::potentialEnergy(const MDCell& cell) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
         const size_t numMolecule = getNumMolecule();
         const auto& pos = cell.getPos();
 
@@ -134,8 +135,8 @@ namespace Physica::Core {
         return potentialEnergyWithoutCoulomb(cell) + coulomb;
     }
 
-    template<class ScalarType>
-    bool Q_TIP4P<ScalarType>::checkHytrogenList() const {
+    template<class ScalarType, class PosScalarType>
+    bool Q_TIP4P<ScalarType, PosScalarType>::checkHytrogenList() const {
         const size_t maxHytrogenId = hytrogenList.getLength() * 2;
         for (size_t i = 0; i < hytrogenList.getLength(); ++i) {
             const auto& pair = hytrogenList[i];
@@ -157,8 +158,8 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType>
-    void Q_TIP4P<ScalarType>::swap(Q_TIP4P& model) noexcept {
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
         hytrogenList.swap(model.hytrogenList);
         chargePos.swap(model.chargePos);
         ewald.swap(model.ewald);
@@ -166,8 +167,8 @@ namespace Physica::Core {
         stepSize.swap(model.stepSize);
     }
 
-    template<class ScalarType>
-    void Q_TIP4P<ScalarType>::makeHytrogenList(const MDCell& refer_cell) {
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::makeHytrogenList(const MDCellType& refer_cell) {
         const size_t numMolecule = refer_cell.getNumParticle() / 3;
         hytrogenList.resize(numMolecule);
 
@@ -203,8 +204,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    Vector<ScalarType> Q_TIP4P<ScalarType>::makeCharges() const {
+    template<class ScalarType, class PosScalarType>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::makeCharges() const {
         const size_t numMolecule = getNumMolecule();
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
@@ -218,8 +219,8 @@ namespace Physica::Core {
         return charges;
     }
 
-    template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::minSquaredDist(const MDCell& cell, size_t from_id, size_t to_id) {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::minSquaredDist(const MDCellType& cell, size_t from_id, size_t to_id) {
         using Vector3D = Vector<ScalarType, 3>;
 
         const auto& pos = cell.getPos();
@@ -241,8 +242,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::modifiedMorse(ScalarType r, size_t numMolecule) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorse(ScalarType r, size_t numMolecule) const {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
@@ -250,20 +251,20 @@ namespace Physica::Core {
         return (delta2 - delta3 + delta4 * (7.0 / 12)) * ((Dr / PhyConst<SI>::avogadroNa) * numMolecule);
     }
 
-    template<class ScalarType>
-    ScalarType Q_TIP4P<ScalarType>::potentialEnergyWithoutCoulomb(const MDCell& cell) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergyWithoutCoulomb(const MDCellType& cell) const {
         using VectorType = Vector<ScalarType, Dim>;
 
         const size_t numMolecule = getNumMolecule();
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = MDCell::estimateRange(lattice, cutoff);
+        const auto range = MDCellType::estimateRange(lattice, cutoff);
         const double epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * numMolecule;
 
         ScalarType interMoleculeEnergy = 0;
         /* Inter molecular */ {
             /* LJ Part */
-            MDCell::forParticleInRange(range, lattice,
+            MDCellType::forParticleInRange(range, lattice,
                 [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
                     ScalarType energy = 0;
                     VectorType posO1, posH11, posH12;

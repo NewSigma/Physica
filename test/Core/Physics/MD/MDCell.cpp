@@ -20,8 +20,9 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 using namespace Physica::Core;
+using MDCellType = MDCell<Scalar<Double, false>, Scalar<Double, false>>;
 
-bool isMDCellNear(const MDCell& cell1, const MDCell& cell2, double precision) {
+bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
     if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))
         return false;
     if (!matrixNear(cell1.getPos(), cell2.getPos(), precision))
@@ -39,8 +40,8 @@ int main() {
     CrystalCell cell2 = cell1;
     cell2.toCartesian();
 
-    MDCell md1(cell1);
-    MDCell md2(cell2);
+    MDCellType md1(cell1);
+    MDCellType md2(cell2);
     if (!isMDCellNear(md1, md2, 1E-15))
         return 1;
 

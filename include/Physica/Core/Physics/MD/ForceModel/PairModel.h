@@ -21,13 +21,14 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PairFunctor>
+    template<class ScalarType, class PosScalarType, class PairFunctor>
     class PairModel final {
         using ResultType = typename std::invoke_result<PairFunctor, ScalarType>::type;
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
-        constexpr static unsigned int Dim = MDCell::Dim;
+        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        constexpr static unsigned int Dim = MDCellType::Dim;
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;
@@ -42,13 +43,13 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
-        [[nodiscard]] Vector<ScalarType> force(const MDCell& cell) const;
-        [[nodiscard]] ScalarType potentialEnergy(const MDCell& cell) const;
+        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
     };
 
-    template<class ScalarType, class PairFunctor>
-    PairModel<ScalarType, PairFunctor>::PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_)
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    PairModel<ScalarType, PosScalarType, PairFunctor>::PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_)
             : cutoff(std::move(cutoff_))
             , force_functor(std::move(functor_))
             , pot_functor(std::move(pot_functor_)) {
@@ -56,23 +57,23 @@ namespace Physica::Core {
         pot_shift = pot_functor(cutoff);
     }
 
-    template<class ScalarType, class PairFunctor>
-    PairModel<ScalarType, PairFunctor>& PairModel<ScalarType, PairFunctor>::operator=(PairModel pair) noexcept {
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    PairModel<ScalarType, PosScalarType, PairFunctor>& PairModel<ScalarType, PosScalarType, PairFunctor>::operator=(PairModel pair) noexcept {
         swap(pair);
         return *this;
     }
 
-    template<class ScalarType, class PairFunctor>
-    Vector<ScalarType> PairModel<ScalarType, PairFunctor>::force(const MDCell& cell) const {
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
         using VectorType = Vector<ScalarType, Dim>;
 
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = MDCell::estimateRange(lattice, cutoff);
+        const auto range = MDCellType::estimateRange(lattice, cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         Vector<ScalarType> force(Dim * numParticle, 0);
-        MDCell::forParticleInRange(range, lattice,
+        MDCellType::forParticleInRange(range, lattice,
             [this, pos, numParticle, &force](VectorType delta) {
                 VectorType r, from;
                 for (size_t i = 0; i < numParticle; ++i) {
@@ -98,8 +99,8 @@ namespace Physica::Core {
         return force;
     }
 
-    template<class ScalarType, class PairFunctor>
-    ScalarType PairModel<ScalarType, PairFunctor>::potentialEnergy(const MDCell& cell) const {
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    ScalarType PairModel<ScalarType, PosScalarType, PairFunctor>::potentialEnergy(const MDCellType& cell) const {
         using VectorType = Vector<ScalarType, Dim>;
 
         const auto& lattice = cell.getLattice();
@@ -107,7 +108,7 @@ namespace Physica::Core {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
-        const auto range = MDCell::estimateRange(cell, cutoff);
+        const auto range = MDCellType::estimateRange(cell, cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;
@@ -137,8 +138,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PairFunctor>
-    void PairModel<ScalarType, PairFunctor>::swap(PairModel& pair) noexcept {
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    void PairModel<ScalarType, PosScalarType, PairFunctor>::swap(PairModel& pair) noexcept {
         cutoff.swap(pair.cutoff);
         squared_cutoff.swap(squared_cutoff);
         pot_shift.swap(pot_shift);
