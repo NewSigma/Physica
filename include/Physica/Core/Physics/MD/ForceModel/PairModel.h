@@ -21,6 +21,10 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
+    /**
+     * References:
+     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
+     */
     template<class ScalarType, class PosScalarType, class PairFunctor>
     class PairModel final {
         using ResultType = typename std::invoke_result<PairFunctor, ScalarType>::type;

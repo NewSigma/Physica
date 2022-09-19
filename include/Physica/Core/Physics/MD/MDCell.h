@@ -43,6 +43,7 @@ namespace Physica::Core {
         void scale(PosScalarType factor);
         void normalizeCell();
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
+        void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
@@ -85,6 +86,13 @@ namespace Physica::Core {
             elem -= PosScalarType(integer - elem.isNegative());
             assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
         }
+        Base::toCartesian();
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void MDCell<ScalarType, PosScalarType>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+        toDirect();
+        Base::unitToSuper_direct(x, y, z);
         Base::toCartesian();
     }
 }

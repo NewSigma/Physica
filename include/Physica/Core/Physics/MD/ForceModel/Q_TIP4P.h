@@ -29,9 +29,10 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
+     * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class ScalarType, class PosScalarType>
-    class Q_TIP4P {
+    class Q_TIP4P final {
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         constexpr static unsigned int Dim = MDCellType::Dim;
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
@@ -52,6 +53,8 @@ namespace Physica::Core {
         EwaldType ewald;
         ScalarType cutoff;
         ScalarType stepSize;
+        ScalarType epsilonE4;
+        ScalarType potShift;
     public:
         Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_);
         Q_TIP4P(const Q_TIP4P&) = default;
@@ -72,10 +75,11 @@ namespace Physica::Core {
         void swap(Q_TIP4P& model) noexcept;
     private:
         Vector<ScalarType> makeCharges() const;
-        ScalarType minSquaredDist(const MDCellType& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
         PositionMatrix makeChargePos(const PositionMatrix& pos) const;
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell, const PositionMatrix& chargePos) const;
+        static Vector<PosScalarType, 3> minDistVector(const MDCellType& cell, size_t from_id, size_t to_id);
+        static inline ScalarType lennardJones(PosScalarType r2);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -89,6 +93,8 @@ namespace Physica::Core {
             hytrogenList[i].second = i * 2 + 1;
         }
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
+        epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * getNumMolecule();
+        potShift = epsilonE4 * lennardJones(square(cutoff));
     }
 
     template<class ScalarType, class PosScalarType>
@@ -130,7 +136,7 @@ namespace Physica::Core {
             auto pos_O = pos.row(maxHytrogenId + i);
             for (size_t j = 0; j < maxHytrogenId; ++j) {
                 auto pos_H = pos.row(j);
-                const ScalarType squared_dist = minSquaredDist(refer_cell, maxHytrogenId + i, j);
+                const ScalarType squared_dist = minDistVector(refer_cell, maxHytrogenId + i, j).squaredNorm();
                 if (squared_dist < bondLength1) {
                     if (bondLength2 > bondLength1) {
                         bondLength2 = squared_dist;
@@ -181,6 +187,8 @@ namespace Physica::Core {
         ewald.swap(model.ewald);
         cutoff.swap(model.cutoff);
         stepSize.swap(model.stepSize);
+        epsilonE4.swap(model.epsilonE4);
+        potShift.swap(model.potShift);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -196,29 +204,6 @@ namespace Physica::Core {
         for (size_t i = maxIndexH; i < maxIndexO; ++i)
             charges[i] = ScalarType(-charge);
         return charges;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType>::minSquaredDist(const MDCellType& cell, size_t from_id, size_t to_id) {
-        using Vector3D = Vector<ScalarType, 3>;
-
-        const auto& pos = cell.getPos();
-        const auto& lattice = cell.getLattice();
-        auto pos1 = pos.row(from_id);
-        auto pos2 = pos.row(to_id);
-
-        ScalarType result = std::numeric_limits<ScalarType>::max();
-        for (int x = -1; x <= 1; ++x) {
-            const Vector3D v1 = pos2.asVector() + lattice.row(0).asVector() * ScalarType(x);
-            for (int y = -1; y <= 1; ++y) {
-                const Vector3D v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
-                for (int z = -1; z <= 1; ++z) {
-                    const Vector3D v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
-                    result = std::min(result, (v3 - pos1.asVector()).squaredNorm());
-                }
-            }
-        }
-        return result;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -259,28 +244,22 @@ namespace Physica::Core {
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
         const auto range = MDCellType::estimateRange(lattice, cutoff);
-        const double epsilonE4 = (4 * epsilon / PhyConst<SI>::avogadroNa) * numMolecule;
 
         ScalarType interMoleculeEnergy = 0;
         /* Inter molecular */ {
             MDCellType::forParticleInRange(range, lattice,
-                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](Vector3D delta) {
-                    ScalarType energy = 0;
+                [this, numMolecule, &pos, &interMoleculeEnergy](Vector3D delta) {
                     const size_t offset = 2 * numMolecule;
+                    ScalarType energy = 0;
+                    Vector3D posO1;
                     for (size_t i = 0; i < numMolecule; ++i) {
-                        const Vector3D posO1 = pos.row(offset + i) + delta;
+                        posO1 = pos.row(offset + i) + delta;
                         for (size_t j = i; j < numMolecule; ++j) {
                             auto posO2 = pos.row(offset + j);
                             const ScalarType r2 = (posO1 - posO2).squaredNorm();
                             const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                            if (isNotSelf && r2 < square(cutoff)) {
-                                constexpr double squared_sigma = sigma * sigma;
-                                const ScalarType rep_r2 = ScalarType(squared_sigma) / r2;
-                                const ScalarType rep_r4 = square(rep_r2);
-                                const ScalarType rep_r6 = rep_r4 * rep_r2;
-                                const ScalarType rep_r12 = square(rep_r6);
-                                energy += (rep_r12 - rep_r6) * epsilonE4;
-                            }
+                            if (isNotSelf && r2 < square(cutoff))
+                                energy += lennardJones(r2) * epsilonE4 - potShift;
                         }
                     }
                     interMoleculeEnergy += energy;
@@ -291,12 +270,8 @@ namespace Physica::Core {
             Vector3D vecOH1, vecOH2;
             const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
-                auto posO = pos.row(offset + i);
-                auto posH1 = pos.row(hytrogenList[i].first);
-                auto posH2 = pos.row(hytrogenList[i].second);
-
-                vecOH1 = posH1.asVector() - posO;
-                vecOH2 = posH2.asVector() - posO;
+                vecOH1 = minDistVector(cell, offset + i, hytrogenList[i].first);
+                vecOH2 = minDistVector(cell, offset + i, hytrogenList[i].second);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
                 const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * numMolecule * 0.5);
@@ -318,5 +293,44 @@ namespace Physica::Core {
             }
         }
         return interMoleculeEnergy + intraMoleculeEnergy - selfCoulomb;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    Vector<PosScalarType, 3> Q_TIP4P<ScalarType, PosScalarType>::minDistVector(const MDCellType& cell, size_t from_id, size_t to_id) {
+        using Vector3D = Vector<PosScalarType, 3>;
+
+        const auto& pos = cell.getPos();
+        const auto& lattice = cell.getLattice();
+        auto pos1 = pos.row(from_id);
+        auto pos2 = pos.row(to_id);
+
+        PosScalarType record_dist = std::numeric_limits<PosScalarType>::max();
+        Vector3D result{};
+        Vector3D v1, v2, v3;
+        for (int x = -1; x <= 1; ++x) {
+            v1 = pos2.asVector() + lattice.row(0).asVector() * ScalarType(x);
+            for (int y = -1; y <= 1; ++y) {
+                v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
+                for (int z = -1; z <= 1; ++z) {
+                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z) - pos1.asVector();
+                    const PosScalarType squared_norm = v3.squaredNorm();
+                    if (squared_norm < record_dist) {
+                        record_dist = squared_norm;
+                        result = v3;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::lennardJones(PosScalarType r2) {
+        constexpr double squared_sigma = sigma * sigma;
+        const ScalarType rep_r2 = ScalarType(squared_sigma) / r2;
+        const ScalarType rep_r4 = square(rep_r2);
+        const ScalarType rep_r6 = rep_r4 * rep_r2;
+        const ScalarType rep_r12 = square(rep_r6);
+        return rep_r12 - rep_r6;
     }
 }
