@@ -129,7 +129,13 @@ namespace Physica::Core {
     }
 
     void Poscar::superToUnit(unsigned int x, unsigned int y, unsigned int z) {
-        Base::superToUnit(x, y, z);
+        if (type == Type::Cartesian) {
+            toDirect(makeInvLattice());
+            Base::superToUnit_direct(x, y, z);
+            toCartesian();
+        }
+        else
+            Base::superToUnit_direct(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
     }

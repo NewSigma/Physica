@@ -25,7 +25,7 @@ int main() {
     using PositionMatrix = typename CrystalCell::PositionMatrix;
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
-    const CrystalCell cell(lattice, pos, {1, 1, 8}, CrystalCell::Type::Direct);
+    const CrystalCell cell_direct(lattice, pos, {1, 1, 8}, CrystalCell::Type::Direct);
 
     const LatticeMatrix answer_lattice{3, 0, 0, 4, 6, 0, 4, 5, 6};
     const PositionMatrix answer_pos{
@@ -49,14 +49,26 @@ int main() {
         0.8333333333333333, 0.7500000000000000, 0.5000000000000000
     };
     const Physica::Utils::Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
-    CrystalCell supercell = cell;
-    supercell.unitToSuper(3, 2, 1);
-    if (!matrixNear(answer_lattice, supercell.getLattice(), 1E-15))
+    CrystalCell supercell_direct = cell_direct;
+    supercell_direct.unitToSuper(3, 2, 1);
+    if (!matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15))
         return 1;
-    if (!matrixNear(answer_pos, supercell.getPos(), 1E-15))
+    if (!matrixNear(answer_pos, supercell_direct.getPos(), 1E-15))
         return 1;
     for (size_t i = 0; i < answer_atomic.getLength(); ++i)
-        if (answer_atomic[i] != supercell.getAtomicNumber(i))
+        if (answer_atomic[i] != supercell_direct.getAtomicNumber(i))
+            return 1;
+
+    CrystalCell supercell_cartesian = cell_direct;
+    supercell_cartesian.toCartesian();
+    supercell_cartesian.unitToSuper(3, 2, 1);
+    if (!matrixNear(answer_lattice, supercell_cartesian.getLattice(), 1E-15))
+        return 1;
+    supercell_direct.toCartesian();
+    if (!matrixNear(supercell_direct.getPos(), supercell_cartesian.getPos(), 1E-15))
+        return 1;
+    for (size_t i = 0; i < answer_atomic.getLength(); ++i)
+        if (answer_atomic[i] != supercell_cartesian.getAtomicNumber(i))
             return 1;
     return 0;
 }

@@ -28,6 +28,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
+using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -36,7 +37,6 @@ constexpr unsigned int numMolecular = 32;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 constexpr double cellVolume = ((numMolecular * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-constexpr double initialBond_HO = PhyConst<AU>::angstormToBohr(1);
 
 void testHytrogenList() {
     typename CrystalCell::LatticeMatrix lattice{
@@ -59,8 +59,9 @@ void testHytrogenList() {
         0.3512600170478342,  0.6392493670479714,  0.1141244566914832
     };
     CrystalCell unit{std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct};
-    MDCell<ScalarType, PosScalarType> cell(std::move(unit));
+    const MDCell<ScalarType, PosScalarType> cell(std::move(unit));
     Q_TIP4P<ScalarType, PosScalarType> model(cell, 1, 1E-4);
+    model.guessHytrogenList(cell);
     if (!model.checkHytrogenList())
         exit(EXIT_FAILURE);
 }
@@ -71,7 +72,7 @@ Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
     const PosScalarType theta(dist(gen) * M_PI);
     const PosScalarType phi(dist(gen) * M_PI * 2);
     Vector<PosScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= PosScalarType(initialBond_HO);
+    result *= PosScalarType(ForceModel::equalR);
     return result;
 }
 
@@ -87,8 +88,16 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
 
     typename CrystalCell::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
-    for (auto elem : pos)
-        elem = latticeFactor * dist(gen);
+    for (size_t i = 0; i < numMolecular; ++i) {
+        auto posO = pos.row(i + maxIndexH);
+        posO[0] = latticeFactor * dist(gen);
+        posO[1] = latticeFactor * dist(gen);
+        posO[2] = latticeFactor * dist(gen);
+        auto posH1 = pos.row(2 * i);
+        auto posH2 = pos.row(2 * i + 1);
+        posH1 = posO + randomVector(gen);
+        posH2 = posO + randomVector(gen);
+    }
 
     typename CrystalCell::AtomicArray atomicNumbers(numAtom);
     for (size_t i = 0; i < maxIndexH; ++i)
@@ -105,7 +114,7 @@ void testMD() {
 
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
-    Q_TIP4P<ScalarType, PosScalarType> model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
+    ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();

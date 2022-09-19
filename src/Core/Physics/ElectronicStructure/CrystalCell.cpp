@@ -53,7 +53,14 @@ namespace Physica::Core {
 
     void CrystalCell::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        Base::unitToSuper(x, y, z);
+        if (type == Type::Cartesian) {
+            toDirect();
+            Base::unitToSuper_direct(x, y, z);
+            toCartesian();
+        }
+        else
+            Base::unitToSuper_direct(x, y, z);
+        
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
         size_t index = 0;

@@ -37,7 +37,7 @@ namespace Physica::Core {
         using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
-
+    public:
         constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
         constexpr static double charge = 1.1128;
@@ -49,7 +49,6 @@ namespace Physica::Core {
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
     private:
         HytrogenListType hytrogenList;
-        PositionMatrix chargePos;
         EwaldType ewald;
         ScalarType cutoff;
         ScalarType stepSize;
@@ -65,25 +64,30 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] const HytrogenListType& getHytrogenList() const noexcept { return hytrogenList; }
+        [[nodiscard]] HytrogenListType& getHytrogenList() noexcept { return hytrogenList; }
         [[nodiscard]] size_t getNumMolecule() const noexcept { return hytrogenList.getLength(); }
         /* Helpers */
+        void guessHytrogenList(const MDCellType& refer_cell);
         bool checkHytrogenList() const;
         void swap(Q_TIP4P& model) noexcept;
     private:
-        void makeHytrogenList(const MDCellType& refer_cell);
         Vector<ScalarType> makeCharges() const;
         ScalarType minSquaredDist(const MDCellType& cell, size_t from_id, size_t to_id);
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
-        ScalarType potentialEnergyWithoutCoulomb(const MDCellType& cell) const;
+        PositionMatrix makeChargePos(const PositionMatrix& pos) const;
+        ScalarType potentialEnergyWithoutEwald(const MDCellType& cell, const PositionMatrix& chargePos) const;
     };
 
     template<class ScalarType, class PosScalarType>
     Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
-            : chargePos(refer_cell.getNumParticle(), 3)
+            : hytrogenList(refer_cell.getNumParticle() / 3)
             , cutoff(std::move(cutoff_))
             , stepSize(std::move(stepSize_)) {
         assert(refer_cell.getNumParticle() % 3 == 0);
-        makeHytrogenList(refer_cell);
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            hytrogenList[i].first = i * 2;
+            hytrogenList[i].second = i * 2 + 1;
+        }
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
 
@@ -95,84 +99,28 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(getNumMolecule() * Dim);
+        const PositionMatrix chargePos = makeChargePos(cell.getPos());
+        Vector<ScalarType> result(getNumMolecule() * 3 * Dim);
         for (size_t i = 0; i < result.getLength(); ++i) {
-            result[i] = -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
+            result[i] = -Differential<ScalarType>::doublePoint([this, i, &cell, &chargePos](ScalarType x) -> ScalarType {
                 PositionMatrix pos = cell.getPos();
                 *(pos.begin() + i) = x;
-                return potentialEnergyWithoutCoulomb(MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec()));
+                return potentialEnergyWithoutEwald(MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec()), chargePos);
             }, ScalarType(cell.getPos().flatten().calc(i)), stepSize);
         }
-        return result + ewald.force(cell.getPos());
+        return result + ewald.force(chargePos);
     }
 
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
-        const size_t numMolecule = getNumMolecule();
-        const auto& pos = cell.getPos();
-
-        ScalarType coulomb = 0;
-        /* Coulomb Part */ {
-            const size_t maxIndexH = 2 * numMolecule;
-            auto posH = chargePos.topRows(maxIndexH);
-            posH = pos.topRows(maxIndexH);
-
-            ScalarType selfCoulomb = 0;
-            const size_t minIndexO = maxIndexH;
-            const size_t maxIndexO = minIndexO + numMolecule;
-            for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                auto partialCharge = chargePos.row(i);
-                auto posO = pos.row(i);
-                auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
-                auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
-                partialCharge = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2) * ScalarType((1 - gamma) * 0.5);
-
-                selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH1.asVector() - partialCharge).norm());
-                selfCoulomb += ScalarType(-charge * charge / 2) / ScalarType((posH2.asVector() - partialCharge).norm());
-            }
-            coulomb = ewald(pos) - selfCoulomb;
-        }
-        return potentialEnergyWithoutCoulomb(cell) + coulomb;
+        const PositionMatrix chargePos = makeChargePos(cell.getPos());
+        return potentialEnergyWithoutEwald(cell, chargePos) + ewald(chargePos);
     }
 
     template<class ScalarType, class PosScalarType>
-    bool Q_TIP4P<ScalarType, PosScalarType>::checkHytrogenList() const {
-        const size_t maxHytrogenId = hytrogenList.getLength() * 2;
-        for (size_t i = 0; i < hytrogenList.getLength(); ++i) {
-            const auto& pair = hytrogenList[i];
-            if (pair.first == pair.second)
-                return false;
-
-            if (pair.first >= maxHytrogenId || pair.second >= maxHytrogenId)
-                return false;
-
-            for (size_t j = i + 1; j < hytrogenList.getLength(); ++j) {
-                const auto& pair2 = hytrogenList[j];
-                if (pair.first == pair2.first
-                 || pair.first == pair2.second
-                 || pair.second == pair2.first
-                 || pair.second == pair2.second)
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
-        hytrogenList.swap(model.hytrogenList);
-        chargePos.swap(model.chargePos);
-        ewald.swap(model.ewald);
-        cutoff.swap(model.cutoff);
-        stepSize.swap(model.stepSize);
-    }
-
-    template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::makeHytrogenList(const MDCellType& refer_cell) {
-        const size_t numMolecule = refer_cell.getNumParticle() / 3;
-        hytrogenList.resize(numMolecule);
-
+    void Q_TIP4P<ScalarType, PosScalarType>::guessHytrogenList(const MDCellType& refer_cell) {
         const auto& pos = refer_cell.getPos();
+        const size_t numMolecule = getNumMolecule();
         const size_t maxHytrogenId = refer_cell.getNumParticle() - numMolecule;
         ScalarType bondLength1, bondLength2;
         size_t hytrogenId1 = 0, hytrogenId2 = 0;
@@ -205,6 +153,37 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    bool Q_TIP4P<ScalarType, PosScalarType>::checkHytrogenList() const {
+        const size_t maxHytrogenId = hytrogenList.getLength() * 2;
+        for (size_t i = 0; i < hytrogenList.getLength(); ++i) {
+            const auto& pair = hytrogenList[i];
+            if (pair.first == pair.second)
+                return false;
+
+            if (pair.first >= maxHytrogenId || pair.second >= maxHytrogenId)
+                return false;
+
+            for (size_t j = i + 1; j < hytrogenList.getLength(); ++j) {
+                const auto& pair2 = hytrogenList[j];
+                if (pair.first == pair2.first
+                 || pair.first == pair2.second
+                 || pair.second == pair2.first
+                 || pair.second == pair2.second)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
+        hytrogenList.swap(model.hytrogenList);
+        ewald.swap(model.ewald);
+        cutoff.swap(model.cutoff);
+        stepSize.swap(model.stepSize);
+    }
+
+    template<class ScalarType, class PosScalarType>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::makeCharges() const {
         const size_t numMolecule = getNumMolecule();
         const size_t maxIndexH = 2 * numMolecule;
@@ -212,10 +191,10 @@ namespace Physica::Core {
         const size_t maxIndexO = minIndexO + numMolecule;
         Vector<ScalarType> charges(maxIndexO);
         for (size_t i = 0; i < maxIndexH; ++i)
-            charges[i] = ScalarType(-charge * 0.5);
+            charges[i] = ScalarType(charge * 0.5);
         
         for (size_t i = maxIndexH; i < maxIndexO; ++i)
-            charges[i] = ScalarType(charge);
+            charges[i] = ScalarType(-charge);
         return charges;
     }
 
@@ -252,8 +231,29 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergyWithoutCoulomb(const MDCellType& cell) const {
-        using VectorType = Vector<ScalarType, Dim>;
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::makeChargePos(const PositionMatrix& pos) const {
+        PositionMatrix chargePos(pos.getRow(), 3);
+        const size_t numMolecule = pos.getRow() / 3;
+        const size_t maxIndexH = 2 * numMolecule;
+        auto chargePosH = chargePos.topRows(maxIndexH);
+        chargePosH = pos.topRows(maxIndexH);
+
+        const size_t minIndexO = maxIndexH;
+        const size_t maxIndexO = minIndexO + numMolecule;
+        for (size_t i = minIndexO; i < maxIndexO; ++i) {
+            auto chargePosO = chargePos.row(i);
+            auto posO = pos.row(i);
+            auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
+            auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
+            chargePosO = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2.asVector()) * ScalarType((1 - gamma) * 0.5);
+        }
+        return chargePos;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergyWithoutEwald(const MDCellType& cell, const PositionMatrix& chargePos) const {
+        using Vector3D = Vector<PosScalarType, Dim>;
 
         const size_t numMolecule = getNumMolecule();
         const auto& lattice = cell.getLattice();
@@ -263,21 +263,19 @@ namespace Physica::Core {
 
         ScalarType interMoleculeEnergy = 0;
         /* Inter molecular */ {
-            /* LJ Part */
             MDCellType::forParticleInRange(range, lattice,
-                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](VectorType delta) {
+                [this, numMolecule, pos, epsilonE4, &interMoleculeEnergy](Vector3D delta) {
                     ScalarType energy = 0;
-                    VectorType posO1, posH11, posH12;
                     const size_t offset = 2 * numMolecule;
                     for (size_t i = 0; i < numMolecule; ++i) {
-                        posO1 = pos.row(offset + i) + delta;
+                        const Vector3D posO1 = pos.row(offset + i) + delta;
                         for (size_t j = i; j < numMolecule; ++j) {
                             auto posO2 = pos.row(offset + j);
                             const ScalarType r2 = (posO1 - posO2).squaredNorm();
                             const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                             if (isNotSelf && r2 < square(cutoff)) {
                                 constexpr double squared_sigma = sigma * sigma;
-                                const ScalarType rep_r2 = reciprocal(r2) * ScalarType(squared_sigma);
+                                const ScalarType rep_r2 = ScalarType(squared_sigma) / r2;
                                 const ScalarType rep_r4 = square(rep_r2);
                                 const ScalarType rep_r6 = rep_r4 * rep_r2;
                                 const ScalarType rep_r12 = square(rep_r6);
@@ -290,7 +288,7 @@ namespace Physica::Core {
         }
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecular */ {
-            VectorType vecOH1, vecOH2;
+            Vector3D vecOH1, vecOH2;
             const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
                 auto posO = pos.row(offset + i);
@@ -301,10 +299,24 @@ namespace Physica::Core {
                 vecOH2 = posH2.asVector() - posO;
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
-                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
-                intraMoleculeEnergy += modifiedMorse(r1, numMolecule) + modifiedMorse(r2, numMolecule);
+                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * numMolecule * 0.5);
+                intraMoleculeEnergy += modifiedMorse(r1, numMolecule) + modifiedMorse(r2, numMolecule) + elastic;
             }
         }
-        return interMoleculeEnergy + intraMoleculeEnergy;
+        ScalarType selfCoulomb = 0;
+        /* Coulomb Part */ {
+            const size_t minIndexO = 2 * numMolecule;
+            const size_t maxIndexO = minIndexO + numMolecule;
+            for (size_t i = minIndexO; i < maxIndexO; ++i) {
+                auto chargePosO = chargePos.row(i);
+                auto chargePosH1 = chargePos.row(hytrogenList[i - minIndexO].first);
+                auto chargePosH2 = chargePos.row(hytrogenList[i - minIndexO].second);
+
+                selfCoulomb += ScalarType(-charge * charge * 0.5) / ScalarType((chargePosH1.asVector() - chargePosO.asVector()).norm());
+                selfCoulomb += ScalarType(-charge * charge * 0.5) / ScalarType((chargePosH2.asVector() - chargePosO.asVector()).norm());
+                selfCoulomb += ScalarType(charge * charge * 0.25) / ScalarType((chargePosH1.asVector() - chargePosH2.asVector()).norm());
+            }
+        }
+        return interMoleculeEnergy + intraMoleculeEnergy - selfCoulomb;
     }
 }
