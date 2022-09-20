@@ -75,6 +75,7 @@ namespace Physica::Core {
         template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
         /* Getters */
+        [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }

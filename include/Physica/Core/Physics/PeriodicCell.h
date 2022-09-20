@@ -33,6 +33,7 @@ namespace Physica::Core {
             };
         };
     }
+
     template<class ScalarType, unsigned int Dim>
     class PeriodicCell : public Internal::PeriodicCellImpl {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
@@ -55,6 +56,8 @@ namespace Physica::Core {
         ~PeriodicCell() = default;
         /* Operators */
         PeriodicCell& operator=(PeriodicCell cell) noexcept;
+        /* Operations */
+        Vector<ScalarType, 3> minDistVector(size_t id_from, size_t id_to) const;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
@@ -94,6 +97,33 @@ namespace Physica::Core {
     PeriodicCell<ScalarType, Dim>& PeriodicCell<ScalarType, Dim>::operator=(PeriodicCell cell) noexcept {
         swap(cell);
         return *this;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    Vector<ScalarType, 3> PeriodicCell<ScalarType, Dim>::minDistVector(size_t id_from, size_t id_to) const {
+        using Vector3D = Vector<ScalarType, 3>;
+
+        auto pos_from = pos.row(id_from);
+        auto pos_to = pos.row(id_to);
+
+        ScalarType record_dist = std::numeric_limits<ScalarType>::max();
+        Vector3D result{};
+        Vector3D v1, v2, v3;
+        for (int x = -1; x <= 1; ++x) {
+            v1 = pos_to.asVector() + lattice.row(0).asVector() * ScalarType(x);
+            for (int y = -1; y <= 1; ++y) {
+                v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
+                for (int z = -1; z <= 1; ++z) {
+                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z) - pos_from.asVector();
+                    const ScalarType squared_norm = v3.squaredNorm();
+                    if (squared_norm < record_dist) {
+                        record_dist = squared_norm;
+                        result = v3;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     template<class ScalarType, unsigned int Dim>

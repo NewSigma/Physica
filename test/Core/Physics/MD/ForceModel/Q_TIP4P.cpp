@@ -32,7 +32,7 @@ using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
-constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
+constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.1;
 constexpr unsigned int numMolecular = 32;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
@@ -110,7 +110,9 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
 }
 
 void testMD() {
-    std::mt19937 gen(2420013718159779819);
+    std::mt19937::result_type seed;
+    Physica::Utils::Random::rdrand(seed);
+    std::mt19937 gen(seed);
 
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);

@@ -78,7 +78,6 @@ namespace Physica::Core {
         ScalarType modifiedMorse(ScalarType r, size_t numMolecule) const;
         PositionMatrix makeChargePos(const PositionMatrix& pos) const;
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell, const PositionMatrix& chargePos) const;
-        static Vector<PosScalarType, 3> minDistVector(const MDCellType& cell, size_t from_id, size_t to_id);
         static inline ScalarType lennardJones(PosScalarType r2);
     };
 
@@ -136,7 +135,7 @@ namespace Physica::Core {
             auto pos_O = pos.row(maxHytrogenId + i);
             for (size_t j = 0; j < maxHytrogenId; ++j) {
                 auto pos_H = pos.row(j);
-                const ScalarType squared_dist = minDistVector(refer_cell, maxHytrogenId + i, j).squaredNorm();
+                const ScalarType squared_dist = refer_cell.minDistVector(maxHytrogenId + i, j).squaredNorm();
                 if (squared_dist < bondLength1) {
                     if (bondLength2 > bondLength1) {
                         bondLength2 = squared_dist;
@@ -270,8 +269,8 @@ namespace Physica::Core {
             Vector3D vecOH1, vecOH2;
             const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
-                vecOH1 = minDistVector(cell, offset + i, hytrogenList[i].first);
-                vecOH2 = minDistVector(cell, offset + i, hytrogenList[i].second);
+                vecOH1 = cell.minDistVector(offset + i, hytrogenList[i].first);
+                vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
                 const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * numMolecule * 0.5);
@@ -293,35 +292,6 @@ namespace Physica::Core {
             }
         }
         return interMoleculeEnergy + intraMoleculeEnergy - selfCoulomb;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    Vector<PosScalarType, 3> Q_TIP4P<ScalarType, PosScalarType>::minDistVector(const MDCellType& cell, size_t from_id, size_t to_id) {
-        using Vector3D = Vector<PosScalarType, 3>;
-
-        const auto& pos = cell.getPos();
-        const auto& lattice = cell.getLattice();
-        auto pos1 = pos.row(from_id);
-        auto pos2 = pos.row(to_id);
-
-        PosScalarType record_dist = std::numeric_limits<PosScalarType>::max();
-        Vector3D result{};
-        Vector3D v1, v2, v3;
-        for (int x = -1; x <= 1; ++x) {
-            v1 = pos2.asVector() + lattice.row(0).asVector() * ScalarType(x);
-            for (int y = -1; y <= 1; ++y) {
-                v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
-                for (int z = -1; z <= 1; ++z) {
-                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z) - pos1.asVector();
-                    const PosScalarType squared_norm = v3.squaredNorm();
-                    if (squared_norm < record_dist) {
-                        record_dist = squared_norm;
-                        result = v3;
-                    }
-                }
-            }
-        }
-        return result;
     }
 
     template<class ScalarType, class PosScalarType>
