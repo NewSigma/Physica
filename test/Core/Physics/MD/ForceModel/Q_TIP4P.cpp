@@ -33,10 +33,8 @@ constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.1;
-constexpr unsigned int numMolecular = 32;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
-constexpr double cellVolume = ((numMolecular * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
 
 void testHytrogenList() {
     typename CrystalCell::LatticeMatrix lattice{
@@ -77,18 +75,19 @@ Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
 }
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
-    const size_t maxIndexH = numMolecular * 2;
-    const size_t maxIndexO = numMolecular * 3;
+MDCell<ScalarType, PosScalarType> makeSystem(unsigned int numMolecule, RandomGenerator& gen) {
+    const size_t maxIndexH = numMolecule * 2;
+    const size_t maxIndexO = numMolecule * 3;
     const size_t numAtom = maxIndexO;
 
-    const Scalar<Float, false> latticeFactor(std::cbrt(cellVolume));
+    PosScalarType cellVolume = ((numMolecule * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+    const PosScalarType latticeFactor(cbrt(cellVolume));
     typename CrystalCell::LatticeMatrix lattice = CrystalCell::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
     typename CrystalCell::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
-    for (size_t i = 0; i < numMolecular; ++i) {
+    for (size_t i = 0; i < numMolecule; ++i) {
         auto posO = pos.row(i + maxIndexH);
         posO[0] = latticeFactor * dist(gen);
         posO[1] = latticeFactor * dist(gen);
@@ -106,7 +105,28 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
         atomicNumbers[i] = 8;
 
     CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
-    return RPMD<ScalarType, PosScalarType>(MDCell<ScalarType, PosScalarType>(std::move(cell)), numReplica, temperatureT, thermostatTime, timeStep);
+    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+}
+
+void testForce() {
+    std::mt19937 gen(9806048078107704755UL);
+    const auto cell = makeSystem(4, gen);
+    const auto& pos = cell.getPos();
+    const ForceModel model(cell, pair_cutoff, 1E-4);
+    const Vector<ScalarType> force1 = model.force(cell);
+    Vector<ScalarType> force2(force1.getLength());
+    /* Force from finite differential */ {
+        for (size_t i = 0; i < force2.getLength(); ++i) {
+            force2[i] = -Differential<ScalarType>::ridders([i, &cell, &model](ScalarType x) -> ScalarType {
+                typename MDCell<ScalarType, PosScalarType>::PositionMatrix temp = cell.getPos();
+                *(temp.begin() + i) = PosScalarType(x);
+                MDCell<ScalarType, PosScalarType> new_cell(cell.getLattice(), std::move(temp), cell.getMassVec());
+                return model.potentialEnergy(new_cell);
+            }, pos.flatten().calc(i), 0.3);
+        }
+    }
+    if (!vectorNear(force1, force2, 1E-3))
+        exit(EXIT_FAILURE);
 }
 
 void testMD() {
@@ -114,28 +134,30 @@ void testMD() {
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    auto rpmd = makeSystem(gen);
+    unsigned int numMolecule = 32;
+    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(numMolecule, gen), numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
+        std::ifstream fin("phase");
+        fin >> rpmd.getPhasePos();
+        fin.close();
         rpmd.updateForce<decltype(model), ThreadExecutor>(model);
         rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
         ScalarType bond = 0;
         for (size_t i = 0; i < 100; ++i) {
             auto pos = rpmd.getPos();
+            PeriodicCell<ScalarType, 3> cell(rpmd.getLattice(), std::move(pos));
             ScalarType temp = 0;
-            for (size_t j = 0; j < numMolecular; ++i) {
-                auto posO = pos.row(2 * numMolecular + j);
-                auto posH1 = pos.row(model.getHytrogenList()[j].first);
-                auto posH2 = pos.row(model.getHytrogenList()[j].second);
-                toNextMean(temp, 2 * j, (posO.asVector() - posH1).norm());
-                toNextMean(temp, 2 * j + 1, (posO.asVector() - posH2).norm());
+            for (size_t j = 0; j < numMolecule; ++i) {
+                toNextMean(temp, 2 * j, cell.minDistVector(2 * numMolecule + j, model.getHytrogenList()[j].first).norm());
+                toNextMean(temp, 2 * j + 1, cell.minDistVector(2 * numMolecule + j, model.getHytrogenList()[j].second).norm());
             }
-            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
             toNextMean(bond, i, temp);
+            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
         }
         std::cout << PhyConst<AU>::bohrToAngstorm(double(bond)) << std::endl;
         std::ofstream fout("phase");
@@ -147,6 +169,7 @@ void testMD() {
 
 int main() {
     testHytrogenList();
+    testForce();
     testMD();
     return 0;
 }

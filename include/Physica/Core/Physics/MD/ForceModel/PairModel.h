@@ -27,8 +27,8 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, class PairFunctor>
     class PairModel final {
-        using ResultType = typename std::invoke_result<PairFunctor, ScalarType>::type;
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
+        using ResultType = typename std::invoke_result<PairFunctor, PosScalarType>::type;
+        static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
@@ -69,8 +69,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
     Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
-        using VectorType = Vector<ScalarType, Dim>;
-
+        using VectorType = Vector<PosScalarType, Dim>;
         const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
         const auto range = MDCellType::estimateRange(lattice, cutoff);
@@ -105,40 +104,28 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
     ScalarType PairModel<ScalarType, PosScalarType, PairFunctor>::potentialEnergy(const MDCellType& cell) const {
-        using VectorType = Vector<ScalarType, Dim>;
-
-        const auto& lattice = cell.getLattice();
+        using VectorType = Vector<PosScalarType, Dim>;
         const auto& pos = cell.getPos();
-        auto a1 = lattice.row(0);
-        auto a2 = lattice.row(1);
-        auto a3 = lattice.row(2);
-        const auto range = MDCellType::estimateRange(cell, cutoff);
+        const auto range = MDCellType::estimateRange(cell.getLattice(), cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;
-        VectorType v1, v2, v3, r;
-        for (size_t i = 0; i < numParticle; ++i) {
-            auto center = pos.row(i);
-            for (size_t j = i; j < numParticle; ++j) {
-                auto v = pos.row(j);
-                for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                    v1 = v + ScalarType(x) * a1.asVector();
-                    for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                        v2 = v1 + ScalarType(y) * a2.asVector();
-                        for (ssize_t z = -range[2]; z <= range[2]; ++z) {
-                            v3 = v2 + ScalarType(z) * a3.asVector();
-                            r = v3 - center;
-                            const ScalarType r2 = r.squaredNorm();
-                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                            if (isNotSelf && r2 < squared_cutoff) {
-                                const ScalarType dist = sqrt(r2);
-                                result += pot_functor(dist) - pot_shift;
-                            }
+        MDCellType::forParticleInRange(range, cell.getLattice(),
+            [this, numParticle, &pos, &result](VectorType delta) {
+                ScalarType temp = 0;
+                for (size_t i = 0; i < numParticle; ++i) {
+                    VectorType from = pos.row(i) + delta;
+                    for (size_t j = i; j < numParticle; ++j) {
+                        const ScalarType r2 = (from - pos.row(j)).squaredNorm();
+                        const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                        if (isNotSelf && r2 < squared_cutoff) {
+                            const ScalarType dist = sqrt(r2);
+                            temp += pot_functor(dist) - pot_shift;
                         }
                     }
                 }
-            }
-        }
+                result += temp;
+            });
         return result;
     }
 

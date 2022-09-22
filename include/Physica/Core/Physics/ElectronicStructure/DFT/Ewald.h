@@ -68,10 +68,11 @@ namespace Physica::Core {
         /* Operators */
         Ewald& operator=(Ewald ewald) noexcept;
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
-        [[nodiscard]] ScalarType operator()(const PositionMatrix& pos) const;
+        [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
         /* Operations */
         void swap(Ewald& ewald) noexcept;
         /* Getters */
+        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
     private:
         void makeTables();
@@ -165,7 +166,7 @@ namespace Physica::Core {
      * \param pos must be in cartesian convension
      */
     template<class ScalarType, class PosScalarType>
-    ScalarType Ewald<ScalarType, PosScalarType>::operator()(const PositionMatrix& pos) const {
+    ScalarType Ewald<ScalarType, PosScalarType>::potentialEnergy(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         ScalarType rSpaceSum = 0;
         PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
@@ -222,6 +223,11 @@ namespace Physica::Core {
         rSpaceSumRange.swap(ewald.rSpaceSumRange);
         kSpaceSumRange.swap(ewald.kSpaceSumRange);
         erfc_table.swap(ewald.erfc_table);
+        exp_table.swap(ewald.exp_table);
+        erfcStep.swap(ewald.erfcStep);
+        repErfcStep.swap(ewald.repErfcStep);
+        expStep.swap(ewald.expStep);
+        repExpStep.swap(ewald.repExpStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -258,8 +264,7 @@ namespace Physica::Core {
         const ScalarType x3 = x2 + step;
         
         const MatrixType mat{square(x1), x1, 1, square(x2), x2, 1, square(x3), x3, 1};
-        const Vector<ScalarType, 3> y = table.segment(index - 1, index + 2);
-        const Vector<ScalarType, 3> coeff = MatrixType(mat.inverse()) * y;
+        const Vector<ScalarType, 3> coeff = MatrixType(mat.inverse()) * table.segment(index - 1, index + 2);
         return ((coeff[0] * x + coeff[1]) * x + coeff[2]);
     }
 }

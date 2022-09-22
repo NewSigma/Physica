@@ -30,7 +30,7 @@ void VASPTest() {
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
     CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {14}, CrystalCell::Type::Direct);
     Ewald<ScalarType> ewald(cell.getLattice(), {4});
-    const auto energy = ewald(cell.getPos());
+    const auto energy = ewald.potentialEnergy(cell.getPos());
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-5))
         exit(EXIT_FAILURE);
 }
@@ -54,7 +54,7 @@ void madelungTest() {
                         }, {1, 1, 1, 1, 1, 1, 1, 1}, CrystalCell::Type::Direct);
         NaCl.toCartesian();
         Ewald<ScalarType> ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
-        const auto energy = ewald(NaCl.getPos());
+        const auto energy = ewald.potentialEnergy(NaCl.getPos());
         const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
         if (!scalarNear(madelung, ScalarType(1.7475645946331822), 1E-7))
             exit(EXIT_FAILURE);
@@ -66,7 +66,7 @@ void madelungTest() {
                             0.5, 0.5, 0.5,
                         }, {1, 1}, CrystalCell::Type::Cartesian);
         Ewald<ScalarType> ewald(CsCl.getLattice(), {1, -1});
-        const auto energy = ewald(CsCl.getPos());
+        const auto energy = ewald.potentialEnergy(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         if (!scalarNear(madelung, ScalarType(1.76267477307099), 1E-7))
             exit(EXIT_FAILURE);
@@ -79,7 +79,7 @@ void madelungTest() {
                         }, {1, 1}, CrystalCell::Type::Direct);
         ZnS.toCartesian();
         Ewald<ScalarType> ewald(ZnS.getLattice(), {1, -1});
-        const auto energy = ewald(ZnS.getPos());
+        const auto energy = ewald.potentialEnergy(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         if (!scalarNear(madelung, ScalarType(1.63805505338879), 1E-8))
             exit(EXIT_FAILURE);
@@ -117,7 +117,7 @@ void forceTest() {
             force2[i] = -Differential<ScalarType>::ridders([i, &pos, &ewald](ScalarType x) -> ScalarType {
                 PositionMatrix temp = pos;
                 *(temp.begin() + i) = ScalarType_(x);
-                return ewald(temp);
+                return ewald.potentialEnergy(temp);
             }, pos.flatten().calc(i), 0.3);
         }
     }
