@@ -81,8 +81,7 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
-        for (size_t i = 0; i < v1.getLength(); ++i)
-            v1[i] = v1[i] - v2.calc(i);
+        v1.getDerived() += (-v2.getDerived());
     }
 
     template<class VectorType, class ScalarType>

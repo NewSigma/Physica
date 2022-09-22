@@ -63,72 +63,13 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const ContinuousVector<Derived>& v) {
-        Base::operator=(v);
-        return *this;
-    }
+    std::ostream& operator<<(std::ostream& os, const ContinuousVector<Derived>& v);
 
     template<class Derived>
-    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
-        Base::operator=(std::forward<Base>(v));
-        return *this;
-    }
+    std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v);
 
-    template<class Derived>
-    template<class PacketType>
-    PacketType ContinuousVector<Derived>::packet(size_t index) const {
-        assert(index + PacketType::size() <= Base::getLength());
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
-            PacketType packet{};
-            packet.load(data_ptr(index));
-            return packet;
-        }
-        else
-            return Base::template packet<PacketType>(index);
-    }
-
-    template<class Derived>
-    template<class PacketType>
-    PacketType ContinuousVector<Derived>::packetPartial(size_t index) const {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
-            PacketType packet{};
-            const size_t count = Base::getLength() - index;
-            packet.load_partial(count, data_ptr(index));
-            return packet;
-        }
-        else
-            return Base::template packetPartial<PacketType>(index);
-    }
-
-    template<class Derived>
-    template<class PacketType>
-    void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
-            packet.store(data_ptr(index));
-        else
-            Base::template writePacket(index, packet);
-    }
-
-    template<class Derived>
-    template<class PacketType>
-    void ContinuousVector<Derived>::writePacketPartial(size_t index, const PacketType packet) {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
-            packet.store_partial(Base::getLength() - index, data_ptr(index));
-        else
-            Base::template writePacketPartial(index, packet);
-    }
-
-    template<class Derived>
-    std::ostream& operator<<(std::ostream& os, const ContinuousVector<Derived>& v) {
-        using ScalarType = typename Derived::ScalarType;
-        os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
-        return os;
-    }
-
-    template<class Derived>
-    std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v) {
-        using ScalarType = typename Derived::ScalarType;
-        is.read(reinterpret_cast<char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
-        return is;
-    }
+    template<class Derived, class OtherDerived>
+    void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
+
+#include "ContinuousVectorImpl.h"
