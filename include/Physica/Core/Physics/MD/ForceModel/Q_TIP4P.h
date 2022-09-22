@@ -110,8 +110,8 @@ namespace Physica::Core {
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
         ScalarType elasticEnergy(const MDCellType& cell) const;
-        static ScalarType modifiedMorsePot(ScalarType r, size_t numMolecule);
-        static ScalarType modifiedMorseForce(ScalarType r, size_t numMolecule);
+        static ScalarType modifiedMorsePot(ScalarType r);
+        static ScalarType modifiedMorseForce(ScalarType r);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -140,7 +140,7 @@ namespace Physica::Core {
         Vector<ScalarType> result(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            const ScalarType factor = ScalarType((24 * epsilon / Internal::Traits<This>::sigma / PhyConst<SI>::avogadroNa) * numMolecule);
+            const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma / PhyConst<SI>::avogadroNa);
             auto force = result.tail(2 * numMolecule * Dim);
             force = LJModel.force(cellWithoutH) * factor;
         }
@@ -160,11 +160,11 @@ namespace Physica::Core {
                 auto forceH1 = result.segment(3 * indexH1, 3 * indexH1 + 3);
                 auto forceH2 = result.segment(3 * indexH2, 3 * indexH2 + 3);
 
-                f = vecOH1 * (modifiedMorseForce(r1, numMolecule) / r1);
+                f = vecOH1 * (modifiedMorseForce(r1) / r1);
                 forceO -= f;
                 forceH1 += f;
                 
-                f = vecOH2 * (modifiedMorseForce(r2, numMolecule) / r2);
+                f = vecOH2 * (modifiedMorseForce(r2) / r2);
                 forceO -= f;
                 forceH1 += f;
             }
@@ -341,7 +341,7 @@ namespace Physica::Core {
         const size_t numMolecule = getNumMolecule();
 
         const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-        const ScalarType factor = (4 * epsilon / PhyConst<SI>::avogadroNa) * getNumMolecule();
+        const ScalarType factor = 4 * epsilon / PhyConst<SI>::avogadroNa;
         const ScalarType interMoleculeEnergy = LJModel.potentialEnergy(cellWithoutH) * factor;
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
@@ -352,11 +352,10 @@ namespace Physica::Core {
                 vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
-                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * numMolecule * 0.5);
-                intraMoleculeEnergy += modifiedMorsePot(r1, numMolecule) + modifiedMorsePot(r2, numMolecule) + elastic;
+                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * 0.5);
+                intraMoleculeEnergy += modifiedMorsePot(r1) + modifiedMorsePot(r2) + elastic;
             }
         }
-
         return interMoleculeEnergy + intraMoleculeEnergy;
     }
 
@@ -392,26 +391,26 @@ namespace Physica::Core {
             vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
             const ScalarType r1 = vecOH1.norm();
             const ScalarType r2 = vecOH2.norm();
-            result += square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * numMolecule * 0.5);
+            result += square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * 0.5);
         }
         return result;
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorsePot(ScalarType r, size_t numMolecule) {
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorsePot(ScalarType r) {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         const ScalarType delta4 = square(delta2);
-        return (delta2 - delta3 + delta4 * (7.0 / 12)) * ((Dr / PhyConst<SI>::avogadroNa) * numMolecule);
+        return (delta2 - delta3 + delta4 * (7.0 / 12)) * (Dr / PhyConst<SI>::avogadroNa);
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorseForce(ScalarType r, size_t numMolecule) {
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorseForce(ScalarType r) {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         const ScalarType delta4 = square(delta2);
-        return -(delta2 * 2 - delta3 * 3 + delta4 * (7.0 / 3)) * ((Dr * alphaR / PhyConst<SI>::avogadroNa) * numMolecule);
+        return -(delta2 * 2 - delta3 * 3 + delta4 * (7.0 / 3)) * (Dr * alphaR / PhyConst<SI>::avogadroNa);
     }
 }

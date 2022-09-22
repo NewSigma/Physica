@@ -125,7 +125,7 @@ void testForce() {
             }, pos.flatten().calc(i), 0.3);
         }
     }
-    if (!vectorNear(force1, force2, 1E-3))
+    if (!vectorNear(force1, force2, 2E-3))
         exit(EXIT_FAILURE);
 }
 
