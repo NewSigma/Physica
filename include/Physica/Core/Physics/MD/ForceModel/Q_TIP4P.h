@@ -72,13 +72,13 @@ namespace Physica::Core {
         using LJModelType = PairModel<ScalarType, PosScalarType, decltype(&Internal::Traits<This>::lennardJonesPot)>;
         constexpr static unsigned int Dim = MDCellType::Dim;
     public:
-        constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double charge = 1.1128;
         constexpr static double gamma = 0.73612;
-        constexpr static double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.9 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.9 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double alphaR = PhyConst<AU>::bohrToAngstorm(2.287);
         constexpr static double equalR = PhyConst<AU>::angstormToBohr(0.9419);
-        constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge);
+        constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
     private:
         HytrogenListType hytrogenList;
@@ -106,7 +106,7 @@ namespace Physica::Core {
         void swap(Q_TIP4P& model) noexcept;
     private:
         Vector<ScalarType> makeCharges() const;
-        PositionMatrix makeChargePos(const PositionMatrix& pos) const;
+        PositionMatrix makeChargePos(const MDCellType& cell) const;
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
         ScalarType elasticEnergy(const MDCellType& cell) const;
@@ -140,7 +140,7 @@ namespace Physica::Core {
         Vector<ScalarType> result(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma / PhyConst<SI>::avogadroNa);
+            const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma);
             auto force = result.tail(2 * numMolecule * Dim);
             force = LJModel.force(cellWithoutH) * factor;
         }
@@ -166,7 +166,7 @@ namespace Physica::Core {
                 
                 f = vecOH2 * (modifiedMorseForce(r2) / r2);
                 forceO -= f;
-                forceH1 += f;
+                forceH2 += f;
             }
 
             for (size_t i = 0; i < result.getLength(); ++i) {
@@ -180,7 +180,7 @@ namespace Physica::Core {
         }
         Vector<ScalarType> coulomb;
         /* Coulomb Part */ {
-            const PositionMatrix chargePos = makeChargePos(cell.getPos());
+            const PositionMatrix chargePos = makeChargePos(cell);
             coulomb = ewald.force(chargePos);
 
             PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos);
@@ -316,21 +316,23 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
-    Q_TIP4P<ScalarType, PosScalarType>::makeChargePos(const PositionMatrix& pos) const {
-        PositionMatrix chargePos(pos.getRow(), 3);
-        const size_t numMolecule = pos.getRow() / 3;
+    Q_TIP4P<ScalarType, PosScalarType>::makeChargePos(const MDCellType& cell) const {
+        PositionMatrix chargePos(cell.getPos().getRow(), 3);
+        const auto& pos = cell.getPos();
+        const size_t numMolecule = getNumMolecule();
         const size_t maxIndexH = 2 * numMolecule;
         auto chargePosH = chargePos.topRows(maxIndexH);
         chargePosH = pos.topRows(maxIndexH);
 
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numMolecule;
+        Vector<PosScalarType, 3> vecOH1, vecOH2;
         for (size_t i = minIndexO; i < maxIndexO; ++i) {
             auto chargePosO = chargePos.row(i);
             auto posO = pos.row(i);
-            auto posH1 = pos.row(hytrogenList[i - minIndexO].first);
-            auto posH2 = pos.row(hytrogenList[i - minIndexO].second);
-            chargePosO = posO.asVector() * ScalarType(gamma) + (posH1.asVector() + posH2.asVector()) * ScalarType((1 - gamma) * 0.5);
+            vecOH1 = cell.minDistVector(i, hytrogenList[i - minIndexO].first);
+            vecOH2 = cell.minDistVector(i, hytrogenList[i - minIndexO].second);
+            chargePosO = posO.asVector() + (vecOH1 + vecOH2) * ScalarType((1 - gamma) * 0.5);
         }
         return chargePos;
     }
@@ -341,7 +343,7 @@ namespace Physica::Core {
         const size_t numMolecule = getNumMolecule();
 
         const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-        const ScalarType factor = 4 * epsilon / PhyConst<SI>::avogadroNa;
+        const ScalarType factor = 4 * epsilon;
         const ScalarType interMoleculeEnergy = LJModel.potentialEnergy(cellWithoutH) * factor;
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
@@ -352,7 +354,7 @@ namespace Physica::Core {
                 vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
-                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * 0.5);
+                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
                 intraMoleculeEnergy += modifiedMorsePot(r1) + modifiedMorsePot(r2) + elastic;
             }
         }
@@ -361,7 +363,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::ewaldEnergy(const MDCellType& cell) const {
-        const PositionMatrix chargePos = makeChargePos(cell.getPos());
+        const PositionMatrix chargePos = makeChargePos(cell);
         const size_t numMolecule = getNumMolecule();
         ScalarType selfCoulomb = 0;
         /* Spurious Coulomb Part */ {
@@ -391,7 +393,7 @@ namespace Physica::Core {
             vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
             const ScalarType r1 = vecOH1.norm();
             const ScalarType r2 = vecOH2.norm();
-            result += square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta / PhyConst<SI>::avogadroNa * 0.5);
+            result += square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
         }
         return result;
     }
@@ -402,7 +404,7 @@ namespace Physica::Core {
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         const ScalarType delta4 = square(delta2);
-        return (delta2 - delta3 + delta4 * (7.0 / 12)) * (Dr / PhyConst<SI>::avogadroNa);
+        return (delta2 - delta3 + delta4 * (7.0 / 12)) * Dr;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -410,7 +412,6 @@ namespace Physica::Core {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
-        const ScalarType delta4 = square(delta2);
-        return -(delta2 * 2 - delta3 * 3 + delta4 * (7.0 / 3)) * (Dr * alphaR / PhyConst<SI>::avogadroNa);
+        return -(delta * 2 - delta2 * 3 + delta3 * (7.0 / 3)) * (Dr * alphaR);
     }
 }

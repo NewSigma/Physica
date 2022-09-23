@@ -75,23 +75,41 @@ Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
 }
 
 template<class RandomGenerator>
-MDCell<ScalarType, PosScalarType> makeSystem(unsigned int numMolecule, RandomGenerator& gen) {
-    const size_t maxIndexH = numMolecule * 2;
-    const size_t maxIndexO = numMolecule * 3;
-    const size_t numAtom = maxIndexO;
+MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+    constexpr size_t MoleculePerCell = 4;
+    constexpr size_t maxIndexH = MoleculePerCell * 2;
+    constexpr size_t maxIndexO = MoleculePerCell * 3;
+    constexpr size_t numAtom = MoleculePerCell * 3;
 
-    PosScalarType cellVolume = ((numMolecule * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+    PosScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
     const PosScalarType latticeFactor(cbrt(cellVolume));
     typename CrystalCell::LatticeMatrix lattice = CrystalCell::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
     typename CrystalCell::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
-    for (size_t i = 0; i < numMolecule; ++i) {
+    for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
-        posO[0] = latticeFactor * dist(gen);
-        posO[1] = latticeFactor * dist(gen);
-        posO[2] = latticeFactor * dist(gen);
+        if (i == 0) {
+            posO[0] = 0;
+            posO[1] = 0;
+            posO[2] = 0;
+        }
+        if (i == 1) {
+            posO[0] = latticeFactor * 0.5;
+            posO[1] = latticeFactor * 0.5;
+            posO[2] = 0;
+        }
+        if (i == 2) {
+            posO[0] = latticeFactor * 0.5;
+            posO[1] = 0;
+            posO[2] = latticeFactor * 0.5;
+        }
+        if (i == 3) {
+            posO[0] = 0;
+            posO[1] = latticeFactor * 0.5;
+            posO[2] = latticeFactor * 0.5;
+        }
         auto posH1 = pos.row(2 * i);
         auto posH2 = pos.row(2 * i + 1);
         posH1 = posO + randomVector(gen);
@@ -105,14 +123,15 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int numMolecule, RandomGen
         atomicNumbers[i] = 8;
 
     CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
+    cell.unitToSuper(cellSize, cellSize, cellSize);
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }
 
 void testForce() {
     std::mt19937 gen(9806048078107704755UL);
-    const auto cell = makeSystem(4, gen);
+    const auto cell = makeSystem(1, gen);
     const auto& pos = cell.getPos();
-    const ForceModel model(cell, pair_cutoff, 1E-4);
+    const ForceModel model(cell, pair_cutoff, 1E-6);
     const Vector<ScalarType> force1 = model.force(cell);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
@@ -125,48 +144,50 @@ void testForce() {
             }, pos.flatten().calc(i), 0.3);
         }
     }
-    if (!vectorNear(force1, force2, 2E-3))
+    if (!vectorNear(force1, force2, 9E-3))
         exit(EXIT_FAILURE);
 }
 
 void testMD() {
-    std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
-    std::mt19937 gen(seed);
+    std::mt19937 gen(12989825518855205292);
 
-    unsigned int numMolecule = 32;
-    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(numMolecule, gen), numReplica, temperatureT, thermostatTime, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-4);
+    ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-6);
+
+    constexpr double answer = 0.978;
+    ScalarType bond_mean = 0;
+    ScalarType bond_var = 0;
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        std::ifstream fin("phase");
-        fin >> rpmd.getPhasePos();
-        fin.close();
-        rpmd.updateForce<decltype(model), ThreadExecutor>(model);
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
-        ScalarType bond = 0;
-        for (size_t i = 0; i < 100; ++i) {
-            auto pos = rpmd.getPos();
-            PeriodicCell<ScalarType, 3> cell(rpmd.getLattice(), std::move(pos));
-            ScalarType temp = 0;
-            for (size_t j = 0; j < numMolecule; ++i) {
-                toNextMean(temp, 2 * j, cell.minDistVector(2 * numMolecule + j, model.getHytrogenList()[j].first).norm());
-                toNextMean(temp, 2 * j + 1, cell.minDistVector(2 * numMolecule + j, model.getHytrogenList()[j].second).norm());
+        for (size_t var_time = 0; var_time < 6; ++var_time) {
+            rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
+            ScalarType bond = 0;
+            for (size_t i = 0; i < 100; ++i) {
+                auto pos = rpmd.getPos();
+                PeriodicCell<ScalarType, 3> cell(rpmd.getLattice(), std::move(pos));
+                ScalarType temp = 0;
+                for (size_t j = 0; j < 4; ++j) {
+                    toNextMean(temp, 2 * j, cell.minDistVector(2 * 4 + j, model.getHytrogenList()[j].first).norm());
+                    toNextMean(temp, 2 * j + 1, cell.minDistVector(2 * 4 + j, model.getHytrogenList()[j].second).norm());
+                }
+                toNextMean(bond, i, temp);
+                rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
             }
-            toNextMean(bond, i, temp);
-            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
+            toNextVariance(bond_var, bond_mean, var_time, bond);
         }
-        std::cout << PhyConst<AU>::bohrToAngstorm(double(bond)) << std::endl;
-        std::ofstream fout("phase");
-        fout << rpmd.getPhasePos();
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
+    if (std::abs(PhyConst<AU>::bohrToAngstorm(double(bond_mean)) - answer) > 3 * PhyConst<AU>::bohrToAngstorm(double(sqrt(bond_var))))
+        exit(EXIT_FAILURE);
 }
-
+/**
+ * Reference:
+ * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
+ */
 int main() {
     testHytrogenList();
     testForce();

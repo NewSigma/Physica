@@ -34,7 +34,6 @@ void VASPTest() {
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-5))
         exit(EXIT_FAILURE);
 }
-
 /**
  * Reference:
  * [1] pyewald(github.com/lukeolson/pyewald)
@@ -127,8 +126,8 @@ void forceTest() {
 }
 
 int main() {
-    forceTest();
     VASPTest();
     madelungTest();
+    forceTest();
     return 0;
 }
