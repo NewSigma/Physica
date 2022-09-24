@@ -95,6 +95,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
         /* Getters */
         [[nodiscard]] const HytrogenListType& getHytrogenList() const noexcept { return hytrogenList; }
         [[nodiscard]] HytrogenListType& getHytrogenList() noexcept { return hytrogenList; }
@@ -232,6 +233,20 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
         return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell) {
+        PositionMatrix dipoles(getNumMolecule(), 3);
+        for (size_t i = 0; i < dipoles.getRow(); ++i) {
+            const size_t indexO = 2 * getNumMolecule() + i;
+            const size_t indexH1 = hytrogenList[i].first;
+            const size_t indexH2 = hytrogenList[i].second;
+            auto dipole = dipoles.row(i);
+            dipole = (cell.minDistVector(indexO, indexH1) + cell.minDistVector(indexO, indexH2)) * ScalarType(-gamma * charge);
+        }
+        return dipoles;
     }
 
     template<class ScalarType, class PosScalarType>

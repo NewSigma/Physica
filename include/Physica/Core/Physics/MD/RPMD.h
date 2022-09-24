@@ -84,6 +84,7 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
+        [[nodiscard]] PeriodicCell<PosScalarType, 3> makeAverageCell() const;
         [[nodiscard]] PositionMatrix getPos() const;
         [[nodiscard]] PositionMatrix getMomentum() const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
@@ -266,6 +267,11 @@ namespace Physica::Core {
             ++index;
         }
         return MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec());
+    }
+
+    template<class ScalarType, class PosScalarType>
+    PeriodicCell<PosScalarType, 3> RPMD<ScalarType, PosScalarType>::makeAverageCell() const {
+        return PeriodicCell<PosScalarType, 3>(getLattice(), getPos());
     }
 
     template<class ScalarType, class PosScalarType>
