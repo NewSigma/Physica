@@ -76,7 +76,7 @@ namespace Physica::Core {
         const size_t numParticle = cell.getNumParticle();
 
         Vector<ScalarType> force(Dim * numParticle, 0);
-        MDCellType::forParticleInRange(range, lattice,
+        MDCellType::forCellInRange(range, lattice,
             [this, pos, numParticle, &force](VectorType delta) {
                 VectorType r, from;
                 for (size_t i = 0; i < numParticle; ++i) {
@@ -110,7 +110,7 @@ namespace Physica::Core {
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;
-        MDCellType::forParticleInRange(range, cell.getLattice(),
+        MDCellType::forCellInRange(range, cell.getLattice(),
             [this, numParticle, &pos, &result](VectorType delta) {
                 ScalarType temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {

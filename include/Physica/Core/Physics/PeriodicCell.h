@@ -69,7 +69,7 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ScalarType cutoff);
-        template<class Functor> static void forParticleInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
+        template<class Functor> static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
@@ -154,7 +154,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     template<class Functor>
-    void PeriodicCell<ScalarType, Dim>::forParticleInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+    void PeriodicCell<ScalarType, Dim>::forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
         using VectorType = Vector<ScalarType, Dim>;
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);

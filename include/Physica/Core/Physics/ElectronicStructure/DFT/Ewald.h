@@ -120,7 +120,7 @@ namespace Physica::Core {
         Vector<ScalarType> result(numParticle * Dim, 0);
         
         const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
-        PeriodicCell<PosScalarType, Dim>::forParticleInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor1, &pos, &result](Vector3D delta) {
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor1, &pos, &result](Vector3D delta) {
                 const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                 if (isNotGammaPoint) {
@@ -141,7 +141,7 @@ namespace Physica::Core {
             });
         result *= ScalarType(4 * M_PI) * inv_volume;
 
-        PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &result](Vector3D delta) {
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &result](Vector3D delta) {
                 for (size_t i = 0; i < numParticle; ++i) {
                     const Vector3D pos_i = pos.row(i).asVector() + delta;
                     Vector<ScalarType, Dim> sum(Dim, 0);
@@ -169,7 +169,7 @@ namespace Physica::Core {
     ScalarType Ewald<ScalarType, PosScalarType>::potentialEnergy(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         ScalarType rSpaceSum = 0;
-        PeriodicCell<PosScalarType, Dim>::forParticleInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
                 ScalarType sum = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
                     const Vector3D pos_i = pos.row(i).asVector() + delta;
@@ -190,7 +190,7 @@ namespace Physica::Core {
         
         ScalarType kSpaceSum = 0;
         const ScalarType factor = reciprocal(square(ScalarType::Two() * integralLimit));
-        PeriodicCell<PosScalarType, Dim>::forParticleInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                 if (isNotGammaPoint) {
