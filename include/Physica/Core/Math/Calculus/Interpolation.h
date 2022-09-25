@@ -21,6 +21,21 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        /**
+         * Critical to performance of \class Ewald, refactor with care
+         */
+        template<class ScalarType>
+        inline ScalarType quadraticInterpolate(ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
+            const ScalarType x_x1 = x - x1;
+            const ScalarType x_x2 = x - x2;
+            const ScalarType x_x3 = x - x3;
+            const ScalarType x1_x2 = x1 - x2;
+            const ScalarType x2_x3 = x2 - x3;
+            const ScalarType x3_x1 = x3 - x1;
+            return -((x_x2 * x_x3) * (x2_x3 * y1) + (x_x1 * x_x3) * (x3_x1 * y2) + (x_x1 * x_x2) * (x1_x2 * y3)) / (x1_x2 * x2_x3 * x3_x1);
+        }
+    }
     /**
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..

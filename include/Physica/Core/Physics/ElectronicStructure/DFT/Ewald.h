@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
@@ -76,11 +77,11 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
     private:
         void makeTables();
-        inline ScalarType calcFromTable(
+        static inline ScalarType calcFromTable(
                 const Vector<ScalarType>& table,
                 ScalarType step,
                 ScalarType repStep,
-                ScalarType x) const;
+                ScalarType x);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -248,23 +249,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(
+    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(
             const Vector<ScalarType>& table,
             ScalarType step,
             ScalarType repStep,
-            ScalarType x) const {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
+            ScalarType x) {
         const size_t index = double(x * repStep + 0.5);
         if (index == 0)
             return 1;
         if (index + 1 >= table.getLength())
             return 0;
-        const ScalarType x2 = step * index;
-        const ScalarType x1 = x2 - step;
-        const ScalarType x3 = x2 + step;
-        
-        const MatrixType mat{square(x1), x1, 1, square(x2), x2, 1, square(x3), x3, 1};
-        const Vector<ScalarType, 3> coeff = MatrixType(mat.inverse()) * table.segment(index - 1, index + 2);
-        return ((coeff[0] * x + coeff[1]) * x + coeff[2]);
+        ScalarType x2 = step * index;
+        auto y = table.segment(index - 1, index + 2);
+        return Internal::quadraticInterpolate(x2 - step, x2, x2 + step, y[0], y[1], y[2], x);
     }
 }
