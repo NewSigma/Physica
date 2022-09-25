@@ -113,7 +113,9 @@ namespace Physica::Core {
             auto data1 = data.row(i);
             for (size_t j = i + 1; j < numData; ++j) {
                 auto data2 = data.row(j);
-                count += (data1.asVector() - data2).squaredNorm() <= squaredR;
+                const ScalarType r2 = (data1.asVector() - data2).squaredNorm();
+                for (size_t k = 0; k < count.getLength(); ++k)
+                    count[k] += ScalarType(r2 <= squaredR[k]);
             }
         }
         const ScalarType factor = ScalarType::Two() / ScalarType(numData * (numData - 1));
