@@ -148,3 +148,7 @@ namespace std {
         }
     };
 }
+
+#ifdef PHYSICA_CUDA
+    #include "DeviceAllocator.cuh"
+#endif

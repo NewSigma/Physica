@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include "DynamicArrayBase.h"
 #include "Physica/Utils/Container/HostAllocator.h"
+#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {
     constexpr size_t Dynamic = 0;
@@ -58,7 +59,8 @@ namespace Physica::Utils {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
         static_assert(sizeof(T) * Length <= (1U << 16U), "[Warning]: Allocate large fixed array on stack is not recommanded");
     public:
-        using Base = Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator>;
+        using This = Array<T, Length, Capacity, Allocator>;
+        using Base = Internal::ArrayBase<This, Allocator>;
         using typename Base::allocator_type;
         using typename Base::AllocatorTraits;
         using typename Base::ValueType;
@@ -73,33 +75,34 @@ namespace Physica::Utils {
         T arr[Length];
         allocator_type alloc;
     public:
-        __host__ __device__ Array() = default;
+        Array() = default;
         template<class... Args>
-        __host__ __device__ explicit Array(size_t length_, Args... args);
-        __host__ __device__ Array(std::initializer_list<T> list);
-        __host__ __device__ Array(const Array& array);
-        __host__ __device__ Array(Array&& array) noexcept;
+        explicit Array(size_t length_, Args... args);
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
         ~Array() = default;
         /* Operators */
-        Array& operator=(Array array) noexcept { swap(array); return *this; }
-        /* Helpers */
+        __host__ __device__ Array& operator=(Array array) noexcept { swap(array); return *this; }
+        /* Operations */
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
-        __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
+        void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
         template<class... Args>
-        __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
+        void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
+        inline device_obj<This> toDevice();
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
-        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] PointerType data() noexcept { return arr; }
+        [[nodiscard]] const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
-        __host__ __device__ void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
+        void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
     };
 
     template<class T, size_t Capacity, class Allocator>
@@ -137,7 +140,7 @@ namespace Physica::Utils {
         ~Array() = default;
         /* Operators */
         Array& operator=(Array array) noexcept { swap(array); return *this; }
-        /* Helpers */
+        /* Operations */
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
@@ -157,7 +160,8 @@ namespace Physica::Utils {
     class Array<T, Dynamic, Dynamic, Allocator>
         : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator> {
     public:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator>;
+        using This = Array<T, Dynamic, Dynamic, Allocator>;
+        using Base = Internal::DynamicArrayBase<This, Allocator>;
         using typename Base::ValueType;
         using typename Base::PointerType;
         using typename Base::LValueReferenceType;
@@ -174,12 +178,12 @@ namespace Physica::Utils {
     protected:
         size_t capacity;
     public:
-        __host__ __device__ Array();
+        Array();
         template<class... Args>
-        __host__ __device__ explicit Array(size_t length_, Args... args);
-        __host__ __device__ Array(std::initializer_list<T> list);
-        __host__ __device__ Array(const Array& array);
-        __host__ __device__ Array(Array&& array) noexcept;
+        explicit Array(size_t length_, Args... args);
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -191,7 +195,7 @@ namespace Physica::Utils {
         ~Array() = default;
         /* Operators */
         Array& operator=(Array array) noexcept { swap(array); return *this; }
-        /* Helpers */
+        /* Operations */
         void append(ConstLValueReferenceType t);
         void append(RValueReferenceType t);
         void append(const Array& t);
@@ -204,11 +208,12 @@ namespace Physica::Utils {
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
-        __host__ __device__ void swap(Array& array) noexcept;
+        void swap(Array& array) noexcept;
+        inline device_obj<This> toDevice();
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
-        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard]] size_t size() const noexcept { return length; }
+        [[nodiscard]] size_t getLength() const noexcept { return length; }
+        [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
     private:
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };
@@ -221,3 +226,7 @@ namespace Physica::Utils {
 }
 
 #include "ArrayImpl.h"
+
+#ifdef PHYSICA_CUDA
+    #include "Array.cuh"
+#endif
