@@ -25,14 +25,14 @@ namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
     template<class... Args>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args... args) {
+    Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args... args) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
             *(arr + i) = T(args...);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) {
+    Array<T, Length, Capacity, Allocator>::Array(std::initializer_list<T> list) {
         assert(list.size() <= Capacity);
         unsigned int i = 0;
         const auto end = list.end();
@@ -41,13 +41,13 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base() {
+    Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base() {
         for (size_t i = 0; i < Length; ++i)
             arr[i] = array[i];
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept {
+    Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept {
         for (size_t i = 0; i < Length; ++i)
             arr[i] = std::move(array[i]);
     }
@@ -196,17 +196,17 @@ namespace Physica::Utils {
     }
     ///////////////////////////////////////Array<T, Dynamic, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
+    Array<T, Dynamic, Dynamic, Allocator>::Array() : Base(0), capacity(0) {}
 
     template<class T, class Allocator>
     template<class... Args>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, Args... args) : Base(length_, length_), capacity(length_) {
+    Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, Args... args) : Base(length_, length_), capacity(length_) {
         for (size_t i = 0; i < length_; ++i)
             alloc.construct(arr + i, args...);
     }
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(std::initializer_list<T> list)
+    Array<T, Dynamic, Dynamic, Allocator>::Array(std::initializer_list<T> list)
             : Base(list.size()), capacity(list.size()) {
         size_t i = 0;
         const auto end = list.end();
@@ -216,11 +216,11 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(const Array& array)
+    Array<T, Dynamic, Dynamic, Allocator>::Array(const Array& array)
             : Base(array), capacity(array.capacity) {}
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept
+    Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept
             : Base(std::move(array)), capacity(array.capacity) { array.capacity = 0; }
 
     template<class T, class Allocator>
@@ -326,7 +326,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& array) noexcept {
+    void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& array) noexcept {
         Base::swap(array);
         std::swap(capacity, array.capacity);
     }

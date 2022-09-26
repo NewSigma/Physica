@@ -1,6 +1,10 @@
 ##############################################Libs################################################
 #############################################Project##############################################
-file(GLOB_RECURSE SOURCES_CORE *.cpp *.h *.cu)
+file(GLOB_RECURSE SOURCES_CORE *.cpp)
+if(${PHYSICA_CUDA})
+    file(GLOB_RECURSE CUDA_SOURCES_CORE *.cu)
+    list(APPEND SOURCES_CORE ${CUDA_SOURCES_CORE})
+endif()
 add_library(PhysicaCore SHARED ${SOURCES_CORE})
 
 install(TARGETS PhysicaCore DESTINATION lib)

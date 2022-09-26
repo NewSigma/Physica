@@ -114,6 +114,7 @@ namespace Physica::Utils::Internal {
         using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
         using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
     public:
+        ~ArrayBase() = default;
         /* Operators */
         [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index);
         [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const;
@@ -140,10 +141,9 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
     protected:
-        __host__ __device__ ArrayBase() = default;
-        __host__ __device__ ArrayBase(const ArrayBase&) = default;
-        __host__ __device__ ArrayBase(ArrayBase&&) noexcept = default;
-        __host__ __device__ ~ArrayBase() = default;
+        ArrayBase() = default;
+        ArrayBase(const ArrayBase&) = default;
+        ArrayBase(ArrayBase&&) noexcept = default;
         /* Operators */
         ArrayBase& operator=(const ArrayBase&) = default;
         ArrayBase& operator=(ArrayBase&&) noexcept = default;

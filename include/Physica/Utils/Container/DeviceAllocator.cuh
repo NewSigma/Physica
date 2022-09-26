@@ -22,6 +22,7 @@
 #include <memory>
 #include <thrust/device_ptr.h>
 #include <cuda_runtime.h>
+#include "Physica/Core/Exception/CudaException.cuh"
 
 namespace Physica::Utils {
     template<class T> class DeviceAllocator;
@@ -110,7 +111,9 @@ namespace Physica::Utils {
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
     #else
         T* p;
-        cudaMalloc(&p, n * sizeof(T));
+        const auto code = cudaMalloc(&p, n * sizeof(T));
+        if (code != cudaError_t::cudaSuccess)
+            throw Core::CudaException(code);
     #endif
         return pointer(p);
     }
@@ -120,7 +123,9 @@ namespace Physica::Utils {
     #ifdef __CUDA__ARCH__
         free(p.get());
     #else
-        cudaFree(p.get());
+        const auto code = cudaFree(p.get());
+        if (code != cudaError_t::cudaSuccess)
+            throw Core::CudaException(code);
     #endif
     }
 
