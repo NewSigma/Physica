@@ -22,7 +22,6 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
 #include "ContinuousVector.h"
-#include "VectorExpression.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
@@ -126,4 +125,4 @@ namespace Physica::Core {
     }
 }
 
-#include "VectorImpl.h"
+#include "VectorImpl/VectorImpl.h"

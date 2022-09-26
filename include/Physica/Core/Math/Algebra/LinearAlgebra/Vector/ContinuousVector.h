@@ -72,4 +72,4 @@ namespace Physica::Core {
     void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
-#include "ContinuousVectorImpl.h"
+#include "VectorImpl/ContinuousVectorImpl.h"
