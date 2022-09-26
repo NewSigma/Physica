@@ -26,29 +26,28 @@ namespace Physica::Utils::Internal {
     public:
         using Base = ArrayBase<Derived, Allocator>;
         using typename Base::allocator_type;
-        using typename Base::AllocatorTraits;
         using typename Base::ValueType;
-        using typename Base::PointerType;
-        using const_pointer = typename AllocatorTraits::const_pointer;
-        using typename Base::LValueReferenceType;
-        using typename Base::ConstLValueReferenceType;
-        using typename Base::RValueReferenceType;
+        using typename Base::pointer;
+        using typename Base::const_pointer;
+        using typename Base::lvalue_reference;
+        using typename Base::const_lvalue_reference;
+        using typename Base::rvalue_reference;
     protected:
-        PointerType arr;
+        pointer arr;
         allocator_type alloc;
         size_t length;
     public:
         DynamicArrayBase() = delete;
         __host__ __device__ ~DynamicArrayBase();
         /* Operators */
-        Derived& operator<<(ConstLValueReferenceType t) { Base::getDerived().append(t); return Base::getDerived(); }
-        Derived& operator<<(RValueReferenceType t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
+        Derived& operator<<(const_lvalue_reference t) { Base::getDerived().append(t); return Base::getDerived(); }
+        Derived& operator<<(rvalue_reference t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
         Derived& operator<<(const Derived& array) { Base::getDerived().append(array); return Base::getDerived(); }
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
         ValueType cutLast();
-        __host__ __device__ inline void grow(ConstLValueReferenceType t);
-        __host__ __device__ inline void grow(RValueReferenceType t);
+        __host__ __device__ inline void grow(const_lvalue_reference t);
+        __host__ __device__ inline void grow(rvalue_reference t);
         void removeAt(size_t index);
         __host__ __device__ void clear() noexcept;
         /* Setters */
@@ -59,13 +58,13 @@ namespace Physica::Utils::Internal {
          */
         __host__ __device__ void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
         /* Getters */
-        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
     protected:
         __host__ __device__ explicit DynamicArrayBase(size_t capacity);
         __host__ __device__ DynamicArrayBase(size_t length_, size_t capacity);
-        __host__ __device__ DynamicArrayBase(size_t length_, PointerType arr_);
+        __host__ __device__ DynamicArrayBase(size_t length_, pointer arr_);
         __host__ __device__ DynamicArrayBase(const DynamicArrayBase& array);
         __host__ __device__ DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Operators */

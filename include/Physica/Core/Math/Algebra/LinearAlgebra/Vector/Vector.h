@@ -46,9 +46,10 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     class Vector : public ContinuousVector<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
+        using This = Vector<T, Length, MaxLength>;
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
-        using Base = ContinuousVector<Vector<T, Length, MaxLength>>;
+        using Base = ContinuousVector<This>;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
     public:
@@ -66,6 +67,7 @@ namespace Physica::Core {
         /* Operations */
         Vector& toOpposite();
         void toUnit();
+        [[nodiscard]] inline device_obj<This> toDevice() const;
         /* Getters */
         using Storage::getLength;
         [[nodiscard]] Vector reverse() const;
@@ -126,3 +128,6 @@ namespace Physica::Core {
 }
 
 #include "VectorImpl/VectorImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "Vector.cuh"
+#endif

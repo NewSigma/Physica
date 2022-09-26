@@ -33,7 +33,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, PointerType arr_)
+    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, pointer arr_)
             : arr(arr_), alloc(), length(length_) {}
 
     template<class Derived, class Allocator>
@@ -42,7 +42,7 @@ namespace Physica::Utils::Internal {
         length = array.length;
         if constexpr (!std::is_trivial<ValueType>::value)
             for(size_t i = 0; i < length; ++i)
-                AllocatorTraits::construct(alloc, arr + i, array[i]);
+                alloc.construct(arr + i, array[i]);
         else {
         #ifdef PHYSICA_CUDA
             #ifdef __CUDA__ARCH__
@@ -71,7 +71,7 @@ namespace Physica::Utils::Internal {
         if constexpr (!std::is_trivial<ValueType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
-                    AllocatorTraits::destroy(alloc, arr + i);
+                    alloc.destroy(arr + i);
         alloc.deallocate(arr, length);
     }
 
@@ -98,13 +98,13 @@ namespace Physica::Utils::Internal {
      * This function can be used when you are sure the current capacity is enough.
      */
     template<class Derived, class Allocator>
-    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(ConstLValueReferenceType t) {
+    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(const_lvalue_reference t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, t);
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(RValueReferenceType t) {
+    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(rvalue_reference t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, std::move(t));
     }

@@ -17,16 +17,20 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-/**
- * \class device_obj: Provide non-invasive implementation for device
- * 
- * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
- */
+
+#include "LValueVector.h"
+
 namespace Physica::Core {
-    template<class T> class device_obj;
-}
-
-namespace Physica::Utils {
-
-    template<class T> class device_obj;
+    template<class Derived>
+    class device_obj<LValueVector<Derived>> : public device_obj<RValueVector<Derived>> {
+    public:
+        using Base = device_obj<RValueVector<Derived>>;
+        using typename Base::ScalarType;
+    public:
+        /* Operators */
+        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
+        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
+        /* Operations */
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
+    };
 }

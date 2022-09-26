@@ -99,3 +99,6 @@ namespace Physica::Core {
 
 #include "VectorImpl/RValueVectorImpl.h"
 #include "VectorImpl/VectorExpression.h"
+#ifdef PHYSICA_CUDA
+    #include "RValueVector.cuh"
+#endif

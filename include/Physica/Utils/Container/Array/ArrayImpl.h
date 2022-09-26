@@ -150,13 +150,13 @@ namespace Physica::Utils {
      * Wrap structure: append() <- grow() <- allocate()
      */
     template<class T, size_t Capacity, class Allocator>
-    inline void Array<T, Dynamic, Capacity, Allocator>::append(ConstLValueReferenceType t) {
+    inline void Array<T, Dynamic, Capacity, Allocator>::append(const_lvalue_reference t) {
         assert(length < Capacity);
         Base::grow(t);
     }
 
     template<class T, size_t Capacity, class Allocator>
-    inline void Array<T, Dynamic, Capacity, Allocator>::append(RValueReferenceType t) {
+    inline void Array<T, Dynamic, Capacity, Allocator>::append(rvalue_reference t) {
         assert(length < Capacity);
         Base::grow(std::move(t));
     }
@@ -224,14 +224,14 @@ namespace Physica::Utils {
             : Base(std::move(array)), capacity(array.capacity) { array.capacity = 0; }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::append(ConstLValueReferenceType t) {
+    void Array<T, Dynamic, Dynamic, Allocator>::append(const_lvalue_reference t) {
         if (length == capacity)
             doubleSpace();
         Base::grow(t);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::append(RValueReferenceType t) {
+    void Array<T, Dynamic, Dynamic, Allocator>::append(rvalue_reference t) {
         if (length == capacity)
             doubleSpace();
         Base::grow(std::move(t));

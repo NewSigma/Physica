@@ -83,3 +83,6 @@ namespace Physica::Core {
 }
 
 #include "VectorImpl/LValueVectorImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "LValueVector.cuh"
+#endif

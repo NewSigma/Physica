@@ -85,26 +85,26 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ inline typename ArrayBase<Derived, Allocator>::LValueReferenceType
+    __host__ __device__ inline typename ArrayBase<Derived, Allocator>::lvalue_reference
     ArrayBase<Derived, Allocator>::operator[](size_t index) {
-        assert(index < Base::getDerived().getLength());
+        assert(index < getLength());
         return data()[index];
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ inline typename ArrayBase<Derived, Allocator>::ConstLValueReferenceType
+    __host__ __device__ inline typename ArrayBase<Derived, Allocator>::const_lvalue_reference
     ArrayBase<Derived, Allocator>::operator[](size_t index) const {
-        assert(index < Base::getDerived().getLength());
+        assert(index < getLength());
         return data()[index];
     }
 
     template<class Derived, class Allocator>
     bool ArrayBase<Derived, Allocator>::operator==(const ArrayBase& array) const {
-        if (Base::getDerived().getLength() != array.getDerived().getLength())
+        if (getLength() != array.getLength())
             return false;
-        if (Base::getDerived().getCapacity() != array.getDerived().getLength())
+        if (getCapacity() != array.getCapacity())
             return false;
-        for (size_t i = 0; i < Base::getDerived().getLength(); ++i)
+        for (size_t i = 0; i < getLength(); ++i)
             if (operator[](i) != array[i])
                 return false;
         return true;

@@ -100,35 +100,35 @@ namespace Physica::Utils::Internal {
     template<class Derived, class Allocator>
     class ArrayBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
+        using AllocatorTraits = std::allocator_traits<Allocator>;
     public:
         using allocator_type = Allocator;
-        using AllocatorTraits = std::allocator_traits<allocator_type>;
         using ValueType = typename AllocatorTraits::value_type;
-        using PointerType = typename AllocatorTraits::pointer;
+        using pointer = typename AllocatorTraits::pointer;
         using const_pointer = typename AllocatorTraits::const_pointer;
-        using LValueReferenceType = typename AllocatorTraits::lvalue_reference;
-        using ConstLValueReferenceType = typename AllocatorTraits::const_lvalue_reference;
-        using RValueReferenceType = typename AllocatorTraits::rvalue_reference;
+        using lvalue_reference = typename AllocatorTraits::lvalue_reference;
+        using const_lvalue_reference = typename AllocatorTraits::const_lvalue_reference;
+        using rvalue_reference = typename AllocatorTraits::rvalue_reference;
         using Iterator = ContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
         using ConstIterator = ContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
         using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
         using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
     public:
         /* Operators */
-        [[nodiscard]] __host__ __device__ LValueReferenceType operator[](size_t index);
-        [[nodiscard]] __host__ __device__ ConstLValueReferenceType operator[](size_t index) const;
+        [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index);
+        [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const;
         bool operator==(const ArrayBase& array) const;
-        __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
+        bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterator */
         __host__ __device__ Iterator begin() noexcept { return Iterator(data()); }
         __host__ __device__ ConstIterator begin() const noexcept { return cbegin(); }
         __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(data()); }
-        __host__ __device__ Iterator end() noexcept { return Iterator(data() + Base::getDerived().getLength()); }
+        __host__ __device__ Iterator end() noexcept { return Iterator(data() + getLength()); }
         __host__ __device__ ConstIterator end() const noexcept { return cend(); }
-        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(data() + Base::getDerived().getLength()); }
-        __host__ __device__ ReverseIterator rbegin() noexcept { return ReverseIterator(data() + Base::getDerived().getLength() - 1); }
+        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(data() + getLength()); }
+        __host__ __device__ ReverseIterator rbegin() noexcept { return ReverseIterator(data() + getLength() - 1); }
         __host__ __device__ ConstReverseIterator rbegin() const noexcept { return crbegin(); }
-        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(data() + Base::getDerived().getLength() - 1); }
+        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(data() + getLength() - 1); }
         __host__ __device__ ReverseIterator rend() noexcept { return ReverseIterator(data() - 1); }
         __host__ __device__ ConstReverseIterator rend() const noexcept { return crend(); }
         __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(data() - 1); }
@@ -136,8 +136,8 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return Base::getDerived().size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
-        [[nodiscard]] __host__ __device__ bool empty() const { return Base::getDerived().getLength() == 0; }
-        [[nodiscard]] __host__ __device__ PointerType data() noexcept { return Base::getDerived().data(); }
+        [[nodiscard]] __host__ __device__ bool empty() const { return getLength() == 0; }
+        [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
     protected:
         __host__ __device__ ArrayBase() = default;

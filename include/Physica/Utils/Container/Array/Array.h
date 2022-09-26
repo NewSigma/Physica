@@ -62,13 +62,12 @@ namespace Physica::Utils {
         using This = Array<T, Length, Capacity, Allocator>;
         using Base = Internal::ArrayBase<This, Allocator>;
         using typename Base::allocator_type;
-        using typename Base::AllocatorTraits;
         using typename Base::ValueType;
-        using typename Base::PointerType;
-        using const_pointer = typename AllocatorTraits::const_pointer;
-        using typename Base::LValueReferenceType;
-        using typename Base::ConstLValueReferenceType;
-        using typename Base::RValueReferenceType;
+        using typename Base::pointer;
+        using typename Base::const_pointer;
+        using typename Base::lvalue_reference;
+        using typename Base::const_lvalue_reference;
+        using typename Base::rvalue_reference;
         constexpr static size_t ArrayLength = Length;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
@@ -93,12 +92,12 @@ namespace Physica::Utils {
         template<class... Args>
         void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
-        inline device_obj<This> toDevice();
+        [[nodiscard]] inline device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
-        [[nodiscard]] PointerType data() noexcept { return arr; }
+        [[nodiscard]] pointer data() noexcept { return arr; }
         [[nodiscard]] const_pointer data() const noexcept { return arr; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
@@ -111,10 +110,10 @@ namespace Physica::Utils {
     public:
         using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator>;
         using typename Base::ValueType;
-        using typename Base::PointerType;
-        using typename Base::LValueReferenceType;
-        using typename Base::ConstLValueReferenceType;
-        using typename Base::RValueReferenceType;
+        using typename Base::pointer;
+        using typename Base::lvalue_reference;
+        using typename Base::const_lvalue_reference;
+        using typename Base::rvalue_reference;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Capacity;
     private:
@@ -144,8 +143,8 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
-        inline void append(ConstLValueReferenceType t);
-        inline void append(RValueReferenceType t);
+        inline void append(const_lvalue_reference t);
+        inline void append(rvalue_reference t);
         void append(const Array& t);
         void append(Array&& t);
         __host__ __device__ void reserve(size_t size);
@@ -163,10 +162,10 @@ namespace Physica::Utils {
         using This = Array<T, Dynamic, Dynamic, Allocator>;
         using Base = Internal::DynamicArrayBase<This, Allocator>;
         using typename Base::ValueType;
-        using typename Base::PointerType;
-        using typename Base::LValueReferenceType;
-        using typename Base::ConstLValueReferenceType;
-        using typename Base::RValueReferenceType;
+        using typename Base::pointer;
+        using typename Base::lvalue_reference;
+        using typename Base::const_lvalue_reference;
+        using typename Base::rvalue_reference;
         constexpr static size_t ArrayLength = Dynamic;
         constexpr static size_t ArrayCapacity = Dynamic;
     private:
@@ -196,8 +195,8 @@ namespace Physica::Utils {
         /* Operators */
         Array& operator=(Array array) noexcept { swap(array); return *this; }
         /* Operations */
-        void append(ConstLValueReferenceType t);
-        void append(RValueReferenceType t);
+        void append(const_lvalue_reference t);
+        void append(rvalue_reference t);
         void append(const Array& t);
         void append(Array&& t);
         template<class... Args>
@@ -209,7 +208,7 @@ namespace Physica::Utils {
         void increase(size_t size);
         void decrease(size_t size);
         void swap(Array& array) noexcept;
-        inline device_obj<This> toDevice();
+        [[nodiscard]] inline device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] size_t size() const noexcept { return length; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }

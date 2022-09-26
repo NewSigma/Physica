@@ -39,15 +39,16 @@ namespace Physica::Utils {
     };
 
     template<class T, class Allocator_>
-    class device_obj<Array<T, Dynamic, Dynamic, Allocator_>> {
-        using This = device_obj<Array<T, Dynamic, Dynamic, Allocator_>>;
+    class device_obj<Array<T, Dynamic, Dynamic, Allocator_>> : public Internal::ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator_>>, DeviceAllocator<T>> {
         using host_obj = Array<T, Dynamic, Dynamic, Allocator_>;
-        using Allocator = DeviceAllocator<T>;
+        using This = device_obj<host_obj>;
+        using Base = Internal::ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
+        using typename Base::allocator_type;
 
         thrust::device_ptr<T> data;
         size_t length;
         size_t capacity;
-        Allocator alloc;
+        allocator_type alloc;
     public:
         device_obj(const host_obj& array);
         device_obj(const This&) = default;
@@ -55,7 +56,8 @@ namespace Physica::Utils {
         ~device_obj();
         /* Operators */
         device_obj& operator=(device_obj other) noexcept;
-        host_obj toHost() const;
+        /* Operations */
+        [[nodiscard]] host_obj toHost() const;
         void swap(device_obj& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() { return getLength(); }
@@ -66,13 +68,13 @@ namespace Physica::Utils {
     template<class T, class Allocator_>
     device_obj<Array<T, Dynamic, Dynamic, Allocator_>>::device_obj(const host_obj& array)
             : length(array.getLength()), capacity(array.getCapacity()) {
-        data = Allocator::allocate(alloc, capacity);
+        data = allocator_type::allocate(alloc, capacity);
         cudaMemcpy(data.get(), array.data(), length, cudaMemcpyKind::cudaMemcpyHostToDevice);
     }
 
     template<class T, class Allocator_>
     device_obj<Array<T, Dynamic, Dynamic, Allocator_>>::~device_obj() {
-        Allocator::deallocate(data.get(), length);
+        allocator_type::deallocate(data.get(), length);
         data = nullptr;
         length = capacity = 0;
     }
@@ -98,12 +100,12 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator_>
-    inline device_obj<Array<T, Length, Capacity, Allocator_>> Array<T, Length, Capacity, Allocator_>::toDevice() {
+    inline device_obj<Array<T, Length, Capacity, Allocator_>> Array<T, Length, Capacity, Allocator_>::toDevice() const {
         return device_obj<Array<T, Length, Capacity, Allocator_>>(*this);
     }
 
     template<class T, class Allocator_>
-    inline device_obj<Array<T, Dynamic, Dynamic, Allocator_>> Array<T, Dynamic, Dynamic, Allocator_>::toDevice() {
+    inline device_obj<Array<T, Dynamic, Dynamic, Allocator_>> Array<T, Dynamic, Dynamic, Allocator_>::toDevice() const {
         return device_obj<Array<T, Dynamic, Dynamic, Allocator_>>(*this);
     }
 }

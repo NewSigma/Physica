@@ -1,0 +1,56 @@
+/*
+ * Copyright 2022 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+namespace Physica::Core {
+    namespace Internal {
+        template<class T, size_t Length, size_t MaxLength>
+        class Traits<device_obj<Vector<T, Length, MaxLength>>> : public Traits<Vector<T, Length, MaxLength>> {};
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    class device_obj<Vector<T, Length, MaxLength>>
+            : public device_obj<LValueVector<Vector<T, Length, MaxLength>>>
+            , public device_obj<Utils::Array<T, Length, MaxLength>> {
+        using host_obj = Vector<T, Length, MaxLength>;
+        using Base = device_obj<LValueVector<host_obj>>;
+        using Storage = device_obj<Utils::Array<T, Length, MaxLength>>;
+    public:
+        using Storage::Storage;
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept;
+        ~device_obj() = default;
+        /* Opporators */
+        using Storage::operator=;
+        using Storage::operator[];
+        /* Opporations */
+        [[nodiscard]] host_obj toHost() const;
+    };
+
+    template<class T, size_t Length, size_t MaxLength>
+    typename device_obj<Vector<T, Length, MaxLength>>::host_obj
+    device_obj<Vector<T, Length, MaxLength>>::toHost() const {
+        return host_obj(Storage::toHost());
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    device_obj<Vector<T, Length, MaxLength>> Vector<T, Length, MaxLength>::toDevice() const {
+        return device_obj<Vector<T, Length, MaxLength>>(*this);
+    }
+}
