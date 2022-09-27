@@ -36,7 +36,7 @@ namespace Physica::Utils {
         /* Getters */
         [[nodiscard]] int getDriverVersion() const { return driverVersion; }
         [[nodiscard]] int getRuntimeVersion() const { return runtimeVersion; }
-        [[nodiscard]] const cudaDeviceProp& getProperty(size_t device) { return propList[device]; }
+        [[nodiscard]] const cudaDeviceProp& getProperty(size_t device) const { return propList[device]; }
         /* Static members */
         static const DeviceProp& getInstance(); // No [[nodiscard]] for initialization in multi-thread mode
     private:

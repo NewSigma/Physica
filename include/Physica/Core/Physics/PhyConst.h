@@ -48,6 +48,7 @@ namespace Physica::Core {
         constexpr static double vacuumDielectric = 8.8541878128E-12;
         constexpr static double boltzmannK = 1.380649E-23;
         constexpr static double avogadroNa = 6.02214076E23;
+        constexpr static double speedOfLight = 299792458;
         /**
          * The first element is a space holder
          */
@@ -78,7 +79,9 @@ namespace Physica::Core {
         constexpr static double bohrRadius = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
+        constexpr static double vacuumDielectric = 1 / (jouleInHartree * PhyConst<SI>::bohrRadius * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
         constexpr static double boltzmannK = 1;
+        constexpr static double speedOfLight = PhyConst<SI>::speedOfLight / PhyConst<SI>::bohrRadius * timeInSecond;
 
         [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
         [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
