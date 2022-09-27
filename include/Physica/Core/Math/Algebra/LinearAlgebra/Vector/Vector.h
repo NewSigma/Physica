@@ -55,6 +55,7 @@ namespace Physica::Core {
     public:
         using Storage::Storage;
         Vector() = default;
+        Vector(Storage array) noexcept;
         template<class Derived>
         Vector(const RValueVector<Derived>& v);
         Vector(const Vector&) = default;

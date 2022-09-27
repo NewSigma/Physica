@@ -26,6 +26,9 @@
  */
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
+    Vector<T, Length, MaxLength>::Vector(Storage array) noexcept : Storage(std::move(array)) {}
+
+    template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
     Vector<T, Length, MaxLength>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);

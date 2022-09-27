@@ -27,21 +27,39 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     class device_obj<Vector<T, Length, MaxLength>>
             : public device_obj<LValueVector<Vector<T, Length, MaxLength>>>
-            , public device_obj<Utils::Array<T, Length, MaxLength>> {
+            , public Utils::device_obj<Utils::Array<T, Length, MaxLength>> {
         using host_obj = Vector<T, Length, MaxLength>;
         using Base = device_obj<LValueVector<host_obj>>;
-        using Storage = device_obj<Utils::Array<T, Length, MaxLength>>;
+        using Storage = Utils::device_obj<Utils::Array<T, Length, MaxLength>>;
     public:
         using Storage::Storage;
-        device_obj(const device_obj&) = default;
+        device_obj(const device_obj&);
         device_obj(device_obj&&) noexcept;
         ~device_obj() = default;
         /* Opporators */
+        device_obj<Vector<T, Length, MaxLength>> operator=(device_obj<Vector<T, Length, MaxLength>> obj) noexcept;
+        using Base::operator=;
         using Storage::operator=;
         using Storage::operator[];
         /* Opporations */
         [[nodiscard]] host_obj toHost() const;
+        using Storage::swap;
+        /* Getters */
+        using Storage::getLength;
     };
+
+    template<class T, size_t Length, size_t MaxLength>
+    device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj& obj) : Storage(obj) {}
+
+    template<class T, size_t Length, size_t MaxLength>
+    device_obj<Vector<T, Length, MaxLength>>::device_obj(device_obj&& obj) noexcept : Storage(std::move(obj)) {}
+
+    template<class T, size_t Length, size_t MaxLength>
+    device_obj<Vector<T, Length, MaxLength>>
+    device_obj<Vector<T, Length, MaxLength>>::operator=(device_obj<Vector<T, Length, MaxLength>> obj) noexcept {
+        swap(obj);
+        return *this;
+    }
 
     template<class T, size_t Length, size_t MaxLength>
     typename device_obj<Vector<T, Length, MaxLength>>::host_obj

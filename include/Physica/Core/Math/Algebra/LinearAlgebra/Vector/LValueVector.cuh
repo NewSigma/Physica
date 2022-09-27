@@ -28,9 +28,30 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         /* Operators */
+        device_obj<LValueVector<Derived>>& operator=(const device_obj<LValueVector<Derived>>& obj);
+        device_obj<LValueVector<Derived>>& operator=(device_obj<LValueVector<Derived>>&& obj) noexcept;
+        template<class T>
+        device_obj<Derived>& operator=(const device_obj<RValueVector<T>>& v);
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
     };
+
+    template<class Derived>
+    device_obj<LValueVector<Derived>>& device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
+        return Base::getDerived() = obj.getDerived();
+    }
+    template<class Derived>
+    device_obj<LValueVector<Derived>>& device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) noexcept {
+        return Base::getDerived() = std::move(obj.getDerived());
+    }
+
+    template<class Derived>
+    template<class T>
+    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<RValueVector<T>>& v) {
+        Base::getDerived().resize(v.getLength());
+        v.assignTo(*this);
+        return *this;
+    }
 }

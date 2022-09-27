@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <cuda_runtime.h>
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {

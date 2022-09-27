@@ -20,6 +20,7 @@
 
 #include "RValueVector.h"
 #include "Physica/Utils/CUDA/device_obj.cuh"
+#include "Physica/Utils/CUDA/DeviceProp.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -33,8 +34,13 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        __global__ void assignTo(device_obj<LValueVector<OtherDerived>>& v) const;
+        void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };
 }
+
+#ifdef __CUDA_ARCH__
+    #include "VectorImpl/RValueVectorImpl.cuh"
+#endif

@@ -45,7 +45,7 @@ namespace Physica::Utils::Internal {
                 alloc.construct(arr + i, array[i]);
         else {
         #ifdef PHYSICA_CUDA
-            #ifdef __CUDA__ARCH__
+            #ifdef __CUDA_ARCH__
                 memcpy(arr, array.arr, length * sizeof(ValueType));
             #else
                 if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)

@@ -107,7 +107,7 @@ namespace Physica::Utils {
 
     template<class T>
     __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
-    #ifdef __CUDA__ARCH__
+    #ifdef __CUDA_ARCH__
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
     #else
         T* p;
@@ -120,19 +120,17 @@ namespace Physica::Utils {
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
-    #ifdef __CUDA__ARCH__
+    #ifdef __CUDA_ARCH__
         free(p.get());
     #else
-        const auto code = cudaFree(p.get());
-        if (code != cudaError_t::cudaSuccess)
-            throw Core::CudaException(code);
+        cudaFree(p.get());
     #endif
     }
 
     template<class T>
     template<class... Args>
     __host__ __device__ void DeviceAllocator<T>::construct(pointer p, Args&&... args) {
-    #ifdef __CUDA__ARCH__
+    #ifdef __CUDA_ARCH__
         ::new (static_cast<void*>(p.get())) T(std::forward<Args>(args)...);
     #else
         T temp(args...);
@@ -144,7 +142,7 @@ namespace Physica::Utils {
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
-    #ifdef __CUDA__ARCH__
+    #ifdef __CUDA_ARCH__
         p->~T();
     #else
         T temp;
