@@ -79,7 +79,7 @@ namespace Physica::Core {
         constexpr static double bohrRadius = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
-        constexpr static double vacuumDielectric = 1 / (jouleInHartree * PhyConst<SI>::bohrRadius * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
+        constexpr static double vacuumDielectric = (PhyConst<SI>::vacuumDielectric * PhyConst<SI>::bohrRadius) / (jouleInHartree * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
         constexpr static double boltzmannK = 1;
         constexpr static double speedOfLight = PhyConst<SI>::speedOfLight / PhyConst<SI>::bohrRadius * timeInSecond;
 
