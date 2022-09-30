@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "AbstractDenseMatrixStorage.h"
+#include "DenseMatrixStorage.h"
 
 namespace Physica::Core::Internal {
     template<class T, size_t Order, size_t MaxOrder> class HalfDenseMatrixStorage;
@@ -28,7 +28,7 @@ namespace Physica::Core::Internal {
         constexpr static size_t Size = Order * (Order + 1) / 2;
         constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
     public:
-        using Base = DenseMatrixStorageHelper<T, Size, MaxSize>;
+        using Base = Utils::Array<T, Size, MaxSize>;
     };
 
     template<class T, size_t Order, size_t MaxOrder>
@@ -43,13 +43,10 @@ namespace Physica::Core::Internal {
         HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
         HalfDenseMatrixStorage(size_t row, size_t column, const T& t) : HalfDenseMatrixStorage(row, t) { assert(row == column); }
         HalfDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
-        /* Operators */
-        using Base::operator[];
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
         void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
         /* Getters */
-        using Base::getLength;
         [[nodiscard]] size_t getOrder() const noexcept { return order; }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }

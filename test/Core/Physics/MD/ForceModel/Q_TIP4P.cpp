@@ -149,7 +149,7 @@ void testForce() {
 }
 
 void testMD() {
-    std::mt19937 gen(12989825518855205292);
+    std::mt19937 gen(12989825518855205292UL);
 
     RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);

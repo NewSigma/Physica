@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.h"
-#include "DenseMatrixImpl/DenseMatrixStorage/HalfDenseMatrixStorage.h"
+#include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t Order, size_t MaxOrder> class DenseSymmMatrix;

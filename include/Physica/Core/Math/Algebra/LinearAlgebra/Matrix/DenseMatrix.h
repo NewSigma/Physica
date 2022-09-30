@@ -25,6 +25,8 @@
 #include "InverseMatrix.h"
 #include "Transpose.h"
 #include "MatrixDecomposition/LUDecomposition.h"
+#include "DenseMatrixImpl/DenseMatrixStorage.h"
+#include "DenseMatrixImpl/DenseMatrixDim.h"
 
 namespace Physica::Core {
     template<class T = MultiScalar, int option = MatrixOption::Column | MatrixOption::Vector
@@ -60,17 +62,24 @@ namespace Physica::Core {
      * option is combinations of \enum MatrixOption
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix : public LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>,
-                        public DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn> {
-        using Base = LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>;
-        using Storage = DenseMatrixStorage<T, option, Row, Column, MaxRow, MaxColumn>;
+    class DenseMatrix : public LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
+                      , public Internal::DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, option>
+                      , public DenseMatrixDim<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, Row, Column, MaxRow, MaxColumn> {
         static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
+        using This = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>;
+        using Base = LValueMatrix<This>;
+        using Storage = Internal::DenseMatrixStorage<This, option>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+        using InitializerType = typename Storage::Base::ValueType;
     public:
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
         using RealMatrix = DenseMatrix<typename T::RealType, option, Row, Column, MaxRow, MaxColumn>;
     public:
-        using Storage::Storage;
+        DenseMatrix() = default;
+        DenseMatrix(size_t row, size_t column);
+        DenseMatrix(size_t row, size_t column, const T& t);
+        DenseMatrix(std::initializer_list<InitializerType> list);
         template<class OtherMatrix>
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
         template<class VectorType>
@@ -84,13 +93,15 @@ namespace Physica::Core {
         using Base::operator=;
         using Storage::operator();
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
-        /* Getters */
-        using Storage::getRow;
-        using Storage::getColumn;
+        /* Operations */
+        void resize(size_t row, size_t column);
         /* Helpers */
         void swap(DenseMatrix& m) noexcept;
         template<class VectorType>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
+        /* Getters */
+        using Dim::getRow;
+        using Dim::getColumn;
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
@@ -113,4 +124,7 @@ namespace Physica::Core {
     }
 }
 
+#ifdef PHYSICA_CUDA
+    #include "DenseMatrix.cuh"
+#endif
 #include "DenseMatrixImpl/DenseMatrixImpl.h"

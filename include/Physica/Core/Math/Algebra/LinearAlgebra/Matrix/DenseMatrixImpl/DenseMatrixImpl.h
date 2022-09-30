@@ -22,6 +22,20 @@
 
 namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(size_t row, size_t column) : Storage(row, column), Dim(row, column) {}
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(size_t row, size_t column, const T& t) : Storage(row, column, t), Dim(row, column) {}
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(std::initializer_list<InitializerType> list) : Storage(std::move(list)) {
+        if constexpr (MatrixOption::isColumnMatrix<This>())
+            Dim::resize(Storage::getSize() / Storage::getLength(), Storage::getLength());
+        else
+            Dim::resize(Storage::getLength(), Storage::getSize() / Storage::getLength());
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     template<class OtherMatrix>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
@@ -47,10 +61,10 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrix& m) : Base(), Storage(m) {}
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrix& m) : Base(), Storage(m), Dim(m) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)) {}
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)), Dim(m) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>&
@@ -60,8 +74,15 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::resize(size_t row, size_t column) {
+        Storage::resize(row, column);
+        Dim::resize(row, column);
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::swap(DenseMatrix& m) noexcept {
         Storage::swap(m);
+        Dim::swap(m);
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

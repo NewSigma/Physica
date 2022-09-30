@@ -26,8 +26,11 @@
 namespace Physica::Utils {
     /**
      * This class helps implemant CRTP.
+     * 
+     * \tparam ID
+     * Only to avoid multiple inheritance
      */
-    template<class Derived>
+    template<class Derived, size_t ID = 0>
     class CRTPBase {
     public:
         [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }

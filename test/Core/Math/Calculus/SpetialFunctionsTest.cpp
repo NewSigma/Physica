@@ -169,37 +169,40 @@ void testSphericalHarmomicY() {
 void testHamonicRotator() {
     constexpr double epsilon = 1E-9;
     using T = Scalar<Double, false>;
-    using Matrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
-    Matrix rotation(3, {0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
-    HamonicRotator rotator(rotation);
+    using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
+    using Matrix3D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 3, 3>;
+    const Matrix3D rotation({0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
+    HamonicRotator<MatrixType> rotator(rotation);
 
     double alpha = M_PI / 4.0;
     /* order 1 */ {
-        Matrix answer(3, {cos(alpha), 0, sin(alpha),
-                          0, 1, 0,
-                          -sin(alpha), 0, cos(alpha)});
+        const Matrix3D answer({cos(alpha), 0, sin(alpha),
+                               0, 1, 0,
+                              -sin(alpha), 0, cos(alpha)});
         if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
             exit(EXIT_FAILURE);
     }
     /* order 2 */ {
+        using Matrix5D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 5, 5>;
         rotator.nextHamonicRotation();
-        Matrix answer(5, {cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
-                          0, cos(alpha), 0, sin(alpha), 0,
-                          0, 0, 1, 0, 0,
-                          0, -sin(alpha), 0, cos(alpha), 0,
-                          -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
+        const Matrix5D answer({cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
+                               0, cos(alpha), 0, sin(alpha), 0,
+                               0, 0, 1, 0, 0,
+                               0, -sin(alpha), 0, cos(alpha), 0,
+                              -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
         if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
             exit(EXIT_FAILURE);
     }
     /* order 3 */ {
+        using Matrix7D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 7, 7>;
         rotator.nextHamonicRotation();
-        Matrix answer(7, {cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
-                          0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
-                          0, 0, cos(alpha), 0, sin(alpha), 0, 0,
-                          0, 0, 0, 1, 0, 0, 0,
-                          0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
-                          0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
-                          -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
+        const Matrix7D answer({cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
+                               0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
+                               0, 0, cos(alpha), 0, sin(alpha), 0, 0,
+                               0, 0, 0, 1, 0, 0, 0,
+                               0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
+                               0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
+                              -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
         if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
             exit(EXIT_FAILURE);
     }
