@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -39,6 +39,7 @@ namespace Physica::Core::Internal {
             , public Utils::CRTPBase<Derived, 1> {
         static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Element)
                       , "Invalid Derived type.");
+        using This = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>;
     public:
         using Base = Utils::Array<typename Traits<Derived>::ScalarType, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>;
     private:
@@ -66,8 +67,12 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
+        [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return Base::getLength(); }
+    private:
+        DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        friend class device_obj<This>;
     };
 
     template<class Derived>
@@ -78,6 +83,7 @@ namespace Physica::Core::Internal {
             , public Utils::CRTPBase<Derived, 1> {
         static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Element)
                       , "Invalid Derived type.");
+        using This = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>;
     public:
         using Base = Utils::Array<typename Traits<Derived>::ScalarType, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>;
     private:
@@ -105,8 +111,12 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
+        [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return Base::getLength(); }
+    private:
+        DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        friend class device_obj<This>;
     };
 
     template<class Derived>
@@ -117,11 +127,12 @@ namespace Physica::Core::Internal {
             , public Utils::CRTPBase<Derived, 1> {
         static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Vector)
                       , "Invalid Derived type.");
+        using This = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
         using Base = Utils::Array<VectorType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;
-    private:
         using Utils::CRTPBase<Derived, 1>::getDerived;
+    private:
         using T = typename Traits<Derived>::ScalarType;
     public:
         DenseMatrixStorage() = default;
@@ -145,8 +156,12 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
+        [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength(); }
+    private:
+        DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        friend class device_obj<This>;
     };
 
     template<class Derived>
@@ -157,6 +172,7 @@ namespace Physica::Core::Internal {
             , public Utils::CRTPBase<Derived, 1> {
         static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Vector)
                       , "Invalid Derived type.");
+        using This = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
     public:
         using VectorType = Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;
         using Base = Utils::Array<VectorType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
@@ -185,9 +201,16 @@ namespace Physica::Core::Internal {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
+        [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength(); }
+    private:
+        DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        friend class device_obj<This>;
     };
 }
 
 #include "DenseMatrixStorageImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "DenseMatrixStorage.cuh"
+#endif

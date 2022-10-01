@@ -38,7 +38,7 @@ namespace Physica::Utils::Internal {
         size_t length;
     public:
         DynamicArrayBase() = delete;
-        __host__ __device__ ~DynamicArrayBase();
+        ~DynamicArrayBase();
         /* Operators */
         Derived& operator<<(const_lvalue_reference t) { Base::getDerived().append(t); return Base::getDerived(); }
         Derived& operator<<(rvalue_reference t) { Base::getDerived().append(std::move(t)); return Base::getDerived(); }
@@ -46,31 +46,31 @@ namespace Physica::Utils::Internal {
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
         ValueType cutLast();
-        __host__ __device__ inline void grow(const_lvalue_reference t);
-        __host__ __device__ inline void grow(rvalue_reference t);
+        inline void grow(const_lvalue_reference t);
+        inline void grow(rvalue_reference t);
         void removeAt(size_t index);
-        __host__ __device__ void clear() noexcept;
+        void clear() noexcept;
         /* Setters */
         /**
          * Low level api. Designed for performance.
          * \size must larger than current length. Because we can not delete the elements we do not need if not.
          * Elements between old length and \size have not allocated. DO NOT try to visit them.
          */
-        __host__ __device__ void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
+        void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
         /* Getters */
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
     protected:
-        __host__ __device__ explicit DynamicArrayBase(size_t capacity);
-        __host__ __device__ DynamicArrayBase(size_t length_, size_t capacity);
-        __host__ __device__ DynamicArrayBase(size_t length_, pointer arr_);
-        __host__ __device__ DynamicArrayBase(const DynamicArrayBase& array);
-        __host__ __device__ DynamicArrayBase(DynamicArrayBase&& array) noexcept;
+        explicit DynamicArrayBase(size_t capacity);
+        DynamicArrayBase(size_t length_, size_t capacity);
+        DynamicArrayBase(size_t length_, pointer arr_);
+        DynamicArrayBase(const DynamicArrayBase& array);
+        DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Operators */
         DynamicArrayBase& operator=(DynamicArrayBase array) noexcept;
         /* Helpers */
-        __host__ __device__ void swap(DynamicArrayBase& array) noexcept;
+        void swap(DynamicArrayBase& array) noexcept;
     };
 }
 

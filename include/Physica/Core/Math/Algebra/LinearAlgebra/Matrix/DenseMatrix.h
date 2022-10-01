@@ -95,6 +95,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<<>(std::ostream& os, const DenseMatrix& mat);
         /* Operations */
         void resize(size_t row, size_t column);
+        [[nodiscard]] inline device_obj<This> toDevice() const;
         /* Helpers */
         void swap(DenseMatrix& m) noexcept;
         template<class VectorType>

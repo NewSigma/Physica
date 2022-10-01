@@ -76,7 +76,7 @@ T calcPhase(const ProgramArgs& args, const Vector<T>& h, const Vector<T>& wave) 
     const T wave_vector = T(2 * M_PI) / args.wave_length;
     const size_t length = h.getLength();
     assert(length == wave.getLength());
-    T r1, r2, wave1, wave2;
+    T r1, r2, wave1 = 1, wave2;
     /* Read values */ {
         const T h_max = args.r_max / args.rho;
         for (size_t i = 0; i < length; ++i) {

@@ -23,6 +23,7 @@
 #include <thrust/device_ptr.h>
 #include <cuda_runtime.h>
 #include "Physica/Core/Exception/CudaException.cuh"
+#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {
     template<class T> class DeviceAllocator;
@@ -33,14 +34,14 @@ namespace std {
     struct allocator_traits<Physica::Utils::DeviceAllocator<T>> {
     public:
         using allocator_type = Physica::Utils::DeviceAllocator<T>;
-        using value_type = T;
-        using pointer = thrust::device_ptr<T>;
-        using const_pointer = const thrust::device_ptr<T>;
-        using void_pointer = thrust::device_ptr<void>;
-        using const_void_pointer = const thrust::device_ptr<void>;
-        using lvalue_reference = thrust::device_reference<T>;
-        using const_lvalue_reference = const T&;
-        using rvalue_reference = T&&;
+        using value_type = Physica::Utils::device_obj<typename Physica::Utils::remove_device_obj<T>::Type>;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using void_pointer = void*;
+        using const_void_pointer = const void*;
+        using lvalue_reference = value_type&;
+        using const_lvalue_reference = const value_type&;
+        using rvalue_reference = value_type&&;
         using size_type = size_t;
         using difference_type = std::ptrdiff_t;
         using propagate_on_container_copy_assignment = std::false_type;
@@ -84,7 +85,7 @@ namespace Physica::Utils {
     template<class T>
     class DeviceAllocator {
     public:
-        using value_type = T;
+        using value_type = typename std::allocator_traits<DeviceAllocator>::value_type;
         using pointer = typename std::allocator_traits<DeviceAllocator>::pointer;
         using size_type = typename std::allocator_traits<DeviceAllocator>::size_type;
         using difference_type = typename std::allocator_traits<DeviceAllocator>::difference_type;
@@ -92,7 +93,7 @@ namespace Physica::Utils {
     public:
         DeviceAllocator() noexcept = default;
         DeviceAllocator(const DeviceAllocator&) noexcept = default;
-        DeviceAllocator(DeviceAllocator&&) noexcept = delete;
+        DeviceAllocator(DeviceAllocator&&) noexcept = default;
         ~DeviceAllocator() = default;
         /* Operators */
         DeviceAllocator& operator=(const DeviceAllocator&) noexcept = default;
@@ -108,10 +109,10 @@ namespace Physica::Utils {
     template<class T>
     __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
     #ifdef __CUDA_ARCH__
-        auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
+        auto* p = reinterpret_cast<T*>(malloc(n * sizeof(value_type)));
     #else
-        T* p;
-        const auto code = cudaMalloc(&p, n * sizeof(T));
+        value_type* p;
+        const auto code = cudaMalloc(&p, n * sizeof(value_type));
         if (code != cudaError_t::cudaSuccess)
             throw Core::CudaException(code);
     #endif
@@ -121,9 +122,9 @@ namespace Physica::Utils {
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
     #ifdef __CUDA_ARCH__
-        free(p.get());
+        free(p);
     #else
-        cudaFree(p.get());
+        cudaFree(p);
     #endif
     }
 
@@ -131,11 +132,11 @@ namespace Physica::Utils {
     template<class... Args>
     __host__ __device__ void DeviceAllocator<T>::construct(pointer p, Args&&... args) {
     #ifdef __CUDA_ARCH__
-        ::new (static_cast<void*>(p.get())) T(std::forward<Args>(args)...);
+        ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
     #else
-        T temp(args...);
-        cudaMemcpy(p.get(), &temp, sizeof(T), cudaMemcpyHostToDevice);
-        if constexpr (!std::is_trivial<T>::value)
+        value_type temp(args...);
+        cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice);
+        if constexpr (!std::is_trivial<value_type>::value)
             temp.release(); //Ownership has been given to device
     #endif
     }
@@ -143,10 +144,10 @@ namespace Physica::Utils {
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
     #ifdef __CUDA_ARCH__
-        p->~T();
+        p->~value_type();
     #else
-        T temp;
-        cudaMemcpy(&temp, p.get(), sizeof(T), cudaMemcpyDeviceToHost);
+        value_type temp;
+        cudaMemcpy(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost);
     #endif
     }
 }

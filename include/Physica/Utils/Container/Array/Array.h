@@ -122,12 +122,12 @@ namespace Physica::Utils {
         using Base::alloc;
         using Base::getDerived;
     public:
-        __host__ __device__ Array();
+        Array();
         template<class... Args>
-        __host__ __device__ explicit Array(size_t length_, Args... args);
-        __host__ __device__ Array(std::initializer_list<T> list);
-        __host__ __device__ Array(const Array& array);
-        __host__ __device__ Array(Array&& array) noexcept;
+        explicit Array(size_t length_, Args... args);
+        Array(std::initializer_list<T> list);
+        Array(const Array& array);
+        Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -147,8 +147,8 @@ namespace Physica::Utils {
         inline void append(rvalue_reference t);
         void append(const Array& t);
         void append(Array&& t);
-        __host__ __device__ void reserve(size_t size);
-        __host__ __device__ void swap(Array& array) noexcept;
+        void reserve(size_t size);
+        void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
@@ -210,9 +210,9 @@ namespace Physica::Utils {
         void swap(Array& array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         /* Getters */
-        [[nodiscard]] size_t size() const noexcept { return length; }
-        [[nodiscard]] size_t getLength() const noexcept { return length; }
-        [[nodiscard]] size_t getCapacity() const noexcept { return capacity; }
+        [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
     private:
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };

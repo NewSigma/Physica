@@ -20,24 +20,24 @@
 
 namespace Physica::Utils::Internal {
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t capacity)
+    DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t capacity)
             : alloc(), length(0) {
         arr = alloc.allocate(capacity);
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, size_t capacity)
+    DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, size_t capacity)
             : DynamicArrayBase(capacity) {
         assert(length <= capacity);
         length = length_;
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, pointer arr_)
+    DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t length_, pointer arr_)
             : arr(arr_), alloc(), length(length_) {}
 
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
+    DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
             const DynamicArrayBase& array) : DynamicArrayBase(array.getDerived().getCapacity()) {
         length = array.length;
         if constexpr (!std::is_trivial<ValueType>::value)
@@ -60,14 +60,14 @@ namespace Physica::Utils::Internal {
     }
     
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
+    DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(
             DynamicArrayBase&& array) noexcept : arr(array.arr), alloc(), length(array.length) {
         array.arr = nullptr;
         array.length = 0;
     }
     
     template<class Derived, class Allocator>
-    __host__ __device__ DynamicArrayBase<Derived, Allocator>::~DynamicArrayBase() {
+    DynamicArrayBase<Derived, Allocator>::~DynamicArrayBase() {
         if constexpr (!std::is_trivial<ValueType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
@@ -98,13 +98,13 @@ namespace Physica::Utils::Internal {
      * This function can be used when you are sure the current capacity is enough.
      */
     template<class Derived, class Allocator>
-    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(const_lvalue_reference t) {
+    inline void DynamicArrayBase<Derived, Allocator>::grow(const_lvalue_reference t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, t);
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ inline void DynamicArrayBase<Derived, Allocator>::grow(rvalue_reference t) {
+    inline void DynamicArrayBase<Derived, Allocator>::grow(rvalue_reference t) {
         assert(length < Base::getDerived().getCapacity());
         alloc.construct(arr + length++, std::move(t));
     }
@@ -119,14 +119,14 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::clear() noexcept {
+    void DynamicArrayBase<Derived, Allocator>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
             alloc.destroy(arr + i);
         length = 0;
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) noexcept {
+    void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) noexcept {
         std::swap(arr, array.arr);
         std::swap(length, array.length);
     }

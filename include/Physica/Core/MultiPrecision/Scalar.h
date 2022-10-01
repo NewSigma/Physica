@@ -182,7 +182,7 @@ namespace Physica::Core {
         protected:
             float f;
         public:
-            AbstractScalar() : f(0) {}
+            AbstractScalar() = default;
             AbstractScalar(float f_) : f(f_) {}
             AbstractScalar(const AbstractScalar& s) = default;
             AbstractScalar(const Integer& i) : AbstractScalar(float(double(i))) {}
@@ -213,7 +213,7 @@ namespace Physica::Core {
         protected:
             double d;
         public:
-            AbstractScalar() : d(0) {}
+            AbstractScalar() = default;
             AbstractScalar(double d_) : d(d_) {}
             AbstractScalar(const AbstractScalar& s) = default;
             AbstractScalar(const Integer& i) : AbstractScalar(double(i)) {}
@@ -377,7 +377,7 @@ namespace Physica::Core {
     static_assert(sizeof(Scalar<MultiPrecision, false>) == sizeof(Internal::AbstractScalar<MultiPrecision>), "Algorithms are based on this assumption.");
 
     template<>
-    class Scalar<MultiPrecision, true> final : public ScalarBase<Scalar<MultiPrecision, true>>, public Internal::AbstractScalar<MultiPrecision> {
+    class Scalar<MultiPrecision, true> : public ScalarBase<Scalar<MultiPrecision, true>>, public Internal::AbstractScalar<MultiPrecision> {
     protected:
         //Accuracy
         MPUnit a;
@@ -449,12 +449,12 @@ namespace Physica::Core {
     //IDEA: Comparisons between Scalar<MultiPrecision, true> may consider their accuracy.
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
-    class Scalar<Float, false> final : public ScalarBase<Scalar<Float, false>>, public Internal::AbstractScalar<Float> {
+    class Scalar<Float, false> : public ScalarBase<Scalar<Float, false>>, public Internal::AbstractScalar<Float> {
     public:
         using Base = Internal::AbstractScalar<Float>;
         using ScalarType = Scalar<Float, false>;
     public:
-        Scalar() : Base() {}
+        Scalar() = default;
         Scalar(float f_) : Base(f_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
@@ -491,7 +491,7 @@ namespace Physica::Core {
     };
 
     template<>
-    class Scalar<Float, true> final : public ScalarBase<Scalar<Float, true>>, public Internal::AbstractScalar<Float> {
+    class Scalar<Float, true> : public ScalarBase<Scalar<Float, true>>, public Internal::AbstractScalar<Float> {
         float a;
     public:
         using Base = Internal::AbstractScalar<Float>;
@@ -538,12 +538,12 @@ namespace Physica::Core {
     inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
-    class Scalar<Double, false> final : public ScalarBase<Scalar<Double, false>>, public Internal::AbstractScalar<Double> {
+    class Scalar<Double, false> : public ScalarBase<Scalar<Double, false>>, public Internal::AbstractScalar<Double> {
     public:
         using Base = Internal::AbstractScalar<Double>;
         using ScalarType = Scalar<Double, false>;
     public:
-        Scalar() : Base() {}
+        Scalar() = default;
         Scalar(double d_) : Base(d_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
@@ -581,7 +581,7 @@ namespace Physica::Core {
     };
 
     template<>
-    class Scalar<Double, true> final : public ScalarBase<Scalar<Double, true>>, public Internal::AbstractScalar<Double> {
+    class Scalar<Double, true> : public ScalarBase<Scalar<Double, true>>, public Internal::AbstractScalar<Double> {
         double a;
     public:
         using Base = Internal::AbstractScalar<Double>;

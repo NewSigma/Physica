@@ -61,7 +61,8 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrix& m) : Base(), Storage(m), Dim(m) {}
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(const DenseMatrix& m)
+            : Base(), Storage(static_cast<const Storage&>(m)), Dim(m) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)), Dim(m) {}
