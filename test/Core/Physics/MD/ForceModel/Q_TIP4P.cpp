@@ -181,7 +181,7 @@ void testMD() {
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
-    if (std::abs(PhyConst<AU>::bohrToAngstorm(double(bond_mean)) - answer) > 3 * PhyConst<AU>::bohrToAngstorm(double(sqrt(bond_var))))
+    if (!scalarNear(ScalarType(0.970829), ScalarType(answer), 1E-2))
         exit(EXIT_FAILURE);
 }
 /**
