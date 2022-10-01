@@ -77,3 +77,7 @@ physica_add_test(DirStack Utils/DirStackTest.cpp)
 if(NOT ${DEBUG_MODE})
     include(SlowTests.cmake)
 endif()
+
+if(${PHYSICA_CUDA})
+    include(CudaTests.cmake)
+endif()
