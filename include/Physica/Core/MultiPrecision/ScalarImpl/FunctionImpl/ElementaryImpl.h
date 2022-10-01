@@ -249,6 +249,15 @@ namespace Physica::Core {
     Scalar<MultiPrecision, true> sin(const Scalar<MultiPrecision, true>& s);
 
     template<ScalarOption option, bool errorTrack>
+    void sincos(Scalar<option, errorTrack> s, Scalar<option, errorTrack>& sin_result, Scalar<option, errorTrack>& cos_result) {
+        using TrivialType = typename Scalar<option, errorTrack>::TrivialType;
+        TrivialType sin_temp, cos_temp;
+        ::sincos(s.getTrivial(), &sin_temp, &cos_temp);
+        sin_result = sin_temp;
+        cos_result = cos_temp;
+    }
+
+    template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> tan(const Scalar<option, errorTrack>& s) {
         return sin(s) / cos(s);
     }

@@ -30,6 +30,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
      * [3] VASP (www.vasp.at)
+     * [4] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
     template<class ScalarType, class PosScalarType = ScalarType>
     class Ewald {
@@ -47,7 +48,6 @@ namespace Physica::Core {
         LatticeMatrix lattice;
         ReciprocalCell<PosScalarType> repCell;
         Vector<ScalarType> charges;
-        ScalarType sumSquaredCharges;
         ScalarType inv_volume;
         ScalarType integralLimit;
         ScalarType selfEnergy;
@@ -103,8 +103,7 @@ namespace Physica::Core {
             rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, PosScalarType(ScalarType(SumPrec) / integralLimit));
             kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
         }
-        sumSquaredCharges = square(charges).sum();
-        selfEnergy = sumSquaredCharges * integralLimit / sqrt(ScalarType(M_PI))
+        selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
                    + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
         makeTables();
     }
@@ -126,17 +125,23 @@ namespace Physica::Core {
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                 if (isNotGammaPoint) {
                     const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
-                    for (size_t i = 0; i < numParticle - 1; ++i) {
+                    ScalarType sum_cos = 0;
+                    ScalarType sum_sin = 0;
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        const ScalarType charge = charges[i];
+                        const ScalarType dot = ScalarType(delta * pos.row(i).asVector());
+                        ScalarType cos_temp, sin_temp;
+                        sincos(dot, sin_temp, cos_temp);
+                        sum_cos += charge * cos_temp;
+                        sum_sin += charge * sin_temp;
+                    }
+                    for (size_t i = 0; i < numParticle; ++i) {
                         auto force_i = result.segment(i * Dim, (i + 1) * Dim);
-                        const ScalarType charge_i = charges[i];
-                        const Vector3D pos_i = pos.row(i).asVector();
-                        for (size_t j = i + 1; j < numParticle; ++j) {
-                            auto force_j = result.segment(j * Dim, (j + 1) * Dim);
-                            const ScalarType dot = ScalarType(delta * (pos_i - pos.row(j).asVector()));
-                            const Vector<ScalarType, Dim> f = (sin(dot) * charge_i * charges[j] * factor2) * delta;
-                            force_i += f;
-                            force_j -= f;
-                        }
+                        const ScalarType charge = charges[i];
+                        const ScalarType dot = ScalarType(delta * pos.row(i).asVector());
+                        ScalarType cos_temp, sin_temp;
+                        sincos(dot, sin_temp, cos_temp);
+                        force_i += ((sin_temp * sum_cos - cos_temp * sum_sin) * (factor2 * charge)) * delta;
                     }
                 }
             });
@@ -195,17 +200,17 @@ namespace Physica::Core {
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                 if (isNotGammaPoint) {
-                    ScalarType sum = 0;
-                    for (size_t i = 0; i < numParticle - 1; ++i) {
-                        const Vector3D pos_i = pos.row(i).asVector();
-                        const ScalarType charge_i = charges[i];
-                        for (size_t j = i + 1; j < numParticle; ++j) {
-                            const ScalarType dot = delta * (pos_i - pos.row(j).asVector());
-                            const ScalarType temp = cos(dot) * (charge_i * charges[j]);
-                            sum += temp;
-                        }
+                    ScalarType sum_cos = 0;
+                    ScalarType sum_sin = 0;
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        const ScalarType charge = charges[i];
+                        const ScalarType dot = delta * pos.row(i).asVector();
+                        ScalarType cos_temp, sin_temp;
+                        sincos(dot, sin_temp, cos_temp);
+                        sum_cos += charge * cos_temp;
+                        sum_sin += charge * sin_temp;
                     }
-                    kSpaceSum += (sumSquaredCharges + sum * 2) / (squaredNorm * exp(squaredNorm * factor));
+                    kSpaceSum += (square(sum_cos) + square(sum_sin)) / (squaredNorm * exp(squaredNorm * factor));
                 }
             });
         kSpaceSum *= ScalarType(4 * M_PI) * inv_volume;
@@ -217,7 +222,6 @@ namespace Physica::Core {
         lattice.swap(ewald.lattice);
         repCell.swap(ewald.repCell);
         charges.swap(ewald.charges);
-        sumSquaredCharges.swap(ewald.sumSquaredCharges);
         inv_volume.swap(ewald.inv_volume);
         integralLimit.swap(ewald.integralLimit);
         selfEnergy.swap(ewald.selfEnergy);

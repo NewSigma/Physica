@@ -60,6 +60,9 @@ namespace Physica::Core {
     Scalar<option, errorTrack> sin(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
+    void sincos(Scalar<option, errorTrack> s, Scalar<option, errorTrack>& sin_result, Scalar<option, errorTrack>& cos_result);
+
+    template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> tan(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
