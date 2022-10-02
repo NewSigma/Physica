@@ -35,6 +35,21 @@ namespace Physica::Core {
             const ScalarType x3_x1 = x3 - x1;
             return -((x_x2 * x_x3) * (x2_x3 * y1) + (x_x1 * x_x3) * (x3_x1 * y2) + (x_x1 * x_x2) * (x1_x2 * y3)) / (x1_x2 * x2_x3 * x3_x1);
         }
+
+        template<class ScalarType>
+        inline ScalarType quadraticInterpolate_diff(ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
+            const ScalarType xx = x * 2.0;
+            const ScalarType x1_xx = x1 - xx;
+            const ScalarType x2_xx = x2 - xx;
+            const ScalarType x3_xx = x3 - xx;
+            const ScalarType y1_y2 = y1 - y2;
+            const ScalarType y2_y3 = y2 - y3;
+            const ScalarType y3_y1 = y3 - y1;
+            const ScalarType x1_x2 = x1 - x2;
+            const ScalarType x2_x3 = x2 - x3;
+            const ScalarType x3_x1 = x3 - x1;
+            return (x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / (x1_x2 * x2_x3 * x3_x1);
+        }
     }
     /**
      * Reference:
