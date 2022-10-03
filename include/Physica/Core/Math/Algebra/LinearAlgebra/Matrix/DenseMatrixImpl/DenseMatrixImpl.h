@@ -99,8 +99,8 @@ namespace Physica::Core {
         MatrixType y(row, col);
         for (size_t i = 0; i < x.getMaxMajor(); ++i) {
             for (size_t j = 0; j < x.getMaxMinor(); ++j) {
-                x.getElementFromMajorMinor(i, j) = vecX[MatrixType::columnFromMajorMinor(i, j)];
-                y.getElementFromMajorMinor(i, j) = vecY[MatrixType::rowFromMajorMinor(i, j)];
+                x.getElementFromMajorMinor(i, j) = vecX[MatrixOption::columnFromMajorMinor<MatrixType>(i, j)];
+                y.getElementFromMajorMinor(i, j) = vecY[MatrixOption::rowFromMajorMinor<MatrixType>(i, j)];
             }
         }
         return std::make_pair(std::move(x), std::move(y));

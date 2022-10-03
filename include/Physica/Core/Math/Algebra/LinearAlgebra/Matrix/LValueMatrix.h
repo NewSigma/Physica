@@ -129,3 +129,6 @@ namespace Physica::Core {
 }
 
 #include "LValueMatrixImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "LValueMatrix.cuh"
+#endif

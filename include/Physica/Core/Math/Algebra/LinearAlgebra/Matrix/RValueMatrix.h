@@ -36,7 +36,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        constexpr static int Option = Internal::Traits<Derived>::Option; //It is declared here because MatrixOption makes no sence to a RValueMatrix
+        constexpr static int Option = Internal::Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
         constexpr static size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
@@ -87,16 +87,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcFromMajorMinor(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
-        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
-        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
+        [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
+        [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
         [[nodiscard]] ScalarType trace() const;
         [[nodiscard]] Transpose<Derived> transpose() const noexcept;
         [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
         [[nodiscard]] Flatten<Derived> flatten() const noexcept;
         [[nodiscard]] ScalarType sum() const { return Base::getDerived().sum(); }
-        /* Static members */
-        [[nodiscard]] inline static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] inline static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept;
     };
 
     template<class MatrixType, class MatrixType2>
@@ -188,3 +185,6 @@ namespace Physica::Core {
 }
 
 #include "RValueMatrixImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "RValueMatrix.cuh"
+#endif

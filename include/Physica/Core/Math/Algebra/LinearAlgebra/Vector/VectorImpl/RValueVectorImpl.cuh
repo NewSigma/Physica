@@ -21,7 +21,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
-        __global__ void assignTo_kernel(device_obj<Derived> source, device_obj<OtherDerived> target) {
+        __global__ void assignTo_kernel(device_obj<RValueVector<Derived>> source, device_obj<LValueVector<OtherDerived>> target) {
             const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
             if (index < getLength())
                 target[index] = source.calc(index);

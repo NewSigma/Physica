@@ -328,12 +328,9 @@ namespace Physica::Core {
         using T = typename TargetType::ScalarType;
         const size_t max_i = target.getMaxMajor();
         const size_t mat_j = target.getMaxMinor();
-        for (size_t i = 0; i < max_i; ++i) {
-            for (size_t j = 0; j < mat_j; ++j) {
-                target.getElementFromMajorMinor(i, j) = T((*this)(TargetType::rowFromMajorMinor(i, j),
-                                                                  TargetType::columnFromMajorMinor(i, j)));
-            }
-        }
+        for (size_t i = 0; i < max_i; ++i)
+            for (size_t j = 0; j < mat_j; ++j)
+                target.getElementFromMajorMinor(i, j) = T(getElementFromMajorMinor(i, j));
     }
 
     template<class Derived>

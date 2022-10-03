@@ -27,16 +27,19 @@ namespace Physica::Core {
         using TargetType = LValueMatrix<OtherDerived>;
 
         if constexpr (isAnyMajor) {
-            for (size_t i = 0; i < target.getMaxMajor(); ++i)
-                for (size_t j = 0; j < target.getMaxMinor(); ++j)
-                    target.getElementFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
-                                                                 TargetType::columnFromMajorMinor(i, j));
+            for (size_t i = 0; i < target.getMaxMajor(); ++i) {
+                for (size_t j = 0; j < target.getMaxMinor(); ++j) {
+                    const size_t r = MatrixOption::rowFromMajorMinor<TargetType>(i, j);
+                    const size_t c = MatrixOption::columnFromMajorMinor<TargetType>(i, j);
+                    target.getElementFromMajorMinor(i, j) = calc(r, c);
+                }
+            }
         }
         else {
             for (size_t i = 0; i < (defaultMajor == MatrixOption::Column ? getColumn() : getRow()); ++i) {
                 for (size_t j = 0; j < (defaultMajor == MatrixOption::Column ?  getRow() : getColumn()); ++j) {
-                    const size_t r = DefaultType::rowFromMajorMinor(i, j);
-                    const size_t c = DefaultType::columnFromMajorMinor(i, j);
+                    const size_t r = MatrixOption::rowFromMajorMinor<DefaultType>(i, j);
+                    const size_t c = MatrixOption::columnFromMajorMinor<DefaultType>(i, j);
                     target(r, c) = calc(r, c);
                 }
             }

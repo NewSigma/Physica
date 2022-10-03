@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -43,59 +43,79 @@ namespace Physica::Core {
         };
     public:
         template<class Matrix>
-        constexpr static bool isColumnMatrix() {
+        __host__ __device__ constexpr static bool isColumnMatrix() {
             return isAnyMajor<Matrix>() || !(Internal::Traits<Matrix>::Option & Row);
         }
 
         template<class Matrix>
-        constexpr static bool isRowMatrix() {
+        __host__ __device__ constexpr static bool isRowMatrix() {
             return isAnyMajor<Matrix>() || !isColumnMatrix<Matrix>();
         }
 
         template<class Matrix>
-        constexpr static bool isAnyMajor() {
+        __host__ __device__ constexpr static bool isAnyMajor() {
             return Internal::Traits<Matrix>::Option & AnyMajor;
         }
 
         template<class Matrix>
-        constexpr static int getMajor() {
+        __host__ __device__ constexpr static int getMajor() {
             return isAnyMajor<Matrix>() ? AnyMajor : (isColumnMatrix<Matrix>() ? Column : Row);
         }
 
         template<class Matrix>
-        constexpr static bool isElementMatrix() {
+        __host__ __device__ constexpr static bool isElementMatrix() {
             return isAnyStorage<Matrix>() || Internal::Traits<Matrix>::Option & Element;
         }
 
         template<class Matrix>
-        constexpr static bool isVectorMatrix() {
+        __host__ __device__ constexpr static bool isVectorMatrix() {
             return isAnyStorage<Matrix>() || !isElementMatrix<Matrix>();
         }
 
         template<class Matrix>
-        constexpr static bool isAnyStorage() {
+        __host__ __device__ constexpr static bool isAnyStorage() {
             return Internal::Traits<Matrix>::Option & AnyStorage;
         }
 
         template<class Matrix>
-        constexpr static int getStorage() {
+        __host__ __device__ constexpr static int getStorage() {
             return isAnyStorage<Matrix>() ? AnyStorage : (isElementMatrix<Matrix>() ? Element : Vector);
         }
 
         template<class Matrix1, class Matrix2>
-        constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
+        __host__ __device__ constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
 
         template<class Matrix1, class Matrix2>
-        constexpr static bool isSameStorage() { return isElementMatrix<Matrix1>() == isElementMatrix<Matrix2>(); }
+        __host__ __device__ constexpr static bool isSameStorage() { return isElementMatrix<Matrix1>() == isElementMatrix<Matrix2>(); }
 
         template<class Matrix>
-        [[nodiscard]] static size_t selectMajor(size_t row, size_t col) {
+        [[nodiscard]] __host__ __device__ static size_t selectMajor(size_t row, size_t col) {
             return isColumnMatrix<Matrix>() ? col : row;
         }
 
         template<class Matrix>
-        [[nodiscard]] static size_t selectMinor(size_t row, size_t col) {
+        [[nodiscard]] __host__ __device__ static size_t selectMinor(size_t row, size_t col) {
             return isColumnMatrix<Matrix>() ? row : col;
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
+            return isColumnMatrix<Matrix>() ? mat.getColumn() : mat.getRow();
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
+            return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getColumn();
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
+            return isColumnMatrix<Matrix>() ? minor : major;
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept {
+            return isColumnMatrix<Matrix>() ? major : minor;
         }
     private:
         MatrixOption();

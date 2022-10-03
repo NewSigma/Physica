@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -192,33 +192,7 @@ namespace Physica::Core {
 
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
-        size_t r, c;
-        if constexpr(isColumnMatrix) {
-            c = major;
-            r = minor;
-        }
-        else {
-            r = major;
-            c = minor;
-        }
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return calc(r, c);
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::getMaxMajor() const noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return getColumn();
-        else
-            return getRow();
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::getMaxMinor() const noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return getRow();
-        else
-            return getColumn();
+        return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
     }
 
     template<class Derived>
@@ -243,22 +217,6 @@ namespace Physica::Core {
     template<class Derived>
     Flatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
         return Flatten<Derived>(this->getDerived());
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::rowFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return minor;
-        else
-            return major;
-    }
-
-    template<class Derived>
-    inline size_t RValueMatrix<Derived>::columnFromMajorMinor([[maybe_unused]] size_t major, [[maybe_unused]] size_t minor) noexcept {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            return major;
-        else
-            return minor;
     }
 
     template<class MatrixType, class MatrixType2>

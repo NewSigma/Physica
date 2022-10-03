@@ -50,6 +50,19 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
         };
 
+        template<Utils::ExpressionType type, class T1, class T2, class ResultType>
+        class Traits<DenseMatrixExpression<type, T1, ScalarBase<T2>, ResultType>> {
+        public:
+            using ScalarType = ResultType;
+            constexpr static int Option = T1::Option;
+            constexpr static size_t RowAtCompile = T1::RowAtCompile;
+            constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+            constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
+            constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
+            constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
+        };
+
         template<class Derived>
         class DenseMatrixExpressionBase : public RValueMatrix<Derived> {
         public:
@@ -62,8 +75,8 @@ namespace Physica::Core {
                 assert(getRow() == m.getRow() && getColumn() == m.getColumn());
                 for (size_t i = 0; i < m.getMaxMajor(); ++i) {
                     for (size_t j = 0; j < m.getMaxMinor(); ++j) {
-                        const size_t r = LValueMatrix<OtherDerived>::rowFromMajorMinor(i, j);
-                        const size_t c = LValueMatrix<OtherDerived>::columnFromMajorMinor(i, j);
+                        const size_t r = MatrixOption::rowFromMajorMinor<OtherDerived>(i, j);
+                        const size_t c = MatrixOption::columnFromMajorMinor<OtherDerived>(i, j);
                         m(r, c) = ScalarType_(calc(r, c));
                     }
                 }       
