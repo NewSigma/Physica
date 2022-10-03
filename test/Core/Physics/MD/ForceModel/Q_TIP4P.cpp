@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <fstream>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -144,7 +142,7 @@ void testForce() {
             }, pos.flatten().calc(i), 0.3);
         }
     }
-    if (!vectorNear(force1, force2, 9E-3))
+    if (!vectorNear(force1, force2, 2E-2))
         exit(EXIT_FAILURE);
 }
 
