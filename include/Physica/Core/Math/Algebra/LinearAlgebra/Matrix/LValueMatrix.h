@@ -101,8 +101,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
-        [[nodiscard]] ScalarType& getElementFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] const ScalarType& getElementFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] ScalarType& refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
         /* Setters */
         void toUnitMatrix();
     protected:

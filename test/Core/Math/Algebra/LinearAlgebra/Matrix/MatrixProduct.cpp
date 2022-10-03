@@ -21,14 +21,12 @@
 using namespace Physica::Core;
 
 int main() {
-    using Matrix = DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Vector, 4, 4>;
+    using Matrix = DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Vector, 2, 2>;
     const Matrix m1{{1, 2}, {2, 1}};
     const Matrix m2{{3, 3}, {1, 5}};
     const Matrix result = m1 * m2;
     const Matrix answer{{9, 9}, {11, 7}};
-    for (int i = 0; i < 2; ++i)
-        for (int j = 0; j < 2; ++j)
-            if (abs((result(i, j) - answer(i, j)) / answer(i, j)).getTrivial() > std::numeric_limits<float>::epsilon())
-                return 1;
+    if (!matrixNear(result, answer, std::numeric_limits<float>::epsilon()))
+        return 1;
     return 0;
 }

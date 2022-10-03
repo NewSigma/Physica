@@ -32,7 +32,7 @@ namespace Physica::Core {
                     target.toUnitMatrix();
                     for (size_t i = 0; i < order_1; ++i) {
                         size_t k = i;
-                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                        while(copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             assert(k < order);
                         }
@@ -42,7 +42,7 @@ namespace Physica::Core {
                         }
                         
                         for (size_t j = i + 1; j < order; ++j) {
-                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             target.majorReduce(j, i, factor);
                         }
@@ -50,7 +50,7 @@ namespace Physica::Core {
 
                     for (size_t i = order_1; i > 0; --i) {
                         size_t k = i;
-                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                        while(copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             assert(k < order);
                         }
@@ -60,7 +60,7 @@ namespace Physica::Core {
                         }
                         
                         for (size_t j = 0; j < i; ++j) {
-                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             target.majorReduce(j, i, factor);
                         }
@@ -72,7 +72,7 @@ namespace Physica::Core {
                     auto temp = SourceType::unitMatrix(order);
                     for (size_t i = 0; i < order_1; ++i) {
                         size_t k = i;
-                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                        while(copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             assert(k < order);
                         }
@@ -82,7 +82,7 @@ namespace Physica::Core {
                         }
 
                         for (size_t j = i + 1; j < order; ++j) {
-                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             temp.majorReduce(j, i, factor);
                         }
@@ -90,7 +90,7 @@ namespace Physica::Core {
 
                     for (size_t i = order_1; i > 0; --i) {
                         size_t k = i;
-                        while(copy.getElementFromMajorMinor(k, i).isZero()) {
+                        while(copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             assert(k < order);
                         }
@@ -100,7 +100,7 @@ namespace Physica::Core {
                         }
 
                         for (size_t j = 0; j < i; ++j) {
-                            auto factor = copy.getElementFromMajorMinor(j, i) / copy.getElementFromMajorMinor(i, i);
+                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             temp.majorReduce(j, i, factor);
                         }

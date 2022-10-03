@@ -74,18 +74,18 @@ namespace Physica::Core {
             target(0, 0) = diag;
             const ScalarType inv_diag = reciprocal(diag);
             for (size_t minor = 1; minor < order; ++minor)
-                target.getElementFromMajorMinor(0, minor) = source.getElementFromMajorMinor(0, minor) * inv_diag;
+                target.refFromMajorMinor(0, minor) = source.refFromMajorMinor(0, minor) * inv_diag;
         }
         /* Handle other vectors */ {
             for (size_t major = 1; major < order; ++major) {
                 size_t minor = 0;
                 for (; minor < major; ++minor)
-                    target.getElementFromMajorMinor(major, minor) = ScalarType::Zero();
+                    target.refFromMajorMinor(major, minor) = ScalarType::Zero();
 
                 ScalarType diag = source(major, major);
                 /* major == minor */ {
                     for (size_t k = 0; k < major; ++k)
-                        diag -= square(target.getElementFromMajorMinor(k, major));
+                        diag -= square(target.refFromMajorMinor(k, major));
                     diag = sqrt(diag);
                     target(major, major) = diag;
                     ++minor;
@@ -93,10 +93,10 @@ namespace Physica::Core {
                 const ScalarType inv_diag = reciprocal(diag);
 
                 for (; minor < order; ++minor) {
-                    ScalarType temp = source.getElementFromMajorMinor(major, minor);
+                    ScalarType temp = source.refFromMajorMinor(major, minor);
                     for (size_t k = 0; k < major; ++k)
-                        temp -= target.getElementFromMajorMinor(k, major) * target.getElementFromMajorMinor(k, minor);
-                    target.getElementFromMajorMinor(major, minor) = temp * inv_diag;
+                        temp -= target.refFromMajorMinor(k, major) * target.refFromMajorMinor(k, minor);
+                    target.refFromMajorMinor(major, minor) = temp * inv_diag;
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace Physica::Core {
         assert(getRow() == target.getRow() && getColumn() == target.getColumn());
         for (size_t i = 0; i < target.getMaxMajor(); ++i)
             for (size_t j = 0; j < target.getMaxMinor(); ++j)
-                target.getElementFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
+                target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
     }
 
     template<class Derived>

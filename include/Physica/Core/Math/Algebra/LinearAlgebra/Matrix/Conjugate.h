@@ -59,8 +59,8 @@ namespace Physica::Core {
         const size_t mat_j = target.getMaxMinor();
         for (size_t i = 0; i < max_i; ++i) {
             for (size_t j = 0; j < mat_j; ++j) {
-                target.getElementFromMajorMinor(i, j) = calc(MatrixOption::rowFromMajorMinor<TargetType>(i, j),
-                                                             MatrixOption::columnFromMajorMinor<TargetType>(i, j));
+                target.refFromMajorMinor(i, j) = calc(MatrixOption::rowFromMajorMinor<TargetType>(i, j),
+                                                      MatrixOption::columnFromMajorMinor<TargetType>(i, j));
             }
         }
     }

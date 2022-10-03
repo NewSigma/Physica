@@ -82,8 +82,8 @@ namespace Physica::Core {
         const size_t mat_j = target.getMaxMinor();
         for (size_t i = 0; i < max_i; ++i) {
             for (size_t j = 0; j < mat_j; ++j) {
-                target.getElementFromMajorMinor(i, j) = calc(MatrixOption::rowFromMajorMinor<TargetType>(i, j),
-                                                             MatrixOption::columnFromMajorMinor<TargetType>(i, j));
+                target.refFromMajorMinor(i, j) = calc(MatrixOption::rowFromMajorMinor<TargetType>(i, j),
+                                                      MatrixOption::columnFromMajorMinor<TargetType>(i, j));
             }
         }
     }
@@ -109,7 +109,7 @@ namespace Physica::Core {
     void TransposeVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         using TargetType = LValueMatrix<OtherMatrix>;
         for (size_t i = 0; i < vec.getLength(); ++i) {
-            target.getElementFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i),
+            target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i),
                                                          TargetType::columnFromMajorMinor(0, i));
         }
     }

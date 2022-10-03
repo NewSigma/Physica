@@ -73,7 +73,7 @@ namespace Physica::Core {
     Derived& LValueMatrix<Derived>::operator=(const Scalar<option, errorTrack>& s) {
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                getElementFromMajorMinor(i, j) = ScalarType(s);
+                refFromMajorMinor(i, j) = ScalarType(s);
         return Base::getDerived();
     }
 
@@ -330,7 +330,7 @@ namespace Physica::Core {
         const size_t mat_j = target.getMaxMinor();
         for (size_t i = 0; i < max_i; ++i)
             for (size_t j = 0; j < mat_j; ++j)
-                target.getElementFromMajorMinor(i, j) = T(getElementFromMajorMinor(i, j));
+                target.refFromMajorMinor(i, j) = T(refFromMajorMinor(i, j));
     }
 
     template<class Derived>
@@ -394,7 +394,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) {
+    typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
         size_t r, c;
         if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
             c = major;
@@ -409,7 +409,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::getElementFromMajorMinor(size_t major, size_t minor) const {
+    const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
         size_t r, c;
         if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
             c = major;
@@ -429,6 +429,6 @@ namespace Physica::Core {
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                getElementFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
+                refFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
     }
 }
