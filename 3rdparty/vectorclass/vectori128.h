@@ -5070,10 +5070,10 @@ template <int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7,
             constexpr uint64_t ixe2o = eoperm(2, indexs);
             constexpr uint64_t ixo2o = eoperm(3, indexs);
 
-            constexpr bool e2e = ixe2e != -1ll;  // even bytes of source to odd  bytes of destination
-            constexpr bool e2o = ixe2o != -1ll;  // even bytes of source to odd  bytes of destination
-            constexpr bool o2e = ixo2e != -1ll;  // odd  bytes of source to even bytes of destination
-            constexpr bool o2o = ixo2o != -1ll;  // odd  bytes of source to odd  bytes of destination
+            constexpr bool e2e = ixe2e != static_cast<uint64_t>(-1ll);  // even bytes of source to odd  bytes of destination
+            constexpr bool e2o = ixe2o != static_cast<uint64_t>(-1ll);  // even bytes of source to odd  bytes of destination
+            constexpr bool o2e = ixo2e != static_cast<uint64_t>(-1ll);  // odd  bytes of source to even bytes of destination
+            constexpr bool o2o = ixo2o != static_cast<uint64_t>(-1ll);  // odd  bytes of source to odd  bytes of destination
 
             if constexpr (e2o || o2e) swapped = rotate_left(Vec8s(a), 8); // swap odd and even bytes
 

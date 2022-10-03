@@ -482,19 +482,10 @@ struct EList {
 template <typename V>
 constexpr auto get_inttype() {
     constexpr int elementsize = sizeof(V) / V::size();  // size of vector elements
-
-    if constexpr (elementsize >= 8) {
-        return -int64_t(1);
-    }
-    else if constexpr (elementsize >= 4) {
-        return int32_t(-1);
-    }
-    else if constexpr (elementsize >= 2) {
-        return int16_t(-1);
-    }
-    else {
-        return int8_t(-1);
-    }
+    using ResultType1 = typename std::conditional<elementsize >= 2, int16_t, int8_t>::type;
+    using ResultType2 = typename std::conditional<elementsize >= 4, int32_t, ResultType1>::type;
+    using ResultType = typename std::conditional<elementsize >= 8, int64_t, ResultType2>::type;
+    return ResultType(-1);
 }
 
 
@@ -990,7 +981,8 @@ constexpr auto pshufb_mask(int const (&A)[V::size()]) {
                 p = ix * elementsize;
             }
             for (j = 0; j < elementsize; j++) {            // loop through bytes in element
-                u.a[k++] = p < 0 ? -1 : p + j;             // store byte permutation index
+                const int8_t temp = static_cast<int8_t>(p + j);
+                u.a[k++] = p < 0 ? -1 : temp;              // store byte permutation index
             }
             m++;
         }
