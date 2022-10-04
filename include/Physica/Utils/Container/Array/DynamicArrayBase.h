@@ -69,8 +69,10 @@ namespace Physica::Utils::Internal {
         DynamicArrayBase(DynamicArrayBase&& array) noexcept;
         /* Operators */
         DynamicArrayBase& operator=(DynamicArrayBase array) noexcept;
-        /* Helpers */
+        /* Operations */
         void swap(DynamicArrayBase& array) noexcept;
+        /* Setters */
+        [[nodiscard]] pointer release() noexcept;
     };
 }
 

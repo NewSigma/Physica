@@ -48,7 +48,7 @@ namespace Physica::Core {
 
     template<class T1, class T2>
     typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t column) const {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = 0;
         for (size_t i = 0; i < mat1.getColumn(); ++i)
             result += ScalarType(mat1.calc(row, i) * mat2.calc(i, column));
         return result;
@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = 0;
         for (size_t i = 0; i < vec.getLength(); ++i)
             result += ScalarType(mat.calc(index, i) * vec.calc(i));
         return result;

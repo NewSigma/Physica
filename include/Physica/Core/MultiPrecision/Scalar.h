@@ -23,6 +23,7 @@
 #include "MultiPrecisionType.h"
 #include "Rational.h"
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     //Forward declarations
@@ -453,6 +454,7 @@ namespace Physica::Core {
     public:
         using Base = Internal::AbstractScalar<Float>;
         using ScalarType = Scalar<Float, false>;
+        using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
         Scalar(float f_) : Base(f_) {}
@@ -542,6 +544,7 @@ namespace Physica::Core {
     public:
         using Base = Internal::AbstractScalar<Double>;
         using ScalarType = Scalar<Double, false>;
+        using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
         Scalar(double d_) : Base(d_) {}

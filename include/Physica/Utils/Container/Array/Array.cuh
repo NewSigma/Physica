@@ -21,6 +21,17 @@
 #include "Physica/Utils/Container/DeviceAllocator.cuh"
 
 namespace Physica::Utils {
+    namespace Internal {
+        template<class T, size_t Length, size_t Capacity, class Allocator>
+        class Traits<device_obj<Array<T, Length, Capacity, Allocator>>> {
+        public:
+            constexpr static size_t ArrayLength = Length;
+            constexpr static size_t ArrayCapacity = Capacity;
+            using AllocatorType = DeviceAllocator<T>;
+            using ValueType = typename AllocatorType::value_type;
+        };
+    }
+
     template<class T, size_t Length, size_t Capacity, class Allocator>
     class device_obj<Array<T, Length, Capacity, Allocator>> : private Array<T, Length, Capacity, Allocator> {
         using host_obj = Array<T, Length, Capacity, Allocator>;
@@ -42,7 +53,8 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator_>
-    class device_obj<Array<T, Dynamic, Dynamic, Allocator_>> : private Internal::ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator_>>, DeviceAllocator<T>> {
+    class device_obj<Array<T, Dynamic, Dynamic, Allocator_>>
+            : private Internal::ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator_>>, DeviceAllocator<T>> {
         using host_obj = Array<T, Dynamic, Dynamic, Allocator_>;
         using This = device_obj<host_obj>;
         using Base = Internal::ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
@@ -114,10 +126,11 @@ namespace Physica::Utils {
         if constexpr (std::is_trivial<T>::value)
             err = cudaMemcpy(d_data, array.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice);
         else {
-            Array<ValueType, Dynamic, Dynamic, Allocator_> buffer(length);
+            Array<ValueType, Dynamic, Dynamic, HostAllocator<ValueType>> buffer(length);
             for (size_t i = 0; i < length; ++i)
                 buffer[i] = array[i].toDevice();
             err = cudaMemcpy(d_data, buffer.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice);
+            buffer.get_allocator().deallocate(buffer.release(), length);
         }
         if (err != cudaError_t::cudaSuccess)
             throw Core::CudaException(err);
@@ -142,7 +155,7 @@ namespace Physica::Utils {
     template<class T, class Allocator_>
     device_obj<Array<T, Dynamic, Dynamic, Allocator_>>::~device_obj() {
         if constexpr (!std::is_trivial<T>::value) {
-            Array<ValueType, Dynamic, Dynamic, Allocator_> buffer(length);
+            Array<ValueType, Dynamic, Dynamic, HostAllocator<ValueType>> buffer(length);
             cudaMemcpy(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost);
         }
         alloc.deallocate(d_data, length);
@@ -164,7 +177,7 @@ namespace Physica::Utils {
         if constexpr (std::is_trivial<T>::value)
             err = cudaMemcpy(result.data(), d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost);
         else {
-            Array<ValueType, Dynamic, Dynamic, Allocator_> buffer(length);
+            Array<ValueType, Dynamic, Dynamic, HostAllocator<ValueType>> buffer(length);
             err = cudaMemcpy(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost);
             for (size_t i = 0; i < length; ++i)
                 result[i] = buffer[i].toHost();

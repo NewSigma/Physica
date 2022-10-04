@@ -330,4 +330,10 @@ namespace Physica::Utils {
         Base::swap(array);
         std::swap(capacity, array.capacity);
     }
+
+    template<class T, class Allocator>
+    typename Array<T, Dynamic, Dynamic, Allocator>::pointer Array<T, Dynamic, Dynamic, Allocator>::release() noexcept {
+        capacity = 0;
+        return Base::release();
+    }
 }

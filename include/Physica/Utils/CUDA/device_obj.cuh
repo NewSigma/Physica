@@ -42,12 +42,22 @@ namespace Physica::Utils {
     };
 
     template<class T>
-    struct remove_device_obj {
-        using Type = T;
+    struct is_device_obj {
+        constexpr static bool value = false;
     };
 
     template<class T>
-    struct remove_device_obj<device_obj<T>> {
-        using Type = T;
+    struct is_device_obj<device_obj<T>> {
+        constexpr static bool value = true;
+    };
+
+    template<class T>
+    struct is_device_obj<Physica::Core::device_obj<T>> {
+        constexpr static bool value = true;
+    };
+
+    template<class T>
+    struct is_device_obj<Physica::Core::Internal::device_obj<T>> {
+        constexpr static bool value = true;
     };
 }

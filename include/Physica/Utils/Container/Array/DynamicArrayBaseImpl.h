@@ -130,4 +130,13 @@ namespace Physica::Utils::Internal {
         std::swap(arr, array.arr);
         std::swap(length, array.length);
     }
+
+    template<class Derived, class Allocator>
+    typename DynamicArrayBase<Derived, Allocator>::pointer
+    DynamicArrayBase<Derived, Allocator>::release() noexcept {
+        pointer copy = arr;
+        length = 0;
+        arr = nullptr;
+        return copy;
+    }
 }

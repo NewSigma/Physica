@@ -268,7 +268,7 @@ namespace Physica::Core {
         const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
         auto row2 = row(r2);
         row2 -= row(r1).asVector() * factor;
-        matrix(r2, elementIndex) = ScalarType::Zero();
+        matrix(r2, elementIndex) = 0;
     }
 
     template<class Derived>
@@ -278,7 +278,7 @@ namespace Physica::Core {
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
         auto col2 = col(c2);
         col2 -= col(c1).asVector() * factor;
-        matrix(elementIndex, c2) = ScalarType::Zero();
+        matrix(elementIndex, c2) = 0;
     }
 
     template<class Derived>

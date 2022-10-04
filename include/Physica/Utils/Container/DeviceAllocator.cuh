@@ -34,7 +34,7 @@ namespace std {
     struct allocator_traits<Physica::Utils::DeviceAllocator<T>> {
     public:
         using allocator_type = Physica::Utils::DeviceAllocator<T>;
-        using value_type = Physica::Utils::device_obj<typename Physica::Utils::remove_device_obj<T>::Type>;
+        using value_type = typename T::device_obj_type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using void_pointer = void*;

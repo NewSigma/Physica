@@ -109,6 +109,9 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
         [[nodiscard]] static DenseMatrix randomMatrix(size_t order) { return randomMatrix(order, order); }
         [[nodiscard]] static DenseMatrix randomMatrix(size_t row, size_t column);
+    private:
+        DenseMatrix(Storage storage, size_t row, size_t column) : Storage(std::move(storage)), Dim(row, column) {}
+        friend class device_obj<This>;
     };
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>

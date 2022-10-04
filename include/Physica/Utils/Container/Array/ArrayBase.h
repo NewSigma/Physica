@@ -113,6 +113,8 @@ namespace Physica::Utils::Internal {
         using ConstIterator = ContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
         using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
         using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
+
+        static_assert(std::is_same<ValueType, typename Traits<Derived>::ValueType>::value, "[Error]: Declaration is not self consistent");
     public:
         ~ArrayBase() = default;
         /* Operators */

@@ -42,6 +42,7 @@ namespace Physica::Core {
         public:
             using ScalarType = ResultType;
             constexpr static int Option = Major | Storage;
+            //Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
             constexpr static size_t RowAtCompile = T1::RowAtCompile;
             constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;

@@ -23,11 +23,13 @@ namespace Physica::Core {
     class device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
             : public device_obj<LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>>
             , public Internal::device_obj<Internal::DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, option>>
-            , public DenseMatrixDim<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, Row, Column, MaxRow, MaxColumn> {
+            , public DenseMatrixDim<device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>, Row, Column, MaxRow, MaxColumn> {
         using host_obj = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>;
+        using host_storage = typename host_obj::Storage;
         using This = device_obj<host_obj>;
+        using Base = device_obj<LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>>;
         using Storage = Internal::device_obj<Internal::DenseMatrixStorage<host_obj, option>>;
-        using Dim = DenseMatrixDim<host_obj, Row, Column, MaxRow, MaxColumn>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
     public:
         device_obj() = default;
         device_obj(const host_obj& mat);
@@ -37,20 +39,27 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost()); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost(), Dim::getRow(), Dim::getColumn()); }
         void swap(device_obj& obj) noexcept;
+        /* Getters */
+        using Dim::getRow;
+        using Dim::getColumn;
     };
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    inline device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::toDevice() const {
-        return device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>(*this);
-    }
+    device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>::device_obj(const host_obj& mat)
+            : Storage(static_cast<const host_storage&>(mat).toDevice()), Dim(mat.getRow(), mat.getColumn()) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     void device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>::swap(
             device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>& obj) noexcept {
         Storage::swap(obj);
         Dim::swap(obj);
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    inline device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::toDevice() const {
+        return device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>(*this);
     }
 }

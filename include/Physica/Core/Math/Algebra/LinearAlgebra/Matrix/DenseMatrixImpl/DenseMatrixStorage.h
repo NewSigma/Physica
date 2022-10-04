@@ -20,7 +20,6 @@
 
 #include <cassert>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
-#include "Physica/Utils/Template/CRTPBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core::Internal {
@@ -69,7 +68,7 @@ namespace Physica::Core::Internal {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         friend class device_obj<This>;
@@ -113,7 +112,7 @@ namespace Physica::Core::Internal {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         friend class device_obj<This>;
@@ -158,7 +157,9 @@ namespace Physica::Core::Internal {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
+            return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength();
+        }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         friend class device_obj<This>;
@@ -203,7 +204,9 @@ namespace Physica::Core::Internal {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
+            return Base::getLength() == 0 ? 0 : Base::getLength() * Base::operator[](0).getLength();
+        }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         friend class device_obj<This>;

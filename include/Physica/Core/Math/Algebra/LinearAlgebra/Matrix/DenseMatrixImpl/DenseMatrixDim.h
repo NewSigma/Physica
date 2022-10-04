@@ -29,12 +29,12 @@ namespace Physica::Core {
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
         /* Getters */
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
         /* Helper */
-        void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
 
     template<class Derived, size_t Column, size_t MaxRow, size_t MaxColumn>
@@ -44,16 +44,16 @@ namespace Physica::Core {
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept {
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(size % getColumn() == 0);
             return size / getColumn();
         }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return Column; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
         /* Helper */
-        void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
 
     template<class Derived, size_t Row, size_t MaxRow, size_t MaxColumn>
@@ -63,16 +63,16 @@ namespace Physica::Core {
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
         /* Getters */
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return Row; }
-        [[nodiscard]] size_t getColumn() const noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(size % getRow() == 0);
             return size / getRow();
         }
         /* Operations */
-        void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
         /* Helper */
-        void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
 
     template<class Derived, size_t MaxRow, size_t MaxColumn>
@@ -84,15 +84,15 @@ namespace Physica::Core {
         DenseMatrixDim() : r(0) {}
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) : r(row_) {}
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return r; }
-        [[nodiscard]] size_t getColumn() const noexcept {
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return r; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(r == 0 || size % getRow() == 0);
             return r == 0 ? 0 : size / getRow();
         }
         /* Operations */
-        void resize(size_t row_, [[maybe_unused]] size_t column_) { r = row_; }
+        __host__ __device__ void resize(size_t row_, [[maybe_unused]] size_t column_) { r = row_; }
         /* Helper */
-        void swap(DenseMatrixDim& dim) noexcept { std::swap(r, dim.r); }
+        __host__ __device__ void swap(DenseMatrixDim& dim) noexcept { std::swap(r, dim.r); }
     };
 }

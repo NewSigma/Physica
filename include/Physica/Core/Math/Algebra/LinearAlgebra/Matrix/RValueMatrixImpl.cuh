@@ -22,27 +22,30 @@ namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
         __global__ void assignTo_kernel(device_obj<RValueMatrix<Derived>> source, device_obj<LValueMatrix<OtherDerived>> target) {
-            //const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            //if (index < getLength())
-            //    target[index] = source.calc(index);
+            const size_t major = blockIdx.y;
+            const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+            if (minor < source.getMaxMinor())
+                target.refFromMajorMinor(major, minor) = source.calcFromMajorMinor(major, minor);
         }
     }
 
     template<class Derived>
     template<class OtherDerived>
     void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
-        //constexpr int elemPerThread = 64;
-        //int device;
-        //cudaGetDevice(&device);
-        //const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
-        //const int numBlock = (getLength() + maxThreadsPerBlock) / maxThreadsPerBlock;
-        //const int numThread = getLength() >= maxThreadPerBlock ? maxThreadPerBlock : getLength();
-        //Internal::assignTo_kernel<<<numBlock, numThread>>>(Base::getDerived(), target.getDerived());
+        constexpr int elemPerThread = 64;
+        int device;
+        cudaGetDevice(&device);
+        const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
+        const size_t major = getMaxMajor();
+        const size_t minor = getMaxMinor();
+        const size_t numThread = minor > maxThreadPerBlock ? maxThreadPerBlock : minor;
+        const size_t numBlockX = (minor + maxThreadsPerBlock) / maxThreadsPerBlock;
+        Internal::assignTo_kernel<<<{numBlockX, major}, numThread>>>(Base::getDerived(), target.getDerived());
     }
 
     template<class Derived>
     typename device_obj<RValueMatrix<Derived>>::ScalarType
-    device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
+    __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
     }
 }

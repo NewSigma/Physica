@@ -58,8 +58,8 @@ namespace Physica::Utils {
     class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
         static_assert(sizeof(T) * Length <= (1U << 16U), "[Warning]: Allocate large fixed array on stack is not recommanded");
-    public:
         using This = Array<T, Length, Capacity, Allocator>;
+    public:
         using Base = Internal::ArrayBase<This, Allocator>;
         using typename Base::allocator_type;
         using typename Base::ValueType;
@@ -158,8 +158,8 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     class Array<T, Dynamic, Dynamic, Allocator>
         : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator> {
-    public:
         using This = Array<T, Dynamic, Dynamic, Allocator>;
+    public:
         using Base = Internal::DynamicArrayBase<This, Allocator>;
         using typename Base::ValueType;
         using typename Base::pointer;
@@ -213,6 +213,8 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+        /* Setters */
+        [[nodiscard]] pointer release() noexcept;
     private:
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };

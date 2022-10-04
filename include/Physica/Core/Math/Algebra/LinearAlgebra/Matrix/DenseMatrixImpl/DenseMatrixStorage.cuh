@@ -117,13 +117,13 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
-            : public device_obj<Utils::Array<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>,
-                                             Traits<Derived>::ColumnAtCompile,
-                                             Traits<Derived>::MaxColumnAtCompile>>
+            : public Physica::Utils::device_obj<Utils::Array<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>,
+                                                             Traits<Derived>::ColumnAtCompile,
+                                                             Traits<Derived>::MaxColumnAtCompile>>
             , public Utils::CRTPBase<device_obj<Derived>, 1> {
         using T = typename Traits<Derived>::ScalarType;
         using VectorType = Vector<T, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
-        using Base = device_obj<Utils::Array<VectorType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>>;
+        using Base = Physica::Utils::device_obj<Utils::Array<VectorType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
         using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
 

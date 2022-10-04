@@ -50,6 +50,7 @@ namespace Physica::Core {
         using Storage = Utils::Array<T, Length, MaxLength>;
     public:
         using Base = ContinuousVector<This>;
+        using device_obj_type = device_obj<This>;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
     public:
