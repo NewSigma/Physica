@@ -91,7 +91,7 @@ namespace Physica::Core {
                 ScalarType result = 0;
                 for (size_t major = 0; major < MatrixOption::selectMajor<Derived>(getRow(), getColumn()); ++major)
                     for (size_t minor = 0; minor < MatrixOption::selectMinor<Derived>(getRow(), getColumn()); ++minor)
-                        result += calc(Base::rowFromMajorMinor(major, minor), Base::columnFromMajorMinor(major, minor));
+                        result += Base::calcFromMajorMinor(major, minor);
                 return result;
             }
         };

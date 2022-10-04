@@ -145,7 +145,6 @@ int main() {
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
         rpmd.updateForce<decltype(pair), ThreadExecutor>(pair);
-        rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
