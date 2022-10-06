@@ -30,37 +30,9 @@ using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
-constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.1;
+constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
-
-void testHytrogenList() {
-    typename CrystalCell::LatticeMatrix lattice{
-        4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
-        2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
-        0.2750800827878018,   0.4169789280520980,   18.0000000000000000
-    };
-    typename CrystalCell::PositionMatrix pos {
-        0.4553508091084409,  0.3980437584135783,  0.1240303800896787,
-        0.4937103263031835,  0.4030549988960055,  0.9488679230950712,
-        0.5596918259357793,  0.8517822319914985,  0.1226285591691945,
-        0.3686253245184842,  0.6403194088783717,  0.0163388989450929,
-        0.5980496296529945,  0.8452761470000689,  0.9474667297556534,
-        0.1076134753395919,  0.7454143691003363,  0.1235631952109221,
-        0.6847635746074375,  0.9781822048654215,  0.0551553884196571,
-        0.9457728898525665,  0.8447981726837335,  0.9479330783198919,
-        0.6786065180112657,  0.9738018598142685,  0.1107906720462844,
-        0.3747794285285615,  0.6414996922536187,  0.9607035572233092,
-        0.7021261874138659,  0.9803177844871507,  0.9573706719037773,
-        0.3512600170478342,  0.6392493670479714,  0.1141244566914832
-    };
-    CrystalCell unit{std::move(lattice), std::move(pos), {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct};
-    const MDCell<ScalarType, PosScalarType> cell(std::move(unit));
-    Q_TIP4P<ScalarType, PosScalarType> model(cell, 1, 1E-4);
-    model.guessHytrogenList(cell);
-    if (!model.checkHytrogenList())
-        exit(EXIT_FAILURE);
-}
 
 template<class RandomGenerator>
 Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
@@ -89,24 +61,24 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
         if (i == 0) {
-            posO[0] = 0;
-            posO[1] = 0;
-            posO[2] = 0;
+            posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+            posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+            posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
         }
-        if (i == 1) {
-            posO[0] = latticeFactor * 0.5;
-            posO[1] = latticeFactor * 0.5;
-            posO[2] = 0;
+        else if (i == 1) {
+            posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
         }
-        if (i == 2) {
-            posO[0] = latticeFactor * 0.5;
-            posO[1] = 0;
-            posO[2] = latticeFactor * 0.5;
+        else if (i == 2) {
+            posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+            posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
         }
-        if (i == 3) {
-            posO[0] = 0;
-            posO[1] = latticeFactor * 0.5;
-            posO[2] = latticeFactor * 0.5;
+        else if (i == 3) {
+            posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+            posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
         }
         auto posH1 = pos.row(2 * i);
         auto posH2 = pos.row(2 * i + 1);
@@ -122,7 +94,8 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
     cell.unitToSuper(cellSize, cellSize, cellSize);
-    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+    const CrystalCell sortted(cell.getLattice(), Q_TIP4P<ScalarType, Scalar<Float, false>>::sortPosition(cell), cell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
+    return MDCell<ScalarType, PosScalarType>(std::move(sortted));
 }
 
 void testForce() {
@@ -142,7 +115,7 @@ void testForce() {
             }, pos.flatten().calc(i), 0.3);
         }
     }
-    if (!vectorNear(force1, force2, 2E-2))
+    if (!vectorNear(force1, force2, 2E-3))
         exit(EXIT_FAILURE);
 }
 
@@ -153,7 +126,7 @@ void testMD() {
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-6);
 
-    constexpr double answer = 0.978;
+    constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond_mean = 0;
     ScalarType bond_var = 0;
 
@@ -167,9 +140,11 @@ void testMD() {
                 auto pos = rpmd.getPos();
                 PeriodicCell<ScalarType, 3> cell(rpmd.getLattice(), std::move(pos));
                 ScalarType temp = 0;
-                for (size_t j = 0; j < 4; ++j) {
-                    toNextMean(temp, 2 * j, cell.minDistVector(2 * 4 + j, model.getHytrogenList()[j].first).norm());
-                    toNextMean(temp, 2 * j + 1, cell.minDistVector(2 * 4 + j, model.getHytrogenList()[j].second).norm());
+                const size_t numO = rpmd.getNumParticle() / 3;
+                const size_t numH = numO * 2;
+                for (size_t j = 0; j < numO; ++j) {
+                    toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
+                    toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
                 }
                 toNextMean(bond, i, temp);
                 rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
@@ -179,7 +154,7 @@ void testMD() {
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
-    if (!scalarNear(ScalarType(0.970829), ScalarType(answer), 1E-2))
+    if (abs(bond_mean - answer) > ScalarType(4) * sqrt(bond_var))
         exit(EXIT_FAILURE);
 }
 /**
@@ -187,7 +162,6 @@ void testMD() {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    testHytrogenList();
     testForce();
     testMD();
     return 0;

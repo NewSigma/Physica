@@ -66,7 +66,6 @@ namespace Physica::Core {
     class Q_TIP4P final {
         using This = Q_TIP4P<ScalarType, PosScalarType>;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
-        using HytrogenListType = Utils::Array<std::pair<size_t, size_t>>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
         using LJModelType = PairModel<ScalarType, PosScalarType, decltype(&Internal::Traits<This>::lennardJonesPot)>;
@@ -81,7 +80,7 @@ namespace Physica::Core {
         constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
     private:
-        HytrogenListType hytrogenList;
+        size_t numMolecule;
         EwaldType ewald;
         ScalarType stepSize;
         LJModelType LJModel;
@@ -95,16 +94,14 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
-        [[nodiscard]] PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
         /* Getters */
-        [[nodiscard]] const HytrogenListType& getHytrogenList() const noexcept { return hytrogenList; }
-        [[nodiscard]] HytrogenListType& getHytrogenList() noexcept { return hytrogenList; }
-        [[nodiscard]] size_t getNumMolecule() const noexcept { return hytrogenList.getLength(); }
+        [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Helpers */
-        void guessHytrogenList(const MDCellType& refer_cell);
-        bool checkHytrogenList() const;
         void swap(Q_TIP4P& model) noexcept;
+        /* Static members */
+        [[nodiscard]] static PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
+        static PositionMatrix sortPosition(const PeriodicCell<PosScalarType, 3>& cell);
     private:
         Vector<ScalarType> makeCharges() const;
         PositionMatrix makeChargePos(const MDCellType& cell) const;
@@ -117,14 +114,10 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
-            : hytrogenList(refer_cell.getNumParticle() / 3)
+            : numMolecule(refer_cell.getNumParticle() / 3)
             , stepSize(std::move(stepSize_))
             , LJModel(std::move(cutoff_), Internal::Traits<This>::lennardJonesForce, Internal::Traits<This>::lennardJonesPot) {
         assert(refer_cell.getNumParticle() % 3 == 0);
-        for (size_t i = 0; i < getNumMolecule(); ++i) {
-            hytrogenList[i].first = i * 2;
-            hytrogenList[i].second = i * 2 + 1;
-        }
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
 
@@ -136,8 +129,8 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
+        assert(cell.getNumParticle() % 3 == 0);
         using Vector3D = Vector<PosScalarType, Dim>;
-        const size_t numMolecule = getNumMolecule();
         Vector<ScalarType> result(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
@@ -151,8 +144,8 @@ namespace Physica::Core {
             const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
                 const size_t indexO = offset + i;
-                const size_t indexH1 = hytrogenList[i].first;
-                const size_t indexH2 = hytrogenList[i].second;
+                const size_t indexH1 = 2 * i;
+                const size_t indexH2 = 2 * i + 1;
                 vecOH1 = cell.minDistVector(indexO, indexH1);
                 vecOH2 = cell.minDistVector(indexO, indexH2);
                 const PosScalarType r1 = vecOH1.norm();
@@ -190,8 +183,8 @@ namespace Physica::Core {
             Vector<ScalarType, 3> f;
             Vector3D vecMH1, vecMH2, vecH1H2;
             for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                const size_t indexH1 = hytrogenList[i - minIndexO].first;
-                const size_t indexH2 = hytrogenList[i - minIndexO].second;
+                const size_t indexH1 = 2 * (i - minIndexO);
+                const size_t indexH2 = indexH1 + 1;
                 auto forceM = coulomb.segment(3 * i, 3 * i + 3);
                 auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
                 auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
@@ -216,8 +209,8 @@ namespace Physica::Core {
             }
             /* Change representation: from partial charge representation to HOH representation */
             for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                const size_t indexH1 = hytrogenList[i - minIndexO].first;
-                const size_t indexH2 = hytrogenList[i - minIndexO].second;
+                const size_t indexH1 = 2 * (i - minIndexO);
+                const size_t indexH2 = indexH1 + 1;
                 auto forceO = coulomb.segment(3 * i, 3 * i + 3);
                 auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
                 auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
@@ -236,13 +229,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
+        std::swap(numMolecule, model.numMolecule);
+        ewald.swap(model.ewald);
+        stepSize.swap(model.stepSize);
+    }
+
+    template<class ScalarType, class PosScalarType>
     typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
     Q_TIP4P<ScalarType, PosScalarType>::makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell) {
-        PositionMatrix dipoles(getNumMolecule(), 3);
+        assert(cell.getNumParticle() % 3 == 0);
+        const size_t numMolecule = cell.getNumParticle() / 3;
+        PositionMatrix dipoles(numMolecule, 3);
         for (size_t i = 0; i < dipoles.getRow(); ++i) {
-            const size_t indexO = 2 * getNumMolecule() + i;
-            const size_t indexH1 = hytrogenList[i].first;
-            const size_t indexH2 = hytrogenList[i].second;
+            const size_t indexO = 2 * numMolecule + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
             auto dipole = dipoles.row(i);
             dipole = (cell.minDistVector(indexO, indexH1) + cell.minDistVector(indexO, indexH2)) * ScalarType(-gamma * charge);
         }
@@ -250,68 +252,53 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::guessHytrogenList(const MDCellType& refer_cell) {
-        const auto& pos = refer_cell.getPos();
-        const size_t numMolecule = getNumMolecule();
-        const size_t maxHytrogenId = refer_cell.getNumParticle() - numMolecule;
-        ScalarType bondLength1, bondLength2;
-        size_t hytrogenId1 = 0, hytrogenId2 = 0;
-        for (size_t i = 0; i < numMolecule; ++i) {
-            bondLength1 = bondLength2 = std::numeric_limits<ScalarType>::max();
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::sortPosition(const PeriodicCell<PosScalarType, 3>& cell) {
+        const auto& source = cell.getPos();
+        const size_t numAtom = source.getRow();
+        assert(numAtom % 3 == 0);
+        const size_t numH = numAtom * 2 / 3;
+        const size_t numO = numAtom / 3;
 
-            auto pos_O = pos.row(maxHytrogenId + i);
-            for (size_t j = 0; j < maxHytrogenId; ++j) {
-                auto pos_H = pos.row(j);
-                const ScalarType squared_dist = refer_cell.minDistVector(maxHytrogenId + i, j).squaredNorm();
-                if (squared_dist < bondLength1) {
-                    if (bondLength2 > bondLength1) {
-                        bondLength2 = squared_dist;
-                        hytrogenId2 = j;
-                    }
-                    else {
-                        bondLength1 = squared_dist;
-                        hytrogenId1 = j;
+        PositionMatrix result(source.getRow(), 3);
+        for (size_t i = 0; i < numO; ++i) {
+            const size_t indexO = i + numH;
+            auto posO = result.row(indexO);
+            posO = source.row(indexO).asVector();
+
+            size_t indexH1 = 0, indexH2 = 0;
+            /* Make indexH1, indexH2 */ {
+                PosScalarType dist1, dist2;
+                dist1 = dist2 = std::numeric_limits<PosScalarType>::max();
+                Utils::Array<bool> isUsed(numH, false);
+                for (size_t j = 0; j < numH; ++j) {
+                    if (!isUsed[j]) {
+                        auto posOH = cell.minDistVector(indexO, j);
+                        const PosScalarType dist = abs(posOH.norm() - equalR);
+                        if (dist1 > dist2) {
+                            if (dist1 > dist) {
+                                dist1 = dist;
+                                indexH1 = j;
+                            }
+                        }
+                        else {
+                            if (dist2 > dist) {
+                                dist2 = dist;
+                                indexH2 = j;
+                            }
+                        }
+                        isUsed[j] = true;
                     }
                 }
-                else if (squared_dist < bondLength2) {
-                    bondLength2 = squared_dist;
-                    hytrogenId2 = j;
-                }
+                if (indexH1 > indexH2)
+                    std::swap(indexH1, indexH2);
             }
-            auto& hytrogenPair = hytrogenList[i];
-            hytrogenPair.first = hytrogenId1;
-            hytrogenPair.second = hytrogenId2;
+            auto posH1 = result.row(2 * i);
+            posH1 = source.row(indexH1).asVector();
+            auto posH2 = result.row(2 * i + 1);
+            posH2 = source.row(indexH2).asVector();
         }
-    }
-
-    template<class ScalarType, class PosScalarType>
-    bool Q_TIP4P<ScalarType, PosScalarType>::checkHytrogenList() const {
-        const size_t maxHytrogenId = hytrogenList.getLength() * 2;
-        for (size_t i = 0; i < hytrogenList.getLength(); ++i) {
-            const auto& pair = hytrogenList[i];
-            if (pair.first == pair.second)
-                return false;
-
-            if (pair.first >= maxHytrogenId || pair.second >= maxHytrogenId)
-                return false;
-
-            for (size_t j = i + 1; j < hytrogenList.getLength(); ++j) {
-                const auto& pair2 = hytrogenList[j];
-                if (pair.first == pair2.first
-                 || pair.first == pair2.second
-                 || pair.second == pair2.first
-                 || pair.second == pair2.second)
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
-        hytrogenList.swap(model.hytrogenList);
-        ewald.swap(model.ewald);
-        stepSize.swap(model.stepSize);
+        return result;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -345,8 +332,10 @@ namespace Physica::Core {
         for (size_t i = minIndexO; i < maxIndexO; ++i) {
             auto chargePosO = chargePos.row(i);
             auto posO = pos.row(i);
-            vecOH1 = cell.minDistVector(i, hytrogenList[i - minIndexO].first);
-            vecOH2 = cell.minDistVector(i, hytrogenList[i - minIndexO].second);
+            const size_t indexH1 = 2 * (i - minIndexO);
+            const size_t indexH2 = indexH1 + 1;
+            vecOH1 = cell.minDistVector(i, indexH1);
+            vecOH2 = cell.minDistVector(i, indexH2);
             chargePosO = posO.asVector() + (vecOH1 + vecOH2) * ScalarType((1 - gamma) * 0.5);
         }
         return chargePos;
@@ -365,8 +354,8 @@ namespace Physica::Core {
             Vector3D vecOH1, vecOH2;
             const size_t offset = 2 * numMolecule;
             for (size_t i = 0; i < numMolecule; ++i) {
-                vecOH1 = cell.minDistVector(offset + i, hytrogenList[i].first);
-                vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
+                vecOH1 = cell.minDistVector(offset + i, 2 * i);
+                vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
                 const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
@@ -386,8 +375,8 @@ namespace Physica::Core {
             const size_t minIndexO = 2 * numMolecule;
             const size_t maxIndexO = minIndexO + numMolecule;
             for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                const size_t indexH1 = hytrogenList[i - minIndexO].first;
-                const size_t indexH2 = hytrogenList[i - minIndexO].second;
+                const size_t indexH1 = 2 * (i - minIndexO);
+                const size_t indexH2 = indexH1 + 1;
                 selfCoulomb += ScalarType(-charge * charge * 0.5) / chargeCell.minDistVector(i, indexH1).norm();
                 selfCoulomb += ScalarType(-charge * charge * 0.5) / chargeCell.minDistVector(i, indexH2).norm();
                 selfCoulomb += ScalarType(charge * charge * 0.25) / chargeCell.minDistVector(indexH1, indexH2).norm();
@@ -404,11 +393,11 @@ namespace Physica::Core {
         Vector3D vecOH1, vecOH2;
         const size_t offset = 2 * numMolecule;
         for (size_t i = 0; i < numMolecule; ++i) {
-            vecOH1 = cell.minDistVector(offset + i, hytrogenList[i].first);
-            vecOH2 = cell.minDistVector(offset + i, hytrogenList[i].second);
-            const ScalarType r1 = vecOH1.norm();
-            const ScalarType r2 = vecOH2.norm();
-            result += square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
+            vecOH1 = cell.minDistVector(offset + i, 2 * i);
+            vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
+            const PosScalarType r1 = vecOH1.norm();
+            const PosScalarType r2 = vecOH2.norm();
+            result += square(arccos(ScalarType((vecOH1 * vecOH2) / (r1 * r2))) - ScalarType(equalTheta)) * (kTheta * 0.5);
         }
         return result;
     }
