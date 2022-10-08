@@ -25,6 +25,7 @@
 
 namespace Physica::Core::Parallel {
     class ProcessExecutor {
+    public:
         using FutureType = ProcessFuture;
     public:
         static int nice_incr;

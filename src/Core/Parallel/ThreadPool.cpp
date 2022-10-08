@@ -37,7 +37,24 @@ namespace Physica::Core::Parallel {
         }
     }
 
+    std::unique_ptr<Task> ThreadPool::steal() {
+        const unsigned int threadCount = getThreadCount();
+        const unsigned int random = threadRand(getThreadInfo().randState);
+        for (size_t i = 0; i < threadCount; ++i) {
+            ThreadData& data = thread_data[(random + i) % threadCount];
+            std::unique_lock locker(data.queueMutex);
+            auto& queue = data.queue;
+            if (!queue.empty()) {
+                std::unique_ptr<Task> task(std::move(queue.front()));
+                queue.pop();
+                return task;
+            }
+        }
+        return std::unique_ptr<Task>(nullptr);
+    }
+
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
+        bindToCore(thread_id);
         auto& threadInfo = getThreadInfo();
         threadInfo.pool = this;
         threadInfo.id = thread_id;
@@ -65,6 +82,14 @@ namespace Physica::Core::Parallel {
         }
     }
 
+    void ThreadPool::bindToCore(unsigned int thread_id) {
+        cpu_set_t set;
+        CPU_ZERO(&set);
+        CPU_SET(thread_id, &set);
+        const pthread_t thread = thread_data[thread_id].thread->native_handle();
+        pthread_setaffinity_np(thread, sizeof(cpu_set_t), &set);
+    }
+
     ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() {
         if (info == nullptr) {
             info = new ThreadInfo();
@@ -79,21 +104,5 @@ namespace Physica::Core::Parallel {
         if (instance == nullptr) {
             instance = new ThreadPool(threadCount);
         }
-    }
-
-    std::unique_ptr<Task> ThreadPool::steal() {
-        const unsigned int threadCount = getThreadCount();
-        const unsigned int random = threadRand(getThreadInfo().randState);
-        for (size_t i = 0; i < threadCount; ++i) {
-            ThreadData& data = thread_data[(random + i) % threadCount];
-            std::unique_lock locker(data.queueMutex);
-            auto& queue = data.queue;
-            if (!queue.empty()) {
-                std::unique_ptr<Task> task(std::move(queue.front()));
-                queue.pop();
-                return task;
-            }
-        }
-        return std::unique_ptr<Task>(nullptr);
     }
 }
