@@ -48,17 +48,14 @@ namespace Physica::Core {
             result.setByte(i, s[i]);
         return result;
     }
-    /*!
-     * Specialization for float and double.
-     * Fix: May overflow.
-     */
+
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> floor(const Scalar<option, errorTrack>& s) {
-        return Scalar<option, errorTrack>(static_cast<size_t>(s.getTrivial()));
+        return Scalar<option, errorTrack>(std::floor(s.getTrivial()));
     }
 
     template<ScalarOption option, bool errorTrack>
     inline Scalar<option, errorTrack> ceil(const Scalar<option, errorTrack>& s) {
-        return ++floor(s);
+        return Scalar<option, errorTrack>(std::ceil(s.getTrivial()));
     }
 }
