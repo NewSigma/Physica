@@ -55,15 +55,11 @@ namespace Physica::Core {
          * Equals to ((x1 - x2) * (x2 - x3) * (x3 - x1))
          */
         template<class ScalarType>
-        inline ScalarType quadraticInterpolate_diff(ScalarType factor, ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
-            const ScalarType xx = x * 2.0;
-            const ScalarType x1_xx = x1 - xx;
-            const ScalarType x2_xx = x2 - xx;
-            const ScalarType x3_xx = x3 - xx;
+        inline ScalarType quadraticInterpolate_diff1(ScalarType factor, ScalarType step, ScalarType x2, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
             const ScalarType y1_y2 = y1 - y2;
             const ScalarType y2_y3 = y2 - y3;
             const ScalarType y3_y1 = y3 - y1;
-            return (x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / factor;
+            return -(step * y3_y1 + ScalarType(2) * (x - x2) * (y1_y2 - y2_y3)) / factor;
         }
     }
     /**

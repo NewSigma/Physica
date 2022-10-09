@@ -54,7 +54,7 @@ namespace Physica::Core {
         Vector<ScalarType> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
-        ScalarType doubleCubicStep;
+        ScalarType doubleSquareStep;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -223,7 +223,7 @@ namespace Physica::Core {
         erfc_table.swap(ewald.erfc_table);
         erfcStep.swap(ewald.erfcStep);
         repErfcStep.swap(ewald.repErfcStep);
-        doubleCubicStep.swap(ewald.doubleCubicStep);
+        doubleSquareStep.swap(ewald.doubleSquareStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -234,7 +234,7 @@ namespace Physica::Core {
         }
         erfcStep = ScalarType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
-        doubleCubicStep = square(erfcStep) * erfcStep * 2;
+        doubleSquareStep = square(erfcStep) * 2;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -260,8 +260,8 @@ namespace Physica::Core {
             const size_t index = double(temp);
             ScalarType x2 = erfcStep * floor(temp);
             auto y = erfc_table.segment(index - 1, index + 2);
-            const ScalarType factor = doubleCubicStep * x;
-            return Internal::quadraticInterpolate_diff(factor, x2 - erfcStep, x2, x2 + erfcStep, y[0], y[1], y[2], x);
+            const ScalarType factor = doubleSquareStep * x;
+            return Internal::quadraticInterpolate_diff1(factor, erfcStep, x2, y[0], y[1], y[2], x);
         }
         return 1;
     }
