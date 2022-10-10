@@ -252,7 +252,10 @@ namespace Physica::Core {
     void sincos(Scalar<option, errorTrack> s, Scalar<option, errorTrack>& sin_result, Scalar<option, errorTrack>& cos_result) {
         using TrivialType = typename Scalar<option, errorTrack>::TrivialType;
         TrivialType sin_temp, cos_temp;
-        ::sincos(s.getTrivial(), &sin_temp, &cos_temp);
+        if constexpr (option == Double)
+            ::sincos(s.getTrivial(), (double*)&sin_temp, (double*)&cos_temp);
+        else
+            ::sincosf(s.getTrivial(), (float*)&sin_temp, (float*)&cos_temp);
         sin_result = sin_temp;
         cos_result = cos_temp;
     }

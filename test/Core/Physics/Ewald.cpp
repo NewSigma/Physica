@@ -24,21 +24,26 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
 
+template<class ScalarType>
 void VASPTest() {
+    constexpr static bool isFloat = ScalarType::option == Float;
+    constexpr double prec = isFloat ? 2E-5 : 1E-5;
+
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
     CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {14}, CrystalCell::Type::Direct);
     Ewald<ScalarType> ewald(cell.getLattice(), {4});
     const auto energy = ewald.potentialEnergy(cell.getPos());
-    if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), 1E-5))
+    if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
         exit(EXIT_FAILURE);
 }
 /**
  * Reference:
  * [1] pyewald(github.com/lukeolson/pyewald)
  */
+template<class ScalarType>
 void madelungTest() {
+    constexpr static bool isFloat = ScalarType::option == Float;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
         CrystalCell NaCl({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
@@ -55,7 +60,8 @@ void madelungTest() {
         Ewald<ScalarType> ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialEnergy(NaCl.getPos());
         const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
-        if (!scalarNear(madelung, ScalarType(1.7475645946331822), 1E-7))
+        constexpr double prec = isFloat ? 1E-6 : 1E-7;
+        if (!scalarNear(madelung, ScalarType(1.7475645946331822), prec))
             exit(EXIT_FAILURE);
     }
     {
@@ -80,12 +86,17 @@ void madelungTest() {
         Ewald<ScalarType> ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        if (!scalarNear(madelung, ScalarType(1.63805505338879), 1E-8))
+        constexpr double prec = isFloat ? 1E-7 : 1E-8;
+        if (!scalarNear(madelung, ScalarType(1.63805505338879), prec))
             exit(EXIT_FAILURE);
     }
 }
 
+template<class ScalarType>
 void forceTest() {
+    constexpr static bool isFloat = ScalarType::option == Float;
+    constexpr double prec = isFloat ? 2E-2 : 1E-3;
+
     using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     using PositionMatrix = typename CrystalCell::PositionMatrix;
     using ScalarType_ = typename CrystalCell::ScalarType;
@@ -121,13 +132,16 @@ void forceTest() {
         }
     }
 
-    if (!vectorNear(force1, force2, 1E-3))
+    if (!vectorNear(force1, force2, prec))
         exit(EXIT_FAILURE);
 }
 
 int main() {
-    VASPTest();
-    madelungTest();
-    forceTest();
+    VASPTest<Scalar<Double, false>>();
+    VASPTest<Scalar<Float, false>>();
+    madelungTest<Scalar<Double, false>>();
+    madelungTest<Scalar<Float, false>>();
+    forceTest<Scalar<Double, false>>();
+    forceTest<Scalar<Float, false>>();
     return 0;
 }
