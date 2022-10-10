@@ -114,6 +114,9 @@ namespace Physica::Core {
             for (int y = -1; y <= 1; ++y) {
                 v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
                 for (int z = -1; z <= 1; ++z) {
+                    const bool isSelf = id_from == id_to;
+                    if (isSelf)
+                        continue; // We are not interested distance from particle to itself
                     v3 = v2 + lattice.row(2).asVector() * ScalarType(z) - pos_from.asVector();
                     const ScalarType squared_norm = v3.squaredNorm();
                     if (squared_norm < record_dist) {
