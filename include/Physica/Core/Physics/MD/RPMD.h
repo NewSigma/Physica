@@ -72,20 +72,22 @@ namespace Physica::Core {
         void initMomentum(RandomGenerator& gen);
         void removeDrift();
         void scaleVelocity();
+        void normalizeCentroid();
         template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
         /* Getters */
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
+        [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
         [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
         [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
-        [[nodiscard]] PeriodicCell<PosScalarType, 3> makeAverageCell() const;
-        [[nodiscard]] PositionMatrix getPos() const;
+        [[nodiscard]] PositionMatrix makeCentroidPos() const;
+        [[nodiscard]] MDCellType makeAverageCell() const;
         [[nodiscard]] PositionMatrix getMomentum() const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
 
@@ -96,7 +98,9 @@ namespace Physica::Core {
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
         template<class ForceModel>
-        [[nodiscard]] ScalarType computeKinetic(ForceModel model) const;
+        [[nodiscard]] ScalarType calcKinetic(ForceModel model) const;
+        template<class ForceModel>
+        [[nodiscard]] ScalarType calcPotential(ForceModel model) const;
         [[nodiscard]] ScalarType estimateTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
@@ -109,7 +113,6 @@ namespace Physica::Core {
         void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         void forceStep(ScalarType deltaT);
         void dynamicStep(ScalarType deltaT);
-        void normalizeCentroid();
         bool checkCentroid() const;
     };
 
@@ -170,7 +173,6 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType>::nve_step(const ForceModel& force) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep);
-        normalizeCentroid();
         updateForce<ForceModel, Executor>(force);
         forceStep(timeStep * 0.5);
     }
@@ -241,6 +243,27 @@ namespace Physica::Core {
         auto momentum = phasePosX.topRows(dof);
         momentum *= factor;
     }
+    /**
+     * Carrying out this function every several steps may stable the simulation.
+     */
+    template<class ScalarType, class PosScalarType>
+    void RPMD<ScalarType, PosScalarType>::normalizeCentroid() {
+        PositionMatrix centroid = makeCentroidPos();
+        cell.toDirect(centroid);
+        size_t index = getDOF();
+        for (const auto elem : centroid) {
+            const size_t component = index % Dim;
+            const size_t atom_start = index - component;
+            const int integer = float(elem);
+            const Vector<PosScalarType, 3> delta = PosScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
+            for (size_t i = 0; i < 3; ++i) {
+                auto row = phasePosX.row(atom_start + i);
+                row -= delta[i];
+            }
+            ++index;
+        }
+        assert(checkCentroid());
+    }
 
     template<class ScalarType, class PosScalarType>
     template<class RandomGenerator, class ForceModel, class Executor>
@@ -270,12 +293,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    PeriodicCell<PosScalarType, 3> RPMD<ScalarType, PosScalarType>::makeAverageCell() const {
-        return PeriodicCell<PosScalarType, 3>(getLattice(), getPos());
-    }
-
-    template<class ScalarType, class PosScalarType>
-    typename RPMD<ScalarType, PosScalarType>::PositionMatrix RPMD<ScalarType, PosScalarType>::getPos() const {
+    typename RPMD<ScalarType, PosScalarType>::PositionMatrix RPMD<ScalarType, PosScalarType>::makeCentroidPos() const {
         PositionMatrix result(getNumParticle(), 3);
         const size_t dof = getDOF();
         size_t index = dof;
@@ -284,6 +302,11 @@ namespace Physica::Core {
             ++index;
         }
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename RPMD<ScalarType, PosScalarType>::MDCellType RPMD<ScalarType, PosScalarType>::makeAverageCell() const {
+        return MDCellType(getLattice(), makeCentroidPos(), cell.getMassVec());
     }
 
     template<class ScalarType, class PosScalarType>
@@ -339,7 +362,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType>::computeKinetic(ForceModel model) const {
+    ScalarType RPMD<ScalarType, PosScalarType>::calcKinetic(ForceModel model) const {
         const size_t dof = getDOF();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
@@ -355,6 +378,15 @@ namespace Physica::Core {
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType, PosScalarType>::calcPotential(ForceModel model) const {
+        ScalarType result = 0;
+        for (size_t i = 0; i < getNumReplica(); ++i)
+            result += model.potentialEnergy(phaseToCell(i));
+        return result / ScalarType(getNumReplica());
     }
 
     template<class ScalarType, class PosScalarType>
@@ -467,28 +499,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void RPMD<ScalarType, PosScalarType>::normalizeCentroid() {
-        PositionMatrix centroid = getPos();
-        cell.toDirect(centroid);
-        size_t index = getDOF();
-        for (const auto elem : centroid) {
-            const size_t component = index % Dim;
-            const size_t atom_start = index - component;
-            const int integer = float(elem);
-            const Vector<PosScalarType, 3> delta = PosScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
-            for (size_t i = 0; i < 3; ++i) {
-                auto row = phasePosX.row(atom_start + i);
-                row -= delta[i];
-            }
-            ++index;
-        }
-        assert(checkCentroid());
-    }
-
-    template<class ScalarType, class PosScalarType>
     bool RPMD<ScalarType, PosScalarType>::checkCentroid() const {
         constexpr bool success = true;
-        PositionMatrix centroid = getPos();
+        PositionMatrix centroid = makeCentroidPos();
         cell.toDirect(centroid);
         for (auto& elem : centroid)
             if (!(PosScalarType::Zero() <= elem && elem <= PosScalarType::One()))

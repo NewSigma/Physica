@@ -152,7 +152,7 @@ int main() {
 
             for (unsigned int j = 0; j < 100; ++j) {
                 rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
-                toNextMean(temp, j, rpmd.computeKinetic(pair));
+                toNextMean(temp, j, rpmd.calcKinetic(pair));
             }
             toNextVariance(var, mean, i, temp);
         }
