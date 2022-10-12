@@ -45,6 +45,8 @@ namespace Physica::Core {
         template<class VectorType>
         void smooth(LValueVector<VectorType>& data) const;
         /* Getters */
+        [[nodiscard]] unsigned char getLRange() const noexcept { return lRange; }
+        [[nodiscard]] unsigned char getRRange() const noexcept { return rRange; }
         [[nodiscard]] size_t getOrder() const noexcept { return coeffs.getRow() - 1; }
         [[nodiscard]] size_t getWindowSize() const noexcept { return coeffs.getRow(); }
     };
