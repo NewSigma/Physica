@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -64,9 +64,9 @@ namespace Physica::Core {
         ~Ewald() = default;
         /* Operators */
         Ewald& operator=(Ewald ewald) noexcept;
+        /* Operations */
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
         [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
-        /* Operations */
         void swap(Ewald& ewald) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }

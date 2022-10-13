@@ -137,8 +137,7 @@ void testMD() {
             rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
             ScalarType bond = 0;
             for (size_t i = 0; i < 100; ++i) {
-                auto pos = rpmd.getPos();
-                PeriodicCell<ScalarType, 3> cell(rpmd.getLattice(), std::move(pos));
+                const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
                 ScalarType temp = 0;
                 const size_t numO = rpmd.getNumParticle() / 3;
                 const size_t numH = numO * 2;

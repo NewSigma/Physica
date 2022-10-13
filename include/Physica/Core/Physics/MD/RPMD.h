@@ -58,22 +58,22 @@ namespace Physica::Core {
     public:
         RPMD(MDCellType cell_, size_t numReplica, ScalarType temperatureT_, ScalarType thermostatTime_, ScalarType timeStep_);
         /* Operations */
-        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class ForceModel, class Executor>
         void updateForce(const ForceModel& model);
-        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class RandomGenerator, class ForceModel, class Executor>
         void nvt_step(RandomGenerator& gen, const ForceModel& force);
-        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class ForceModel, class Executor>
         void nve_step(const ForceModel& force);
-        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class RandomGenerator, class ForceModel, class Executor>
         void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force);
-        template<class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class ForceModel, class Executor>
         void nve_step_for(ScalarType duration, const ForceModel& force);
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
         void removeDrift();
         void scaleVelocity();
         void normalizeCentroid();
-        template<class RandomGenerator, class ForceModel, class Executor = Parallel::SequentialExecutor>
+        template<class RandomGenerator, class ForceModel, class Executor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
         /* Getters */
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
@@ -93,15 +93,14 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType getClassicalKinetic() const;
         template<class ForceModel>
-        [[nodiscard]] ScalarType getClassicalPotentialEnergy(ForceModel model) const;
+        [[nodiscard]] ScalarType getClassicalPotentialEnergy(const ForceModel& model) const;
         [[nodiscard]] ScalarType getClassicalElastic() const;
         template<class ForceModel>
-        [[nodiscard]] ScalarType getClassicalInternalEnergy(ForceModel model) const;
-        template<class ForceModel>
-        [[nodiscard]] ScalarType calcKinetic(ForceModel model) const;
-        template<class ForceModel>
-        [[nodiscard]] ScalarType calcPotential(ForceModel model) const;
-        [[nodiscard]] ScalarType estimateTemperature() const;
+        [[nodiscard]] ScalarType getClassicalInternalEnergy(const ForceModel& model) const;
+        [[nodiscard]] ScalarType calcKinetic() const;
+        template<class ForceModel, class Executor>
+        [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
+        [[nodiscard]] ScalarType calcTemperature() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
@@ -236,7 +235,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void RPMD<ScalarType, PosScalarType>::scaleVelocity() {
-        const ScalarType temperatureNow = estimateTemperature();
+        const ScalarType temperatureNow = calcTemperature();
         assert(temperatureNow.isPositive());
         const size_t dof = getDOF();
         const ScalarType factor = sqrt(temperatureT / temperatureNow);
@@ -334,7 +333,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType>::getClassicalPotentialEnergy(ForceModel model) const {
+    ScalarType RPMD<ScalarType, PosScalarType>::getClassicalPotentialEnergy(const ForceModel& model) const {
         ScalarType result = 0;
         for (size_t i = 0; i < getNumReplica(); ++i)
             result += model.potentialEnergy(phaseToCell(i));
@@ -356,13 +355,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType>::getClassicalInternalEnergy(ForceModel model) const {
+    ScalarType RPMD<ScalarType, PosScalarType>::getClassicalInternalEnergy(const ForceModel& model) const {
         return getClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model) + getClassicalElastic();
     }
 
     template<class ScalarType, class PosScalarType>
-    template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType>::calcKinetic(ForceModel model) const {
+    ScalarType RPMD<ScalarType, PosScalarType>::calcKinetic() const {
         const size_t dof = getDOF();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
@@ -370,27 +368,27 @@ namespace Physica::Core {
 
         ScalarType kinetic = repBeta * dof;
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto col = phasePosX.col(replica);
-            auto pos = col.tail(dof);
-            MDCellType cell = phaseToCell(replica);
-            cell.normalizeCell();
-            kinetic += (averaged_pos - pos) * model.force(std::move(cell));
+            auto phase = phasePosX.col(replica);
+            auto pos = phase.tail(dof);
+            kinetic += (averaged_pos - pos) * forceBuffer.col(replica);
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;
     }
 
     template<class ScalarType, class PosScalarType>
-    template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType>::calcPotential(ForceModel model) const {
-        ScalarType result = 0;
-        for (size_t i = 0; i < getNumReplica(); ++i)
-            result += model.potentialEnergy(phaseToCell(i));
-        return result / ScalarType(getNumReplica());
+    template<class ForceModel, class Executor>
+    ScalarType RPMD<ScalarType, PosScalarType>::calcPotential(const ForceModel& model) const {
+        Vector<ScalarType> temp(getNumReplica());
+        auto kernel = [this, model, &temp](unsigned int replica) {
+            temp[replica] = model.potentialEnergy(phaseToCell(replica));
+        };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        return mean(temp);
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType RPMD<ScalarType, PosScalarType>::estimateTemperature() const {
+    ScalarType RPMD<ScalarType, PosScalarType>::calcTemperature() const {
         return getClassicalKinetic() * (2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica());
     }
 
