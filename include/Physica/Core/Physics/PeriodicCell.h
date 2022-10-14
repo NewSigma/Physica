@@ -103,21 +103,19 @@ namespace Physica::Core {
     Vector<ScalarType, 3> PeriodicCell<ScalarType, Dim>::minDistVector(size_t id_from, size_t id_to) const {
         using Vector3D = Vector<ScalarType, 3>;
 
-        auto pos_from = pos.row(id_from);
-        auto pos_to = pos.row(id_to);
-
         ScalarType record_dist = std::numeric_limits<ScalarType>::max();
         Vector3D result{};
         Vector3D v1, v2, v3;
+        const Vector3D delta = pos.row(id_to).asVector() - pos.row(id_from).asVector();
         for (int x = -1; x <= 1; ++x) {
-            v1 = pos_to.asVector() + lattice.row(0).asVector() * ScalarType(x);
+            v1 = delta + lattice.row(0).asVector() * ScalarType(x);
             for (int y = -1; y <= 1; ++y) {
                 v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
                 for (int z = -1; z <= 1; ++z) {
                     const bool isSelf = id_from == id_to;
                     if (isSelf)
                         continue; // We are not interested distance from particle to itself
-                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z) - pos_from.asVector();
+                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
                     const ScalarType squared_norm = v3.squaredNorm();
                     if (squared_norm < record_dist) {
                         record_dist = squared_norm;

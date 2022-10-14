@@ -103,7 +103,7 @@ void testForce() {
     const auto cell = makeSystem(1, gen);
     const auto& pos = cell.getPos();
     const ForceModel model(cell, pair_cutoff, 1E-6);
-    const Vector<ScalarType> force1 = model.force(cell);
+    const Vector<ScalarType> force1 = model.template force<SequentialExecutor>(cell);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
         for (size_t i = 0; i < force2.getLength(); ++i) {

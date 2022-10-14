@@ -19,12 +19,19 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 namespace Physica::Core::Parallel {
-    void ThreadExecutor::wait(FutureType& future) {
+    void ThreadExecutor::auto_wait(FutureType& future) {
         const auto nano = std::chrono::nanoseconds(1);
         while (future.wait_for(nano) != std::future_status::ready) {
             std::unique_ptr<Task> task = ThreadPool::getInstance().steal();
             if (task != nullptr)
                 task->execute();
+            else
+                std::this_thread::yield();
         }
+    }
+
+    void ThreadExecutor::auto_wait(FutureGroup<FutureType>& group) {
+        for (auto& future : group.getFutures())
+            auto_wait(future);
     }
 }

@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -120,7 +121,7 @@ void forceTest() {
         3.052176714,  2.816649675,  2.054240227
     };
     const Ewald<ScalarType, ScalarType_> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    const auto force1 = ewald.force(pos);
+    const auto force1 = ewald.template force<Parallel::SequentialExecutor>(pos);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
         for (size_t i = 0; i < force2.getLength(); ++i) {

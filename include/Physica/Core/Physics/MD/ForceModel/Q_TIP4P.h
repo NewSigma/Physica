@@ -92,6 +92,7 @@ namespace Physica::Core {
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
@@ -128,55 +129,61 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    template<class Executor>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         using Vector3D = Vector<PosScalarType, Dim>;
-        Vector<ScalarType> result(3 * numMolecule * Dim, 0);
-        /* LJ */ {
-            const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma);
-            auto force = result.tail(2 * numMolecule * Dim);
-            force = LJModel.force(cellWithoutH) * factor;
-        }
-        /* Intra molecule */ {
-            Vector3D vecOH1, vecOH2;
-            Vector<ScalarType, 3> f;
-            const size_t offset = 2 * numMolecule;
-            for (size_t i = 0; i < numMolecule; ++i) {
-                const size_t indexO = offset + i;
-                const size_t indexH1 = 2 * i;
-                const size_t indexH2 = 2 * i + 1;
-                vecOH1 = cell.minDistVector(indexO, indexH1);
-                vecOH2 = cell.minDistVector(indexO, indexH2);
-                const PosScalarType r1 = vecOH1.norm();
-                const PosScalarType r2 = vecOH2.norm();
-                auto forceO = result.segment(3 * indexO, 3 * indexO + 3);
-                auto forceH1 = result.segment(3 * indexH1, 3 * indexH1 + 3);
-                auto forceH2 = result.segment(3 * indexH2, 3 * indexH2 + 3);
-
-                f = vecOH1 * (modifiedMorseForce(r1) / r1);
-                forceO -= f;
-                forceH1 += f;
-                
-                f = vecOH2 * (modifiedMorseForce(r2) / r2);
-                forceO -= f;
-                forceH2 += f;
+        
+        Vector<ScalarType> result;
+        auto future = Executor::schedule([this, &cell, &result]() {
+            Vector<ScalarType> noCoulombForce(3 * numMolecule * Dim, 0);
+            /* LJ */ {
+                const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
+                const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma);
+                auto force = noCoulombForce.tail(2 * numMolecule * Dim);
+                force = LJModel.template force<Executor>(cellWithoutH) * factor;
             }
+            /* Intra molecule */ {
+                Vector3D vecOH1, vecOH2;
+                Vector<ScalarType, 3> f;
+                const size_t offset = 2 * numMolecule;
+                for (size_t i = 0; i < numMolecule; ++i) {
+                    const size_t indexO = offset + i;
+                    const size_t indexH1 = 2 * i;
+                    const size_t indexH2 = 2 * i + 1;
+                    vecOH1 = cell.minDistVector(indexO, indexH1);
+                    vecOH2 = cell.minDistVector(indexO, indexH2);
+                    const PosScalarType r1 = vecOH1.norm();
+                    const PosScalarType r2 = vecOH2.norm();
+                    auto forceO = noCoulombForce.segment(3 * indexO, 3 * indexO + 3);
+                    auto forceH1 = noCoulombForce.segment(3 * indexH1, 3 * indexH1 + 3);
+                    auto forceH2 = noCoulombForce.segment(3 * indexH2, 3 * indexH2 + 3);
 
-            for (size_t i = 0; i < result.getLength(); ++i) {
-                result[i] += -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
-                    PositionMatrix pos = cell.getPos();
-                    *(pos.begin() + i) = x;
-                    MDCellType temp(cell.getLattice(), std::move(pos), cell.getMassVec());
-                    return elasticEnergy(temp);
-                }, ScalarType(cell.getPos().flatten().calc(i)), stepSize);
+                    f = vecOH1 * (modifiedMorseForce(r1) / r1);
+                    forceO -= f;
+                    forceH1 += f;
+                    
+                    f = vecOH2 * (modifiedMorseForce(r2) / r2);
+                    forceO -= f;
+                    forceH2 += f;
+                }
+
+                for (size_t i = 0; i < noCoulombForce.getLength(); ++i) {
+                    noCoulombForce[i] += -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
+                        PositionMatrix pos = cell.getPos();
+                        *(pos.begin() + i) = x;
+                        MDCellType temp(cell.getLattice(), std::move(pos), cell.getMassVec());
+                        return elasticEnergy(temp);
+                    }, ScalarType(cell.getPos().flatten().calc(i)), stepSize);
+                }
             }
-        }
+            result = std::move(noCoulombForce);
+        });
+        
         Vector<ScalarType> coulomb;
         /* Coulomb Part */ {
             const PositionMatrix chargePos = makeChargePos(cell);
-            coulomb = ewald.force(chargePos);
-
+            coulomb = ewald.template force<Executor>(chargePos);
             PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos);
             const size_t minIndexO = 2 * numMolecule;
             const size_t maxIndexO = minIndexO + numMolecule;
@@ -220,7 +227,9 @@ namespace Physica::Core {
                 forceO *= ScalarType(gamma);
             }
         }
-        return result + coulomb;
+        Executor::auto_wait(future);
+        result += coulomb;
+        return result;
     }
 
     template<class ScalarType, class PosScalarType>

@@ -34,6 +34,7 @@ namespace Physica::Core::Parallel {
      * Eigen https://eigen.tuxfamily.org/
      */
     class ThreadPool {
+        constexpr static size_t MainThreadID = std::numeric_limits<size_t>::max();
     public:
         struct ThreadData {
             std::unique_ptr<std::thread> thread;
@@ -44,9 +45,9 @@ namespace Physica::Core::Parallel {
         };
 
         struct ThreadInfo {
-            ThreadPool* pool;
-            uint64_t randState;
             size_t id;
+            size_t numScheduled;
+            uint64_t randState;
         };
     private:
         static ThreadPool* instance;
@@ -71,6 +72,7 @@ namespace Physica::Core::Parallel {
         void shouldExit() { exit = true; }
         /* Static Members */
         [[nodiscard]] static ThreadInfo& getThreadInfo();
+        [[nodiscard]] static inline bool isMainThread() noexcept;
         static void initThreadPool(unsigned int threadCount);
         static void deInitThreadPool() { delete instance; instance = nullptr; }
         [[nodiscard]] static ThreadPool& getInstance() { return *instance; }
@@ -84,22 +86,34 @@ namespace Physica::Core::Parallel {
         [[nodiscard]] static inline unsigned int threadRand(uint64_t& state);
     };
 
+    template<class Function, class ... Args>
+    std::future<typename std::invoke_result<Function, Args...>::type> ThreadPool::schedule(Function func, Args... args) {
+        using ResultType = typename std::invoke_result<Function, Args...>::type;
+        unsigned int schedule_to;
+        auto& info = getThreadInfo();
+        if (isMainThread())
+            schedule_to = info.numScheduled % getThreadCount();
+        else
+            schedule_to = info.id;
+        info.numScheduled += 1;
+
+        std::packaged_task<ResultType()> task(std::bind(func, args...));
+        auto result = task.get_future();
+        auto& data = thread_data[schedule_to];
+        data.queueMutex.lock();
+        data.queue.emplace(new PackagedTask(std::move(task)));
+        data.queueMutex.unlock();
+        return result;
+    }
+
+    inline bool ThreadPool::isMainThread() noexcept {
+        return getThreadInfo().id == MainThreadID;
+    }
+
     inline unsigned int ThreadPool::threadRand(uint64_t& state) {
         uint64_t current = state;
         state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
         // Generate the random output (using the PCG-XSH-RS scheme)
         return static_cast<unsigned int>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
-    }
-
-    template<class Function, class ... Args>
-    std::future<typename std::invoke_result<Function, Args...>::type> ThreadPool::schedule(Function func, Args... args) {
-        using ResultType = typename std::invoke_result<Function, Args...>::type;
-        std::packaged_task<ResultType()> task(std::bind(func, args...));
-        auto result = task.get_future();
-        unsigned int random_id = threadRand(getThreadInfo().randState) % thread_data.size();
-        auto& data = thread_data[random_id];
-        std::lock_guard lock(data.queueMutex);
-        data.queue.emplace(new PackagedTask(std::move(task)));
-        return result;
     }
 }

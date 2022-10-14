@@ -32,7 +32,8 @@ namespace Physica::Core::Parallel {
         static FutureType schedule(Functor func, Args... args);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core);
-        static void wait([[maybe_unused]] FutureType& future) {}
+        static void auto_wait([[maybe_unused]] FutureType& future) {}
+        static void auto_wait([[maybe_unused]] FutureGroup<FutureType>& group) {}
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
     };

@@ -56,7 +56,6 @@ namespace Physica::Core::Parallel {
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
         bindToCore(thread_id);
         auto& threadInfo = getThreadInfo();
-        threadInfo.pool = this;
         threadInfo.id = thread_id;
         auto& data = thread_data[thread_id];
         auto& queue = data.queue;
@@ -93,9 +92,9 @@ namespace Physica::Core::Parallel {
     ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() {
         if (info == nullptr) {
             info = new ThreadInfo();
-            info->pool = nullptr;
+            info->id = MainThreadID;
+            info->numScheduled = 0;
             info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
-            info->id = 0;
         }
         return *info;
     }

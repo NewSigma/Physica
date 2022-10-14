@@ -37,5 +37,7 @@ namespace Physica::Core::Parallel {
         void append(FutureType future) {
             futures.push_back(std::move(future));
         }
+
+        [[nodiscard]] std::vector<FutureType>& getFutures() noexcept { return futures; }
     };
 }

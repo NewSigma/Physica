@@ -47,6 +47,7 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
@@ -68,6 +69,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
+    template<class Executor>
     Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
         using VectorType = Vector<PosScalarType, Dim>;
         const auto& lattice = cell.getLattice();

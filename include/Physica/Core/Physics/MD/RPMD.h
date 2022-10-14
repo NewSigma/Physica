@@ -151,9 +151,10 @@ namespace Physica::Core {
             MDCellType cell = phaseToCell(replica);
             cell.normalizeCell();
             auto saveTo = forceBuffer.col(replica);
-            saveTo = model.force(std::move(cell));
+            saveTo = model.template force<Executor>(std::move(cell));
         };
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        auto future = Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread());
+        Executor::auto_wait(future);
     }
 
     template<class ScalarType, class PosScalarType>
