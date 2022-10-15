@@ -94,15 +94,26 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
     cell.unitToSuper(cellSize, cellSize, cellSize);
-    const CrystalCell sortted(cell.getLattice(), Q_TIP4P<ScalarType, Scalar<Float, false>>::sortPosition(cell), cell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-    return MDCell<ScalarType, PosScalarType>(std::move(sortted));
+    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+}
+
+void testSort() {
+    using CellType = MDCell<ScalarType, PosScalarType>;
+    using PositionMatrix = typename CellType::PositionMatrix;
+    std::mt19937 gen{};
+    CellType cell = makeSystem(3, gen);
+    const CellType origin_cell = cell;
+    auto order = ForceModel::sortPosition(cell);
+    PositionMatrix result = order.transpose() * cell.getPos();
+    if (!matrixNear(result, origin_cell.getPos(), 1E-15))
+        exit(EXIT_FAILURE);
 }
 
 void testForce() {
     std::mt19937 gen(9806048078107704755UL);
-    const auto cell = makeSystem(1, gen);
+    auto cell = makeSystem(1, gen);
+    ForceModel model(cell, pair_cutoff, 1E-6);
     const auto& pos = cell.getPos();
-    const ForceModel model(cell, pair_cutoff, 1E-6);
     const Vector<ScalarType> force1 = model.template force<SequentialExecutor>(cell);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
@@ -122,9 +133,10 @@ void testForce() {
 void testMD() {
     std::mt19937 gen(12989825518855205292UL);
 
-    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, temperatureT, thermostatTime, timeStep);
+    auto cell = makeSystem(1, gen);
+    ForceModel model(cell, pair_cutoff, 1E-6);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-6);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond_mean = 0;
@@ -161,6 +173,7 @@ void testMD() {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
+    testSort();
     testForce();
     testMD();
     return 0;

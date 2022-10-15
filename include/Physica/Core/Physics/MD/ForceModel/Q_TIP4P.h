@@ -21,6 +21,7 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
@@ -102,7 +103,7 @@ namespace Physica::Core {
         void swap(Q_TIP4P& model) noexcept;
         /* Static members */
         [[nodiscard]] static PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
-        static PositionMatrix sortPosition(const PeriodicCell<PosScalarType, 3>& cell);
+        static PermutationMatrix<PosScalarType> sortPosition(PeriodicCell<PosScalarType, 3>& cell);
     private:
         Vector<ScalarType> makeCharges() const;
         PositionMatrix makeChargePos(const MDCellType& cell) const;
@@ -261,18 +262,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
-    Q_TIP4P<ScalarType, PosScalarType>::sortPosition(const PeriodicCell<PosScalarType, 3>& cell) {
+    PermutationMatrix<PosScalarType> Q_TIP4P<ScalarType, PosScalarType>::sortPosition(PeriodicCell<PosScalarType, 3>& cell) {
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
         assert(numAtom % 3 == 0);
         const size_t numH = numAtom * 2 / 3;
         const size_t numO = numAtom / 3;
 
-        PositionMatrix result(source.getRow(), 3);
+        PositionMatrix new_pos(source.getRow(), 3);
+        Utils::Array<size_t> order(numAtom);
         for (size_t i = 0; i < numO; ++i) {
             const size_t indexO = i + numH;
-            auto posO = result.row(indexO);
+            auto posO = new_pos.row(indexO);
             posO = source.row(indexO).asVector();
 
             size_t indexH1 = 0, indexH2 = 0;
@@ -302,12 +303,17 @@ namespace Physica::Core {
                 if (indexH1 > indexH2)
                     std::swap(indexH1, indexH2);
             }
-            auto posH1 = result.row(2 * i);
+            auto posH1 = new_pos.row(2 * i);
             posH1 = source.row(indexH1).asVector();
-            auto posH2 = result.row(2 * i + 1);
+            order[2 * i] = indexH1;
+
+            auto posH2 = new_pos.row(2 * i + 1);
             posH2 = source.row(indexH2).asVector();
+            order[2 * i + 1] = indexH2;
+            order[numH + i] = numH + i;
         }
-        return result;
+        cell.setPos(new_pos);
+        return PermutationMatrix<PosScalarType>(std::move(order));
     }
 
     template<class ScalarType, class PosScalarType>

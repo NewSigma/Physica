@@ -75,6 +75,7 @@ namespace Physica::Core {
         void normalizeCentroid();
         template<class RandomGenerator, class ForceModel, class Executor>
         [[nodiscard]] bool isStableNVT(size_t numStep, RandomGenerator& gen, const ForceModel& force, double precision);
+        void checkParam() const;
         /* Getters */
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
@@ -142,6 +143,7 @@ namespace Physica::Core {
             }
         }
         setTemperature(temperatureT_);
+        checkParam();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -278,6 +280,14 @@ namespace Physica::Core {
         }
         const ScalarType factor = ScalarType(getDOF() * getNumReplica()) / ScalarType(getDOF() * getNumReplica() + 2);
         return scalarNear(square(kinetic), factor * squared_kinetic, precision);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void RPMD<ScalarType, PosScalarType>::checkParam() const {
+        const ScalarType cycle = ScalarType(2 * M_PI) / omegaW;
+        bool isSmallEnough = timeStep < cycle / ScalarType(4);
+        if (!isSmallEnough)
+            throw std::invalid_argument("[Error]: Time step is too large");
     }
 
     template<class ScalarType, class PosScalarType>

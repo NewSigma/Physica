@@ -66,13 +66,9 @@ namespace Physica::Core {
         size_t index = 0;
         for (size_t atom = 0; atom < numAtom; ++atom) {
             const auto atomic = atomicNumbers[atom];
-            for (unsigned int z_ = 0; z_ < z; ++z_) {
-                for (unsigned int y_ = 0; y_ < y; ++y_) {
-                    for (unsigned int x_ = 0; x_ < x; ++x_) {
-                        new_atomic[index] = atomic;
-                        ++index;
-                    }
-                }
+            for (unsigned int _ = 0; _ < x * y * z; ++_) {
+                new_atomic[index] = atomic;
+                ++index;
             }
         }
         atomicNumbers.swap(new_atomic);

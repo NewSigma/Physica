@@ -64,6 +64,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
         [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const { return ReciprocalCell(lattice); }
         [[nodiscard]] ScalarType getVolume() const noexcept { return getVolume(lattice); }
+        /* Setters */
+        void setPos(PositionMatrix new_pos) noexcept { pos = std::move(new_pos); }
         /* Helper */
         void swap(PeriodicCell& cell) noexcept;
         /* Static members */
