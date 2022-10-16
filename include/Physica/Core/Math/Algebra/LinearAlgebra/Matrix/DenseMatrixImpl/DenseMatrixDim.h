@@ -32,7 +32,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row && column_ == Column); }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
@@ -51,7 +51,7 @@ namespace Physica::Core {
         }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(column_ == Column); }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
@@ -70,7 +70,7 @@ namespace Physica::Core {
             return size / getRow();
         }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };

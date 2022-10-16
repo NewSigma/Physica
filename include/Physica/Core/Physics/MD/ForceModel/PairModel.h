@@ -49,6 +49,10 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
     };

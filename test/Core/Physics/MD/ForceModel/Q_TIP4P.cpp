@@ -135,7 +135,7 @@ void testMD() {
 
     auto cell = makeSystem(1, gen);
     ForceModel model(cell, pair_cutoff, 1E-6);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, temperatureT, thermostatTime, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);

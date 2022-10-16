@@ -124,7 +124,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, temperatureT, thermostatTime, timeStep);
+    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
 }
 /**
  * Reference:

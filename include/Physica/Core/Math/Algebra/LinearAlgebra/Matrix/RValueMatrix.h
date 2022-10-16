@@ -94,6 +94,9 @@ namespace Physica::Core {
         [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
         [[nodiscard]] Flatten<Derived> flatten() const noexcept;
         [[nodiscard]] ScalarType sum() const { return Base::getDerived().sum(); }
+        /* Static members */
+        [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
+        [[nodiscard]] static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::columnFromMajorMinor<Derived>(major, minor); }
     };
 
     template<class MatrixType, class MatrixType2>

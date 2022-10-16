@@ -103,7 +103,7 @@ int main() {
     Cycler::init();
     std::mt19937 gen{};
 
-    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, temperatureT, thermostatTime, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-6);
     {
