@@ -28,7 +28,10 @@ if(${DEBUG_MODE})
     set(CMAKE_CXX_FLAGS -O0)
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
 else()
-    set(CMAKE_CXX_FLAGS -O2)
+    set(CMAKE_CXX_FLAGS "-O2 \
+                         -fno-math-errno \
+                         -fno-signaling-nans \
+                         -fno-trapping-math")
 endif()
 
 set(CMAKE_CXX_FLAGS "\
