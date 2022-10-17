@@ -112,7 +112,7 @@ void testSort() {
 void testForce() {
     std::mt19937 gen(9806048078107704755UL);
     auto cell = makeSystem(1, gen);
-    ForceModel model(cell, pair_cutoff, 1E-6);
+    ForceModel model(cell, pair_cutoff);
     const auto& pos = cell.getPos();
     const Vector<ScalarType> force1 = model.template force<SequentialExecutor>(cell);
     Vector<ScalarType> force2(force1.getLength());
@@ -134,7 +134,7 @@ void testMD() {
     std::mt19937 gen(12989825518855205292UL);
 
     auto cell = makeSystem(1, gen);
-    ForceModel model(cell, pair_cutoff, 1E-6);
+    ForceModel model(cell, pair_cutoff);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
 

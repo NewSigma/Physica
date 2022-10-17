@@ -14,6 +14,7 @@ option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_TORCH "Enable Torch support" OFF)
 set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
+include(cmake/Modules/FindSIMD.cmake)
 
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")

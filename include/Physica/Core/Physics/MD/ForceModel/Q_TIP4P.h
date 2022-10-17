@@ -83,10 +83,9 @@ namespace Physica::Core {
     private:
         size_t numMolecule;
         EwaldType ewald;
-        ScalarType stepSize;
         LJModelType LJModel;
     public:
-        Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_);
+        Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_);
         Q_TIP4P(const Q_TIP4P&) = default;
         Q_TIP4P(Q_TIP4P&&) noexcept = default;
         ~Q_TIP4P() = default;
@@ -113,15 +112,13 @@ namespace Physica::Core {
         PositionMatrix makeChargePos(const MDCellType& cell) const;
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
-        ScalarType elasticEnergy(const MDCellType& cell) const;
         static ScalarType modifiedMorsePot(ScalarType r);
         static ScalarType modifiedMorseForce(ScalarType r);
     };
 
     template<class ScalarType, class PosScalarType>
-    Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, ScalarType stepSize_)
+    Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_)
             : numMolecule(refer_cell.getNumParticle() / 3)
-            , stepSize(std::move(stepSize_))
             , LJModel(std::move(cutoff_), Internal::Traits<This>::lennardJonesForce, Internal::Traits<This>::lennardJonesPot) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
@@ -187,13 +184,36 @@ namespace Physica::Core {
                 forceH2 += f;
             }
 
-            for (size_t i = 0; i < shortForce.getLength(); ++i) {
-                shortForce[i] += -Differential<ScalarType>::doublePoint([this, i, &cell](ScalarType x) -> ScalarType {
-                    PositionMatrix pos = cell.getPos();
-                    *(pos.begin() + i) = x;
-                    MDCellType temp(cell.getLattice(), std::move(pos), cell.getMassVec());
-                    return elasticEnergy(temp);
-                }, ScalarType(cell.getPos().flatten().calc(i)), stepSize);
+            Vector3D force1, force2;
+            for (size_t i = 0; i < numMolecule; ++i) {
+                vecOH1 = cell.minDistVector(offset + i, 2 * i);
+                vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
+                const PosScalarType rep_r1 = reciprocal(vecOH1.norm());
+                const PosScalarType rep_r2 = reciprocal(vecOH2.norm());
+                const ScalarType u = (vecOH1 * vecOH2) * (rep_r1 * rep_r2);
+                const ScalarType temp = reciprocal(sqrt(ScalarType(1) - square(u)));
+                const ScalarType factor1 = square(rep_r1) * u * temp;
+                const ScalarType factor2 = square(rep_r2) * u * temp;
+                const ScalarType factor3 = rep_r1 * rep_r2 * temp;
+
+                for (int i = 0; i < 3; ++i) {
+                    force1[i] = vecOH1[i] * factor1 - vecOH2[i] * factor3;
+                    force2[i] = vecOH2[i] * factor2 - vecOH1[i] * factor3;
+                }
+                const ScalarType theta = arccos(u);
+                const ScalarType factor = (ScalarType(equalTheta) - theta) * kTheta;
+                force1 *= factor;
+                force2 *= factor;
+
+                const size_t indexO = offset + i;
+                const size_t indexH1 = 2 * i;
+                const size_t indexH2 = 2 * i + 1;
+                auto forceO = shortForce.segment(3 * indexO, 3 * indexO + 3);
+                auto forceH1 = shortForce.segment(3 * indexH1, 3 * indexH1 + 3);
+                auto forceH2 = shortForce.segment(3 * indexH2, 3 * indexH2 + 3);
+                forceH1 += force1;
+                forceH2 += force2;
+                forceO -= (force1 + force2);
             }
         }
         return shortForce;
@@ -264,7 +284,6 @@ namespace Physica::Core {
     void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
         std::swap(numMolecule, model.numMolecule);
         ewald.swap(model.ewald);
-        stepSize.swap(model.stepSize);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -420,23 +439,6 @@ namespace Physica::Core {
             }
         }
         return ewald.potentialEnergy(chargePos) - selfCoulomb;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType>::elasticEnergy(const MDCellType& cell) const {
-        using Vector3D = Vector<PosScalarType, Dim>;
-        const size_t numMolecule = getNumMolecule();
-        ScalarType result = 0;
-        Vector3D vecOH1, vecOH2;
-        const size_t offset = 2 * numMolecule;
-        for (size_t i = 0; i < numMolecule; ++i) {
-            vecOH1 = cell.minDistVector(offset + i, 2 * i);
-            vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
-            const PosScalarType r1 = vecOH1.norm();
-            const PosScalarType r2 = vecOH2.norm();
-            result += square(arccos(ScalarType((vecOH1 * vecOH2) / (r1 * r2))) - ScalarType(equalTheta)) * (kTheta * 0.5);
-        }
-        return result;
     }
 
     template<class ScalarType, class PosScalarType>

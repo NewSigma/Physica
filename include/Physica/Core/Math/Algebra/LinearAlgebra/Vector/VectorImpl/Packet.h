@@ -25,6 +25,7 @@
     #include "vectorclass/vectorclass.h"
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
+#include "Physica/SIMD.h"
 
 namespace Physica::Core::Internal {
     template<>

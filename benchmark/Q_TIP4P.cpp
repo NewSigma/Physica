@@ -105,7 +105,7 @@ int main() {
 
     RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff, 1E-6);
+    ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
     {
         const auto from = Cycler::tic();
         rpmd.nvt_step_for<decltype(gen), decltype(model), SequentialExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), gen, model);
