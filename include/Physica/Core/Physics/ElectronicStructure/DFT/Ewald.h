@@ -35,6 +35,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType = ScalarType>
     class Ewald {
         constexpr static unsigned int Dim = 3;
+        constexpr static unsigned int NumAtomPerCore = 64;
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
         using SearchRangeType = typename PeriodicCell<PosScalarType, Dim>::SearchRangeType;
@@ -112,7 +113,7 @@ namespace Physica::Core {
     Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> result;
-        auto future = Executor::schedule([this, numParticle, &pos, &result]() {
+        auto kSpaceFuture = Executor::schedule([this, numParticle, &pos, &result]() {
             Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
             const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
             Vector<ScalarType> buffer(numParticle * 2);
@@ -146,25 +147,49 @@ namespace Physica::Core {
             result = std::move(kSpaceSum);
         });
         Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
-        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
-                for (size_t i = 0; i < numParticle; ++i) {
-                    const Vector3D pos_i = pos.row(i).asVector() + delta;
-                    Vector<ScalarType, Dim> sum(Dim, 0);
-                    for (size_t j = 0; j < numParticle; ++j) {
-                        if (j == i)
-                            continue;
-                        const Vector3D pos_ij = pos_i - pos.row(j).asVector();
-                        const ScalarType r2 = ScalarType(pos_ij.squaredNorm());
-                        const ScalarType r = sqrt(r2);
-                        const ScalarType charge = charges[j];
-                        const ScalarType temp = calcFromTable_diff(r) * (charge);
-                        sum += temp * pos_ij;
+        const bool isSmallSystem = numParticle <= NumAtomPerCore;
+        if (isSmallSystem) {
+            PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        const Vector3D pos_i = pos.row(i).asVector() + delta;
+                        Vector<ScalarType, Dim> sum(Dim, 0);
+                        for (size_t j = 0; j < numParticle; ++j) {
+                            if (j == i)
+                                continue;
+                            const Vector3D pos_ij = pos_i - pos.row(j).asVector();
+                            const ScalarType r2 = ScalarType(pos_ij.squaredNorm());
+                            const ScalarType r = sqrt(r2);
+                            const ScalarType charge = charges[j];
+                            const ScalarType temp = calcFromTable_diff(r) * (charge);
+                            sum += temp * pos_ij;
+                        }
+                        auto force_i = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
+                        force_i += charges[i] * sum;
                     }
-                    auto force_i = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
-                    force_i += charges[i] * sum;
-                }
-            });
-        Executor::auto_wait(future);
+                });
+        }
+        else {
+            auto rSpaceFuture = Executor::parallel_for([this, numParticle, &pos, &rSpaceSum](unsigned int i) {
+                Vector<ScalarType, Dim> sum(Dim, 0);
+                PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, i, numParticle, &pos, &sum](Vector3D delta) {
+                        const Vector3D pos_i = pos.row(i).asVector() + delta;
+                        for (size_t j = 0; j < numParticle; ++j) {
+                            if (j == i)
+                                continue;
+                            const Vector3D pos_ij = pos_i - pos.row(j).asVector();
+                            const ScalarType r2 = ScalarType(pos_ij.squaredNorm());
+                            const ScalarType r = sqrt(r2);
+                            const ScalarType charge = charges[j];
+                            const ScalarType temp = calcFromTable_diff(r) * (charge);
+                            sum += temp * pos_ij;
+                        }
+                    });
+                auto force_i = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
+                force_i += charges[i] * sum;
+            }, numParticle, (numParticle + NumAtomPerCore) / NumAtomPerCore);
+            Executor::auto_wait(rSpaceFuture);
+        }
+        Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;
     }

@@ -29,10 +29,15 @@ namespace Physica::Core {
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::DenseMatrix(std::initializer_list<InitializerType> list) : Storage(std::move(list)) {
-        if constexpr (MatrixOption::isColumnMatrix<This>())
-            Dim::resize(Storage::getSize() / Storage::getLength(), Storage::getLength());
-        else
-            Dim::resize(Storage::getLength(), Storage::getSize() / Storage::getLength());
+        if constexpr (MatrixOption::isVectorMatrix<This>()) {
+            if constexpr (MatrixOption::isColumnMatrix<This>())
+                Dim::resize(Storage::getSize() / Storage::getLength(), Storage::getLength());
+            else
+                Dim::resize(Storage::getLength(), Storage::getSize() / Storage::getLength());
+        }
+        else {
+            Dim::resize(Row, Column);
+        }
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
