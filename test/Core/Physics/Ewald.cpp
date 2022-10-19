@@ -23,8 +23,23 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
+using namespace Physica;
 using namespace Physica::Core;
 using namespace Physica::Utils;
+
+namespace Physica {
+    struct Test {
+        template<class ScalarType, class PosScalarType>
+        static Vector<ScalarType> rSpaceForce_smallSystem(const Ewald<ScalarType, PosScalarType>& ewald, const typename PeriodicCell<PosScalarType, 3>::PositionMatrix& pos) {
+            return ewald.rSpaceForce_smallSystem(pos);
+        }
+
+        template<class ScalarType, class PosScalarType, class Executor>
+        static Vector<ScalarType> rSpaceForce_largeSystem(const Ewald<ScalarType, PosScalarType>& ewald, const typename PeriodicCell<PosScalarType, 3>::PositionMatrix& pos) {
+            return ewald.template rSpaceForce_largeSystem<Executor>(pos);
+        }
+    };
+}
 
 template<class ScalarType>
 void VASPTest() {
@@ -98,6 +113,7 @@ void forceTest() {
     constexpr static bool isFloat = ScalarType::option == Float;
     constexpr double prec = isFloat ? 2E-2 : 1E-3;
 
+    using Executor = Parallel::SequentialExecutor;
     using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     using PositionMatrix = typename CrystalCell::PositionMatrix;
     using ScalarType_ = typename CrystalCell::ScalarType;
@@ -121,7 +137,7 @@ void forceTest() {
         3.052176714,  2.816649675,  2.054240227
     };
     const Ewald<ScalarType, ScalarType_> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    const auto force1 = ewald.template force<Parallel::SequentialExecutor>(pos);
+    const auto force1 = ewald.template force<Executor>(pos);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
         for (size_t i = 0; i < force2.getLength(); ++i) {
@@ -134,6 +150,11 @@ void forceTest() {
     }
 
     if (!vectorNear(force1, force2, prec))
+        exit(EXIT_FAILURE);
+
+    const auto small = Test::rSpaceForce_smallSystem(ewald, pos);
+    const auto large = Test::rSpaceForce_largeSystem<ScalarType, ScalarType_, Executor>(ewald, pos);
+    if (!vectorNear(small, large, 1E-4))
         exit(EXIT_FAILURE);
 }
 

@@ -28,7 +28,7 @@ using namespace Physica::Core::Parallel;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
-using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
+using ForceModel = Q_TIP4P<ScalarType, PosScalarType, 10>;
 constexpr size_t numReplica = 192;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
