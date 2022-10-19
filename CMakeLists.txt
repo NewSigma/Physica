@@ -12,7 +12,7 @@ option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
 option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_TORCH "Enable Torch support" OFF)
-set(PHYSICA_SIMD_OPTION "" CACHE STRING "Compiler options of enabled SIMD instruction sets") # Pass options based on processor to gain optimized performance
+option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 include(cmake/Modules/FindSIMD.cmake)
 
@@ -34,9 +34,12 @@ else()
                          -fno-trapping-math")
 endif()
 
+if(${PHYSICA_OPTIMIZE})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
 set(CMAKE_CXX_FLAGS "\
 ${CMAKE_CXX_FLAGS} \
-${PHYSICA_SIMD_OPTION} \
 -Wall -Wextra \
 -fPIC \
 -mrdrnd \
