@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/ElectronicStructure/DFT/Grid3D.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/RSpaceGrid.h"
 
 namespace Physica::Core {
     enum class LDAType {
@@ -32,12 +32,12 @@ namespace Physica::Core {
 
         template<class ScalarType, LDAType type, bool polarized>
         class Traits<LDA<ScalarType, type, polarized>> {
-            using Grid = Grid3D<ScalarType, false>;
+            using GridType = RSpaceGrid<ScalarType>;
         public:
             constexpr static bool isSpinPolarized = polarized;
             constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
-            using DensityType = Utils::Array<Grid, NumSpin>;
-            using PotType = Utils::Array<Grid, NumSpin>;
+            using DensityType = Utils::Array<GridType, NumSpin>;
+            using PotType = Utils::Array<GridType, NumSpin>;
         };
     }
 

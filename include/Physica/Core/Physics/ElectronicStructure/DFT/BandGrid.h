@@ -20,29 +20,29 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "KPoint.h"
-#include "Grid3D.h"
+#include "RSpaceGrid.h"
 
 namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class BandGrid;
 
     template<class ScalarType, bool isSpinPolarized>
     class BandGrid {
-        using KPoints = Grid3D<KPoint<ScalarType, 0, isSpinPolarized>, false>;
-        using LatticeMatrix = typename KPoints::LatticeMatrix;
+        using KPointGrid = RSpaceGrid<KPoint<ScalarType, 0, isSpinPolarized>>;
+        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
-        KPoints kPoints;
+        KPointGrid kPointGrid;
+        LatticeMatrix repLatt;
         size_t electronCount;
     public:
-        template<class MatrixType>
-        BandGrid(const LValueMatrix<MatrixType>& repLatt, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_);
+        BandGrid(LatticeMatrix repLatt_, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_);
         BandGrid(const BandGrid&) = default;
         BandGrid(BandGrid&&) noexcept = default;
         ~BandGrid() = default;
         /* Operators */
         BandGrid& operator=(BandGrid band) noexcept;
         /* Getters */
-        [[nodiscard]] KPoints& getKPoints() { return kPoints; }
-        [[nodiscard]] const KPoints& getKPoints() const noexcept { return kPoints; }
+        [[nodiscard]] KPointGrid& getKPointGrid() { return kPointGrid; }
+        [[nodiscard]] const KPointGrid& getKPointGrid() const noexcept { return kPointGrid; }
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         template<class VectorType>
         [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
@@ -53,18 +53,18 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool isSpinPolarized>
-    template<class MatrixType>
-    BandGrid<ScalarType, isSpinPolarized>::BandGrid(const LValueMatrix<MatrixType>& repLatt,
+    BandGrid<ScalarType, isSpinPolarized>::BandGrid(LatticeMatrix repLatt_,
                                                     size_t kPointX,
                                                     size_t kPointY,
                                                     size_t kPointZ,
                                                     size_t electronCount_)
-            : kPoints(repLatt, kPointX, kPointY, kPointZ)
+            : kPointGrid(kPointX, kPointY, kPointZ)
+            , repLatt(std::move(repLatt_))
             , electronCount(electronCount_) {
-        assert(kPoints.getSize() != 0);
+        assert(kPointGrid.getSize() != 0);
         size_t kPointID = 0;
 
-        const ScalarType kPointWeight = reciprocal(ScalarType(kPoints.getSize()));
+        const ScalarType kPointWeight = reciprocal(ScalarType(kPointGrid.getSize()));
         const ScalarType stepX = reciprocal(ScalarType(kPointX));
         const ScalarType stepY = reciprocal(ScalarType(kPointY));
         const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
@@ -81,7 +81,7 @@ namespace Physica::Core {
             for (size_t y = 1; y <= kPointY; ++y) {
                 kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPoints[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
+                    kPointGrid.asVector()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
                     kz += stepZ;
                     ++kPointID;
                 }
@@ -94,7 +94,7 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized>
     ScalarType BandGrid<ScalarType, isSpinPolarized>::getTotalEnergy() const noexcept {
         ScalarType energy = ScalarType::Zero();
-        for (const auto& kPoint : kPoints) {
+        for (const auto& kPoint : kPointGrid) {
             const ScalarType energyUp = kPoint.getBandEnergy(SpinState::Up).sum();
             const ScalarType energyDown = kPoint.getBandEnergy(SpinState::Down).head(electronCount / 2).sum();
             energy += (energyUp + energyDown) * kPoint.getWeight();
@@ -112,8 +112,8 @@ namespace Physica::Core {
         for (size_t i = 0; i < atEnergy.getLength(); ++i) {
             const ScalarType energy = atEnergy[i];
             ScalarType density = ScalarType::Zero();
-            for (size_t kPointId = 0; kPointId < kPoints.getSize(); ++i) {
-                const ScalarType energy0 = kPoints[kPointId].getTotalEnergy();
+            for (size_t kPointId = 0; kPointId < kPointGrid.getSize(); ++i) {
+                const ScalarType energy0 = kPointGrid[kPointId].getTotalEnergy();
                 const auto gradE = gradEnergy(kPointId);
                 const ScalarType normalizer = gradE[0] * gradE[1] * gradE[2] * ScalarType(0.5);
 
@@ -148,7 +148,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& band) noexcept {
-        swap(kPoints, band.kPoints);
+        swap(kPointGrid, band.kPointGrid);
         swap(electronCount, band.electronCount);
     }
 
@@ -167,14 +167,14 @@ namespace Physica::Core {
     Vector<ScalarType, 3> BandGrid<ScalarType, isSpinPolarized>::gradEnergy(size_t kPointId) const {
         auto dimAdd = [](size_t dim, size_t dim_all) { return dim == dim_all - 1 ? 0 : dim + 1; };
         auto dimSub = [](size_t dim, size_t dim_all) { return dim == 0 ? dim_all - 1 : dim - 1; };
-        const auto[x, y, z] = kPoints.indexToDim(kPointId);
-        const size_t dimX = kPoints.getDimX();
-        const size_t dimY = kPoints.getDimY();
-        const size_t dimZ = kPoints.getDimZ();
+        const auto[x, y, z] = kPointGrid.indexToDim(kPointId);
+        const size_t dimX = kPointGrid.getDimX();
+        const size_t dimY = kPointGrid.getDimY();
+        const size_t dimZ = kPointGrid.getDimZ();
         const ScalarType factor = ScalarType(0.25);
-        const ScalarType gradX = (kPoints(dimAdd(x, dimX), y, z) -  kPoints(dimSub(x, dimX), y, z)) * factor;
-        const ScalarType gradY = (kPoints(x, dimAdd(y, dimY), z) -  kPoints(x, dimSub(y, dimY), z)) * factor;
-        const ScalarType gradZ = (kPoints(x, y, dimAdd(z, dimZ)) -  kPoints(x, y, dimSub(z, dimZ))) * factor;
+        const ScalarType gradX = (kPointGrid(dimAdd(x, dimX), y, z) -  kPointGrid(dimSub(x, dimX), y, z)) * factor;
+        const ScalarType gradY = (kPointGrid(x, dimAdd(y, dimY), z) -  kPointGrid(x, dimSub(y, dimY), z)) * factor;
+        const ScalarType gradZ = (kPointGrid(x, y, dimAdd(z, dimZ)) -  kPointGrid(x, y, dimSub(z, dimZ))) * factor;
         return {gradX, gradY, gradZ};
     }
 }

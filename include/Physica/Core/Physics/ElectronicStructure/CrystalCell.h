@@ -23,12 +23,15 @@
 
 namespace Physica::Core {
     class Poscar;
+    template<class T> class KSpaceGrid;
 
     class CrystalCell final : public PeriodicCell<Scalar<Float, false>, 3> {
     public:
         using Base = PeriodicCell<Scalar<Float, false>, 3>;
         using ScalarType = Scalar<Float, false>;
+        using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
+        using StructureFactorType = Utils::Array<KSpaceGrid<ComplexType>>;
     private:
         AtomicArray atomicNumbers;
         Type type;
@@ -45,6 +48,7 @@ namespace Physica::Core {
         void toDirect();
         void toCartesian();
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
+        [[nodiscard]] Utils::Array<KSpaceGrid<ComplexType>> makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }

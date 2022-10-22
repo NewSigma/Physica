@@ -99,7 +99,7 @@ namespace Physica::Core {
         void transform(const Vector<ScalarType>& data);
         void invTransform(const Vector<ComplexType>& data);
         /* Getters */
-        [[nodiscard]] size_t getDimen() const noexcept { return rSpaceSize.getLength(); }
+        [[nodiscard]] constexpr static size_t getDimen() { return Dim; }
         [[nodiscard]] const Utils::Array<int, Dim>& getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] int getRSpaceSize(size_t dim) const noexcept { return rSpaceSize[dim]; }
         [[nodiscard]] const Utils::Array<int, Dim>& getKSpaceSize() const noexcept { return kSpaceSize; }

@@ -18,54 +18,53 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
-#include "Grid3D.h"
+#include "KSpaceGrid.h"
 
 namespace Physica::Core {
     /**
-     * \class PWBaseWave is plain wave based wave function
+     * \class PWBaseWave
+     * Plain wave base wave function
      */
     template<class ScalarType>
     class PWBaseWave {
-        using ComplexType = ComplexScalar<ScalarType>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using SignedGrid = Grid3D<ComplexType, true>;
-        using Dim = typename SignedGrid::Dim;
+        using ComplexType = ComplexScalar<ScalarType>;
+        using GridType = KSpaceGrid<ComplexType>;
 
-        SignedGrid grid;
+        GridType grid;
+        LatticeMatrix repCell;
     public:
-        PWBaseWave(ScalarType cutEnergy, LatticeMatrix reciprocalLattice);
+        PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_);
         /* Operators */
         [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> r) const;
         template<class VectorType>
         PWBaseWave& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
-        [[nodiscard]] size_t getPlainWaveCount() const noexcept { return grid.getSize(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return grid.getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return grid.getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return grid.getDimZ(); }
-        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(Dim dim) const noexcept;
-        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t index) const noexcept { return getWaveVector(indexToDim(index)); }
-        [[nodiscard]] ScalarType getKinetic(Dim dim) const noexcept;
-        [[nodiscard]] size_t dimToIndex(ssize_t x, ssize_t y, ssize_t z) const noexcept { return grid.dimToIndex(x, y, z); }
-        [[nodiscard]] Dim indexToDim(size_t index) const noexcept { return grid.indexToDim(index); }
+        [[nodiscard]] size_t getNumPlaneWave() const noexcept { return grid.getSize(); }
+        [[nodiscard]] ssize_t getDimX() const noexcept { return grid.getDimX(); }
+        [[nodiscard]] ssize_t getDimY() const noexcept { return grid.getDimY(); }
+        [[nodiscard]] ssize_t getDimZ() const noexcept { return grid.getDimZ(); }
+        [[nodiscard]] typename GridType::Index3D getDim() const noexcept { return grid.getDim(); }
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(ssize_t x, ssize_t y, ssize_t z) const noexcept;
+        [[nodiscard]] ScalarType getKinetic(ssize_t x, ssize_t y, ssize_t z) const noexcept;
     };
 
     template<class ScalarType>
-    PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix reciprocalLattice)
-            : grid(SignedGrid::gridFromCutEnergy(cutEnergy, reciprocalLattice)) {}
+    PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_) : repCell(std::move(repCell_)) {
+        grid = KSpaceGrid<ComplexType>::makeGrid(cutEnergy, repCell);
+    }
 
     template<class ScalarType>
     typename PWBaseWave<ScalarType>::ComplexType PWBaseWave<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
-        const size_t length = grid.getSize();
+        using Index3D = typename GridType::Index3D;
         ComplexType result = ComplexType::Zero();
-        for (size_t i = 0; i < length; ++i) {
-            const ScalarType phase = getWaveVector(indexToDim(i)) * r;
-            const auto c = cos(phase);
-            const auto s = sqrt(ScalarType::One() - square(c)); //Sign is not necessary to wave functions
-            result += grid[i] * ComplexType(c, s); //Using platform specific sincos() may gain performance improvement
-        }
+        GridType::forKIndexInGrid(grid.getDim(), repCell, [this, &result, &r](Vector<ScalarType, 3> k, Index3D index) {
+            const ScalarType phase = k * r;
+            ScalarType s, c;
+            sincos(phase, s, c);
+            result += grid(index) * ComplexType(c, s);
+        });
         return result;
     }
 
@@ -77,17 +76,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType, 3> PWBaseWave<ScalarType>::getWaveVector(Dim dim) const noexcept {
-        auto[n1, n2, n3] = dim;
-        const auto& lattice = grid.getLattice();
-        return lattice.row(0).asVector() * ScalarType(n1) +
-               lattice.row(1).asVector() * ScalarType(n2) +
-               lattice.row(2).asVector() * ScalarType(n3);
+    Vector<ScalarType, 3> PWBaseWave<ScalarType>::getWaveVector(ssize_t x, ssize_t y, ssize_t z) const noexcept {
+        return repCell.row(0).asVector() * ScalarType(x) +
+               repCell.row(1).asVector() * ScalarType(y) +
+               repCell.row(2).asVector() * ScalarType(z);
     }
 
     template<class ScalarType>
-    ScalarType PWBaseWave<ScalarType>::getKinetic(Dim dim) const noexcept {
+    ScalarType PWBaseWave<ScalarType>::getKinetic(ssize_t x, ssize_t y, ssize_t z) const noexcept {
         constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
-        return getWaveVector(dim).squaredNorm() * ScalarType(factor);
+        return getWaveVector(x, y, z).squaredNorm() * ScalarType(factor);
     }
 }

@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/ElectronicStructure/DFT/KSpaceGrid.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
@@ -72,6 +73,36 @@ namespace Physica::Core {
             }
         }
         atomicNumbers.swap(new_atomic);
+    }
+
+    typename CrystalCell::StructureFactorType CrystalCell::makeStructureFactor(ScalarType cutEnergy) const {
+        using GridType = KSpaceGrid<ComplexType>;
+        using VectorType = Vector<ScalarType, 3>;
+        const auto species = getSpecies();
+        const auto repCell = Base::reciprocal();
+        const auto& lattice = repCell.getLattice();
+        auto factorGrids = Utils::Array<GridType>(species.size(), GridType::makeGrid(cutEnergy, lattice));
+
+        size_t i = 0;
+        for (uint16_t element : species) {
+            GridType& grid = factorGrids[i];
+            size_t j = 0;
+            GridType::forReducedKInGrid(grid.getDim(), lattice, [this, element, &i, &j, &grid](VectorType k) {
+                ComplexType factor = ComplexType::Zero();
+                for (size_t ion = 0; ion < getAtomCount(); ++ion) {
+                    if (getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
+                        const ScalarType phase = k * getPos().row(ion).asVector();
+                        ScalarType s, c;
+                        sincos(phase, s, c);
+                        factor += ComplexType(c, s);
+                    }
+                }
+                grid.asVector()[j] = factor;
+                j += 1;
+            });
+            ++i;
+        }
+        return factorGrids;
     }
 
     std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {

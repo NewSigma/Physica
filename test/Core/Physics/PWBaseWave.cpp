@@ -26,31 +26,31 @@ using ScalarType = Scalar<Double, false>;
 int main() {
     const ScalarType cutOffE = ScalarType(32);
     PWBaseWave<ScalarType> wave(cutOffE, {0.1, 0.2, 0.3, 0.3, 0.2, 0.1, -0.1, 0.2, 0.5});
-    size_t dimX = wave.getDimX();
-    size_t dimY = wave.getDimY();
-    size_t dimZ = wave.getDimZ();
+    ssize_t dimX = wave.getDimX();
+    ssize_t dimY = wave.getDimY();
+    ssize_t dimZ = wave.getDimZ();
 
-    bool xWithinRange = wave.getKinetic(std::make_tuple(dimX, 0, 0)) <= cutOffE;
+    bool xWithinRange = wave.getKinetic(dimX, 0, 0) <= cutOffE;
     if (!xWithinRange)
         return 1;
 
-    bool yWithinRange = wave.getKinetic(std::make_tuple(0, dimY, 0)) <= cutOffE;
+    bool yWithinRange = wave.getKinetic(0, dimY, 0) <= cutOffE;
     if (!yWithinRange)
         return 1;
 
-    bool zWithinRange = wave.getKinetic(std::make_tuple(0, 0, dimZ)) <= cutOffE;
+    bool zWithinRange = wave.getKinetic(0, 0, dimZ) <= cutOffE;
     if (!zWithinRange)
         return 1;
 
-    bool xNotEnough = wave.getKinetic(std::make_tuple(dimX + 1, 0, 0)) <= cutOffE;
+    bool xNotEnough = wave.getKinetic(dimX + 1, 0, 0) <= cutOffE;
     if (xNotEnough)
         return 1;
 
-    bool yNotEnough = wave.getKinetic(std::make_tuple(0, dimY + 1, 0)) <= cutOffE;
+    bool yNotEnough = wave.getKinetic(0, dimY + 1, 0) <= cutOffE;
     if (yNotEnough)
         return 1;
 
-    bool zNotEnough = wave.getKinetic(std::make_tuple(0, 0, dimZ + 1)) <= cutOffE;
+    bool zNotEnough = wave.getKinetic(0, 0, dimZ + 1) <= cutOffE;
     if (zNotEnough)
         return 1;
     return 0;
