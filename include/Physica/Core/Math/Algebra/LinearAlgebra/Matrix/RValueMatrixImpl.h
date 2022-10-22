@@ -191,6 +191,11 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline DiagVector<Derived> RValueMatrix<Derived>::diag() const {
+        return DiagVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
     }

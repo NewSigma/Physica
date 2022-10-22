@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RMatrixBlock.h"
+#include "DiagVector.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
@@ -82,6 +83,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const RMatrixBlock<Derived> bottomRightCorner(size_t from) const;
         [[nodiscard]] inline RMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         [[nodiscard]] inline const RMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline DiagVector<Derived> diag() const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] ScalarType calcFromMajorMinor(size_t row, size_t col) const;
