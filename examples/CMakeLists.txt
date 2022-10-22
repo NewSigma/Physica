@@ -15,4 +15,6 @@ if(${PHYSICA_GUI})
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
 
+physica_add_example(Correlation RPMD/Correlation.cpp)
+physica_add_example(RDF RPMD/RDF.cpp)
 physica_add_example(Ising Ising.cpp)
