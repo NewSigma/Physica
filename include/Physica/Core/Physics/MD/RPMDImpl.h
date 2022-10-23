@@ -336,7 +336,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     ScalarType RPMD<ScalarType, PosScalarType>::calcTemperature() const {
-        return getClassicalKinetic() * (2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica());
+        return square(getMomentum()).sum() * (1 / (3 * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
     }
 
     template<class ScalarType, class PosScalarType>
