@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Schur.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 
 namespace Physica::Core {
