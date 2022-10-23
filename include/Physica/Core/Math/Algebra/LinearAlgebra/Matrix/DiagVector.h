@@ -18,14 +18,15 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/RValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class DiagVector;
+    template<class MatrixType, bool isLValueMatrix> class DiagVector;
 
     namespace Internal {
-        template<class MatrixType>
-        class Traits<DiagVector<MatrixType>> {
+        template<class MatrixType, bool isLValueMatrix>
+        class Traits<DiagVector<MatrixType, isLValueMatrix>> {
+            static_assert(std::is_convertible<MatrixType&, Core::LValueMatrix<MatrixType>&>::value, isLValueMatrix, "[Error]: Invalid LValueMatrix");
         public:
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile ? MatrixType::RowAtCompile : MatrixType::ColumnAtCompile;
@@ -33,16 +34,30 @@ namespace Physica::Core {
         };
     }
 
-    template<class MatrixType>
+    template<class MatrixType, bool isLValueMatrix>
     class DiagVector : public RValueVector<DiagVector<MatrixType>> {
         const MatrixType& mat;
         using Base = RValueVector<DiagVector<MatrixType>>;
     public:
         using typename Base::ScalarType;
     public:
-        DiagVector(const MatrixType& mat_) : mat(mat_) {}
+        explicit DiagVector(const MatrixType& mat_) : mat(mat_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
+        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+    };
+
+    template<class MatrixType>
+    class DiagVector<MatrixType, true> : public LValueVector<DiagVector<MatrixType>> {
+        const MatrixType& mat;
+        using Base = LValueVector<DiagVector<MatrixType>>;
+    public:
+        using typename Base::ScalarType;
+    public:
+        explicit DiagVector(const MatrixType& mat_) : mat(mat_) {}
+        /* Getters */
+        [[nodiscard]] ScalarType& operator[](size_t index) { return mat(index, index); }
+        [[nodiscard]] const ScalarType& operator[](size_t index) const { return mat(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
 }

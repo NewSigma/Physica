@@ -24,8 +24,8 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 
 int main() {
-    const ScalarType cutOffE = ScalarType(32);
-    PWBaseWave<ScalarType> wave(cutOffE, {0.1, 0.2, 0.3, 0.3, 0.2, 0.1, -0.1, 0.2, 0.5});
+    const ScalarType cutOffE = ScalarType(0.5);
+    PWBaseWave<ScalarType> wave(cutOffE, {1, 2, 3, 3, 2, 1, -1, 2, 6});
     ssize_t dimX = wave.getDimX();
     ssize_t dimY = wave.getDimY();
     ssize_t dimZ = wave.getDimZ();

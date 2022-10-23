@@ -191,8 +191,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline DiagVector<Derived> RValueMatrix<Derived>::diag() const {
-        return DiagVector<Derived>(Base::getDerived());
+    inline DiagVector<Derived, false> RValueMatrix<Derived>::diag() const {
+        return DiagVector<Derived, false>(Base::getDerived());
     }
 
     template<class Derived>

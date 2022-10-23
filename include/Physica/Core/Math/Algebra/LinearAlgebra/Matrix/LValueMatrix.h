@@ -84,6 +84,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const LMatrixBlock<Derived> bottomRightCorner(size_t from) const;
         [[nodiscard]] inline LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         [[nodiscard]] inline const LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline DiagVector<Derived, true> diag() const;
 
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
         ScalarType determinate() const;
