@@ -16,5 +16,6 @@ if(${PHYSICA_GUI})
 endif()
 
 physica_add_example(Correlation RPMD/Correlation.cpp)
+physica_add_example(IRAbsorb RPMD/IRAbsorb.cpp)
 physica_add_example(RDF RPMD/RDF.cpp)
 physica_add_example(Ising Ising.cpp)
