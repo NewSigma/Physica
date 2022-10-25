@@ -31,11 +31,13 @@ namespace Physica::Core {
     protected:
         using ElementType = typename MeshType::ElementType;
         using VectorType = typename ElementType::VectorType;
-        using SolverType = IterateSolver<SparseMatrix<ScalarType>, Vector<ScalarType>>;
+        using SolverType = IterateSolver<ScalarType>;
 
         MeshType mesh;
-        SolverType solver;
+        SparseMatrix<ScalarType> A;
+        Vector<ScalarType> b;
     private:
+        SolverType solver;
         Utils::Array<size_t> map_var_node;
         Utils::Array<size_t> map_node_var;
     public:
@@ -46,6 +48,8 @@ namespace Physica::Core {
         [[nodiscard]] const MeshType& getMesh() const noexcept { return mesh; }
     protected:
         void solverToMesh();
+        void solve() { solver.solve(A, b); }
+        const Vector<ScalarType>& getSolution() const noexcept { return solver.getSolution(); }
         /* Getters */
         [[nodiscard]] size_t getDegreeOfFreedom() const { return map_var_node.getLength(); }
         [[nodiscard]] size_t varToNode(size_t x) const { return map_var_node[x]; }
@@ -56,10 +60,11 @@ namespace Physica::Core {
     };
 
     template<class MeshType>
-    AbstractModel<MeshType>::AbstractModel(MeshType mesh_) : mesh(std::move(mesh_)), solver() {
+    AbstractModel<MeshType>::AbstractModel(MeshType mesh_) : mesh(std::move(mesh_)) {
         const size_t n = mesh.getNumFreeNodes();
-        solver.A = SparseMatrix<ScalarType>(n, n);
-        solver.b.resize(n);
+        A.resize(n, n);
+        b.resize(n);
+        solver.resize(n);
         map_var_node.resize(n);
         map_node_var.resize(mesh.getNumNodes());
         makeMaps();

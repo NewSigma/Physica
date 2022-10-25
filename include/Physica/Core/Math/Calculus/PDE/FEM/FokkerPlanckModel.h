@@ -31,7 +31,6 @@ namespace Physica::Core {
         using typename Base::VectorType;
         using BufferType = typename Base::SolverType::VectorType;
         using Base::mesh;
-        using Base::solver;
 
         Functor force;
         Functor diffuse;
@@ -80,8 +79,8 @@ namespace Physica::Core {
 
     template<class MeshType, class Functor>
     void FokkerPlanckModel<MeshType, Functor>::setInitialCond(Functor initial) {
-        solver.A.clear();
-        solver.b = ScalarType::Zero();
+        Base::A.clear();
+        Base::b = ScalarType::Zero();
         const auto& nodeTypes = mesh.getNodeTypes();
         const auto& coeffs = mesh.getCoeffs();
         for (const auto& elem : mesh.getElements()) {
@@ -102,12 +101,12 @@ namespace Physica::Core {
                         switch (nodeTypes[baseNode]) {
                             case NodeType::Free: {
                                 const size_t col = Base::nodeToVar(baseNode);
-                                const ScalarType value = solver.A.calc(row, col) + integral;
-                                solver.A.insert(value, row, col);
+                                const ScalarType value = Base::A.calc(row, col) + integral;
+                                Base::A.insert(value, row, col);
                                 break;
                             }
                             case NodeType::Dirichlet: {
-                                solver.b[row] -= coeffs[baseNode] * integral;
+                                Base::b[row] -= coeffs[baseNode] * integral;
                                 break;
                             }
                         }
@@ -117,11 +116,11 @@ namespace Physica::Core {
                         const VectorType globalPos = elem.toGlobalPos(p);
                         return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(globalPos);
                     };
-                    solver.b[row] += ElementType::template gauss_integral<decltype(func), 0>(func);
+                    Base::b[row] += ElementType::template gauss_integral<decltype(func), 0>(func);
                 }
             }
         }
-        solver.solve();
+        Base::solve();
         Base::solverToMesh();
     }
 
@@ -130,9 +129,9 @@ namespace Physica::Core {
         meshToBuffer(buffer1);
         buffer2 = buffer1;
         spaceStep();
-        buffer1 += solver.b * (stepSize * 0.5);
+        buffer1 += Base::getSolution() * (stepSize * 0.5);
         spaceStep();
-        buffer2 += solver.b * stepSize;
+        buffer2 += Base::getSolution() * stepSize;
         bufferToMesh(buffer2);
     }
 
@@ -176,8 +175,8 @@ namespace Physica::Core {
 
     template<class MeshType, class Functor>
     void FokkerPlanckModel<MeshType, Functor>::spaceStep() {
-        solver.b = stiff * buffer1;
-        solver.solve();
+        Base::b = stiff * buffer1;
+        Base::solve();
     }
 
     template<class MeshType, class Functor>

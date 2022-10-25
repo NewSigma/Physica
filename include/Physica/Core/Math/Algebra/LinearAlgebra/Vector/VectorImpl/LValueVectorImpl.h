@@ -66,6 +66,11 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    void LValueVector<Derived>::toUnit() {
+        Base::getDerived() *= reciprocal(Base::getDerived().norm());
+    }
+
+    template<class Derived>
     bool LValueVector<Derived>::isZero() const {
         for(size_t i = 0; i < Base::getLength(); ++i)
             if (!(*this)[i].isZero())

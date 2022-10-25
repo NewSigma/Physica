@@ -55,6 +55,7 @@ namespace Physica::Core {
         SparseMatrix(size_t row, size_t col);
         /* Operations */
         void insert(ScalarType x, size_t row, size_t col);
+        void resize(size_t row, size_t col);
         void clear();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -113,6 +114,14 @@ namespace Physica::Core {
             for (size_t i = major + 1; i < majorStarts.getLength(); ++i)
                 ++majorStarts[i];
         }
+    }
+
+    template<class ScalarType, int option>
+    void SparseMatrix<ScalarType, option>::resize(size_t row, size_t col) {
+        elements.resize(0);
+        minorIndexes.resize(0);
+        majorStarts.resize(MatrixOption::selectMajor<This>(row, col) + 1, 0);
+        maxMinor = MatrixOption::selectMinor<This>(row, col);
     }
 
     template<class ScalarType, int option>

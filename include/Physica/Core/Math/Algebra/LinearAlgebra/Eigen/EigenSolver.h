@@ -62,6 +62,7 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         void sort();
+        void resize(size_t size);
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
@@ -81,16 +82,15 @@ namespace Physica::Core {
     EigenSolver<MatrixType>::EigenSolver() : eigenvalues(), rawEigenvectors(), computeEigenvectors(false) {}
 
     template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(size_t size)
-            : eigenvalues(size)
-            , rawEigenvectors(size, size) {}
+    EigenSolver<MatrixType>::EigenSolver(size_t size) {
+        resize(size);
+    }
 
     template<class MatrixType>
     template<class OtherMatrix>
     EigenSolver<MatrixType>::EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
-            : eigenvalues(source.getRow())
-            , rawEigenvectors(source.getRow(), source.getRow())
-            , computeEigenvectors(computeEigenvectors_) {
+            : computeEigenvectors(computeEigenvectors_) {
+        resize(source.getRow());
         compute(source, computeEigenvectors);
     }
 
@@ -145,6 +145,12 @@ namespace Physica::Core {
             if (computeEigenvectors)
                 rawEigenvectors[i].swap(rawEigenvectors[index_min]);
         }
+    }
+
+    template<class MatrixType>
+    void EigenSolver<MatrixType>::resize(size_t size) {
+        eigenvalues.resize(size);
+        rawEigenvectors.resize(size, size);
     }
 
     template<class MatrixType>

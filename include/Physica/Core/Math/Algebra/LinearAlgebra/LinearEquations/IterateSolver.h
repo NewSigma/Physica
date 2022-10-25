@@ -18,39 +18,39 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Conjugate.h"
+
 namespace Physica::Core {
-    template<class RMatrix, class LVector>
+    template<class ScalarType>
     class IterateSolver {
     public:
-        using MatrixType = RMatrix;
-        using VectorType = LVector;
-        using ScalarType = typename MatrixType::ScalarType;
-        static_assert(std::is_convertible<MatrixType&, RValueMatrix<MatrixType>&>::value, "[Error]: Type 'MatrixType' must be a matrix");
-        static_assert(std::is_convertible<VectorType&, LValueVector<VectorType>&>::value, "[Error]: Type 'VectorType' must be a lvector");
-    public:
-        MatrixType A;
-        VectorType b;
+        using VectorType = Vector<ScalarType>;
+    private:
+        VectorType solution;
     public:
         IterateSolver() = default;
-        IterateSolver(MatrixType A_, VectorType b_);
+        IterateSolver(size_t order);
         IterateSolver(const IterateSolver&) = default;
         IterateSolver(IterateSolver&&) noexcept = default;
         ~IterateSolver() = default;
         /* Operators */
         IterateSolver& operator=(IterateSolver solver) noexcept;
         /* Operations */
-        void solve();
+        template<class MatrixType>
+        const VectorType& solve(const RValueMatrix<MatrixType>& A, VectorType b);
+        void resize(size_t size) { solution.resize(size); }
         /* Getters */
-        [[nodiscard]] const VectorType& getSolution() { return b; }
+        [[nodiscard]] size_t getOrder() const noexcept { return solution.getLength(); }
+        [[nodiscard]] const VectorType& getSolution() const noexcept { return solution; }
         /* Helpers */
         void swap(IterateSolver& solver) noexcept;
     };
 
-    template<class MatrixType, class VectorType>
-    IterateSolver<MatrixType, VectorType>::IterateSolver(MatrixType A_, VectorType b_) : A(std::move(A_)), b(std::move(b_)) {}
+    template<class ScalarType>
+    IterateSolver<ScalarType>::IterateSolver(size_t order) : solution(order) {}
 
-    template<class MatrixType, class VectorType>
-    IterateSolver<MatrixType, VectorType>& IterateSolver<MatrixType, VectorType>::operator=(IterateSolver solver) noexcept {
+    template<class ScalarType>
+    IterateSolver<ScalarType>& IterateSolver<ScalarType>::operator=(IterateSolver solver) noexcept {
         swap(solver);
         return *this;
     }
@@ -61,18 +61,20 @@ namespace Physica::Core {
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.112
      */
-    template<class MatrixType, class VectorType>
-    void IterateSolver<MatrixType, VectorType>::solve() {
-        VectorType residual = -b;
-        VectorType p = b;
-        b = ScalarType::Zero();
-        VectorType& x = b; //rename
+    template<class ScalarType>
+    template<class MatrixType>
+    const typename IterateSolver<ScalarType>::VectorType& IterateSolver<ScalarType>::solve(const RValueMatrix<MatrixType>& A, VectorType b) {
+        solution = std::move(b);
+        VectorType residual = -solution;
+        VectorType p = solution;
+        solution = ScalarType::Zero();
+        VectorType& x = solution; //rename
         VectorType temp;
 
         ScalarType squaredNorm = residual.squaredNorm();
         while(squaredNorm > std::numeric_limits<ScalarType>::epsilon()) {
             temp = A * p;
-            const ScalarType step = squaredNorm / (p * temp);
+            const ScalarType step = squaredNorm / (p.conjugate() * temp);
             x += step * p;
             residual += step * temp;
             const ScalarType next_squaredNorm = residual.squaredNorm();
@@ -80,17 +82,16 @@ namespace Physica::Core {
             squaredNorm = next_squaredNorm;
             p = beta * p - residual;
         }
+        return solution;
     }
 
-    template<class MatrixType, class VectorType>
-    void IterateSolver<MatrixType, VectorType>::swap(IterateSolver& solver) noexcept {
-        A.swap(solver.A);
-        b.swap(solver.b);
+    template<class ScalarType>
+    void IterateSolver<ScalarType>::swap(IterateSolver& solver) noexcept {
+        solution.swap(solver.solution);
     }
 
-    template<class MatrixType, class VectorType>
-    inline void swap(IterateSolver<MatrixType, VectorType>& solver1,
-                     IterateSolver<MatrixType, VectorType>& solver2) noexcept {
+    template<class ScalarType>
+    inline void swap(IterateSolver<ScalarType>& solver1, IterateSolver<ScalarType>& solver2) noexcept {
         solver1.swap(solver2);
     }
 }

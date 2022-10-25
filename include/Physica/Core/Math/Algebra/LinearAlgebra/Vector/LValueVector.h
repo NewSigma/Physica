@@ -55,6 +55,7 @@ namespace Physica::Core {
         const LVectorBlock<Derived> tail(size_t from) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from); }
         LVectorBlock<Derived> segment(size_t from, size_t to) { return LVectorBlock<Derived>(Base::getDerived(), from, to); }
         const LVectorBlock<Derived> segment(size_t from, size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
+        void toUnit();
         /* Getters */
         [[nodiscard]] bool isZero() const;
     protected:

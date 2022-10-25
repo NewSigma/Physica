@@ -24,34 +24,16 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 
 int main() {
-    const ScalarType cutOffE = ScalarType(0.5);
-    PWBaseWave<ScalarType> wave(cutOffE, {1, 2, 3, 3, 2, 1, -1, 2, 6});
+    const ScalarType cutOffE = ScalarType(10);
+    PWBaseWave<ScalarType> wave(cutOffE, {5, 0, 0, 0, 5, 0, 0, 0, 5});
     ssize_t dimX = wave.getDimX();
-    ssize_t dimY = wave.getDimY();
-    ssize_t dimZ = wave.getDimZ();
 
-    bool xWithinRange = wave.getKinetic(dimX, 0, 0) <= cutOffE;
+    bool xWithinRange = wave.getKinetic(dimX - 1, 0, 0) <= cutOffE;
     if (!xWithinRange)
         return 1;
 
-    bool yWithinRange = wave.getKinetic(0, dimY, 0) <= cutOffE;
-    if (!yWithinRange)
-        return 1;
-
-    bool zWithinRange = wave.getKinetic(0, 0, dimZ) <= cutOffE;
-    if (!zWithinRange)
-        return 1;
-
-    bool xNotEnough = wave.getKinetic(dimX + 1, 0, 0) <= cutOffE;
+    bool xNotEnough = wave.getKinetic(dimX, 0, 0) < cutOffE;
     if (xNotEnough)
-        return 1;
-
-    bool yNotEnough = wave.getKinetic(0, dimY + 1, 0) <= cutOffE;
-    if (yNotEnough)
-        return 1;
-
-    bool zNotEnough = wave.getKinetic(0, 0, dimZ + 1) <= cutOffE;
-    if (zNotEnough)
         return 1;
     return 0;
 }
