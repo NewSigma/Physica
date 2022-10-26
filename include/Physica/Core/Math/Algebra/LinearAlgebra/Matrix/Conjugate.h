@@ -72,7 +72,7 @@ namespace Physica::Core {
         using Base = RValueVector<ConjugateVector<VectorType>>;
         using typename Base::ScalarType;
     public:
-        ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        explicit ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
         template<class OtherVector>
         void assignTo(LValueVector<OtherVector>& target) const;
         /* Getters */

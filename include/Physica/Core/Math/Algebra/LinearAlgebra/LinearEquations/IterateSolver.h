@@ -25,6 +25,7 @@ namespace Physica::Core {
     class IterateSolver {
     public:
         using VectorType = Vector<ScalarType>;
+        using RealType = typename ScalarType::RealType;
     private:
         VectorType solution;
     public:
@@ -71,14 +72,14 @@ namespace Physica::Core {
         VectorType& x = solution; //rename
         VectorType temp;
 
-        ScalarType squaredNorm = residual.squaredNorm();
+        RealType squaredNorm = residual.squaredNorm();
         while(squaredNorm > std::numeric_limits<ScalarType>::epsilon()) {
             temp = A * p;
             const ScalarType step = squaredNorm / (p.conjugate() * temp);
             x += step * p;
             residual += step * temp;
-            const ScalarType next_squaredNorm = residual.squaredNorm();
-            const ScalarType beta = next_squaredNorm / squaredNorm;
+            const RealType next_squaredNorm = residual.squaredNorm();
+            const RealType beta = next_squaredNorm / squaredNorm;
             squaredNorm = next_squaredNorm;
             p = beta * p - residual;
         }

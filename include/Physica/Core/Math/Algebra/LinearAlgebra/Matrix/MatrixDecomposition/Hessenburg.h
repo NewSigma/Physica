@@ -55,7 +55,7 @@ namespace Physica::Core {
         HouseholderNorm normVector;
         const MatrixType& source;
     public:
-        Hessenburg(const LValueMatrix<MatrixType>& source_);
+        Hessenburg(const RValueMatrix<MatrixType>& source_);
         /* Getters */
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
@@ -65,7 +65,7 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    Hessenburg<MatrixType>::Hessenburg(const LValueMatrix<MatrixType>& source_)
+    Hessenburg<MatrixType>::Hessenburg(const RValueMatrix<MatrixType>& source_)
             : working(source_.getRow(), source_.getRow())
             , normVector(source_.getRow() - 2)
             , source(source_.getDerived()) {

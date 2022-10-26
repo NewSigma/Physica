@@ -91,11 +91,13 @@ namespace Physica::Core {
     template<class VectorType>
     class TransposeVector : public RValueMatrix<TransposeVector<VectorType>> {
         const VectorType& vec;
+        using This = TransposeVector<VectorType>;
     public:
-        using Base = RValueMatrix<TransposeVector<VectorType>>;
+        using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     public:
-        TransposeVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        explicit TransposeVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        /* Operations */
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
