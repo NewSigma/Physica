@@ -53,6 +53,8 @@ physica_add_test(GeoBase Core/Math/Geometry/GeoBase.cpp)
 physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradientTest.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
 physica_add_test(QuadraticProgramming Core/Math/Optimization/QuadraticProgramming.cpp)
+### Statistics
+physica_add_test(NumCharacter Core/Math/Statistics/NumCharacter.cpp)
 ### Transform
 physica_add_test(FFT Core/Math/Transform/FFT.cpp)
 ## MultiPrecision

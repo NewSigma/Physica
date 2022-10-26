@@ -105,7 +105,7 @@ namespace Physica::Core {
         const ScalarType x_mean = mean(x);
         const ScalarType y_mean = mean(y);
         Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
-        return mean(temp);
+        return temp.sum() / ScalarType(temp.getLength() - 1);
     }
 
     template<class VectorType>
