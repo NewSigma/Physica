@@ -74,49 +74,64 @@ namespace Physica::Core {
         }
         const RealType inv_factor = reciprocal(factor);
         const MatrixType normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
-        const Hessenburg hess(normalized);
-        matrixT = hess.getMatrixH();
 
-        const size_t order = matrixT.getRow();
-        size_t upper = order - 1;
+        const size_t order = normalized.getRow();
         size_t iter = 0;
-        size_t total_iter = 0;
-        const size_t max_iter = Decouplable::maxItePerCol * order;
-        while (1 <= upper && upper < order) {
-            const size_t lower = activeWindowDownDiag(matrixT, upper);
-            if (lower == upper) {
-                upper -= 1;
-                iter = 0;
-            }
-            else {
-                if constexpr (ScalarType::isComplex) {
-                    complexQR(lower, upper, complexShift(upper, iter));
-                    ++iter;
-                    ++total_iter;
+        if (order != 2) {
+            const Hessenburg hess(normalized);
+            matrixT = hess.getMatrixH();
+
+            size_t upper = order - 1;
+            size_t total_iter = 0;
+            const size_t max_iter = Decouplable::maxItePerCol * order;
+            while (1 <= upper && upper < order) {
+                const size_t lower = activeWindowDownDiag(matrixT, upper);
+                if (lower == upper) {
+                    upper -= 1;
+                    iter = 0;
                 }
                 else {
-                    if (lower + 1 == upper) {
-                        splitOffTwoRows(lower);
-                        upper -= 2;
-                        iter = 0;
-                    }
-                    else {
-                        const size_t sub_order = upper - lower + 1;
-                        francisQR(lower, sub_order);
+                    if constexpr (ScalarType::isComplex) {
+                        complexQR(lower, upper, complexShift(upper, iter));
                         ++iter;
                         ++total_iter;
                     }
+                    else {
+                        if (lower + 1 == upper) {
+                            splitOffTwoRows(lower);
+                            upper -= 2;
+                            iter = 0;
+                        }
+                        else {
+                            const size_t sub_order = upper - lower + 1;
+                            francisQR(lower, sub_order);
+                            ++iter;
+                            ++total_iter;
+                        }
+                    }
                 }
+
+                if (total_iter == max_iter)
+                    throw BadConvergenceException();
             }
+            matrixT *= factor;
 
-            if (total_iter == max_iter)
-                throw BadConvergenceException();
+            if (computeMatrixU) {
+                WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
+                matrixU = std::move(temp);
+            }
         }
-        matrixT *= factor;
-
-        if (computeMatrixU) {
-            WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
-            matrixU = std::move(temp);
+        else {
+            matrixT = normalized;
+            if constexpr (ScalarType::isComplex) {
+                while (activeWindowDownDiag(matrixT, 1) != 1)
+                    complexQR(0, 1, complexShift(1, iter));
+            }
+            else {
+                if (activeWindowDownDiag(matrixT, 1) != 1)
+                    splitOffTwoRows(0);
+            }
+            matrixT *= factor;
         }
     }
     /**

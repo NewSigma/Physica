@@ -317,7 +317,7 @@ namespace Physica::Core {
             col[i] = ScalarType::One();
             for (size_t j = i - 1; j < i; --j) {
                 auto row = block.row(j);
-                col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
+                col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]); //TODO: handle degeneracy
             }
         }
     }

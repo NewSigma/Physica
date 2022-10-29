@@ -81,6 +81,18 @@ int main() {
     using RealType = Scalar<Double, false>;
     using ComplexType = ComplexScalar<RealType>;
     {
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector>;
+        const MatrixType mat{{1, 2}, {3, 4}};
+        if (!realSchurTest(mat, 1E-15))
+            return 1;
+    }
+    {
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector>;
+        const MatrixType mat{{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+        if (!schurTest(mat, 1E-14))
+            return 1;
+    }
+    {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!realSchurTest(mat1, 1E-14))
