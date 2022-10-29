@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     JacobiDavidson<ScalarType>::JacobiDavidson(size_t size, size_t numRequired, RealType error_)
-            : linearSolver(size), eigenvalues(numRequired), eigenvectors(size, numRequired), error(error_) {
+            : eigenvalues(numRequired), eigenvectors(size, numRequired), error(error_) {
         assert(numRequired < size);
         const size_t ite = calcInnerIteration(size);
         eigenSolver.resize(ite);
@@ -104,13 +104,13 @@ namespace Physica::Core {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == initial.getLength());
 
-        WorkingMatrix working;
         VectorType residule;
         initial.toUnit();
         /* Init */ {
             auto col = eigenvectors.col(0);
             col = initial;
         }
+        VectorType buffer(initial.getLength());
 
         const size_t innerIteration = getInnerIteration();
         for (size_t i = 0; i < getNumRequired(); ++i) {
@@ -131,20 +131,25 @@ namespace Physica::Core {
 
             for (size_t j = 1; j < innerIteration; ++j) {
                 /* Correction */ {
-                    working = source;
-                    auto diag = working.diag();
-                    diag -= eigenvalue;
+                    residule = -residule;
+                    linearSolver.solve_functor([this, i, &buffer, &source](const VectorType& v, VectorType& dot) {
+                        auto orthogonalSpace = eigenvectors.leftCols(i + 1);
+                        auto head1 = dot.head(i + 1);
+                        head1 = orthogonalSpace.transpose().conjugate() * v;
+                        buffer = v - orthogonalSpace * head1;
 
-                    working -= eigenvector.asVector() * (eigenvector.asVector().transpose().conjugate() * working).compute();
-                    const VectorType buffer = working * eigenvector.asVector();
-                    working -= buffer * eigenvector.asVector().conjugate().transpose();
-                    linearSolver.solve(working, -residule);
+                        dot = source.getDerived() * buffer - eigenvalues[i] * buffer;
+                        auto head2 = buffer.head(i + 1);
+                        head2 = orthogonalSpace.transpose().conjugate() * dot;
+                        dot -= orthogonalSpace * head2;
+                    }, residule);
                 }
                 /* Orthogonalize */ {
+                    const VectorType& correction = residule;
                     auto leftCols = searchSpace.leftCols(j);
-                    const VectorType project = leftCols.transpose().conjugate() * linearSolver.getSolution();
+                    const VectorType project = leftCols.transpose().conjugate() * correction;
                     auto new_direction = searchSpace.col(j);
-                    new_direction = linearSolver.getSolution() - leftCols * project;
+                    new_direction = correction - leftCols * project;
                     new_direction.toUnit();
                     auto new_dot = dotSpace.col(j);
                     new_dot = source * new_direction;
@@ -208,26 +213,26 @@ namespace Physica::Core {
             auto corner2 = projectDotSpace.topLeftCorner(j + 1);
             auto corner = projectSpace.topLeftCorner(j + 1);
 
-            corner = eigenvalues[index] * corner2 + eigenvalues[index].conjugate() * corner2.conjugate();
-            corner += corner1;
+            corner = eigenvalues[index] * corner1 + eigenvalues[index].conjugate() * corner1.transpose().conjugate();
+            corner -= corner2;
 
             eigenSolver.resize(j + 1);
             eigenSolver.compute(corner, true);
             eigenSolver.sort();
             auto subSearchSpace = searchSpace.leftCols(j + 1);
             auto eigenvector = eigenvectors.col(index);
-            eigenvector = subSearchSpace * eigenSolver.getRawEigenvectors().col(0);
+            eigenvector = subSearchSpace * eigenSolver.getRawEigenvectors().col(j);
         }
     }
 
     template<class ScalarType>
     size_t JacobiDavidson<ScalarType>::calcInnerIteration(size_t order) {
-        size_t iteration = MaxSizePerMatrix / order;
-        if (iteration > MaxInnerIteration)
-            iteration = MaxInnerIteration;
-        else if (iteration < MinInnerIteration)
-            iteration = MinInnerIteration;
-        return iteration;
+        size_t ite = MaxSizePerMatrix / order;
+        if (ite > MaxInnerIteration)
+            ite = MaxInnerIteration;
+        else if (ite < MinInnerIteration)
+            ite = MinInnerIteration;
+        return std::min(ite, order);
     }
 
     template<class ScalarType>
