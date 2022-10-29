@@ -49,7 +49,6 @@ namespace Physica::Core {
     protected:
         void solverToMesh();
         void solve() { solver.solve(A, b); }
-        const Vector<ScalarType>& getSolution() const noexcept { return solver.getSolution(); }
         /* Getters */
         [[nodiscard]] size_t getDegreeOfFreedom() const { return map_var_node.getLength(); }
         [[nodiscard]] size_t varToNode(size_t x) const { return map_var_node[x]; }
@@ -74,7 +73,7 @@ namespace Physica::Core {
     void AbstractModel<MeshType>::solverToMesh() {
         auto& coeffs = mesh.getCoeffs();
         for (size_t i = 0; i < getDegreeOfFreedom(); ++i) {
-            coeffs[varToNode(i)] = solver.getSolution()[i];
+            coeffs[varToNode(i)] = b[i];
         }
     }
 

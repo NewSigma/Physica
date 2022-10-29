@@ -129,9 +129,9 @@ namespace Physica::Core {
         meshToBuffer(buffer1);
         buffer2 = buffer1;
         spaceStep();
-        buffer1 += Base::getSolution() * (stepSize * 0.5);
+        buffer1 += Base::b * (stepSize * 0.5);
         spaceStep();
-        buffer2 += Base::getSolution() * stepSize;
+        buffer2 += Base::b * stepSize;
         bufferToMesh(buffer2);
     }
 

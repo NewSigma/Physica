@@ -57,10 +57,11 @@ int main() {
     }
     {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 4>;
-        MatrixType mat = A.leftCols(4);
-        VectorType b = A.col(4);
-        IterateSolver<ScalarType> solver(4);
-        if (!vectorNear(solver.solve(mat, std::move(b)), answer, 1E-14))
+        const MatrixType mat = A.leftCols(4);
+        Vector<ScalarType> b = A.col(4);
+        IterateSolver<ScalarType> solver{};
+        solver.solve(mat, b);
+        if (!vectorNear(b, answer, 1E-14))
             return 1;
     }
     return 0;

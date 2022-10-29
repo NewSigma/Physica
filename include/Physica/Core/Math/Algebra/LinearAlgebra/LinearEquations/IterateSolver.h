@@ -24,13 +24,14 @@ namespace Physica::Core {
     template<class ScalarType>
     class IterateSolver {
     public:
-        using VectorType = Vector<ScalarType>;
+        using VectorType = Vector<ScalarType>; // IterateSolver is intended for large problem, so there is no need for fixed vectors
         using RealType = typename ScalarType::RealType;
     private:
-        VectorType solution;
+        RealType error;
+        size_t maxIteration;
     public:
-        IterateSolver() = default;
-        IterateSolver(size_t order);
+        IterateSolver();
+        IterateSolver(size_t maxIteration_, RealType error_);
         IterateSolver(const IterateSolver&) = default;
         IterateSolver(IterateSolver&&) noexcept = default;
         ~IterateSolver() = default;
@@ -38,17 +39,20 @@ namespace Physica::Core {
         IterateSolver& operator=(IterateSolver solver) noexcept;
         /* Operations */
         template<class MatrixType>
-        const VectorType& solve(const RValueMatrix<MatrixType>& A, VectorType b);
-        void resize(size_t size) { solution.resize(size); }
-        /* Getters */
-        [[nodiscard]] size_t getOrder() const noexcept { return solution.getLength(); }
-        [[nodiscard]] const VectorType& getSolution() const noexcept { return solution; }
+        inline void solve(const RValueMatrix<MatrixType>& A, VectorType& b);
+        template<class Functor>
+        void solve_functor(Functor dot_functor, VectorType& b);
+        void resize([[maybe_unused]] size_t size) {}
         /* Helpers */
         void swap(IterateSolver& solver) noexcept;
     };
 
     template<class ScalarType>
-    IterateSolver<ScalarType>::IterateSolver(size_t order) : solution(order) {}
+    IterateSolver<ScalarType>::IterateSolver() : error(std::numeric_limits<ScalarType>::epsilon()), maxIteration(0) {}
+
+    template<class ScalarType>
+    IterateSolver<ScalarType>::IterateSolver(size_t maxIteration_, RealType error_)
+            : error(std::move(error_)), maxIteration(maxIteration_) {}
 
     template<class ScalarType>
     IterateSolver<ScalarType>& IterateSolver<ScalarType>::operator=(IterateSolver solver) noexcept {
@@ -64,17 +68,25 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     template<class MatrixType>
-    const typename IterateSolver<ScalarType>::VectorType& IterateSolver<ScalarType>::solve(const RValueMatrix<MatrixType>& A, VectorType b) {
-        solution = std::move(b);
-        VectorType residual = -solution;
-        VectorType p = solution;
-        solution = ScalarType::Zero();
-        VectorType& x = solution; //rename
-        VectorType temp;
+    inline void IterateSolver<ScalarType>::solve(const RValueMatrix<MatrixType>& A, VectorType& b) {
+        assert(A.getRow() == A.getColumn());
+        assert(A.getRow() == b.getLength());
+        solve_functor([&A](const VectorType& v, VectorType& dot) { dot = A.getDerived() * v; }, b);
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    void IterateSolver<ScalarType>::solve_functor(Functor dot_functor, VectorType& b) {
+        VectorType residual = -b;
+        VectorType p = b;
+        VectorType& x = b; //rename
+        x = ScalarType::Zero();
+        VectorType temp(b.getLength());
 
         RealType squaredNorm = residual.squaredNorm();
-        while(squaredNorm > std::numeric_limits<ScalarType>::epsilon()) {
-            temp = A * p;
+        size_t iteration = 1;
+        while(squaredNorm > error) {
+            dot_functor(p, temp);
             const ScalarType step = squaredNorm / (p.conjugate() * temp);
             x += step * p;
             residual += step * temp;
@@ -82,13 +94,17 @@ namespace Physica::Core {
             const RealType beta = next_squaredNorm / squaredNorm;
             squaredNorm = next_squaredNorm;
             p = beta * p - residual;
+
+            if (iteration == maxIteration)
+                break;
+            ++iteration;
         }
-        return solution;
     }
 
     template<class ScalarType>
     void IterateSolver<ScalarType>::swap(IterateSolver& solver) noexcept {
-        solution.swap(solver.solution);
+        error.swap(solver.error);
+        std::swap(maxIteration, solver.maxIteration);
     }
 
     template<class ScalarType>
