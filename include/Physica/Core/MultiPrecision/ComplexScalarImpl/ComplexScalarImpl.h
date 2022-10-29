@@ -75,26 +75,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::Zero() {
-        return ComplexScalar(ScalarType::Zero(), ScalarType::Zero());
-    }
-
-    template<class ScalarType>
-    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::One() {
-        return ComplexScalar(ScalarType::One(), ScalarType::Zero());
-    }
-
-    template<class ScalarType>
-    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::Two() {
-        return ComplexScalar(ScalarType::Two(), ScalarType::Zero());
-    }
-
-    template<class ScalarType>
-    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::Random() {
-        return ComplexScalar(randomScalar<ScalarType>(), randomScalar<ScalarType>());
-    }
-
-    template<class ScalarType>
     ScalarType ComplexScalar<ScalarType>::squaredNorm() const {
         return square(real) + square(imag);
     }
@@ -112,6 +92,29 @@ namespace Physica::Core {
         if(real.isNegative() && !imag.isZero())
             result += RealType(M_PI);
         return result;
+    }
+
+    template<class ScalarType>
+    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::Zero() {
+        return ComplexScalar(ScalarType::Zero(), ScalarType::Zero());
+    }
+
+    template<class ScalarType>
+    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::One() {
+        return ComplexScalar(ScalarType::One(), ScalarType::Zero());
+    }
+
+    template<class ScalarType>
+    inline ComplexScalar<ScalarType> ComplexScalar<ScalarType>::Two() {
+        return ComplexScalar(ScalarType::Two(), ScalarType::Zero());
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    ComplexScalar<ScalarType> ComplexScalar<ScalarType>::random_uniform(RandomGenerator& gen) {
+        ScalarType real = ScalarType::random_uniform(gen);
+        ScalarType imag = ScalarType::random_uniform(gen);
+        return ComplexScalar(std::move(real), std::move(imag));
     }
 
     template<class ScalarType>

@@ -32,7 +32,8 @@ void func([[maybe_unused]] size_t i) {
 }
 
 int main() {
-    const MatrixType A = MatrixType::randomMatrix(4);
+    std::mt19937 gen{};
+    const MatrixType A = MatrixType::random_uniform(4, gen);
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
 

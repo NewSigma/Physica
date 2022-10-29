@@ -80,12 +80,9 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>
     template<class RandomGenerator>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(size_t len, RandomGenerator& generator) {
-        Vector<T, Length, MaxLength> result{};
-        result.reserve(len);
-        std::uniform_real_distribution<typename T::TrivialType> dist{};
+        Vector<T, Length, MaxLength> result(len);
         for (size_t i = 0; i < len; ++i)
-            result.get_allocator().construct(result.data() + i, dist(generator));
-        result.setLength(len);
+            result[i] = T::random_uniform(generator);
         return result;
     }
 

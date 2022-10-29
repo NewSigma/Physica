@@ -119,11 +119,13 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::randomMatrix(size_t row, size_t column) {
+    template<class RandomGenerator>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>::random_uniform(
+            size_t row, size_t column, RandomGenerator& gen) {
         DenseMatrix result(row, column);
         for (size_t i = 0; i < result.getMaxMajor(); ++i)
             for (size_t j = 0; j < result.getMaxMinor(); ++j)
-                result.refFromMajorMinor(i, j) = randomScalar<T>();
+                result.refFromMajorMinor(i, j) = T::random_uniform(gen);
         return result;
     }
 

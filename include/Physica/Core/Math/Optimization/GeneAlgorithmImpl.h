@@ -35,10 +35,11 @@ namespace Physica::Core {
     }
 
     template<class Function, class VectorType>
-    void GeneAlgorithm<Function, VectorType>::solve() {
+    template<class RandomGenerator>
+    void GeneAlgorithm<Function, VectorType>::solve(RandomGenerator& gen) {
         for (size_t iteration = 0; iteration < config.maxGeneration; ++iteration) {
-            crossover();
-            mutation();
+            crossover(gen);
+            mutation(gen);
         }
 
         for (size_t i = 1; i < config.populationSize; ++i) {
@@ -48,18 +49,19 @@ namespace Physica::Core {
     }
 
     template<class Function, class VectorType>
-    void GeneAlgorithm<Function, VectorType>::crossover() {
+    template<class RandomGenerator>
+    void GeneAlgorithm<Function, VectorType>::crossover(RandomGenerator& gen) {
         const auto populationSize = config.populationSize;
         const auto crossoverRate = config.crossoverRate;
         for (size_t i = 0; i < populationSize; i++) {
-            const ScalarType random = randomScalar<ScalarType>();
+            const ScalarType random = ScalarType::random_uniform(gen);
             if (random < ScalarType(crossoverRate)) {
                 unsigned int sampleIndex1 = std::rand() % populationSize;
                 unsigned int sampleIndex2 = std::rand() % populationSize;
                 auto& sample1 = population[sampleIndex1];
                 auto& sample2 = population[sampleIndex2];
 
-                const ScalarType random1 = randomScalar<ScalarType>();
+                const ScalarType random1 = ScalarType::random_uniform(gen);
                 //Whether random2 > random1 or not does not matter.
                 VectorType child = sample1 + (sample2 - sample1) * random1;
                 ScalarType fitness_child = func(std::cref(child));
@@ -72,8 +74,9 @@ namespace Physica::Core {
     }
 
     template<class Function, class VectorType>
-    void GeneAlgorithm<Function, VectorType>::mutation() {
-        const ScalarType random = randomScalar<ScalarType>();
+    template<class RandomGenerator>
+    void GeneAlgorithm<Function, VectorType>::mutation(RandomGenerator& gen) {
+        const ScalarType random = ScalarType::random_uniform(gen);
         if(random < ScalarType(config.mutationRate)) {
             unsigned int randomIndex = std::rand() % config.populationSize;
             population[randomIndex] = VectorType::randomVector(config.lowerBound, config.upperBound);

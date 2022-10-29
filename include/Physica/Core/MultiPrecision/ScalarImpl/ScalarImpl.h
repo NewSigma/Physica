@@ -19,6 +19,7 @@
 #pragma once
 
 #include <iomanip>
+#include <random>
 #include "ScalarArithmetic.h"
 /**
  * This file is part of implementations of \Scalar.
@@ -228,6 +229,12 @@ namespace Physica::Core {
     inline Scalar<Float, true> Scalar<Float, false>::operator/(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f / s.f, fabsf((s.f * s.getA()) / (s.f * (s.f - s.getA()))));
     }
+
+    template<class RandomGenerator>
+    Scalar<Float, false> Scalar<Float, false>::random_uniform(RandomGenerator& gen) {
+        std::uniform_real_distribution<float> dist{};
+        return Scalar(dist(gen));
+    }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
@@ -282,6 +289,12 @@ namespace Physica::Core {
 
     inline Scalar<Double, true> Scalar<Double, false>::operator/(const Scalar<Double, true>& s) const {
         return Scalar<Double, true>(d / s.d, fabs((s.d * s.getA()) / (s.d * (s.d - s.getA()))));
+    }
+
+    template<class RandomGenerator>
+    Scalar<Double, false> Scalar<Double, false>::random_uniform(RandomGenerator& gen) {
+        std::uniform_real_distribution<double> dist{};
+        return Scalar(dist(gen));
     }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////
 }

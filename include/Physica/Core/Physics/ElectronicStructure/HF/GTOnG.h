@@ -63,8 +63,10 @@ namespace Physica::Core::Physics {
         [[nodiscard]] ScalarType* getCoeffs() noexcept { return coeffs; }
         [[nodiscard]] const ScalarType* getCoeffs() const noexcept { return coeffs; }
         /* Static Members */
-        [[nodiscard]] static GTOnG randomBase(const Vector<ScalarType>& center) { return randomBase(center, 0, 0, 0); }
-        [[nodiscard]] static GTOnG randomBase(const Vector<ScalarType>& center, size_t l, size_t m, size_t n);
+        template<class RandomGenerator>
+        [[nodiscard]] static GTOnG randomBase(const Vector<ScalarType>& center, RandomGenerator& gen) { return randomBase(center, 0, 0, 0, gen); }
+        template<class RandomGenerator>
+        [[nodiscard]] static GTOnG randomBase(const Vector<ScalarType>& center, size_t l, size_t m, size_t n, RandomGenerator& gen);
     };
 
     template<class ScalarType, size_t Size>
@@ -116,11 +118,12 @@ namespace Physica::Core::Physics {
     }
 
     template<class ScalarType, size_t Size>
-    GTOnG<ScalarType, Size> GTOnG<ScalarType, Size>::randomBase(const Vector<ScalarType>& center, size_t l, size_t m, size_t n) {
+    template<class RandomGenerator>
+    GTOnG<ScalarType, Size> GTOnG<ScalarType, Size>::randomBase(const Vector<ScalarType>& center, size_t l, size_t m, size_t n, RandomGenerator& gen) {
         GTOnG result{};
         for (size_t i = 0; i < Size; ++i) {
-            result.bases[i] = GaussBase<ScalarType>(center, randomScalar<ScalarType>(), l, m, n);
-            result.coeffs[i] = randomScalar<ScalarType>();
+            result.bases[i] = GaussBase<ScalarType>(center, ScalarType::random_uniform(gen), l, m, n);
+            result.coeffs[i] = ScalarType::random_uniform(gen);
         }
         return result;
     }

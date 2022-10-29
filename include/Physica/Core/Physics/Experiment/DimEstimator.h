@@ -38,8 +38,8 @@ namespace Physica::Core {
         Vector<ScalarType> intrinsicDim;
         Vector<ScalarType> correlateDim;
     public:
-        template<class VectorType>
-        DimEstimator(size_t sampleNum, const Utils::Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius);
+        template<class VectorType, class RandomGenerator>
+        DimEstimator(size_t sampleNum, const Utils::Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);
         /* Operations */
         template<class MatrixType, class VectorType>
         ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
@@ -52,15 +52,16 @@ namespace Physica::Core {
         static inline VectorType corrIntegral(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
     };
 
-    template<class VectorType>
+    template<class VectorType, class RandomGenerator>
     DimEstimator::DimEstimator(size_t sampleNum,
                                const Utils::Array<size_t>& intrinsicDim_,
-                               const LValueVector<VectorType>& radius)
+                               const LValueVector<VectorType>& radius,
+                               RandomGenerator& gen)
             : intrinsicDim(intrinsicDim_.getLength()) {
         const size_t length = intrinsicDim.getLength();
         correlateDim.resize(length);
         const size_t maxDim = *std::max_element(intrinsicDim_.cbegin(), intrinsicDim_.cend());
-        const auto data = DataMatrix::randomMatrix(sampleNum, maxDim);
+        const auto data = DataMatrix::random_uniform(sampleNum, maxDim, gen);
         for (size_t i = 0; i < length; ++i) {
             intrinsicDim[i] = ScalarType(intrinsicDim_[i]);
             correlateDim[i] = corrDimen(data.leftCols(intrinsicDim_[i]), radius);

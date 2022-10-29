@@ -47,7 +47,8 @@ namespace Physica::Core {
         GeneAlgorithm(Function func_, const AlgorithmConfig& config_);
         ~GeneAlgorithm() = default;
 
-        void solve();
+        template<class RandomGenerator>
+        void solve(RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] const AlgorithmConfig& getConfig() const noexcept { return config; }
         [[nodiscard]] size_t getDim() const noexcept { return config.lowerBound.getLength(); }
@@ -56,8 +57,10 @@ namespace Physica::Core {
         /* Setters */
         void setConfig(const AlgorithmConfig& c) { config = c; }
     private:
-        void crossover();
-        void mutation();
+        template<class RandomGenerator>
+        void crossover(RandomGenerator& gen);
+        template<class RandomGenerator>
+        void mutation(RandomGenerator& gen);
     };
 }
 

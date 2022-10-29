@@ -19,21 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    //!Return a real number between 0 and 1.
-    template<class ScalarType>
-    inline ScalarType randomScalar() {
-        return ScalarType(static_cast<double>(random()) / RAND_MAX);
-    }
-    //!Return a real number between lowerBound and upperBound.
-    template<class ScalarType>
-    inline ScalarType randomScalar(const ScalarBase<ScalarType>& lowerBound, const ScalarBase<ScalarType>& upperBound) {
-        using ResultType = typename Internal::RemoveErrorTrack<ScalarType>::Type;
-        auto castUpper = ResultType(upperBound.getDerived());
-        auto castLower = ResultType(lowerBound.getDerived());
-        auto s = randomScalar<ResultType>();
-        return s * (castUpper - castLower) + castLower;
-    }
-
     template<bool errorTrack>
     Scalar<MultiPrecision, errorTrack> floor(const Scalar<MultiPrecision, errorTrack>& s) {
         if(s.isInteger())

@@ -59,10 +59,6 @@ namespace Physica::Core {
         bool operator!=(const ComplexScalar<ScalarType>& c) const { return !(operator==(c)); }
         /* Helpers */
         void swap(ComplexScalar& c) noexcept;
-        static inline ComplexScalar Zero();
-        static inline ComplexScalar One();
-        static inline ComplexScalar Two();
-        static inline ComplexScalar Random();
         /* Getters */
         [[nodiscard]] ScalarType squaredNorm() const;
         [[nodiscard]] inline ScalarType norm() const;
@@ -75,6 +71,12 @@ namespace Physica::Core {
         /* Setters */
         void setReal(const ScalarType& s) { real = s; }
         void setImag(const ScalarType& s) { imag = s; }
+        /* Static Members */
+        static inline ComplexScalar Zero();
+        static inline ComplexScalar One();
+        static inline ComplexScalar Two();
+        template<class RandomGenerator>
+        [[nodiscard]] static ComplexScalar random_uniform(RandomGenerator& gen);
     };
 
     template<class ScalarType>

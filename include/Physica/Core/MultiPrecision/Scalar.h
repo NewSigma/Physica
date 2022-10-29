@@ -488,6 +488,9 @@ namespace Physica::Core {
         static void setA([[maybe_unused]] float value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
+        /* Static Members */
+        template<class RandomGenerator>
+        [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         /* Friends */
         friend class Scalar<Float, true>;
     };
@@ -579,6 +582,9 @@ namespace Physica::Core {
         static void setA([[maybe_unused]] double value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
         Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
+        /* Static Members */
+        template<class RandomGenerator>
+        [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         /* Friends */
         friend class Scalar<Double, true>;
     };

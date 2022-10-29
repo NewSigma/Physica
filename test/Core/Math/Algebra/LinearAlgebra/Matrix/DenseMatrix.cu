@@ -23,7 +23,8 @@ using ScalarType = Scalar<Float, false>;
 using MatrixType = DenseMatrix<ScalarType>;
 
 int main() {
-    const MatrixType A = MatrixType::randomMatrix(16, 16);
+    std::mt19937 gen{};
+    const MatrixType A = MatrixType::random_uniform(16, 16, gen);
     const auto d_A = A.toDevice();
     const MatrixType B = d_A.toHost();
     if (A != B)

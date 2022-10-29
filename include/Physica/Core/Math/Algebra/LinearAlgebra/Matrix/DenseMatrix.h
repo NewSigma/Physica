@@ -107,8 +107,10 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
-        [[nodiscard]] static DenseMatrix randomMatrix(size_t order) { return randomMatrix(order, order); }
-        [[nodiscard]] static DenseMatrix randomMatrix(size_t row, size_t column);
+        template<class RandomGenerator>
+        [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomGenerator& gen) { return random_uniform(order, order, gen); }
+        template<class RandomGenerator>
+        [[nodiscard]] static DenseMatrix random_uniform(size_t row, size_t column, RandomGenerator& gen);
     private:
         DenseMatrix(Storage storage, size_t row, size_t column) : Storage(std::move(storage)), Dim(row, column) {}
         friend class device_obj<This>;
