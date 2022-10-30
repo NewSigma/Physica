@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/Filter/SavitzkyGolay.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
     /**
@@ -28,6 +29,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class IRAbsorb {
+        static_assert(is_scalar<ScalarType>::value, "[Error]: ScalarType must be a scalar");
         using VectorType = Vector<ScalarType>;
     public:
         VectorType symmCorr;
