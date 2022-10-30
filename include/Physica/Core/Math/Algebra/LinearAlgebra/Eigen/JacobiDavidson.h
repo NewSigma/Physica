@@ -105,17 +105,24 @@ namespace Physica::Core {
         assert(source.getRow() == initial.getLength());
 
         VectorType residule;
-        initial.toUnit();
-        /* Init */ {
-            auto col = eigenvectors.col(0);
-            col = initial;
-        }
         VectorType buffer(initial.getLength());
 
         const size_t innerIteration = getInnerIteration();
         for (size_t i = 0; i < getNumRequired(); ++i) {
             ScalarType& eigenvalue = eigenvalues[i];
             auto eigenvector = eigenvectors.col(i);
+            if (i == 0)
+                eigenvector = initial;
+            else {
+                buffer = source.getDerived() * initial;
+                buffer.swap(initial);
+                eigenvector = initial;
+                auto orthogonalSpace = eigenvectors.leftCols(i);
+                auto head = buffer.head(i);
+                head = orthogonalSpace.transpose().conjugate() * eigenvector;
+                eigenvector -= orthogonalSpace * head;
+            }
+            eigenvector.toUnit();
             bool isConverged = false;
         restart:
             /* j = 0 */ {
@@ -213,7 +220,8 @@ namespace Physica::Core {
             auto corner2 = projectDotSpace.topLeftCorner(j + 1);
             auto corner = projectSpace.topLeftCorner(j + 1);
 
-            corner = eigenvalues[index] * corner1 + eigenvalues[index].conjugate() * corner1.transpose().conjugate();
+            const ScalarType target = toRealVector(eigenvalues.head(index + 1)).min();
+            corner = target * corner1 + target.conjugate() * corner1.transpose().conjugate();
             corner -= corner2;
 
             eigenSolver.resize(j + 1);

@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 
 using namespace Physica::Core;
@@ -33,8 +32,11 @@ int main() {
     };
     const Vector<ScalarType> eigen_answer{-3.5532, -1.7061, 1.1174, 6.6899};
     const DenseHermiteMatrix<ComplexType> hermite = data + data.transpose().conjugate();
-    JacobiDavidson<ComplexType> jd(4, 1);
-    jd.compute(hermite, Vector<ComplexType>{{1, -2}, {0, -1}, {1, 0}, {-1, 1}});
-    std::cout << jd.getEigenvalues().format() << std::endl;
+    JacobiDavidson<ComplexType> jd(4, 3);
+
+    std::mt19937 gen{};
+    jd.compute(hermite, Vector<ComplexType>::random(4, gen));
+    if (!vectorNear(jd.getEigenvalues(), eigen_answer.head(3), 1E-4))
+        return 1;
     return 0;
 }
