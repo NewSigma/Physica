@@ -131,7 +131,7 @@ namespace Physica::AI {
                 break;
             ++iteration;
             if (iteration >= maxIteration)
-                throw Core::BadConvergenceException();
+                throw Core::BadConvergenceException("Exceed max iteration of AP");
         };
     }
 

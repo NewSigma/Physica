@@ -112,7 +112,7 @@ namespace Physica::Core {
                 }
 
                 if (total_iter == max_iter)
-                    throw BadConvergenceException();
+                    throw BadConvergenceException("Exceed max iteration of Schur");
             }
             matrixT *= factor;
 

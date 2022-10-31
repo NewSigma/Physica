@@ -22,8 +22,10 @@
 
 namespace Physica::Core {
     class BadConvergenceException : public IOException {
+        const char* msg;
     public:
+        BadConvergenceException(const char* msg_) : msg(msg_) {}
         ~BadConvergenceException() noexcept override = default;
-        const char* what() const noexcept override { return "[Error]: Cannot converge"; }
+        const char* what() const noexcept override { return msg; }
     };
 }

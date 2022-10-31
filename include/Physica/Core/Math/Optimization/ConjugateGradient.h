@@ -157,7 +157,7 @@ namespace Physica::Core::Math {
             if (abs(step_upper - step) < std::numeric_limits<ScalarType>::epsilon())
                 return step_upper;
             if (++i > maxIteration)
-                throw BadConvergenceException();
+                throw BadConvergenceException("Exceed max iteration of ConjugateGradient");
         }
     }
     /**
