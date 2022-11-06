@@ -46,7 +46,7 @@ namespace Physica::Core {
         constexpr static size_t MaxSearchDim = 32; //Refer to [1]
         constexpr static size_t MinSearchDim = 5; //Refer to [1]
         constexpr static size_t MaxSizePerMatrix = 1024 * 1024 * 1024 / sizeof(ScalarType);
-        constexpr static size_t MaxLinearSolverIteration = 0;
+        constexpr static size_t MaxLinearSolverIteration = 4096;
         constexpr static double LinearSolverPrecision = 1E-5;
         constexpr static double DefaultStableThreshold = 0.1; //Refer to [4]
     public:
@@ -90,6 +90,11 @@ namespace Physica::Core {
         /* Setters */
         void setError(RealType error_);
     private:
+        template<class MatrixType>
+        void krylovInitialize(const RValueMatrix<MatrixType>& source,
+                              VectorType& initial,
+                              VectorType& buffer,
+                              size_t eigenIndex);
         void assembleProjects(size_t numSearchDim);
         void refinedRitzSearch(size_t eigenIndex, size_t numSearchDim, ScalarType eigenGoal);
         static size_t calcInnerIteration(size_t order);
@@ -137,40 +142,46 @@ namespace Physica::Core {
         for (size_t i = 0; i < getNumRequired(); ++i) {
             const bool useDefaultGoal = i == 0 && eigenGoal == ScalarType(InvalidGoal);
             RealType lastDeltaEigen = std::numeric_limits<ScalarType>::max();
-            ScalarType& eigenvalue = eigenvalues[i];
-            auto eigenvector = eigenvectors.col(i);
+            size_t numSearchDim;
             /* Init */ {
-                if (i == 0)
-                    eigenvector = initial;
-                else {
-                    buffer = source.getDerived() * initial;
-                    buffer.swap(initial);
-                    initial.toUnit();
-                    auto orthogonalSpace = eigenvectors.leftCols(i);
-                    auto head = buffer.head(i);
-                    head = orthogonalSpace.transpose().conjugate() * initial;
-                    eigenvector = initial - orthogonalSpace * head;
-                }
-                eigenvector.toUnit();
-
-                auto col = searchSpace.col(0);
-                col = eigenvector.asVector();
-                auto dot = dotSpace.col(0);
-                dot = source * eigenvector.asVector();
-                eigenvalue = eigenvector.asVector().conjugate() * dot;
-                residule = dot - eigenvalue * eigenvector.asVector();
-                projectSearchSpace(0, 0) = eigenvalue;
-                projectDotSpace(0, 0) = dot.squaredNorm();
-
+                krylovInitialize(source, initial, buffer, i);
+                numSearchDim = MinSearchDim;
                 if (useDefaultGoal)
-                    eigenGoal = eigenvalue;
+                    eigenGoal = projectSearchSpace(0, 0);
             }
 
+            ScalarType& eigenvalue = eigenvalues[i];
+            auto eigenvector = eigenvectors.col(i);
             bool isConverged = false;
-            size_t numSearchDim = 1;
             size_t iteration = 0;
         restart:
             for (; numSearchDim < searchSpace.getColumn(); ++numSearchDim) {
+                refinedRitzSearch(i, numSearchDim, eigenGoal);
+                residule = source * eigenvector.asVector();
+                eigenvalue = eigenvector.asVector().conjugate() * residule;
+                residule -= eigenvalue * eigenvector.asVector();
+
+                const RealType squaredRes = residule.squaredNorm();
+                isConverged = squaredRes < error;
+                if (isConverged)
+                    break;
+                /* Update goal */ {
+                    if (useDefaultGoal)
+                        eigenGoal = eigenvalue;
+                    else {
+                        auto subSearchSpace = searchSpace.leftCols(numSearchDim);
+                        const VectorType eigenvector2 = subSearchSpace * eigenSolver.getRawEigenvectors().col(numSearchDim - 2);
+                        buffer = source * eigenvector2;
+                        const ScalarType eigenvalue2 = eigenvector2.conjugate() * buffer;
+                        const RealType deltaEigen = eigenvalue2.getReal() - eigenvalue.getReal();
+                        const bool nearConverge = squaredRes < square(deltaEigen);
+                        const bool deltaEigenStable = abs(deltaEigen / lastDeltaEigen - 1.0) < stableThreshold;
+                        const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<ScalarType>::epsilon();
+                        if (!goodDeltaEigen || (deltaEigenStable && nearConverge))
+                            eigenGoal = eigenvalue;
+                        lastDeltaEigen = deltaEigen;
+                    }
+                }
                 /* Correction */ {
                     residule = -residule;
                     residule.toUnit();
@@ -196,38 +207,19 @@ namespace Physica::Core {
                     auto new_dot = dotSpace.col(numSearchDim);
                     new_dot = source * new_direction;
                 }
-                refinedRitzSearch(i, numSearchDim, eigenGoal);
-                residule = source * eigenvector.asVector();
-                eigenvalue = eigenvector.asVector().conjugate() * residule;
-                residule -= eigenvalue * eigenvector.asVector();
-
-                const RealType squaredRes = residule.squaredNorm();
-                isConverged = squaredRes < error;
-                if (isConverged)
-                    break;
-                /* Update goal */ {
-                    if (useDefaultGoal)
-                        eigenGoal = eigenvalue;
-                    else {
-                        auto subSearchSpace = searchSpace.leftCols(numSearchDim + 1);
-                        const VectorType eigenvector2 = subSearchSpace * eigenSolver.getRawEigenvectors().col(numSearchDim - 1);
-                        buffer = source * eigenvector2;
-                        const ScalarType eigenvalue2 = eigenvector2.conjugate() * buffer;
-                        const RealType deltaEigen = eigenvalue2.getReal() - eigenvalue.getReal();
-                        const bool nearConverge = squaredRes < square(deltaEigen);
-                        const bool deltaEigenStable = abs(deltaEigen / lastDeltaEigen - 1.0) < stableThreshold;
-                        const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<ScalarType>::epsilon();
-                        if (!goodDeltaEigen || (deltaEigenStable && nearConverge))
-                            eigenGoal = eigenvalue;
-                        lastDeltaEigen = deltaEigen;
-                    }
-                }
+                assembleProjects(numSearchDim);
             }
 
             ++iteration;
             if (!isConverged) {
                 if (iteration == MaxIterationPerEigen)
                     throw BadConvergenceException("Exceed max iteration of JacobiDavidson");
+                for (size_t dim = 0; dim < MinSearchDim; ++dim) {
+                    const size_t index = searchSpace.getColumn() - MinSearchDim + dim;
+                    searchSpace[dim].swap(searchSpace[index]);
+                    dotSpace[dim].swap(dotSpace[index]);
+                    assembleProjects(dim);
+                }
                 numSearchDim = MinSearchDim;
                 goto restart;
             }
@@ -281,51 +273,114 @@ namespace Physica::Core {
         assert(error_.isPositive());
         error = error_;
     }
+    /**
+     * Refer to [1]
+     */
+    template<class ScalarType>
+    template<class MatrixType>
+    void JacobiDavidson<ScalarType>::krylovInitialize(
+            const RValueMatrix<MatrixType>& source,
+            VectorType& initial,
+            VectorType& buffer,
+            size_t eigenIndex) {
+        if (eigenIndex == 0) {
+            /* dim = 0 */ {
+                initial.toUnit();
+                auto col = searchSpace.col(0);
+                col = initial;
+                auto dot = dotSpace.col(0);
+                dot = source.getDerived() * col.asVector();
+                assembleProjects(0);
+            }
+            for (size_t dim = 1; dim < MinSearchDim; ++dim) {
+                auto col = searchSpace.col(dim);
+                col = source.getDerived() * searchSpace.col(dim - 1).asVector();
+
+                auto orthogonalSpace = searchSpace.leftCols(dim);
+                auto head = buffer.head(dim);
+                head = orthogonalSpace.transpose().conjugate() * col;
+                col -= orthogonalSpace * head;
+                col.toUnit();
+
+                auto dot = dotSpace.col(dim);
+                dot = source.getDerived() * col.asVector();
+                assembleProjects(dim);
+            }
+        }
+        else {
+            const auto lastEigenvector = eigenvectors.col(eigenIndex - 1);
+            /* dim = 0 */ {
+                auto col = searchSpace.col(0);
+                col -= (lastEigenvector.asVector().conjugate() * col.asVector()) * lastEigenvector.asVector();
+                col.toUnit();
+                auto dot = dotSpace.col(0);
+                dot = source.getDerived() * col.asVector();
+                assembleProjects(0);
+            }
+            for (size_t dim = 1; dim < MinSearchDim; ++dim) {
+                auto col = searchSpace.col(dim);
+                col -= (lastEigenvector.asVector().conjugate() * col.asVector()) * lastEigenvector.asVector();
+
+                auto orthogonalSpace = searchSpace.leftCols(dim);
+                auto head = buffer.head(dim);
+                head = orthogonalSpace.transpose().conjugate() * col;
+                col -= orthogonalSpace * head;
+                col.toUnit();
+
+                auto dot = dotSpace.col(dim);
+                dot = source.getDerived() * col.asVector();
+                assembleProjects(dim);
+            }
+        }
+    }
 
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::assembleProjects(size_t numSearchDim) {
         const size_t i = numSearchDim;
         auto new_direction = searchSpace.col(i);
         auto new_dot = dotSpace.col(i);
-        /* Fill projectSearchSpace */ {
-            auto leftCols = dotSpace.leftCols(i);
-            auto col = projectSearchSpace.col(i);
-            auto head1 = col.head(i);
-            head1 = leftCols.transpose().conjugate() * new_direction;
-            auto row = projectSearchSpace.row(i);
-            auto head2 = row.head(i);
-            head2 = head1.conjugate();
-            projectSearchSpace(i, i) = new_dot.asVector().conjugate() * new_direction;
+        if (i != 0) {
+            /* Fill projectSearchSpace */ {
+                auto leftCols = dotSpace.leftCols(i);
+                auto col = projectSearchSpace.col(i);
+                auto head1 = col.head(i);
+                head1 = leftCols.transpose().conjugate() * new_direction;
+                auto row = projectSearchSpace.row(i);
+                auto head2 = row.head(i);
+                head2 = head1.conjugate();
+                projectSearchSpace(i, i) = new_dot.asVector().conjugate() * new_direction;
+            }
+            /* Fill projectDotSpace */ {
+                auto leftCols = dotSpace.leftCols(i);
+                auto col = projectDotSpace.col(i);
+                auto head1 = col.head(i);
+                head1 = leftCols.transpose().conjugate() * new_dot;
+                auto row = projectDotSpace.row(i);
+                auto head2 = row.head(i);
+                head2 = head1.conjugate();
+                projectDotSpace(i, i) = new_dot.squaredNorm();
+            }
         }
-        /* Fill projectDotSpace */ {
-            auto leftCols = dotSpace.leftCols(i);
-            auto col = projectDotSpace.col(i);
-            auto head1 = col.head(i);
-            head1 = leftCols.transpose().conjugate() * new_dot;
-            auto row = projectDotSpace.row(i);
-            auto head2 = row.head(i);
-            head2 = head1.conjugate();
-            projectDotSpace(i, i) = new_dot.squaredNorm();
+        else {
+            projectSearchSpace(0, 0) = new_dot.asVector().conjugate() * new_direction;
+            projectDotSpace(0, 0) = new_dot.squaredNorm();
         }
     }
 
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::refinedRitzSearch(size_t eigenIndex, size_t numSearchDim, ScalarType eigenGoal) {
-        const size_t i = numSearchDim;
-        assembleProjects(i);
-
-        auto corner1 = projectSearchSpace.topLeftCorner(i + 1);
-        auto corner2 = projectDotSpace.topLeftCorner(i + 1);
-        auto corner = projectSpace.topLeftCorner(i + 1);
+        auto corner1 = projectSearchSpace.topLeftCorner(numSearchDim);
+        auto corner2 = projectDotSpace.topLeftCorner(numSearchDim);
+        auto corner = projectSpace.topLeftCorner(numSearchDim);
         corner = eigenGoal * corner1 + eigenGoal.conjugate() * corner1.transpose().conjugate();
         corner -= corner2;
 
-        eigenSolver.resize(i + 1);
+        eigenSolver.resize(numSearchDim);
         eigenSolver.compute(corner, true);
         eigenSolver.sort();
-        auto subSearchSpace = searchSpace.leftCols(i + 1);
+        auto subSearchSpace = searchSpace.leftCols(numSearchDim);
         auto eigenvector = eigenvectors.col(eigenIndex);
-        eigenvector = subSearchSpace * eigenSolver.getRawEigenvectors().col(i);
+        eigenvector = subSearchSpace * eigenSolver.getRawEigenvectors().col(numSearchDim - 1);
     }
 
     template<class ScalarType>
@@ -335,7 +390,7 @@ namespace Physica::Core {
             ite = MaxSearchDim;
         else if (ite < MinSearchDim)
             ite = MinSearchDim;
-        return std::min(ite, order);
+        return ite;
     }
 
     template<class ScalarType>
