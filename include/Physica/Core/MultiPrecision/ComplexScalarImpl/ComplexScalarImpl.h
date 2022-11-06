@@ -118,6 +118,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class RandomGenerator>
+    ComplexScalar<ScalarType> ComplexScalar<ScalarType>::random_normal(RandomGenerator& gen) {
+        ScalarType real = ScalarType::random_normal(gen);
+        ScalarType imag = ScalarType::random_normal(gen);
+        return ComplexScalar(std::move(real), std::move(imag));
+    }
+
+    template<class ScalarType>
     bool scalarNear(const ComplexScalar<ScalarType>& s1,
                     const ComplexScalar<ScalarType>& s2,
                     double precision) {

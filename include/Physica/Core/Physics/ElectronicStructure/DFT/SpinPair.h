@@ -40,8 +40,12 @@ namespace Physica::Core {
     template<class T, bool isSpinPolarized>
     class SpinPair : public Internal::Traits<SpinPair<T, isSpinPolarized>>::Base {
         using Base = typename Internal::Traits<SpinPair<T, isSpinPolarized>>::Base;
+        constexpr static unsigned char NumSpin = Base::getLength();
     public:
-        using Base::Base;
+        using ElemType = T;
+    public:
+        template<class... Args>
+        explicit SpinPair(Args... args);
         SpinPair(const SpinPair&) = default;
         SpinPair(SpinPair&&) noexcept = default;
         ~SpinPair() = default;
@@ -54,4 +58,8 @@ namespace Physica::Core {
     private:
         using Base::operator[];
     };
+
+    template<class T, bool isSpinPolarized>
+    template<class... Args>
+    SpinPair<T, isSpinPolarized>::SpinPair(Args... args) : Base(NumSpin, std::forward<Args>(args)...) {}
 }

@@ -32,6 +32,7 @@ namespace Physica::Utils {
         MoreEq,
         Reciprocal,
         Sqrt,
+        Cbrt,
         Abs,
         Square,
         Ln,

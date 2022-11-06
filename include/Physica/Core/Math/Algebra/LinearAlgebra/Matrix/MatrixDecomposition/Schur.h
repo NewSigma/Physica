@@ -124,8 +124,12 @@ namespace Physica::Core {
         else {
             matrixT = normalized;
             if constexpr (ScalarType::isComplex) {
-                while (activeWindowDownDiag(matrixT, 1) != 1)
+                while (activeWindowDownDiag(matrixT, 1) != 1) {
                     complexQR(0, 1, complexShift(1, iter));
+                    iter += 1;
+                    if (iter == Decouplable::maxItePerCol)
+                        throw BadConvergenceException("Exceed iteration of schur");
+                }
             }
             else {
                 if (activeWindowDownDiag(matrixT, 1) != 1)

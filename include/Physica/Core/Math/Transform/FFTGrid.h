@@ -24,10 +24,12 @@
 namespace Physica::Core {
     template<class ScalarType>
     class FFTGrid : private KSpaceGrid<ScalarType> {
-        static_assert(ScalarType::isComplex == true);
+        static_assert(!ScalarType::isComplex, "[Error]: Complex version not implemented");
     public:
         using Base = KSpaceGrid<ScalarType>;
         using RealType = typename ScalarType::RealType;
+        using ComplexType = ComplexScalar<RealType>;
+        using typename Base::Index3D;
     public:
         FFTGrid() = default;
         FFTGrid(const FFT<RealType, 3>& fft);
@@ -36,9 +38,10 @@ namespace Physica::Core {
         ~FFTGrid() = default;
         /* Operators */
         FFTGrid& operator=(FFTGrid grid) noexcept;
-        [[nodiscard]] ScalarType& operator()(ssize_t x, ssize_t y, ssize_t z);
-        [[nodiscard]] const ScalarType& operator()(ssize_t x, ssize_t y, ssize_t z) const;
+        [[nodiscard]] ComplexType& operator()(ssize_t x, ssize_t y, ssize_t z);
+        [[nodiscard]] ComplexType& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
         /* Operations */
+        [[nodiscard]] ComplexType calc(ssize_t x, ssize_t y, ssize_t z) const;
         void swap(FFTGrid& grid) noexcept { Base::swap(grid); }
         /* Getters */
         using Base::asVector;
@@ -58,18 +61,18 @@ namespace Physica::Core {
         swap(grid);
         return *this;
     }
-
+    
     template<class ScalarType>
-    ScalarType& FFTGrid<ScalarType>::operator()(ssize_t x, ssize_t y, ssize_t z) {
+    typename FFTGrid<ScalarType>::ComplexType& FFTGrid<ScalarType>::operator()(ssize_t x, ssize_t y, ssize_t z) {
         const ssize_t x1 = x >= 0 ? (x - getDimX()) : (x + getDimX() + 1);
         const ssize_t y1 = y >= 0 ? (y - getDimY()) : (y + getDimY() + 1);
         return Base::operator()(x1, y1, z);
     }
-    
+
     template<class ScalarType>
-    const ScalarType& FFTGrid<ScalarType>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
+    typename FFTGrid<ScalarType>::ComplexType FFTGrid<ScalarType>::calc(ssize_t x, ssize_t y, ssize_t z) const {
         const ssize_t x1 = x >= 0 ? (x - getDimX()) : (x + getDimX() + 1);
         const ssize_t y1 = y >= 0 ? (y - getDimY()) : (y + getDimY() + 1);
-        return Base::operator()(x1, y1, z);
+        return Base::calc(x1, y1, z);
     }
 }

@@ -27,43 +27,46 @@ namespace Physica::Core {
      * Plain wave base wave function
      */
     template<class ScalarType>
-    class PWBaseWave {
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+    class PWBaseWave : private KSpaceGrid<ComplexScalar<ScalarType>> {
         using ComplexType = ComplexScalar<ScalarType>;
-        using GridType = KSpaceGrid<ComplexType>;
+        using Base = KSpaceGrid<ComplexType>;
+        using typename Base::Container;
+        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
-        GridType grid;
         LatticeMatrix repCell;
     public:
         PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_);
         /* Operators */
-        [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> r) const;
+        using Base::operator();
+        [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> k, Vector<ScalarType, 3> r) const;
         template<class VectorType>
         PWBaseWave& operator=(const RValueVector<VectorType>& newCoeffs);
         /* Getters */
-        [[nodiscard]] size_t getNumPlaneWave() const noexcept { return grid.getSize(); }
-        [[nodiscard]] ssize_t getDimX() const noexcept { return grid.getDimX(); }
-        [[nodiscard]] ssize_t getDimY() const noexcept { return grid.getDimY(); }
-        [[nodiscard]] ssize_t getDimZ() const noexcept { return grid.getDimZ(); }
-        [[nodiscard]] typename GridType::Index3D getDim() const noexcept { return grid.getDim(); }
+        using Base::asVector;
+        using Base::getDimX;
+        using Base::getDimY;
+        using Base::getDimZ;
+        using Base::getDim;
+        [[nodiscard]] size_t getNumPlaneWave() const noexcept { return Base::getSize(); }
         [[nodiscard]] Vector<ScalarType, 3> getWaveVector(ssize_t x, ssize_t y, ssize_t z) const noexcept;
         [[nodiscard]] ScalarType getKinetic(ssize_t x, ssize_t y, ssize_t z) const noexcept;
     };
 
     template<class ScalarType>
     PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_) : repCell(std::move(repCell_)) {
-        grid = KSpaceGrid<ComplexType>::makeGrid(cutEnergy, repCell);
+        Base::operator=(KSpaceGrid<ComplexType>::makeGrid(cutEnergy, repCell));
     }
 
     template<class ScalarType>
-    typename PWBaseWave<ScalarType>::ComplexType PWBaseWave<ScalarType>::operator()(Vector<ScalarType, 3> r) const {
-        using Index3D = typename GridType::Index3D;
+    typename PWBaseWave<ScalarType>::ComplexType PWBaseWave<ScalarType>::operator()(
+            Vector<ScalarType, 3> k, Vector<ScalarType, 3> r) const {
+        using Index3D = typename Base::Index3D;
         ComplexType result = ComplexType::Zero();
-        GridType::forKIndexInGrid(grid.getDim(), repCell, [this, &result, &r](Vector<ScalarType, 3> k, Index3D index) {
-            const ScalarType phase = k * r;
+        Base::forKIndexInGrid(getDim(), repCell, [this, &result, &k, &r](Vector<ScalarType, 3> K, Index3D index) {
+            const ScalarType phase = (k + K) * r;
             ScalarType s, c;
             sincos(phase, s, c);
-            result += grid(index) * ComplexType(c, s);
+            result += this->operator()(index) * ComplexType(c, s);
         });
         return result;
     }
@@ -71,7 +74,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class VectorType>
     PWBaseWave<ScalarType>& PWBaseWave<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
-        grid.asVector() = newCoeffs;
+        asVector() = newCoeffs;
         return *this;
     }
 

@@ -72,6 +72,8 @@ namespace Physica::Core {
         void swap(DenseHermiteMatrix& m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseHermiteMatrix unitMatrix(size_t order);
+        template<class MatrixType>
+        [[nodiscard]] bool isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision);
     };
     /**
      * Save the upper triangle part of \param mat
@@ -135,6 +137,19 @@ namespace Physica::Core {
         DenseHermiteMatrix<ScalarType, Order, MaxOrder> result(order);
         result.toUnitMatrix();
         return result;
+    }
+
+    template<class ScalarType, size_t Order, size_t MaxOrder>
+    template<class MatrixType>
+    bool DenseHermiteMatrix<ScalarType, Order, MaxOrder>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {
+        if (mat.getRow() != mat.getColumn())
+            return false;
+        
+        for (size_t i = 0; i < mat.getRow(); ++i)
+            for (size_t j = 0; j < mat.getColumn(); ++j)
+                if (!scalarNear(mat.calc(i, j), mat.calc(j, i).conjugate(), precision))
+                    return false;
+        return true;
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>

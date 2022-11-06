@@ -34,7 +34,8 @@ namespace Physica::Core {
                         size_t k = i;
                         while(copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
-                            assert(k < order);
+                            [[maybe_unused]] const bool isNotSingular = k < order;
+                            assert(isNotSingular);
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
@@ -52,7 +53,8 @@ namespace Physica::Core {
                         size_t k = i;
                         while(copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
-                            assert(k < order);
+                            [[maybe_unused]] const bool isNotSingular = k < order;
+                            assert(isNotSingular);
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);

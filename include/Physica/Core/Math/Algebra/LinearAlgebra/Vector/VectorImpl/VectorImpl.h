@@ -59,6 +59,20 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
+    template<class RandomGenerator>
+    void Vector<T, Length, MaxLength>::random_uniform(RandomGenerator& gen) {
+        for (size_t i = 0; i < this->getLength(); ++i)
+            this->operator[](i) = T::random_uniform(gen);
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class RandomGenerator>
+    void Vector<T, Length, MaxLength>::random_normal(RandomGenerator& gen) {
+        for (size_t i = 0; i < this->getLength(); ++i)
+            this->operator[](i) = T::random_normal(gen);
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
     Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::reverse() const {
         const size_t length = this->getLength();
         Vector<T, Length, MaxLength> result(length);

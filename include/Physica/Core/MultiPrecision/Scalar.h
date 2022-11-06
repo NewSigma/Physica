@@ -491,6 +491,8 @@ namespace Physica::Core {
         /* Static Members */
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
         /* Friends */
         friend class Scalar<Float, true>;
     };
@@ -585,6 +587,8 @@ namespace Physica::Core {
         /* Static Members */
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
         /* Friends */
         friend class Scalar<Double, true>;
     };

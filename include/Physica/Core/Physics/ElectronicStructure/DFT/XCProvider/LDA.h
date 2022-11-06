@@ -212,7 +212,7 @@ namespace Physica::Core {
         const auto& rho = density[0].asVector();
         auto& V = xc[0].asVector();
 
-        buffer = pow(rho, ScalarType(1.0 / 3));
+        buffer = cbrt(rho);
         V = ScalarType(4.0 / 3 * factor0) * buffer;
     }
     /**

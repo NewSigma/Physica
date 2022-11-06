@@ -64,7 +64,7 @@ namespace Physica::Core::Internal {
         const size_t row = matrix.getRow();
         const size_t column = matrix.getColumn();
         assert(r1 < row && r2 < row);
-        for (size_t i = 0, temp = 0; i < column; ++i, temp += column)
+        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
             swap(matrix[temp + r1], matrix[temp + r2]);
     }
 

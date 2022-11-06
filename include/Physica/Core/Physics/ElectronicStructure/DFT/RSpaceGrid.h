@@ -27,11 +27,10 @@ namespace Physica::Core {
     template<class T>
     class RSpaceGrid {
         constexpr static bool isScalar = is_scalar<T>::value;
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-    protected:
-        using Container = typename std::conditional<isScalar, Vector<T>, Utils::Array<T>>::type;
     public:
+        using Container = typename std::conditional<isScalar, Vector<T>, Utils::Array<T>>::type;
         using Index3D = Utils::Array<size_t, 3>;
+        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
     private:
         Container values;
@@ -41,6 +40,7 @@ namespace Physica::Core {
     public:
         RSpaceGrid() = default;
         RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_);
+        RSpaceGrid(Index3D dim);
         RSpaceGrid(const RSpaceGrid&) = default;
         RSpaceGrid(RSpaceGrid&&) noexcept = default;
         ~RSpaceGrid() = default;
@@ -50,6 +50,9 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t x, size_t y, size_t z) const;
         [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
+        /* Operations */
+        void resize(size_t x, size_t y, size_t z);
+        void swap(RSpaceGrid& grid) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
         auto begin() const noexcept { return cbegin(); }
@@ -69,8 +72,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
         [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
         [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
-        /* Helpers */
-        void swap(RSpaceGrid& grid) noexcept;
         /* Static members */
         template<class Functor>
         static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
@@ -87,6 +88,9 @@ namespace Physica::Core {
             , dimZ(dimZ_) {
         values.resize(dimX * dimY * dimZ);
     }
+
+    template<class T>
+    RSpaceGrid<T>::RSpaceGrid(Index3D dim) : RSpaceGrid(dim[0], dim[1], dim[2]) {}
 
     template<class T>
     RSpaceGrid<T>::RSpaceGrid(Container values_, size_t dimX_, size_t dimY_, size_t dimZ_)
@@ -114,6 +118,14 @@ namespace Physica::Core {
     }
 
     template<class T>
+    void RSpaceGrid<T>::resize(size_t x, size_t y, size_t z) {
+        values.resize(x * y * z);
+        dimX = x;
+        dimY = y;
+        dimZ = z;
+    }
+
+    template<class T>
     void RSpaceGrid<T>::swap(RSpaceGrid& grid) noexcept {
         using std::swap;
         swap(values, grid.values);
@@ -128,11 +140,11 @@ namespace Physica::Core {
         using ScalarType = typename VectorType::ScalarType;
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
-        a1 = lattice.row(0).asVector() * reciprocal(ScalarType(grid.getDimX() - 1));
+        a1 = lattice.row(0).asVector() * reciprocal(ScalarType(grid.getDimX()));
         auto a2 = sub_lattice.row(1);
-        a2 = lattice.row(1).asVector() * reciprocal(ScalarType(grid.getDimY() - 1));
+        a2 = lattice.row(1).asVector() * reciprocal(ScalarType(grid.getDimY()));
         auto a3 = sub_lattice.row(2);
-        a3 = lattice.row(2).asVector() * reciprocal(ScalarType(grid.getDimZ() - 1));
+        a3 = lattice.row(2).asVector() * reciprocal(ScalarType(grid.getDimZ()));
 
         VectorType v1, v2, v3;
         for (size_t x = 0; x < grid.getDimX(); ++x) {
@@ -170,6 +182,25 @@ namespace Physica::Core {
                 }
             }
         }
+    }
+
+    template<class T>
+    std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
+        using Index3D = typename RSpaceGrid<T>::Index3D;
+        const Index3D dim = grid.getDim();
+        os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
+        os << grid.asVector();
+        return os;
+    }
+
+    template<class T>
+    std::istream& operator>>(std::istream& is, RSpaceGrid<T>& grid) {
+        using Index3D = typename RSpaceGrid<T>::Index3D;
+        Index3D dim;
+        is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
+        grid.resize(dim[0], dim[1], dim[2]);
+        is >> grid.asVector();
+        return is;
     }
 
     template<class T>

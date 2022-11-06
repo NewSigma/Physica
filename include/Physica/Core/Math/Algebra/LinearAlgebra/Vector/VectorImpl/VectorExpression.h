@@ -407,6 +407,33 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
+    class VectorExpression<Utils::ExpressionType::Cbrt, VectorType>
+            : public RValueVector<VectorExpression<Utils::ExpressionType::Cbrt, VectorType>> {
+        using Base = RValueVector<VectorExpression<Utils::ExpressionType::Cbrt, VectorType>>;
+        const VectorType& exp;
+    public:
+        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return cbrt(exp.calc(s)); }
+        template<class PacketType>
+        [[nodiscard]] PacketType packet(size_t index) const {
+            PacketType result = exp.template packet<PacketType>(index);
+            for (size_t i = 0; i < static_cast<size_t>(PacketType::size()); ++i)
+                result.insert(i, std::cbrt(result[i]));
+            return result;
+        }
+        template<class PacketType>
+        [[nodiscard]] PacketType packetPartial(size_t index) const {
+            const size_t count = Base::getLength() - index;
+            PacketType result = exp.template packetPartial<PacketType>(index);
+            for (size_t i = 0; i < count; ++i)
+                result.insert(i, std::cbrt(result[i]));
+            return result;
+        }
+        [[nodiscard]] size_t getLength() const { return exp.getLength(); }
+    };
+
+    template<class VectorType>
     class VectorExpression<Utils::ExpressionType::Abs, VectorType>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Abs, VectorType>> {
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Abs, VectorType>>;
@@ -611,6 +638,11 @@ namespace Physica::Core {
     template<class VectorType>
     inline VectorExpression<Utils::ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) {
         return VectorExpression<Utils::ExpressionType::Sqrt, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<Utils::ExpressionType::Cbrt, VectorType> cbrt(const RValueVector<VectorType>& v) {
+        return VectorExpression<Utils::ExpressionType::Cbrt, VectorType>(v);
     }
 
     template<class VectorType>

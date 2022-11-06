@@ -77,6 +77,8 @@ namespace Physica::Core {
         static inline ComplexScalar Two();
         template<class RandomGenerator>
         [[nodiscard]] static ComplexScalar random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static ComplexScalar random_normal(RandomGenerator& gen);
     };
 
     template<class ScalarType>

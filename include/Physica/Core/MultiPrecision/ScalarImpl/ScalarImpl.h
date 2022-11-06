@@ -235,6 +235,12 @@ namespace Physica::Core {
         std::uniform_real_distribution<float> dist{};
         return Scalar(dist(gen));
     }
+
+    template<class RandomGenerator>
+    Scalar<Float, false> Scalar<Float, false>::random_normal(RandomGenerator& gen) {
+        std::normal_distribution<float> dist{};
+        return Scalar(dist(gen));
+    }
     /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<bool errorTrack>
@@ -294,6 +300,12 @@ namespace Physica::Core {
     template<class RandomGenerator>
     Scalar<Double, false> Scalar<Double, false>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<double> dist{};
+        return Scalar(dist(gen));
+    }
+
+    template<class RandomGenerator>
+    Scalar<Double, false> Scalar<Double, false>::random_normal(RandomGenerator& gen) {
+        std::normal_distribution<double> dist{};
         return Scalar(dist(gen));
     }
     /////////////////////////////////////////Double-WithError///////////////////////////////////////////

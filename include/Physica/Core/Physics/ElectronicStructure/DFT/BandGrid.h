@@ -33,8 +33,9 @@ namespace Physica::Core {
         KPointGrid kPointGrid;
         LatticeMatrix repLatt;
         size_t electronCount;
+        size_t numBand;
     public:
-        BandGrid(LatticeMatrix repLatt_, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_);
+        BandGrid(LatticeMatrix repLatt_, size_t kPointX, size_t kPointY, size_t kPointZ, size_t electronCount_, size_t numBand_);
         BandGrid(const BandGrid&) = default;
         BandGrid(BandGrid&&) noexcept = default;
         ~BandGrid() = default;
@@ -43,6 +44,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] KPointGrid& getKPointGrid() { return kPointGrid; }
         [[nodiscard]] const KPointGrid& getKPointGrid() const noexcept { return kPointGrid; }
+        [[nodiscard]] size_t getNumBand() const noexcept { return numBand; }
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         template<class VectorType>
         [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
@@ -57,18 +59,20 @@ namespace Physica::Core {
                                                     size_t kPointX,
                                                     size_t kPointY,
                                                     size_t kPointZ,
-                                                    size_t electronCount_)
+                                                    size_t electronCount_,
+                                                    size_t numBand_)
             : kPointGrid(kPointX, kPointY, kPointZ)
             , repLatt(std::move(repLatt_))
-            , electronCount(electronCount_) {
+            , electronCount(electronCount_)
+            , numBand(numBand_) {
         assert(kPointGrid.getSize() != 0);
+        assert(numBand >= (electronCount + 1) / 2);
         size_t kPointID = 0;
 
         const ScalarType kPointWeight = reciprocal(ScalarType(kPointGrid.getSize()));
         const ScalarType stepX = reciprocal(ScalarType(kPointX));
         const ScalarType stepY = reciprocal(ScalarType(kPointY));
         const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
-        const size_t numBand = (electronCount + 1) / 2;
 
         Vector<ScalarType, 3> k{};
         ScalarType& kx = k[0];

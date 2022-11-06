@@ -31,7 +31,7 @@ namespace Physica::Core {
         using ScalarType = Scalar<Float, false>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
-        using StructureFactorType = Utils::Array<KSpaceGrid<ComplexType>>;
+        using StructureFactorType = Utils::Array<KSpaceGrid<ScalarType>>;
     private:
         AtomicArray atomicNumbers;
         Type type;
@@ -48,7 +48,7 @@ namespace Physica::Core {
         void toDirect();
         void toCartesian();
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
-        [[nodiscard]] Utils::Array<KSpaceGrid<ComplexType>> makeStructureFactor(ScalarType cutEnergy) const;
+        [[nodiscard]] StructureFactorType makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }
