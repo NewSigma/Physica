@@ -83,20 +83,18 @@ namespace Physica::Core {
         x = ScalarType::Zero();
         VectorType dot(b.getLength());
 
-        RealType squaredNorm = residual.squaredNorm();
-        size_t iteration = 1;
-        while(squaredNorm > error) {
+        RealType squaredRes = residual.squaredNorm();
+        size_t iteration = 0;
+        while(squaredRes > error && iteration < maxIteration) {
             dot_functor(p, dot);
-            const ScalarType step = squaredNorm / (p.conjugate() * dot);
+            const RealType step = squaredRes / (p.conjugate() * dot).getReal();
             x += step * p;
             residual += step * dot;
-            const RealType next_squaredNorm = residual.squaredNorm();
-            const RealType beta = next_squaredNorm / squaredNorm;
-            squaredNorm = next_squaredNorm;
+            const RealType next_squaredRes = residual.squaredNorm();
+            const RealType beta = next_squaredRes / squaredRes;
+            squaredRes = next_squaredRes;
             p = beta * p - residual;
 
-            if (iteration == maxIteration)
-                break;
             ++iteration;
         }
     }
