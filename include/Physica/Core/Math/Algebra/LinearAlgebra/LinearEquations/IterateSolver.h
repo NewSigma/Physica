@@ -40,11 +40,13 @@ namespace Physica::Core {
         /* Operations */
         template<class MatrixType>
         inline void solve(const RValueMatrix<MatrixType>& A, VectorType& b);
-        template<class Functor>
-        void solve_functor(Functor dot_functor, VectorType& b);
+        template<class Functor, class AnyVector>
+        void solve_functor(Functor dot_functor, LValueVector<AnyVector>& b);
         void resize([[maybe_unused]] size_t size) {}
         /* Helpers */
         void swap(IterateSolver& solver) noexcept;
+        /* Setters */
+        void setMaxIteration(size_t iteration) noexcept { maxIteration = iteration; }
     };
 
     template<class ScalarType>
@@ -75,11 +77,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class Functor>
-    void IterateSolver<ScalarType>::solve_functor(Functor dot_functor, VectorType& b) {
-        VectorType residual = -b;
-        VectorType p = b;
-        VectorType& x = b; //rename
+    template<class Functor, class AnyVector>
+    void IterateSolver<ScalarType>::solve_functor(Functor dot_functor, LValueVector<AnyVector>& b) {
+        VectorType residual = -b.getDerived();
+        VectorType p = b.getDerived();
+        AnyVector& x = b.getDerived();
         x = ScalarType::Zero();
         VectorType dot(b.getLength());
 

@@ -25,16 +25,16 @@ using ComplexType = ComplexScalar<ScalarType>;
 int main() {
     using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
     std::mt19937 gen{};
-    const MatrixType data = MatrixType::random_uniform(16, gen);
+    const MatrixType data = MatrixType::random_uniform(64, gen);
     const DenseHermiteMatrix<ComplexType> hermite = data + data.transpose().conjugate();
 
     EigenSolver<MatrixType> eig(hermite, false);
     eig.sort();
     JacobiDavidson<ComplexType> jd(hermite.getRow(), 4);
-    jd.compute(hermite, Vector<ComplexType>::random(16, gen), eig.getEigenvalues()[0]);
+    jd.compute(hermite, Vector<ComplexType>::random(data.getRow(), gen));
     jd.sort();
 
-    if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-14))
+    if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))
         return 1;
     return 0;
 }
