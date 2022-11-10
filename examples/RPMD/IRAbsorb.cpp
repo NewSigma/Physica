@@ -18,9 +18,10 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/IRAbsorb.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Utils/Random.h"
@@ -138,6 +139,22 @@ void testMD() {
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
+
+    IRAbsorb<ScalarType> ir(corr, timeStep, double(rpmd.getVolume()), 128, 4);
+    auto spectrum = ir.makeSpectrum();
+    spectrum *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 100));
+    auto waveNum = ir.makeWaveNum();
+    waveNum *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 100));
+    {
+        std::ofstream fout("spectrum");
+        fout << spectrum;
+        fout.close();
+    }
+    {
+        std::ofstream fout("waveNum");
+        fout << waveNum;
+        fout.close();
+    }
     {
         std::ofstream fout("corr");
         fout << corr;

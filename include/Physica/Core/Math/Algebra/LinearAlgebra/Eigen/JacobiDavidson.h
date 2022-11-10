@@ -31,8 +31,7 @@ namespace Physica::Core {
      * References:
      * [1] M.E. Hochstenbach and Y. Notay, The Jacobi–Davidson method (https://doi.org/10.1002/gamm.201490038)
      * [2] Gerard L. G. Sleijpen and Henk A. Van der Vorst, A Jacobi-Davidson Iteration Method for Linear Eigenvalue Problems (https://doi.org/10.1137/S0036144599363084)
-     * [3] https://people.inf.ethz.ch/arbenz/ewp/Lnotes/chapter12.pdf
-     * [4] Y. Notay, Combination of Jacobi–Davidson and conjugate gradients for the partial symmetric eigenproblem (https://doi.org/10.1002/nla.246)
+     * [3] Y. Notay, Combination of Jacobi–Davidson and conjugate gradients for the partial symmetric eigenproblem (https://doi.org/10.1002/nla.246)
      */
     template<class ScalarType>
     class JacobiDavidson {
@@ -49,7 +48,7 @@ namespace Physica::Core {
         constexpr static size_t MaxSizePerMatrix = 1024 * 1024 * 1024 / sizeof(ScalarType);
         constexpr static size_t MaxLinearSolverIteration = 64;
         constexpr static double LinearSolverPrecision = 1E-5;
-        constexpr static double DefaultStableThreshold = 0.1; //Refer to [4]
+        constexpr static double DefaultStableThreshold = 0.1; //Refer to [3]
     public:
         constexpr static double InvalidGoal = std::numeric_limits<ScalarType>::max();
     private:
@@ -98,6 +97,8 @@ namespace Physica::Core {
         void assembleProjects(size_t numSearchDim);
         void ordinarySearch(size_t numSearchDim);
         void refinedSearch(size_t eigenIndex, size_t numSearchDim, ScalarType eigenGoal);
+        void prepareRestart();
+        /* Static member */
         static size_t calcInnerIteration(size_t order);
     };
 
@@ -204,12 +205,7 @@ namespace Physica::Core {
             if (!isConverged) {
                 if (iteration == MaxIterationPerEigen)
                     throw BadConvergenceException("Exceed max iteration of JacobiDavidson");
-                for (size_t dim = 0; dim < MinSearchDim; ++dim) {
-                    const size_t index = searchSpace.getColumn() - MinSearchDim + dim;
-                    searchSpace[dim].swap(searchSpace[index]);
-                    dotSpace[dim].swap(dotSpace[index]);
-                    assembleProjects(dim);
-                }
+                prepareRestart();
                 numSearchDim = MinSearchDim;
                 goto restart;
             }
@@ -374,6 +370,16 @@ namespace Physica::Core {
         auto subSearchSpace = searchSpace.leftCols(numSearchDim);
         auto eigenvector = eigenvectors.col(eigenIndex);
         eigenvector = subSearchSpace * eigenSolver.getRawEigenvectors().col(numSearchDim - 1);
+    }
+
+    template<class ScalarType>
+    void JacobiDavidson<ScalarType>::prepareRestart() {
+        for (size_t dim = 0; dim < MinSearchDim; ++dim) {
+            const size_t index = searchSpace.getColumn() - MinSearchDim + dim;
+            searchSpace[dim].swap(searchSpace[index]);
+            dotSpace[dim].swap(dotSpace[index]);
+            assembleProjects(dim);
+        }
     }
 
     template<class ScalarType>
