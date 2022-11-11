@@ -196,10 +196,8 @@ namespace Physica::Core {
                 const ScalarType factor2 = square(rep_r2) * u * temp;
                 const ScalarType factor3 = rep_r1 * rep_r2 * temp;
 
-                for (int i = 0; i < 3; ++i) {
-                    force1[i] = vecOH1[i] * factor1 - vecOH2[i] * factor3;
-                    force2[i] = vecOH2[i] * factor2 - vecOH1[i] * factor3;
-                }
+                force1 = vecOH1 * factor1 - vecOH2 * factor3;
+                force2 = vecOH2 * factor2 - vecOH1 * factor3;
                 const ScalarType theta = arccos(u);
                 const ScalarType factor = (ScalarType(equalTheta) - theta) * kTheta;
                 force1 *= factor;

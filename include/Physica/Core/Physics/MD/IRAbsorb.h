@@ -76,7 +76,7 @@ namespace Physica::Core {
     template<class ScalarType>
     typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeSpectrum() const {
         const Vector<ScalarType> norm = toRealVector(fft.getKSpace()) * ScalarType(1 / (2 * M_PI));
-        const ScalarType step =  getDeltaWaveNum();
+        const ScalarType step = fft.getKSpaceDelta();
 
         Vector<ScalarType> spectrum(getDataLength() + filter.getLRange() + filter.getRRange());
         size_t index = 0;
