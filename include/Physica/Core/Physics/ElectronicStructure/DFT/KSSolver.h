@@ -150,18 +150,12 @@ namespace Physica::Core {
                 const Vector3D k = kPoint.getPos();
                 assembleH(k);
                 /* Solve band */ {
-                    ComplexType eigenGuess;
-                    const bool noAvailableGuess = iteration == 0;
-                    if (noAvailableGuess)
-                        eigenGuess = ComplexType(0);
-                    else
-                        eigenGuess = eigSolver[SpinState::Up].getEigenvalues()[0];
                     {
-                        eigSolver[SpinState::Up].compute(h[SpinState::Up], orbits[SpinState::Up][0].asVector(), eigenGuess);
+                        eigSolver[SpinState::Up].compute(h[SpinState::Up], orbits[SpinState::Up][0].asVector());
                         eigSolver[SpinState::Up].sort();
                     }
                     if constexpr (isSpinPolarized) {
-                        eigSolver[SpinState::Down].compute(h[SpinState::Down], orbits[SpinState::Down][0].asVector(), eigenGuess);
+                        eigSolver[SpinState::Down].compute(h[SpinState::Down], orbits[SpinState::Down][0].asVector());
                         eigSolver[SpinState::Down].sort();
                     }
                 }
@@ -172,7 +166,7 @@ namespace Physica::Core {
                     const auto& delta_rho = chargeMixer.getResidule()[SpinState::Up].asVector();
                     const ScalarType error = delta_rho.squaredNorm();
                     const bool isConverged = error < criteria;
-                    //std::cout << error << std::endl;
+                    std::cout << error << std::endl;
                     if (isConverged)
                         break;
                 }
