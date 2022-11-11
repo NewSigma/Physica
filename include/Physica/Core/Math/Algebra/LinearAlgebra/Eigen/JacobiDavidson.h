@@ -143,7 +143,7 @@ namespace Physica::Core {
             bool isConverged = false;
             size_t iteration = 0;
         restart:
-            for (; numSearchDim < searchSpace.getColumn(); ++numSearchDim) {
+            while(true) {
                 if (i == 0) {
                     ordinarySearch(numSearchDim);
                     eigenvalue = eigenSolver.getEigenvalues()[0];
@@ -158,7 +158,8 @@ namespace Physica::Core {
 
                 const RealType squaredRes = residule.squaredNorm();
                 isConverged = squaredRes < error;
-                if (isConverged)
+                const bool shouldRestart = numSearchDim == searchSpace.getColumn();
+                if (isConverged || shouldRestart)
                     break;
                 /* Update goal */ {
                     if (useDefaultGoal)
@@ -199,6 +200,7 @@ namespace Physica::Core {
                     new_dot = source * new_direction;
                 }
                 assembleProjects(numSearchDim);
+                numSearchDim += 1;
             }
 
             ++iteration;
