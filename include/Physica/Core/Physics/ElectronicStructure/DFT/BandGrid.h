@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "KPoint.h"
-#include "RSpaceGrid.h"
+#include "Physica/Core/Physics/Container/RSpaceGrid.h"
 
 namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class BandGrid;

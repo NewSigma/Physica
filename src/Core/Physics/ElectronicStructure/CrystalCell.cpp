@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Core/Physics/ElectronicStructure/DFT/KSpaceGrid.h"
+#include "Physica/Core/Physics/Container/KSpaceGrid.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {

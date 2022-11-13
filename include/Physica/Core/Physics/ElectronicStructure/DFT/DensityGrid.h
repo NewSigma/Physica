@@ -19,7 +19,7 @@
 #pragma once
 
 #include "SpinPair.h"
-#include "RSpaceGrid.h"
+#include "Physica/Core/Physics/Container/RSpaceGrid.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {

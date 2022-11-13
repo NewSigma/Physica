@@ -229,7 +229,7 @@ namespace Physica::Core {
             rho = averageDensity;
         }
         if constexpr (isSpinPolarized) {
-            auto& zeta = density[1].asVector();
+            auto& zeta = density[SpinState::Down].asVector();
             zeta = ScalarType::Zero();
         }
     }

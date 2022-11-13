@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2021-2022 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,11 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <fstream>
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
 #include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
@@ -30,15 +32,34 @@ using ComplexType = ComplexScalar<ScalarType>;
 int main() {
     using namespace Physica::Utils;
     Cycler::init();
-    CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {14}, CrystalCell::Type::Direct);
+    CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {2}, CrystalCell::Type::Direct);
     ScalarType cutEnergy(0.8);
+
+    std::mt19937::result_type seed;
+    Physica::Utils::Random::rdrand(seed);
+    std::mt19937 gen(seed);
     {
-        BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14);
-        auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(Si, cutEnergy, 2, std::move(grid));
+        BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 2);
+        using SolverType = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>;
+        SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid), gen);
+/*
+        using DensityType = typename SolverType::DensityType;
+        DensityType rho(solver.getFFTDim());
+        DensityType last_rho{};
+        std::ifstream fin("rho");
+        fin >> last_rho;
+        rho.fit(last_rho);
+        solver.setDensity(std::move(rho));
+*/
         const auto from = Cycler::tic();
-        solver.solve(1E-3, 100);
+        solver.solve(1E-4, 100);
         const auto to = Cycler::toc();
         std::cout << "Time use: " << Cycler::toSeconds(to - from) << '\n';
+        const auto& band = solver.getBand().getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up);
+        std::cout << band.format() << std::endl;
+
+        //std::ofstream fout("rho");
+        //fout << solver.getDensityGrid();
     }
     return 0;
 }
