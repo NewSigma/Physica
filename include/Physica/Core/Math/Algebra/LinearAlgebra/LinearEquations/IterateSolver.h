@@ -87,7 +87,7 @@ namespace Physica::Core {
 
         RealType squaredRes = residual.squaredNorm();
         size_t iteration = 0;
-        while(squaredRes > error && iteration < maxIteration) {
+        while(squaredRes > error && (iteration < maxIteration || maxIteration == 0)) {
             dot_functor(p, dot);
             const RealType step = squaredRes / (p.conjugate() * dot).getReal();
             x += step * p;
