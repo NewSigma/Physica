@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 
 namespace Physica::Core {
     /**
@@ -32,7 +33,9 @@ namespace Physica::Core {
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
-        constexpr static unsigned int Dim = MDCellType::Dim;
+        using CellListType = CellList<ScalarType, PosScalarType>;
+        using Index3D = typename CellListType::Index3D;
+        using Vector3D = Vector<PosScalarType, 3>;
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;
@@ -75,52 +78,45 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, class PairFunctor>
     template<class Executor>
     Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
-        using VectorType = Vector<PosScalarType, Dim>;
-        const auto& lattice = cell.getLattice();
         const auto& pos = cell.getPos();
-        const auto range = MDCellType::estimateRange(lattice, cutoff);
-        const size_t numParticle = cell.getNumParticle();
+        CellListType cellList(cell, cutoff);
 
-        Vector<ScalarType> force(Dim * numParticle, 0);
-        MDCellType::forCellInRange(range, lattice,
-            [this, pos, numParticle, &force](VectorType delta) {
-                VectorType r, from;
-                for (size_t i = 0; i < numParticle; ++i) {
-                    auto force_i = force.segment(3 * i, 3 * i + 3);
-                    from = pos.row(i) + delta;
-                    for (size_t j = i; j < numParticle; ++j) {
-                        auto force_j = force.segment(3 * j, 3 * j + 3);
-                        auto to = pos.row(j);
+        Vector<ScalarType> force(3 * cell.getNumParticle(), 0);
+        cellList.forCellInList([this, pos, &cellList, &force](Index3D center) {
+            cellList.forNeighInRange(center, [this, center, pos, &cellList, &force](Vector3D translate, Index3D neigh) {
+                Vector3D r, from;
+                for (size_t atom1 : cellList(center)) {
+                    auto f = force.segment(3 * atom1, 3 * atom1 + 3);
+                    from = pos.row(atom1) - translate;
+                    for (size_t atom2 : cellList(neigh)) {
+                        auto to = pos.row(atom2);
                         r = to.asVector() - from;
                         const ScalarType r2 = r.squaredNorm();
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                        if (isNotSelf && r2 < squared_cutoff) {
+                        if (isNotSelf) {
                             const ScalarType dist = sqrt(r2);
                             const ScalarType f_norm = force_functor(dist);
-                            r *= f_norm / dist;
-                            const VectorType& f = r;
-                            force_i -= f;
-                            force_j += f;
+                            f -= r * ScalarType(f_norm / dist);
                         }
                     }
                 }
             });
+        });
         return force;
     }
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
     ScalarType PairModel<ScalarType, PosScalarType, PairFunctor>::potentialEnergy(const MDCellType& cell) const {
-        using VectorType = Vector<PosScalarType, Dim>;
         const auto& pos = cell.getPos();
         const auto range = MDCellType::estimateRange(cell.getLattice(), cutoff);
         const size_t numParticle = cell.getNumParticle();
 
         ScalarType result = 0;
         MDCellType::forCellInRange(range, cell.getLattice(),
-            [this, numParticle, &pos, &result](VectorType delta) {
+            [this, numParticle, &pos, &result](Vector3D delta) {
                 ScalarType temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
-                    VectorType from = pos.row(i) + delta;
+                    Vector3D from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const ScalarType r2 = (from - pos.row(j)).squaredNorm();
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;

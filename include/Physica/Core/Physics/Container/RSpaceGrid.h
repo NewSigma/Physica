@@ -39,7 +39,8 @@ namespace Physica::Core {
         size_t dimZ;
     public:
         RSpaceGrid() = default;
-        RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_);
+        template<class... Args>
+        RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_, Args... args);
         RSpaceGrid(Index3D dim);
         RSpaceGrid(const RSpaceGrid&) = default;
         RSpaceGrid(RSpaceGrid&&) noexcept = default;
@@ -51,7 +52,8 @@ namespace Physica::Core {
         [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
         /* Operations */
-        void resize(size_t x, size_t y, size_t z);
+        template<class... Args>
+        void resize(size_t x, size_t y, size_t z, Args... args);
         void swap(RSpaceGrid& grid) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
@@ -72,6 +74,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
         [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
         [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
+        /* Helpers */
+        [[nodiscard]] size_t index3dTo1d(Index3D index) const noexcept;
         /* Static members */
         template<class Functor>
         static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
@@ -82,11 +86,12 @@ namespace Physica::Core {
     };
 
     template<class T>
-    RSpaceGrid<T>::RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_)
+    template<class... Args>
+    RSpaceGrid<T>::RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_, Args... args)
             : dimX(dimX_)
             , dimY(dimY_)
             , dimZ(dimZ_) {
-        values.resize(dimX * dimY * dimZ);
+        values.resize(dimX * dimY * dimZ, std::forward<Args>(args)...);
     }
 
     template<class T>
@@ -118,8 +123,9 @@ namespace Physica::Core {
     }
 
     template<class T>
-    void RSpaceGrid<T>::resize(size_t x, size_t y, size_t z) {
-        values.resize(x * y * z);
+    template<class... Args>
+    void RSpaceGrid<T>::resize(size_t x, size_t y, size_t z, Args... args) {
+        values.resize(x * y * z, std::forward<Args>(args)...);
         dimX = x;
         dimY = y;
         dimZ = z;
@@ -132,6 +138,11 @@ namespace Physica::Core {
         swap(dimX, grid.dimX);
         swap(dimY, grid.dimY);
         swap(dimZ, grid.dimZ);
+    }
+
+    template<class T>
+    size_t RSpaceGrid<T>::index3dTo1d(Index3D index) const noexcept {
+        return index[0] * dimY * dimZ + index[1] * dimZ + index[2];
     }
 
     template<class T>
