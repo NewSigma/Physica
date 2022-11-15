@@ -79,29 +79,35 @@ namespace Physica::Core {
     template<class Executor>
     Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
-        CellListType cellList(cell, cutoff);
+        const size_t numParticle = cell.getNumParticle();
+        const CellListType cellList(cell, cutoff);
 
         Vector<ScalarType> force(3 * cell.getNumParticle(), 0);
-        cellList.forCellInList([this, pos, &cellList, &force](Index3D center) {
-            cellList.forNeighInRange(center, [this, center, pos, &cellList, &force](Vector3D translate, Index3D neigh) {
-                Vector3D r, from;
-                for (size_t atom1 : cellList(center)) {
-                    auto f = force.segment(3 * atom1, 3 * atom1 + 3);
-                    from = pos.row(atom1) - translate;
-                    for (size_t atom2 : cellList(neigh)) {
-                        auto to = pos.row(atom2);
-                        r = to.asVector() - from;
-                        const ScalarType r2 = r.squaredNorm();
-                        const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                        if (isNotSelf) {
-                            const ScalarType dist = sqrt(r2);
-                            const ScalarType f_norm = force_functor(dist);
-                            f -= r * ScalarType(f_norm / dist);
-                        }
+        for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
+            const Index3D center = cellList.getAtomCellMap()[atom1];
+            cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &force](Vector3D translate, Index3D neigh) {
+                Vector3D r;
+                const Vector3D from = pos.row(atom1) - translate;
+                auto f1 = force.segment(3 * atom1, 3 * atom1 + 3);
+                for (size_t atom2 : cellList(neigh)) {
+                    const bool isDoubleCounted = atom2 < atom1;
+                    if (isDoubleCounted)
+                        continue;
+                    const auto to = pos.row(atom2);
+                    auto f2 = force.segment(3 * atom2, 3 * atom2 + 3);
+                    r = to.asVector() - from;
+                    const ScalarType r2 = r.squaredNorm();
+                    const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                    if (isNotSelf && r2 < squared_cutoff) {
+                        const ScalarType dist = sqrt(r2);
+                        const ScalarType f_norm = force_functor(dist);
+                        r *= ScalarType(f_norm / dist);
+                        f1 -= r;
+                        f2 += r;
                     }
                 }
             });
-        });
+        }
         return force;
     }
 

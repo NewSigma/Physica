@@ -74,8 +74,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
         [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
         [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
-        /* Helpers */
-        [[nodiscard]] size_t index3dTo1d(Index3D index) const noexcept;
         /* Static members */
         template<class Functor>
         static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
@@ -138,11 +136,6 @@ namespace Physica::Core {
         swap(dimX, grid.dimX);
         swap(dimY, grid.dimY);
         swap(dimZ, grid.dimZ);
-    }
-
-    template<class T>
-    size_t RSpaceGrid<T>::index3dTo1d(Index3D index) const noexcept {
-        return index[0] * dimY * dimZ + index[1] * dimZ + index[2];
     }
 
     template<class T>

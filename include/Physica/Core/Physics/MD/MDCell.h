@@ -82,8 +82,7 @@ namespace Physica::Core {
     void MDCell<ScalarType, PosScalarType>::normalizeCell() {
         Base::toDirect(invLattice);
         for (auto& elem : Base::pos) {
-            const int integer = float(elem);
-            elem -= PosScalarType(integer - elem.isNegative());
+            elem -= floor(elem);
             assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
         }
         Base::toCartesian();

@@ -37,7 +37,7 @@ namespace Physica::Core {
         PositionMatrix buffer;
         CellGrid cellGrid;
         ScalarType cutoff;
-        Utils::Array<size_t> atomCellMap;
+        Utils::Array<Index3D> atomCellMap;
     public:
         CellList(const MDCellType& mdCell, ScalarType cutoff_);
         CellList(const CellList&) = default;
@@ -52,6 +52,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return atomCellMap.getLength(); }
+        [[nodiscard]] const Utils::Array<Index3D>& getAtomCellMap() const noexcept { return atomCellMap; }
         /* Static members */
         template<class Functor>
         void forCellInList(Functor func) const;
@@ -76,10 +77,9 @@ namespace Physica::Core {
 
         mdCell.toDirect(buffer);
         for (size_t i = 0; i < getNumParticle(); ++i) {
-            const Index3D index3d = posToIndex(i);
-            const size_t index1d = cellGrid.index3dTo1d(index3d);
-            atomCellMap[i] = index1d;
-            cellGrid.asVector()[index1d].push_front(i);
+            const Index3D index = posToIndex(i);
+            atomCellMap[i] = index;
+            cellGrid(index).push_front(i);
         }
     }
 
@@ -94,12 +94,11 @@ namespace Physica::Core {
         buffer = mdCell.getPos();
         mdCell.toDirect(buffer);
         for (size_t i = 0; i < getNumParticle(); ++i) {
-            const Index3D index3d = posToIndex(i);
-            const size_t indexNewCell = cellGrid.index3dTo1d(index3d);
+            const Index3D indexNewCell = posToIndex(i);
             if (atomCellMap[i] != indexNewCell) {
-                const size_t indexOldCell = atomCellMap[i];
-                cellGrid.asVector()[indexOldCell].remove(i);
-                cellGrid.asVector()[indexNewCell].push_front(i);
+                const Index3D indexOldCell = atomCellMap[i];
+                cellGrid(indexOldCell).remove(i);
+                cellGrid(indexNewCell).push_front(i);
                 atomCellMap[i] = indexNewCell;
             }
         }
