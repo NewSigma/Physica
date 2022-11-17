@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 #include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
@@ -29,8 +29,7 @@ namespace Physica::Core {
      * Reference:
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
-     * [3] VASP (www.vasp.at)
-     * [4] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
+     * [3] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
     template<class ScalarType, class PosScalarType = ScalarType, int NumUnroll = 2>
     class Ewald {
@@ -39,12 +38,12 @@ namespace Physica::Core {
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
         using SearchRangeType = typename PeriodicCell<PosScalarType, Dim>::SearchRangeType;
+        using CellListType = CellList<ScalarType, PosScalarType>;
+        using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<PosScalarType, Dim>;
         constexpr static size_t ErfcTableSize = 4096 + 512;
         constexpr static double ErfcTableStep = 0.001;
-        constexpr static double SumPrec = 4; // Refer to [2]
-    public:
-        constexpr static unsigned int NumAtomPerCore = 64;
+        constexpr static double SumPrec = ErfcTableSize * ErfcTableStep; // Refer to [2]
     private:
         LatticeMatrix lattice;
         ReciprocalCell<PosScalarType> repCell;
@@ -52,6 +51,7 @@ namespace Physica::Core {
         ScalarType inv_volume;
         ScalarType integralLimit;
         ScalarType selfEnergy;
+        PosScalarType rSpaceCutoff;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
         Vector<ScalarType> erfc_table;
@@ -76,12 +76,11 @@ namespace Physica::Core {
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
     private:
+        void initIntegralLimit(PosScalarType volume);
         void makeTables();
         inline ScalarType calcFromTable(ScalarType x) const;
         inline ScalarType calcFromTable_diff(ScalarType x) const;
-        Vector<ScalarType> rSpaceForce_smallSystem(const PositionMatrix& pos) const;
-        template<class Executor>
-        Vector<ScalarType> rSpaceForce_largeSystem(const PositionMatrix& pos) const;
+        Vector<ScalarType> rSpaceForce(const PositionMatrix& pos) const;
 
         friend class ::Physica::Test;
     };
@@ -98,12 +97,10 @@ namespace Physica::Core {
             , erfc_table(ErfcTableSize) {
         const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(ScalarType(volume));
-        {
-            const ScalarType averageCellSize = cbrt(ScalarType(volume));
-            integralLimit = sqrt(ScalarType(M_PI)) / averageCellSize;
-            rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, PosScalarType(ScalarType(SumPrec) / integralLimit));
-            kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
-        }
+        initIntegralLimit(volume);
+        rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
+        rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
+        kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
         selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
                    + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
         makeTables();
@@ -120,11 +117,16 @@ namespace Physica::Core {
     Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::force(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> result;
-        auto kSpaceFuture = Executor::schedule([this, numParticle, &pos, &result]() {
-            Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
+        auto rSpaceFuture = Executor::schedule([this, pos, &result]() {
+            result = rSpaceForce(pos);
+        });
+
+        Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
+        /* kSpaceSum */ {
             const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
             Vector<ScalarType> buffer(numParticle * 2);
-            PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor1, &buffer, &pos, &kSpaceSum](Vector3D delta) {
+            PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
+                [this, numParticle, factor1, &buffer, &pos, &kSpaceSum](Vector3D delta) {
                     const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
                     const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                     if (isNotGammaPoint) {
@@ -143,26 +145,16 @@ namespace Physica::Core {
                         for (size_t i = 0; i < numParticle; ++i) {
                             auto force_i = kSpaceSum.segment(i * Dim, (i + 1) * Dim);
                             const ScalarType charge = charges[i];
-                            const ScalarType dot = ScalarType(delta * pos.row(i).asVector());
                             const ScalarType& sin_temp = buffer[2 * i];
                             const ScalarType& cos_temp = buffer[2 * i + 1];
                             force_i += ((sin_temp * sum_cos - cos_temp * sum_sin) * (factor2 * charge)) * delta;
                         }
                     }
                 });
-            kSpaceSum *= ScalarType(4 * M_PI) * inv_volume;
-            result = std::move(kSpaceSum);
-        });
-        Vector<ScalarType> rSpaceSum;
-        /* rSpaceSum */ {
-            const bool isSmallSystem = numParticle <= NumAtomPerCore;
-            if (isSmallSystem)
-                rSpaceSum = rSpaceForce_smallSystem(pos);
-            else
-                rSpaceSum = rSpaceForce_largeSystem<Executor>(pos);
+            kSpaceSum *= ScalarType(8 * M_PI) * inv_volume;
         }
-        Executor::auto_wait(kSpaceFuture);
-        result += rSpaceSum;
+        Executor::auto_wait(rSpaceFuture);
+        result += kSpaceSum;
         return result;
     }
     /**
@@ -222,12 +214,29 @@ namespace Physica::Core {
         inv_volume.swap(ewald.inv_volume);
         integralLimit.swap(ewald.integralLimit);
         selfEnergy.swap(ewald.selfEnergy);
+        rSpaceCutoff.swap(ewald.rSpaceCutoff);
         rSpaceSumRange.swap(ewald.rSpaceSumRange);
         kSpaceSumRange.swap(ewald.kSpaceSumRange);
         erfc_table.swap(ewald.erfc_table);
         erfcStep.swap(ewald.erfcStep);
         repErfcStep.swap(ewald.repErfcStep);
         doubleSquareStep.swap(ewald.doubleSquareStep);
+    }
+
+    template<class ScalarType, class PosScalarType, int NumUnroll>
+    void Ewald<ScalarType, PosScalarType, NumUnroll>::initIntegralLimit(PosScalarType volume) {
+        const ScalarType averageCellSize = cbrt(ScalarType(volume));
+        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * M_PI) / averageCellSize;
+
+        constexpr double factor = 2 * M_PI;
+        const auto& repLatt = repCell.getLattice();
+        const ScalarType heightX = reciprocal(repLatt.row(0).norm()) * factor;
+        const ScalarType heightY = reciprocal(repLatt.row(1).norm()) * factor;
+        const ScalarType heightZ = reciprocal(repLatt.row(2).norm()) * factor;
+        constexpr double factor1 = 0.99; //A rule of thumb
+        const ScalarType maxRSpaceCutoff = std::min(heightX, std::min(heightY, heightZ)) * factor1;
+        const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
+        integralLimit = std::max(estimate, minLimit);
     }
 
     template<class ScalarType, class PosScalarType, int NumUnroll>
@@ -271,62 +280,29 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, int NumUnroll>
-    Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::rSpaceForce_smallSystem(const PositionMatrix& pos) const {
+    Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::rSpaceForce(const PositionMatrix& pos) const {
         const auto numParticle = getNumParticle();
         Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
-        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
-                for (size_t i = 0; i < numParticle; ++i) {
-                    const Vector3D pos_i = pos.row(i).asVector() + delta;
-                    Vector<ScalarType, Dim> sum(Dim, 0);
-                    for (size_t j = 0; j < numParticle; ++j) {
-                        if (j == i)
-                            continue;
-                        const Vector3D pos_ij = pos_i - pos.row(j).asVector();
-                        const ScalarType r2 = ScalarType(pos_ij.squaredNorm());
-                        const ScalarType r = sqrt(r2);
-                        const ScalarType charge = charges[j];
-                        const ScalarType temp = calcFromTable_diff(r) * (charge);
-                        sum += temp * pos_ij;
-                    }
-                    auto force_i = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
-                    force_i += charges[i] * sum;
+        const CellListType cellList(lattice, pos, rSpaceCutoff);
+        for (size_t i = 0; i < numParticle; ++i) {
+            const Index3D center = cellList.getAtomCellMap()[i];
+            cellList.forNeighInRange(center, [this, i, pos, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
+                const Vector3D from = pos.row(i) - translate;
+                Vector3D delta;
+                Vector<ScalarType, Dim> sum(Dim, 0);
+                for (size_t j : cellList(neigh)) {
+                    const auto to = pos.row(j);
+                    delta = from - to;
+                    const ScalarType r2 = ScalarType(delta.squaredNorm());
+                    const ScalarType r = sqrt(r2);
+                    const ScalarType charge = charges[j];
+                    const ScalarType temp = charge * calcFromTable_diff(r);
+                    sum += temp * delta;
                 }
+                auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
+                f += charges[i] * sum;
             });
-        return rSpaceSum;
-    }
-
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::rSpaceForce_largeSystem(const PositionMatrix& pos) const {
-        const auto numParticle = getNumParticle();
-        if (numParticle % NumUnroll != 0)
-            throw std::invalid_argument("NumParticle does not match NumUnroll");
-
-        Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
-        auto rSpaceFuture = Executor::parallel_for([this, numParticle, &pos, &rSpaceSum](unsigned int i) {
-            Vector<ScalarType, Dim> sum(Dim, 0);
-            PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, i, numParticle, &pos, &sum](Vector3D delta) {
-                    const Vector3D pos_i = pos.row(i).asVector() + delta;
-                    Vector<ScalarType, NumUnroll> temp{};
-                    Vector3D pos_ijk[NumUnroll];
-                    for (size_t j = 0; j < numParticle; j += NumUnroll) {
-                        #pragma GCC unroll 16
-                        for (int k = 0; k < NumUnroll; ++k) {
-                            pos_ijk[k] = pos_i - pos.row(j + k).asVector();
-                            temp[k] = sqrt(ScalarType(pos_ijk[k].squaredNorm()));
-                        }
-                        #pragma GCC unroll 16
-                        for (int k = 0; k < NumUnroll; ++k) {
-                            const ScalarType charge = charges[j + k];
-                            const ScalarType factor = calcFromTable_diff(temp[k]) * charge;
-                            sum += factor * pos_ijk[k];
-                        }
-                    }
-                });
-            auto force_i = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
-            force_i += charges[i] * sum;
-        }, numParticle, (numParticle + NumAtomPerCore) / NumAtomPerCore);
-        Executor::auto_wait(rSpaceFuture);
+        }
         return rSpaceSum;
     }
 }

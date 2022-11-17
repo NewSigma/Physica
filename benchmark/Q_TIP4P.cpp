@@ -103,12 +103,14 @@ int main() {
     Cycler::init();
     std::mt19937 gen{};
 
-    RPMD<ScalarType, PosScalarType> rpmd(makeSystem(1, gen), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
+    auto cell = makeSystem(2, gen);
+    ForceModel::sortPosition(cell);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
     {
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<decltype(gen), decltype(model), SequentialExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), gen, model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), SequentialExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), gen, model);
         const auto to = Cycler::toc();
         std::cout << "1 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
     }
@@ -116,7 +118,7 @@ int main() {
         ThreadPool::initThreadPool(2);
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), gen, model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), gen, model);
         const auto to = Cycler::toc();
         std::cout << "2 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();
@@ -126,7 +128,7 @@ int main() {
         ThreadPool::initThreadPool(4);
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), gen, model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), gen, model);
         const auto to = Cycler::toc();
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();

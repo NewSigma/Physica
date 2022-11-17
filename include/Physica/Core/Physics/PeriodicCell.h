@@ -70,13 +70,16 @@ namespace Physica::Core {
         void swap(PeriodicCell& cell) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
+        static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ScalarType cutoff);
         template<class Functor> static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
+        template<class Functor> static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice) { toDirect(pos, invLattice); }
         static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
         void toCartesian();
+        void toCartesian(PositionMatrix& target) const;
         void scale_direct(ScalarType factor);
         void scalr_cartesian(ScalarType factor);
         static void unitToSuper_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
@@ -141,6 +144,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const LatticeMatrix& lattice) {
+        const InvLatticeMatrix inv = lattice.inverse();
+        toDirect(target, inv);
+    }
+
+    template<class ScalarType, unsigned int Dim>
     typename PeriodicCell<ScalarType, Dim>::SearchRangeType
     PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, ScalarType cutoff) {
         ssize_t max_x, max_y, max_z;
@@ -177,6 +186,29 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    template<class Functor>
+    void PeriodicCell<ScalarType, Dim>::forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+        using VectorType = Vector<ScalarType, Dim>;
+        auto a1 = lattice.row(0);
+        auto a2 = lattice.row(1);
+        auto a3 = lattice.row(2);
+
+        VectorType v1, v2, v3;
+        for (ssize_t x = 0; x <= range[0]; ++x) {
+            v1 = ScalarType(x) * a1.asVector();
+            const ssize_t minY = x == 0 ? 0 : -range[1];
+            for (ssize_t y = minY; y <= range[1]; ++y) {
+                v2 = v1 + ScalarType(y) * a2.asVector();
+                const ssize_t minZ = (x == 0 && y == 0) ? 0 : -range[2];
+                for (ssize_t z = minZ; z <= range[2]; ++z) {
+                    v3 = v2 + ScalarType(z) * a3.asVector();
+                    func(v3);
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
         target *= invLattice;
     }
@@ -184,6 +216,11 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::toCartesian() {
         pos *= lattice;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toCartesian(PositionMatrix& target) const {
+        target *= lattice;
     }
 
     template<class ScalarType, unsigned int Dim>

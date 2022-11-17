@@ -111,7 +111,8 @@ void testSort() {
 
 void testForce() {
     std::mt19937 gen(9806048078107704755UL);
-    auto cell = makeSystem(1, gen);
+    auto cell = makeSystem(2, gen);
+    ForceModel::sortPosition(cell);
     ForceModel model(cell, pair_cutoff);
     const auto& pos = cell.getPos();
     const Vector<ScalarType> force1 = model.template force<SequentialExecutor>(cell);
@@ -126,46 +127,42 @@ void testForce() {
             }, pos.flatten().calc(i), 0.3);
         }
     }
-    if (!vectorNear(force1, force2, 2E-3))
+    if (!vectorNear(force1, force2, 1E-3))
         exit(EXIT_FAILURE);
 }
 
 void testMD() {
     std::mt19937 gen(12989825518855205292UL);
 
-    auto cell = makeSystem(1, gen);
+    auto cell = makeSystem(2, gen);
+    ForceModel::sortPosition(cell);
     ForceModel model(cell, pair_cutoff);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
-    ScalarType bond_mean = 0;
-    ScalarType bond_var = 0;
+    ScalarType bond = 0;
 
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        for (size_t var_time = 0; var_time < 6; ++var_time) {
-            rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
-            ScalarType bond = 0;
-            for (size_t i = 0; i < 100; ++i) {
-                const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
-                ScalarType temp = 0;
-                const size_t numO = rpmd.getNumParticle() / 3;
-                const size_t numH = numO * 2;
-                for (size_t j = 0; j < numO; ++j) {
-                    toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
-                    toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
-                }
-                toNextMean(bond, i, temp);
-                rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
+        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-12), gen, model);
+        for (size_t i = 0; i < 100; ++i) {
+            const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
+            ScalarType temp = 0;
+            const size_t numO = rpmd.getNumParticle() / 3;
+            const size_t numH = numO * 2;
+            for (size_t j = 0; j < numO; ++j) {
+                toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
+                toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
-            toNextVariance(bond_var, bond_mean, var_time, bond);
+            toNextMean(bond, i, temp);
+            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
         }
     }
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
-    if (abs(bond_mean - answer) > ScalarType(4) * sqrt(bond_var))
+    if (!scalarNear(bond, ScalarType(answer), 2E-2))
         exit(EXIT_FAILURE);
 }
 /**
@@ -173,8 +170,8 @@ void testMD() {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    testSort();
-    testForce();
+    //testSort();
+    //testForce();
     testMD();
     return 0;
 }

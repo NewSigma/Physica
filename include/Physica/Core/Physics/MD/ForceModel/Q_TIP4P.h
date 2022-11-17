@@ -392,6 +392,7 @@ namespace Physica::Core {
             vecOH2 = cell.minDistVector(i, indexH2);
             chargePosO = posO.asVector() + (vecOH1 + vecOH2) * ScalarType((1 - gamma) * 0.5);
         }
+        cell.normalizePos(chargePos);
         return chargePos;
     }
 

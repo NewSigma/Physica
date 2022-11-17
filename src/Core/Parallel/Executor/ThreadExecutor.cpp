@@ -28,6 +28,7 @@ namespace Physica::Core::Parallel {
             else
                 std::this_thread::yield();
         }
+        future.get();
     }
 
     void ThreadExecutor::auto_wait(FutureGroup<FutureType>& group) {

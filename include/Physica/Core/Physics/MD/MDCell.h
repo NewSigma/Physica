@@ -42,6 +42,7 @@ namespace Physica::Core {
         /* Operations */
         void scale(PosScalarType factor);
         void normalizeCell();
+        void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
@@ -64,13 +65,16 @@ namespace Physica::Core {
             const auto atomicNum = cell.getAtomicNumber(i);
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
+        normalizeCell();
     }
 
     template<class ScalarType, class PosScalarType>
     MDCell<ScalarType, PosScalarType>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
             : Base(std::move(lattice), std::move(pos))
             , massVec(std::move(massVec_))
-            , invLattice(Base::makeInvLattice()) {}
+            , invLattice(Base::makeInvLattice()) {
+        normalizeCell();
+    }
 
     template<class ScalarType, class PosScalarType>
     void MDCell<ScalarType, PosScalarType>::scale(PosScalarType factor) {
@@ -86,6 +90,16 @@ namespace Physica::Core {
             assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
         }
         Base::toCartesian();
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void MDCell<ScalarType, PosScalarType>::normalizePos(PositionMatrix& target) const {
+        Base::toDirect(target, invLattice);
+        for (auto& elem : target) {
+            elem -= floor(elem);
+            assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
+        }
+        Base::toCartesian(target);
     }
 
     template<class ScalarType, class PosScalarType>

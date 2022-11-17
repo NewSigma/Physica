@@ -39,6 +39,7 @@ namespace Physica::Core {
         ScalarType cutoff;
         Utils::Array<Index3D> atomCellMap;
     public:
+        CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_);
         CellList(const MDCellType& mdCell, ScalarType cutoff_);
         CellList(const CellList&) = default;
         CellList(CellList&&) noexcept = default;
@@ -63,8 +64,25 @@ namespace Physica::Core {
         /* Helpers */
         inline Vector3D findNeighbor(size_t dimId, Index3D centerIndex, int deltaIndex, Index3D& neighborIndex) const;
         /* Static members */
-        static Index3D makeGridDim(const MDCellType& mdCell, ScalarType cutoff);
+        static Index3D makeGridDim(const LatticeMatrix& lattice, ScalarType cutoff);
     };
+
+    template<class ScalarType, class PosScalarType>
+    CellList<ScalarType, PosScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_)
+            : lattice(std::move(lattice_))
+            , buffer(std::move(pos))
+            , cutoff(cutoff_) {
+        atomCellMap.resize(buffer.getRow());
+        const auto dim = makeGridDim(lattice, cutoff);
+        cellGrid.resize(dim[0], dim[1], dim[2]);
+
+        PeriodicCell<PosScalarType, 3>::toDirect(buffer, lattice);
+        for (size_t i = 0; i < getNumParticle(); ++i) {
+            const Index3D index = posToIndex(i);
+            atomCellMap[i] = index;
+            cellGrid(index).push_front(i);
+        }
+    }
 
     template<class ScalarType, class PosScalarType>
     CellList<ScalarType, PosScalarType>::CellList(const MDCellType& mdCell, ScalarType cutoff_)
@@ -72,7 +90,7 @@ namespace Physica::Core {
             , buffer(mdCell.getPos())
             , cutoff(cutoff_)
             , atomCellMap(mdCell.getNumParticle()) {
-        const auto dim = makeGridDim(mdCell, cutoff);
+        const auto dim = makeGridDim(lattice, cutoff);
         cellGrid.resize(dim[0], dim[1], dim[2]);
 
         mdCell.toDirect(buffer);
@@ -146,9 +164,9 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     typename CellList<ScalarType, PosScalarType>::Index3D
     CellList<ScalarType, PosScalarType>::posToIndex(size_t atomId) const {
-        assert(ScalarType(0) <= buffer(atomId, 0) && buffer(atomId, 0) <= ScalarType(1));
-        assert(ScalarType(0) <= buffer(atomId, 1) && buffer(atomId, 1) <= ScalarType(1));
-        assert(ScalarType(0) <= buffer(atomId, 2) && buffer(atomId, 2) <= ScalarType(1));
+        assert(PosScalarType(0) <= buffer(atomId, 0) && buffer(atomId, 0) <= PosScalarType(1));
+        assert(PosScalarType(0) <= buffer(atomId, 1) && buffer(atomId, 1) <= PosScalarType(1));
+        assert(PosScalarType(0) <= buffer(atomId, 2) && buffer(atomId, 2) <= PosScalarType(1));
         const size_t x = size_t(double(buffer(atomId, 0) * ScalarType(cellGrid.getDimX())));
         const size_t y = size_t(double(buffer(atomId, 1) * ScalarType(cellGrid.getDimY())));
         const size_t z = size_t(double(buffer(atomId, 2) * ScalarType(cellGrid.getDimZ())));
@@ -189,9 +207,9 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     typename CellList<ScalarType, PosScalarType>::Index3D
-    CellList<ScalarType, PosScalarType>::makeGridDim(const MDCellType& mdCell, ScalarType cutoff) {
+    CellList<ScalarType, PosScalarType>::makeGridDim(const LatticeMatrix& lattice, ScalarType cutoff) {
         size_t dimX, dimY, dimZ;
-        const ReciprocalCell repCell(mdCell.getLattice());
+        const ReciprocalCell repCell(lattice);
         const auto& repLatt = repCell.getLattice();
         const ScalarType factor = reciprocal(cutoff) * (2 * M_PI);
         dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
