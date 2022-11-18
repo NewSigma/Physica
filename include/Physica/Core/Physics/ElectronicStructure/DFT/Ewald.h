@@ -31,9 +31,8 @@ namespace Physica::Core {
      * [2] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
      * [3] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
-    template<class ScalarType, class PosScalarType = ScalarType, int NumUnroll = 2>
+    template<class ScalarType, class PosScalarType = ScalarType>
     class Ewald {
-        static_assert(0 <= NumUnroll && NumUnroll <= 16, "[Error]: Invalid value");
         constexpr static unsigned int Dim = 3;
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
@@ -85,12 +84,12 @@ namespace Physica::Core {
         friend class ::Physica::Test;
     };
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Ewald<ScalarType, PosScalarType, NumUnroll>::Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_)
+    template<class ScalarType, class PosScalarType>
+    Ewald<ScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_)
             : Ewald(lattice_, ReciprocalCell(lattice_), std::move(charges_)) {}
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Ewald<ScalarType, PosScalarType, NumUnroll>::Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<ScalarType> charges_)
+    template<class ScalarType, class PosScalarType>
+    Ewald<ScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<ScalarType> charges_)
             : lattice(std::move(lattice_))
             , repCell(std::move(repCell_))
             , charges(std::move(charges_))
@@ -106,15 +105,15 @@ namespace Physica::Core {
         makeTables();
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Ewald<ScalarType, PosScalarType, NumUnroll>& Ewald<ScalarType, PosScalarType, NumUnroll>::operator=(Ewald ewald) noexcept {
+    template<class ScalarType, class PosScalarType>
+    Ewald<ScalarType, PosScalarType>& Ewald<ScalarType, PosScalarType>::operator=(Ewald ewald) noexcept {
         swap(ewald);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
+    template<class ScalarType, class PosScalarType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::force(const PositionMatrix& pos) const {
+    Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> result;
         auto rSpaceFuture = Executor::schedule([this, pos, &result]() {
@@ -155,8 +154,8 @@ namespace Physica::Core {
     /**
      * \param pos must be in cartesian convension
      */
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Ewald<ScalarType, PosScalarType, NumUnroll>::potentialEnergy(const PositionMatrix& pos) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Ewald<ScalarType, PosScalarType>::potentialEnergy(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         ScalarType rSpaceSum = 0;
         PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
@@ -201,8 +200,8 @@ namespace Physica::Core {
         return (rSpaceSum + kSpaceSum) * 0.5 - selfEnergy;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    void Ewald<ScalarType, PosScalarType, NumUnroll>::swap(Ewald& ewald) noexcept {
+    template<class ScalarType, class PosScalarType>
+    void Ewald<ScalarType, PosScalarType>::swap(Ewald& ewald) noexcept {
         lattice.swap(ewald.lattice);
         repCell.swap(ewald.repCell);
         charges.swap(ewald.charges);
@@ -218,8 +217,8 @@ namespace Physica::Core {
         doubleSquareStep.swap(ewald.doubleSquareStep);
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    void Ewald<ScalarType, PosScalarType, NumUnroll>::initIntegralLimit(PosScalarType volume) {
+    template<class ScalarType, class PosScalarType>
+    void Ewald<ScalarType, PosScalarType>::initIntegralLimit(PosScalarType volume) {
         const ScalarType averageCellSize = cbrt(ScalarType(volume));
         const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * M_PI) / averageCellSize;
 
@@ -234,8 +233,8 @@ namespace Physica::Core {
         integralLimit = std::max(estimate, minLimit);
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    void Ewald<ScalarType, PosScalarType, NumUnroll>::makeTables() {
+    template<class ScalarType, class PosScalarType>
+    void Ewald<ScalarType, PosScalarType>::makeTables() {
         for (size_t i = 0; i < erfc_table.getLength(); ++i) {
             ScalarType x = ScalarType(i * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
@@ -245,8 +244,8 @@ namespace Physica::Core {
         doubleSquareStep = square(erfcStep) * 2;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    inline ScalarType Ewald<ScalarType, PosScalarType, NumUnroll>::calcFromTable(ScalarType x) const {
+    template<class ScalarType, class PosScalarType>
+    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(ScalarType x) const {
         ScalarType temp = x * repErfcStep + 0.5;
         if (temp > ScalarType(ErfcTableSize - 1))
             return 0;
@@ -259,8 +258,8 @@ namespace Physica::Core {
         return 1;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    inline ScalarType Ewald<ScalarType, PosScalarType, NumUnroll>::calcFromTable_diff(ScalarType x) const {
+    template<class ScalarType, class PosScalarType>
+    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable_diff(ScalarType x) const {
         ScalarType temp = x * repErfcStep + 0.5;
         if (temp > ScalarType(ErfcTableSize - 1))
             return 0;
@@ -274,8 +273,8 @@ namespace Physica::Core {
         return 1;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Vector<ScalarType> Ewald<ScalarType, PosScalarType, NumUnroll>::rSpaceForce(const PositionMatrix& pos) const {
+    template<class ScalarType, class PosScalarType>
+    Vector<ScalarType> Ewald<ScalarType, PosScalarType>::rSpaceForce(const PositionMatrix& pos) const {
         const auto numParticle = getNumParticle();
         Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
         const CellListType cellList(lattice, pos, rSpaceCutoff);

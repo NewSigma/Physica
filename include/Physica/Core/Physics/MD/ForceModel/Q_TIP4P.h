@@ -28,13 +28,13 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, int NumUnroll> class Q_TIP4P;
+    template<class ScalarType, class PosScalarType> class Q_TIP4P;
 
     namespace Internal {
         template<class T> class Traits;
 
-        template<class ScalarType, class PosScalarType, int NumUnroll>
-        class Traits<Q_TIP4P<ScalarType, PosScalarType, NumUnroll>> {
+        template<class ScalarType, class PosScalarType>
+        class Traits<Q_TIP4P<ScalarType, PosScalarType>> {
         public:
             constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
 
@@ -63,12 +63,12 @@ namespace Physica::Core {
      * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
-    template<class ScalarType, class PosScalarType, int NumUnroll>
+    template<class ScalarType, class PosScalarType>
     class Q_TIP4P final {
-        using This = Q_TIP4P<ScalarType, PosScalarType, NumUnroll>;
+        using This = Q_TIP4P<ScalarType, PosScalarType>;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using EwaldType = Ewald<ScalarType, PosScalarType, NumUnroll>;
+        using EwaldType = Ewald<ScalarType, PosScalarType>;
         using LJModelType = PairModel<ScalarType, PosScalarType, decltype(&Internal::Traits<This>::lennardJonesPot)>;
         constexpr static unsigned int Dim = MDCellType::Dim;
     public:
@@ -116,23 +116,23 @@ namespace Physica::Core {
         static ScalarType modifiedMorseForce(ScalarType r);
     };
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_)
+    template<class ScalarType, class PosScalarType>
+    Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_)
             : numMolecule(refer_cell.getNumParticle() / 3)
             , LJModel(std::move(cutoff_), Internal::Traits<This>::lennardJonesForce, Internal::Traits<This>::lennardJonesPot) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Q_TIP4P<ScalarType, PosScalarType, NumUnroll>& Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::operator=(Q_TIP4P model) noexcept {
+    template<class ScalarType, class PosScalarType>
+    Q_TIP4P<ScalarType, PosScalarType>& Q_TIP4P<ScalarType, PosScalarType>::operator=(Q_TIP4P model) noexcept {
         swap(model);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
+    template<class ScalarType, class PosScalarType>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::force(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
 
         Vector<ScalarType> result;
@@ -146,9 +146,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
+    template<class ScalarType, class PosScalarType>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::force_short(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_short(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         using Vector3D = Vector<PosScalarType, Dim>;
 
@@ -217,9 +217,9 @@ namespace Physica::Core {
         return shortForce;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
+    template<class ScalarType, class PosScalarType>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::force_long(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         using Vector3D = Vector<PosScalarType, Dim>;
 
@@ -273,20 +273,20 @@ namespace Physica::Core {
         return coulomb;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::potentialEnergy(const MDCellType& cell) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
         return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    void Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::swap(Q_TIP4P& model) noexcept {
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
         std::swap(numMolecule, model.numMolecule);
         ewald.swap(model.ewald);
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    typename Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::PositionMatrix
-    Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell) {
+    template<class ScalarType, class PosScalarType>
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell) {
         assert(cell.getNumParticle() % 3 == 0);
         const size_t numMolecule = cell.getNumParticle() / 3;
         PositionMatrix dipoles(numMolecule, 3);
@@ -300,8 +300,8 @@ namespace Physica::Core {
         return dipoles;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    PermutationMatrix<PosScalarType> Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::sortPosition(PeriodicCell<PosScalarType, 3>& cell) {
+    template<class ScalarType, class PosScalarType>
+    PermutationMatrix<PosScalarType> Q_TIP4P<ScalarType, PosScalarType>::sortPosition(PeriodicCell<PosScalarType, 3>& cell) {
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
         assert(numAtom % 3 == 0);
@@ -355,8 +355,8 @@ namespace Physica::Core {
         return PermutationMatrix<PosScalarType>(std::move(order));
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::makeCharges() const {
+    template<class ScalarType, class PosScalarType>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::makeCharges() const {
         const size_t numMolecule = getNumMolecule();
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
@@ -370,9 +370,9 @@ namespace Physica::Core {
         return charges;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    typename Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::PositionMatrix
-    Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::makeChargePos(const MDCellType& cell) const {
+    template<class ScalarType, class PosScalarType>
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::makeChargePos(const MDCellType& cell) const {
         PositionMatrix chargePos(cell.getPos().getRow(), 3);
         const auto& pos = cell.getPos();
         const size_t numMolecule = getNumMolecule();
@@ -396,8 +396,8 @@ namespace Physica::Core {
         return chargePos;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::potentialEnergyWithoutEwald(const MDCellType& cell) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergyWithoutEwald(const MDCellType& cell) const {
         using Vector3D = Vector<PosScalarType, Dim>;
         const size_t numMolecule = getNumMolecule();
 
@@ -420,8 +420,8 @@ namespace Physica::Core {
         return interMoleculeEnergy + intraMoleculeEnergy;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::ewaldEnergy(const MDCellType& cell) const {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::ewaldEnergy(const MDCellType& cell) const {
         const PositionMatrix chargePos = makeChargePos(cell);
         const size_t numMolecule = getNumMolecule();
         ScalarType selfCoulomb = 0;
@@ -440,8 +440,8 @@ namespace Physica::Core {
         return ewald.potentialEnergy(chargePos) - selfCoulomb;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::modifiedMorsePot(ScalarType r) {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorsePot(ScalarType r) {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
@@ -449,8 +449,8 @@ namespace Physica::Core {
         return (delta2 - delta3 + delta4 * (7.0 / 12)) * Dr;
     }
 
-    template<class ScalarType, class PosScalarType, int NumUnroll>
-    ScalarType Q_TIP4P<ScalarType, PosScalarType, NumUnroll>::modifiedMorseForce(ScalarType r) {
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::modifiedMorseForce(ScalarType r) {
         const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;

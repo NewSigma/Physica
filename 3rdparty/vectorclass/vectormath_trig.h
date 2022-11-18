@@ -140,7 +140,9 @@ static inline VTYPE sincos_d([[maybe_unused]] VTYPE* cosret, VTYPE const xx) {
     if constexpr (SC == 3) {  // calculate both. cos returned through pointer
         *cosret = cos1;
     }
-    if constexpr ((SC & 1) != 0) return sin1; else return cos1;
+    if constexpr ((SC & 1) != 0)
+        return sin1;
+    return cos1;
 }
 
 // instantiations of sincos_d template:
@@ -259,15 +261,15 @@ static inline VTYPE sincos_f([[maybe_unused]] VTYPE* cosret, VTYPE const xx) {
         signcos = ((q + 1) & 2) << 30;
         cos1 ^= reinterpret_f(signcos);
     }
-    if constexpr (SC == 1) return sin1;
-    else if constexpr (SC == 2) return cos1;
+    if constexpr (SC == 1)
+        return sin1;
+    else if constexpr (SC == 2)
+        return cos1;
     else if constexpr (SC == 3) {  // calculate both. cos returned through pointer
         *cosret = cos1;
         return sin1;
     }
-    else {  // SC == 4. tan
-        return sin1 / cos1;
-    }
+    return sin1 / cos1; // SC == 4. tan
 }
 
 // instantiations of sincos_f template:
