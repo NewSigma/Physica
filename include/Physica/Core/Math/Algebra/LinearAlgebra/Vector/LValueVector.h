@@ -84,6 +84,7 @@ namespace Physica::Core {
 }
 
 #include "VectorImpl/LValueVectorImpl.h"
+#include "VectorImpl/Sincos.h"
 #ifdef PHYSICA_CUDA
     #include "LValueVector.cuh"
 #endif

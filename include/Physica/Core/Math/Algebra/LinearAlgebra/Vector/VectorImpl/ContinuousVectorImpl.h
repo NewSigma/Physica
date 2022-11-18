@@ -41,7 +41,6 @@ namespace Physica::Core {
                 const size_t length = v1.getLength();
                 size_t i = 0;
                 const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
-                PacketType buffer(0);
                 for (; i < to; i += PacketType::size()) {
                     const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
                     v1.getDerived().writePacket(i, sum);

@@ -124,30 +124,25 @@ namespace Physica::Core {
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
         /* kSpaceSum */ {
             const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
+            Vector<ScalarType> dots(numParticle);
             Vector<ScalarType> buffer(numParticle * 2);
             PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
-                [this, numParticle, factor1, &buffer, &pos, &kSpaceSum](Vector3D delta) {
+                [this, numParticle, factor1, &dots, &buffer, &pos, &kSpaceSum](Vector3D delta) {
                     const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
                     const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                     if (isNotGammaPoint) {
+                        auto sin_vec = buffer.head(numParticle);
+                        auto cos_vec = buffer.tail(numParticle);
+
+                        dots = pos * delta;
+                        sincos(dots, sin_vec, cos_vec);
+                        const ScalarType sum_cos = cos_vec * charges;
+                        const ScalarType sum_sin = sin_vec * charges;
                         const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
-                        ScalarType sum_cos = 0;
-                        ScalarType sum_sin = 0;
-                        for (size_t i = 0; i < numParticle; ++i) {
-                            const ScalarType charge = charges[i];
-                            const ScalarType dot = ScalarType(delta * pos.row(i).asVector());
-                            ScalarType& sin_temp = buffer[2 * i];
-                            ScalarType& cos_temp = buffer[2 * i + 1];
-                            sincos(dot, sin_temp, cos_temp);
-                            sum_cos += charge * cos_temp;
-                            sum_sin += charge * sin_temp;
-                        }
                         for (size_t i = 0; i < numParticle; ++i) {
                             auto force_i = kSpaceSum.segment(i * Dim, (i + 1) * Dim);
                             const ScalarType charge = charges[i];
-                            const ScalarType& sin_temp = buffer[2 * i];
-                            const ScalarType& cos_temp = buffer[2 * i + 1];
-                            force_i += ((sin_temp * sum_cos - cos_temp * sum_sin) * (factor2 * charge)) * delta;
+                            force_i += ((sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charge)) * delta;
                         }
                     }
                 });

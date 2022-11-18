@@ -24,6 +24,24 @@
 * Apache License version 2.0 or later.
 ******************************************************************************/
 
+/*
+ * Copyright 2022 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef VECTORMATH_TRIG_H
 #define VECTORMATH_TRIG_H  1
 
@@ -44,30 +62,30 @@ namespace VCL_NAMESPACE {
 // xx = input x (radians)
 // cosret = return pointer (only if SC = 3)
 template<typename VTYPE, int SC>
-static inline VTYPE sincos_d(VTYPE * cosret, VTYPE const xx) {
+static inline VTYPE sincos_d([[maybe_unused]] VTYPE* cosret, VTYPE const xx) {
 
     // define constants
-    const double P0sin = -1.66666666666666307295E-1;
-    const double P1sin = 8.33333333332211858878E-3;
-    const double P2sin = -1.98412698295895385996E-4;
-    const double P3sin = 2.75573136213857245213E-6;
-    const double P4sin = -2.50507477628578072866E-8;
-    const double P5sin = 1.58962301576546568060E-10;
+    constexpr double P0sin = -1.66666666666666307295E-1;
+    constexpr double P1sin = 8.33333333332211858878E-3;
+    constexpr double P2sin = -1.98412698295895385996E-4;
+    constexpr double P3sin = 2.75573136213857245213E-6;
+    constexpr double P4sin = -2.50507477628578072866E-8;
+    constexpr double P5sin = 1.58962301576546568060E-10;
 
-    const double P0cos = 4.16666666666665929218E-2;
-    const double P1cos = -1.38888888888730564116E-3;
-    const double P2cos = 2.48015872888517045348E-5;
-    const double P3cos = -2.75573141792967388112E-7;
-    const double P4cos = 2.08757008419747316778E-9;
-    const double P5cos = -1.13585365213876817300E-11;
+    constexpr double P0cos = 4.16666666666665929218E-2;
+    constexpr double P1cos = -1.38888888888730564116E-3;
+    constexpr double P2cos = 2.48015872888517045348E-5;
+    constexpr double P3cos = -2.75573141792967388112E-7;
+    constexpr double P4cos = 2.08757008419747316778E-9;
+    constexpr double P5cos = -1.13585365213876817300E-11;
 
-    const double DP1 = 7.853981554508209228515625E-1 * 2.;
-    const double DP2 = 7.94662735614792836714E-9 * 2.;
-    const double DP3 = 3.06161699786838294307E-17 * 2.;
+    constexpr double DP1 = 7.853981554508209228515625E-1 * 2.;
+    constexpr double DP2 = 7.94662735614792836714E-9 * 2.;
+    constexpr double DP3 = 3.06161699786838294307E-17 * 2.;
     /*
-    const double DP1sc = 7.85398125648498535156E-1;
-    const double DP2sc = 3.77489470793079817668E-8;
-    const double DP3sc = 2.69515142907905952645E-15;
+    constexpr double DP1sc = 7.85398125648498535156E-1;
+    constexpr double DP2sc = 3.77489470793079817668E-8;
+    constexpr double DP3sc = 2.69515142907905952645E-15;
     */
     typedef decltype(roundi(xx)) ITYPE;          // integer vector type
     typedef decltype(nan_code(xx)) UITYPE;       // unsigned integer vector type
@@ -135,8 +153,8 @@ static inline Vec2d cos(Vec2d const x) {
     return sincos_d<Vec2d, 2>(0, x);
 }
 
-static inline Vec2d sincos(Vec2d * cosret, Vec2d const x) {
-    return sincos_d<Vec2d, 3>(cosret, x);
+static inline void sincos(const Vec2d x, Vec2d& s, Vec2d& c) {
+    s = sincos_d<Vec2d, 3>(&c, x);
 }
 
 #if MAX_VECTOR_SIZE >= 256
@@ -148,8 +166,8 @@ static inline Vec4d cos(Vec4d const x) {
     return sincos_d<Vec4d, 2>(0, x);
 }
 
-static inline Vec4d sincos(Vec4d * cosret, Vec4d const x) {
-    return sincos_d<Vec4d, 3>(cosret, x);
+static inline void sincos(const Vec4d x, Vec4d& s, Vec4d& c) {
+    s = sincos_d<Vec4d, 3>(&c, x);
 }
 #endif // MAX_VECTOR_SIZE >= 256
 
@@ -162,8 +180,8 @@ static inline Vec8d cos(Vec8d const x) {
     return sincos_d<Vec8d, 2>(0, x);
 }
 
-static inline Vec8d sincos(Vec8d * cosret, Vec8d const x) {
-    return sincos_d<Vec8d, 3>(cosret, x);
+static inline void sincos(const Vec8d x, Vec8d& s, Vec8d& c) {
+    s = sincos_d<Vec8d, 3>(&c, x);
 }
 #endif // MAX_VECTOR_SIZE >= 512
 
@@ -178,20 +196,18 @@ static inline Vec8d sincos(Vec8d * cosret, Vec8d const x) {
 // xx = input x (radians)
 // cosret = return pointer (only if SC = 3)
 template<typename VTYPE, int SC>
-static inline VTYPE sincos_f(VTYPE * cosret, VTYPE const xx) {
+static inline VTYPE sincos_f([[maybe_unused]] VTYPE* cosret, VTYPE const xx) {
+    constexpr float DP1F = 0.78515625f * 2.f;
+    constexpr float DP2F = 2.4187564849853515625E-4f * 2.f;
+    constexpr float DP3F = 3.77489497744594108E-8f * 2.f;
 
-    // define constants
-    const float DP1F = 0.78515625f * 2.f;
-    const float DP2F = 2.4187564849853515625E-4f * 2.f;
-    const float DP3F = 3.77489497744594108E-8f * 2.f;
+    constexpr float P0sinf = -1.6666654611E-1f;
+    constexpr float P1sinf = 8.3321608736E-3f;
+    constexpr float P2sinf = -1.9515295891E-4f;
 
-    const float P0sinf = -1.6666654611E-1f;
-    const float P1sinf = 8.3321608736E-3f;
-    const float P2sinf = -1.9515295891E-4f;
-
-    const float P0cosf = 4.166664568298827E-2f;
-    const float P1cosf = -1.388731625493765E-3f;
-    const float P2cosf = 2.443315711809948E-5f;
+    constexpr float P0cosf = 4.166664568298827E-2f;
+    constexpr float P1cosf = -1.388731625493765E-3f;
+    constexpr float P2cosf = 2.443315711809948E-5f;
 
     typedef decltype(roundi(xx)) ITYPE;          // integer vector type
     typedef decltype(nan_code(xx)) UITYPE;       // unsigned integer vector type
@@ -264,8 +280,8 @@ static inline Vec4f cos(Vec4f const x) {
     return sincos_f<Vec4f, 2>(0, x);
 }
 
-static inline Vec4f sincos(Vec4f * cosret, Vec4f const x) {
-    return sincos_f<Vec4f, 3>(cosret, x);
+static inline void sincos(const Vec4f x, Vec4f& s, Vec4f& c) {
+    s = sincos_f<Vec4f, 3>(&c, x);
 }
 
 static inline Vec4f tan(Vec4f const x) {
@@ -281,8 +297,8 @@ static inline Vec8f cos(Vec8f const x) {
     return sincos_f<Vec8f, 2>(0, x);
 }
 
-static inline Vec8f sincos(Vec8f * cosret, Vec8f const x) {
-    return sincos_f<Vec8f, 3>(cosret, x);
+static inline void sincos(const Vec8f x, Vec8f& s, Vec8f& c) {
+    s = sincos_f<Vec8f, 3>(&c, x);
 }
 
 static inline Vec8f tan(Vec8f const x) {
@@ -299,8 +315,8 @@ static inline Vec16f cos(Vec16f const x) {
     return sincos_f<Vec16f, 2>(0, x);
 }
 
-static inline Vec16f sincos(Vec16f * cosret, Vec16f const x) {
-    return sincos_f<Vec16f, 3>(cosret, x);
+static inline void sincos(const Vec16f x, Vec16f& s, Vec16f& c) {
+    s = sincos_f<Vec16f, 3>(&c, x);
 }
 
 static inline Vec16f tan(Vec16f const x) {
