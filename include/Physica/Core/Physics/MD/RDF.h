@@ -21,6 +21,10 @@
 #include "MDCell.h"
 
 namespace Physica::Core {
+    /**
+     * Reference:
+     * [1] Daan Frenkel and Berend Smit. Understanding Molecular Simulation[M]. Academic Press. 2002:85-86
+     */
     template<class ScalarType>
     class RDF {
         constexpr static unsigned int Dim = 3;
