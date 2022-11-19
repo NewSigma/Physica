@@ -44,12 +44,12 @@ namespace Physica::Core {
 
         template<Utils::ExpressionType type, class Exp1, class Exp2>
         class Traits<VectorExpression<type, Exp1, Exp2>> {
-            static_assert(Exp1::SizeAtCompile == Exp2::SizeAtCompile, "[Possible optimization]: Binary operation between vectors should have same size at compile");
-            static_assert(Exp1::MaxSizeAtCompile == Exp2::MaxSizeAtCompile, "[Possible optimization]: Binary operation between vectors should have same max size at compile");
+            static_assert(Exp1::SizeAtCompile == Dynamic || Exp2::SizeAtCompile == Dynamic || (Exp1::SizeAtCompile == Exp2::SizeAtCompile)
+                         , "[Error]: Vector dimentions do not match");
         public:
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp1::ScalarType, typename Exp2::ScalarType>::Type;
-            constexpr static size_t SizeAtCompile = Exp1::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile;
+            constexpr static size_t SizeAtCompile = Exp1::SizeAtCompile > Exp2::SizeAtCompile ? Exp1::SizeAtCompile : Exp2::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile > Exp2::MaxSizeAtCompile ? Exp1::MaxSizeAtCompile : Exp2::MaxSizeAtCompile;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         };
 

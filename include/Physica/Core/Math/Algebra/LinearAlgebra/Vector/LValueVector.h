@@ -65,10 +65,10 @@ namespace Physica::Core {
     };
 
     template<class Derived, class OtherDerived>
-    void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
+    inline void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 
     template<class Derived, class OtherDerived>
-    void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
+    inline void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 
     template<class VectorType, class ScalarType>
     inline void operator+=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
