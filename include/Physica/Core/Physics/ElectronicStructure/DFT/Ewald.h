@@ -124,15 +124,13 @@ namespace Physica::Core {
         /* kSpaceSum */ {
             const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
             Vector<ScalarType> dots(numParticle);
-            Vector<ScalarType> buffer(numParticle * 2);
+            Vector<ScalarType> sin_vec(numParticle);
+            Vector<ScalarType> cos_vec(numParticle);
             PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
-                [this, numParticle, factor1, &dots, &buffer, &pos, &kSpaceSum](Vector3D delta) {
+                [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
                     const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
                     const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
                     if (isNotGammaPoint) {
-                        auto sin_vec = buffer.head(numParticle);
-                        auto cos_vec = buffer.tail(numParticle);
-
                         dots = pos * delta;
                         sincos(dots, sin_vec, cos_vec);
                         const ScalarType sum_cos = cos_vec * charges;

@@ -200,7 +200,7 @@ namespace Physica::Core {
         constexpr bool isNotComplex = !VectorType1::isComplex && !VectorType2::isComplex;
         constexpr bool isBadPacket = std::is_same<ScalarType1, PacketType>::value;
         [[maybe_unused]] constexpr bool enableSIMD = isSameType && isNotComplex && !isBadPacket;
-        return Internal::InnerDotImpl<VectorType1, VectorType2, false>::run(v1, v2); //TODO: We disabled SIMD because it did not enhance performance as expected
+        return Internal::InnerDotImpl<VectorType1, VectorType2, enableSIMD>::run(v1, v2);
     }
 
     template<class VectorType1, class VectorType2>
