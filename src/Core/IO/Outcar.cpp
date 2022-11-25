@@ -17,11 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/IO/Outcar.h"
+#include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     Outcar::Outcar(const char* path, unsigned int numAtom_) : numAtom(numAtom_) {
         std::ifstream fin(path);
+        if (!fin)
+            throw IOException();
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
