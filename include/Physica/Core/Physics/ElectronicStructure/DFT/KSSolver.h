@@ -95,7 +95,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDensitySize() const noexcept { return xcProvider.getBufferSize(); }
         /* Static members */
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
-        static inline void normalizeIndex(ssize_t& index, ssize_t range) noexcept;
     };
 
     template<class ScalarType, class XCProvider>
@@ -290,15 +289,13 @@ namespace Physica::Core {
                     for (; y2 < externalPot.getDimY(); ++y2) {
                         ssize_t z2 = (x1 == x2 && y1 == y2) ? z1 + 1 : -externalPot.getDimZ();
                         for (; z2 < externalPot.getDimZ(); ++z2) {
-                            ssize_t deltaX = x1 - x2;
-                            ssize_t deltaY = y1 - y2;
-                            ssize_t deltaZ = z1 - z2;
-                            normalizeIndex(deltaX, externalPot.getDimX());
-                            normalizeIndex(deltaY, externalPot.getDimY());
-                            normalizeIndex(deltaZ, externalPot.getDimZ());
+                            SignedIndex3D delta{x1 - x2, y1 - y2, z1 - z2};
+                            KSpaceGrid<ComplexType>::normalizeIndex(delta, externalPot.getDim());
+                            const ssize_t deltaX = delta[0];
+                            const ssize_t deltaY = delta[1];
+                            const ssize_t deltaZ = delta[2];
                             const VectorType k2 = any_wave.getWaveVector(x2, y2, z2);
                             const VectorType deltaK = k1 - k2;
-
 
                             const ComplexType external = externalPot.calc(deltaX, deltaY, deltaZ);
                             const ComplexType hartree = kSpaceDencity.calc(deltaX, deltaY, deltaZ) * coeff / deltaK.squaredNorm();
@@ -395,13 +392,5 @@ namespace Physica::Core {
         result[1] = dim[1] * 2 + 1;
         result[2] = dim[2] * 2 + 1;
         return result;
-    }
-
-     template<class ScalarType, class XCProvider>
-    inline void KSSolver<ScalarType, XCProvider>::normalizeIndex(ssize_t& index, ssize_t range) noexcept {
-        if (index > range)
-            index -= range;
-        else if (index < -range)
-            index += range;
     }
 }

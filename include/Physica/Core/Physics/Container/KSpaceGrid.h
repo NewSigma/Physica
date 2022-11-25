@@ -66,6 +66,7 @@ namespace Physica::Core {
         inline static void forKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
         static void forReducedKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
+        static void normalizeIndex(Index3D& index, const Index3D& range);
     protected:
         KSpaceGrid(Container data, size_t dimX_, size_t dimY_, size_t dimZ_);
     };
@@ -208,6 +209,17 @@ namespace Physica::Core {
                     }
                 }
             }
+        }
+    }
+
+    template<class T>
+    void KSpaceGrid<T>::normalizeIndex(Index3D& index, const Index3D& range) {
+        for (int i = 0; i < 3; ++i) {
+            if (index[i] > range[i])
+                index[i] -= range[i];
+            else if (index[i] < -range[i])
+                index[i] += range[i];
+            assert(0 <= index[i] && index[1] < range[i]);
         }
     }
 }
