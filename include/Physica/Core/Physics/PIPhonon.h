@@ -29,7 +29,6 @@ namespace Physica::Core {
         using ScalarType = Scalar<Double, false>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
         using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
-        using SignedIndex3D = typename KSpaceGrid<ScalarType>::Index3D;
         constexpr static unsigned int Dim = 3;
 
         FFT<ScalarType, 3> fft;
@@ -65,8 +64,6 @@ namespace Physica::Core {
         void swap(PIPhonon& obj) noexcept;
     private:
         void toKSpace();
-        /* Getters */
-        SignedIndex3D getSignedSuperSize() const noexcept;
     };
 
     template<class MatrixType>
@@ -97,10 +94,16 @@ namespace Physica::Core {
                     [&, this, offset_r, offset_c](UnsignedIndex3D cell1) {
                         RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
                             [&, this, cell1, offset_r, offset_c](UnsignedIndex3D cell2) {
-                                SignedIndex3D delta;
-                                for (int i = 0; i < 3; ++i)
-                                    delta[i] = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
-                                KSpaceGrid<ScalarType>::normalizeIndex(delta, getSignedSuperSize());
+                                const auto range = getSuperSize();
+                                UnsignedIndex3D delta;
+                                for (int i = 0; i < 3; ++i) {
+                                    ssize_t temp = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
+                                    if (temp < 0)
+                                        temp += range[i];
+                                    else if (temp >= static_cast<ssize_t>(range[i]))
+                                        temp -= range[i];
+                                    delta[i] = temp;
+                                }
 
                                 const size_t cell1_index1d = cell1[0] * superSizeY * superSizeZ + cell1[1] * superSizeZ + cell1[2];
                                 const size_t cell2_index1d = cell2[0] * superSizeY * superSizeZ + cell2[1] * superSizeZ + cell2[2];

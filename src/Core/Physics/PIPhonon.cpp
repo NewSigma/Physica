@@ -89,8 +89,4 @@ namespace Physica::Core {
             }
         }
     }
-
-    typename PIPhonon::SignedIndex3D PIPhonon::getSignedSuperSize() const noexcept {
-        return {static_cast<ssize_t>(superSizeX), static_cast<ssize_t>(superSizeY), static_cast<ssize_t>(superSizeZ)};
-    }
 }
