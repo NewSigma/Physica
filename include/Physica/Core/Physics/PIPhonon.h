@@ -22,11 +22,14 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/HalfDenseMatrixStorage.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Physics/Container/KSpaceGrid.h"
 
 namespace Physica::Core {
     class PIPhonon final {
         using ScalarType = Scalar<Double, false>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
+        using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
+        using SignedIndex3D = typename KSpaceGrid<ScalarType>::Index3D;
         constexpr static unsigned int Dim = 3;
 
         FFT<ScalarType, 3> fft;
@@ -57,10 +60,13 @@ namespace Physica::Core {
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * getNumAtomUnitCell(); }
         [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSizeX * superSizeY * superSizeZ; }
+        [[nodiscard]] UnsignedIndex3D getSuperSize() const noexcept { return {superSizeX, superSizeY, superSizeZ}; }
         /* Helpers */
         void swap(PIPhonon& obj) noexcept;
     private:
         void toKSpace();
+        /* Getters */
+        SignedIndex3D getSignedSuperSize() const noexcept;
     };
 
     template<class MatrixType>
@@ -79,20 +85,45 @@ namespace Physica::Core {
             average_momentum[i] = mean(momentum.row(i));
         }
 
+        Vector<ScalarType> buffer1(numCell);
+        Vector<ScalarType> buffer2(numCell);
         for (size_t r = 0; r < unitDof; ++r) {
+            const size_t offset_r = r * numCell;
             for (size_t c = r; c < unitDof; ++c) {
+                const size_t offset_c = c * numCell;
+                buffer1 = ScalarType(0);
+                buffer2 = ScalarType(0);
+                RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
+                    [&, this, offset_r, offset_c](UnsignedIndex3D cell1) {
+                        RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
+                            [&, this, cell1, offset_r, offset_c](UnsignedIndex3D cell2) {
+                                SignedIndex3D delta;
+                                for (int i = 0; i < 3; ++i)
+                                    delta[i] = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
+                                KSpaceGrid<ScalarType>::normalizeIndex(delta, getSignedSuperSize());
+
+                                const size_t cell1_index1d = cell1[0] * superSizeY * superSizeZ + cell1[1] * superSizeZ + cell1[2];
+                                const size_t cell2_index1d = cell2[0] * superSizeY * superSizeZ + cell2[1] * superSizeZ + cell2[2];
+                                const size_t offset_buffer = delta[0] * superSizeY * superSizeZ + delta[1] * superSizeZ + delta[2];
+
+                                const size_t offset_r1 = offset_r + cell1_index1d;
+                                const ScalarType force_r = average_force[offset_r1];
+                                const ScalarType momentum_r = average_momentum[offset_r1];
+                                const size_t offset_c1 = offset_c + cell2_index1d;
+                                const ScalarType force_c = average_force[offset_c1];
+                                const ScalarType momentum_c = average_momentum[offset_c1];
+                                buffer1[offset_buffer] += force_r * force_c;
+                                buffer2[offset_buffer] += momentum_r * momentum_c;
+                            });
+                    });
+                const ScalarType factor = reciprocal(ScalarType(numCell));
+                buffer1 *= factor;
+                buffer2 *= factor;
+
+                const size_t offset_corr = force_corr.accessingIndex(r, c);
                 for (size_t cell = 0; cell < numCell; ++cell) {
-                    const size_t offset_r = r * numCell + cell;
-                    const ScalarType force_r = average_force[offset_r];
-                    const ScalarType momentum_r = average_momentum[offset_r];
-
-                    const size_t offset_c = c * numCell + cell;
-                    const ScalarType force_c = average_force[offset_c];
-                    const ScalarType momentum_c = average_momentum[offset_c];
-
-                    const size_t offset_corr = force_corr.accessingIndex(r, c);
-                    toNextMean(force_corr[offset_corr][cell], numSample, force_r * force_c);
-                    toNextMean(momentum_corr[offset_corr][cell], numSample, momentum_r * momentum_c);
+                    toNextMean(force_corr[offset_corr][cell], numSample, buffer1[cell]);
+                    toNextMean(momentum_corr[offset_corr][cell], numSample, buffer2[cell]);
                 }
             }
         }
