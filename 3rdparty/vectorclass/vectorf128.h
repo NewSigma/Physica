@@ -638,12 +638,10 @@ public:
     float operator [] (int index) const {
         return extract(index);
     }
-    static constexpr int size() {
-        return 4;
-    }
-    static constexpr int elementtype() {
-        return 16;
-    }
+    /* Static members */
+    static constexpr int size() { return 4; }
+    static constexpr int elementtype() { return 16; }
+    static Vec4f Zeros() noexcept { return Vec4f(_mm_setzero_ps()); }
     typedef __m128 registertype;
 };
 
@@ -1615,12 +1613,10 @@ public:
     double operator [] (int index) const {
         return extract(index);
     }
-    static constexpr int size() {
-        return 2;
-    }
-    static constexpr int elementtype() {
-        return 17;
-    }
+    /* Static members */
+    static constexpr int size() { return 2; }
+    static constexpr int elementtype() { return 17; }
+    static Vec2d Zeros() noexcept { return Vec2d(_mm_setzero_pd()); }
     typedef __m128d registertype;
 };
 

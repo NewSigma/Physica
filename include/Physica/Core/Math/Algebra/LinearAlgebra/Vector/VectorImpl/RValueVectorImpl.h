@@ -121,13 +121,10 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     PacketType RValueVector<Derived>::packetPartial(size_t index) const {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-        PacketType packet{};
+        PacketType packet = PacketType::Zeros();
         for (int i = 0; index < getLength(); ++i, ++index)
             packet.insert(i, calc(index).getTrivial());
         return packet;
-    #pragma GCC diagnostic pop
     }
 
     template<class Derived>
