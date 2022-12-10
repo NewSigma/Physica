@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RValueMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/Container/KSpaceGrid.h"
@@ -27,6 +27,7 @@
 namespace Physica::Core {
     class PIPhonon final {
         using ScalarType = Scalar<Double, false>;
+        using ComplexType = ComplexScalar<ScalarType>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
         using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
         constexpr static unsigned int Dim = 3;
@@ -36,9 +37,15 @@ namespace Physica::Core {
         size_t superSizeX;
         size_t superSizeY;
         size_t superSizeZ;
+
         CorrMatrix force_corr;
         CorrMatrix momentum_corr;
         size_t numSample;
+
+        Utils::Array<DenseHermiteMatrix<ComplexType>> kSpaceForceCorr;
+        Utils::Array<DenseHermiteMatrix<ComplexType>> kSpaceMomentumCorr;
+
+        Utils::Array<DenseMatrix<ComplexType>> normalModes;
     public:
         PIPhonon(size_t numAtomUnitCell_,
                  size_t superSizeX_,
@@ -54,6 +61,7 @@ namespace Physica::Core {
         /* Operations */
         template<class MatrixType>
         void sample(const RValueMatrix<MatrixType>& force, const RValueMatrix<MatrixType>& momentum);
+        void compute();
         /* Getters */
         [[nodiscard]] size_t getNumAtomUnitCell() const noexcept { return numAtomUnitCell; }
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * getNumAtomUnitCell(); }
@@ -64,6 +72,7 @@ namespace Physica::Core {
         void swap(PIPhonon& obj) noexcept;
     private:
         void toKSpace();
+        void applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target);
     };
 
     template<class MatrixType>

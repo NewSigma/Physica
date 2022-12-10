@@ -25,6 +25,8 @@
 
 namespace Physica::Core {
     /**
+     * A = UTU^H
+     * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/

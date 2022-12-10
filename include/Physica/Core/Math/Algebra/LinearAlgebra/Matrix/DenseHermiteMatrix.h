@@ -57,6 +57,9 @@ namespace Physica::Core {
         template<class OtherMatrix>
         DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
+        DenseHermiteMatrix(const DenseHermiteMatrix&) = default;
+        DenseHermiteMatrix(DenseHermiteMatrix&&) noexcept = default;
+        ~DenseHermiteMatrix() = default;
         /* Operators */
         DenseHermiteMatrix& operator=(DenseHermiteMatrix m) noexcept;
         DenseHermiteMatrix& operator=(RealType r);
