@@ -1,19 +1,17 @@
 # Physica
 
-Physica provides several basic modules in computational physics.
+Physica is a library that provides several basic modules in computational physics.
 
 There will be a lot of work to do in the future
 
 ## Table of Contents
 
-- [Background](#background)
-- [Install](#install)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Install
+## Usage
 
 This project uses the following packages:  
 
@@ -21,24 +19,7 @@ This project uses the following packages:
 [Qt](https://www.qt.io/)  6.2.1  (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  11.4  (Optional)  
 
-Then you can compile Physica using the following commands:
-
-```sh
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/where/Physica/should/be/installed/to /path/to/Physica
-$ make install    (alternatively $ make -j<N> install)
-```
-
-## Usage
-
-You can run the executable file in your console:
-
-```sh
-$ /path/where/Physica/should/be/installed/to/Physica
-```
-
-Or link Physica to your program.
+To use Physica, compile and link Physica to your program.
 
 ## Maintainers
 
