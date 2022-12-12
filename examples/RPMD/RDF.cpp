@@ -107,7 +107,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 int main() {
     std::mt19937 gen{};
 
-    auto cell = makeSystem(2, gen);
+    auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
     rpmd.initMomentum(gen);
@@ -132,7 +132,8 @@ int main() {
         for (size_t i = 0; i < 1000; ++i) {
             rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
             rpmd.normalizeCentroid();
-            rdf.sample(rpmd.makeAverageCell());
+            for (size_t j = 0; j < numReplica; ++j)
+                rdf.sample(rpmd.phaseToCell(j));
         }
     }
     pool.shouldExit();
