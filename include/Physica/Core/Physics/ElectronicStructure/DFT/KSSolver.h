@@ -62,8 +62,7 @@ namespace Physica::Core {
         XCProvider xcProvider;
         FFT<ScalarType, 3> fft;
     public:
-        template<class RandomGenerator>
-        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType fftDimFactor, BandType band_, RandomGenerator& gen);
+        KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType fftDimFactor, BandType band_);
         KSSolver(const KSSolver&) = delete;
         KSSolver(KSSolver&&) noexcept = delete;
         ~KSSolver() = default;
@@ -72,20 +71,20 @@ namespace Physica::Core {
         KSSolver& operator=(KSSolver&& base) noexcept = delete;
         /* Operations */
         bool solve(ScalarType criteria, size_t maxIte);
+        void initDensity();
+        void initDensity(const DensityType& rho);
+        template<class RandomGenerator> void initWaveFunc(RandomGenerator& gen);
+        template<class RandomGenerator> void initWaveFunc(const SpinPair<KSOrbit, isSpinPolarized>& initial, RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] size_t getNumPlaneWave() const noexcept { return orbits[SpinState::Up][0].getNumPlaneWave(); }
+        [[nodiscard]] const KSOrbits& getOrbits() const noexcept { return orbits; }
         [[nodiscard]] const BandType& getBand() const noexcept { return band; }
         [[nodiscard]] const DensityType& getDensityGrid() const noexcept { return density; }
         [[nodiscard]] typename RSpaceGrid<ScalarType>::Index3D getFFTDim() const noexcept { return xcPot[SpinState::Up].getDim(); }
-        /* Setters */
-        void setDensity(DensityType rho) noexcept { density.swap(rho); }
     protected:
         /* Operations */
         typename RSpaceGrid<ScalarType>::Index3D makeFFTDim(ScalarType fftDimFactor);
-        template<class RandomGenerator>
-        void initWaveFunc(RandomGenerator& gen);
         void initExternalPot();
-        void initDensity();
         void assembleH(Vector3D k);
         void fillPotential();
         void updateOrbits();
@@ -98,8 +97,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class XCProvider>
-    template<class RandomGenerator>
-    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType fftDimFactor, BandType band_, RandomGenerator& gen)
+    KSSolver<ScalarType, XCProvider>::KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType fftDimFactor, BandType band_)
             : cell(std::move(cell_))
             , cutEnergy(cutEnergy_)
             , iteration(0)
@@ -136,8 +134,6 @@ namespace Physica::Core {
                 fft = FFT<ScalarType, 3>(dim, fftDeltaTs);
             }
         }
-        initWaveFunc(gen);
-        initDensity();
         initExternalPot();
     }
 
@@ -182,6 +178,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initDensity() {
+        const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
+        {
+            auto& rho = density[SpinState::Up].asVector();
+            rho = averageDensity;
+        }
+        if constexpr (isSpinPolarized) {
+            auto& zeta = density[SpinState::Down].asVector();
+            zeta = ScalarType::Zero();
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    void KSSolver<ScalarType, XCProvider>::initDensity(const DensityType& rho) {
+        density.fit(rho);
+    }
+
+    template<class ScalarType, class XCProvider>
     template<class RandomGenerator>
     void KSSolver<ScalarType, XCProvider>::initWaveFunc(RandomGenerator& gen) {
         {
@@ -191,6 +205,30 @@ namespace Physica::Core {
         if constexpr (isSpinPolarized) {
             auto& waveDown = orbits[SpinState::Down][0];
             waveDown.asVector().random_normal(gen);
+        }
+    }
+
+    template<class ScalarType, class XCProvider>
+    template<class RandomGenerator>
+    void KSSolver<ScalarType, XCProvider>::initWaveFunc(const SpinPair<KSOrbit, isSpinPolarized>& initial, RandomGenerator& gen) {
+        const ssize_t dimX = std::min(initial[SpinState::Up].getDimX(), orbits[SpinState::Up][0].getDimX());
+        const ssize_t dimY = std::min(initial[SpinState::Up].getDimY(), orbits[SpinState::Up][0].getDimY());
+        const ssize_t dimZ = std::min(initial[SpinState::Up].getDimZ(), orbits[SpinState::Up][0].getDimZ());
+        {
+            auto& waveUp = orbits[SpinState::Up][0];
+            waveUp.asVector().random_normal(gen);
+            for (ssize_t x = -dimX; x <= dimX; ++x)
+                for (ssize_t y = -dimY; y <= dimY; ++y)
+                    for (ssize_t z = 0; z <= dimZ; ++z)
+                        waveUp(x, y, z) = initial[SpinState::Up](x, y, z);
+        }
+        if constexpr (isSpinPolarized) {
+            auto& waveDown = orbits[SpinState::Down][0];
+            waveDown.asVector().random_normal(gen);
+            for (ssize_t x = -dimX; x <= dimX; ++x)
+                for (ssize_t y = -dimY; y <= dimY; ++y)
+                    for (ssize_t z = 0; z <= dimZ; ++z)
+                        waveDown(x, y, z) = initial[SpinState::Down](x, y, z);
         }
     }
 
@@ -218,19 +256,6 @@ namespace Physica::Core {
             ++i;
         }
         externalPot(0, 0, 0) = ComplexType::Zero();
-    }
-
-    template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::initDensity() {
-        const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
-        {
-            auto& rho = density[SpinState::Up].asVector();
-            rho = averageDensity;
-        }
-        if constexpr (isSpinPolarized) {
-            auto& zeta = density[SpinState::Down].asVector();
-            zeta = ScalarType::Zero();
-        }
     }
 
     template<class ScalarType, class XCProvider>

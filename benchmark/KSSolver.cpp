@@ -28,38 +28,51 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 using ComplexType = ComplexScalar<ScalarType>;
+constexpr bool isSpinPolarized = false;
 
 int main() {
     using namespace Physica::Utils;
     Cycler::init();
     CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {2}, CrystalCell::Type::Direct);
-    ScalarType cutEnergy(0.8);
+    ScalarType cutEnergy(4.9);
 
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
-    std::mt19937 gen(seed);
+    std::mt19937 gen{};
     {
-        BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 2);
-        using SolverType = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>;
-        SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid), gen);
-/*
-        using DensityType = typename SolverType::DensityType;
-        DensityType rho(solver.getFFTDim());
-        DensityType last_rho{};
-        std::ifstream fin("rho");
-        fin >> last_rho;
-        rho.fit(last_rho);
-        solver.setDensity(std::move(rho));
-*/
+        BandGrid<ScalarType, isSpinPolarized> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 4);
+        using SolverType = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, isSpinPolarized>>;
+        SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid));
+
+        {
+            using DensityType = typename SolverType::DensityType;
+            DensityType last_rho{};
+            std::ifstream fin("rho");
+            fin >> last_rho;
+            solver.initDensity(last_rho);
+        }
+        {
+            PWBaseWave<ScalarType> wave{};
+            std::ifstream fin("wave");
+            fin >> wave;
+            solver.initWaveFunc(/*SpinPair<PWBaseWave<ScalarType>, isSpinPolarized>(std::move(wave)), */gen);
+        }
+
         const auto from = Cycler::tic();
-        solver.solve(1E-4, 100);
+        solver.solve(1E-8, 100);
         const auto to = Cycler::toc();
         std::cout << "Time use: " << Cycler::toSeconds(to - from) << '\n';
         const auto& band = solver.getBand().getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up);
         std::cout << band.format() << std::endl;
 
-        //std::ofstream fout("rho");
-        //fout << solver.getDensityGrid();
+        {
+            std::ofstream fout("rho");
+            fout << solver.getDensityGrid();
+        }
+        {
+            std::ofstream fout("wave");
+            fout << solver.getOrbits()[SpinState::Up][0];
+        }
     }
     return 0;
 }

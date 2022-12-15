@@ -51,6 +51,10 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(size_t x, size_t y, size_t z) const;
         [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
+        template<class T1>
+        friend std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T1>& grid);
+        template<class T1>
+        friend std::istream& operator>>(std::istream& is, RSpaceGrid<T1>& grid);
         /* Operations */
         template<class... Args>
         void resize(size_t x, size_t y, size_t z, Args... args);
@@ -120,6 +124,25 @@ namespace Physica::Core {
     template<class T>
     const T& RSpaceGrid<T>::operator()(size_t x, size_t y, size_t z) const {
         return values[x * dimY * dimZ + y * dimZ + z];
+    }
+
+    template<class T>
+    std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
+        using Index3D = typename RSpaceGrid<T>::Index3D;
+        const Index3D dim = grid.getDim();
+        os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
+        os << grid.asVector();
+        return os;
+    }
+
+    template<class T>
+    std::istream& operator>>(std::istream& is, RSpaceGrid<T>& grid) {
+        using Index3D = typename RSpaceGrid<T>::Index3D;
+        Index3D dim;
+        is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
+        grid.resize(dim[0], dim[1], dim[2]);
+        is >> grid.asVector();
+        return is;
     }
 
     template<class T>
@@ -197,25 +220,6 @@ namespace Physica::Core {
             for (size_t y = 0; y < dim[1]; ++y)
                 for (size_t z = 0; z < dim[2]; ++z)
                     func(Index3D{x, y, z});
-    }
-
-    template<class T>
-    std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
-        using Index3D = typename RSpaceGrid<T>::Index3D;
-        const Index3D dim = grid.getDim();
-        os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
-        os << grid.asVector();
-        return os;
-    }
-
-    template<class T>
-    std::istream& operator>>(std::istream& is, RSpaceGrid<T>& grid) {
-        using Index3D = typename RSpaceGrid<T>::Index3D;
-        Index3D dim;
-        is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
-        grid.resize(dim[0], dim[1], dim[2]);
-        is >> grid.asVector();
-        return is;
     }
 
     template<class T>

@@ -27,9 +27,9 @@ namespace Physica::Core {
         constexpr static bool isComplex = T::isComplex;
         using RealType = typename T::RealType;
         using ComplexType = ComplexScalar<RealType>;
-        using Base = RSpaceGrid<ComplexType>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     public:
+        using Base = RSpaceGrid<ComplexType>;
         using typename Base::Container;
         using Index3D = Utils::Array<ssize_t, 3>;
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
@@ -45,6 +45,10 @@ namespace Physica::Core {
         [[nodiscard]] const ComplexType& operator()(ssize_t x, ssize_t y, ssize_t z) const;
         [[nodiscard]] ComplexType& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const ComplexType& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
+        template<class T1>
+        friend std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid);
+        template<class T1>
+        friend std::istream& operator>>(std::istream& is, KSpaceGrid<T1>& grid);
         /* Operations */
         [[nodiscard]] ComplexType calc(ssize_t x, ssize_t y, ssize_t z) const;
         void swap(KSpaceGrid& grid) noexcept { Base::swap(grid); }
@@ -109,6 +113,17 @@ namespace Physica::Core {
             assert(z >= 0);
             return Base::operator()(x + getDimX(), y + getDimY(), z);
         }
+    }
+
+    template<class T1>
+    std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid) {
+        os << static_cast<const typename KSpaceGrid<T1>::Base&>(grid);
+        return os;
+    }
+    template<class T1>
+    std::istream& operator>>(std::istream& is, KSpaceGrid<T1>& grid) {
+        is >> static_cast<typename KSpaceGrid<T1>::Base&>(grid);
+        return is;
     }
 
     template<class T>

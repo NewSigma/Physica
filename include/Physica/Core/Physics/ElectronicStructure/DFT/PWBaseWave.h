@@ -28,19 +28,32 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class PWBaseWave : private KSpaceGrid<ComplexScalar<ScalarType>> {
+    public:
         using ComplexType = ComplexScalar<ScalarType>;
         using Base = KSpaceGrid<ComplexType>;
+    private:
         using typename Base::Container;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
         LatticeMatrix repCell;
     public:
+        PWBaseWave() = default;
         PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_);
+        PWBaseWave(const PWBaseWave&) = default;
+        PWBaseWave(PWBaseWave&&) noexcept = default;
+        ~PWBaseWave() = default;
         /* Operators */
         using Base::operator();
+        PWBaseWave& operator=(PWBaseWave wave) noexcept;
         [[nodiscard]] ComplexType operator()(Vector<ScalarType, 3> k, Vector<ScalarType, 3> r) const;
         template<class VectorType>
         PWBaseWave& operator=(const RValueVector<VectorType>& newCoeffs);
+        template<class T>
+        friend std::ostream& operator<<(std::ostream& os, const PWBaseWave<T>& wave);
+        template<class T>
+        friend std::istream& operator>>(std::istream& is, PWBaseWave<T>& wave);
+        /* Operations */
+        void swap(PWBaseWave& wave) noexcept;
         /* Getters */
         using Base::asVector;
         using Base::getDimX;
@@ -55,6 +68,12 @@ namespace Physica::Core {
     template<class ScalarType>
     PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_) : repCell(std::move(repCell_)) {
         Base::operator=(KSpaceGrid<ComplexType>::makeGrid(cutEnergy, repCell));
+    }
+
+    template<class ScalarType>
+    PWBaseWave<ScalarType>& PWBaseWave<ScalarType>::operator=(PWBaseWave<ScalarType> wave) noexcept {
+        swap(wave);
+        return *this;
     }
 
     template<class ScalarType>
@@ -76,6 +95,27 @@ namespace Physica::Core {
     PWBaseWave<ScalarType>& PWBaseWave<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
         asVector() = newCoeffs;
         return *this;
+    }
+
+    template<class T>
+    std::ostream& operator<<(std::ostream& os, const PWBaseWave<T>& wave) {
+        os << wave.repCell;
+        os << static_cast<const typename PWBaseWave<T>::Base&>(wave);
+        return os;
+    }
+
+    template<class T>
+    std::istream& operator>>(std::istream& is, PWBaseWave<T>& wave) {
+        is >> wave.repCell;
+        is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        is >> static_cast<typename PWBaseWave<T>::Base&>(wave);
+        return is;
+    }
+
+    template<class ScalarType>
+    void PWBaseWave<ScalarType>::swap(PWBaseWave& wave) noexcept {
+        Base::swap(wave);
+        repCell.swap(wave.repCell);
     }
 
     template<class ScalarType>
