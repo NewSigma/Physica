@@ -131,12 +131,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
+    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
         return sqrt(Base::getDerived().squaredNorm());
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
+    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
         auto result = RealType::Zero();
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();

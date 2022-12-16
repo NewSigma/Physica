@@ -69,8 +69,8 @@ namespace Physica::Core {
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
-        [[nodiscard]] RealType norm() const;
-        [[nodiscard]] RealType squaredNorm() const;
+        [[nodiscard]] inline RealType norm() const;
+        [[nodiscard]] inline RealType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;

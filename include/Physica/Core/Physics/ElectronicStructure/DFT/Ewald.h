@@ -57,6 +57,8 @@ namespace Physica::Core {
         ScalarType erfcStep;
         ScalarType repErfcStep;
         ScalarType doubleSquareStep;
+        ScalarType maxErfcX;
+        ScalarType halfErfcStep;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -114,14 +116,10 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     template<class Executor>
     Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force(const PositionMatrix& pos) const {
-        const size_t numParticle = getNumParticle();
         Vector<ScalarType> result;
-        auto rSpaceFuture = Executor::schedule([this, pos, &result]() {
-            result = rSpaceForce(pos);
-        });
-
-        Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-        /* kSpaceSum */ {
+        auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
+            const size_t numParticle = getNumParticle();
+            Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
             const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
             Vector<ScalarType> dots(numParticle);
             Vector<ScalarType> sin_vec(numParticle);
@@ -144,9 +142,11 @@ namespace Physica::Core {
                     }
                 });
             kSpaceSum *= ScalarType(8 * M_PI) * inv_volume;
-        }
-        Executor::auto_wait(rSpaceFuture);
-        result += kSpaceSum;
+            result = std::move(kSpaceSum);
+        });
+        Vector<ScalarType> rSpaceSum = rSpaceForce(pos);
+        Executor::auto_wait(kSpaceFuture);
+        result += rSpaceSum;
         return result;
     }
     /**
@@ -213,6 +213,8 @@ namespace Physica::Core {
         erfcStep.swap(ewald.erfcStep);
         repErfcStep.swap(ewald.repErfcStep);
         doubleSquareStep.swap(ewald.doubleSquareStep);
+        maxErfcX.swap(ewald.maxErfcX);
+        halfErfcStep.swap(ewald.halfErfcStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -240,16 +242,19 @@ namespace Physica::Core {
         erfcStep = ScalarType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         doubleSquareStep = square(erfcStep) * 2;
+        maxErfcX = (ScalarType(ErfcTableSize - 1) - 0.5) * erfcStep;
+        halfErfcStep = erfcStep * 0.5;
     }
 
     template<class ScalarType, class PosScalarType>
     inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(ScalarType x) const {
-        ScalarType temp = x * repErfcStep + 0.5;
-        if (temp > ScalarType(ErfcTableSize - 1))
+        if (x > maxErfcX)
             return 0;
-        else if (temp > 1) {
+        const bool safeToRound = x > halfErfcStep;
+        if (safeToRound) {
+            const ScalarType temp = x * repErfcStep + 0.5;
             const size_t index = double(temp);
-            ScalarType x2 = erfcStep * floor(temp);
+            const ScalarType x2 = erfcStep * floor(temp);
             auto y = erfc_table.segment(index - 1, index + 2);
             return Internal::quadraticInterpolate(x2 - erfcStep, x2, x2 + erfcStep, y[0], y[1], y[2], x); //Optimize: make use of x1, x2, x3 are equal distance
         }
@@ -258,12 +263,13 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable_diff(ScalarType x) const {
-        ScalarType temp = x * repErfcStep + 0.5;
-        if (temp > ScalarType(ErfcTableSize - 1))
+        if (x > maxErfcX)
             return 0;
-        else if (temp > 1) {
+        const bool safeToRound = x > halfErfcStep;
+        if (safeToRound) {
+            const ScalarType temp = x * repErfcStep + 0.5;
             const size_t index = double(temp);
-            ScalarType x2 = erfcStep * floor(temp);
+            const ScalarType x2 = erfcStep * floor(temp);
             auto y = erfc_table.segment(index - 1, index + 2);
             const ScalarType factor = doubleSquareStep * x;
             return Internal::quadraticInterpolate_diff1(factor, erfcStep, x2, y[0], y[1], y[2], x);
@@ -285,10 +291,8 @@ namespace Physica::Core {
                 for (size_t j : cellList(neigh)) {
                     const auto to = pos.row(j);
                     delta = from - to;
-                    const ScalarType r2 = ScalarType(delta.squaredNorm());
-                    const ScalarType r = sqrt(r2);
                     const ScalarType charge = charges[j];
-                    const ScalarType temp = charge * calcFromTable_diff(r);
+                    const ScalarType temp = charge * calcFromTable_diff(delta.norm());
                     sum += temp * delta;
                 }
                 auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
