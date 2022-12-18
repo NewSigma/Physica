@@ -57,7 +57,9 @@ namespace Physica::Core {
         /* Operators */
         PeriodicCell& operator=(PeriodicCell cell) noexcept;
         /* Operations */
-        Vector<ScalarType, 3> minDistVector(size_t id_from, size_t id_to) const;
+        [[nodiscard]] Vector<ScalarType, 3> minDistVector(size_t id_from, size_t id_to) const;
+        [[nodiscard]] Vector<ScalarType, 3> minDistVector(Vector<ScalarType, 3> from, size_t id_to) const;
+        void normalizeCartesianCell();
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
@@ -117,9 +119,9 @@ namespace Physica::Core {
             for (int y = -1; y <= 1; ++y) {
                 v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
                 for (int z = -1; z <= 1; ++z) {
-                    const bool isSelf = id_from == id_to;
+                    const bool isSelf = id_from == id_to && x == 0 && y == 0 && z == 0;
                     if (isSelf)
-                        continue; // We are not interested distance from particle to itself
+                        continue; // We are not interested to distance between particle and itself
                     v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
                     const ScalarType squared_norm = v3.squaredNorm();
                     if (squared_norm < record_dist) {
@@ -130,6 +132,41 @@ namespace Physica::Core {
             }
         }
         return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    Vector<ScalarType, 3> PeriodicCell<ScalarType, Dim>::minDistVector(Vector<ScalarType, 3> from, size_t id_to) const {
+        using Vector3D = Vector<ScalarType, 3>;
+
+        ScalarType record_dist = std::numeric_limits<ScalarType>::max();
+        Vector3D result{};
+        Vector3D v1, v2, v3;
+        const Vector3D delta = pos.row(id_to).asVector() - from;
+        for (int x = -1; x <= 1; ++x) {
+            v1 = delta + lattice.row(0).asVector() * ScalarType(x);
+            for (int y = -1; y <= 1; ++y) {
+                v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
+                for (int z = -1; z <= 1; ++z) {
+                    v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
+                    const ScalarType squared_norm = v3.squaredNorm();
+                    if (squared_norm < record_dist) {
+                        record_dist = squared_norm;
+                        result = v3;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::normalizeCartesianCell() {
+        toDirect(makeInvLattice());
+        for (auto& elem : pos) {
+            elem -= floor(elem);
+            assert(ScalarType::Zero() <= elem && elem <= ScalarType::One());
+        }
+        toCartesian(pos);
     }
 
     template<class ScalarType, unsigned int Dim>
