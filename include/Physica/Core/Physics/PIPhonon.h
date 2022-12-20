@@ -31,6 +31,7 @@ namespace Physica::Core {
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
         using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
         constexpr static unsigned int Dim = 3;
+        constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();
 
         FFT<ScalarType, 3> fft;
         size_t numAtomUnitCell;

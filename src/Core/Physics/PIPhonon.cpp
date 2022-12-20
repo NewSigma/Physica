@@ -77,18 +77,30 @@ namespace Physica::Core {
         applyTranslationInvariance(kSpaceMomentumCorr[0]);
 
         DenseMatrix<ComplexType> buffer(getUnitCellDOF(), getUnitCellDOF());
+        DenseMatrix<ComplexType> base(getUnitCellDOF(), getUnitCellDOF());
         EigenSolver<DenseMatrix<ComplexType>> solver(buffer.getRow());
         for (size_t qPointId = 0; qPointId < kSpaceForceCorr.getLength(); ++qPointId) {
-            const Schur<DenseMatrix<ComplexType>> schur(kSpaceMomentumCorr[qPointId], true);
-            for (size_t i = 0; i < buffer.getColumn(); ++i) {
-                const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).getReal();
-                if (eigenvalue.isPositive())
-                    buffer.col(i) = schur.getMatrixU().col(i).asVector() * sqrt(eigenvalue);
-                else
-                    buffer.col(0).asVector() = ScalarType(0);
+            const bool isGammaPoint = qPointId == 0;
+            if (isGammaPoint) {
+                const Schur<DenseMatrix<ScalarType>> schur(toRealMatrix(kSpaceMomentumCorr[qPointId]), true);
+                for (size_t i = 0; i < base.getColumn(); ++i) {
+                    const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i);
+                    if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
+                        base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
+                    else
+                        base.col(i).asVector() = ScalarType(0);
+                }
             }
-            auto& base = kSpaceMomentumCorr[qPointId];
-            base = DenseHermiteMatrix<ComplexType>(buffer);
+            else {
+                const Schur<DenseMatrix<ComplexType>> schur(kSpaceMomentumCorr[qPointId], true);
+                for (size_t i = 0; i < base.getColumn(); ++i) {
+                    const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).getReal();
+                    if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
+                        base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
+                    else
+                        base.col(i).asVector() = ScalarType(0);
+                }
+            }
             buffer = base.transpose().conjugate() * kSpaceForceCorr[qPointId];
             buffer *= base;
             
@@ -96,7 +108,7 @@ namespace Physica::Core {
             solver.sort();
             normalModes[qPointId] = base * solver.getEigenvectors();
             for (size_t i = 0; i < buffer.getColumn(); ++i)
-                base(i, i) = solver.getEigenvalues()[i];
+                kSpaceMomentumCorr[qPointId](i, i) = solver.getEigenvalues()[i];
         }
     }
 
