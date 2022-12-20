@@ -728,12 +728,10 @@ public:
     Vec4f get_high() const {
         return _mm256_extractf128_ps(ymm,1);
     }
-    static constexpr int size() {
-        return 8;
-    }
-    static constexpr int elementtype() {
-        return 16;
-    }
+    /* Static members */
+    static constexpr int size() noexcept { return 8; }
+    static constexpr int elementtype() noexcept { return 16; }
+    static Vec8f Zeros() noexcept { return Vec8f(_mm256_setzero_ps()); }
     typedef __m256 registertype;
 };
 
@@ -1578,12 +1576,10 @@ public:
     Vec2d get_high() const {
         return _mm256_extractf128_pd(ymm,1);
     }
-    static constexpr int size() {
-        return 4;
-    }
-    static constexpr int elementtype() {
-        return 17;
-    }
+    /* Static members */
+    static constexpr int size() { return 4; }
+    static constexpr int elementtype() { return 17; }
+    static Vec4d Zeros() noexcept { return Vec4d(_mm256_setzero_pd()); }
     typedef __m256d registertype;
 };
 

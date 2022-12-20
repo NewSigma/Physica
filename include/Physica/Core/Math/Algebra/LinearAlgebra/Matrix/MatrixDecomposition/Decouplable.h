@@ -49,7 +49,8 @@ namespace Physica::Core {
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
             RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
-            temp = std::max(abs(temp * RealType(std::numeric_limits<ScalarType>::epsilon())), RealType(std::numeric_limits<ScalarType>::min()));
+            temp = std::max(abs(temp * std::numeric_limits<RealType>::epsilon()),
+                            RealType(std::numeric_limits<RealType>::epsilon() * std::numeric_limits<RealType>::epsilon()));
             if (abs(mat(lower, lower_1)) < temp) {
                 mat(lower, lower_1) = ScalarType::Zero();
                 break;

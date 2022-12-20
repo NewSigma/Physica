@@ -337,10 +337,10 @@ namespace Physica::Core {
         using TargetType = LValueMatrix<OtherDerived>;
         using T = typename TargetType::ScalarType;
         const size_t max_i = target.getMaxMajor();
-        const size_t mat_j = target.getMaxMinor();
+        const size_t max_j = target.getMaxMinor();
         for (size_t i = 0; i < max_i; ++i)
-            for (size_t j = 0; j < mat_j; ++j)
-                target.refFromMajorMinor(i, j) = T(refFromMajorMinor(i, j));
+            for (size_t j = 0; j < max_j; ++j)
+                target.refFromMajorMinor(i, j) = T(this->operator()(MatrixOption::rowFromMajorMinor<OtherDerived>(i, j), MatrixOption::columnFromMajorMinor<OtherDerived>(i, j)));
     }
 
     template<class Derived>

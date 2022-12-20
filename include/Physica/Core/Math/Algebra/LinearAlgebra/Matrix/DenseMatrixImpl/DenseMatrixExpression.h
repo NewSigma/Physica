@@ -444,3 +444,5 @@ namespace Physica::Core {
         return DenseMatrixExpression<Utils::ExpressionType::Cos, MatrixType>(m);
     }
 }
+
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RealMatrix.h"

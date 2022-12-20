@@ -95,7 +95,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDensitySize() const noexcept { return xcProvider.getBufferSize(); }
         /* Static members */
         [[nodiscard]] static int16_t getCharge(uint16_t atomicNum) { return atomicNum; }
-        static inline void normalizeIndex(ssize_t& index, ssize_t range) noexcept;
     };
 
     template<class ScalarType, class XCProvider>
@@ -245,9 +244,9 @@ namespace Physica::Core {
         KSpaceGrid<ComplexType>::forKInGrid(orbits[SpinState::Up][0].getDim(), repCell.getLattice(), [this, &i, &k](VectorType K) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
             const ScalarType kinetic = (k + K).squaredNorm() * factor;
-            h[SpinState::Up](i, i) += kinetic;
+            h[SpinState::Up](i, i) = kinetic;
             if constexpr (isSpinPolarized)
-                h[SpinState::Down](i, i) += kinetic;
+                h[SpinState::Down](i, i) = kinetic;
             i += 1;
         });
         fillPotential();
@@ -278,34 +277,35 @@ namespace Physica::Core {
         size_t row = 0;
         KSpaceGrid<ComplexType>::forKIndexInGrid(orbits[SpinState::Up][0].getDim(), repCell.getLattice(),
             [this, &row, &kSpaceDencity, &kSpaceXC_up, &kSpaceXC_down](VectorType k1, SignedIndex3D index) {
-                const ScalarType coeff = ScalarType(4 * M_PI) / cell.getVolume();
+                const ScalarType coeff = 1 / PhyConst<AU>::vacuumDielectric;
+                const ScalarType repVolume = reciprocal(cell.getVolume());
                 const auto any_wave = orbits[SpinState::Up][0];
                 const ssize_t x1 = index[0];
                 const ssize_t y1 = index[1];
                 const ssize_t z1 = index[2];
                 size_t col = row + 1;
                 for (ssize_t x2 = x1; x2 < externalPot.getDimX(); ++x2) {
-                    for (ssize_t y2 = y1; y2 < externalPot.getDimY(); ++y2) {
-                        for (ssize_t z2 = z1 + 1; z2 < externalPot.getDimZ(); ++z2) {
-                            ssize_t deltaX = x1 - x2;
-                            ssize_t deltaY = y1 - y2;
-                            ssize_t deltaZ = z1 - z2;
-                            normalizeIndex(deltaX, externalPot.getDimX());
-                            normalizeIndex(deltaY, externalPot.getDimY());
-                            normalizeIndex(deltaZ, externalPot.getDimZ());
+                    ssize_t y2 = x2 == x1 ? y1 : -externalPot.getDimY();
+                    for (; y2 < externalPot.getDimY(); ++y2) {
+                        ssize_t z2 = (x1 == x2 && y1 == y2) ? z1 + 1 : -externalPot.getDimZ();
+                        for (; z2 < externalPot.getDimZ(); ++z2) {
+                            SignedIndex3D delta{x1 - x2, y1 - y2, z1 - z2};
+                            KSpaceGrid<ComplexType>::normalizeIndex(delta, externalPot.getDim());
+                            const ssize_t deltaX = delta[0];
+                            const ssize_t deltaY = delta[1];
+                            const ssize_t deltaZ = delta[2];
                             const VectorType k2 = any_wave.getWaveVector(x2, y2, z2);
                             const VectorType deltaK = k1 - k2;
-
 
                             const ComplexType external = externalPot.calc(deltaX, deltaY, deltaZ);
                             const ComplexType hartree = kSpaceDencity.calc(deltaX, deltaY, deltaZ) * coeff / deltaK.squaredNorm();
                             {
                                 const ComplexType xc_up = kSpaceXC_up.calc(deltaX, deltaY, deltaZ);
-                                h[SpinState::Up](row, col) += xc_up + hartree + external;
+                                h[SpinState::Up](row, col) += (xc_up + hartree) * repVolume + external;
                             }
                             if constexpr (isSpinPolarized) {
                                 const ComplexType xc_down = kSpaceXC_down.calc(deltaX, deltaY, deltaZ);
-                                h[SpinState::Down](row, col) += xc_down + hartree + external;
+                                h[SpinState::Down](row, col) += (xc_down + hartree) * repVolume + external;
                             }
                             col += 1;
                         }
@@ -392,13 +392,5 @@ namespace Physica::Core {
         result[1] = dim[1] * 2 + 1;
         result[2] = dim[2] * 2 + 1;
         return result;
-    }
-
-     template<class ScalarType, class XCProvider>
-    inline void KSSolver<ScalarType, XCProvider>::normalizeIndex(ssize_t& index, ssize_t range) noexcept {
-        if (index > range)
-            index -= range;
-        else if (index < -range)
-            index += range;
     }
 }

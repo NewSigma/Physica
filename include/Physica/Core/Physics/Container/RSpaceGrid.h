@@ -79,6 +79,8 @@ namespace Physica::Core {
         static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
         template<class Functor>
         static void forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
+        template<class Functor>
+        static void forIndexInGrid(Index3D dim, Functor func);
     protected:
         RSpaceGrid(Container values_, size_t dimX_, size_t dimY_, size_t dimZ_);
     };
@@ -186,6 +188,15 @@ namespace Physica::Core {
                 }
             }
         }
+    }
+
+    template<class T>
+    template<class Functor>
+    void RSpaceGrid<T>::forIndexInGrid(Index3D dim, Functor func) {
+        for (size_t x = 0; x < dim[0]; ++x)
+            for (size_t y = 0; y < dim[1]; ++y)
+                for (size_t z = 0; z < dim[2]; ++z)
+                    func(Index3D{x, y, z});
     }
 
     template<class T>
