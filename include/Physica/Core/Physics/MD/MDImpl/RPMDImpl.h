@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
+
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     RPMD<ScalarType, PosScalarType>::RPMD(MDCellType cell_,
@@ -422,14 +424,28 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType>::thermostatStep(RandomGenerator& gen, ScalarType deltaT) {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
+        ScalarType factor_translational;
+        {
+            using VectorType = Vector<ScalarType, 1>;
+            [[maybe_unused]] ScalarType _ = 0;
+            const ScalarType nowT = calcTemperature();
+            VectorType sol{nowT};
+            SRK2<ScalarType, 1>::step(timeStep, _, sol,
+                                        [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                            return {(temperatureT - sol[0]) / thermostatTime};
+                                        },
+                                        [this, &gen]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                            std::normal_distribution dist{};
+                                            return {sqrt((temperatureT * sol[0]) / (thermostatTime * getDOF())) * 2 * dist(gen)};
+                                        });
+            factor_translational = sqrt(temperatureT / sol[0]);
+        }
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
-            const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
             toNormalRepr(i);
-            /* Translational mode */ {
-                const ScalarType viscosityY = Core::reciprocal(thermostatTime);
-                thermostatImpl(0, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
-            }
+            buffer(0, 0) *= factor_translational;
+
+            const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / getNumReplica();
                 const ScalarType viscosityY = sin(phase) * omegaW;
