@@ -110,6 +110,30 @@ namespace Physica::Core {
         return result;
     }
 
+    std::pair<size_t, size_t> RandIce::findHydrogenInMolecule(size_t indexO) const {
+        ScalarType minSquaredDist1 = std::numeric_limits<ScalarType>::max();
+        ScalarType minSquaredDist2 = std::numeric_limits<ScalarType>::max();
+        size_t indexH1 = 0;
+        size_t indexH2 = 1;
+        for (size_t i = 0; i < getEndIndexH(); ++i) {
+            const ScalarType squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexO).squaredNorm();
+            if (squaredDist < minSquaredDist1) {
+                indexH1 = i;
+                minSquaredDist1 = squaredDist;
+            }
+            else if (squaredDist < minSquaredDist2) {
+                indexH2 = i;
+                minSquaredDist2 = squaredDist;
+            }
+
+            if (minSquaredDist1 < minSquaredDist2) {
+                std::swap(minSquaredDist1, minSquaredDist2);
+                std::swap(indexH1, indexH2);
+            }
+        }
+        return {indexH1, indexH2};
+    }
+
     void RandIce::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
         assert(!isHydrogenOccupied[indexH]);
         assert(numHydrogenRequired[indexO] > 0);

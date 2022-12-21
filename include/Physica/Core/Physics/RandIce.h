@@ -45,6 +45,7 @@ namespace Physica::Core {
         RandIce& operator=(RandIce obj) noexcept;
         /* Operations */
         template<class RandomGenerator> CrystalCell run(RandomGenerator& gen);
+        template<class RandomGenerator> CrystalCell makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
         void swap(RandIce& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
@@ -53,6 +54,7 @@ namespace Physica::Core {
         void searchDanglingH(PositionMatrix& pos);
         Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
         Utils::Array<size_t> findBondedHInRadius(size_t indexO, ScalarType radius) const;
+        std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexO) const;
         template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
         template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
         void fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH);
@@ -82,6 +84,39 @@ namespace Physica::Core {
             searchForPairs(pos);
         }
         randUninitializedH(pos, gen);
+        CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
+        result.normalizeCartesianCell();
+        return result;
+    }
+
+    template<class RandomGenerator>
+    CrystalCell RandIce::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
+        assert(numDefect < getNumMolecule());
+        PositionMatrix pos = initialCell.getPos();
+
+        Utils::Array<size_t> permutation(getNumMolecule());
+        for (size_t i = 0; i < permutation.getLength(); ++i)
+            permutation[i] = i;
+
+        for (unsigned int i = 0; i < numDefect; ++i) {
+            size_t indexDefectO;
+            /* Random molecular */ {
+                std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1 - i);
+                const size_t randIndex = dist(gen);
+                indexDefectO = permutation[randIndex];
+                std::swap(permutation[randIndex], permutation[getNumMolecule() - 1 - i]);
+            }
+            auto otherO = findOInRadius(indexDefectO, maxDistOO);
+            const auto hydrogenInMolecular = findHydrogenInMolecule(indexDefectO);
+            {
+                std::uniform_int_distribution<size_t> dist(0, otherO.getLength() - 1);
+                const size_t randIndexO = otherO[dist(gen)];
+                const size_t randIndexH = (gen() % 2U == 0) ? hydrogenInMolecular.first : hydrogenInMolecular.second;
+                auto row = pos.row(randIndexH);
+                const Vector3D delta = initialCell.minDistVector(getStartIndexO() + indexDefectO, randIndexO);
+                row = pos.row(getStartIndexO() + indexDefectO) + delta * (ScalarType(BondLengthOH) / delta.norm());
+            }
+        }
         CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
         result.normalizeCartesianCell();
         return result;
