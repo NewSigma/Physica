@@ -51,7 +51,7 @@ namespace Physica::Core {
             elem = 2U;
     }
 
-    void RandIce::searchDanglingH(PositionMatrix& pos) {
+    void RandIce::searchDanglingH() {
         const size_t startIndexO = getStartIndexO();
         const size_t endIndexO = getEndIndexO();
         for (size_t i = startIndexO; i < endIndexO; ++i) {
@@ -64,7 +64,7 @@ namespace Physica::Core {
                 if (isDanglingH) {
                     numDanglingH += 1;
                     isHydrogenOccupied[j] = true;
-                    auto r = pos.row((i - startIndexO) * 2U + numDanglingH);
+                    auto r = initialCell.getPos().row((i - startIndexO) * 2U + numDanglingH);
                     r = initialCell.getPos().row(j).asVector();
                 }
             }
