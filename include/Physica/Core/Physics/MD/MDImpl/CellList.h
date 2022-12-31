@@ -167,9 +167,12 @@ namespace Physica::Core {
         assert(PosScalarType(0) <= buffer(atomId, 0) && buffer(atomId, 0) <= PosScalarType(1));
         assert(PosScalarType(0) <= buffer(atomId, 1) && buffer(atomId, 1) <= PosScalarType(1));
         assert(PosScalarType(0) <= buffer(atomId, 2) && buffer(atomId, 2) <= PosScalarType(1));
-        const size_t x = size_t(double(buffer(atomId, 0) * ScalarType(cellGrid.getDimX())));
-        const size_t y = size_t(double(buffer(atomId, 1) * ScalarType(cellGrid.getDimY())));
-        const size_t z = size_t(double(buffer(atomId, 2) * ScalarType(cellGrid.getDimZ())));
+        const ScalarType x0 = abs(buffer(atomId, 0) - std::numeric_limits<ScalarType>::epsilon());
+        const ScalarType y0 = abs(buffer(atomId, 1) - std::numeric_limits<ScalarType>::epsilon());
+        const ScalarType z0 = abs(buffer(atomId, 2) - std::numeric_limits<ScalarType>::epsilon());
+        const size_t x = size_t(double(x0 * ScalarType(cellGrid.getDimX())));
+        const size_t y = size_t(double(y0 * ScalarType(cellGrid.getDimY())));
+        const size_t z = size_t(double(z0 * ScalarType(cellGrid.getDimZ())));
         return {x, y, z};
     }
 
