@@ -44,6 +44,7 @@ namespace Physica::Core {
         /* Operators */
         RandIce& operator=(RandIce obj) noexcept;
         /* Operations */
+        Utils::Array<CrystalCell> exhaust();
         template<class RandomGenerator> CrystalCell makeRand(RandomGenerator& gen);
         template<class RandomGenerator> CrystalCell makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
         void swap(RandIce& obj) noexcept;
@@ -54,6 +55,7 @@ namespace Physica::Core {
         void searchDanglingH();
         Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
         Utils::Array<size_t> findBondedHInRadius(size_t indexO, ScalarType radius) const;
+        Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO, ScalarType radius) const;
         std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexO) const;
         template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
         template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
@@ -62,6 +64,8 @@ namespace Physica::Core {
         void searchForPairs(PositionMatrix& pos);
         size_t getIndexToPair() const;
         template<class RandomGenerator> void randUninitializedH(PositionMatrix& pos, RandomGenerator& gen);
+        void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result);
+        bool isDanglingH(size_t indexH) const;
         /* Getters */
         [[nodiscard]] size_t getEndIndexH() const noexcept { return getNumMolecule() * 2U; }
         [[nodiscard]] size_t getStartIndexO() const noexcept { return getEndIndexH(); }
