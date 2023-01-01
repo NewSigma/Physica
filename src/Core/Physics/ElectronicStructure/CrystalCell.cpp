@@ -37,7 +37,10 @@ namespace Physica::Core {
     }
 
     void CrystalCell::scale(ScalarType factor) {
-        Base::scale_direct(factor);
+        if (type == Type::Direct)
+            Base::scale_direct(factor);
+        else
+            Base::scale_cartesian(factor);
     }
 
     void CrystalCell::toDirect() {

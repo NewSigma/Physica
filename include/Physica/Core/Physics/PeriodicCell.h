@@ -83,7 +83,7 @@ namespace Physica::Core {
         void toCartesian();
         void toCartesian(PositionMatrix& target) const;
         void scale_direct(ScalarType factor);
-        void scalr_cartesian(ScalarType factor);
+        void scale_cartesian(ScalarType factor);
         static void unitToSuper_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         static void superToUnit_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         void unitToSuper_direct(unsigned int x, unsigned int y, unsigned int z);
@@ -267,7 +267,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::scalr_cartesian(ScalarType factor) {
+    void PeriodicCell<ScalarType, Dim>::scale_cartesian(ScalarType factor) {
         assert(factor.isPositive());
         lattice *= factor;
         pos *= factor;

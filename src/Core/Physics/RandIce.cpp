@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "Physica/Core/Physics/RandIce.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
@@ -36,6 +37,14 @@ namespace Physica::Core {
         return *this;
     }
 
+    Utils::Array<CrystalCell> RandIce::exhaust() {
+        Utils::Array<CrystalCell> result{};
+        prepareRun();
+        searchDanglingH();
+        exhaustImpl(0, initialCell.getPos(), result);
+        return result;
+    }
+
     void RandIce::swap(RandIce& obj) noexcept {
         initialCell.swap(obj.initialCell);
         std::swap(maxDistOO, obj.maxDistOO);
@@ -51,7 +60,7 @@ namespace Physica::Core {
             elem = 2U;
     }
 
-    void RandIce::searchDanglingH(PositionMatrix& pos) {
+    void RandIce::searchDanglingH() {
         const size_t startIndexO = getStartIndexO();
         const size_t endIndexO = getEndIndexO();
         for (size_t i = startIndexO; i < endIndexO; ++i) {
@@ -64,7 +73,7 @@ namespace Physica::Core {
                 if (isDanglingH) {
                     numDanglingH += 1;
                     isHydrogenOccupied[j] = true;
-                    auto r = pos.row((i - startIndexO) * 2U + numDanglingH);
+                    auto r = initialCell.getPos().row((i - startIndexO) * 2U + numDanglingH);
                     r = initialCell.getPos().row(j).asVector();
                 }
             }
@@ -92,21 +101,21 @@ namespace Physica::Core {
         const auto otherO = findOInRadius(indexO, radius);
         const ScalarType squaredRadiusH = square(radius * 0.5);
         Utils::Array<size_t> result{};
-        for (size_t oxygen : otherO) {
+        for (size_t i = 0; i < getEndIndexH(); ++i) {
             const size_t shiftIndexO = getStartIndexO() + indexO;
-            const Vector3D delta = initialCell.minDistVector(shiftIndexO, oxygen);
-            const Vector3D middle = initialCell.getPos().row(shiftIndexO).asVector() + delta * ScalarType(0.5);
-            ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
-            size_t indexH = 0;
-            for (size_t i = 0; i < getEndIndexH(); ++i) {
-                const ScalarType squaredDist = initialCell.minDistVector(middle, i).squaredNorm();
-                if (squaredDist < minSquaredDist) {
-                    minSquaredDist = squaredDist;
-                    indexH = i;
-                }
-            }
-            result.append(indexH);
+            const bool isHInRange = initialCell.minDistVector(shiftIndexO, i).squaredNorm() < square(radius);
+            if (isHInRange && !isDanglingH(i))
+                result.append(i);
         }
+        return result;
+    }
+
+    Utils::Array<size_t> RandIce::findFreeBondedHInRadius(size_t indexO, ScalarType radius) const {
+        Utils::Array<size_t> result{};
+        const auto hInRange = findBondedHInRadius(indexO, radius);
+        for (auto h : hInRange)
+            if (!isHydrogenOccupied[h])
+                result.append(h);
         return result;
     }
 
@@ -178,6 +187,55 @@ namespace Physica::Core {
                 return indexO;
         }
         return getNumMolecule();
+    }
+
+    void RandIce::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result) {
+        const bool recursionStop = stackDepth == getNumMolecule();
+        if (recursionStop) {
+            CrystalCell cell(initialCell.getLattice(), pos, initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
+            cell.normalizeCartesianCell();
+            result.append(std::move(cell));
+            return;
+        }
+
+        const unsigned char numNeedH = numHydrogenRequired[stackDepth];
+        if (numNeedH == 0) {
+            exhaustImpl(stackDepth + 1, pos, result);
+            return;
+        }
+
+        const auto freeH = findFreeBondedHInRadius(stackDepth, maxDistOO);
+        if (freeH.getLength() < numNeedH)
+            return;
+
+        for (size_t j = 0; j < freeH.getLength() - 1; ++j) {
+            PositionMatrix copy = pos;
+            fetchHydrogen(copy, stackDepth, freeH[j]);
+            if (numNeedH == 2U) {
+                for (size_t k = j + 1; k < freeH.getLength(); ++k) {
+                    PositionMatrix copy1 = copy;
+                    fetchHydrogen(copy1, stackDepth, freeH[k]);
+                    exhaustImpl(stackDepth + 1, copy1, result);
+
+                    numHydrogenRequired[stackDepth] += 1;
+                    isHydrogenOccupied[freeH[k]] = false;
+                }
+            }
+            else
+                exhaustImpl(stackDepth + 1, copy, result);
+
+            numHydrogenRequired[stackDepth] += 1;
+            isHydrogenOccupied[freeH[j]] = false;
+        }
+    }
+
+    bool RandIce::isDanglingH(size_t indexH) const {
+        unsigned int numOInRange = 0;
+        for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+            if (initialCell.minDistVector(indexH, i).squaredNorm() < square(maxDistOO))
+                numOInRange += 1U;
+        }
+        return numOInRange < 2U;
     }
 
     bool RandIce::isFinished() const noexcept {
