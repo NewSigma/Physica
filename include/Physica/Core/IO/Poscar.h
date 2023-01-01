@@ -51,6 +51,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
         friend std::istream& operator>>(std::istream& is, Poscar& poscar);
         /* Operations */
+        void scale(ScalarType factor);
         void standrizeLattice();
         void extendInZ(ScalarType factor);
         void superToUnit(unsigned int x, unsigned int y, unsigned int z);

@@ -78,7 +78,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void MDCell<ScalarType, PosScalarType>::scale(PosScalarType factor) {
-        Base::scalr_cartesian(factor);
+        Base::scale_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }
 

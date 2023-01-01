@@ -87,6 +87,13 @@ namespace Physica::Core {
         return is;
     }
 
+    void Poscar::scale(ScalarType factor) {
+        if (type == Type::Cartesian)
+            scale_cartesian(factor);
+        else
+            scale_direct(factor);
+    }
+
     void Poscar::standrizeLattice() {
         using MatrixType = typename LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
