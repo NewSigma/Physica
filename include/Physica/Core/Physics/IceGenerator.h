@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,14 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     /**
      * References:
      * [1] M. Matsumoto, T. Yagasaki, H. Tanaka. GenIce: Hydrogen-Disordered Ice Generator.[J]. J. Comput. Chem. 2017, DOI: 10.1002/jcc.25077
      */
-    class RandIce {
+    class IceGenerator {
         using ScalarType = typename CrystalCell::ScalarType;
         using PositionMatrix = typename CrystalCell::PositionMatrix;
         using Vector3D = Vector<ScalarType, 3>;
@@ -37,25 +38,25 @@ namespace Physica::Core {
         Utils::Array<bool> isHydrogenOccupied;
         Utils::Array<unsigned char> numHydrogenRequired;
     public:
-        RandIce(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
-        RandIce(const RandIce&) = default;
-        RandIce(RandIce&&) noexcept = default;
-        ~RandIce() = default;
+        IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
+        IceGenerator(const IceGenerator&) = default;
+        IceGenerator(IceGenerator&&) noexcept = default;
+        ~IceGenerator() = default;
         /* Operators */
-        RandIce& operator=(RandIce obj) noexcept;
+        IceGenerator& operator=(IceGenerator obj) noexcept;
         /* Operations */
         Utils::Array<CrystalCell> exhaust();
         template<class RandomGenerator> CrystalCell makeRand(RandomGenerator& gen);
         template<class RandomGenerator> CrystalCell makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
-        void swap(RandIce& obj) noexcept;
+        void swap(IceGenerator& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
     private:
         void prepareRun();
         void searchDanglingH();
         Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
-        Utils::Array<size_t> findBondedHInRadius(size_t indexO, ScalarType radius) const;
-        Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO, ScalarType radius) const;
+        Utils::Array<size_t> findBondedH(size_t indexO) const;
+        Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
         std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexO) const;
         template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
         template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
@@ -65,7 +66,6 @@ namespace Physica::Core {
         size_t getIndexToPair() const;
         template<class RandomGenerator> void randUninitializedH(PositionMatrix& pos, RandomGenerator& gen);
         void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result);
-        bool isDanglingH(size_t indexH) const;
         /* Getters */
         [[nodiscard]] size_t getEndIndexH() const noexcept { return getNumMolecule() * 2U; }
         [[nodiscard]] size_t getStartIndexO() const noexcept { return getEndIndexH(); }
@@ -74,10 +74,12 @@ namespace Physica::Core {
         /* Static members */
         template<class RandomGenerator>
         static Vector<ScalarType, 3> randUnitVector(RandomGenerator& gen);
+
+        friend class ::Physica::Test;
     };
 
     template<class RandomGenerator>
-    CrystalCell RandIce::makeRand(RandomGenerator& gen) {
+    CrystalCell IceGenerator::makeRand(RandomGenerator& gen) {
         PositionMatrix pos = initialCell.getPos();
         prepareRun();
         searchDanglingH();
@@ -94,7 +96,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    CrystalCell RandIce::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
+    CrystalCell IceGenerator::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
 
@@ -127,11 +129,11 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    size_t RandIce::makeRandEmptyO(RandomGenerator& gen) const {
+    size_t IceGenerator::makeRandEmptyO(RandomGenerator& gen) const {
         std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
         size_t result = dist(gen);
         for (size_t i = 0; i < getNumMolecule(); ++i) {
-            const auto hInRange = findBondedHInRadius(result, maxDistOO);
+            const auto hInRange = findBondedH(result);
             const size_t numFreeH = countFreeH(hInRange);
             const bool isOxygenEmpty = numHydrogenRequired[result] != 0;
             if (isOxygenEmpty && numFreeH != 0)
@@ -143,9 +145,9 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    size_t RandIce::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
+    size_t IceGenerator::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
         assert(indexO < getNumMolecule());
-        const auto hInRange = findBondedHInRadius(indexO, maxDistOO);
+        const auto hInRange = findBondedH(indexO);
         size_t randLogicIndex;
         /* Rand index */ {
             const size_t numFreeH = countFreeH(hInRange);
@@ -166,7 +168,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    void RandIce::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
+    void IceGenerator::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             while (numHydrogenRequired[i] != 0) {
                 auto row = pos.row(i * 2U + (2U - numHydrogenRequired[i]));
@@ -177,7 +179,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    typename RandIce::Vector3D RandIce::randUnitVector(RandomGenerator& gen) {
+    typename IceGenerator::Vector3D IceGenerator::randUnitVector(RandomGenerator& gen) {
         std::uniform_real_distribution dist{};
         const ScalarType theta(dist(gen) * M_PI);
         const ScalarType phi(dist(gen) * M_PI * 2);

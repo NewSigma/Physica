@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,11 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include "Physica/Core/Physics/RandIce.h"
+#include "Physica/Core/Physics/IceGenerator.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    RandIce::RandIce(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
+    IceGenerator::IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
             : initialCell(std::move(initialCell_))
             , maxDistOO(maxDistOO_)
             , maxDistOH(maxDistOH_) {
@@ -32,12 +32,12 @@ namespace Physica::Core {
             initialCell.toCartesian();
     }
 
-    RandIce& RandIce::operator=(RandIce obj) noexcept {
+    IceGenerator& IceGenerator::operator=(IceGenerator obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    Utils::Array<CrystalCell> RandIce::exhaust() {
+    Utils::Array<CrystalCell> IceGenerator::exhaust() {
         Utils::Array<CrystalCell> result{};
         prepareRun();
         searchDanglingH();
@@ -45,7 +45,7 @@ namespace Physica::Core {
         return result;
     }
 
-    void RandIce::swap(RandIce& obj) noexcept {
+    void IceGenerator::swap(IceGenerator& obj) noexcept {
         initialCell.swap(obj.initialCell);
         std::swap(maxDistOO, obj.maxDistOO);
         std::swap(maxDistOH, obj.maxDistOH);
@@ -53,37 +53,26 @@ namespace Physica::Core {
         numHydrogenRequired.swap(obj.numHydrogenRequired);
     }
 
-    void RandIce::prepareRun() {
+    void IceGenerator::prepareRun() {
         for (auto& elem : isHydrogenOccupied)
             elem = false;
         for (auto& elem : numHydrogenRequired)
             elem = 2U;
     }
 
-    void RandIce::searchDanglingH() {
-        const size_t startIndexO = getStartIndexO();
-        const size_t endIndexO = getEndIndexO();
-        for (size_t i = startIndexO; i < endIndexO; ++i) {
-            const auto hInRadius = findBondedHInRadius(i - startIndexO, maxDistOO);
-            unsigned char numDanglingH = 0;
-            for (size_t j = 0; j < getEndIndexH(); ++j) {
-                const bool isInRange = initialCell.minDistVector(i, j).squaredNorm() < square(maxDistOH);
-                const bool noHydrogenBond = std::find(hInRadius.begin(), hInRadius.end(), j) == hInRadius.end();
-                const bool isDanglingH = isInRange && noHydrogenBond;
-                if (isDanglingH) {
-                    numDanglingH += 1;
-                    isHydrogenOccupied[j] = true;
-                    auto r = initialCell.getPos().row((i - startIndexO) * 2U + numDanglingH);
-                    r = initialCell.getPos().row(j).asVector();
-                }
-            }
-            numHydrogenRequired[i - startIndexO] -= numDanglingH;
-            if (numDanglingH > 2U)
-                throw std::invalid_argument("[Error]: Bad initial structure");
+    void IceGenerator::searchDanglingH() {
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            const auto pair = findHydrogenInMolecule(i);
+            const auto hInRadius = findBondedH(i);
+            const bool isDanglingH1 = std::find(hInRadius.begin(), hInRadius.end(), pair.first) == hInRadius.end();
+            const bool isDanglingH2 = std::find(hInRadius.begin(), hInRadius.end(), pair.second) == hInRadius.end();
+            isHydrogenOccupied[pair.first] = isDanglingH1;
+            isHydrogenOccupied[pair.second] = isDanglingH2;
+            numHydrogenRequired[i] -= static_cast<unsigned char>(isDanglingH1) + static_cast<unsigned char>(isDanglingH2);
         }
     }
 
-    Utils::Array<size_t> RandIce::findOInRadius(size_t indexO, ScalarType radius) const {
+    Utils::Array<size_t> IceGenerator::findOInRadius(size_t indexO, ScalarType radius) const {
         Utils::Array<size_t> result{};
         const ScalarType squaredRadiusO = square(radius);
         for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
@@ -97,29 +86,43 @@ namespace Physica::Core {
         return result;
     }
 
-    Utils::Array<size_t> RandIce::findBondedHInRadius(size_t indexO, ScalarType radius) const {
-        const auto otherO = findOInRadius(indexO, radius);
-        const ScalarType squaredRadiusH = square(radius * 0.5);
+    Utils::Array<size_t> IceGenerator::findBondedH(size_t indexO) const {
+        const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
         Utils::Array<size_t> result{};
-        for (size_t i = 0; i < getEndIndexH(); ++i) {
+        CrystalCell::forCellInRange(range, initialCell.getLattice(), [this, indexO, &result](Vector3D delta) {
+            const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
+            const ScalarType squaredRadiusO = square(maxDistOO);
             const size_t shiftIndexO = getStartIndexO() + indexO;
-            const bool isHInRange = initialCell.minDistVector(shiftIndexO, i).squaredNorm() < square(radius);
-            if (isHInRange && !isDanglingH(i))
-                result.append(i);
-        }
+
+            for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+                const Vector3D otherO = initialCell.getPos().row(i) + delta;
+                const ScalarType r2 = (initialCell.getPos().row(shiftIndexO) - otherO).squaredNorm();
+                const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
+                const bool isInRange = r2 < squaredRadiusO;
+                if (isNotSelf && isInRange) {
+                    const Vector3D middle = (otherO + initialCell.getPos().row(shiftIndexO)) * ScalarType(0.5);
+                    for (size_t j = 0; j < getEndIndexH(); ++j) {
+                        const bool isHInRange = initialCell.minDistVector(middle, j).squaredNorm() < squaredRadiusH;
+                        const bool isOccupied = std::find(result.cbegin(), result.cend(), j) != result.cend();
+                        if (isHInRange && !isOccupied)
+                            result.append(j);
+                    }
+                }
+            }
+        });
         return result;
     }
 
-    Utils::Array<size_t> RandIce::findFreeBondedHInRadius(size_t indexO, ScalarType radius) const {
+    Utils::Array<size_t> IceGenerator::findFreeBondedHInRadius(size_t indexO) const {
         Utils::Array<size_t> result{};
-        const auto hInRange = findBondedHInRadius(indexO, radius);
+        const auto hInRange = findBondedH(indexO);
         for (auto h : hInRange)
             if (!isHydrogenOccupied[h])
                 result.append(h);
         return result;
     }
 
-    std::pair<size_t, size_t> RandIce::findHydrogenInMolecule(size_t indexO) const {
+    std::pair<size_t, size_t> IceGenerator::findHydrogenInMolecule(size_t indexO) const {
         ScalarType minSquaredDist1 = std::numeric_limits<ScalarType>::max();
         ScalarType minSquaredDist2 = std::numeric_limits<ScalarType>::max();
         size_t indexH1 = 0;
@@ -143,7 +146,7 @@ namespace Physica::Core {
         return {indexH1, indexH2};
     }
 
-    void RandIce::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
+    void IceGenerator::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
         assert(!isHydrogenOccupied[indexH]);
         assert(numHydrogenRequired[indexO] > 0);
         
@@ -158,18 +161,18 @@ namespace Physica::Core {
         numHydrogenRequired[indexO] -= 1;
     }
 
-    size_t RandIce::countFreeH(const Utils::Array<size_t>& hIndexes) const {
+    size_t IceGenerator::countFreeH(const Utils::Array<size_t>& hIndexes) const {
         size_t numFreeH = 0;
         for (auto h : hIndexes)
             numFreeH += isHydrogenOccupied[h] == false;
         return numFreeH;
     }
 
-    void RandIce::searchForPairs(PositionMatrix& pos) {
+    void IceGenerator::searchForPairs(PositionMatrix& pos) {
         size_t indexO = getIndexToPair();
         bool isValidIndex = indexO != getNumMolecule();
         while (isValidIndex) {
-            const auto hInRange = findBondedHInRadius(indexO, maxDistOO);
+            const auto hInRange = findBondedH(indexO);
             for (auto h : hInRange) {
                 if (!isHydrogenOccupied[h])
                     fetchHydrogen(pos, indexO, h);
@@ -179,9 +182,9 @@ namespace Physica::Core {
         }
     }
 
-    size_t RandIce::getIndexToPair() const {
+    size_t IceGenerator::getIndexToPair() const {
         for (size_t indexO = 0; indexO < getNumMolecule(); ++indexO) {
-            const auto hInRange = findBondedHInRadius(indexO, maxDistOO);
+            const auto hInRange = findBondedH(indexO);
             const size_t numFreeH = countFreeH(hInRange);
             if (numFreeH > 0 && numFreeH == numHydrogenRequired[indexO])
                 return indexO;
@@ -189,7 +192,7 @@ namespace Physica::Core {
         return getNumMolecule();
     }
 
-    void RandIce::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result) {
+    void IceGenerator::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result) {
         const bool recursionStop = stackDepth == getNumMolecule();
         if (recursionStop) {
             CrystalCell cell(initialCell.getLattice(), pos, initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
@@ -204,7 +207,7 @@ namespace Physica::Core {
             return;
         }
 
-        const auto freeH = findFreeBondedHInRadius(stackDepth, maxDistOO);
+        const auto freeH = findFreeBondedHInRadius(stackDepth);
         if (freeH.getLength() < numNeedH)
             return;
 
@@ -229,18 +232,9 @@ namespace Physica::Core {
         }
     }
 
-    bool RandIce::isDanglingH(size_t indexH) const {
-        unsigned int numOInRange = 0;
-        for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
-            if (initialCell.minDistVector(indexH, i).squaredNorm() < square(maxDistOO))
-                numOInRange += 1U;
-        }
-        return numOInRange < 2U;
-    }
-
-    bool RandIce::isFinished() const noexcept {
+    bool IceGenerator::isFinished() const noexcept {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
-            const auto hInRange = findBondedHInRadius(i, maxDistOO);
+            const auto hInRange = findBondedH(i);
             const size_t numFreeH = countFreeH(hInRange);
             if (numFreeH != 0 && numHydrogenRequired[i] != 0)
                 return false;

@@ -319,24 +319,21 @@ namespace Physica::Core {
             /* Make indexH1, indexH2 */ {
                 PosScalarType dist1, dist2;
                 dist1 = dist2 = std::numeric_limits<PosScalarType>::max();
-                Utils::Array<bool> isUsed(numH, false);
+                
                 for (size_t j = 0; j < numH; ++j) {
-                    if (!isUsed[j]) {
-                        auto posOH = cell.minDistVector(indexO, j);
-                        const PosScalarType dist = abs(posOH.norm() - equalR);
-                        if (dist1 > dist2) {
-                            if (dist1 > dist) {
-                                dist1 = dist;
-                                indexH1 = j;
-                            }
+                    auto posOH = cell.minDistVector(indexO, j);
+                    const PosScalarType dist = posOH.squaredNorm();
+                    if (dist1 > dist2) {
+                        if (dist1 > dist) {
+                            dist1 = dist;
+                            indexH1 = j;
                         }
-                        else {
-                            if (dist2 > dist) {
-                                dist2 = dist;
-                                indexH2 = j;
-                            }
+                    }
+                    else {
+                        if (dist2 > dist) {
+                            dist2 = dist;
+                            indexH2 = j;
                         }
-                        isUsed[j] = true;
                     }
                 }
                 if (indexH1 > indexH2)
@@ -349,7 +346,7 @@ namespace Physica::Core {
             auto posH2 = new_pos.row(2 * i + 1);
             posH2 = source.row(indexH2).asVector();
             order[2 * i + 1] = indexH2;
-            order[numH + i] = numH + i;
+            order[indexO] = indexO;
         }
         cell.setPos(new_pos);
         return PermutationMatrix<PosScalarType>(std::move(order));
