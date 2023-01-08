@@ -33,7 +33,7 @@ constexpr bool isSpinPolarized = false;
 int main() {
     using namespace Physica::Utils;
     Cycler::init();
-    CrystalCell Si({5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, {2}, CrystalCell::Type::Direct);
+    CrystalCell Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {2});
     ScalarType cutEnergy(4.9);
 
     std::mt19937::result_type seed;

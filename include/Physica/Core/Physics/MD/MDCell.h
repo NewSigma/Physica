@@ -41,23 +41,27 @@ namespace Physica::Core {
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
         void scale(PosScalarType factor);
-        void normalizeCell();
+        void normalize();
         void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
-        [[nodiscard]] constexpr static Type getType() noexcept { return Base::Type::Cartesian; }
+        [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
     protected:
         void toDirect() { Base::toDirect(invLattice); }
+    private:
+        using Base::normalize;
+        using Base::scale;
+        using Base::getType;
     };
 
     template<class ScalarType, class PosScalarType>
     MDCell<ScalarType, PosScalarType>::MDCell(CrystalCell cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
-        Base::operator=(Base(cell.getLattice(), cell.getPos()));
+        Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
         invLattice = Base::makeInvLattice();
 
         massVec.resize(Base::getNumParticle());
@@ -65,15 +69,15 @@ namespace Physica::Core {
             const auto atomicNum = cell.getAtomicNumber(i);
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
-        normalizeCell();
+        normalize();
     }
 
     template<class ScalarType, class PosScalarType>
     MDCell<ScalarType, PosScalarType>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
-            : Base(std::move(lattice), std::move(pos))
-            , massVec(std::move(massVec_))
-            , invLattice(Base::makeInvLattice()) {
-        normalizeCell();
+            : Base(std::move(lattice), std::move(pos), Base::Type::Cartesian)
+            , massVec(std::move(massVec_)) {
+        invLattice = Base::makeInvLattice();
+        normalize();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -83,12 +87,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void MDCell<ScalarType, PosScalarType>::normalizeCell() {
+    void MDCell<ScalarType, PosScalarType>::normalize() {
         Base::toDirect(invLattice);
-        for (auto& elem : Base::pos) {
-            elem -= floor(elem);
-            assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
-        }
+        Base::normalize_direct();
         Base::toCartesian();
     }
 
@@ -99,7 +100,7 @@ namespace Physica::Core {
             elem -= floor(elem);
             assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
         }
-        Base::toCartesian(target);
+        Base::toCartesian(target, Base::getLattice());
     }
 
     template<class ScalarType, class PosScalarType>

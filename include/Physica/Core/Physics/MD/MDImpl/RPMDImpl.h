@@ -69,7 +69,7 @@ namespace Physica::Core {
         if (isContractEnabled()) {
             auto kernel_short = [&](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
-                cell.normalizeCell();
+                cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
                 saveTo = model.template force_short<Executor>(std::move(cell));
             };
@@ -78,7 +78,7 @@ namespace Physica::Core {
             contract();
             auto kernel_long = [&](unsigned int contract) {
                 MDCellType cell = contractToCell(contract);
-                cell.normalizeCell();
+                cell.normalize();
                 auto saveTo = forceContract.col(contract);
                 saveTo = model.template force_long<Executor>(std::move(cell));
             };
@@ -91,7 +91,7 @@ namespace Physica::Core {
         else {
             auto kernel = [&](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
-                cell.normalizeCell();
+                cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
                 saveTo = model.template force<Executor>(std::move(cell));
             };

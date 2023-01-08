@@ -91,7 +91,7 @@ namespace Physica::Core {
         }
         randUninitializedH(pos, gen);
         CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-        result.normalizeCartesianCell();
+        result.normalize();
         return result;
     }
 
@@ -124,7 +124,7 @@ namespace Physica::Core {
             }
         }
         CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-        result.normalizeCartesianCell();
+        result.normalize();
         return result;
     }
 

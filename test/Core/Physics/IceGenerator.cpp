@@ -52,7 +52,7 @@ CrystalCell makeCell() {
         0.3570788249281732, 0.0879730900605094, 0.9388101767036668
     };
 
-    CrystalCell cell(lattice, pos, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct);
+    CrystalCell cell({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     cell.toCartesian();
     return cell;

@@ -53,7 +53,7 @@ namespace Physica::Core {
                                                 0.456810000, 0.939370000, 0.176470000};
             VaspWarpper vasp{};
             vasp.vaspWorkingDir = ".";
-            vasp.poscar = Poscar(std::move(lattice), std::move(pos), {2, 6}, CrystalCell::Type::Direct);
+            vasp.poscar = Poscar({std::move(lattice), std::move(pos), CrystalCell::Type::Direct}, {2, 6});
             vasp.future = Parallel::Test::makeDummyFuture();
             return vasp;
         }

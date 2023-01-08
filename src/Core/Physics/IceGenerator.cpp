@@ -195,8 +195,8 @@ namespace Physica::Core {
     void IceGenerator::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result) {
         const bool recursionStop = stackDepth == getNumMolecule();
         if (recursionStop) {
-            CrystalCell cell(initialCell.getLattice(), pos, initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-            cell.normalizeCartesianCell();
+            CrystalCell cell({initialCell.getLattice(), pos, CrystalCell::Type::Cartesian}, initialCell.getAtomicNumbers());
+            cell.normalize();
             result.append(std::move(cell));
             return;
         }

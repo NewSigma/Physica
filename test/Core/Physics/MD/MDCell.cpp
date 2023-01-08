@@ -36,7 +36,7 @@ int main() {
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
 
-    const CrystalCell cell1(lattice, pos, {1, 1, 2}, CrystalCell::Type::Direct);
+    const CrystalCell cell1({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 2});
     CrystalCell cell2 = cell1;
     cell2.toCartesian();
 
@@ -45,7 +45,7 @@ int main() {
     if (!isMDCellNear(md1, md2, 1E-15))
         return 1;
 
-    md1.normalizeCell();
+    md1.normalize();
     if (!isMDCellNear(md1, md2, 1E-6))
         return 1;
     return 0;

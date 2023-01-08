@@ -22,48 +22,22 @@
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, AtomicArray atomicNumbers_, Type type_)
-            : Base(std::move(lattice_), std::move(pos_))
-            , atomicNumbers(std::move(atomicNumbers_))
-            , type(type_) {
+    CrystalCell::CrystalCell(Base base, AtomicArray atomicNumbers_)
+            : Base(std::move(base))
+            , atomicNumbers(std::move(atomicNumbers_)) {
         assert(pos.getRow() == atomicNumbers.getLength());
     }
 
-    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)), type(poscar.getType()) {}
+    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)) {}
 
     CrystalCell& CrystalCell::operator=(CrystalCell cell) noexcept {
         swap(cell);
         return *this;
     }
 
-    void CrystalCell::scale(ScalarType factor) {
-        if (type == Type::Direct)
-            Base::scale_direct(factor);
-        else
-            Base::scale_cartesian(factor);
-    }
-
-    void CrystalCell::toDirect() {
-        assert(type == Type::Cartesian);
-        Base::toDirect(Base::makeInvLattice());
-        type = Type::Direct;
-    }
-
-    void CrystalCell::toCartesian() {
-        assert(type == Type::Direct);
-        Base::toCartesian();
-        type = Type::Cartesian;
-    }
-
     void CrystalCell::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        if (type == Type::Cartesian) {
-            toDirect();
-            Base::unitToSuper_direct(x, y, z);
-            toCartesian();
-        }
-        else
-            Base::unitToSuper_direct(x, y, z);
+        Base::unitToSuper(x, y, z);
         
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
@@ -125,6 +99,5 @@ namespace Physica::Core {
     void CrystalCell::swap(CrystalCell& cell) noexcept {
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
-        std::swap(type, cell.type);
     }
 }

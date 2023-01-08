@@ -58,7 +58,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
         0.3512600170478342,  0.6392493670479714,  0.1141244566914832
     };
 
-    CrystalCell cell(lattice, pos, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8}, CrystalCell::Type::Direct);
+    CrystalCell cell({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     cell.unitToSuper(cellSize, cellSize, 1);
     cell.toCartesian();

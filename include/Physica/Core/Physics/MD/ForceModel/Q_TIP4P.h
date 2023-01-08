@@ -227,7 +227,7 @@ namespace Physica::Core {
         /* Coulomb Part */ {
             const PositionMatrix chargePos = makeChargePos(cell);
             coulomb = ewald.template force<Executor>(chargePos);
-            PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos);
+            PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos, cell.getType());
             const size_t minIndexO = 2 * numMolecule;
             const size_t maxIndexO = minIndexO + numMolecule;
             Vector<ScalarType, 3> f;
@@ -423,7 +423,7 @@ namespace Physica::Core {
         const size_t numMolecule = getNumMolecule();
         ScalarType selfCoulomb = 0;
         /* Spurious Coulomb Part */ {
-            PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos);
+            PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos, cell.getType());
             const size_t minIndexO = 2 * numMolecule;
             const size_t maxIndexO = minIndexO + numMolecule;
             for (size_t i = minIndexO; i < maxIndexO; ++i) {

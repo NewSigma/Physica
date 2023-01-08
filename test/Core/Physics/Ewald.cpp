@@ -33,7 +33,7 @@ void VASPTest() {
     constexpr double prec = isFloat ? 2E-5 : 1E-5;
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
-    CrystalCell cell({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, {14}, CrystalCell::Type::Direct);
+    CrystalCell cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {14});
     Ewald<ScalarType> ewald(cell.getLattice(), {4});
     const auto energy = ewald.potentialEnergy(cell.getPos());
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
@@ -48,7 +48,7 @@ void madelungTest() {
     constexpr static bool isFloat = ScalarType::option == Float;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
-        CrystalCell NaCl({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.0, 0.5, 0.5,
                             0.5, 0.0, 0.5,
@@ -57,7 +57,7 @@ void madelungTest() {
                             0.5, 0.0, 0.0,
                             0.0, 0.5, 0.0,
                             0.0, 0.0, 0.5
-                        }, {1, 1, 1, 1, 1, 1, 1, 1}, CrystalCell::Type::Direct);
+                        }, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
         NaCl.toCartesian();
         Ewald<ScalarType> ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialEnergy(NaCl.getPos());
@@ -68,10 +68,10 @@ void madelungTest() {
     }
     {
         const double lengthInBohr = 1;
-        CrystalCell CsCl({lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell CsCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.5, 0.5, 0.5,
-                        }, {1, 1}, CrystalCell::Type::Cartesian);
+                         }, CrystalCell::Type::Cartesian}, {1, 1});
         Ewald<ScalarType> ewald(CsCl.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
@@ -81,10 +81,10 @@ void madelungTest() {
     }
     {
         const double lengthInBohr = 0.5;
-        CrystalCell ZnS({0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
+        CrystalCell ZnS({{0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
                             0.0, 0.0, 0.0,
                             0.25, 0.25, 0.25,
-                        }, {1, 1}, CrystalCell::Type::Direct);
+                        }, CrystalCell::Type::Direct}, {1, 1});
         ZnS.toCartesian();
         Ewald<ScalarType> ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(ZnS.getPos());

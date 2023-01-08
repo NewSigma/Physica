@@ -96,7 +96,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
     for (size_t i = maxIndexH; i < maxIndexO; ++i)
         atomicNumbers[i] = 8;
 
-    CrystalCell cell(std::move(lattice), std::move(pos), std::move(atomicNumbers), CrystalCell::Type::Cartesian);
+    CrystalCell cell({std::move(lattice), std::move(pos), CrystalCell::Type::Cartesian}, std::move(atomicNumbers));
     cell.unitToSuper(cellSize, cellSize, cellSize);
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }
@@ -147,7 +147,7 @@ int main() {
         fout << rdf.makeRDF(rpmd.getVolume());
     }
     {
-        Poscar poscar(rpmd.getLattice(), rpmd.makeCentroidPos(), {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3}, Poscar::Type::Cartesian);
+        Poscar poscar({rpmd.getLattice(), rpmd.makeCentroidPos(), Poscar::Type::Cartesian}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
         std::ofstream fout("H2O.vasp");
         fout << poscar;
         fout.close();

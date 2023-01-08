@@ -34,9 +34,8 @@ namespace Physica::Core {
         using StructureFactorType = Utils::Array<KSpaceGrid<ScalarType>>;
     private:
         AtomicArray atomicNumbers;
-        Type type;
     public:
-        CrystalCell(LatticeMatrix lattice_, PositionMatrix pos_, AtomicArray atomicNumbers_, Type type_);
+        CrystalCell(Base base, AtomicArray atomicNumbers_);
         CrystalCell(Poscar poscar);
         CrystalCell(const CrystalCell&) = default;
         CrystalCell(CrystalCell&&) noexcept = default;
@@ -44,9 +43,6 @@ namespace Physica::Core {
         /* Operators */
         CrystalCell& operator=(CrystalCell cell) noexcept;
         /* Operations */
-        void scale(ScalarType factor);
-        void toDirect();
-        void toCartesian();
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] StructureFactorType makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
@@ -58,5 +54,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getElectronCount() const;
         /* Helpers */
         void swap(CrystalCell& cell) noexcept;
+    private:
+        using Base::unitToSuper;
     };
 }

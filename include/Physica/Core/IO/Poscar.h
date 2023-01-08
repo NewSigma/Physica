@@ -42,30 +42,29 @@ namespace Physica::Core {
         using Type = typename CrystalCell::Type;
     private:
         Utils::Array<size_t> numOfEachType;
-        Type type;
     public:
         Poscar();
-        Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, Type type_);
+        Poscar(Base base, Utils::Array<size_t> numOfEachType_);
         Poscar(CrystalCell cell);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
         friend std::istream& operator>>(std::istream& is, Poscar& poscar);
         /* Operations */
-        void scale(ScalarType factor);
         void standrizeLattice();
         void extendInZ(ScalarType factor);
         void superToUnit(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
-        [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         /* Helpers */
         void swap(Poscar& poscar) noexcept;
     private:
+        using Base::superToUnit;
         void readNumOfEachType(std::istream& is);
         void readAtomPos(std::istream& is);
         size_t sumNumOfEachType() const;
+        void extendInZ_direct(ScalarType factor);
 
         friend class Xdatcar;
     };

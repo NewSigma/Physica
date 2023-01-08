@@ -25,17 +25,15 @@
 
 namespace Physica::Core {
     Poscar::Poscar() : Base()
-                     , numOfEachType()
-                     , type(CrystalCell::Type::Direct) {}
+                     , numOfEachType() {}
 
-    Poscar::Poscar(LatticeMatrix lattice_, PositionMatrix pos_, Utils::Array<size_t> numOfEachType_, Type type_)
-            : Base(std::move(lattice_), std::move(pos_))
-            , numOfEachType(std::move(numOfEachType_))
-            , type(type_) {
+    Poscar::Poscar(Base base, Utils::Array<size_t> numOfEachType_)
+            : Base(std::move(base))
+            , numOfEachType(std::move(numOfEachType_)) {
         assert(getAtomCount() == sumNumOfEachType());
     }
 
-    Poscar::Poscar(CrystalCell cell) : Base(std::move(cell)), type(cell.getType()) {
+    Poscar::Poscar(CrystalCell cell) : Base(std::move(cell)) {
         std::unordered_set<uint16_t> set{};
         for (uint16_t elem : cell.getAtomicNumbers())
             set.insert(elem);
@@ -87,13 +85,6 @@ namespace Physica::Core {
         return is;
     }
 
-    void Poscar::scale(ScalarType factor) {
-        if (type == Type::Cartesian)
-            scale_cartesian(factor);
-        else
-            scale_direct(factor);
-    }
-
     void Poscar::standrizeLattice() {
         using MatrixType = typename LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
@@ -119,30 +110,17 @@ namespace Physica::Core {
      * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
      */
     void Poscar::extendInZ(ScalarType factor) {
-        assert(type == Type::Direct);
-        assert(lattice(0, 2).isZero());
-        assert(lattice(1, 2).isZero());
-        lattice(2, 2) *= factor;
-
-        const ScalarType inv_factor = Core::reciprocal(factor);
-
-        auto col = pos.col(2);
-        for (size_t i = 0; i < col.getLength(); ++i) {
-            if (col[i] > ScalarType(0.5))
-                col[i] += (ScalarType::One() - col[i]) * inv_factor;
-            else
-                col[i] *= inv_factor;
+        if (Base::type == Type::Cartesian) {
+            Base::toDirect();
+            extendInZ_direct(factor);
+            Base::toCartesian();
         }
+        else
+            extendInZ_direct(factor);
     }
 
     void Poscar::superToUnit(unsigned int x, unsigned int y, unsigned int z) {
-        if (type == Type::Cartesian) {
-            toDirect(makeInvLattice());
-            Base::superToUnit_direct(x, y, z);
-            toCartesian();
-        }
-        else
-            Base::superToUnit_direct(x, y, z);
+        Base::superToUnit(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
     }
@@ -194,10 +172,8 @@ namespace Physica::Core {
     }
 
     void Poscar::swap(Poscar& poscar) noexcept {
-        lattice.swap(poscar.lattice);
-        pos.swap(poscar.pos);
+        Base::swap(poscar);
         numOfEachType.swap(poscar.numOfEachType);
-        std::swap(type, poscar.type);
     }
 
     void Poscar::readNumOfEachType(std::istream& is) {
@@ -238,5 +214,22 @@ namespace Physica::Core {
         for (size_t num : numOfEachType)
             result += num;
         return result;
+    }
+
+    void Poscar::extendInZ_direct(ScalarType factor) {
+        assert(type == Type::Direct);
+        assert(lattice(0, 2).isZero());
+        assert(lattice(1, 2).isZero());
+        lattice(2, 2) *= factor;
+
+        const ScalarType inv_factor = Core::reciprocal(factor);
+
+        auto col = pos.col(2);
+        for (size_t i = 0; i < col.getLength(); ++i) {
+            if (col[i] > ScalarType(0.5))
+                col[i] += (ScalarType::One() - col[i]) * inv_factor;
+            else
+                col[i] *= inv_factor;
+        }
     }
 }
