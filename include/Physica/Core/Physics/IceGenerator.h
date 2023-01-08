@@ -52,8 +52,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
     private:
-        void prepareRun();
-        void searchDanglingH();
+        PositionMatrix prepareRun();
+        void searchDanglingH(PositionMatrix& pos);
         Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
         Utils::Array<size_t> findBondedH(size_t indexO) const;
         Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
@@ -80,9 +80,8 @@ namespace Physica::Core {
 
     template<class RandomGenerator>
     CrystalCell IceGenerator::makeRand(RandomGenerator& gen) {
-        PositionMatrix pos = initialCell.getPos();
-        prepareRun();
-        searchDanglingH();
+        PositionMatrix pos = prepareRun();;
+        searchDanglingH(pos);
         while (!isFinished()) {
             const size_t randO = makeRandEmptyO(gen);
             const size_t randH = makeRandFreeH(randO, gen);

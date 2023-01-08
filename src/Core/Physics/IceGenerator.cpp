@@ -39,9 +39,9 @@ namespace Physica::Core {
 
     Utils::Array<CrystalCell> IceGenerator::exhaust() {
         Utils::Array<CrystalCell> result{};
-        prepareRun();
-        searchDanglingH();
-        exhaustImpl(0, initialCell.getPos(), result);
+        PositionMatrix pos = prepareRun();
+        searchDanglingH(pos);
+        exhaustImpl(0, pos, result);
         return result;
     }
 
@@ -53,22 +53,25 @@ namespace Physica::Core {
         numHydrogenRequired.swap(obj.numHydrogenRequired);
     }
 
-    void IceGenerator::prepareRun() {
+    typename IceGenerator::PositionMatrix IceGenerator::prepareRun() {
         for (auto& elem : isHydrogenOccupied)
             elem = false;
         for (auto& elem : numHydrogenRequired)
             elem = 2U;
+        return initialCell.getPos();
     }
 
-    void IceGenerator::searchDanglingH() {
+    void IceGenerator::searchDanglingH(PositionMatrix& pos) {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             const auto pair = findHydrogenInMolecule(i);
             const auto hInRadius = findBondedH(i);
             const bool isDanglingH1 = std::find(hInRadius.begin(), hInRadius.end(), pair.first) == hInRadius.end();
             const bool isDanglingH2 = std::find(hInRadius.begin(), hInRadius.end(), pair.second) == hInRadius.end();
-            isHydrogenOccupied[pair.first] = isDanglingH1;
-            isHydrogenOccupied[pair.second] = isDanglingH2;
-            numHydrogenRequired[i] -= static_cast<unsigned char>(isDanglingH1) + static_cast<unsigned char>(isDanglingH2);
+            if (isDanglingH1)
+                fetchHydrogen(pos, i, pair.first);
+
+            if (isDanglingH2)
+                fetchHydrogen(pos, i, pair.second);
         }
     }
 
