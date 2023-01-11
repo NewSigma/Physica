@@ -67,13 +67,17 @@ namespace Physica::AI {
 
     template<class Dataset>
     std::pair<Dataset, Dataset> KFold<Dataset>::cutDataset(unsigned int fold) {
-        const int64_t fold_size = set.getFeatures().sizes()[0] / numFold;
-        auto valid_features = set.getFeatures().slice(0, fold * fold_size, (fold + 1) * fold_size);
-        auto valid_labels = set.getLabels().slice(0, fold * fold_size, (fold + 1) * fold_size);
-        auto train_features1 = set.getFeatures().slice(0, 0, fold * fold_size);
-        auto train_labels1 = set.getLabels().slice(0, 0, fold * fold_size);
-        auto train_features2 = set.getFeatures().slice(0, (fold + 1) * fold_size, set.size().value());
-        auto train_labels2 = set.getLabels().slice(0, (fold + 1) * fold_size, set.size().value());
+        const size_t numData = set.size().value();
+        const auto index = torch::randperm(numData);
+        const auto all_features = torch::index_select(set.getFeatures(), 0, index);
+        const auto all_labels = torch::index_select(set.getLabels(), 0, index);
+        const int64_t fold_size = numData / numFold;
+        auto valid_features = all_features.slice(0, fold * fold_size, (fold + 1) * fold_size);
+        auto valid_labels = all_labels.slice(0, fold * fold_size, (fold + 1) * fold_size);
+        auto train_features1 = all_features.slice(0, 0, fold * fold_size);
+        auto train_labels1 = all_labels.slice(0, 0, fold * fold_size);
+        auto train_features2 = all_features.slice(0, (fold + 1) * fold_size, numData);
+        auto train_labels2 = all_labels.slice(0, (fold + 1) * fold_size, numData);
         auto train_features = torch::cat({std::move(train_features1), std::move(train_features2)});
         auto train_labels = torch::cat({std::move(train_labels1), std::move(train_labels2)});
         return std::make_pair(Dataset(std::move(train_features), std::move(train_labels)),

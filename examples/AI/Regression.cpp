@@ -156,8 +156,8 @@ RegressionDataset readTrainData() {
     MatrixType data(1460, 332);
     std::ifstream fin("../../data/train_num.csv");
     fin >> data;
-    return RegressionDataset(toTensor(data.leftCols(331), at::kFloat),
-                             toTensor(data.col(331).asVector(), at::kFloat).resize_({1460, 1}));
+    return RegressionDataset(toTensor(data.leftCols(data.getColumn() - 1), at::kFloat),
+                             toTensor(data.col(data.getColumn() - 1).asVector(), at::kFloat).resize_({1460, 1}));
 }
 
 TensorDataset readTestData() {
