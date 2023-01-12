@@ -47,6 +47,16 @@ struct NetOptions : public ParamSet<NetOptions> {
     unsigned int step;
     double gamma;
 
+    friend std::istream& operator>>(std::istream& is, NetOptions& options) {
+        is >> options.numEpoch
+           >> options.layer_dim1
+           >> options.layer_dim2
+           >> options.lr
+           >> options.step
+           >> options.gamma;
+        return is;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const NetOptions& options) {
         os << ' ' << options.numEpoch
            << ' ' << options.layer_dim1
@@ -136,8 +146,9 @@ public:
             for (auto& batch : *data_loader) {
                 optimizer.zero_grad();
                 torch::Tensor prediction = forward(batch.data);
-                torch::Tensor mse = torch::mse_loss(prediction, batch.target);
-                mse.backward();
+                torch::Tensor temp = (prediction - batch.target) / batch.target;
+                torch::Tensor loss = temp.norm();
+                loss.backward();
                 optimizer.step();
             }
             scheduler.step();
@@ -153,7 +164,7 @@ public:
 
 RegressionDataset readTrainData() {
     using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
-    MatrixType data(1460, 332);
+    MatrixType data(1460, 348);
     std::ifstream fin("../../data/train_num.csv");
     fin >> data;
     return RegressionDataset(toTensor(data.leftCols(data.getColumn() - 1), at::kFloat),
@@ -162,23 +173,32 @@ RegressionDataset readTrainData() {
 
 TensorDataset readTestData() {
     using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
-    MatrixType data(1459, 331);
-    std::ifstream fin("../../data/train_num.csv");
+    MatrixType data(1459, 347);
+    std::ifstream fin("../../data/test_num.csv");
     fin >> data;
     return TensorDataset(toTensor(data));
 }
 
 int main() {
-    auto net = std::make_shared<Net>(331, 1);
+    Net net(347, 1);
     KFold kFold(readTrainData(), 5);
 
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
+    Physica::Utils::Random::rdrand(seed);
+    torch::manual_seed(seed);
 
     RandomSearch<Net> searcher{};
-    searcher.search(10, *net, kFold, gen);
-    std::cout << searcher.getParams() << std::endl;
-    std::cout << searcher.getScore() << std::endl;
+    searcher.search(10, net, kFold, gen);
+    net.active_params = searcher.getParams();
+
+    net.train(readTrainData());
+    auto y = net.forward(readTestData().tensor);
+    std::ofstream fout("submission");
+    fout << "Id,SalePrice\n";
+    for (size_t i = 0; i < static_cast<size_t>(y.size(0)); ++i) {
+        fout << i + 1461 << ',' << y[i].item().toDouble() << '\n';
+    }
     return 0;
 }
