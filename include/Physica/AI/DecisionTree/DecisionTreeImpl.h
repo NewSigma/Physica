@@ -19,6 +19,8 @@
 #pragma once
 
 namespace Physica::AI {
+    template<class ScalarType, DecisionTreeType Type>
+    DecisionTree<ScalarType, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
 
     template<class ScalarType, DecisionTreeType Type>
     DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, VectorType splitPoints_, Utils::Array<DecisionTree> subTrees_)
@@ -70,18 +72,15 @@ namespace Physica::AI {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::train(
+    ScalarType DecisionTree<ScalarType, Type>::checkStopRecursion(
             const Dataset& dataset,
-            std::forward_list<size_t> availableSample,
-            std::forward_list<size_t> availableFeature) {
+            const std::forward_list<size_t>& availableSample,
+            const std::forward_list<size_t>& availableFeature) {
+        assert(!availableSample.empty());
         constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
         const auto& features = dataset.features;
         const auto& labels = dataset.labels;
-        const size_t numFeature = dataset.features.getColumn();
-        bool debug = std::distance(availableSample.begin(), availableSample.end()) == 26;
-        if (debug) {
-            std::cout << "A\n";
-        }
+
         if constexpr (isClassifyTree) {
             const ScalarType label = labels[availableSample.front()];
             bool isAllLabelSame = true;
@@ -89,7 +88,7 @@ namespace Physica::AI {
                 isAllLabelSame &= label == labels[index];
             
             if (isAllLabelSame)
-                return DecisionTree(numFeature, {label}, {});
+                return label;
         }
 
         const bool isFeatureEmpty = availableFeature.empty();
@@ -99,32 +98,32 @@ namespace Physica::AI {
                 prediction = findCommonLabel(labels, availableSample);
             else
                 prediction = makeAverageLabel(labels, availableSample);
-            return DecisionTree(numFeature, {prediction}, {});
+            return prediction;
         }
 
-        {
-            const size_t featureId = availableFeature.front();
-            const bool oneFeatureLeft = (++availableFeature.begin()) == availableFeature.end();
-            if (oneFeatureLeft) {
-                const ScalarType feature = features(availableSample.front(), featureId);
-                bool isAllFeatureSame = true;
-                for (size_t sample : availableSample)
-                    isAllFeatureSame &= features(sample, featureId) == feature;
-                
-                if (isAllFeatureSame) {
-                    ScalarType prediction;
-                    if constexpr (Type == DecisionTreeType::Classify)
-                        prediction = findCommonLabel(labels, availableSample);
-                    else
-                        prediction = makeAverageLabel(labels, availableSample);
-                    return DecisionTree(numFeature, {prediction}, {});
-                }
+        for (auto featureId : availableFeature) {
+            const ScalarType feature = features(availableSample.front(), featureId);
+            for (size_t sample : availableSample) {
+                const bool isSeparable = features(sample, featureId) != feature;
+                if (isSeparable)
+                    return std::nan("");
             }
         }
 
-        auto pair = selectOptimalFeature(dataset, availableSample, availableFeature, isClassifyTree ? giniIndex : mse);
-        const size_t featureId = pair.first;
-        VectorType& splitPoints = pair.second;
+        if constexpr (Type == DecisionTreeType::Classify)
+            return findCommonLabel(labels, availableSample);
+        else
+            return makeAverageLabel(labels, availableSample);
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    template<class TrainFunctor>
+    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::doRecursion(const Dataset& dataset,
+                                                                               const std::forward_list<size_t>& availableSample,
+                                                                               const std::forward_list<size_t>& availableFeature,
+                                                                               size_t featureId,
+                                                                               VectorType splitPoints,
+                                                                               TrainFunctor functor) {
         std::forward_list<size_t> newAvailableFeature{};
         for (auto feature : availableFeature) {
             if (feature != featureId)
@@ -142,8 +141,8 @@ namespace Physica::AI {
             }
 
             subTrees.reserve(2U);
-            subTrees.append(train(dataset, std::move(list1), newAvailableFeature));
-            subTrees.append(train(dataset, std::move(list2), newAvailableFeature));
+            subTrees.append(functor(dataset, std::move(list1), newAvailableFeature));
+            subTrees.append(functor(dataset, std::move(list2), newAvailableFeature));
         }
         else {
             subTrees.reserve(splitPoints.getLength());
@@ -153,11 +152,28 @@ namespace Physica::AI {
                     if (dataset.features(sample, featureId) == point)
                         newAvailableSample.push_front(sample);
                 }
-                auto tree = train(dataset, std::move(newAvailableSample), std::move(newAvailableFeature));
+                auto tree = functor(dataset, std::move(newAvailableSample), std::move(newAvailableFeature));
                 subTrees.append(std::move(tree));
             }
         }
         return DecisionTree(featureId, std::move(splitPoints), std::move(subTrees));
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::train(
+            const Dataset& dataset,
+            std::forward_list<size_t> availableSample,
+            std::forward_list<size_t> availableFeature) {
+        using TrainFunctor = DecisionTree (*)(const Dataset& dataset, std::forward_list<size_t>, std::forward_list<size_t>);
+        const size_t numFeature = dataset.features.getColumn();
+        const ScalarType criteria = checkStopRecursion(dataset, availableSample, availableFeature);
+        const bool shouldStopRecursion = !std::isnan(double(criteria));
+        if (shouldStopRecursion)
+            return DecisionTree(numFeature, {criteria}, {});
+
+        constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
+        auto pair = selectOptimalFeature(dataset, availableSample, availableFeature, isClassifyTree ? giniIndex : mse);
+        return doRecursion<TrainFunctor>(dataset, availableSample, availableFeature, pair.first, std::move(pair.second), train);
     }
 
     template<class ScalarType, DecisionTreeType Type>

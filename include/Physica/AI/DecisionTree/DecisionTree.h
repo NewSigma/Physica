@@ -27,6 +27,8 @@ namespace Physica::AI {
         Regression,
         Classify
     };
+
+    template<class ScalarType, DecisionTreeType Type> class RandomForest;
     /*
      * Reference:
      * [1] 周志华. 机器学习[M]. 清华大学出版社, 2016.73-
@@ -48,6 +50,7 @@ namespace Physica::AI {
         VectorType splitPoints;
         Utils::Array<DecisionTree> subTrees;
     public:
+        DecisionTree(const Dataset& dataset);
         DecisionTree(const DecisionTree&) = default;
         DecisionTree(DecisionTree&&) noexcept = default;
         ~DecisionTree() = default;
@@ -65,6 +68,16 @@ namespace Physica::AI {
         [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && splitPoints.getLength() == 1; }
         [[nodiscard]] bool isLeafNode() const noexcept { return subTrees.getLength() == 0; }
         /* Static members */
+        static ScalarType checkStopRecursion(const Dataset& dataset,
+                                             const std::forward_list<size_t>& availableSample,
+                                             const std::forward_list<size_t>& availableFeature);
+        template<class TrainFunctor>
+        static DecisionTree doRecursion(const Dataset& dataset,
+                                        const std::forward_list<size_t>& availableSample,
+                                        const std::forward_list<size_t>& availableFeature,
+                                        size_t featureId,
+                                        VectorType splitPoints,
+                                        TrainFunctor functor);
         static DecisionTree train(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
                                   std::forward_list<size_t> availableFeature);
@@ -76,6 +89,8 @@ namespace Physica::AI {
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,
                                                                   LossFunctor functor);
+        /* Friends */
+        friend class RandomForest<ScalarType, Type>;
     };
 }
 
