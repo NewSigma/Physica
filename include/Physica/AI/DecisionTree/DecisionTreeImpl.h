@@ -171,9 +171,42 @@ namespace Physica::AI {
         if (shouldStopRecursion)
             return DecisionTree(numFeature, {criteria}, {});
 
-        constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
-        auto pair = selectOptimalFeature(dataset, availableSample, availableFeature, isClassifyTree ? giniIndex : mse);
+        auto pair = selectOptimalFeature(dataset, availableSample, availableFeature, getLossFunctor());
         return doRecursion<TrainFunctor>(dataset, availableSample, availableFeature, pair.first, std::move(pair.second), train);
+    }
+
+
+    template<class ScalarType, DecisionTreeType Type>
+    ScalarType DecisionTree<ScalarType, Type>::findCommonLabel(
+            const VectorType& labels,
+            const std::forward_list<size_t>& availableSample) {
+        assert(!availableSample.empty());
+        std::multiset<ScalarType> set{};
+        for (size_t sample : availableSample)
+            set.insert(labels[sample]);
+        
+        size_t numCount = 0;
+        ScalarType result = 0;
+        for (auto ite = set.begin(); ite != set.end(); ++ite) {
+            size_t temp = set.count(*ite);
+            if (temp > numCount) {
+                numCount = temp;
+                result = *ite;
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    ScalarType DecisionTree<ScalarType, Type>::makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample) {
+        ScalarType result = 0;
+        size_t count = 0;
+        for (auto sample : availableSample) {
+            result += labels[sample];
+            count += 1;
+        }
+        result /= ScalarType(count);
+        return result;
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -287,38 +320,5 @@ namespace Physica::AI {
             }
         }
         return {optimalFeatureId, std::move(splitPoints)};
-    }
-
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::findCommonLabel(
-            const VectorType& labels,
-            const std::forward_list<size_t>& availableSample) {
-        assert(!availableSample.empty());
-        std::multiset<ScalarType> set{};
-        for (size_t sample : availableSample)
-            set.insert(labels[sample]);
-        
-        size_t numCount = 0;
-        ScalarType result = 0;
-        for (auto ite = set.begin(); ite != set.end(); ++ite) {
-            size_t temp = set.count(*ite);
-            if (temp > numCount) {
-                numCount = temp;
-                result = *ite;
-            }
-        }
-        return result;
-    }
-
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample) {
-        ScalarType result = 0;
-        size_t count = 0;
-        for (auto sample : availableSample) {
-            result += labels[sample];
-            count += 1;
-        }
-        result /= ScalarType(count);
-        return result;
     }
 }

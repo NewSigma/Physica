@@ -89,9 +89,16 @@ namespace Physica::AI {
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,
                                                                   LossFunctor functor);
+        static inline LossFunctor getLossFunctor();
         /* Friends */
         friend class RandomForest<ScalarType, Type>;
     };
+
+    template<class ScalarType, DecisionTreeType Type>
+    inline typename DecisionTree<ScalarType, Type>::LossFunctor DecisionTree<ScalarType, Type>::getLossFunctor() {
+        constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
+        return isClassifyTree ? giniIndex : mse;
+    }
 }
 
 #include "DecisionTreeImpl.h"

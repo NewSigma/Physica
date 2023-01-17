@@ -19,6 +19,7 @@
 #pragma once
 
 #include "DecisionTree.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::AI {
     /*
@@ -47,7 +48,7 @@ namespace Physica::AI {
         [[nodiscard]] size_t getNumTrees() const noexcept { return trees.getLength(); }
         /* Static members */
         template<class RandomGenerator>
-        [[nodiscard]] static RandomForest train(unsigned int numTree, const Dataset& dataset, RandomGenerator& gen);
+        [[nodiscard]] static std::pair<RandomForest, ScalarType> train(unsigned int numTree, const Dataset& dataset, RandomGenerator& gen);
     private:
         RandomForest(Utils::Array<TreeType> trees_);
         template<class RandomGenerator>
@@ -99,27 +100,54 @@ namespace Physica::AI {
 
     template<class ScalarType, DecisionTreeType Type>
     template<class RandomGenerator>
-    RandomForest<ScalarType, Type> RandomForest<ScalarType, Type>::train(
+    std::pair<RandomForest<ScalarType, Type>, ScalarType> RandomForest<ScalarType, Type>::train(
             unsigned int numTree,
             const Dataset& dataset,
             RandomGenerator& gen) {
-        std::forward_list<size_t> availableFeature;
+        std::forward_list<size_t> availableFeature{};
         const size_t numFeature = dataset.features.getColumn();
         for (size_t i = 0; i < numFeature; ++i)
             availableFeature.push_front(i);
 
+        const size_t numSample = dataset.features.getRow();
         Utils::Array<TreeType> trees{};
         trees.reserve(numTree);
-        const size_t numSample = dataset.features.getRow();
+        ScalarType forestError = 0;
         std::uniform_int_distribution<size_t> dist(0, numSample - 1);
         for (size_t i = 0; i < numTree; ++i) {
-            std::forward_list<size_t> availableSample;
+            std::set<size_t> set{};
             for (size_t _ = 0; _ < numSample; ++_)
-                availableSample.push_front(dist(gen));
-            
-            trees.append(trainTree(dataset, std::move(availableSample), availableFeature, gen));
+                set.insert(dist(gen));
+
+            std::forward_list<size_t> trainSample{}, testSample{};
+            size_t numTestSample = 0;
+            for (size_t j = 0; j < numSample; ++j) {
+                if (set.find(j) == set.end()) {
+                    testSample.push_front(j);
+                    numTestSample += 1;
+                }
+                else
+                    trainSample.push_front(j);
+            }
+
+            auto tree = trainTree(dataset, std::move(trainSample), availableFeature, gen);
+            ScalarType treeError;
+            if constexpr (Type == DecisionTreeType::Classify) {
+                size_t count = 0;
+                for (size_t sample : testSample)
+                    count += tree.predict(dataset.features.row(sample)) == dataset.labels[sample];
+                treeError = ScalarType(count) / ScalarType(numTestSample);
+            }
+            else {
+                treeError = 0;
+                for (size_t sample : testSample)
+                    treeError += square(tree.predict(dataset.features.row(sample)) - dataset.labels[sample]);
+                treeError /= ScalarType(numTestSample);
+            }
+            Core::toNextMean(forestError, i, treeError);
+            trees.append(std::move(tree));
         }
-        return RandomForest(std::move(trees));
+        return {RandomForest(std::move(trees)), forestError};
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -129,7 +157,6 @@ namespace Physica::AI {
             std::forward_list<size_t> availableSample,
             std::forward_list<size_t> availableFeature,
             RandomGenerator& gen) {
-        constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
         std::forward_list<size_t> randomFeature = availableFeature;
         /* make randomFeature */ {
             const size_t numAvailableFeature = std::distance(availableFeature.cbegin(), availableFeature.cend());
@@ -153,7 +180,7 @@ namespace Physica::AI {
         auto pair = TreeType::selectOptimalFeature(dataset,
                                                    availableSample,
                                                    randomFeature,
-                                                   isClassifyTree ? TreeType::giniIndex : TreeType::mse);
+                                                   TreeType::getLossFunctor());
         return TreeType::doRecursion(dataset,
                                      availableSample,
                                      availableFeature,
