@@ -25,6 +25,7 @@ namespace Physica::AI {
     /*
      * Reference:
      * [1] Leo Breiman, Random forests[J]. Machine Learning, 45, 5–32, 2001
+     * [2] Manual On Setting Up, Using, And Understanding Random Forests V3.1 (https://www.stat.berkeley.edu/~breiman/Using_random_forests_V3.1.pdf)
      */
 
     template<class ScalarType, DecisionTreeType Type>
@@ -45,10 +46,12 @@ namespace Physica::AI {
         [[nodiscard]] ScalarType predict(const VectorType& features) const;
         void swap(RandomForest& obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getNumTrees() const noexcept { return trees.getLength(); }
+        [[nodiscard]] size_t getNumTree() const noexcept { return trees.getLength(); }
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] static std::pair<RandomForest, ScalarType> train(unsigned int numTree, const Dataset& dataset, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static ScalarType makeFeatureImportance(size_t featureId, unsigned int numTree, const Dataset& dataset, RandomGenerator& gen);
     private:
         RandomForest(Utils::Array<TreeType> trees_);
         template<class RandomGenerator>
@@ -56,6 +59,10 @@ namespace Physica::AI {
                                   std::forward_list<size_t> availableSample,
                                   std::forward_list<size_t> availableFeature,
                                   RandomGenerator& gen);
+        template<class RandomGenerator>
+        static std::pair<std::forward_list<size_t>, std::forward_list<size_t>> randTrainTestSet(size_t numSample, RandomGenerator& gen);
+        static void testTree(ScalarType prediction, ScalarType label, size_t sampleId, VectorType& predictions, Utils::Array<size_t>& numTestSample);
+        static ScalarType makeTestError(const VectorType& predictions, const VectorType& labels, const Utils::Array<size_t>& numTestSample);
     };
 
     template<class ScalarType, DecisionTreeType Type>
@@ -88,7 +95,7 @@ namespace Physica::AI {
         else {
             ScalarType mean = 0;
             for (size_t i = 0; i < trees.getLength(); ++i)
-                toNextMean(mean, trees[i].predict(features), i);
+                toNextMean(mean, i, trees[i].predict(features));
             return mean;
         }
     }
@@ -104,50 +111,50 @@ namespace Physica::AI {
             unsigned int numTree,
             const Dataset& dataset,
             RandomGenerator& gen) {
-        std::forward_list<size_t> availableFeature{};
-        const size_t numFeature = dataset.features.getColumn();
-        for (size_t i = 0; i < numFeature; ++i)
-            availableFeature.push_front(i);
-
         const size_t numSample = dataset.features.getRow();
+        const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getColumn());
         Utils::Array<TreeType> trees{};
         trees.reserve(numTree);
-        ScalarType forestError = 0;
-        std::uniform_int_distribution<size_t> dist(0, numSample - 1);
+        VectorType predictions(numSample, 0);
+        Utils::Array<size_t> numTestSample(numSample, 0);
         for (size_t i = 0; i < numTree; ++i) {
-            std::set<size_t> set{};
-            for (size_t _ = 0; _ < numSample; ++_)
-                set.insert(dist(gen));
-
-            std::forward_list<size_t> trainSample{}, testSample{};
-            size_t numTestSample = 0;
-            for (size_t j = 0; j < numSample; ++j) {
-                if (set.find(j) == set.end()) {
-                    testSample.push_front(j);
-                    numTestSample += 1;
-                }
-                else
-                    trainSample.push_front(j);
-            }
+            auto pair = randTrainTestSet(numSample, gen);
+            auto& trainSample = pair.first;
+            auto& testSample = pair.second;
 
             auto tree = trainTree(dataset, std::move(trainSample), availableFeature, gen);
-            ScalarType treeError;
-            if constexpr (Type == DecisionTreeType::Classify) {
-                size_t count = 0;
-                for (size_t sample : testSample)
-                    count += tree.predict(dataset.features.row(sample)) == dataset.labels[sample];
-                treeError = ScalarType(count) / ScalarType(numTestSample);
-            }
-            else {
-                treeError = 0;
-                for (size_t sample : testSample)
-                    treeError += square(tree.predict(dataset.features.row(sample)) - dataset.labels[sample]);
-                treeError /= ScalarType(numTestSample);
-            }
-            Core::toNextMean(forestError, i, treeError);
+            for (size_t sample : testSample)
+                testTree(tree.predict(dataset.features.row(sample)), dataset.labels[sample], sample, predictions, numTestSample);
             trees.append(std::move(tree));
         }
-        return {RandomForest(std::move(trees)), forestError};
+        return {RandomForest(std::move(trees)), makeTestError(predictions, dataset.labels, numTestSample)};
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    template<class RandomGenerator>
+    ScalarType RandomForest<ScalarType, Type>::makeFeatureImportance(
+            size_t featureId,
+            unsigned int numTree,
+            const Dataset& dataset,
+            RandomGenerator& gen) {
+        const size_t numSample = dataset.features.getRow();
+        const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getColumn());
+        VectorType predictions(numSample, 0);
+        Utils::Array<size_t> numTestSample(numSample, 0);
+        std::uniform_int_distribution<size_t> dist(0, numSample - 1);
+        for (size_t i = 0; i < numTree; ++i) {
+            auto pair = randTrainTestSet(numSample, gen);
+            auto& trainSample = pair.first;
+            auto& testSample = pair.second;
+
+            auto tree = trainTree(dataset, std::move(trainSample), availableFeature, gen);
+            for (size_t sample : testSample) {
+                VectorType feature = dataset.features.row(sample);
+                feature[featureId] = dataset.features(dist(gen), featureId);
+                testTree(tree.predict(feature), dataset.labels[sample], sample, predictions, numTestSample);
+            }
+        }
+        return makeTestError(predictions, dataset.labels, numTestSample) - train(numTree, dataset, gen).second;
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -191,5 +198,66 @@ namespace Physica::AI {
                                             std::forward_list<size_t> availableFeature) {
                                         return trainTree(dataset, availableSample, availableFeature, gen);
                                      });
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    template<class RandomGenerator>
+    std::pair<std::forward_list<size_t>, std::forward_list<size_t>>
+    RandomForest<ScalarType, Type>::randTrainTestSet(size_t numSample, RandomGenerator& gen) {
+        std::uniform_int_distribution<size_t> dist(0, numSample - 1);
+        std::set<size_t> set{};
+        for (size_t _ = 0; _ < numSample; ++_)
+            set.insert(dist(gen));
+
+        std::forward_list<size_t> trainSample{}, testSample{};
+        for (size_t j = 0; j < numSample; ++j) {
+            if (set.find(j) == set.end())
+                testSample.push_front(j);
+            else
+                trainSample.push_front(j);
+        }
+        return std::make_pair(std::move(trainSample), std::move(testSample));
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    void RandomForest<ScalarType, Type>::testTree(
+            ScalarType prediction,
+            [[maybe_unused]] ScalarType label,
+            size_t sampleId,
+            VectorType& predictions,
+            Utils::Array<size_t>& numTestSample) {
+        if constexpr (Type == DecisionTreeType::Classify) {
+            const bool isCorrect = prediction == label;
+            predictions[sampleId] += ScalarType(isCorrect ? 1.0 : -1.0);
+            numTestSample[sampleId] += 1;
+        }
+        else {
+            toNextMean(predictions[sampleId], numTestSample[sampleId], prediction);
+            numTestSample[sampleId] += 1;
+        }
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    ScalarType RandomForest<ScalarType, Type>::makeTestError(
+            const VectorType& predictions,
+            const VectorType& labels,
+            [[maybe_unused]] const Utils::Array<size_t>& numTestSample) {
+        const size_t numSample = predictions.getLength();
+        if constexpr (Type == DecisionTreeType::Classify) {
+            size_t count = 0;
+            for (size_t i = 0; i < numSample; ++i) {
+                const bool isPredictionCorrect = predictions[i].isPositive();
+                count += isPredictionCorrect;
+            }
+            const ScalarType accuracy = ScalarType(count) / ScalarType(numSample);
+            return accuracy;
+        }
+        else {
+            ScalarType mse = 0;
+            for (size_t i = 0; i < numSample; ++i)
+                mse += square(predictions[i] - labels[i]);
+            mse /= ScalarType(numSample);
+            return mse;
+        }
     }
 }

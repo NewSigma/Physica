@@ -68,6 +68,7 @@ namespace Physica::AI {
         [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && splitPoints.getLength() == 1; }
         [[nodiscard]] bool isLeafNode() const noexcept { return subTrees.getLength() == 0; }
         /* Static members */
+        static std::forward_list<size_t> makeInitialFeatures(size_t numFeature);
         static ScalarType checkStopRecursion(const Dataset& dataset,
                                              const std::forward_list<size_t>& availableSample,
                                              const std::forward_list<size_t>& availableFeature);

@@ -61,14 +61,18 @@ namespace Physica::AI {
     template<class ScalarType, DecisionTreeType Type>
     DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::train(const Dataset& dataset) {
         std::forward_list<size_t> availableSample;
-        std::forward_list<size_t> availableFeature;
         const size_t numSample = dataset.features.getRow();
-        const size_t numFeature = dataset.features.getColumn();
         for (size_t i = 0; i < numSample; ++i)
             availableSample.push_front(i);
+        return train(dataset, std::move(availableSample), makeInitialFeatures(dataset.features.getColumn()));
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    std::forward_list<size_t> DecisionTree<ScalarType, Type>::makeInitialFeatures(size_t numFeature) {
+        std::forward_list<size_t> availableFeature;
         for (size_t i = 0; i < numFeature; ++i)
             availableFeature.push_front(i);
-        return train(dataset, std::move(availableSample), std::move(availableFeature));
+        return availableFeature;
     }
 
     template<class ScalarType, DecisionTreeType Type>
