@@ -27,12 +27,15 @@
 namespace Physica::AI {
     template<class Dataset>
     class KFold {
+    public:
         using ScalarType = Core::Scalar<Core::Double, false>;
+    private:
         using Metrics = Core::DenseMatrix<ScalarType, Core::MatrixOption::Row | Core::MatrixOption::Vector, 2>;
         
         Dataset set;
         unsigned int numFold;
         Metrics metrics;
+        at::Tensor permutation;
     public:
         KFold(Dataset set_, unsigned int numFold);
         ~KFold() = default;
@@ -40,10 +43,11 @@ namespace Physica::AI {
         template<class ModelType>
         void validate(Model<ModelType>& model);
         /* Getters */
+        [[nodiscard]] size_t getNumData() const { return set.size().value(); }
         [[nodiscard]] double getTrainLoss() const { return double(mean(metrics.row(0))); }
         [[nodiscard]] double getValidLoss() const { return double(mean(metrics.row(1))); }
     private:
-        std::pair<Dataset, Dataset> cutDataset(unsigned int fold);
+        std::pair<Dataset, Dataset> cutDataset(unsigned int fold) const;
     };
 
     template<class Dataset>
@@ -54,6 +58,7 @@ namespace Physica::AI {
     template<class ModelType>
     void KFold<Dataset>::validate(Model<ModelType>& model) {
         static_assert(std::is_same<Dataset, typename ModelType::DataSet>::value, "Type of datasets do not match");
+        permutation = torch::randperm(getNumData());
         for (size_t i = 0; i < numFold; ++i) {
             const auto splitted_set = cutDataset(i);
             model.init();
@@ -66,11 +71,10 @@ namespace Physica::AI {
     }
 
     template<class Dataset>
-    std::pair<Dataset, Dataset> KFold<Dataset>::cutDataset(unsigned int fold) {
-        const size_t numData = set.size().value();
-        const auto index = torch::randperm(numData);
-        const auto all_features = torch::index_select(set.getFeatures(), 0, index);
-        const auto all_labels = torch::index_select(set.getLabels(), 0, index);
+    std::pair<Dataset, Dataset> KFold<Dataset>::cutDataset(unsigned int fold) const {
+        const size_t numData = getNumData();
+        const auto all_features = torch::index_select(set.getFeatures(), 0, permutation);
+        const auto all_labels = torch::index_select(set.getLabels(), 0, permutation);
         const int64_t fold_size = numData / numFold;
         auto valid_features = all_features.slice(0, fold * fold_size, (fold + 1) * fold_size);
         auto valid_labels = all_labels.slice(0, fold * fold_size, (fold + 1) * fold_size);

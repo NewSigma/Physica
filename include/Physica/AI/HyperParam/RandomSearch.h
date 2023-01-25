@@ -36,7 +36,11 @@ namespace Physica::AI {
         RandomSearch(HyperParams params_, double score_);
         /* Operations */
         template<class RandomGenerator>
-        void search(unsigned int step, Model<ModelType>& model, KFold<DataSet>& kFold, RandomGenerator& gen);
+        void search(unsigned int step,
+                    unsigned int numStatistic,
+                    Model<ModelType>& model,
+                    KFold<DataSet>& kFold,
+                    RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] const HyperParams& getParams() const noexcept { return params; }
         [[nodiscard]] double getScore() const noexcept { return score; }
@@ -50,13 +54,23 @@ namespace Physica::AI {
 
     template<class ModelType>
     template<class RandomGenerator>
-    void RandomSearch<ModelType>::search(unsigned int step, Model<ModelType>& model, KFold<DataSet>& kFold, RandomGenerator& gen) {
+    void RandomSearch<ModelType>::search(
+            unsigned int step,
+            unsigned int numStatistic,
+            Model<ModelType>& model,
+            KFold<DataSet>& kFold,
+            RandomGenerator& gen) {
+        using ScalarType = typename KFold<DataSet>::ScalarType;
         for (unsigned int _ = 0; _ < step; ++_) {
             model.active_params = HyperParams::randomSet(gen);
-            kFold.validate(model);
-            const double new_score = mixed_loss(double(kFold.getTrainLoss()), double(kFold.getValidLoss()));
-            if (new_score < score || score == uninitialized_score) {
-                score = new_score;
+            ScalarType new_score = 0;
+            for (unsigned int i = 0; i < numStatistic; ++i) {
+                kFold.validate(model);
+                ScalarType temp = mixed_loss(double(kFold.getTrainLoss()), double(kFold.getValidLoss()));
+                toNextMean(new_score, i, temp);
+            }
+            if (new_score < ScalarType(score) || score == uninitialized_score) {
+                score = double(new_score);
                 params = model.active_params;
             }
         }

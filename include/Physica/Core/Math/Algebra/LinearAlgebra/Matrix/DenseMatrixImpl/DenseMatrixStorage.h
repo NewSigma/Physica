@@ -71,6 +71,8 @@ namespace Physica::Core::Internal {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+
+        using Base::getCapacity;
         friend class device_obj<This>;
     };
 
@@ -115,6 +117,8 @@ namespace Physica::Core::Internal {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+
+        using Base::getCapacity;
         friend class device_obj<This>;
     };
 
@@ -162,6 +166,8 @@ namespace Physica::Core::Internal {
         }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+
+        using Base::getCapacity;
         friend class device_obj<This>;
     };
 
@@ -209,6 +215,8 @@ namespace Physica::Core::Internal {
         }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+
+        using Base::getCapacity;
         friend class device_obj<This>;
     };
 }
