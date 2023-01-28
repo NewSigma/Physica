@@ -106,7 +106,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] PositionMatrix makeCentroidPos() const;
         [[nodiscard]] MDCellType makeAverageCell() const;
-        [[nodiscard]] PositionMatrix getMomentum() const;
+        [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
+        [[nodiscard]] PositionMatrix getMomentum(size_t replica) const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
 
         [[nodiscard]] ScalarType getClassicalKinetic() const;

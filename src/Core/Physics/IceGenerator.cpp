@@ -21,15 +21,17 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    IceGenerator::IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
-            : initialCell(std::move(initialCell_))
-            , maxDistOO(maxDistOO_)
+    IceGenerator::IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_)
+            : maxDistOO(maxDistOO_)
             , maxDistOH(maxDistOH_) {
-        assert(initialCell.getNumParticle() % 3U == 0);
         isHydrogenOccupied.resize(getEndIndexH());
         numHydrogenRequired.resize(getNumMolecule());
-        if (initialCell.getType() == CrystalCell::Type::Direct)
-            initialCell.toCartesian();
+    }
+
+    IceGenerator::IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
+            : IceGenerator(maxDistOO_, maxDistOH_) {
+        assert(initialCell.getNumParticle() % 3U == 0);
+        setInitialCell(std::move(initialCell_));
     }
 
     IceGenerator& IceGenerator::operator=(IceGenerator obj) noexcept {
@@ -44,6 +46,49 @@ namespace Physica::Core {
         exhaustImpl(0, pos, result);
         return result;
     }
+    /**
+     * Reference:
+     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     */
+    CrystalCell IceGenerator::makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const {
+        const bool isInvalidRing = ring.getLength() == 0;
+        if (isInvalidRing)
+            return initialCell;
+
+        PositionMatrix pos = initialCell.getPos();
+        for (size_t bead = 0; bead < ring.getLength(); ++bead) {
+            const size_t lastBead = bead == 0 ? ring.getLength() - 1 : bead - 1;
+            const size_t nextBead = bead == ring.getLength() - 1 ? 0 : bead + 1;
+            const size_t indexO = getStartIndexO() + ring[bead];
+            const size_t indexLastO = getStartIndexO() + ring[lastBead];
+            const size_t indexNextO = getStartIndexO() + ring[nextBead];
+            const Vector3D vecO2O1 = initialCell.minDistVector(indexO, indexLastO);
+            const Vector3D vecO2O3 = initialCell.minDistVector(indexO, indexNextO);
+
+            const auto pair = findHydrogenInMolecule(ring[bead]);
+            const size_t indexH1 = findHydrogenBetweenO(indexO, indexNextO);
+            const size_t indexH2 = pair.first == indexH1 ? pair.second : pair.first;
+            assert(indexH1 == pair.first || indexH1 == pair.second);
+
+            const Vector3D vecO2H2 = initialCell.minDistVector(indexO, indexH2);
+            ScalarType angle;
+            {
+                const Vector3D v1 = vecO2H2.crossProduct(vecO2O1);
+                const Vector3D v2 = vecO2H2.crossProduct(vecO2O3);
+                angle = v1.angleTo(v2);
+            }
+            const Vector3D vecO2H1 = initialCell.minDistVector(indexO, indexH1);
+            const Vector3D cross = vecO2O1.crossProduct(vecO2O3);
+            const ScalarType dot = cross * vecO2H2;
+            if (dot.isNegative())
+                angle = -angle;
+            pos.row(indexH1) = pos.row(indexO) + rotate(angle, vecO2H2, vecO2H1);
+            momentumMat.row(indexH1) = rotate(angle, vecO2H2, momentumMat.row(indexH1));
+        }
+        CrystalCell result({initialCell.getLattice(), std::move(pos), CrystalCell::Type::Cartesian}, initialCell.getAtomicNumbers());
+        result.normalize();
+        return result;
+    }
 
     void IceGenerator::swap(IceGenerator& obj) noexcept {
         initialCell.swap(obj.initialCell);
@@ -51,6 +96,12 @@ namespace Physica::Core {
         std::swap(maxDistOH, obj.maxDistOH);
         isHydrogenOccupied.swap(obj.isHydrogenOccupied);
         numHydrogenRequired.swap(obj.numHydrogenRequired);
+    }
+
+    void IceGenerator::setInitialCell(CrystalCell cell) {
+        initialCell.swap(cell);
+        if (initialCell.getType() == CrystalCell::Type::Direct)
+            initialCell.toCartesian();
     }
 
     typename IceGenerator::PositionMatrix IceGenerator::prepareRun() {
@@ -89,21 +140,21 @@ namespace Physica::Core {
         return result;
     }
 
-    Utils::Array<size_t> IceGenerator::findBondedH(size_t indexO) const {
+    Utils::Array<size_t> IceGenerator::findBondedH(size_t indexMolecule) const {
         const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
         Utils::Array<size_t> result{};
-        CrystalCell::forCellInRange(range, initialCell.getLattice(), [this, indexO, &result](Vector3D delta) {
+        CrystalCell::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D delta) {
             const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
             const ScalarType squaredRadiusO = square(maxDistOO);
-            const size_t shiftIndexO = getStartIndexO() + indexO;
+            const size_t indexO = getStartIndexO() + indexMolecule;
 
             for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
                 const Vector3D otherO = initialCell.getPos().row(i) + delta;
-                const ScalarType r2 = (initialCell.getPos().row(shiftIndexO) - otherO).squaredNorm();
+                const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
                 const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
                 const bool isInRange = r2 < squaredRadiusO;
                 if (isNotSelf && isInRange) {
-                    const Vector3D middle = (otherO + initialCell.getPos().row(shiftIndexO)) * ScalarType(0.5);
+                    const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);
                     for (size_t j = 0; j < getEndIndexH(); ++j) {
                         const bool isHInRange = initialCell.minDistVector(middle, j).squaredNorm() < squaredRadiusH;
                         const bool isOccupied = std::find(result.cbegin(), result.cend(), j) != result.cend();
@@ -125,13 +176,13 @@ namespace Physica::Core {
         return result;
     }
 
-    std::pair<size_t, size_t> IceGenerator::findHydrogenInMolecule(size_t indexO) const {
+    std::pair<size_t, size_t> IceGenerator::findHydrogenInMolecule(size_t indexMolecule) const {
         ScalarType minSquaredDist1 = std::numeric_limits<ScalarType>::max();
         ScalarType minSquaredDist2 = std::numeric_limits<ScalarType>::max();
         size_t indexH1 = 0;
         size_t indexH2 = 1;
         for (size_t i = 0; i < getEndIndexH(); ++i) {
-            const ScalarType squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexO).squaredNorm();
+            const ScalarType squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexMolecule).squaredNorm();
             if (squaredDist < minSquaredDist1) {
                 indexH1 = i;
                 minSquaredDist1 = squaredDist;
@@ -147,6 +198,21 @@ namespace Physica::Core {
             }
         }
         return {indexH1, indexH2};
+    }
+
+    size_t IceGenerator::findHydrogenBetweenO(size_t indexO1, size_t indexO2) const {
+        ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
+        const Vector3D delta = initialCell.minDistVector(indexO1, indexO2);
+        const Vector3D middle = initialCell.getPos().row(indexO1) + delta * ScalarType(0.5);
+        size_t result = 0;
+        for (size_t i = 0; i < getEndIndexH(); ++i) {
+            const ScalarType squaredDist = initialCell.minDistVector(middle, i).squaredNorm();
+            if (squaredDist < minSquaredDist) {
+                minSquaredDist = squaredDist;
+                result = i;
+            }
+        }
+        return result;
     }
 
     void IceGenerator::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
@@ -243,5 +309,15 @@ namespace Physica::Core {
                 return false;
         }
         return true;
+    }
+
+    typename IceGenerator::Vector3D IceGenerator::rotate(ScalarType angle, Vector3D axis, Vector3D target) {
+        const ScalarType factor1 = cos(angle);
+
+        const Vector3D parallel = (target * axis / axis.squaredNorm()) * axis;
+        const Vector3D verticle = target - parallel;
+        const Vector3D verticle2 = parallel.crossProduct(verticle);
+        ScalarType factor2 = sin(angle) / parallel.norm();
+        return Vector3D(parallel + factor1 * verticle + factor2 * verticle2);
     }
 }

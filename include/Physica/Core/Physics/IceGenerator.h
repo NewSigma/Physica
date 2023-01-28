@@ -38,6 +38,7 @@ namespace Physica::Core {
         Utils::Array<bool> isHydrogenOccupied;
         Utils::Array<unsigned char> numHydrogenRequired;
     public:
+        IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_);
         IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
         IceGenerator(const IceGenerator&) = default;
         IceGenerator(IceGenerator&&) noexcept = default;
@@ -48,16 +49,21 @@ namespace Physica::Core {
         Utils::Array<CrystalCell> exhaust();
         template<class RandomGenerator> CrystalCell makeRand(RandomGenerator& gen);
         template<class RandomGenerator> CrystalCell makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
+        template<class RandomGenerator> Utils::Array<size_t> randRing(RandomGenerator& gen) const;
+        CrystalCell makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const;
         void swap(IceGenerator& obj) noexcept;
+        /* Setters */
+        void setInitialCell(CrystalCell cell);
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
     private:
         PositionMatrix prepareRun();
         void searchDanglingH(PositionMatrix& pos);
         Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
-        Utils::Array<size_t> findBondedH(size_t indexO) const;
+        Utils::Array<size_t> findBondedH(size_t indexMolecule) const;
         Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
-        std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexO) const;
+        std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
+        size_t findHydrogenBetweenO(size_t indexO1, size_t indexO2) const;
         template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
         template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
         void fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH);
@@ -72,6 +78,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getEndIndexO() const noexcept { return initialCell.getNumParticle(); }
         [[nodiscard]] bool isFinished() const noexcept;
         /* Static members */
+        static Vector3D rotate(ScalarType angle, Vector3D axis, Vector3D target);
         template<class RandomGenerator>
         static Vector<ScalarType, 3> randUnitVector(RandomGenerator& gen);
 
@@ -124,6 +131,77 @@ namespace Physica::Core {
         }
         CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
         result.normalize();
+        return result;
+    }
+    /**
+     * Reference:
+     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     */
+    template<class RandomGenerator>
+    Utils::Array<size_t> IceGenerator::randRing(RandomGenerator& gen) const {
+        Utils::Array<size_t> ring{};
+        size_t ringStart = 0;
+        {
+            std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
+            const size_t randMolecule = dist(gen);
+            ring.append(randMolecule);
+        }
+
+        bool isRingGenerated = false;
+        while(!isRingGenerated) {
+            const size_t lastMolecule = ring[ring.getLength() - 1];
+            const auto pair = findHydrogenInMolecule(lastMolecule);
+            const auto bondH = findBondedH(lastMolecule);
+            const bool isBondedH1 = std::find(bondH.begin(), bondH.end(), pair.first) != bondH.end();
+            const bool isBondedH2 = std::find(bondH.begin(), bondH.end(), pair.second) != bondH.end();
+            size_t indexH = 0;
+            if (isBondedH1 && isBondedH2)
+                indexH = gen() % 2 == 0 ? pair.first : pair.second;
+            else if (isBondedH1 || isBondedH2)
+                indexH = isBondedH1 ? pair.first : pair.second;
+            else
+                return Utils::Array<size_t>{};
+            
+            const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
+            size_t nextIndexO = getNumMolecule();
+            CrystalCell::forCellInRange(range, initialCell.getLattice(), [this, lastMolecule, indexH, &nextIndexO](Vector3D delta) {
+                const bool hasDone = nextIndexO != getNumMolecule();
+                if (hasDone)
+                    return;
+
+                const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
+                const ScalarType squaredRadiusO = square(maxDistOO);
+                const size_t indexO = getStartIndexO() + lastMolecule;
+                for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+                    const Vector3D otherO = initialCell.getPos().row(i) + delta;
+                    const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
+                    const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
+                    const bool isInRange = r2 < squaredRadiusO;
+                    if (isNotSelf && isInRange) {
+                        const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);
+                        const bool isHInRange = initialCell.minDistVector(middle, indexH).squaredNorm() < squaredRadiusH;
+                        if (isHInRange) {
+                            nextIndexO = i;
+                            return;
+                        }
+                    }
+                }
+            });
+            const size_t nextMolecule = nextIndexO - getStartIndexO();
+            for (size_t i = 0; i < ring.getLength(); ++i) {
+                if (nextMolecule == ring[i]) {
+                    ringStart = i;
+                    isRingGenerated = true;
+                    goto done;
+                }
+            }
+            ring.append(nextMolecule);
+        done:;
+        }
+
+        Utils::Array<size_t> result(ring.getLength() - ringStart);
+        for (size_t i = 0; i < result.getLength(); ++i)
+            result[i] = ring[i + ringStart];
         return result;
     }
 

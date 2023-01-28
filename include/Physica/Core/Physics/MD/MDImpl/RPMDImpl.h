@@ -258,11 +258,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    typename RPMD<ScalarType, PosScalarType>::PositionMatrix RPMD<ScalarType, PosScalarType>::getMomentum() const {
+    typename RPMD<ScalarType, PosScalarType>::PositionMatrix RPMD<ScalarType, PosScalarType>::makeCentroidMomentum() const {
         PositionMatrix result(getNumParticle(), 3, 0);
         size_t index = 0;
         for (auto& elem : result) {
             elem = PosScalarType(mean(phasePosX.row(index)));
+            ++index;
+        }
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename RPMD<ScalarType, PosScalarType>::PositionMatrix RPMD<ScalarType, PosScalarType>::getMomentum(size_t replica) const {
+        PositionMatrix result(getNumParticle(), 3, 0);
+        size_t index = 0;
+        for (auto& elem : result) {
+            elem = PosScalarType(phasePosX(index, replica));
             ++index;
         }
         return result;
@@ -338,7 +349,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     ScalarType RPMD<ScalarType, PosScalarType>::calcTemperature() const {
-        return square(getMomentum()).sum() * (1 / (3 * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
+        return square(makeCentroidMomentum()).sum() * (1 / (3 * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
     }
 
     template<class ScalarType, class PosScalarType>

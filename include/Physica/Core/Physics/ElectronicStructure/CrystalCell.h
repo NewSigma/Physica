@@ -35,6 +35,7 @@ namespace Physica::Core {
     private:
         AtomicArray atomicNumbers;
     public:
+        CrystalCell() = default;
         CrystalCell(Base base, AtomicArray atomicNumbers_);
         CrystalCell(Poscar poscar);
         CrystalCell(const CrystalCell&) = default;
