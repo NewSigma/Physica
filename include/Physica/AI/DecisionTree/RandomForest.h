@@ -210,7 +210,7 @@ namespace Physica::AI {
         const ScalarType criteria = TreeType::checkStopRecursion(dataset, availableSample, randomFeature);
         const bool shouldStopRecursion = !std::isnan(double(criteria));
         if (shouldStopRecursion)
-            return TreeType(dataset.features.getColumn(), {criteria}, {});
+            return TreeType(dataset.features.getColumn(), criteria, {}, TreeType::NodeType::Classify);
 
         auto pair = TreeType::selectOptimalFeature(dataset,
                                                    availableSample,

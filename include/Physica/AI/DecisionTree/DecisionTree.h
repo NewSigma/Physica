@@ -46,9 +46,15 @@ namespace Physica::AI {
 
         using LossFunctor = ScalarType (*)(const Dataset&, const std::forward_list<size_t>&);
     private:
+        enum NodeType {
+            Regression,
+            Classify
+        };
+
         size_t featureId;
-        VectorType splitPoints;
+        ScalarType splitPoint;
         Utils::Array<DecisionTree> subTrees;
+        NodeType nodeType;
     public:
         DecisionTree(const Dataset& dataset);
         DecisionTree(const DecisionTree&) = default;
@@ -62,10 +68,10 @@ namespace Physica::AI {
         /* Static members */
         static DecisionTree train(const Dataset& dataset);
     private:
-        DecisionTree(size_t featureId_, VectorType splitPoints_, Utils::Array<DecisionTree> subTrees_);
+        DecisionTree(size_t featureId_, ScalarType splitPoint_, Utils::Array<DecisionTree> subTrees_, NodeType nodeType_);
         /* Getters */
-        [[nodiscard]] bool isClassifyNode() const noexcept { return !isLeafNode() && splitPoints.getLength() != 1; }
-        [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && splitPoints.getLength() == 1; }
+        [[nodiscard]] bool isClassifyNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Classify; }
+        [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Regression; }
         [[nodiscard]] bool isLeafNode() const noexcept { return subTrees.getLength() == 0; }
         /* Static members */
         static std::forward_list<size_t> makeInitialFeatures(size_t numFeature);
@@ -77,7 +83,7 @@ namespace Physica::AI {
                                         const std::forward_list<size_t>& availableSample,
                                         const std::forward_list<size_t>& availableFeature,
                                         size_t featureId,
-                                        VectorType splitPoints,
+                                        ScalarType splitPoint,
                                         TrainFunctor functor);
         static DecisionTree train(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
@@ -86,7 +92,7 @@ namespace Physica::AI {
         static ScalarType makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
         static ScalarType giniIndex(const Dataset& dataset, const std::forward_list<size_t>& availableSample);
         static ScalarType mse(const Dataset& dataset, const std::forward_list<size_t>& availableSample);
-        static std::pair<size_t, VectorType> selectOptimalFeature(const Dataset& dataset,
+        static std::pair<size_t, ScalarType> selectOptimalFeature(const Dataset& dataset,
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,
                                                                   LossFunctor functor);

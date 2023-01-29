@@ -23,8 +23,11 @@ namespace Physica::AI {
     DecisionTree<ScalarType, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
 
     template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, VectorType splitPoints_, Utils::Array<DecisionTree> subTrees_)
-            : featureId(featureId_), splitPoints(std::move(splitPoints_)), subTrees(std::move(subTrees_)) {}
+    DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, ScalarType splitPoint_, Utils::Array<DecisionTree> subTrees_, NodeType nodeType_)
+            : featureId(featureId_)
+            , splitPoint(std::move(splitPoint_))
+            , subTrees(std::move(subTrees_))
+            , nodeType(nodeType_) {}
 
     template<class ScalarType, DecisionTreeType Type>
     DecisionTree<ScalarType, Type>& DecisionTree<ScalarType, Type>::operator=(DecisionTree tree) noexcept {
@@ -35,27 +38,23 @@ namespace Physica::AI {
     template<class ScalarType, DecisionTreeType Type>
     ScalarType DecisionTree<ScalarType, Type>::predict(const VectorType& features) const {
         if (isLeafNode())
-            return splitPoints[0];
+            return splitPoint;
 
         const ScalarType feature = features[featureId];
-        if (isClassifyNode()) {
-            for (size_t i = 0; i < splitPoints.getLength(); ++i) {
-                if (feature == splitPoints[i])
-                    return subTrees[i].predict(features);
-            }
-        }
-        else {
-            const size_t index = (feature < splitPoints[0]) ? 0U : 1U;
-            return subTrees[index].predict(features);
-        }
-        return std::nan("");
+        size_t index;
+        if (isClassifyNode())
+            index = (feature == splitPoint) ? 0U : 1U;
+        else
+            index = (feature < splitPoint) ? 0U : 1U;
+        return subTrees[index].predict(features);
     }
 
     template<class ScalarType, DecisionTreeType Type>
     void DecisionTree<ScalarType, Type>::swap(DecisionTree& tree) noexcept {
         std::swap(featureId, tree.featureId);
-        splitPoints.swap(tree.splitPoints);
+        splitPoint.swap(tree.splitPoint);
         subTrees.swap(tree.subTrees);
+        std::swap(nodeType, tree.nodeType);
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -126,7 +125,7 @@ namespace Physica::AI {
                                                                                const std::forward_list<size_t>& availableSample,
                                                                                const std::forward_list<size_t>& availableFeature,
                                                                                size_t featureId,
-                                                                               VectorType splitPoints,
+                                                                               ScalarType splitPoint,
                                                                                TrainFunctor functor) {
         std::forward_list<size_t> newAvailableFeature{};
         for (auto feature : availableFeature) {
@@ -135,32 +134,28 @@ namespace Physica::AI {
         }
 
         Utils::Array<DecisionTree> subTrees{};
-        if (dataset.isFeatureContinuous[featureId]) {
-            std::forward_list<size_t> list1{}, list2{};
+        std::forward_list<size_t> list1{}, list2{};
+        subTrees.reserve(2U);
+        const bool isContinuous = dataset.isFeatureContinuous[featureId];
+        if (isContinuous) {
             for (auto sample : availableSample) {
-                if (dataset.features(sample, featureId) < splitPoints[0])
+                if (dataset.features(sample, featureId) < splitPoint)
                     list1.push_front(sample);
                 else
                     list2.push_front(sample);
             }
-
-            subTrees.reserve(2U);
-            subTrees.append(functor(dataset, std::move(list1), newAvailableFeature));
-            subTrees.append(functor(dataset, std::move(list2), newAvailableFeature));
         }
         else {
-            subTrees.reserve(splitPoints.getLength());
-            for (auto point : splitPoints) {
-                std::forward_list<size_t> newAvailableSample{};
-                for (auto sample : availableSample) {
-                    if (dataset.features(sample, featureId) == point)
-                        newAvailableSample.push_front(sample);
-                }
-                auto tree = functor(dataset, std::move(newAvailableSample), std::move(newAvailableFeature));
-                subTrees.append(std::move(tree));
+            for (auto sample : availableSample) {
+                if (dataset.features(sample, featureId) == splitPoint)
+                    list1.push_front(sample);
+                else
+                    list2.push_front(sample);
             }
         }
-        return DecisionTree(featureId, std::move(splitPoints), std::move(subTrees));
+        subTrees.append(functor(dataset, std::move(list1), newAvailableFeature));
+        subTrees.append(functor(dataset, std::move(list2), newAvailableFeature));
+        return DecisionTree(featureId, splitPoint, std::move(subTrees), isContinuous ? Regression : Classify);
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -173,7 +168,7 @@ namespace Physica::AI {
         const ScalarType criteria = checkStopRecursion(dataset, availableSample, availableFeature);
         const bool shouldStopRecursion = !std::isnan(double(criteria));
         if (shouldStopRecursion)
-            return DecisionTree(numFeature, {criteria}, {});
+            return DecisionTree(numFeature, criteria, {}, NodeType::Classify);
 
         auto pair = selectOptimalFeature(dataset, availableSample, availableFeature, getLossFunctor());
         return doRecursion<TrainFunctor>(dataset, availableSample, availableFeature, pair.first, std::move(pair.second), train);
@@ -239,11 +234,12 @@ namespace Physica::AI {
             sumSquare += square(label);
             count += 1;
         }
-        return ScalarType(count) * sumSquare - square(sum);
+        const ScalarType factor = reciprocal(ScalarType(count));
+        return sumSquare * factor - square(sum * factor);
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    std::pair<size_t, typename DecisionTree<ScalarType, Type>::VectorType>
+    std::pair<size_t, ScalarType>
     DecisionTree<ScalarType, Type>::selectOptimalFeature(
             const Dataset& dataset,
             const std::forward_list<size_t>& availableSample,
@@ -251,7 +247,7 @@ namespace Physica::AI {
             LossFunctor functor) {
         assert(!availableFeature.empty());
         size_t optimalFeatureId = dataset.features.getColumn();
-        VectorType splitPoints{};
+        ScalarType optimalSplitPoint = 0;
         ScalarType minLoss = std::numeric_limits<ScalarType>::max();
         for (auto featureId : availableFeature) {
             VectorType featureVector{};
@@ -268,11 +264,10 @@ namespace Physica::AI {
                 }
             }
 
-            ScalarType loss = 0;
+            std::forward_list<size_t> list1{}, list2{};
+            ScalarType splitPoint = 0;
+            ScalarType loss = std::numeric_limits<ScalarType>::max();
             if (dataset.isFeatureContinuous[featureId]) {
-                std::forward_list<size_t> list1{}, list2{};
-                loss = std::numeric_limits<ScalarType>::max();
-                ScalarType splitPoint = 0;
                 for (size_t i = 0; i < featureVector.getLength() - 1; ++i) {
                     const ScalarType midpoint = (featureVector[i] + featureVector[i + 1]) * 0.5;
                     size_t weight1 = 0;
@@ -294,35 +289,36 @@ namespace Physica::AI {
                     list1.clear();
                     list2.clear();
                 }
-
-                if (loss <= minLoss) {
-                    minLoss = loss;
-                    optimalFeatureId = featureId;
-                    splitPoints = {splitPoint};
-                }
             }
             else {
-                std::forward_list<size_t> list{};
-                loss = 0;
-                for (auto value : featureVector) {
-                    size_t weight = 0;
+                for (size_t i = 0; i < featureVector.getLength(); ++i) {
+                    size_t weight1 = 0;
                     for (auto sample : availableSample) {
-                        if (dataset.features(sample, featureId) == value) {
-                            list.push_front(sample);
-                            weight += 1;
+                        if (dataset.features(sample, featureId) == featureVector[i]) {
+                            list1.push_front(sample);
+                            weight1 += 1;
                         }
+                        else
+                            list2.push_front(sample);
                     }
-                    loss += functor(dataset, list) * ScalarType(weight);
-                    list.clear();
-                }
 
-                if (loss <= minLoss) {
-                    minLoss = loss;
-                    optimalFeatureId = featureId;
-                    splitPoints.swap(featureVector);
+                    const size_t weight2 = featureVector.getLength() - weight1;
+                    const ScalarType temp = functor(dataset, list1) * ScalarType(weight1) + functor(dataset, list2) * ScalarType(weight2);
+                    if (temp < loss) {
+                        loss = temp;
+                        splitPoint = featureVector[i];
+                    }
+                    list1.clear();
+                    list2.clear();
                 }
             }
+
+            if (loss <= minLoss) {
+                minLoss = loss;
+                optimalFeatureId = featureId;
+                optimalSplitPoint = splitPoint;
+            }
         }
-        return {optimalFeatureId, std::move(splitPoints)};
+        return {optimalFeatureId, optimalSplitPoint};
     }
 }
