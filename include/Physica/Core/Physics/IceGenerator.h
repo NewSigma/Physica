@@ -162,31 +162,25 @@ namespace Physica::Core {
             else
                 return Utils::Array<size_t>{};
             
-            const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
             size_t nextIndexO = getNumMolecule();
-            CrystalCell::forCellInRange(range, initialCell.getLattice(), [this, lastMolecule, indexH, &nextIndexO](Vector3D delta) {
-                const bool hasDone = nextIndexO != getNumMolecule();
-                if (hasDone)
-                    return;
-
-                const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
+            /* Find next oxygen */ {
+                const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
                 const ScalarType squaredRadiusO = square(maxDistOO);
                 const size_t indexO = getStartIndexO() + lastMolecule;
+                ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
                 for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
-                    const Vector3D otherO = initialCell.getPos().row(i) + delta;
-                    const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
+                    const ScalarType r2 = initialCell.minDistVector(i, indexO).squaredNorm();
                     const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
                     const bool isInRange = r2 < squaredRadiusO;
                     if (isNotSelf && isInRange) {
-                        const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);
-                        const bool isHInRange = initialCell.minDistVector(middle, indexH).squaredNorm() < squaredRadiusH;
-                        if (isHInRange) {
+                        const ScalarType squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();
+                        if (squaredDist < minSquaredDist) {
+                            minSquaredDist = squaredDist;
                             nextIndexO = i;
-                            return;
                         }
                     }
                 }
-            });
+            }
             const size_t nextMolecule = nextIndexO - getStartIndexO();
             for (size_t i = 0; i < ring.getLength(); ++i) {
                 if (nextMolecule == ring[i]) {

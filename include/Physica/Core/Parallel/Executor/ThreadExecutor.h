@@ -50,7 +50,6 @@ namespace Physica::Core::Parallel {
             Functor func, unsigned int loopCount, unsigned int core) {
         using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
-        assert(loopCount >= core);
         assert(core > 0);
         const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
         unsigned int from = 0; 
