@@ -126,9 +126,9 @@ int main() {
                 rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E-15));
                 rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
                 rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E15));
-                const auto p0 = rpmd.getMomentum();
+                const auto p0 = rpmd.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
-                    toNextMean(temp[k], j, hadamard(rpmd.getMomentum(), p0).sum() * factor);
+                    toNextMean(temp[k], j, hadamard(rpmd.makeCentroidMomentum(), p0).sum() * factor);
                     rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
                 }
             }

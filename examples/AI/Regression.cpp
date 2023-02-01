@@ -190,7 +190,7 @@ int main() {
     torch::manual_seed(seed);
 
     RandomSearch<Net> searcher{};
-    searcher.search(10, net, kFold, gen);
+    searcher.search(10, 6, net, kFold, gen);
     net.active_params = searcher.getParams();
 
     net.train(readTrainData());
