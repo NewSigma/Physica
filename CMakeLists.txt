@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.19)
 
 project(Physica VERSION 0.0.1 LANGUAGES CXX)
 #include all macros
-include(cmake/Modules/PhysicaCheck.cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+include(PhysicaCheck)
 #############################################Settings#############################################
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
@@ -14,7 +15,7 @@ option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_TORCH "Enable Torch support" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
-include(cmake/Modules/FindSIMD.cmake)
+include(FindSIMD)
 
 set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
@@ -65,7 +66,6 @@ if(${RUN_CHECKS})
 endif()
 ##############################################Libs################################################
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
@@ -118,6 +118,8 @@ if(${PHYSICA_GUI})
     endif()
 endif()
 
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION share)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
 install(FILES include/Physica/Config.h DESTINATION include/Physica)
 install(FILES include/Physica/SIMD.h DESTINATION include/Physica)
 install(FILES include/Physica/SystemBits.h DESTINATION include/Physica)
