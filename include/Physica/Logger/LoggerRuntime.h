@@ -25,6 +25,7 @@
 #include <mutex>
 #include <memory>
 #include <cstring>
+#include <unistd.h>
 #include "LogBuffer.h"
 #include "LoggerType.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
@@ -51,21 +52,12 @@ namespace Physica::Logger {
          * ID of buffer being logged.
          */
         int processingBufferID;
-        /**
-         * Store all registered loggers.
-         */
         std::vector<AbstractLogger*> loggerList;
-        /**
-         * Store info of logged logs.
-         */
         std::vector<LogInfo> logInfos;
         /**
          * The thread used to output logs.
          */
         std::thread logThread;
-        /**
-         * Does log thread should exit.
-         */
         bool shouldExit;
     public:
         LoggerRuntime(const LoggerRuntime&) = delete;
@@ -92,7 +84,7 @@ namespace Physica::Logger {
         LoggerRuntime();
 
         void logThreadMain();
-        int getNextBufferToLog() noexcept;
+        void findNextBufferToLog() noexcept;
     };
 
     inline AbstractLogger& getLogger(size_t index) {
@@ -150,7 +142,12 @@ namespace Physica::Logger {
 
 #define Warning(loggerID, format, ...) Log(loggerID, Warning, format, ##__VA_ARGS__)
 
-#define Fatal(loggerID, format, ...) do { Log(loggerID, Fatal, format, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(false)
+#define Fatal(loggerID, format, ...)                    \
+    do {                                                \
+        using namespace Physica::Logger;                \
+        Log(loggerID, Fatal, format, ##__VA_ARGS__);    \
+        exit(EXIT_FAILURE);                             \
+    } while(false)
 /**
  * Use Error instead of Fatal when a system call fails.
  */

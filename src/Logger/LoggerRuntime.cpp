@@ -81,7 +81,7 @@ namespace Physica::Logger {
                 if(shouldExit)
                     return;
                 std::this_thread::sleep_for(1s);
-                getNextBufferToLog();
+                findNextBufferToLog();
             }
 
             LogBuffer& buffer = *bufferList[processingBufferID];
@@ -90,33 +90,27 @@ namespace Physica::Logger {
                 buffer.read(&loggerID);
                 loggerList[loggerID]->log(buffer);
             }
-            getNextBufferToLog();
+            findNextBufferToLog();
         }
     }
-    /**
-     * Return true if all buffers are empty.
-     */
-    int LoggerRuntime::getNextBufferToLog() noexcept {
-        if (processingBufferID == -1)
-            return 0;
-        size_t size = bufferList.size();
-        int i = static_cast<int>((processingBufferID + 1) % size);
-        for (; i != processingBufferID; i = (processingBufferID + 1) % size) {
-            LogBuffer* buffer = bufferList[i];
-            if (buffer->isEmpty()) {
-                if (buffer->getShouldDelete()) {
-                    std::unique_lock<std::mutex> lock(bufferListMutex);
-                    delete buffer;
-                    bufferList.erase(bufferList.begin() + i);
-                    --size;
-                }
-            }
-            else {
-                processingBufferID = i;
-                return processingBufferID;
-            }
+
+    void LoggerRuntime::findNextBufferToLog() noexcept {
+        std::vector<LogBuffer*> newBufferList{};
+        newBufferList.reserve(bufferList.size());
+        for (auto ite = bufferList.begin(); ite != bufferList.end(); ++ite) {
+            auto buffer = *ite;
+            if (!(buffer->isEmpty() && buffer->getShouldDelete()))
+                newBufferList.push_back(buffer);
+        }
+        bufferList.swap(newBufferList);
+
+        const size_t size = bufferList.size();
+        for (size_t i = 0; i < size; ++i) {
+            processingBufferID = static_cast<int>((processingBufferID + 1) % size);
+            auto* buffer = bufferList[processingBufferID];
+            if (!buffer->isEmpty())
+                return;
         }
         processingBufferID = -1;
-        return processingBufferID;
     }
 }
