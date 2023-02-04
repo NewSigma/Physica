@@ -116,6 +116,11 @@ namespace Physica::Utils {
         assert(cyclesPerSec > 0);
         return toNanoseconds(cycles, cyclesPerSec) / 1000;
     }
+
+    uint64_t Cycler::toMillisecond(uint64_t cycles, double cyclesPerSec) {
+        assert(cyclesPerSec > 0);
+        return toNanoseconds(cycles, cyclesPerSec) / 1000000;
+    }
     /*!
      * Given an elapsed time measured in cycles, return a floating-point number
      * giving the corresponding time in seconds.

@@ -17,13 +17,23 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
+#include <sys/time.h>
 #include "Physica/Logger/LoggerTimer.h"
 
 namespace Physica::Logger {
-    LoggerTimer::LoggerTimer() : startCycle(Utils::Cycler::now()), startTime(std::time(nullptr)) {}
+    LoggerTimer::LoggerTimer() {
+        gettimeofday(&startTime, nullptr);
+        startCycle = Utils::Cycler::now();
+    }
 
-    time_t LoggerTimer::toTime(uint64_t cycle) const {
+    timeval LoggerTimer::toTime(uint64_t cycle) const {
         assert(cycle > startCycle);
-        return startTime + Utils::Cycler::toSeconds(cycle - startCycle);
+        const uint64_t delta = cycle - startCycle;
+        const uint64_t us = Utils::Cycler::toMicroseconds(delta) + startTime.tv_usec;
+        const uint64_t s = us / 1000000;
+        timeval result = startTime;
+        result.tv_sec += s;
+        result.tv_usec = us - 1000000 * s;
+        return result;
     }
 }

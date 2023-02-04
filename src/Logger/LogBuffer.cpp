@@ -36,14 +36,16 @@ namespace Physica::Logger {
             const LoggerTimer& timer = runtime.getTimer();
             uint64_t cycle;
             read(&cycle);
-            time_t now = timer.toTime(cycle);
-            auto localTime = std::localtime(&now);
+            const timeval t = timer.toTime(cycle);
+            auto localTime = std::localtime(&t.tv_sec);
             logString << '['
                       << localTime->tm_hour
                       << ':'
                       << localTime->tm_min
                       << ':'
-                      << localTime->tm_sec;
+                      << localTime->tm_sec
+                      << ':'
+                      << (t.tv_usec / 1000);
         }
         //Handle file, line and severity.
         logString << "] ["

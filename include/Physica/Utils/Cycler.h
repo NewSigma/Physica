@@ -109,6 +109,7 @@ namespace Physica::Utils {
 
         static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
         static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
+        static uint64_t toMillisecond(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
         static double toSeconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
         static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = localCyclesPerSec);
         static uint64_t fromSeconds(double seconds, double cyclesPerSec = localCyclesPerSec);

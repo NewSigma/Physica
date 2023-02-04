@@ -27,16 +27,16 @@ namespace Physica::Logger {
      * This class handle conversion between cycle at initialize and Unix time.
      */
     class LoggerTimer {
+        timeval startTime;
         uint64_t startCycle;
-        time_t startTime;
     public:
         LoggerTimer();
         ~LoggerTimer() = default;
         /* Operations */
-        [[nodiscard]] time_t now() const { return toTime(Utils::Cycler::now()); }
-        [[nodiscard]] time_t toTime(uint64_t cycle) const;
+        [[nodiscard]] timeval now() const { return toTime(Utils::Cycler::now()); }
+        [[nodiscard]] timeval toTime(uint64_t cycle) const;
         /* Getters */
+        [[nodiscard]] timeval getStartTime() const noexcept { return startTime; }
         [[nodiscard]] uint64_t getStartCycle() const noexcept { return startCycle; }
-        [[nodiscard]] time_t getStartTime() const noexcept { return startTime; }
     };
 }
