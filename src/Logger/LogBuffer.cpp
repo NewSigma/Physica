@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -81,6 +81,7 @@ namespace Physica::Logger {
                             read(p++);
                         str[strLength] = '\0';
                         logString << str;
+                        delete[] str;
                         break;
                     }
                     case 'd':
@@ -93,7 +94,13 @@ namespace Physica::Logger {
                     case 'x':
                     case 'X':
                     case 'u':
+                        printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
+                        exit(EXIT_FAILURE);
                     case 'f':
+                        float f;
+                        read(&f);
+                        logString << f;
+                        break;
                     case 'F':
                     case 'a':
                     case 'A':
@@ -107,7 +114,7 @@ namespace Physica::Logger {
                         logString << p;
                         break;
                     default:
-                        //The format should have been checked be format analyzer.
+                        //The format should have been checked by the format analyzer.
                         printf("[%s:%d|Fatal]: The code should not execute this sentence, please check your code."
                                 , __FILENAME__, __LINE__);
                         exit(EXIT_FAILURE);
