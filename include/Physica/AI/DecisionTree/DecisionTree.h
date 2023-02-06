@@ -44,7 +44,7 @@ namespace Physica::AI {
             Utils::Array<bool> isFeatureContinuous;
         };
 
-        using LossFunctor = ScalarType (*)(const Dataset&, const std::forward_list<size_t>&);
+        using LossFunctor = ScalarType (*)(const Dataset&, const Utils::Array<size_t>&);
     private:
         enum NodeType {
             Regression,
@@ -90,8 +90,8 @@ namespace Physica::AI {
                                   std::forward_list<size_t> availableFeature);
         static ScalarType findCommonLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
         static ScalarType makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
-        static ScalarType giniIndex(const Dataset& dataset, const std::forward_list<size_t>& availableSample);
-        static ScalarType mse(const Dataset& dataset, const std::forward_list<size_t>& availableSample);
+        static ScalarType giniIndex(const Dataset& dataset, const Utils::Array<size_t>& availableSample);
+        static ScalarType mse(const Dataset& dataset, const Utils::Array<size_t>& availableSample);
         static std::pair<size_t, ScalarType> selectOptimalFeature(const Dataset& dataset,
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,

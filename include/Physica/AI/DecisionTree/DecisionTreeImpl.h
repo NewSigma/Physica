@@ -209,7 +209,7 @@ namespace Physica::AI {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::giniIndex(const Dataset& dataset, const std::forward_list<size_t>& availableSample) {
+    ScalarType DecisionTree<ScalarType, Type>::giniIndex(const Dataset& dataset, const Utils::Array<size_t>& availableSample) {
         std::multiset<ScalarType> set{};
         for (size_t sample : availableSample)
             set.insert(dataset.labels[sample]);
@@ -224,7 +224,7 @@ namespace Physica::AI {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::mse(const Dataset& dataset, const std::forward_list<size_t>& availableSample) {
+    ScalarType DecisionTree<ScalarType, Type>::mse(const Dataset& dataset, const Utils::Array<size_t>& availableSample) {
         ScalarType sum = 0;
         ScalarType sumSquare = 0;
         size_t count = 0;
@@ -246,9 +246,14 @@ namespace Physica::AI {
             const std::forward_list<size_t>& availableFeature,
             LossFunctor functor) {
         assert(!availableFeature.empty());
+
+        const size_t numAvailableSample = std::distance(availableSample.begin(), availableSample.end());
         size_t optimalFeatureId = dataset.features.getColumn();
         ScalarType optimalSplitPoint = 0;
         ScalarType minLoss = std::numeric_limits<ScalarType>::max();
+        Utils::Array<size_t> list1{}, list2{};
+        list1.reserve(numAvailableSample);
+        list2.reserve(numAvailableSample);
         for (auto featureId : availableFeature) {
             VectorType featureVector{};
             {
@@ -264,7 +269,6 @@ namespace Physica::AI {
                 }
             }
 
-            std::forward_list<size_t> list1{}, list2{};
             ScalarType splitPoint = 0;
             ScalarType loss = std::numeric_limits<ScalarType>::max();
             if (dataset.isFeatureContinuous[featureId]) {
@@ -273,11 +277,11 @@ namespace Physica::AI {
                     size_t weight1 = 0;
                     for (auto sample : availableSample) {
                         if (dataset.features(sample, featureId) < midpoint) {
-                            list1.push_front(sample);
+                            list1.grow(sample);
                             weight1 += 1;
                         }
                         else
-                            list2.push_front(sample);
+                            list2.grow(sample);
                     }
 
                     const size_t weight2 = featureVector.getLength() - weight1;
@@ -295,11 +299,11 @@ namespace Physica::AI {
                     size_t weight1 = 0;
                     for (auto sample : availableSample) {
                         if (dataset.features(sample, featureId) == featureVector[i]) {
-                            list1.push_front(sample);
+                            list1.grow(sample);
                             weight1 += 1;
                         }
                         else
-                            list2.push_front(sample);
+                            list2.grow(sample);
                     }
 
                     const size_t weight2 = featureVector.getLength() - weight1;
