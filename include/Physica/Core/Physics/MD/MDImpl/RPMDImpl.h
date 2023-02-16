@@ -429,7 +429,10 @@ namespace Physica::Core {
             forceToBeadRepr(i);
         }
     }
-
+    /**
+     * Reference:
+     * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
+     */
     template<class ScalarType, class PosScalarType>
     template<class RandomGenerator>
     void RPMD<ScalarType, PosScalarType>::thermostatStep(RandomGenerator& gen, ScalarType deltaT) {

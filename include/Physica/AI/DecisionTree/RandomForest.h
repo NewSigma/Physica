@@ -31,6 +31,7 @@ namespace Physica::AI {
     class RandomForest {
         using TreeType = DecisionTree<ScalarType, Type>;
         using VectorType = typename TreeType::VectorType;
+        using MatrixType = typename TreeType::MatrixType;
     public:
         using Dataset = typename TreeType::Dataset;
     private:
@@ -52,6 +53,12 @@ namespace Physica::AI {
         template<class RandomGenerator>
         [[nodiscard]] static ScalarType makeFeatureImportance(
                 size_t featureId,
+                unsigned int numForest,
+                unsigned int numTree,
+                Dataset dataset,
+                RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] std::forward_list<size_t> selectImportantFeature(
                 unsigned int numForest,
                 unsigned int numTree,
                 Dataset dataset,
@@ -183,6 +190,44 @@ namespace Physica::AI {
             Core::toNextMean(mean, i, deltaError);
         }
         return mean;
+    }
+
+    template<class ScalarType, DecisionTreeType Type>
+    template<class RandomGenerator>
+    std::forward_list<size_t> RandomForest<ScalarType, Type>::selectImportantFeature(
+            unsigned int numForest,
+            unsigned int numTree,
+            Dataset dataset,
+            RandomGenerator& gen) {
+        std::forward_list<size_t> result{};
+        for (size_t i = 0; i < dataset.isFeatureContinuous.getLength(); ++i)
+            result.push_front(i);
+        
+        const size_t numSample = dataset.labels.getLength();
+        while (true) {
+            const size_t numFeature = std::distance(result.begin(), result.end());
+            MatrixType features(numSample, numFeature);
+            Utils::Array<bool> isFeatureContinuous(numFeature);
+            {
+                size_t index = 0;
+                for (auto ite = result.begin(); ite != result.end(); ++ite) {
+                    features.col(index) = dataset.features.col(*ite).asVector();
+                    isFeatureContinuous[index] = dataset.isFeatureContinuous[*ite];
+                }
+            }
+            auto importance = VectorType(numFeature * 2);
+            for (size_t i = 0; i < importance.getLength(); ++i)
+                importance[i] = makeFeatureImportance(i, numForest, numTree, {features, dataset.labels, isFeatureContinuous}, gen);
+            
+            const auto shadow_importance = importance.tail(numFeature);
+            const ScalarType upper_bound = mean(shadow_importance) + deviation(shadow_importance);
+            auto ite = result.before_begin();
+            for (size_t i = numFeature - 1; i < numFeature; --i, ++ite) {
+                if (importance[i] < upper_bound)
+                    result.erase_after(ite);
+            }
+        }
+        return result;
     }
 
     template<class ScalarType, DecisionTreeType Type>
