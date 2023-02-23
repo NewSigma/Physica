@@ -26,7 +26,7 @@
 using namespace torch::data::datasets;
 using namespace Physica::Core;
 using namespace Physica::AI;
-constexpr size_t numFeature = 175;
+constexpr size_t numFeature = 101;
 
 struct NetOptions;
 class Net;
@@ -128,7 +128,7 @@ public:
         return x;
     }
 
-    void train(const RegressionDataset& dataset) {
+    void trainOn(const RegressionDataset& dataset) {
         if (fc1.is_empty())
             init();
         torch::data::DataLoaderOptions loader_option{};
@@ -157,7 +157,9 @@ public:
     }
 
     double loss(const torch::Tensor& features, const torch::Tensor& labels) {
-        const auto clipped_preds = forward(features).clamp(1);
+        if (is_training())
+            toEvalMode();
+        const auto clipped_preds = eval(features).clamp(1);
         const auto rmse = torch::mse_loss(clipped_preds.log(), labels.log()).sqrt();
         return rmse.item().to<double>();
     }
@@ -182,20 +184,25 @@ TensorDataset readTestData() {
 
 int main() {
     Net net(numFeature, 1);
+    auto& options = net.active_params;
+    options.numEpoch = 100;
+    options.lr = 0.003;
+    options.layer_dim1 = 128;
+    options.layer_dim2 = 128;
+    options.gamma = 0.99;
+    options.step = 500;
     KFold kFold(readTrainData(), 5);
 
-    std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
-    std::mt19937 gen(seed);
-    Physica::Utils::Random::rdrand(seed);
+    std::mt19937::result_type seed = 15283801376691677053UL;
+    //Physica::Utils::Random::rdrand(seed);
     torch::manual_seed(seed);
 
-    RandomSearch<Net> searcher{};
-    searcher.search(10, 6, net, kFold, gen);
-    net.active_params = searcher.getParams();
+    kFold.validate(net);
+    std::cout << kFold.getTrainLoss() << ' ' << kFold.getValidLoss() << std::endl;
+    return 0;
 
     net.train(readTrainData());
-    auto y = net.forward(readTestData().tensor);
+    auto y = net.eval(readTestData().tensor);
     std::ofstream fout("submission");
     fout << "Id,SalePrice\n";
     for (size_t i = 0; i < static_cast<size_t>(y.size(0)); ++i) {

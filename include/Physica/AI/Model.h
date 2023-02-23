@@ -38,11 +38,25 @@ namespace Physica::AI {
     public:
         /* Operations */
         void init() { this->getDerived().init(); }
-        void train(const DataSet& data) { this->getDerived().train(data); }
+        void trainOn(const DataSet& data) { this->getDerived().trainOn(data); }
+        void train(const DataSet& data) {
+            if (!is_training())
+                toTrainMode();
+            trainOn(data);
+        }
+        void toTrainMode() { Base::train(true); }
+        void toEvalMode() { Base::train(false); }
         /* Getters */
         torch::Tensor forward(torch::Tensor x) { return this->getDerived().forward(std::move(x)); }
         double loss(const torch::Tensor& features, const torch::Tensor& labels) { return this->getDerived().loss(features, labels); }
+        torch::Tensor eval(torch::Tensor x) {
+            assert(!is_training());
+            return this->getDerived().forward(std::move(x));
+        }
     protected:
         Model() = default;
+    private:
+        using Base::train;
+        using Base::eval;
     };
 }
