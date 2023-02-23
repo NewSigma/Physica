@@ -31,6 +31,8 @@ namespace Physica::AI {
         using ScalarType = Core::Scalar<Core::Double, false>;
     private:
         using Metrics = Core::DenseMatrix<ScalarType, Core::MatrixOption::Row | Core::MatrixOption::Vector, 2>;
+        using VectorType = Core::Vector<ScalarType>;
+        using LearningCurveType = std::pair<VectorType, VectorType>;
         
         Dataset set;
         unsigned int numFold;
@@ -42,10 +44,12 @@ namespace Physica::AI {
         /* Operations */
         template<class ModelType>
         void validate(Model<ModelType>& model);
+        template<class ModelType>
+        LearningCurveType makeLearningCurve(Model<ModelType>& model, unsigned int numEpoch);
         /* Getters */
         [[nodiscard]] size_t getNumData() const { return set.size().value(); }
-        [[nodiscard]] double getTrainLoss() const { return double(mean(metrics.row(0))); }
-        [[nodiscard]] double getValidLoss() const { return double(mean(metrics.row(1))); }
+        [[nodiscard]] ScalarType getTrainLoss() const { return mean(metrics.row(0)); }
+        [[nodiscard]] ScalarType getValidLoss() const { return mean(metrics.row(1)); }
     private:
         std::pair<Dataset, Dataset> cutDataset(unsigned int fold) const;
     };
@@ -68,6 +72,31 @@ namespace Physica::AI {
             const double valid_loss = model.loss(splitted_set.second.getFeatures(), splitted_set.second.getLabels());
             metrics(1, i) = ScalarType(valid_loss);
         }
+    }
+
+    template<class Dataset>
+    template<class ModelType>
+    typename KFold<Dataset>::LearningCurveType KFold<Dataset>::makeLearningCurve(Model<ModelType>& model, unsigned int numEpoch) {
+        static_assert(std::is_same<Dataset, typename ModelType::DataSet>::value, "Type of datasets do not match");
+        assert(numEpoch != 0);
+        permutation = torch::randperm(getNumData());
+        const unsigned int stepSize = model.active_params.numEpoch;
+        const unsigned int numStep = (numEpoch + stepSize - 1) / stepSize;
+        VectorType trainLoss(numStep, 0);
+        VectorType validLoss(numStep, 0);
+        for (size_t i = 0; i < numFold; ++i) {
+            const auto splitted_set = cutDataset(i);
+            model.init();
+            for (unsigned int step = 0; step < numStep; ++step) {
+                model.train(splitted_set.first);
+                
+                const ScalarType train_loss = model.loss(splitted_set.first.getFeatures(), splitted_set.first.getLabels());
+                toNextMean(trainLoss[step], i, train_loss);
+                const ScalarType valid_loss = model.loss(splitted_set.second.getFeatures(), splitted_set.second.getLabels());
+                toNextMean(validLoss[step], i, valid_loss);
+            }
+        }
+        return std::make_pair(std::move(trainLoss), std::move(validLoss));
     }
 
     template<class Dataset>

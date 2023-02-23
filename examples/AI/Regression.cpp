@@ -22,9 +22,13 @@
 #include "Physica/AI/Model.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Utils/Random.h"
+#include <QtWidgets/QApplication>
+#include <QtCharts/QValueAxis>
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace torch::data::datasets;
 using namespace Physica::Core;
+using namespace Physica::Gui;
 using namespace Physica::AI;
 constexpr size_t numFeature = 101;
 
@@ -182,31 +186,73 @@ TensorDataset readTestData() {
     return TensorDataset(toTensor(data));
 }
 
-int main() {
+int main(int argc, char** argv) {
     Net net(numFeature, 1);
     auto& options = net.active_params;
-    options.numEpoch = 100;
-    options.lr = 0.003;
-    options.layer_dim1 = 128;
-    options.layer_dim2 = 128;
     options.gamma = 0.99;
     options.step = 500;
+
+    options.numEpoch = 25;
+    options.lr = 0.002;
+    options.layer_dim1 = 32;
+    options.layer_dim2 = 64;
     KFold kFold(readTrainData(), 5);
 
-    std::mt19937::result_type seed = 15283801376691677053UL;
-    //Physica::Utils::Random::rdrand(seed);
+    std::mt19937::result_type seed;
+    Physica::Utils::Random::rdrand(seed);
     torch::manual_seed(seed);
 
-    kFold.validate(net);
-    std::cout << kFold.getTrainLoss() << ' ' << kFold.getValidLoss() << std::endl;
-    return 0;
+    auto curve = kFold.makeLearningCurve(net, 500);
 
-    net.train(readTrainData());
-    auto y = net.eval(readTestData().tensor);
-    std::ofstream fout("submission");
-    fout << "Id,SalePrice\n";
-    for (size_t i = 0; i < static_cast<size_t>(y.size(0)); ++i) {
-        fout << i + 1461 << ',' << y[i].item().toDouble() << '\n';
+    QApplication app(argc, argv);
+    QFont font;
+    Plot* plot = new Plot();
+    auto& chart = *plot->chart();
+    chart.legend()->setVisible(false);
+    {
+        constexpr double minX = 0;
+        constexpr double maxX = 10;
+        constexpr double minY = 50;
+        constexpr double maxY = 120;
+        QValueAxis* axisX = new QValueAxis();
+        font = axisX->labelsFont();
+        font.setPointSize(15);
+        axisX->setTickAnchor(0);
+        axisX->setTickInterval(2);
+        //axisX->setTickType(QValueAxis::TicksDynamic);
+        axisX->setMinorGridLineVisible(false);
+        axisX->setLinePenColor(Qt::black);
+        axisX->setGridLineVisible(false);
+        axisX->setLabelsFont(font);
+        //axisX->setRange(minX, maxX);
+        axisX->setTitleFont(font);
+        QValueAxis* axisY = new QValueAxis();
+        axisY->setTickAnchor(0);
+        axisY->setTickInterval(10);
+        //axisY->setTickType(QValueAxis::TicksDynamic);
+        axisY->setMinorGridLineVisible(false);
+        axisY->setMinorTickCount(4);
+        axisY->setLinePenColor(Qt::black);
+        axisY->setGridLineVisible(false);
+        axisY->setMinorGridLineVisible(false);
+        axisY->setLabelsFont(font);
+        //axisY->setRange(minY, maxY);
+        axisY->setTitleFont(font);
+
+        chart.addAxis(axisX, Qt::AlignBottom);
+        chart.addAxis(axisY, Qt::AlignLeft);
+
+        {
+            auto& scatter = plot->line(curve.first);
+            scatter.attachAxis(axisX);
+            scatter.attachAxis(axisY);
+        }
+        {
+            auto& scatter = plot->line(curve.second);
+            scatter.attachAxis(axisX);
+            scatter.attachAxis(axisY);
+        }
     }
-    return 0;
+    plot->show();
+    return QApplication::exec();
 }
