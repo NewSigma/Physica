@@ -26,6 +26,7 @@
 using namespace torch::data::datasets;
 using namespace Physica::Core;
 using namespace Physica::AI;
+constexpr size_t numFeature = 175;
 
 struct NetOptions;
 class Net;
@@ -164,7 +165,7 @@ public:
 
 RegressionDataset readTrainData() {
     using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
-    MatrixType data(1460, 348);
+    MatrixType data(1460, numFeature + 1);
     std::ifstream fin("../../data/train_num.csv");
     fin >> data;
     return RegressionDataset(toTensor(data.leftCols(data.getColumn() - 1), at::kFloat),
@@ -173,14 +174,14 @@ RegressionDataset readTrainData() {
 
 TensorDataset readTestData() {
     using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
-    MatrixType data(1459, 347);
+    MatrixType data(1459, numFeature);
     std::ifstream fin("../../data/test_num.csv");
     fin >> data;
     return TensorDataset(toTensor(data));
 }
 
 int main() {
-    Net net(347, 1);
+    Net net(numFeature, 1);
     KFold kFold(readTrainData(), 5);
 
     std::mt19937::result_type seed;
