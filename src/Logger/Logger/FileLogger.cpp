@@ -36,7 +36,7 @@ namespace Physica::Logger {
     void FileLogger::log(LogBuffer& buffer) {
         const std::string msg = buffer.makeMsgString();
         const char* c_str = msg.c_str();
-        if (write(fd, c_str, strlen(c_str) + 1) == -1) {
+        if (write(fd, c_str, strlen(c_str)) == -1) {
             std::cerr << "[Error]: Failed to write to log file\n";
             exit(EXIT_FAILURE);
         }
