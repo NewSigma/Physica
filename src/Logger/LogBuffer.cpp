@@ -97,7 +97,7 @@ namespace Physica::Logger {
                         printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
                         exit(EXIT_FAILURE);
                     case 'f':
-                        float f;
+                        double f;
                         read(&f);
                         logString << f;
                         break;
