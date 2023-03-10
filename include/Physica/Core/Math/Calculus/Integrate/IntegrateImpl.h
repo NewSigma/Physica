@@ -142,6 +142,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t dim>
+    template<class Function, class RandomGenerator, class Executor>
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::parallel_solve(
+            Function func,
+            const Utils::Array<typename RandomGenerator::result_type>& seeds) const {
+        const size_t numGen = seeds.getLength();
+        Utils::Array<RandomGenerator> gens(numGen);
+        for (size_t i = 0; i < numGen; ++i)
+            gens[i] = RandomGenerator(seeds[i]);
+
+        Vector<ScalarType> results(numGen);
+        auto future = Executor::parallel_for([this, func, &gens, &results](unsigned int i) { results[i] = solve(func, gens[i]); }, numGen, numGen);
+        Executor::auto_wait(future);
+        return mean(results);
+    }
+
+    template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator>
     ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const {
         assert(numSequence > 0);
@@ -149,7 +165,7 @@ namespace Physica::Core {
         ScalarType variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
             toNextVariance(variance, mean, i, solve(func, generator));
-        deviation = sqrt(variance / numSequence);
+        deviation = sqrt(variance);
         return mean;
     }
 }

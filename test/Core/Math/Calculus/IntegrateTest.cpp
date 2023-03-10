@@ -59,7 +59,7 @@ int main() {
                                  , gen, deviation);
         }
         const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
-        if (!isGoodResult || abs(answer - result) > ScalarType(2) * deviation)
+        if (!isGoodResult || abs(answer - result) > deviation)
             return 1;
     }
     return 0;
