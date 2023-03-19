@@ -36,7 +36,7 @@ namespace Physica::Core {
         assert(0 < numContract && numContract <= numReplica);
 
         const size_t dof = getDOF();
-        phasePosX.resize(2 * dof, numReplica);
+        phaseMatrix.resize(2 * dof, numReplica);
         forceBuffer.resize(dof, numReplica);
         if (isContractEnabled()) {
             posContract.resize(dof, numContract);
@@ -44,19 +44,19 @@ namespace Physica::Core {
         }
         buffer.resize(2, fft.getKSpaceSize());
 
-        auto momentum = phasePosX.topRows(dof);
+        auto momentum = phaseMatrix.topRows(dof);
         momentum = ScalarType::Zero();
 
         /* Fill pos */ {
             size_t index = dof;
             for (auto elem : cell.getPos()) {
-                phasePosX(index, 0) = elem;
+                phaseMatrix(index, 0) = elem;
                 ++index;
             }
             for (size_t i = 1; i < getNumReplica(); ++i) {
-                auto phasePos = phasePosX.col(i);
-                auto pos = phasePos.tail(dof);
-                pos = phasePosX.col(0).tail(dof);
+                auto col = phaseMatrix.col(i);
+                auto pos = col.tail(dof);
+                pos = phaseMatrix.col(0).tail(dof);
             }
         }
         setTemperature(temperatureT_);
@@ -148,14 +148,14 @@ namespace Physica::Core {
             const ScalarType factor = sqrt(repBeta * mass);
             for (size_t j = 0; j < getNumReplica(); ++j) {
                 const ScalarType temp = factor * dist(gen);
-                phasePosX(i, j) = temp;
+                phaseMatrix(i, j) = temp;
                 driftMomentum[direction] += temp;
             }
         }
         driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
 
         for (size_t i = 0; i < dof; ++i) {
-            auto row = phasePosX.row(i);
+            auto row = phaseMatrix.row(i);
             row -= driftMomentum[i % 3];
         }
     }
@@ -167,12 +167,12 @@ namespace Physica::Core {
         for (size_t i = 0; i < dof; ++i) {
             const size_t direction = i % Dim;
             for (size_t j = 0; j < getNumReplica(); ++j)
-                driftMomentum[direction] += phasePosX(i, j);
+                driftMomentum[direction] += phaseMatrix(i, j);
         }
         driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
 
         for (size_t i = 0; i < dof; ++i) {
-            auto row = phasePosX.row(i);
+            auto row = phaseMatrix.row(i);
             row -= driftMomentum[i % 3];
         }
     }
@@ -183,7 +183,7 @@ namespace Physica::Core {
         assert(temperatureNow.isPositive());
         const size_t dof = getDOF();
         const ScalarType factor = sqrt(temperatureT / temperatureNow);
-        auto momentum = phasePosX.topRows(dof);
+        auto momentum = phaseMatrix.topRows(dof);
         momentum *= factor;
     }
     /**
@@ -200,7 +200,7 @@ namespace Physica::Core {
             const int integer = float(elem);
             const Vector<PosScalarType, 3> delta = PosScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
             for (size_t i = 0; i < 3; ++i) {
-                auto row = phasePosX.row(atom_start + i);
+                auto row = phaseMatrix.row(atom_start + i);
                 row -= delta[i];
             }
             ++index;
@@ -211,7 +211,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     typename RPMD<ScalarType, PosScalarType>::MDCellType RPMD<ScalarType, PosScalarType>::phaseToCell(size_t replica) const {
         PositionMatrix pos(getNumParticle(), 3);
-        auto phase = phasePosX.col(replica);
+        auto phase = phaseMatrix.col(replica);
         size_t index = getDOF();
         for (auto& elem : pos) {
             elem = PosScalarType(phase[index]);
@@ -246,7 +246,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         size_t index = dof;
         for (auto& elem : result) {
-            elem = PosScalarType(mean(phasePosX.row(index)));
+            elem = PosScalarType(mean(phaseMatrix.row(index)));
             ++index;
         }
         return result;
@@ -262,7 +262,7 @@ namespace Physica::Core {
         PositionMatrix result(getNumParticle(), 3, 0);
         size_t index = 0;
         for (auto& elem : result) {
-            elem = PosScalarType(mean(phasePosX.row(index)));
+            elem = PosScalarType(mean(phaseMatrix.row(index)));
             ++index;
         }
         return result;
@@ -273,7 +273,7 @@ namespace Physica::Core {
         PositionMatrix result(getNumParticle(), 3, 0);
         size_t index = 0;
         for (auto& elem : result) {
-            elem = PosScalarType(phasePosX(index, replica));
+            elem = PosScalarType(phaseMatrix(index, replica));
             ++index;
         }
         return result;
@@ -285,7 +285,7 @@ namespace Physica::Core {
         ScalarType classical_kinetic = 0;
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
-            auto p = phasePosX.row(i);
+            auto p = phaseMatrix.row(i);
             classical_kinetic += square(p.asVector()).sum() / (mass * 2);
         }
         return classical_kinetic;
@@ -303,7 +303,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     ScalarType RPMD<ScalarType, PosScalarType>::getClassicalElastic() const {
         const size_t dof = getDOF();
-        auto pos = phasePosX.bottomRows(dof);
+        auto pos = phaseMatrix.bottomRows(dof);
         ScalarType result = 0;
         for (size_t i = 0; i < dof; ++i) {
             const ScalarType mass = cell.getMass(i / Dim);
@@ -324,11 +324,11 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
-            averaged_pos[i] = mean(phasePosX.row(dof + i));
+            averaged_pos[i] = mean(phaseMatrix.row(dof + i));
 
         ScalarType kinetic = repBeta * dof;
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto phase = phasePosX.col(replica);
+            auto phase = phaseMatrix.col(replica);
             auto pos = phase.tail(dof);
             kinetic += (averaged_pos - pos) * forceBuffer.col(replica);
         }
@@ -363,11 +363,11 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     void RPMD<ScalarType, PosScalarType>::toNormalRepr(size_t posID) {
         assert(posID < getDOF());
-        fft.transform(phasePosX.row(posID));
+        fft.transform(phaseMatrix.row(posID));
         auto momentum = buffer.row(0);
         momentum = fft.getKSpace();
 
-        fft.transform(phasePosX.row(posID + getDOF()));
+        fft.transform(phaseMatrix.row(posID + getDOF()));
         auto pos = buffer.row(1);
         pos = fft.getKSpace();
     }
@@ -376,11 +376,11 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType>::toBeadRepr(size_t posID) {
         assert(posID < getDOF());
         fft.invTransform(buffer.row(0));
-        auto momentum = phasePosX.row(posID);
+        auto momentum = phaseMatrix.row(posID);
         momentum = fft.getRSpace();
 
         fft.invTransform(buffer.row(1));
-        auto pos = phasePosX.row(posID + getDOF());
+        auto pos = phaseMatrix.row(posID + getDOF());
         pos = fft.getRSpace();
     }
 
@@ -481,8 +481,8 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType>::forceStep(ScalarType deltaT) {
         const size_t dof = getDOF();
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto phasePos = phasePosX.col(replica);
-            auto momentum = phasePos.head(dof);
+            auto col = phaseMatrix.col(replica);
+            auto momentum = col.head(dof);
             momentum += forceBuffer.col(replica).asVector() * deltaT;
         }
     }

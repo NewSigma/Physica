@@ -39,7 +39,7 @@ bool testDriftMomentum(const RPMD<ScalarType, PosScalarType>& rpmd, double preci
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
-            sum += rpmd.getPhasePos().row(j).asVector().sum();
+            sum += rpmd.getPhaseMatrix().row(j).asVector().sum();
         if (!scalarNear(sum, ScalarType::Zero(), precision))
             return false;
     }

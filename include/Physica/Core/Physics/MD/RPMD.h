@@ -41,7 +41,7 @@ namespace Physica::Core {
     class RPMD final {
         using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
     public:
-        using PhasePosType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using PhaseMatrixType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -49,11 +49,11 @@ namespace Physica::Core {
     private:
         MDCellType cell;
         FFT<ScalarType, 1> fft;
-        PhasePosType phasePosX;
+        PhaseMatrixType phaseMatrix;
         ForceMatrix forceBuffer;
 
         FFT<PosScalarType, 1> fftContract;
-        PhasePosType posContract;
+        PhaseMatrixType posContract;
         ForceMatrix forceContract;
 
         BufferType buffer;
@@ -97,9 +97,9 @@ namespace Physica::Core {
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
-        [[nodiscard]] const PhasePosType& getPhasePos() const noexcept { return phasePosX; }
-        [[nodiscard]] PhasePosType& getPhasePos() noexcept { return phasePosX; }
-        [[nodiscard]] size_t getNumReplica() const noexcept { return phasePosX.getColumn(); }
+        [[nodiscard]] const PhaseMatrixType& getPhaseMatrix() const noexcept { return phaseMatrix; }
+        [[nodiscard]] PhaseMatrixType& getPhaseMatrix() noexcept { return phaseMatrix; }
+        [[nodiscard]] size_t getNumReplica() const noexcept { return phaseMatrix.getColumn(); }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
