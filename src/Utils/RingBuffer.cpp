@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -46,25 +46,16 @@ namespace Physica::Utils {
         ring.buffer = nullptr;
     }
 
-    RingBuffer& RingBuffer::operator=(const RingBuffer& ring) {
-        if(this != &ring) {
-            this->~RingBuffer();
-            size = ring.size;
-            buffer = new char[size];
-            bufferReader = ring.bufferReader;
-            bufferWriter = ring.bufferWriter;
-        }
+    RingBuffer& RingBuffer::operator=(RingBuffer ring) noexcept {
+        swap(ring);
         return *this;
     }
 
-    RingBuffer& RingBuffer::operator=(RingBuffer&& ring) noexcept {
-        this->~RingBuffer();
-        buffer = ring.buffer;
-        ring.buffer = nullptr;
-        size = ring.size;
-        bufferReader = ring.bufferReader;
-        bufferWriter = ring.bufferWriter;
-        return *this;
+    void RingBuffer::swap(RingBuffer& ring) noexcept {
+        std::swap(buffer, ring.buffer);
+        std::swap(size, ring.size);
+        std::swap(bufferReader, ring.bufferReader);
+        std::swap(bufferWriter, ring.bufferWriter);
     }
     /*!
      * Read data from src and write bytes bytes to the buffer.

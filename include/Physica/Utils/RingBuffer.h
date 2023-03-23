@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_RINGBUFFER_H
-#define PHYSICA_RINGBUFFER_H
+#pragma once
 
 #include <cstddef>
 
@@ -48,9 +47,9 @@ namespace Physica::Utils {
         RingBuffer(RingBuffer&& ring) noexcept;
         ~RingBuffer();
         /* Operators */
-        RingBuffer& operator=(const RingBuffer& ring);
-        RingBuffer& operator=(RingBuffer&& ring) noexcept;
+        RingBuffer& operator=(RingBuffer ring) noexcept;
         /* Operations */
+        void swap(RingBuffer& ring) noexcept;
         template<typename T>
         inline void write(T t);
 
@@ -99,5 +98,3 @@ namespace Physica::Utils {
         creadBytes(reinterpret_cast<char*>(t), sizeof(T), bias);
     }
 }
-
-#endif
