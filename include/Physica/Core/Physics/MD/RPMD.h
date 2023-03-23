@@ -44,6 +44,7 @@ namespace Physica::Core {
         using PhaseMatrixType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         constexpr static unsigned int Dim = MDCellType::Dim;
     private:
@@ -80,6 +81,8 @@ namespace Physica::Core {
         void nvt_step(RandomGenerator& gen, const ForceModel& force);
         template<class ForceModel, class Executor>
         void nve_step(const ForceModel& force);
+        template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
+        void npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& force);
         template<class RandomGenerator, class ForceModel, class Executor>
         void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force);
         template<class ForceModel, class Executor>
@@ -93,7 +96,9 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
         void checkParam() const;
         /* Getters */
-        [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
+        [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
+        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
+        [[nodiscard]] const typename MDCellType::InvLatticeMatrix& getInvLattice() const noexcept { return cell.getInvLattice(); }
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
@@ -120,6 +125,7 @@ namespace Physica::Core {
         template<class ForceModel, class Executor>
         [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
         [[nodiscard]] ScalarType calcTemperature() const;
+        [[nodiscard]] LatticeMatrix makeStress() const;
         /* Setters */
         void setTemperature(ScalarType temperature);
         void setThermostatTime(ScalarType time) { thermostatTime = time; }

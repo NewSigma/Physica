@@ -121,6 +121,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
+    void RPMD<ScalarType, PosScalarType>::npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& force) {
+        barostat.forceStep(*this, timeStep * 0.5);
+        barostat.dynamicStep(timeStep * 0.5);
+        thermostatStep(gen, timeStep);
+        barostat.dynamicStep(timeStep * 0.5);
+        updateForce<ForceModel, Executor>(force);
+        barostat.forceStep(*this, timeStep * 0.5);
+    }
+
+    template<class ScalarType, class PosScalarType>
     template<class RandomGenerator, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force) {
         uint64_t step = double(duration / timeStep) + 0.5;
@@ -350,6 +361,30 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     ScalarType RPMD<ScalarType, PosScalarType>::calcTemperature() const {
         return square(makeCentroidMomentum()).sum() * (1 / (3 * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename RPMD<ScalarType, PosScalarType>::LatticeMatrix RPMD<ScalarType, PosScalarType>::makeStress() const {
+        assert(getNumReplica() == 1);
+        const size_t dof = getDOF();
+        LatticeMatrix result(3, 3, 0);
+        for (size_t replica = 0; replica < 1; ++replica) {
+            const auto col = phaseMatrix.col(replica);
+            const auto momentum = col.head(dof);
+            const auto pos = col.tail(dof);
+            const auto force = md.getForce().col(replica);
+            for (size_t i = 0; i < getNumParticle(); ++i) {
+                const size_t from = i * getDim();
+                const size_t to = from + getDim();
+                const ScalarType factor = reciprocal(getMassVec()[i]);
+                const auto momentum1 = momentum.segment(from, to);
+                const auto pos1 = pos.segment(from, to);
+                const auto force1 = force.segment(from, to);
+                result += (factor * momentum1) * momentum1.transpose() + force1 * pos1.transpose();
+            }
+        }
+        result *= reciprocal(getVolume());
+        return result;
     }
 
     template<class ScalarType, class PosScalarType>

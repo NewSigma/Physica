@@ -29,11 +29,11 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
         using Base = PeriodicCell<PosScalarType, 3>;
         using typename Base::LatticeMatrix;
+        using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Type;
         using MassVector = Vector<ScalarType>;
     private:
-        using typename Base::InvLatticeMatrix;
         MassVector massVec;
         InvLatticeMatrix invLattice;
     public:
@@ -48,6 +48,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
+        [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
     protected:
         void toDirect() { Base::toDirect(invLattice); }

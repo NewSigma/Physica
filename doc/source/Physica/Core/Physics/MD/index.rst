@@ -4,5 +4,5 @@ Core
 .. toctree::
    :maxdepth: 1
 
-   PIPhonon
-   RHFSolver
+   ParrinelloRahman
+   RPMD
