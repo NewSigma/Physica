@@ -27,7 +27,6 @@ namespace Physica::Gui {
      * DensityPlot provide a approach to show 2D data.
      */
     class DensityPlot : public QWidget {
-        Q_OBJECT
     private:
         static constexpr int GlobalAlpha = 200;
 

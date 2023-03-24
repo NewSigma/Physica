@@ -372,7 +372,7 @@ namespace Physica::Core {
             const auto col = phaseMatrix.col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
-            const auto force = md.getForce().col(replica);
+            const auto force = getForce().col(replica);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * getDim();
                 const size_t to = from + getDim();

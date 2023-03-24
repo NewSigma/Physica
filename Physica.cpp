@@ -18,7 +18,6 @@
  */
 #include <QApplication>
 #include "Physica/Core/PhysicaInit.h"
-#include "Physica/Gui/PhysicaMain.h"
 
 int main(int argc, char** argv) {
     initPhysica();
@@ -28,8 +27,6 @@ int main(int argc, char** argv) {
     QApplication::setOrganizationName("NewSigma@163.com");
 
     QApplication app(argc, argv);
-
-    (new Physica::Gui::PhysicaMain())->show();
 
     return QApplication::exec();
 }
