@@ -35,6 +35,7 @@ namespace Physica::Logger {
         x,
         X,
         u,
+        U,
         f,
         F,
         a,

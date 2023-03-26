@@ -98,6 +98,9 @@ namespace Physica::Logger {
                         case 'u':
                             result = u;
                             break;
+                        case 'U':
+                            result = U;
+                            break;
                         case 'f':
                             result = f;
                             break;

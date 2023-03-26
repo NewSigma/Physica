@@ -67,11 +67,12 @@ namespace Physica::Logger {
                     case '%':
                         logString << '%';
                         break;
-                    case 'c':
+                    case 'c': {
                         char temp;
                         read(&temp);
                         logString << static_cast<char>(temp);
                         break;
+                    }
                     case 's': {
                         size_t strLength;
                         read(&strLength);
@@ -93,9 +94,20 @@ namespace Physica::Logger {
                     case 'o':
                     case 'x':
                     case 'X':
-                    case 'u':
                         printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
                         exit(EXIT_FAILURE);
+                    case 'u': {
+                        unsigned int temp;
+                        read(&temp);
+                        logString << temp;
+                        break;
+                    }
+                    case 'U': {
+                        unsigned long temp;
+                        read(&temp);
+                        logString << temp;
+                        break;
+                    }
                     case 'f':
                         double f;
                         read(&f);
