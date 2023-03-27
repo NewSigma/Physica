@@ -58,14 +58,4 @@ namespace Physica::Logger {
     inline void AbstractLogger::setGlobalLevel(LogLevel level) noexcept {
         globalLevel = level == LogLevel::Global ? LogLevel::Off : level;
     }
-    /*!
-     * No-Op function that triggers the GNU preprocessor's format checker for
-     * printf format strings and argument parameters.
-     *
-     * \param format
-     *      printf format string
-     * \param ...
-     *      format parameters
-     */
-    inline void __attribute__ ((format (printf, 1, 2))) checkFormat(const char*, ...) {}
 }

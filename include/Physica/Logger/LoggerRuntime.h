@@ -108,9 +108,6 @@ namespace Physica::Logger {
         AbstractLogger& logger = LoggerRuntime::getInstance().getLogger(loggerID);                  \
         LogLevel level = logger.getCurrentLevel();                                                  \
         if(level >= LogLevel::severity) {                                                           \
-            if(false)                                                                               \
-                Physica::Logger::checkFormat(format, ##__VA_ARGS__);                                \
-                                                                                                    \
             constexpr size_t argCount = getArgCount(format);                                        \
             static constexpr std::array<ArgType, argCount> argArray                                 \
                                                         = analyzeFormatString<argCount>(format);    \

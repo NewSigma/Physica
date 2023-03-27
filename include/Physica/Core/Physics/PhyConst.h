@@ -68,9 +68,11 @@ namespace Physica::Core {
         constexpr static double hartreeInEv = 27.211386245988;
         constexpr static double rydbergInEv = hartreeInEv * 0.5;
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
-        constexpr static double jouleInHartree = 1 / (PhyConst<SI>::unitCharge * hartreeInEv);
+        constexpr static double hartreeInJoule = PhyConst<SI>::unitCharge * hartreeInEv;
+        constexpr static double jouleInHartree = 1 / hartreeInJoule;
         constexpr static double timeInSecond = PhyConst<SI>::reducedPlanck * jouleInHartree;
         constexpr static double temperatureInK = 1 / (PhyConst<SI>::boltzmannK * jouleInHartree);
+        constexpr static double pressInGPa = hartreeInJoule / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius) * 1E-9;
     public:
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
@@ -91,6 +93,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double secondToTime(double second) { return second / timeInSecond; }
         [[nodiscard]] constexpr static double temperatureToK(double atomic_tem) { return atomic_tem * temperatureInK; }
         [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
+        [[nodiscard]] constexpr static double pressToGPa(double atomic_press) { return atomic_press * pressInGPa; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electroMass; }
     };
 }
