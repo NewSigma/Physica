@@ -23,11 +23,10 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType>
-    class MDCell : public PeriodicCell<PosScalarType, 3> {
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    class MDCell : public PeriodicCell<PosScalarType, Dim> {
     public:
-        constexpr static unsigned int Dim = 3;
-        using Base = PeriodicCell<PosScalarType, 3>;
+        using Base = PeriodicCell<PosScalarType, Dim>;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
@@ -58,8 +57,8 @@ namespace Physica::Core {
         using Base::getType;
     };
 
-    template<class ScalarType, class PosScalarType>
-    MDCell<ScalarType, PosScalarType>::MDCell(CrystalCell cell) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    MDCell<ScalarType, PosScalarType, Dim>::MDCell(CrystalCell cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
@@ -73,29 +72,29 @@ namespace Physica::Core {
         normalize();
     }
 
-    template<class ScalarType, class PosScalarType>
-    MDCell<ScalarType, PosScalarType>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    MDCell<ScalarType, PosScalarType, Dim>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
             : Base(std::move(lattice), std::move(pos), Base::Type::Cartesian)
             , massVec(std::move(massVec_)) {
         invLattice = Base::makeInvLattice();
         normalize();
     }
 
-    template<class ScalarType, class PosScalarType>
-    void MDCell<ScalarType, PosScalarType>::scale(PosScalarType factor) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void MDCell<ScalarType, PosScalarType, Dim>::scale(PosScalarType factor) {
         Base::scale_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }
 
-    template<class ScalarType, class PosScalarType>
-    void MDCell<ScalarType, PosScalarType>::normalize() {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void MDCell<ScalarType, PosScalarType, Dim>::normalize() {
         Base::toDirect(invLattice);
         Base::normalize_direct();
         Base::toCartesian();
     }
 
-    template<class ScalarType, class PosScalarType>
-    void MDCell<ScalarType, PosScalarType>::normalizePos(PositionMatrix& target) const {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void MDCell<ScalarType, PosScalarType, Dim>::normalizePos(PositionMatrix& target) const {
         Base::toDirect(target, invLattice);
         for (auto& elem : target) {
             elem -= floor(elem);
@@ -104,8 +103,8 @@ namespace Physica::Core {
         Base::toCartesian(target, Base::getLattice());
     }
 
-    template<class ScalarType, class PosScalarType>
-    void MDCell<ScalarType, PosScalarType>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void MDCell<ScalarType, PosScalarType, Dim>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
         toDirect();
         Base::unitToSuper_direct(x, y, z);
         Base::toCartesian();
