@@ -31,11 +31,12 @@ namespace Physica::Core {
         using LatticeMatrix = typename MDType::MDCellType::LatticeMatrix;
 
         ScalarType latticeMass;
-        ScalarType latticeMomentum;
+        LatticeMatrix latticeMomentum;
         LatticeMatrix targetStress;
         
         LatticeMatrix buffer;
     public:
+        ParrinelloRahman() = default;
         ParrinelloRahman(ScalarType latticeMass_, LatticeMatrix targetStress_);
         ParrinelloRahman(const ParrinelloRahman&) = default;
         ParrinelloRahman(ParrinelloRahman&&) noexcept = default;
@@ -45,13 +46,19 @@ namespace Physica::Core {
         /* Operations */
         void forceStep(MDType& md, ScalarType deltaT);
         void swap(ParrinelloRahman& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] ScalarType getLatticeMass() const noexcept { return latticeMass; }
+        [[nodiscard]] const LatticeMatrix& getLatticeMomentum() const noexcept { return latticeMomentum; }
     };
 
     template<class ScalarType, class PosScalarType>
     ParrinelloRahman<ScalarType, PosScalarType>::ParrinelloRahman(ScalarType latticeMass_, LatticeMatrix targetStress_)
             : latticeMass(latticeMass_)
             , latticeMomentum(3, 3, 0)
-            , targetStress(std::move(targetStress_)) {}
+            , targetStress(std::move(targetStress_)) {
+        buffer = targetStress.transpose();
+        targetStress = (targetStress + buffer) * ScalarType(0.5);
+    }
 
     template<class ScalarType, class PosScalarType>
     ParrinelloRahman<ScalarType, PosScalarType>&
@@ -63,32 +70,32 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     void ParrinelloRahman<ScalarType, PosScalarType>::forceStep(MDType& md, ScalarType deltaT) {
         assert(md.getNumReplica() == 1);
-        constexpr unsigned int dim = md.getDim();
+        constexpr unsigned int Dim = md.getDim();
         /* Make lattice correction matrix */ {
-            const ScalarType factor = reciprocal(ScalarType(-2 * M_PI) * latticeMass);
-            buffer = md.getInvLattice() * latticeMomentum;
-            const LatticeMatrix temp = buffer.transpose();
-            buffer += temp;
-
-            for (unsigned int i = 0; i < dim; ++i)
-                buffer(i, i) += ScalarType(1);
+            const ScalarType factor = reciprocal(ScalarType(2 * M_PI) * latticeMass);
+            buffer = md.getInvLattice().transpose() * latticeMomentum * factor;
         }
-        const size_t numReplica = md.getReplica();
+        const size_t numReplica = md.getNumReplica();
         const size_t dof = md.getDOF();
         const size_t numParticle = md.getNumParticle();
         auto& phaseMatrix = md.getPhaseMatrix();
-        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+        for (size_t replica = 0; replica < numReplica; ++replica) {
             auto col = phaseMatrix.col(replica);
             auto momentum = col.head(dof);
             auto force = md.getForce().col(replica);
             for (size_t i = 0; i < numParticle; ++i) {
-                auto segment = momentum.segment(i * dim, (i + 1) * dim);
-                const Vector<ScalarType, 3> temp = (force + buffer * segment)  * deltaT;
-                segment = temp;
+                const size_t from = i * Dim;
+                const size_t to = from + Dim;
+                auto p = momentum.segment(from, to);
+                const Vector<ScalarType, 3> deltaP = (force.segment(from, to) - buffer * p)  * deltaT;
+                p += deltaP;
             }
         }
 
-        const ScalarType targetPress = targetStress.diag().sum() * ScalarType(1.0 / dim);
+        const ScalarType factor = deltaT / ScalarType(2 * M_PI);
+        const LatticeMatrix stress = md.makeStress();
+        buffer = (stress + stress.transpose()) * ScalarType(0.5);
+        latticeMomentum += factor * (md.getInvLattice().transpose() * (buffer - targetStress)).compute();
     }
 
     template<class ScalarType, class PosScalarType>

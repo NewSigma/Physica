@@ -50,12 +50,15 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
+        /* Setters */
+        void setLattice(LatticeMatrix new_lattice);
     protected:
         void toDirect() { Base::toDirect(invLattice); }
     private:
         using Base::normalize;
         using Base::scale;
         using Base::getType;
+        using Base::setLattice;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -109,5 +112,11 @@ namespace Physica::Core {
         toDirect();
         Base::unitToSuper_direct(x, y, z);
         Base::toCartesian();
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void MDCell<ScalarType, PosScalarType>::setLattice(LatticeMatrix new_lattice) {
+        Base::setLattice(new_lattice);
+        invLattice = Base::makeInvLattice();
     }
 }

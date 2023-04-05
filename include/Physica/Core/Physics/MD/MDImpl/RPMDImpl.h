@@ -102,41 +102,41 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     template<class RandomGenerator, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType>::nvt_step(RandomGenerator& gen, const ForceModel& force) {
+    void RPMD<ScalarType, PosScalarType>::nvt_step(RandomGenerator& gen, const ForceModel& model) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep * 0.5);
         thermostatStep(gen, timeStep);
         dynamicStep(timeStep * 0.5);
-        updateForce<ForceModel, Executor>(force);
+        updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType>
     template<class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType>::nve_step(const ForceModel& force) {
+    void RPMD<ScalarType, PosScalarType>::nve_step(const ForceModel& model) {
         forceStep(timeStep * 0.5);
         dynamicStep(timeStep);
-        updateForce<ForceModel, Executor>(force);
+        updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType>
     template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType>::npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& force) {
+    void RPMD<ScalarType, PosScalarType>::npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& model) {
         barostat.forceStep(*this, timeStep * 0.5);
-        barostat.dynamicStep(timeStep * 0.5);
+        npt_dynamicStep(barostat, timeStep * 0.5);
         thermostatStep(gen, timeStep);
-        barostat.dynamicStep(timeStep * 0.5);
-        updateForce<ForceModel, Executor>(force);
+        npt_dynamicStep(barostat, timeStep * 0.5);
+        updateForce<ForceModel, Executor>(model);
         barostat.forceStep(*this, timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType>
     template<class RandomGenerator, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force) {
+    void RPMD<ScalarType, PosScalarType>::nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& model) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<RandomGenerator, ForceModel, Executor>(gen, force);
+            nvt_step<RandomGenerator, ForceModel, Executor>(gen, model);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -145,6 +145,18 @@ namespace Physica::Core {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<ForceModel, Executor>(force);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
+    void RPMD<ScalarType, PosScalarType>::npt_step_for(
+            ScalarType duration,
+            RandomGenerator& gen,
+            Barostat& barostat,
+            const ForceModel& model) {
+        uint64_t step = double(duration / timeStep) + 0.5;
+        for (uint64_t _ = 0; _ < step; ++_)
+            npt_step<RandomGenerator, Barostat, ForceModel, Executor>(gen, barostat, model);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -362,17 +374,22 @@ namespace Physica::Core {
     ScalarType RPMD<ScalarType, PosScalarType>::calcTemperature() const {
         return square(makeCentroidMomentum()).sum() * (1 / (3 * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
     }
-
+    /**
+     * The function has size effect, extend the cell shall ease the problem, refer to [1].
+     * 
+     * Reference:
+     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
+     */
     template<class ScalarType, class PosScalarType>
     typename RPMD<ScalarType, PosScalarType>::LatticeMatrix RPMD<ScalarType, PosScalarType>::makeStress() const {
         assert(getNumReplica() == 1);
         const size_t dof = getDOF();
-        LatticeMatrix result(3, 3, 0);
+        LatticeMatrix stress(3, 3, 0);
         for (size_t replica = 0; replica < 1; ++replica) {
             const auto col = phaseMatrix.col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
-            const auto force = getForce().col(replica);
+            const auto force = forceBuffer.col(replica);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * getDim();
                 const size_t to = from + getDim();
@@ -380,11 +397,11 @@ namespace Physica::Core {
                 const auto momentum1 = momentum.segment(from, to);
                 const auto pos1 = pos.segment(from, to);
                 const auto force1 = force.segment(from, to);
-                result += (factor * momentum1) * momentum1.transpose() + force1 * pos1.transpose();
+                stress += (factor * momentum1) * momentum1.transpose() - pos1 * force1.transpose();
             }
         }
-        result *= reciprocal(getVolume());
-        return result;
+        stress *= reciprocal(getVolume());
+        return stress;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -552,6 +569,14 @@ namespace Physica::Core {
             }
             toBeadRepr(i);
         }
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Barostat>
+    void RPMD<ScalarType, PosScalarType>::npt_dynamicStep(Barostat& barostat, ScalarType deltaT) {
+        dynamicStep(deltaT);
+        LatticeMatrix lattice = getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
+        cell.setLattice(std::move(lattice));
     }
 
     template<class ScalarType, class PosScalarType>

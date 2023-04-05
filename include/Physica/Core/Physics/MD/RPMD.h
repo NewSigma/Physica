@@ -78,15 +78,17 @@ namespace Physica::Core {
         template<class ForceModel, class Executor>
         void updateForce(const ForceModel& model);
         template<class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step(RandomGenerator& gen, const ForceModel& force);
+        void nvt_step(RandomGenerator& gen, const ForceModel& model);
         template<class ForceModel, class Executor>
-        void nve_step(const ForceModel& force);
+        void nve_step(const ForceModel& model);
         template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
-        void npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& force);
+        void npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
         template<class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& force);
+        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& model);
         template<class ForceModel, class Executor>
-        void nve_step_for(ScalarType duration, const ForceModel& force);
+        void nve_step_for(ScalarType duration, const ForceModel& model);
+        template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
+        void npt_step_for(ScalarType duration, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
         void removeDrift();
@@ -109,6 +111,8 @@ namespace Physica::Core {
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
+        [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
+
         [[nodiscard]] PositionMatrix makeCentroidPos() const;
         [[nodiscard]] MDCellType makeAverageCell() const;
         [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
@@ -142,6 +146,8 @@ namespace Physica::Core {
         void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         void forceStep(ScalarType deltaT);
         void dynamicStep(ScalarType deltaT);
+        template<class Barostat>
+        void npt_dynamicStep(Barostat& barostat, ScalarType deltaT);
         bool checkCentroid() const;
     };
 }
