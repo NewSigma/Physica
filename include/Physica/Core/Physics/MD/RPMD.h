@@ -37,16 +37,15 @@ namespace Physica::Core {
      * 
      * TODO: replace several ScalarType to PosScalarType
      */
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
     class RPMD final {
         using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
     public:
         using PhaseMatrixType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        constexpr static unsigned int Dim = MDCellType::Dim;
     private:
         MDCellType cell;
         FFT<ScalarType, 1> fft;

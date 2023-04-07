@@ -65,12 +65,12 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType>
     class Q_TIP4P final {
+        constexpr static unsigned int Dim = 3;
         using This = Q_TIP4P<ScalarType, PosScalarType>;
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
         using LJModelType = PairModel<ScalarType, PosScalarType, decltype(&Internal::Traits<This>::lennardJonesPot)>;
-        constexpr static unsigned int Dim = MDCellType::Dim;
     public:
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double charge = 1.1128;

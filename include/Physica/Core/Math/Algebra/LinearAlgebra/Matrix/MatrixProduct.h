@@ -163,7 +163,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType1, class MatrixType2>
-    inline typename std::enable_if<MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1, MatrixProduct<MatrixType1, MatrixType2>>::type
+    inline typename std::enable_if<(MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1) ||
+                                   (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
+                                   MatrixProduct<MatrixType1, MatrixType2>>::type
     operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
@@ -184,6 +186,15 @@ namespace Physica::Core {
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
         assert(mat.getColumn() == vec.getLength());
         return MatrixVectorProduct(mat.getDerived(), vec.getDerived());
+    }
+
+    template<class MatrixType, class VectorType>
+    inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColumnAtCompile == 1,
+                                   typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
+                                                                               typename VectorType::ScalarType>::Type>::type
+    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
+        assert(mat.getColumn() == vec.getLength());
+        return mat.row(0) * vec;
     }
 }
 
