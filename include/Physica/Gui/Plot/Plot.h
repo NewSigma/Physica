@@ -50,7 +50,7 @@ namespace Physica::Gui {
         template<class VectorType1, class VectorType2>
         QScatterSeries& scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
         template<class VectorType>
-        QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool dencity = false);
+        QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool density = false);
         template<class VectorType>
         QAreaSeries& area(const Core::LValueVector<VectorType>& x,
                           const Core::LValueVector<VectorType>& lower,
@@ -124,7 +124,7 @@ namespace Physica::Gui {
     }
 
     template<class VectorType>
-    QAreaSeries& Plot::hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool dencity) {
+    QAreaSeries& Plot::hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool density) {
         using ScalarType = typename VectorType::ScalarType;
         
         double binWidth, min;
@@ -140,7 +140,7 @@ namespace Physica::Gui {
             }
             assert(maximum >= minimum);
             min = double(minimum);
-            binWidth = double(maximum - minimum) / binCount;
+            binWidth = double(maximum - minimum + (binCount - 1)) / binCount;
             if (binWidth == 0)
                 binWidth = 1;
         }
@@ -153,11 +153,12 @@ namespace Physica::Gui {
         }
 
         QLineSeries* upper_series = new QLineSeries();
-        double current_x = min;
-        if (dencity) {
-            const double dencity_factor = 1 / (binWidth * length);
+        const double initial_x = min;
+        double current_x = initial_x;
+        if (density) {
+            const double density_factor = 1 / (binWidth * length);
             for (size_t i = 0; i < binCount; ++i) {
-                const double y = arr[i] * dencity_factor;
+                const double y = arr[i] * density_factor;
                 *upper_series << QPointF(current_x, y);
                 current_x += binWidth;
                 *upper_series << QPointF(current_x, y);
@@ -172,7 +173,7 @@ namespace Physica::Gui {
             }
         }
         QLineSeries* lower_series = new QLineSeries();
-        *lower_series << QPointF(min, 0) << QPointF(current_x, 0);
+        *lower_series << QPointF(initial_x, 0) << QPointF(current_x, 0);
 
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
 

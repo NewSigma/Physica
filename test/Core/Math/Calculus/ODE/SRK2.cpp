@@ -34,7 +34,6 @@ int main() {
     constexpr size_t iteration = 5000;
 
     const size_t count = t_max / stepSize;
-    std::random_device rd{};
     Vector<ScalarType> x(count, 0);
     for (size_t i = 0; i < iteration; ++i) {
         std::mt19937 gen{i};
