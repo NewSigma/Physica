@@ -490,7 +490,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::thermostatStep(RandomGenerator& gen, ScalarType deltaT) {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
-        ScalarType factor_translational;
+        ScalarType factor_translational = 1.0;
         {
             using VectorType = Vector<ScalarType, 1>;
             [[maybe_unused]] ScalarType _ = 0;
