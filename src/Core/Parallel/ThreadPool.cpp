@@ -30,6 +30,7 @@ namespace Physica::Core::Parallel {
 
     ThreadPool::~ThreadPool() {
         exit = true;
+        cond.notify_all();
         for (auto& data : thread_data) {
             auto& thread = data.thread;
             if (thread->joinable())
@@ -75,8 +76,10 @@ namespace Physica::Core::Parallel {
                     task->execute();
                 else if (exit)
                     return;
-                else
-                    std::this_thread::yield();
+                else {
+                    std::unique_lock poolLocker(poolMutex);
+                    cond.wait(poolLocker);
+                }
             }
         }
     }

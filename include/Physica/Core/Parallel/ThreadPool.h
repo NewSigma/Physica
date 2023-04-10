@@ -23,6 +23,7 @@
 #include <mutex>
 #include <queue>
 #include <functional>
+#include <condition_variable>
 #include <vector>
 #include <future>
 #include <sys/sysinfo.h>
@@ -54,6 +55,8 @@ namespace Physica::Core::Parallel {
         thread_local static ThreadInfo* info;
 
         std::vector<ThreadData> thread_data;
+        std::mutex poolMutex;
+        std::condition_variable cond;
         bool exit;
     public:
         ThreadPool(const ThreadPool&) = delete;
@@ -103,6 +106,7 @@ namespace Physica::Core::Parallel {
         data.queueMutex.lock();
         data.queue.emplace(new PackagedTask(std::move(task)));
         data.queueMutex.unlock();
+        cond.notify_one();
         return result;
     }
 
