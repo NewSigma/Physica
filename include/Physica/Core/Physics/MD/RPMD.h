@@ -24,6 +24,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "MDCell.h"
+#include "MDImpl/DynamicStep.h"
 
 namespace Physica::Core {
     /**
@@ -39,13 +40,14 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
     class RPMD final {
-        using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
+        using DynamicStepImpl = DynamicStep<ScalarType, PosScalarType, Dim>;
     public:
         using PhaseMatrixType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
+        using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
     private:
         MDCellType cell;
         FFT<ScalarType, 1> fft;
@@ -56,6 +58,7 @@ namespace Physica::Core {
         PhaseMatrixType posContract;
         ForceMatrix forceContract;
 
+        DynamicStepImpl dynamicStep;
         BufferType buffer;
         /* Constant */
         ScalarType temperatureT;
@@ -144,10 +147,11 @@ namespace Physica::Core {
         void thermostatStep(RandomGenerator& gen, ScalarType deltaT);
         void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         void forceStep(ScalarType deltaT);
-        void dynamicStep(ScalarType deltaT);
-        template<class Barostat>
-        void npt_dynamicStep(Barostat& barostat, ScalarType deltaT);
         bool checkCentroid() const;
+        /* Setters */
+        void setLattice(LatticeMatrix lattice);
+
+        friend class DynamicStep<ScalarType, PosScalarType, Dim>; //TODO: Remove it in future
     };
 }
 

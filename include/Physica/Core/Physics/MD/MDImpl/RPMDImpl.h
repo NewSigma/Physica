@@ -60,6 +60,8 @@ namespace Physica::Core {
             }
         }
         setTemperature(temperatureT_);
+
+        dynamicStep = DynamicStepImpl(*this);
         checkParam();
     }
 
@@ -104,9 +106,9 @@ namespace Physica::Core {
     template<class RandomGenerator, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::nvt_step(RandomGenerator& gen, const ForceModel& model) {
         forceStep(timeStep * 0.5);
-        dynamicStep(timeStep * 0.5);
+        dynamicStep.nve_step(timeStep * 0.5);
         thermostatStep(gen, timeStep);
-        dynamicStep(timeStep * 0.5);
+        dynamicStep.nve_step(timeStep * 0.5);
         updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
@@ -115,7 +117,7 @@ namespace Physica::Core {
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::nve_step(const ForceModel& model) {
         forceStep(timeStep * 0.5);
-        dynamicStep(timeStep);
+        dynamicStep.nve_step(timeStep);
         updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
@@ -124,9 +126,9 @@ namespace Physica::Core {
     template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& model) {
         barostat.forceStep(*this, timeStep * 0.5);
-        npt_dynamicStep(barostat, timeStep * 0.5);
+        dynamicStep.npt_Step(barostat, timeStep * 0.5);
         thermostatStep(gen, timeStep);
-        npt_dynamicStep(barostat, timeStep * 0.5);
+        dynamicStep.npt_Step(barostat, timeStep * 0.5);
         updateForce<ForceModel, Executor>(model);
         barostat.forceStep(*this, timeStep * 0.5);
     }
@@ -540,46 +542,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RPMD<ScalarType, PosScalarType, Dim>::dynamicStep(ScalarType deltaT) {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
-        using VectorType = Vector<ComplexScalar<ScalarType>, 2>;
-        const size_t dof = getDOF();
-
-        MatrixType matA(2, 2);
-        VectorType temp{};
-        for (size_t i = 0; i < dof; ++i) {
-            const auto mass = cell.getMass(i / Dim);
-            toNormalRepr(i);
-            /* Translational mode */ {
-                buffer(1, 0) += buffer(0, 0) * deltaT / mass;
-            }
-            for (size_t j = 1; j < buffer.getColumn(); ++j) {
-                auto col = buffer.col(j);
-                const ScalarType omegaK = omegaW * sin(ScalarType(M_PI * j / getNumReplica())) * 2;
-                const ScalarType factor = ScalarType(mass) * omegaK;
-                const ScalarType phase = omegaK * deltaT;
-                const ScalarType cosine = cos(phase);
-                const ScalarType sine = sin(phase);
-                matA(0, 0) = cosine;
-                matA(0, 1) = -factor * sine;
-                matA(1, 0) = sine / factor;
-                matA(1, 1) = cosine;
-                temp = matA * col;
-                col = temp;
-            }
-            toBeadRepr(i);
-        }
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class Barostat>
-    void RPMD<ScalarType, PosScalarType, Dim>::npt_dynamicStep(Barostat& barostat, ScalarType deltaT) {
-        dynamicStep(deltaT);
-        LatticeMatrix lattice = getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
-        cell.setLattice(std::move(lattice));
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
     bool RPMD<ScalarType, PosScalarType, Dim>::checkCentroid() const {
         constexpr bool success = true;
         PositionMatrix centroid = makeCentroidPos();
@@ -588,5 +550,10 @@ namespace Physica::Core {
             if (!(PosScalarType::Zero() <= elem && elem <= PosScalarType::One()))
                 return !success;
         return success;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void RPMD<ScalarType, PosScalarType, Dim>::setLattice(LatticeMatrix lattice) {
+        cell.setLattice(std::move(lattice));
     }
 }
