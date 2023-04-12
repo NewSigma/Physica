@@ -38,6 +38,7 @@ namespace Physica::Core {
         CellGrid cellGrid;
         ScalarType cutoff;
         Utils::Array<Index3D> atomCellMap;
+        Utils::Array<Vector3D> neighShifts;
     public:
         CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_);
         CellList(const MDCellType& mdCell, ScalarType cutoff_);
@@ -62,7 +63,9 @@ namespace Physica::Core {
     private:
         Index3D posToIndex(size_t atomId) const;
         /* Helpers */
-        inline Vector3D findNeighbor(size_t dimId, Index3D centerIndex, int deltaIndex, Index3D& neighborIndex) const;
+        void updateNeighShifts();
+        template<size_t DimID>
+        inline int findNeighbor(size_t centerIndex, int deltaIndex, Index3D& neighborIndex) const;
         /* Static members */
         static Index3D makeGridDim(const LatticeMatrix& lattice, ScalarType cutoff);
     };
@@ -71,7 +74,8 @@ namespace Physica::Core {
     CellList<ScalarType, PosScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_)
             : lattice(std::move(lattice_))
             , buffer(std::move(pos))
-            , cutoff(cutoff_) {
+            , cutoff(cutoff_)
+            , neighShifts(3 * 3 * 3) {
         atomCellMap.resize(buffer.getRow());
         const auto dim = makeGridDim(lattice, cutoff);
         cellGrid.resize(dim[0], dim[1], dim[2]);
@@ -82,6 +86,7 @@ namespace Physica::Core {
             atomCellMap[i] = index;
             cellGrid(index).push_front(i);
         }
+        updateNeighShifts();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -89,7 +94,8 @@ namespace Physica::Core {
             : lattice(mdCell.getLattice())
             , buffer(mdCell.getPos())
             , cutoff(cutoff_)
-            , atomCellMap(mdCell.getNumParticle()) {
+            , atomCellMap(mdCell.getNumParticle())
+            , neighShifts(3 * 3 * 3) {
         const auto dim = makeGridDim(lattice, cutoff);
         cellGrid.resize(dim[0], dim[1], dim[2]);
 
@@ -99,6 +105,7 @@ namespace Physica::Core {
             atomCellMap[i] = index;
             cellGrid(index).push_front(i);
         }
+        updateNeighShifts();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -128,6 +135,7 @@ namespace Physica::Core {
         cutoff.swap(list.cutoff);
         atomCellMap.swap(list.atomCellMap);
         buffer.swap(list.buffer);
+        neighShifts.swap(list.neighShifts);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -147,15 +155,20 @@ namespace Physica::Core {
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
 
-        Vector3D v1, v2, v3;
         Index3D index{};
+        const size_t centerX = centerCell[0];
         for (int deltaX = -1; deltaX <= 1; ++deltaX) {
-            v1 = findNeighbor(0, centerCell, deltaX, index);
+            const int indexShiftX = findNeighbor<0>(centerX, deltaX, index);
+            const size_t centerY = centerCell[1];
+
             for (int deltaY = -1; deltaY <= 1; ++deltaY) {
-                v2 = v1 + findNeighbor(1, centerCell, deltaY, index);
+                const int indexShiftY = findNeighbor<1>(centerY, deltaY, index);
+                const size_t centerZ = centerCell[2];
+
                 for (int deltaZ = -1; deltaZ <= 1; ++deltaZ) {
-                    v3 = v2 + findNeighbor(2, centerCell, deltaZ, index);
-                    func(v3, index);
+                    const int indexShiftZ = findNeighbor<2>(centerZ, deltaZ, index);
+                    const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
+                    func(neighShifts[indexShift], index);
                 }
             }
         }
@@ -177,35 +190,34 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    typename CellList<ScalarType, PosScalarType>::Vector3D
-    CellList<ScalarType, PosScalarType>::findNeighbor(
-            size_t dimId,
-            Index3D centerIndex,
+    void CellList<ScalarType, PosScalarType>::updateNeighShifts() {
+        for (int x = 0; x < 3; ++x) {
+            PosScalarType deltaX(x - 1);
+            for (int y = 0; y < 3; ++y) {
+                PosScalarType deltaY(y - 1);
+                for (int z = 0; z < 3; ++z) {
+                    PosScalarType deltaZ(z - 1);
+                    const int index = x * 3 * 3 + y * 3 + z;
+                    neighShifts[index] = lattice.transpose() * Vector3D{deltaX, deltaY, deltaZ};
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<size_t DimID>
+    int CellList<ScalarType, PosScalarType>::findNeighbor(
+            size_t centerIndex,
             int deltaIndex,
             Index3D& neighborIndex) const {
-        const size_t dimSize = cellGrid.getDim()[dimId];
-        const auto lattVec = lattice.row(dimId);
-
-        const size_t neigh = static_cast<ssize_t>(centerIndex[dimId]) + deltaIndex;
-        Vector3D result{};
-
+        const size_t dimSize = cellGrid.getDim()[DimID];
+        const size_t neigh = static_cast<ssize_t>(centerIndex) + deltaIndex;
+        const size_t arr[3]{dimSize - 1, neigh, 0};
         const bool isGood = neigh < dimSize;
-        if (isGood) {
-            result = PosScalarType(0);
-            neighborIndex[dimId] = neigh;
-            return result;
-        }
         const bool isOverflow = neigh == dimSize;
-        if (isOverflow) {
-            result = lattVec;
-            neighborIndex[dimId] = 0;
-            return result;
-        }
-        /* Underflow */ {
-            result = -lattVec.asVector();
-            neighborIndex[dimId] = dimSize - 1;
-            return result;
-        }
+        const int index = isGood + isOverflow * 2;
+        neighborIndex[DimID] = arr[index];
+        return index;
     }
 
     template<class ScalarType, class PosScalarType>
