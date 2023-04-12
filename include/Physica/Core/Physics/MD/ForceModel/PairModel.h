@@ -86,10 +86,22 @@ namespace Physica::Core {
         for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
             const Index3D center = cellList.getAtomCellMap()[atom1];
             cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &force](Vector3D translate, Index3D neigh) {
-                Vector3D r;
                 const Vector3D from = pos.row(atom1) - translate;
-                auto f1 = force.segment(3 * atom1, 3 * atom1 + 3);
-                for (size_t atom2 : cellList(neigh)) {
+                const auto& subCell = cellList(neigh);
+
+                Vector3D r, f(3, 0);
+                auto ite = subCell.cbegin();
+                bool isValid = ite != subCell.cend();
+                size_t atomToSolve;
+                if (isValid)
+                    atomToSolve = *(ite++);
+
+                while (isValid) {
+                    const size_t atom2 = atomToSolve;
+                    isValid = ite != subCell.cend();
+                    if (isValid)
+                        atomToSolve = *(ite++);
+
                     const bool isDoubleCounted = atom2 < atom1;
                     if (isDoubleCounted)
                         continue;
@@ -102,10 +114,12 @@ namespace Physica::Core {
                         const ScalarType dist = sqrt(r2);
                         const ScalarType f_norm = force_functor(dist);
                         r *= ScalarType(f_norm / dist);
-                        f1 -= r;
+                        f -= r;
                         f2 += r;
                     }
                 }
+                auto f1 = force.segment(3 * atom1, 3 * atom1 + 3);
+                f1 += f;
             });
         }
         return force;
