@@ -29,40 +29,30 @@ namespace Physica::Core {
                                                ScalarType thermostatTime_,
                                                ScalarType timeStep_)
             : cell(std::move(cell_))
-            , fft(numReplica, 1)
             , fftContract(numContract, 1)
             , thermostatTime(std::move(thermostatTime_))
             , timeStep(std::move(timeStep_)) {
         assert(0 < numContract && numContract <= numReplica);
+        ringPolymer = RingPolymer(cell, numReplica);
 
         const size_t dof = getDOF();
-        phaseMatrix.resize(2 * dof, numReplica);
         forceBuffer.resize(dof, numReplica);
         if (isContractEnabled()) {
             posContract.resize(dof, numContract);
             forceContract.resize(dof, numContract);
         }
-        buffer.resize(2, fft.getKSpaceSize());
 
-        auto momentum = phaseMatrix.topRows(dof);
-        momentum = ScalarType::Zero();
-
-        /* Fill pos */ {
-            size_t index = dof;
-            for (auto elem : cell.getPos()) {
-                phaseMatrix(index, 0) = elem;
-                ++index;
-            }
-            for (size_t i = 1; i < getNumReplica(); ++i) {
-                auto col = phaseMatrix.col(i);
-                auto pos = col.tail(dof);
-                pos = phaseMatrix.col(0).tail(dof);
-            }
-        }
         setTemperature(temperatureT_);
 
-        dynamicStep = DynamicStepImpl(*this);
+        dynamicStep = DynamicStepImpl(omegaW, getKSpaceSize(), getNumReplica());
         checkParam();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    RPMD<ScalarType, PosScalarType, Dim>&
+    RPMD<ScalarType, PosScalarType, Dim>::operator=(RPMD<ScalarType, PosScalarType, Dim> obj) noexcept {
+        swap(obj);
+        return *this;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -106,9 +96,9 @@ namespace Physica::Core {
     template<class RandomGenerator, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::nvt_step(RandomGenerator& gen, const ForceModel& model) {
         forceStep(timeStep * 0.5);
-        dynamicStep.nve_step(timeStep * 0.5);
+        dynamicStep.nve_step(ringPolymer, getMassVec(), timeStep * 0.5);
         thermostatStep(gen, timeStep);
-        dynamicStep.nve_step(timeStep * 0.5);
+        dynamicStep.nve_step(ringPolymer, getMassVec(), timeStep * 0.5);
         updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
@@ -117,7 +107,7 @@ namespace Physica::Core {
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::nve_step(const ForceModel& model) {
         forceStep(timeStep * 0.5);
-        dynamicStep.nve_step(timeStep);
+        dynamicStep.nve_step(ringPolymer, getMassVec(), timeStep);
         updateForce<ForceModel, Executor>(model);
         forceStep(timeStep * 0.5);
     }
@@ -126,9 +116,9 @@ namespace Physica::Core {
     template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& model) {
         barostat.forceStep(*this, timeStep * 0.5);
-        dynamicStep.npt_Step(barostat, timeStep * 0.5);
+        dynamicStep.npt_Step(ringPolymer, cell, barostat, timeStep * 0.5);
         thermostatStep(gen, timeStep);
-        dynamicStep.npt_Step(barostat, timeStep * 0.5);
+        dynamicStep.npt_Step(ringPolymer, cell, barostat, timeStep * 0.5);
         updateForce<ForceModel, Executor>(model);
         barostat.forceStep(*this, timeStep * 0.5);
     }
@@ -166,6 +156,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::initMomentum(RandomGenerator& gen) {
         std::normal_distribution<> dist{};
         const size_t dof = getDOF();
+        auto& phaseMatrix = getPhaseMatrix();
         Vector<ScalarType, Dim> driftMomentum(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
@@ -186,29 +177,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RPMD<ScalarType, PosScalarType, Dim>::removeDrift() {
-        const size_t dof = getDOF();
-        Vector<ScalarType, Dim> driftMomentum(Dim, 0);
-        for (size_t i = 0; i < dof; ++i) {
-            const size_t direction = i % Dim;
-            for (size_t j = 0; j < getNumReplica(); ++j)
-                driftMomentum[direction] += phaseMatrix(i, j);
-        }
-        driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
-
-        for (size_t i = 0; i < dof; ++i) {
-            auto row = phaseMatrix.row(i);
-            row -= driftMomentum[i % Dim];
-        }
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::scaleVelocity() {
         const ScalarType temperatureNow = calcTemperature();
         assert(temperatureNow.isPositive());
         const size_t dof = getDOF();
         const ScalarType factor = sqrt(temperatureT / temperatureNow);
-        auto momentum = phaseMatrix.topRows(dof);
+        auto momentum = getPhaseMatrix().topRows(dof);
         momentum *= factor;
     }
     /**
@@ -216,7 +190,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::normalizeCentroid() {
-        PositionMatrix centroid = makeCentroidPos();
+        PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         size_t index = getDOF();
         for (const auto elem : centroid) {
@@ -225,7 +199,7 @@ namespace Physica::Core {
             const int integer = float(elem);
             const Vector<PosScalarType, Dim> delta = PosScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
             for (size_t i = 0; i < Dim; ++i) {
-                auto row = phaseMatrix.row(atom_start + i);
+                auto row = getPhaseMatrix().row(atom_start + i);
                 row -= delta[i];
             }
             ++index;
@@ -235,14 +209,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     typename RPMD<ScalarType, PosScalarType, Dim>::MDCellType RPMD<ScalarType, PosScalarType, Dim>::phaseToCell(size_t replica) const {
-        PositionMatrix pos(getNumParticle(), Dim);
-        auto phase = phaseMatrix.col(replica);
-        size_t index = getDOF();
-        for (auto& elem : pos) {
-            elem = PosScalarType(phase[index]);
-            ++index;
-        }
-        return MDCellType(cell.getLattice(), std::move(pos), cell.getMassVec());
+        return MDCellType(cell.getLattice(), ringPolymer.makeBeadPos(replica), cell.getMassVec());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -258,6 +225,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
+    typename RPMD<ScalarType, PosScalarType, Dim>::MDCellType RPMD<ScalarType, PosScalarType, Dim>::makeAverageCell() const {
+        return MDCellType(getLattice(), ringPolymer.makeCentroidPos(), cell.getMassVec());
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::checkParam() const {
         const ScalarType cycle = ScalarType(2 * M_PI) / omegaW;
         bool isSmallEnough = timeStep < cycle / ScalarType(4);
@@ -266,42 +238,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename RPMD<ScalarType, PosScalarType, Dim>::PositionMatrix RPMD<ScalarType, PosScalarType, Dim>::makeCentroidPos() const {
-        PositionMatrix result(getNumParticle(), Dim);
-        const size_t dof = getDOF();
-        size_t index = dof;
-        for (auto& elem : result) {
-            elem = PosScalarType(mean(phaseMatrix.row(index)));
-            ++index;
-        }
-        return result;
-    }
+    void RPMD<ScalarType, PosScalarType, Dim>::swap(RPMD& obj) noexcept {
+        cell.swap(obj.cell);
+        ringPolymer.swap(obj.ringPolymer);
+        forceBuffer.swap(obj.forceBuffer);
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename RPMD<ScalarType, PosScalarType, Dim>::MDCellType RPMD<ScalarType, PosScalarType, Dim>::makeAverageCell() const {
-        return MDCellType(getLattice(), makeCentroidPos(), cell.getMassVec());
-    }
+        fftContract.swap(obj.fftContract);
+        posContract.swap(obj.posContract);
+        forceContract.swap(obj.forceContract);
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename RPMD<ScalarType, PosScalarType, Dim>::PositionMatrix RPMD<ScalarType, PosScalarType, Dim>::makeCentroidMomentum() const {
-        PositionMatrix result(getNumParticle(), Dim, 0);
-        size_t index = 0;
-        for (auto& elem : result) {
-            elem = PosScalarType(mean(phaseMatrix.row(index)));
-            ++index;
-        }
-        return result;
-    }
+        dynamicStep.swap(obj.dynamicStep);
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename RPMD<ScalarType, PosScalarType, Dim>::PositionMatrix RPMD<ScalarType, PosScalarType, Dim>::getMomentum(size_t replica) const {
-        PositionMatrix result(getNumParticle(), Dim, 0);
-        size_t index = 0;
-        for (auto& elem : result) {
-            elem = PosScalarType(phaseMatrix(index, replica));
-            ++index;
-        }
-        return result;
+        temperatureT.swap(obj.temperatureT);
+        thermostatTime.swap(obj.thermostatTime);
+        timeStep.swap(obj.timeStep);
+        repBeta.swap(obj.repBeta);
+        omegaW.swap(obj.omegaW);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -310,7 +262,7 @@ namespace Physica::Core {
         ScalarType classical_kinetic = 0;
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
-            auto p = phaseMatrix.row(i);
+            auto p = getPhaseMatrix().row(i);
             classical_kinetic += square(p.asVector()).sum() / (mass * 2);
         }
         return classical_kinetic;
@@ -328,7 +280,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RPMD<ScalarType, PosScalarType, Dim>::getClassicalElastic() const {
         const size_t dof = getDOF();
-        auto pos = phaseMatrix.bottomRows(dof);
+        auto pos = getPhaseMatrix().bottomRows(dof);
         ScalarType result = 0;
         for (size_t i = 0; i < dof; ++i) {
             const ScalarType mass = cell.getMass(i / Dim);
@@ -347,13 +299,14 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RPMD<ScalarType, PosScalarType, Dim>::calcKinetic() const {
         const size_t dof = getDOF();
+        auto& phase = getPhaseMatrix();
         Vector<ScalarType> averaged_pos(dof, 0);
         for (size_t i = 0; i < dof; ++i)
-            averaged_pos[i] = mean(phaseMatrix.row(dof + i));
+            averaged_pos[i] = mean(phase.row(dof + i));
 
         ScalarType kinetic = repBeta * dof;
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto phase = phaseMatrix.col(replica);
+            auto phase = getPhaseMatrix().col(replica);
             auto pos = phase.tail(dof);
             kinetic += (averaged_pos - pos) * forceBuffer.col(replica);
         }
@@ -374,7 +327,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RPMD<ScalarType, PosScalarType, Dim>::calcTemperature() const {
-        return square(makeCentroidMomentum()).sum() * (1 / (Dim * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
+        return square(ringPolymer.makeCentroidMomentum()).sum() * (1 / (Dim * PhyConst<AU>::boltzmannK)) / cell.getMassVec().sum();
     }
     /**
      * The function has size effect, extend the cell shall ease the problem, refer to [1].
@@ -389,7 +342,7 @@ namespace Physica::Core {
         const size_t dof = getDOF();
         LatticeMatrix stress(Dim, Dim, 0);
         for (size_t replica = 0; replica < 1; ++replica) {
-            const auto col = phaseMatrix.col(replica);
+            const auto col = getPhaseMatrix().col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
             const auto force = forceBuffer.col(replica);
@@ -416,33 +369,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RPMD<ScalarType, PosScalarType, Dim>::toNormalRepr(size_t posID) {
-        assert(posID < getDOF());
-        fft.transform(phaseMatrix.row(posID));
-        auto momentum = buffer.row(0);
-        momentum = fft.getKSpace();
-
-        fft.transform(phaseMatrix.row(posID + getDOF()));
-        auto pos = buffer.row(1);
-        pos = fft.getKSpace();
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RPMD<ScalarType, PosScalarType, Dim>::toBeadRepr(size_t posID) {
-        assert(posID < getDOF());
-        fft.invTransform(buffer.row(0));
-        auto momentum = phaseMatrix.row(posID);
-        momentum = fft.getRSpace();
-
-        fft.invTransform(buffer.row(1));
-        auto pos = phaseMatrix.row(posID + getDOF());
-        pos = fft.getRSpace();
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::toContractBeadRepr(size_t posID) {
         assert(posID < getDOF());
-        auto row = buffer.row(1);
+        auto row = ringPolymer.getBuffer().row(1);
         auto head = row.head(fftContract.getKSpaceSize());
         fftContract.invTransform(head);
         auto pos = posContract.row(posID);
@@ -453,7 +382,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::forceToNormRepr(size_t posID) {
         assert(posID < getDOF());
         fftContract.transform(forceContract.row(posID));
-        auto row = buffer.row(0);
+        auto row = ringPolymer.getBuffer().row(0);
         row = ScalarType(0);
         auto head = row.head(fftContract.getKSpaceSize());
         head = fftContract.getKSpace();
@@ -462,6 +391,8 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::forceToBeadRepr(size_t posID) {
         assert(posID < getDOF());
+        auto& buffer = ringPolymer.getBuffer();
+        auto& fft = ringPolymer.getCanonicalFFT();
         fft.invTransform(buffer.row(0));
         auto f = forceBuffer.row(posID);
         f += fft.getRSpace() * (ScalarType(getNumReplica()) / ScalarType(getNumContract()));
@@ -471,7 +402,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::contract() {
         const size_t dof = getDOF();
         for (size_t i = 0; i < dof; ++i) {
-            toNormalRepr(i);
+            ringPolymer.toNormalRepr(i);
             toContractBeadRepr(i);
         }
     }
@@ -509,9 +440,10 @@ namespace Physica::Core {
                                         });
             factor_translational = sqrt(temperatureT / sol[0]);
         }
+        auto& buffer = ringPolymer.getBuffer();
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = cell.getMass(i / Dim);
-            toNormalRepr(i);
+            ringPolymer.toNormalRepr(i);
             buffer(0, 0) *= factor_translational;
 
             const ScalarType factor = sqrt(repBeta * mass * getNumReplica());
@@ -521,7 +453,7 @@ namespace Physica::Core {
                 const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
                 thermostatImpl(j, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
             }
-            toBeadRepr(i);
+            ringPolymer.toBeadRepr(i);
         }
     }
 
@@ -529,6 +461,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random) {
         const ScalarType c1 = exp(-viscosityY * deltaT);
         const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
+        auto& buffer = ringPolymer.getBuffer();
         buffer(0, mode_index) = c1 * buffer(0, mode_index) + factor * c2 * random;
     }
 
@@ -536,7 +469,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim>::forceStep(ScalarType deltaT) {
         const size_t dof = getDOF();
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto col = phaseMatrix.col(replica);
+            auto col = getPhaseMatrix().col(replica);
             auto momentum = col.head(dof);
             momentum += forceBuffer.col(replica).asVector() * deltaT;
         }
@@ -545,16 +478,11 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     bool RPMD<ScalarType, PosScalarType, Dim>::checkCentroid() const {
         constexpr bool success = true;
-        PositionMatrix centroid = makeCentroidPos();
+        PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         for (auto& elem : centroid)
             if (!(PosScalarType::Zero() <= elem && elem <= PosScalarType::One()))
                 return !success;
         return success;
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RPMD<ScalarType, PosScalarType, Dim>::setLattice(LatticeMatrix lattice) {
-        cell.setLattice(std::move(lattice));
     }
 }

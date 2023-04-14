@@ -147,7 +147,7 @@ int main() {
         fout << rdf.makeRDF(rpmd.getVolume());
     }
     {
-        Poscar poscar({rpmd.getLattice(), rpmd.makeCentroidPos(), Poscar::Type::Cartesian}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
+        Poscar poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar::Type::Cartesian}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
         std::ofstream fout("H2O.vasp");
         fout << poscar;
         fout.close();

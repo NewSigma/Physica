@@ -19,68 +19,68 @@
 #pragma once
 
 namespace Physica::Core {
+    template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
     template<class ScalarType, class PosScalarType, unsigned int Dim> class RPMD;
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     class DynamicStep {
-        using RPMDType = RPMD<ScalarType, PosScalarType, Dim>;
-        using LatticeMatrix = typename RPMDType::LatticeMatrix;
-        using BufferType = typename RPMDType::BufferType;
+        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using MassVector = typename MDCellType::MassVector;
+        using BufferType = typename RingPolymerType::BufferType;
         using VectorType = Vector<ScalarType>;
         using Vector2D = Vector<ScalarType, 2>;
 
-        RPMDType* rpmd;
         VectorType omegaK;
         Utils::Array<Vector2D> coeffMatrixBase;
         ScalarType lastTimeStep;
     public:
         DynamicStep();
-        DynamicStep(RPMDType& rpmd_);
+        DynamicStep(ScalarType omegaW, size_t kSpaceSize, size_t numReplica);
         DynamicStep(const DynamicStep&) = default;
         DynamicStep(DynamicStep&&) noexcept = default;
         ~DynamicStep() = default;
         /* Operators */
         DynamicStep& operator=(DynamicStep obj) noexcept;
         /* Operations */
-        void nve_step(ScalarType deltaT);
+        void nve_step(RingPolymerType& ringPolymer, const MassVector& mass, ScalarType deltaT);
         template<class Barostat>
-        void npt_step(Barostat& barostat, ScalarType deltaT);
+        void npt_step(RingPolymerType& ringPolymer, MDCellType& cell, Barostat& barostat, ScalarType deltaT);
         void swap(DynamicStep& obj) noexcept;
     private:
         void updateTimeStep(ScalarType deltaT);
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep() : rpmd(nullptr), lastTimeStep(0) {}
+    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep() : lastTimeStep(0) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep(RPMDType& rpmd_)
-            : rpmd(&rpmd_)
-            , omegaK(rpmd_.buffer.getColumn())
-            , coeffMatrixBase(rpmd_.buffer.getColumn())
+    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep(ScalarType omegaW, size_t kSpaceSize, size_t numReplica)
+            : omegaK(kSpaceSize)
+            , coeffMatrixBase(kSpaceSize)
             , lastTimeStep(0) {
-        const size_t numReplica = rpmd->getNumReplica();
         for (size_t i = 0; i < omegaK.getLength(); ++i)
-            omegaK[i] = rpmd->getOmegaW() * sin(ScalarType(M_PI * i / numReplica)) * 2;
+            omegaK[i] = omegaW * sin(ScalarType(M_PI * i / numReplica)) * 2;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void DynamicStep<ScalarType, PosScalarType, Dim>::nve_step(ScalarType deltaT) {
+    void DynamicStep<ScalarType, PosScalarType, Dim>::nve_step(RingPolymerType& ringPolymer, const MassVector& massVec, ScalarType deltaT) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
-        const size_t dof = rpmd->getDOF();
+        const size_t dof = ringPolymer.getDOF();
         const size_t kSpaceSize = omegaK.getLength();
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
 
         MatrixType matA(2, 2);
         ComplexVector2D temp{};
-        BufferType& buffer = rpmd->buffer;
+        BufferType& buffer = ringPolymer.getBuffer();
         assert(kSpaceSize == buffer.getColumn());
         
         for (size_t i = 0; i < dof; ++i) {
-            const auto mass = rpmd->getMassVec()[i / Dim];
-            rpmd->toNormalRepr(i);
+            const auto mass = massVec[i / Dim];
+            ringPolymer.toNormalRepr(i);
             /* Translational mode */ {
                 buffer(1, 0) += buffer(0, 0) * deltaT / mass;
             }
@@ -96,18 +96,20 @@ namespace Physica::Core {
                 temp = matA * col;
                 col = temp;
             }
-            rpmd->toBeadRepr(i);
+            ringPolymer.toBeadRepr(i);
         }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<class Barostat>
     void DynamicStep<ScalarType, PosScalarType, Dim>::npt_step(
+            RingPolymerType& ringPolymer,
+            MDCellType& cell,
             Barostat& barostat,
             ScalarType deltaT) {
-        nve_step(rpmd, deltaT);
-        LatticeMatrix lattice = rpmd->getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
-        rpmd->setLattice(std::move(lattice));
+        nve_step(ringPolymer, cell.getMassVec(), deltaT);
+        LatticeMatrix lattice = cell->getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
+        cell.setLattice(std::move(lattice));
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -119,7 +121,6 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void DynamicStep<ScalarType, PosScalarType, Dim>::swap(DynamicStep& obj) noexcept {
-        std::swap(rpmd, obj.rpmd);
         omegaK.swap(obj.omegaK);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
         lastTimeStep.swap(obj.lastTimeStep);

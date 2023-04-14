@@ -45,6 +45,7 @@ namespace Physica::Core {
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
+        [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }

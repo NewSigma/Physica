@@ -25,6 +25,7 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "MDCell.h"
 #include "MDImpl/DynamicStep.h"
+#include "MDImpl/RingPolymer.h"
 
 namespace Physica::Core {
     /**
@@ -43,24 +44,22 @@ namespace Physica::Core {
     class RPMD final {
         using DynamicStepImpl = DynamicStep<ScalarType, PosScalarType, Dim>;
     public:
-        using PhaseMatrixType = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MDCellType = typename RingPolymerType::MDCellType;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using BufferType = DenseMatrix<ComplexScalar<ScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
     private:
         MDCellType cell;
-        FFT<ScalarType, 1> fft;
-        PhaseMatrixType phaseMatrix;
+        RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
 
         FFT<PosScalarType, 1> fftContract;
-        PhaseMatrixType posContract;
+        PhaseMatrix posContract;
         ForceMatrix forceContract;
 
         DynamicStepImpl dynamicStep;
-        BufferType buffer;
         /* Constant */
         ScalarType temperatureT;
         ScalarType thermostatTime;
@@ -77,6 +76,8 @@ namespace Physica::Core {
         RPMD(const RPMD&) = default;
         RPMD(RPMD&&) noexcept = default;
         ~RPMD() = default;
+        /* Operators */
+        RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
         template<class ForceModel, class Executor>
         void updateForce(const ForceModel& model);
@@ -94,12 +95,13 @@ namespace Physica::Core {
         void npt_step_for(ScalarType duration, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
         template<class RandomGenerator>
         void initMomentum(RandomGenerator& gen);
-        void removeDrift();
         void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
+        [[nodiscard]] MDCellType makeAverageCell() const;
         void checkParam() const;
+        void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
@@ -107,19 +109,17 @@ namespace Physica::Core {
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
-        [[nodiscard]] const PhaseMatrixType& getPhaseMatrix() const noexcept { return phaseMatrix; }
-        [[nodiscard]] PhaseMatrixType& getPhaseMatrix() noexcept { return phaseMatrix; }
-        [[nodiscard]] size_t getNumReplica() const noexcept { return phaseMatrix.getColumn(); }
+        [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
+        [[nodiscard]] const PhaseMatrix& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
+        [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
+        [[nodiscard]] size_t getDOF() const noexcept { return ringPolymer.getDOF(); }
+        [[nodiscard]] size_t getNumReplica() const noexcept { return ringPolymer.getNumReplica(); }
+        [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
-        [[nodiscard]] size_t getDOF() const noexcept { return Dim * getNumParticle(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
 
-        [[nodiscard]] PositionMatrix makeCentroidPos() const;
-        [[nodiscard]] MDCellType makeAverageCell() const;
-        [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
-        [[nodiscard]] PositionMatrix getMomentum(size_t replica) const;
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
 
         [[nodiscard]] ScalarType getClassicalKinetic() const;
@@ -138,8 +138,6 @@ namespace Physica::Core {
         void setTemperature(ScalarType temperature);
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
-        void toNormalRepr(size_t posID);
-        void toBeadRepr(size_t posID);
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);
         void forceToBeadRepr(size_t posID);
@@ -150,10 +148,6 @@ namespace Physica::Core {
         void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         void forceStep(ScalarType deltaT);
         bool checkCentroid() const;
-        /* Setters */
-        void setLattice(LatticeMatrix lattice);
-
-        friend class DynamicStep<ScalarType, PosScalarType, Dim>; //TODO: Remove it in future
     };
 }
 

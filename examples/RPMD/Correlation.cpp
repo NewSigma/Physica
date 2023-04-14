@@ -111,6 +111,7 @@ int main() {
     {
         std::mt19937 gen(1082247429173841685);
         RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+        auto& ringPolymer = rpmd.getRingPolymer();
         rpmd.initMomentum(gen);
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
@@ -126,9 +127,9 @@ int main() {
                 rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E-15));
                 rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
                 rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E15));
-                const auto p0 = rpmd.makeCentroidMomentum();
+                const auto p0 = ringPolymer.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
-                    toNextMean(temp[k], j, hadamard(rpmd.makeCentroidMomentum(), p0).sum() * factor);
+                    toNextMean(temp[k], j, hadamard(ringPolymer.makeCentroidMomentum(), p0).sum() * factor);
                     rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
                 }
             }
