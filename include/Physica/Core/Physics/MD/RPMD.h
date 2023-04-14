@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -35,6 +35,7 @@ namespace Physica::Core {
      * [4] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
      * [5] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. J. Chem. Phys, 2016, 145(2):1291-1301.
      * [6] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
+     * [7] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004)
      * 
      * TODO: replace several ScalarType to PosScalarType
      */
@@ -131,7 +132,8 @@ namespace Physica::Core {
         template<class ForceModel, class Executor>
         [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
         [[nodiscard]] ScalarType calcTemperature() const;
-        [[nodiscard]] LatticeMatrix makeStress() const;
+        template<class ForceModel>
+        [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         /* Setters */
         void setTemperature(ScalarType temperature);
         void setThermostatTime(ScalarType time) { thermostatTime = time; }

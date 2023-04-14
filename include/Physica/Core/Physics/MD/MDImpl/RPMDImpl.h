@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -381,10 +381,11 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
+     * [2] Thompson, Plimpton, Mattson, J Chem Phys, 131, 154107 (2009).
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename RPMD<ScalarType, PosScalarType, Dim>::LatticeMatrix RPMD<ScalarType, PosScalarType, Dim>::makeStress() const {
-        assert(getNumReplica() == 1);
+    template<class ForceModel>
+    typename RPMD<ScalarType, PosScalarType, Dim>::LatticeMatrix RPMD<ScalarType, PosScalarType, Dim>::makeStress(const ForceModel& model) const {
         const size_t dof = getDOF();
         LatticeMatrix stress(Dim, Dim, 0);
         for (size_t replica = 0; replica < 1; ++replica) {
@@ -403,7 +404,7 @@ namespace Physica::Core {
             }
         }
         stress *= reciprocal(getVolume());
-        return stress;
+        return stress + model.staticStress(makeAverageCell());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

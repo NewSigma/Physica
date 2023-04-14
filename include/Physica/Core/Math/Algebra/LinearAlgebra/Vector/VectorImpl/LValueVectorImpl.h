@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,7 +33,7 @@ namespace Physica::Core {
     template<class OtherVector>
     Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v) {
         Base::getDerived().resize(v.getLength());
-        v.getDerived().assignTo(*this);
+        v.getDerived().assignTo(Base::getDerived());
         return Base::getDerived();
     }
 

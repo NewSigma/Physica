@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -35,6 +35,7 @@ namespace Physica::Core {
             using ScalarType = T;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = MaxLength;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         };
     }
 

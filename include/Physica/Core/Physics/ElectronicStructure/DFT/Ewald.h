@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -58,7 +58,6 @@ namespace Physica::Core {
         ScalarType repErfcStep;
         ScalarType doubleSquareStep;
         ScalarType squareMaxErfcX;
-        ScalarType squareHalfErfcStep;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -79,8 +78,8 @@ namespace Physica::Core {
     private:
         void initIntegralLimit(PosScalarType volume);
         void makeTables();
-        inline ScalarType calcFromTable(ScalarType x, ScalarType x2) const;
-        inline ScalarType calcFromTable_diff(ScalarType x, ScalarType x2) const;
+        inline ScalarType calcFromTable(ScalarType x) const;
+        inline ScalarType calcFromTable_diff(ScalarType x) const;
         Vector<ScalarType> rSpaceForce(const PositionMatrix& pos) const;
 
         friend class ::Physica::Test;
@@ -95,7 +94,7 @@ namespace Physica::Core {
             : lattice(std::move(lattice_))
             , repCell(std::move(repCell_))
             , charges(std::move(charges_))
-            , erfc_table(ErfcTableSize) {
+            , erfc_table(ErfcTableSize + 1) {
         const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(ScalarType(volume));
         initIntegralLimit(volume);
@@ -165,9 +164,8 @@ namespace Physica::Core {
                         const Vector3D pos_ij = pos_i - pos.row(j).asVector();
                         const ScalarType r2 = pos_ij.squaredNorm();
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                        if (isNotSelf) {
-                            const ScalarType r = sqrt(r2);
-                            const ScalarType temp = calcFromTable(r, r2) * (charge_i * charges[j]);
+                        if (isNotSelf && r2 < squareMaxErfcX) {
+                            const ScalarType temp = calcFromTable(sqrt(r2)) * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
                         }
                     }
@@ -214,7 +212,6 @@ namespace Physica::Core {
         repErfcStep.swap(ewald.repErfcStep);
         doubleSquareStep.swap(ewald.doubleSquareStep);
         squareMaxErfcX.swap(ewald.squareMaxErfcX);
-        squareHalfErfcStep.swap(ewald.squareHalfErfcStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -235,46 +232,34 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::makeTables() {
-        for (size_t i = 0; i < erfc_table.getLength(); ++i) {
-            ScalarType x = ScalarType(i * ErfcTableStep);
+        for (size_t i = 1; i < erfc_table.getLength(); ++i) {
+            ScalarType x = ScalarType((i - 1) * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
+        erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = ScalarType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         doubleSquareStep = square(erfcStep) * 2;
         squareMaxErfcX = square((ScalarType(ErfcTableSize - 1) - 0.5) * erfcStep);
-        squareHalfErfcStep = erfcStep * 0.5;
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(ScalarType x, ScalarType x2) const {
-        if (x2 > squareMaxErfcX)
-            return 0;
-        const bool safeToRound = x2 > squareHalfErfcStep;
-        if (safeToRound) {
-            const ScalarType temp = x * repErfcStep + 0.5;
-            const size_t index = double(temp);
-            const ScalarType x2 = erfcStep * floor(temp);
-            auto y = erfc_table.segment(index - 1, index + 2);
-            return Internal::quadraticInterpolate(x2 - erfcStep, x2, x2 + erfcStep, y[0], y[1], y[2], x); //Optimize: make use of x1, x2, x3 are equal distance
-        }
-        return 1;
+    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(ScalarType x) const {
+        const ScalarType temp = x * repErfcStep + 0.5;
+        const size_t index = double(temp);
+        const ScalarType x1 = erfcStep * floor(temp);
+        auto y = erfc_table.segment(index, index + 3);
+        return Internal::quadraticInterpolate(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], x); //Optimize: make use of x1, x2, x3 are equal distance
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable_diff(ScalarType x, ScalarType x2) const {
-        if (x2 > squareMaxErfcX)
-            return 0;
-        const bool safeToRound = x2 > squareHalfErfcStep;
-        if (safeToRound) {
-            const ScalarType temp = x * repErfcStep + 0.5;
-            const size_t index = double(temp);
-            const ScalarType x2 = erfcStep * floor(temp);
-            auto y = erfc_table.segment(index - 1, index + 2);
-            const ScalarType factor = doubleSquareStep * x;
-            return Internal::quadraticInterpolate_diff1(factor, erfcStep, x2, y[0], y[1], y[2], x);
-        }
-        return 1;
+    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable_diff(ScalarType x) const {
+        const ScalarType temp = x * repErfcStep + 0.5;
+        const size_t index = double(temp);
+        const ScalarType x1 = erfcStep * floor(temp);
+        auto y = erfc_table.segment(index, index + 3);
+        const ScalarType factor = doubleSquareStep * x + std::numeric_limits<ScalarType>::epsilon(); // Avoid divide by zero
+        return Internal::quadraticInterpolate_diff1(factor, erfcStep, x1, y[0], y[1], y[2], x);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -293,8 +278,10 @@ namespace Physica::Core {
                     delta = from - to;
                     const ScalarType charge = charges[j];
                     const ScalarType r2 = delta.squaredNorm();
-                    const ScalarType temp = charge * calcFromTable_diff(sqrt(r2), r2);
-                    sum += temp * delta;
+                    if (r2 < squareMaxErfcX) {
+                        const ScalarType temp = charge * calcFromTable_diff(sqrt(r2));
+                        sum += temp * delta;
+                    }
                 }
                 auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
                 f += charges[i] * sum;
