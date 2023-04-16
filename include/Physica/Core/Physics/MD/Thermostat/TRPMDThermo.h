@@ -18,73 +18,52 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 #include "Langevin.h"
 
 namespace Physica::Core {
     /**
      * Reference:
-     * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
+     * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. J. Chem. Phys, 2014, 140(23):5106.
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
-    class DoubleThermo {
+    class TRPMDThermo {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
-        ScalarType thermostatTime;
     public:
-        DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_);
-        DoubleThermo(const DoubleThermo&) = default;
-        DoubleThermo(DoubleThermo&&) noexcept = default;
-        ~DoubleThermo() = default;
+        TRPMDThermo(ScalarType temperatureT_);
+        TRPMDThermo(const TRPMDThermo&) = default;
+        TRPMDThermo(TRPMDThermo&&) noexcept = default;
+        ~TRPMDThermo() = default;
         /* Operators */
-        DoubleThermo& operator=(DoubleThermo obj) noexcept;
+        TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
         template<class RandomGenerator>
         void step(RingPolymerType& RingPolymer, RandomGenerator& gen, ScalarType deltaT) const;
-        void swap(DoubleThermo& obj) noexcept;
-        /* Setters */
-        void setThermostatTime(ScalarType time) { thermostatTime = time; }
+        void swap(TRPMDThermo& obj) noexcept;
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
-            : temperatureT(temperatureT_)
-            , thermostatTime(thermostatTime_) {}
+    TRPMDThermo<ScalarType, PosScalarType, Dim>::TRPMDThermo(ScalarType temperatureT_)
+            : temperatureT(temperatureT_) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>&
-    DoubleThermo<ScalarType, PosScalarType, Dim>::operator=(DoubleThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
+    TRPMDThermo<ScalarType, PosScalarType, Dim>&
+    TRPMDThermo<ScalarType, PosScalarType, Dim>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<class RandomGenerator>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::step(
+    void TRPMDThermo<ScalarType, PosScalarType, Dim>::step(
             RingPolymerType& ringPolymer,
             RandomGenerator& gen,
             ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        ScalarType factor_translational = 1.0;
-        /* Make factor */ {
-            using VectorType = Vector<ScalarType, 1>;
-            [[maybe_unused]] ScalarType _ = 0;
-            const ScalarType nowT = ringPolymer.calcTemperature();
-            VectorType sol{nowT};
-            SRK2<ScalarType, 1>::step(deltaT, _, sol,
-                                        [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                            return {(temperatureT - sol[0]) / thermostatTime};
-                                        },
-                                        [this, dof, &gen]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                            std::normal_distribution dist{};
-                                            return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
-                                        });
-            factor_translational = sqrt(temperatureT / sol[0]);
-        }
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
@@ -94,8 +73,6 @@ namespace Physica::Core {
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = massVec[i / Dim];
             ringPolymer.toNormalRepr(i);
-            buffer(0, 0) *= factor_translational;
-
             const ScalarType factor = sqrt(repBeta * mass * numReplica);
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / numReplica;
@@ -114,8 +91,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::swap(DoubleThermo<ScalarType, PosScalarType, Dim>& obj) noexcept {
+    void TRPMDThermo<ScalarType, PosScalarType, Dim>::swap(TRPMDThermo<ScalarType, PosScalarType, Dim>& obj) noexcept {
         temperatureT.swap(obj.temperatureT);
-        thermostatTime.swap(obj.thermostatTime);
     }
 }

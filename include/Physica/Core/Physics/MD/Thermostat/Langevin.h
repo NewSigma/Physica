@@ -18,16 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
-#include "Langevin.h"
-
 namespace Physica::Core {
+    template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
     /**
      * Reference:
-     * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
+     * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
-    class DoubleThermo {
+    class Langevin {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
@@ -36,55 +34,47 @@ namespace Physica::Core {
         ScalarType temperatureT;
         ScalarType thermostatTime;
     public:
-        DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_);
-        DoubleThermo(const DoubleThermo&) = default;
-        DoubleThermo(DoubleThermo&&) noexcept = default;
-        ~DoubleThermo() = default;
+        Langevin(ScalarType temperatureT_, ScalarType thermostatTime_);
+        Langevin(const Langevin&) = default;
+        Langevin(Langevin&&) noexcept = default;
+        ~Langevin() = default;
         /* Operators */
-        DoubleThermo& operator=(DoubleThermo obj) noexcept;
+        Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
         template<class RandomGenerator>
         void step(RingPolymerType& RingPolymer, RandomGenerator& gen, ScalarType deltaT) const;
-        void swap(DoubleThermo& obj) noexcept;
+        void swap(Langevin& obj) noexcept;
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
+        /* Static members */
+        static inline void langevinImpl(
+            BufferType& buffer,
+            size_t mode_index,
+            ScalarType deltaT,
+            ScalarType viscosityY,
+            ScalarType factor,
+            ComplexScalar<ScalarType> random);
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
+    Langevin<ScalarType, PosScalarType, Dim>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>&
-    DoubleThermo<ScalarType, PosScalarType, Dim>::operator=(DoubleThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
+    Langevin<ScalarType, PosScalarType, Dim>&
+    Langevin<ScalarType, PosScalarType, Dim>::operator=(Langevin<ScalarType, PosScalarType, Dim> obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<class RandomGenerator>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::step(
+    void Langevin<ScalarType, PosScalarType, Dim>::step(
             RingPolymerType& ringPolymer,
             RandomGenerator& gen,
             ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        ScalarType factor_translational = 1.0;
-        /* Make factor */ {
-            using VectorType = Vector<ScalarType, 1>;
-            [[maybe_unused]] ScalarType _ = 0;
-            const ScalarType nowT = ringPolymer.calcTemperature();
-            VectorType sol{nowT};
-            SRK2<ScalarType, 1>::step(deltaT, _, sol,
-                                        [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                            return {(temperatureT - sol[0]) / thermostatTime};
-                                        },
-                                        [this, dof, &gen]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                            std::normal_distribution dist{};
-                                            return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
-                                        });
-            factor_translational = sqrt(temperatureT / sol[0]);
-        }
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
@@ -93,28 +83,37 @@ namespace Physica::Core {
         std::normal_distribution<> dist{};
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = massVec[i / Dim];
-            ringPolymer.toNormalRepr(i);
-            buffer(0, 0) *= factor_translational;
-
             const ScalarType factor = sqrt(repBeta * mass * numReplica);
+            ringPolymer.toNormalRepr(i);
+            /* Translational mode */ {
+                const ScalarType viscosityY = Core::reciprocal(thermostatTime);
+                langevinImpl(buffer, 0, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
+            }
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / numReplica;
                 const ScalarType viscosityY = sin(phase) * omegaW;
                 const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
-                Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
-                    buffer,
-                    j,
-                    deltaT,
-                    viscosityY,
-                    factor,
-                    ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                langevinImpl(buffer, j, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
             }
             ringPolymer.toBeadRepr(i);
         }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::swap(DoubleThermo<ScalarType, PosScalarType, Dim>& obj) noexcept {
+    void Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
+            BufferType& buffer,
+            size_t mode_index,
+            ScalarType deltaT,
+            ScalarType viscosityY,
+            ScalarType factor,
+            ComplexScalar<ScalarType> random) {
+        const ScalarType c1 = exp(-viscosityY * deltaT);
+        const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
+        buffer(0, mode_index) = c1 * buffer(0, mode_index) + factor * c2 * random;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void Langevin<ScalarType, PosScalarType, Dim>::swap(Langevin<ScalarType, PosScalarType, Dim>& obj) noexcept {
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
     }
