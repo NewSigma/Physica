@@ -62,16 +62,12 @@ namespace Physica::Core {
         DynamicStepImpl dynamicStep;
         /* Constant */
         ScalarType temperatureT;
-        ScalarType thermostatTime;
         ScalarType timeStep;
-        ScalarType repBeta;
-        ScalarType omegaW;
     public:
         RPMD(MDCellType cell_,
              size_t numReplica,
              size_t numContract,
              ScalarType temperatureT_,
-             ScalarType thermostatTime_,
              ScalarType timeStep_);
         RPMD(const RPMD&) = default;
         RPMD(RPMD&&) noexcept = default;
@@ -81,20 +77,22 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel, class Executor>
         void updateForce(const ForceModel& model);
-        template<class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step(RandomGenerator& gen, const ForceModel& model);
         template<class ForceModel, class Executor>
         void nve_step(const ForceModel& model);
-        template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
-        void npt_step(RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
-        template<class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step_for(ScalarType duration, RandomGenerator& gen, const ForceModel& model);
         template<class ForceModel, class Executor>
         void nve_step_for(ScalarType duration, const ForceModel& model);
-        template<class RandomGenerator, class Barostat, class ForceModel, class Executor>
-        void npt_step_for(ScalarType duration, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
-        template<class RandomGenerator>
-        void initMomentum(RandomGenerator& gen);
+
+        template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
+        void nvt_step(const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model);
+        template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
+        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model);
+
+        template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
+        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
+        template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
+
+        template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
@@ -119,11 +117,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
-        [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
 
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
 
-        [[nodiscard]] ScalarType getClassicalKinetic() const;
         template<class ForceModel>
         [[nodiscard]] ScalarType getClassicalPotentialEnergy(const ForceModel& model) const;
         [[nodiscard]] ScalarType getClassicalElastic() const;
@@ -132,21 +128,17 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcKinetic() const;
         template<class ForceModel, class Executor>
         [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
-        [[nodiscard]] ScalarType calcTemperature() const;
+
         template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         /* Setters */
         void setTemperature(ScalarType temperature);
-        void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);
         void forceToBeadRepr(size_t posID);
         void contract();
         void decontract();
-        template<class RandomGenerator>
-        void thermostatStep(RandomGenerator& gen, ScalarType deltaT);
-        void thermostatImpl(size_t mode_index, ScalarType deltaT, ScalarType viscosityY, ScalarType factor, ComplexScalar<ScalarType> random);
         void forceStep(ScalarType deltaT);
         bool checkCentroid() const;
     };

@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 #include "Physica/Core/Physics/MD/RDF.h"
@@ -30,6 +31,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
+using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -109,7 +111,8 @@ int main() {
 
     auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
+    const ThermostatType thermo(temperatureT, thermostatTime);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
 
@@ -128,9 +131,9 @@ int main() {
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, model);
         for (size_t i = 0; i < 1000; ++i) {
-            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
+            rpmd.nvt_step<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(thermo, gen, model);
             rpmd.normalizeCentroid();
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

@@ -23,11 +23,13 @@ namespace Physica::Core {
     class RingPolymer {
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MassVector = typename MDCellType::MassVector;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using PhaseMatrix = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using BufferType = DenseMatrix<ComplexScalar<PosScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
     private:
         PhaseMatrix phase;
+        MassVector massVec;
         FFT<PosScalarType, 1> fft;
         BufferType buffer;
     public:
@@ -39,6 +41,7 @@ namespace Physica::Core {
         /* Operators */
         RingPolymer& operator=(RingPolymer obj) noexcept;
         /* Operations */
+        template<class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
         void removeDrift();
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
@@ -46,6 +49,9 @@ namespace Physica::Core {
         [[nodiscard]] PositionMatrix makeCentroidPos() const;
         [[nodiscard]] PositionMatrix makeBeadMomentum(size_t replica) const;
         [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
+
+        [[nodiscard]] ScalarType calcClassicalKinetic() const;
+        [[nodiscard]] ScalarType calcTemperature() const;
         void swap(RingPolymer& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
@@ -54,15 +60,22 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDOF() const noexcept { return phase.getRow() / 2U; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getDOF() / Dim; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phase.getColumn(); }
+
+        [[nodiscard]] const MassVector& getMassVec() const noexcept { return massVec; }
         [[nodiscard]] FFT<PosScalarType, 1>& getCanonicalFFT() noexcept { return fft; }
+
         [[nodiscard]] const BufferType& getBuffer() const noexcept { return buffer; }
         [[nodiscard]] BufferType& getBuffer() noexcept { return buffer; }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getColumn(); }
+        /* Helpers */
+        [[nodiscard]] ScalarType calcRepBeta(ScalarType temperatureT) const noexcept;
+        [[nodiscard]] ScalarType calcOmegaW(ScalarType temperatureT) const noexcept;
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     RingPolymer<ScalarType, PosScalarType, Dim>::RingPolymer(const MDCellType& cell, size_t numReplica)
             : phase(2 * cell.getDOF(), numReplica)
+            , massVec(cell.getMassVec())
             , fft(numReplica, 1) {
         const size_t dof = getDOF();
         buffer.resize(2, fft.getKSpaceSize());
@@ -88,6 +101,31 @@ namespace Physica::Core {
     RingPolymer<ScalarType, PosScalarType, Dim>::operator=(RingPolymer<ScalarType, PosScalarType, Dim> obj) noexcept {
         swap(obj);
         return *this;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class RandomGenerator>
+    void RingPolymer<ScalarType, PosScalarType, Dim>::initMomentum(ScalarType temperatureT, RandomGenerator& gen) {
+        std::normal_distribution<> dist{};
+        const size_t dof = getDOF();
+        const ScalarType repBeta = calcRepBeta(temperatureT);
+        Vector<ScalarType, Dim> driftMomentum(Dim, 0);
+        for (size_t i = 0; i < dof; ++i) {
+            const auto mass = massVec[i / Dim];
+            const size_t direction = i % Dim;
+            const ScalarType factor = sqrt(repBeta * mass);
+            for (size_t j = 0; j < getNumReplica(); ++j) {
+                const ScalarType temp = factor * dist(gen);
+                phase(i, j) = temp;
+                driftMomentum[direction] += temp;
+            }
+        }
+        driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+
+        for (size_t i = 0; i < dof; ++i) {
+            auto row = phase.row(i);
+            row -= driftMomentum[i % Dim];
+        }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -182,9 +220,37 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcClassicalKinetic() const {
+        const size_t dof = getDOF();
+        ScalarType result = 0;
+        for (size_t i = 0; i < dof; ++i) {
+            const auto mass = massVec[i / Dim];
+            auto p = phase.row(i);
+            result += square(p.asVector()).sum() / (mass * 2);
+        }
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcTemperature() const {
+        return square(makeCentroidMomentum()).sum() * (1 / (Dim * PhyConst<AU>::boltzmannK)) / massVec.sum();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RingPolymer<ScalarType, PosScalarType, Dim>::swap(RingPolymer& obj) noexcept {
         phase.swap(obj.phase);
+        massVec.swap(obj.massVec);
         fft.swap(obj.fft);
         buffer.swap(obj.buffer);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcRepBeta(ScalarType temperatureT) const noexcept {
+        return temperatureT * PhyConst<AU>::boltzmannK * getNumReplica();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcOmegaW(ScalarType temperatureT) const noexcept {
+        return calcRepBeta(temperatureT) / PhyConst<AU>::reducedPlanck;
     }
 }

@@ -19,6 +19,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 
@@ -26,6 +27,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
+using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -137,7 +139,7 @@ void testMD() {
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     ForceModel model(cell, pair_cutoff);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
@@ -146,7 +148,8 @@ void testMD() {
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-12), gen, model);
+        const ThermostatType thermo(temperatureT, thermostatTime);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-12), thermo, gen, model);
         for (size_t i = 0; i < 100; ++i) {
             const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
             ScalarType temp = 0;
@@ -157,7 +160,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<decltype(gen), decltype(model), ThreadExecutor>(gen, model);
+            rpmd.nvt_step<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(thermo, gen, model);
         }
     }
     pool.shouldExit();

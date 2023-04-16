@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Cycler.h"
 
@@ -28,6 +29,7 @@ using namespace Physica::Core::Parallel;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
+using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 192;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
@@ -71,7 +73,8 @@ int main() {
 
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, thermostatTime, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
+    const ThermostatType thermo(temperatureT, thermostatTime);
     rpmd.initMomentum(gen);
     ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
     {
@@ -79,7 +82,7 @@ int main() {
         ThreadPool& pool = ThreadPool::getInstance();
         //ProfilerStart("profiler.dat");
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), thermo, gen, model);
         const auto to = Cycler::toc();
         //ProfilerStop();
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';

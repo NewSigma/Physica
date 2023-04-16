@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -9,6 +10,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
+using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 48;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(14);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -96,7 +98,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
+    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -112,6 +114,7 @@ int main() {
         std::mt19937 gen(1082247429173841685);
         RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
         auto& ringPolymer = rpmd.getRingPolymer();
+        ThermostatType thermo(temperatureT, thermostatTime);
         rpmd.initMomentum(gen);
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
@@ -124,13 +127,13 @@ int main() {
         for (unsigned int i = 0; i < 6; ++i) {
             temp = ScalarType(0);
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E-15));
-                rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), gen, pair);
-                rpmd.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E15));
+                thermo.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E-15));
+                rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, pair);
+                thermo.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E15));
                 const auto p0 = ringPolymer.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
                     toNextMean(temp[k], j, hadamard(ringPolymer.makeCentroidMomentum(), p0).sum() * factor);
-                    rpmd.nvt_step<decltype(gen), decltype(pair), ThreadExecutor>(gen, pair);
+                    rpmd.nvt_step<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(thermo, gen, pair);
                 }
             }
 

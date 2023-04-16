@@ -19,6 +19,7 @@
 #include <gperftools/profiler.h>
 #include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -29,6 +30,7 @@ using namespace Physica::Core::Parallel;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
+using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -116,7 +118,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, thermostatTime, timeStep);
+    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -130,6 +132,7 @@ int main() {
     ThreadPool& pool = ThreadPool::getInstance();
     {
         auto rpmd = makeSystem(gen);
+        const ThermostatType thermo(temperatureT, thermostatTime);
         rpmd.initMomentum(gen);
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
@@ -137,7 +140,7 @@ int main() {
 
         ProfilerStart("profiler.dat");
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(10 * 1E-12), gen, pair);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(10 * 1E-12), thermo, gen, pair);
         const auto to = Cycler::toc();
         ProfilerStop();
 

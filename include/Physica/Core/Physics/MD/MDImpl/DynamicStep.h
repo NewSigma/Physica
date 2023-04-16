@@ -33,21 +33,24 @@ namespace Physica::Core {
         using Vector2D = Vector<ScalarType, 2>;
 
         VectorType omegaK;
+        ScalarType omegaW;
         Utils::Array<Vector2D> coeffMatrixBase;
         ScalarType lastTimeStep;
     public:
         DynamicStep();
-        DynamicStep(ScalarType omegaW, size_t kSpaceSize, size_t numReplica);
+        DynamicStep(ScalarType repBeta, size_t kSpaceSize, size_t numReplica);
         DynamicStep(const DynamicStep&) = default;
         DynamicStep(DynamicStep&&) noexcept = default;
         ~DynamicStep() = default;
         /* Operators */
         DynamicStep& operator=(DynamicStep obj) noexcept;
         /* Operations */
-        void nve_step(RingPolymerType& ringPolymer, const MassVector& mass, ScalarType deltaT);
+        void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         template<class Barostat>
         void npt_step(RingPolymerType& ringPolymer, MDCellType& cell, Barostat& barostat, ScalarType deltaT);
         void swap(DynamicStep& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
     private:
         void updateTimeStep(ScalarType deltaT);
     };
@@ -56,8 +59,9 @@ namespace Physica::Core {
     DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep() : lastTimeStep(0) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep(ScalarType omegaW, size_t kSpaceSize, size_t numReplica)
+    DynamicStep<ScalarType, PosScalarType, Dim>::DynamicStep(ScalarType repBeta, size_t kSpaceSize, size_t numReplica)
             : omegaK(kSpaceSize)
+            , omegaW(repBeta / PhyConst<AU>::reducedPlanck)
             , coeffMatrixBase(kSpaceSize)
             , lastTimeStep(0) {
         for (size_t i = 0; i < omegaK.getLength(); ++i)
@@ -65,11 +69,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void DynamicStep<ScalarType, PosScalarType, Dim>::nve_step(RingPolymerType& ringPolymer, const MassVector& massVec, ScalarType deltaT) {
+    void DynamicStep<ScalarType, PosScalarType, Dim>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
         const size_t dof = ringPolymer.getDOF();
         const size_t kSpaceSize = omegaK.getLength();
+        const auto& massVec = ringPolymer.getMassVec();
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
 
@@ -115,7 +120,7 @@ namespace Physica::Core {
             MDCellType& cell,
             Barostat& barostat,
             ScalarType deltaT) {
-        nve_step(ringPolymer, cell.getMassVec(), deltaT);
+        nve_step(ringPolymer, deltaT);
         LatticeMatrix lattice = cell->getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
         cell.setLattice(std::move(lattice));
     }
@@ -130,6 +135,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void DynamicStep<ScalarType, PosScalarType, Dim>::swap(DynamicStep& obj) noexcept {
         omegaK.swap(obj.omegaK);
+        omegaW.swap(obj.omegaW);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
         lastTimeStep.swap(obj.lastTimeStep);
     }
