@@ -119,9 +119,8 @@ void testMD() {
     ThreadPool& pool = ThreadPool::getInstance();
     {
         for (size_t path = 0; path < 16; ++path) {
-            thermo.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E-15));
             rpmd.nvt_step_for<ThermostatType, decltype(gen), ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, model);
-            thermo.setThermostatTime(PhyConst<AU>::secondToTime(100 * 1E15));
+
             typename MDCell<ScalarType, PosScalarType>::PositionMatrix buffer(model.getNumMolecule(), 3, 0);
             for (size_t i = 0; i < numReplica; ++i)
                 buffer += model.makeDipoleMoments(rpmd.phaseToCell(i));
