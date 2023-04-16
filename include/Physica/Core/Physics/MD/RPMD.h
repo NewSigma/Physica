@@ -110,6 +110,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
         [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
+        [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }
         [[nodiscard]] const PhaseMatrix& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
         [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
         [[nodiscard]] size_t getDOF() const noexcept { return ringPolymer.getDOF(); }

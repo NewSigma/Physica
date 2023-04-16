@@ -73,30 +73,38 @@ namespace Physica::Core {
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
 
-        MatrixType matA(2, 2);
-        ComplexVector2D temp{};
-        BufferType& buffer = ringPolymer.getBuffer();
-        assert(kSpaceSize == buffer.getColumn());
-        
-        for (size_t i = 0; i < dof; ++i) {
-            const auto mass = massVec[i / Dim];
-            ringPolymer.toNormalRepr(i);
-            /* Translational mode */ {
-                buffer(1, 0) += buffer(0, 0) * deltaT / mass;
+        if (ringPolymer.getNumReplica() > 1) {
+            MatrixType matA(2, 2);
+            ComplexVector2D temp{};
+            BufferType& buffer = ringPolymer.getBuffer();
+            assert(kSpaceSize == buffer.getColumn());
+            for (size_t i = 0; i < dof; ++i) {
+                const auto mass = massVec[i / Dim];
+                ringPolymer.toNormalRepr(i);
+                /* Translational mode */ {
+                    buffer(1, 0) += buffer(0, 0) * deltaT / mass;
+                }
+                for (size_t j = 1; j < kSpaceSize; ++j) {
+                    auto col = buffer.col(j);
+                    const ScalarType factor = ScalarType(mass) * omegaK[j];
+                    const ScalarType cosine = coeffMatrixBase[j][0];
+                    const ScalarType sine = coeffMatrixBase[j][1];
+                    matA(0, 0) = cosine;
+                    matA(0, 1) = -factor * sine;
+                    matA(1, 0) = sine / factor;
+                    matA(1, 1) = cosine;
+                    temp = matA * col;
+                    col = temp;
+                }
+                ringPolymer.toBeadRepr(i);
             }
-            for (size_t j = 1; j < kSpaceSize; ++j) {
-                auto col = buffer.col(j);
-                const ScalarType factor = ScalarType(mass) * omegaK[j];
-                const ScalarType cosine = coeffMatrixBase[j][0];
-                const ScalarType sine = coeffMatrixBase[j][1];
-                matA(0, 0) = cosine;
-                matA(0, 1) = -factor * sine;
-                matA(1, 0) = sine / factor;
-                matA(1, 1) = cosine;
-                temp = matA * col;
-                col = temp;
+        }
+        else {
+            auto& phase = ringPolymer.asMatrix();
+            for (size_t i = 0; i < dof; ++i) {
+                const auto mass = massVec[i / Dim];
+                phase(i + dof, 0) += phase(i, 0) * deltaT / mass;
             }
-            ringPolymer.toBeadRepr(i);
         }
     }
 
