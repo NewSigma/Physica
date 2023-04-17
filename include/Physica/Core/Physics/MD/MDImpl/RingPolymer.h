@@ -42,6 +42,7 @@ namespace Physica::Core {
         RingPolymer& operator=(RingPolymer obj) noexcept;
         /* Operations */
         template<class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
+        void scaleVelocity(ScalarType temperatureT);
         void removeDrift();
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
@@ -126,6 +127,15 @@ namespace Physica::Core {
             auto row = phase.row(i);
             row -= driftMomentum[i % Dim];
         }
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void RingPolymer<ScalarType, PosScalarType, Dim>::scaleVelocity(ScalarType temperatureT) {
+        const ScalarType temperatureNow = calcTemperature();
+        const size_t dof = getDOF();
+        const ScalarType factor = sqrt(temperatureT / temperatureNow);
+        auto momentum = phase.topRows(dof);
+        momentum *= factor;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

@@ -156,12 +156,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::scaleVelocity() {
-        const ScalarType temperatureNow = ringPolymer.calcTemperature();
-        assert(temperatureNow.isPositive());
-        const size_t dof = getDOF();
-        const ScalarType factor = sqrt(temperatureT / temperatureNow);
-        auto momentum = getPhaseMatrix().topRows(dof);
-        momentum *= factor;
+        ringPolymer.scaleVelocity(temperatureT);
     }
     /**
      * Carrying out this function every several steps may stable the simulation.
