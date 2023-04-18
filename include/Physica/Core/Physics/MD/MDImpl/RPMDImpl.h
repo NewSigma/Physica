@@ -306,7 +306,7 @@ namespace Physica::Core {
                 const auto momentum1 = momentum.segment(from, to);
                 const auto pos1 = pos.segment(from, to);
                 const auto force1 = force.segment(from, to);
-                stress += (factor * momentum1) * momentum1.transpose() - pos1 * force1.transpose();
+                stress += (factor * momentum1) * momentum1.transpose();
             }
         }
         stress *= reciprocal(getVolume());

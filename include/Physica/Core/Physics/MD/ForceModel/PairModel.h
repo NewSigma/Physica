@@ -33,6 +33,7 @@ namespace Physica::Core {
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
@@ -57,6 +58,7 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix staticStress(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
     };
 
@@ -148,6 +150,55 @@ namespace Physica::Core {
                 }
                 result += temp;
             });
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, class PairFunctor>
+    typename PairModel<ScalarType, PosScalarType, PairFunctor>::LatticeMatrix
+    PairModel<ScalarType, PosScalarType, PairFunctor>::staticStress(const MDCellType& cell) const {
+        const auto& pos = cell.getPos();
+        const size_t numParticle = cell.getNumParticle();
+        const CellListType cellList(cell, cutoff);
+
+        LatticeMatrix result(3, 3, 0);
+        for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
+            const Index3D center = cellList.getAtomCellMap()[atom1];
+            Vector3D f1(3, 0);
+            cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &f1](Vector3D translate, Index3D neigh) {
+                const Vector3D from = pos.row(atom1) - translate;
+                const auto& subCell = cellList(neigh);
+
+                Vector3D r, f(3, 0);
+                auto ite = subCell.cbegin();
+                bool isValid = ite != subCell.cend();
+                size_t atomToSolve;
+                if (isValid)
+                    atomToSolve = *(ite++);
+
+                while (isValid) {
+                    const size_t atom2 = atomToSolve;
+                    isValid = ite != subCell.cend();
+                    if (isValid)
+                        atomToSolve = *(ite++);
+
+                    const bool isSelf = atom1 == atom2;
+                    if (isSelf)
+                        continue;
+                    const auto to = pos.row(atom2);
+                    r = to.asVector() - from;
+                    const ScalarType r2 = r.squaredNorm();
+                    if (r2 < squared_cutoff) {
+                        const ScalarType dist = sqrt(r2);
+                        const ScalarType f_norm = force_functor(dist);
+                        r *= ScalarType(f_norm / dist);
+                        f -= r;
+                    }
+                }
+                f1 += f;
+            });
+            result += f1 * pos.row(atom1).asVector().transpose();
+        }
+        result *= reciprocal(ScalarType(cell.getVolume() * 2.0));
         return result;
     }
 
