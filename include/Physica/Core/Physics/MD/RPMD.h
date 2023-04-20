@@ -73,12 +73,9 @@ namespace Physica::Core {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Executor>
-        void updateForce(const ForceModel& model);
-        template<class ForceModel, class Executor>
-        void nve_step(const ForceModel& model);
-        template<class ForceModel, class Executor>
-        void nve_step_for(ScalarType duration, const ForceModel& model);
+        template<class ForceModel, class Executor> void updateForce(const ForceModel& model);
+        template<class ForceModel, class Executor> void nve_step(const ForceModel& model);
+        template<class ForceModel, class Executor> void nve_step_for(ScalarType duration, const ForceModel& model);
 
         template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
         void nvt_step(const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model);

@@ -58,7 +58,7 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
-        [[nodiscard]] LatticeMatrix staticStress(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
     };
 
@@ -155,7 +155,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
     typename PairModel<ScalarType, PosScalarType, PairFunctor>::LatticeMatrix
-    PairModel<ScalarType, PosScalarType, PairFunctor>::staticStress(const MDCellType& cell) const {
+    PairModel<ScalarType, PosScalarType, PairFunctor>::virial(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
         const size_t numParticle = cell.getNumParticle();
         const CellListType cellList(cell, cutoff);

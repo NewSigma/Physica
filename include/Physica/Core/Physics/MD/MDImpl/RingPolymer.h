@@ -43,6 +43,7 @@ namespace Physica::Core {
         /* Operations */
         template<class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
         void scaleVelocity(ScalarType temperatureT);
+        [[nodiscard]] Vector<ScalarType, Dim> makeDriftMomentum() const;
         void removeDrift();
         void toNormalRepr(size_t posID);
         void toBeadRepr(size_t posID);
@@ -139,19 +140,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void RingPolymer<ScalarType, PosScalarType, Dim>::removeDrift() {
+    Vector<ScalarType, Dim> RingPolymer<ScalarType, PosScalarType, Dim>::makeDriftMomentum() const {
         const size_t dof = getDOF();
-        Vector<ScalarType, Dim> driftMomentum(Dim, 0);
+        Vector<ScalarType, Dim> result(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
             const size_t direction = i % Dim;
             for (size_t j = 0; j < getNumReplica(); ++j)
-                driftMomentum[direction] += phase(i, j);
+                result[direction] += phase(i, j);
         }
-        driftMomentum *= Core::reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+        return result;
+    }
 
-        for (size_t i = 0; i < dof; ++i) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void RingPolymer<ScalarType, PosScalarType, Dim>::removeDrift() {
+        Vector<ScalarType, Dim> averageDrift = makeDriftMomentum() * reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+        for (size_t i = 0; i < getDOF(); ++i) {
             auto row = phase.row(i);
-            row -= driftMomentum[i % Dim];
+            row -= averageDrift[i % Dim];
         }
     }
 

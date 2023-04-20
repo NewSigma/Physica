@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -32,40 +32,47 @@ namespace Physica::Core {
         static_assert(is_scalar<ScalarType>::value, "[Error]: ScalarType must be a scalar");
         using VectorType = Vector<ScalarType>;
     public:
-        VectorType symmCorr;
-        FFT<ScalarType, 1> fft;
+        VectorType dipoleCorr;
+        mutable FFT<ScalarType, 1> fft;
         ScalarType factor;
         SavitzkyGolay<ScalarType> filter;
     public:
-        IRAbsorb(const VectorType& dipoleCorr,
+        IRAbsorb(VectorType dipoleCorr_,
+                 ScalarType temperatureT,
                  ScalarType deltaT,
                  double volume,
                  unsigned char filterRange,
                  size_t filterOrder);
+        IRAbsorb(const IRAbsorb&) = default;
+        IRAbsorb(IRAbsorb&&) noexcept = default;
+        ~IRAbsorb() = default;
+        /* Operators */
+        IRAbsorb& operator=(IRAbsorb obj) noexcept;
         /* Operations */
         [[nodiscard]] VectorType makeWaveNum() const;
         [[nodiscard]] VectorType makeSpectrum() const;
+        void swap(IRAbsorb& obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getDataLength() const noexcept { return symmCorr.getLength() / 2; }
+        [[nodiscard]] size_t getDataLength() const noexcept { return dipoleCorr.getLength(); }
         [[nodiscard]] ScalarType getDeltaWaveNum() const { return fft.getKSpaceDelta() / ScalarType(PhyConst<AU>::speedOfLight); }
     };
 
     template<class ScalarType>
-    IRAbsorb<ScalarType>::IRAbsorb(const VectorType& dipoleCorr,
+    IRAbsorb<ScalarType>::IRAbsorb(VectorType dipoleCorr_,
+                                   ScalarType temperatureT,
                                    ScalarType deltaT,
                                    double volume,
                                    unsigned char filterRange,
                                    size_t filterOrder)
-            : symmCorr(2 * dipoleCorr.getLength())
+            : dipoleCorr(std::move(dipoleCorr_))
             , fft(2 * dipoleCorr.getLength(), deltaT)
-            , factor(M_PI / (3 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * volume * PhyConst<AU>::boltzmannK * PhyConst<AU>::kToTemperature(298)))
-            , filter(filterRange, filterRange, filterOrder, deltaT) {
-        const Vector<ScalarType> temp = dipoleCorr.reverse();
-        auto head = symmCorr.head(dipoleCorr.getLength());
-        head = dipoleCorr;
-        auto tail = symmCorr.tail(dipoleCorr.getLength());
-        tail = temp;
-        fft.transform(symmCorr);
+            , factor(M_PI / (3 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * volume * PhyConst<AU>::boltzmannK * double(temperatureT)))
+            , filter(filterRange, filterRange, filterOrder, deltaT) {}
+
+    template<class ScalarType>
+    IRAbsorb<ScalarType>& IRAbsorb<ScalarType>::operator=(IRAbsorb<ScalarType> obj) noexcept {
+        swap(obj);
+        return *this;
     }
 
     template<class ScalarType>
@@ -75,6 +82,13 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeSpectrum() const {
+        Vector<ScalarType> symmCorr(2 * getDataLength());
+        const Vector<ScalarType> temp = dipoleCorr.reverse();
+        auto head = symmCorr.head(dipoleCorr.getLength());
+        head = dipoleCorr;
+        auto tail = symmCorr.tail(dipoleCorr.getLength());
+        tail = temp;
+        fft.transform(symmCorr);
         const Vector<ScalarType> norm = toRealVector(fft.getKSpace()) * ScalarType(1 / (2 * M_PI));
         const ScalarType step = fft.getKSpaceDelta();
 
@@ -88,5 +102,13 @@ namespace Physica::Core {
             spectrum[index] = 0.0;
         filter.smooth(spectrum);
         return spectrum.segment(filter.getLRange(), getDataLength() + filter.getLRange());
+    }
+
+    template<class ScalarType>
+    void IRAbsorb<ScalarType>::swap(IRAbsorb& obj) noexcept {
+        dipoleCorr.swap(obj.dipoleCorr);
+        fft.swap(obj.fft);
+        factor.swap(obj.factor);
+        filter.swap(obj.filter);
     }
 }

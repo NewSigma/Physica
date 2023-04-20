@@ -310,7 +310,7 @@ namespace Physica::Core {
             }
         }
         stress *= reciprocal(getVolume());
-        return stress + model.staticStress(makeAverageCell());
+        return stress + model.virial(makeAverageCell());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -379,12 +379,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     bool RPMD<ScalarType, PosScalarType, Dim>::checkCentroid() const {
-        constexpr bool success = true;
+        constexpr bool isGood = true;
         PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         for (auto& elem : centroid)
             if (!(PosScalarType::Zero() <= elem && elem <= PosScalarType::One()))
-                return !success;
-        return success;
+                return !isGood;
+        return isGood;
     }
 }
