@@ -20,7 +20,6 @@
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
-    template<class ScalarType, class PosScalarType, unsigned int Dim> class RPMD;
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     class PeriodicModel {

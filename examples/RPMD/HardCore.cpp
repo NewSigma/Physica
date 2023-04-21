@@ -19,29 +19,67 @@
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Gui/Plot/Plot.h"
-#include "Physica/Core/Physics/MD/MD1D.h"
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
+using namespace Physica::Core::Parallel;
 using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 using MatrixType = DenseMatrix<ScalarType>;
+using MDType = RPMD<ScalarType, ScalarType, 1>;
+using MDCellType = typename MDType::MDCellType;
 constexpr double timeStep = 0.001;
+constexpr double latticeSize = 100;
+constexpr size_t numMolecular = 10;
+
+template<class ScalarType>
+class EmptyForceModel final {
+public:
+    /* Operations */
+    template<class Executor>
+    [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+    template<class Executor>
+    [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+    template<class Executor>
+    [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+};
+
+MDCellType makeSystem(std::mt19937& gen) {
+    typename MDCellType::LatticeMatrix lattice{latticeSize};
+
+    std::uniform_real_distribution dist{};
+    Vector<ScalarType> posVec(numMolecular);
+    for (auto& elem : posVec)
+        elem = dist(gen) * latticeSize;
+    std::sort(posVec.begin(), posVec.end());
+    typename MDCellType::PositionMatrix pos(numMolecular, 1);
+    pos.col(0) = posVec;
+
+    typename MDCellType::MassVector massVec(numMolecular);
+    for (auto& elem : massVec)
+        elem = dist(gen);
+    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+}
 
 int main(int argc, char** argv) {
+    using ForceModel = EmptyForceModel<ScalarType>;
+    using KineticModel = HardCore<ScalarType>;
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    MD1D<ScalarType> md(10, 100, timeStep, timeStep * 0.01);
-    md.init(gen);
+    MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
+    rpmd.initMomentum(gen);
+    KineticModel kineticModel(latticeSize, 0.01);
 
-    MatrixType record(100000, md.getNumParticle());
-    for (int i = 0; i < record.getRow(); ++i) {
-        md.nve_step();
-        record.row(i) = md.getPos();
+    MatrixType record(100000, rpmd.getNumParticle());
+    for (size_t i = 0; i < record.getRow(); ++i) {
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+        record.row(i) = rpmd.getRingPolymer().makeBeadPos(0);
     }
 
     QApplication app(argc, argv);
@@ -106,7 +144,7 @@ int main(int argc, char** argv) {
         chart.addAxis(axisTop, Qt::AlignTop);
         chart.addAxis(axisRight, Qt::AlignRight);
 
-        for (int i = 0; i < md.getNumParticle(); ++i) {
+        for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
             auto& spline = plot->line(record.col(i));
             spline.attachAxis(axisX);
             spline.attachAxis(axisY);

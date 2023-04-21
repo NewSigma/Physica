@@ -68,6 +68,7 @@ namespace Physica::Core {
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         void superToUnit(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
+        [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] Type getType() const noexcept { return type; }

@@ -210,10 +210,10 @@ int main(int argc, char** argv) {
     auto& chart = *plot->chart();
     chart.legend()->setVisible(false);
     {
-        constexpr double minX = 0;
-        constexpr double maxX = 10;
-        constexpr double minY = 50;
-        constexpr double maxY = 120;
+        //constexpr double minX = 0;
+        //constexpr double maxX = 10;
+        //constexpr double minY = 50;
+        //constexpr double maxY = 120;
         QValueAxis* axisX = new QValueAxis();
         font = axisX->labelsFont();
         font.setPointSize(15);
