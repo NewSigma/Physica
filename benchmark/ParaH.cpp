@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Utils/Random.h"
 #include "Physica/Utils/Cycler.h"
 
@@ -31,6 +32,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -133,6 +135,7 @@ int main() {
     {
         auto rpmd = makeSystem(gen);
         const ThermostatType thermo(temperatureT, thermostatTime);
+        KineticModel kineticModel(temperatureT, numReplica);
         rpmd.initMomentum(gen);
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
@@ -140,7 +143,7 @@ int main() {
 
         ProfilerStart("profiler.dat");
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(10 * 1E-12), thermo, gen, pair);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(10 * 1E-12), thermo, gen, kineticModel, pair);
         const auto to = Cycler::toc();
         ProfilerStop();
 

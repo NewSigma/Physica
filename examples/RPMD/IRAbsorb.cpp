@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Physics/MD/IRAbsorb.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/IO/Poscar.h"
@@ -33,6 +34,7 @@ using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -111,29 +113,30 @@ void testMD() {
     ThermostatType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, 8, temperatureT, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
 
     Vector<ScalarType> corr(40000);
 
     ThreadPool::initThreadPool(16);
     ThreadPool& pool = ThreadPool::getInstance();
     {
+        KineticModel kineticModel(temperatureT, numReplica);
         for (size_t path = 0; path < 16; ++path) {
-            rpmd.nvt_step_for<ThermostatType, decltype(gen), ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, model);
+            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, kineticModel, forceModel);
 
-            typename MDCell<ScalarType, PosScalarType>::PositionMatrix buffer(model.getNumMolecule(), 3, 0);
+            typename MDCell<ScalarType, PosScalarType>::PositionMatrix buffer(forceModel.getNumMolecule(), 3, 0);
             for (size_t i = 0; i < numReplica; ++i)
-                buffer += model.makeDipoleMoments(rpmd.phaseToCell(i));
+                buffer += forceModel.makeDipoleMoments(rpmd.phaseToCell(i));
             buffer *= reciprocal(ScalarType(numReplica));
             Vector<ScalarType, 3> dipole0{buffer.col(0).asVector().sum(), buffer.col(1).asVector().sum(), buffer.col(2).asVector().sum()};
             for (size_t i = 0; i < corr.getLength(); ++i) {
                 buffer = ScalarType(0);
                 for (size_t i = 0; i < numReplica; ++i)
-                    buffer += model.makeDipoleMoments(rpmd.phaseToCell(i));
+                    buffer += forceModel.makeDipoleMoments(rpmd.phaseToCell(i));
                 buffer *= reciprocal(ScalarType(numReplica));
                 Vector<ScalarType, 3> dipole1{buffer.col(0).asVector().sum(), buffer.col(1).asVector().sum(), buffer.col(2).asVector().sum()};
                 toNextMean(corr[i], path, dipole0 * dipole1);
-                rpmd.nvt_step<ThermostatType, decltype(gen), ForceModel, ThreadExecutor>(thermo, gen, model);
+                rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(thermo, gen, kineticModel, forceModel);
             }
             rpmd.normalizeCentroid();
             std::cout << path << std::endl;
@@ -142,7 +145,7 @@ void testMD() {
     pool.shouldExit();
     ThreadPool::deInitThreadPool();
 
-    IRAbsorb<ScalarType> ir(corr, timeStep, double(rpmd.getVolume()), 128, 4);
+    IRAbsorb<ScalarType> ir(corr, temperatureT, timeStep, double(rpmd.getVolume()), 128, 4);
     auto spectrum = ir.makeSpectrum();
     spectrum *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 100));
     auto waveNum = ir.makeWaveNum();

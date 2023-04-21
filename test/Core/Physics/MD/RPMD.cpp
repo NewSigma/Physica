@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 
@@ -28,6 +29,7 @@ using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -142,6 +144,7 @@ int main() {
         std::mt19937 gen(3438603950906262893);
         auto rpmd = makeSystem(gen);
         const ThermostatType thermo(temperatureT, thermostatTime);
+        KineticModel kineticModel(temperatureT, numReplica);
         rpmd.initMomentum(gen);
         if (!testDriftMomentum(rpmd, 1E-12))
             return 1;
@@ -151,14 +154,15 @@ int main() {
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(
+            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 gen,
+                kineticModel,
                 pair);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(thermo, gen, pair);
+                rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(thermo, gen, kineticModel, pair);
                 toNextMean(temp, j, rpmd.calcKinetic());
             }
             toNextVariance(var, mean, i, temp);

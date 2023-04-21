@@ -24,7 +24,6 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "MDCell.h"
-#include "MDImpl/DynamicStep.h"
 #include "MDImpl/RingPolymer.h"
 
 namespace Physica::Core {
@@ -40,7 +39,6 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
     class RPMD final {
-        using DynamicStepImpl = DynamicStep<ScalarType, PosScalarType, Dim>;
     public:
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
@@ -56,8 +54,6 @@ namespace Physica::Core {
         FFT<PosScalarType, 1> fftContract;
         PhaseMatrix posContract;
         ForceMatrix forceContract;
-
-        DynamicStepImpl dynamicStep;
         /* Constant */
         ScalarType temperatureT;
         ScalarType timeStep;
@@ -74,18 +70,42 @@ namespace Physica::Core {
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
         template<class ForceModel, class Executor> void updateForce(const ForceModel& model);
-        template<class ForceModel, class Executor> void nve_step(const ForceModel& model);
-        template<class ForceModel, class Executor> void nve_step_for(ScalarType duration, const ForceModel& model);
+        template<class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void nve_step(KineticModel& kineticModel, const ForceModel& forceModel);
+        template<class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel);
 
-        template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step(const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model);
-        template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
-        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model);
+        template<class Thermostat,
+                 class RandomGenerator,
+                 class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void nvt_step(const Thermostat& thermostat, RandomGenerator& gen, KineticModel& kineticModel, const ForceModel& forceModel);
+        template<class Thermostat,
+                 class RandomGenerator,
+                 class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, KineticModel& kineticModel, const ForceModel& forceModel);
 
-        template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
-        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
-        template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, const ForceModel& model);
+        template<class Thermostat,
+                 class RandomGenerator,
+                 class Barostat,
+                 class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, const ForceModel& forceModel);
+        template<class Thermostat,
+                 class RandomGenerator,
+                 class Barostat,
+                 class KineticModel,
+                 class ForceModel,
+                 class Executor>
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, const ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();

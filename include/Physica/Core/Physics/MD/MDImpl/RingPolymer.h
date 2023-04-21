@@ -27,10 +27,11 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using PhaseMatrix = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector>;
         using BufferType = DenseMatrix<ComplexScalar<PosScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
+        using FFTType = FFT<PosScalarType, 1>;
     private:
         PhaseMatrix phase;
         MassVector massVec;
-        FFT<PosScalarType, 1> fft;
+        FFTType fft;
         BufferType buffer;
     public:
         RingPolymer() = default;
@@ -72,6 +73,10 @@ namespace Physica::Core {
         /* Helpers */
         [[nodiscard]] ScalarType calcRepBeta(ScalarType temperatureT) const noexcept;
         [[nodiscard]] ScalarType calcOmegaW(ScalarType temperatureT) const noexcept;
+        /* Static members */
+        [[nodiscard]] static ScalarType calcRepBeta(ScalarType temperatureT, size_t numReplica) noexcept;
+        [[nodiscard]] static ScalarType calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept;
+        [[nodiscard]] static size_t calcKSpaceSize(size_t numReplica) noexcept;
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -261,11 +266,26 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcRepBeta(ScalarType temperatureT) const noexcept {
-        return temperatureT * PhyConst<AU>::boltzmannK * getNumReplica();
+        return calcRepBeta(temperatureT, getNumReplica());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcOmegaW(ScalarType temperatureT) const noexcept {
-        return calcRepBeta(temperatureT) / PhyConst<AU>::reducedPlanck;
+        return calcOmegaW(temperatureT, getNumReplica());
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcRepBeta(ScalarType temperatureT, size_t numReplica) noexcept {
+        return temperatureT * PhyConst<AU>::boltzmannK * numReplica;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept {
+        return calcRepBeta(temperatureT, numReplica) / PhyConst<AU>::reducedPlanck;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    size_t RingPolymer<ScalarType, PosScalarType, Dim>::calcKSpaceSize(size_t numReplica) noexcept {
+        return FFTType::rSizeToKSize(numReplica);
     }
 }

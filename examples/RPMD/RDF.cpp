@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 #include "Physica/Core/Physics/MD/RDF.h"
@@ -32,6 +33,7 @@ using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -114,7 +116,8 @@ int main() {
     const ThermostatType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
+    KineticModel kineticModel(temperatureT, numReplica);
 
     RDF<PosScalarType> rdf;
     {
@@ -131,9 +134,9 @@ int main() {
     ThreadPool::initThreadPool(4);
     ThreadPool& pool = ThreadPool::getInstance();
     {
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, kineticModel, forceModel);
         for (size_t i = 0; i < 1000; ++i) {
-            rpmd.nvt_step<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(thermo, gen, model);
+            rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(thermo, gen, kineticModel, forceModel);
             rpmd.normalizeCentroid();
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

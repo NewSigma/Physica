@@ -39,8 +39,6 @@ namespace Physica::Core {
         }
 
         setTemperature(temperatureT_);
-
-        dynamicStep = DynamicStepImpl(ringPolymer.calcRepBeta(temperatureT), getKSpaceSize(), getNumReplica());
         checkParam();
     }
 
@@ -89,63 +87,95 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim>::nve_step(const ForceModel& model) {
+    template<class KineticModel,
+             class ForceModel,
+             class Executor>
+    void RPMD<ScalarType, PosScalarType, Dim>::nve_step(KineticModel& kineticModel, const ForceModel& forceModel) {
         forceStep(timeStep * 0.5);
-        dynamicStep.nve_step(ringPolymer, timeStep);
-        updateForce<ForceModel, Executor>(model);
+        kineticModel.nve_step(ringPolymer, timeStep);
+        updateForce<ForceModel, Executor>(forceModel);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim>::nve_step_for(ScalarType duration, const ForceModel& force) {
+    template<class KineticModel,
+             class ForceModel,
+             class Executor>
+    void RPMD<ScalarType, PosScalarType, Dim>::nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            nve_step<ForceModel, Executor>(force);
+            nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim>::nvt_step(const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model) {
+    template<class Thermostat,
+             class RandomGenerator,
+             class KineticModel,
+             class ForceModel,
+             class Executor>
+    void RPMD<ScalarType, PosScalarType, Dim>::nvt_step(
+            const Thermostat& thermostat,
+            RandomGenerator& gen,
+            KineticModel& kineticModel,
+            const ForceModel& forceModel) {
         forceStep(timeStep * 0.5);
-        dynamicStep.nve_step(ringPolymer, timeStep * 0.5);
+        kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         thermostat.step(ringPolymer, gen, timeStep);
-        dynamicStep.nve_step(ringPolymer, timeStep * 0.5);
-        updateForce<ForceModel, Executor>(model);
+        kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+        updateForce<ForceModel, Executor>(forceModel);
         forceStep(timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class Thermostat, class RandomGenerator, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim>::nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, const ForceModel& model) {
+    template<class Thermostat,
+             class RandomGenerator,
+             class KineticModel,
+             class ForceModel,
+             class Executor>
+    void RPMD<ScalarType, PosScalarType, Dim>::nvt_step_for(
+            ScalarType duration,
+            const Thermostat& thermostat,
+            RandomGenerator& gen,
+            KineticModel& kineticModel,
+            const ForceModel& forceModel) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<Thermostat, RandomGenerator, ForceModel, Executor>(thermostat, gen, model);
+            nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, gen, kineticModel, forceModel);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim>::npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, const ForceModel& model) {
+    template<class Thermostat,
+             class RandomGenerator,
+             class Barostat,
+             class KineticModel,
+             class ForceModel,
+             class Executor>
+    void RPMD<ScalarType, PosScalarType, Dim>::npt_step(
+            const Thermostat& thermostat,
+            RandomGenerator& gen,
+            Barostat& barostat,
+            KineticModel& kineticModel,
+            const ForceModel& forceModel) {
         barostat.forceStep(*this, timeStep * 0.5);
-        dynamicStep.npt_Step(ringPolymer, cell, barostat, timeStep * 0.5);
+        kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
         thermostat.step(ringPolymer, gen, timeStep);
-        dynamicStep.npt_Step(ringPolymer, cell, barostat, timeStep * 0.5);
-        updateForce<ForceModel, Executor>(model);
+        kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
+        updateForce<ForceModel, Executor>(forceModel);
         barostat.forceStep(*this, timeStep * 0.5);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class Thermostat, class RandomGenerator, class Barostat, class ForceModel, class Executor>
+    template<class Thermostat, class RandomGenerator, class Barostat, class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::npt_step_for(
             ScalarType duration,
             const Thermostat& thermostat,
             RandomGenerator& gen,
             Barostat& barostat,
-            const ForceModel& model) {
+            KineticModel& kineticModel,
+            const ForceModel& forceModel) {
         uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
-            npt_step<Thermostat, RandomGenerator, Barostat, ForceModel, Executor>(thermostat, gen, barostat, model);
+            npt_step<Thermostat, RandomGenerator, Barostat, KineticModel, ForceModel, Executor>(thermostat, gen, barostat, kineticModel, forceModel);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -204,7 +234,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void RPMD<ScalarType, PosScalarType, Dim>::checkParam() const {
-        const ScalarType cycle = ScalarType(2 * M_PI) / dynamicStep.getOmegaW();
+        const ScalarType cycle = ScalarType(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
         bool isSmallEnough = timeStep < cycle / ScalarType(4);
         if (!isSmallEnough)
             throw std::invalid_argument("[Error]: Time step is too large");
@@ -219,8 +249,6 @@ namespace Physica::Core {
         fftContract.swap(obj.fftContract);
         posContract.swap(obj.posContract);
         forceContract.swap(obj.forceContract);
-
-        dynamicStep.swap(obj.dynamicStep);
 
         temperatureT.swap(obj.temperatureT);
         timeStep.swap(obj.timeStep);
@@ -239,11 +267,12 @@ namespace Physica::Core {
     ScalarType RPMD<ScalarType, PosScalarType, Dim>::getClassicalElastic() const {
         const size_t dof = getDOF();
         auto pos = getPhaseMatrix().bottomRows(dof);
+        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
         ScalarType result = 0;
         for (size_t i = 0; i < dof; ++i) {
             const ScalarType mass = cell.getMass(i / Dim);
             for (size_t j = 0; j < getNumReplica(); ++j)
-                result += mass * square(dynamicStep.getOmegaW() * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
+                result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
         }
         return result;
     }

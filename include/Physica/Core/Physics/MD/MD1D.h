@@ -81,7 +81,7 @@ namespace Physica::Core {
         std::uniform_real_distribution<TrivialType> uniform_dist{};
         std::normal_distribution<TrivialType> normal_dist{};
         for (size_t i = 0; i < getNumParticle(); ++i) {
-            pos[i] = uniform_dist(gen);
+            pos[i] = ScalarType(uniform_dist(gen)) * latticeSize;
             velocity[i] = normal_dist(gen);
             mass[i] = uniform_dist(gen);
         }

@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Cycler.h"
 
@@ -30,6 +31,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -110,10 +112,16 @@ int main() {
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     rpmd.initMomentum(gen);
-    ForceModel model(rpmd.phaseToCell(0), pair_cutoff);
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
+    KineticModel kineticModel(temperatureT, numReplica);
     {
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), SequentialExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), thermo, gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), SequentialExecutor>(
+            PhyConst<AU>::secondToTime(5 * 1E-14),
+            thermo,
+            gen,
+            kineticModel,
+            forceModel);
         const auto to = Cycler::toc();
         std::cout << "1 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
     }
@@ -121,7 +129,12 @@ int main() {
         ThreadPool::initThreadPool(2);
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), thermo, gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
+            PhyConst<AU>::secondToTime(5 * 1E-14),
+            thermo,
+            gen,
+            kineticModel,
+            forceModel);
         const auto to = Cycler::toc();
         std::cout << "2 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();
@@ -131,7 +144,12 @@ int main() {
         ThreadPool::initThreadPool(4);
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), thermo, gen, model);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
+            PhyConst<AU>::secondToTime(5 * 1E-14),
+            thermo,
+            gen,
+            kineticModel,
+            forceModel);
         const auto to = Cycler::toc();
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();

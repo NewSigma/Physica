@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -11,6 +12,7 @@ using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 48;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(14);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(0.1 * 1E-12);
@@ -119,6 +121,7 @@ int main() {
 
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
         rpmd.updateForce<decltype(pair), ThreadExecutor>(pair);
+        KineticModel kineticModel(temperatureT, numReplica);
 
         Vector<ScalarType> corr(CorrStep, 0);
         Vector<ScalarType> corr_var(CorrStep, 0);
@@ -127,11 +130,11 @@ int main() {
         for (unsigned int i = 0; i < 6; ++i) {
             temp = ScalarType(0);
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, pair);
+                rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, kineticModel, pair);
                 const auto p0 = ringPolymer.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
                     toNextMean(temp[k], j, hadamard(ringPolymer.makeCentroidMomentum(), p0).sum() * factor);
-                    rpmd.nvt_step<ThermostatType, decltype(gen), decltype(pair), ThreadExecutor>(thermo, gen, pair);
+                    rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(thermo, gen, kineticModel, pair);
                 }
             }
 

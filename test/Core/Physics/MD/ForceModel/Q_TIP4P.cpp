@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 
@@ -29,6 +30,7 @@ using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
+using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -138,7 +140,7 @@ void testMD() {
 
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    ForceModel model(cell, pair_cutoff);
+    ForceModel forceModel(cell, pair_cutoff);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(gen);
 
@@ -149,7 +151,13 @@ void testMD() {
     ThreadPool& pool = ThreadPool::getInstance();
     {
         const ThermostatType thermo(temperatureT, thermostatTime);
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(PhyConst<AU>::secondToTime(1 * 1E-12), thermo, gen, model);
+        KineticModel kineticModel(temperatureT, numReplica);
+        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
+            PhyConst<AU>::secondToTime(1 * 1E-12),
+            thermo,
+            gen,
+            kineticModel,
+            forceModel);
         for (size_t i = 0; i < 100; ++i) {
             const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
             ScalarType temp = 0;
@@ -160,7 +168,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermostatType, decltype(gen), decltype(model), ThreadExecutor>(thermo, gen, model);
+            rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(thermo, gen, kineticModel, forceModel);
         }
     }
     pool.shouldExit();
