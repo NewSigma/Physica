@@ -253,7 +253,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     ScalarType RingPolymer<ScalarType, PosScalarType, Dim>::calcTemperature() const {
-        return square(makeCentroidMomentum()).sum() * (1 / (Dim * PhyConst<AU>::boltzmannK)) / massVec.sum();
+        const MassVector repMass = reciprocal(massVec);
+        const auto momentum = makeCentroidMomentum();
+        ScalarType sum = 0;
+        for (size_t i = 0; i < getNumParticle(); ++i)
+            sum += square(momentum.row(i).asVector()).sum() * square(repMass[i]);
+        return sum / (ScalarType(Dim * PhyConst<AU>::boltzmannK) * repMass.sum());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

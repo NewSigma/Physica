@@ -24,9 +24,10 @@ namespace Physica::Core {
     template<class ScalarType>
     class ProbabilityDistributionFunction {
         using This = ProbabilityDistributionFunction;
+        using BucketType = Utils::Array<size_t>;
         using VectorType = Vector<ScalarType>;
 
-        VectorType bucket;
+        BucketType bucket;
         VectorType seperates;
         ScalarType repDelta;
     public:
@@ -43,10 +44,12 @@ namespace Physica::Core {
         [[nodiscard]] VectorType makeDistribution() const;
         void swap(This& obj) noexcept;
         /* Getters */
-        [[nodiscard]] const VectorType& getBucket() const noexcept { return bucket; }
+        [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
         [[nodiscard]] ScalarType getFromPoint() const noexcept { return seperates[0]; }
         [[nodiscard]] ScalarType getToPoint() const noexcept { return *seperates.crbegin(); }
+    private:
+        size_t calcNumSample() const;
     };
 
     template<class ScalarType>
@@ -61,12 +64,13 @@ namespace Physica::Core {
     void ProbabilityDistributionFunction<ScalarType>::sample(ScalarType data) {
         const long index = double((data - getFromPoint()) * repDelta);
         if (0 <= index && size_t(index) < getNumBin())
-            bucket[index] += ScalarType(1);
+            bucket[index] += 1;
     }
 
     template<class ScalarType>
     void ProbabilityDistributionFunction<ScalarType>::clear() {
-        bucket = ScalarType(0);
+        for (auto& elem : bucket)
+            elem = 0;
     }
 
     template<class ScalarType>
@@ -79,7 +83,11 @@ namespace Physica::Core {
     template<class ScalarType>
     typename ProbabilityDistributionFunction<ScalarType>::VectorType
     ProbabilityDistributionFunction<ScalarType>::makeDistribution() const {
-        return bucket * (repDelta / bucket.sum());
+        const ScalarType factor = repDelta / ScalarType(calcNumSample());
+        VectorType result(getNumBin());
+        for (size_t i = 0; i < result.getLength(); ++i)
+            result[i] = ScalarType(bucket[i]) * factor;
+        return result;
     }
 
     template<class ScalarType>
@@ -94,5 +102,13 @@ namespace Physica::Core {
         bucket.swap(obj.bucket);
         seperates.swap(obj.seperates);
         repDelta.swap(obj.repDelta);
+    }
+
+    template<class ScalarType>
+    size_t ProbabilityDistributionFunction<ScalarType>::calcNumSample() const {
+        size_t num = 0;
+        for (auto elem : bucket)
+            num += elem;
+        return num;
     }
 }

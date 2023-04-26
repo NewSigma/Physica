@@ -62,6 +62,8 @@ namespace Physica::Gui {
                                            Utils::Array<double> levels);
         template<class VectorType>
         QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
+        template<class VectorType>
+        QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& x, const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);
@@ -219,6 +221,29 @@ namespace Physica::Gui {
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
             auto* set = setFromVector(data[i]);
+            set->setX(double(std::move(x[i])));
+            series->append(set);
+        }
+        chart()->addSeries(series);
+
+        update();
+        return *series;
+    }
+
+    template<class VectorType>
+    QBoxPlotSeries& Plot::errorBar(
+            const Core::LValueVector<VectorType>& x,
+            const Core::LValueVector<VectorType>& mean,
+            const Core::LValueVector<VectorType>& deviation) {
+        assert(x.getLength() == data.getLength());
+        QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            auto* set = new QBoxSet();
+            set->setValue(QBoxSet::LowerExtreme, double(mean[i] - deviation[i]));
+            set->setValue(QBoxSet::UpperExtreme, double(mean[i] + deviation[i]));
+            set->setValue(QBoxSet::Median, double(mean[i]));
+            set->setValue(QBoxSet::LowerQuartile, double(mean[i]));
+            set->setValue(QBoxSet::UpperQuartile, double(mean[i]));
             set->setX(double(std::move(x[i])));
             series->append(set);
         }

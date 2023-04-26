@@ -304,6 +304,22 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Ln, MatrixType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Ln, MatrixType>> {
+    public:
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Ln, MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& mat;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ln(mat.calc(row, col)); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+    };
+
+    template<class MatrixType>
     class DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>
             : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Exp, MatrixType>> {
     public:
@@ -427,6 +443,11 @@ namespace Physica::Core {
     template<class MatrixType>
     DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType> square(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<Utils::ExpressionType::Square, MatrixType>(m);
+    }
+
+    template<class MatrixType>
+    DenseMatrixExpression<Utils::ExpressionType::Ln, MatrixType> ln(const RValueMatrix<MatrixType>& m) {
+        return DenseMatrixExpression<Utils::ExpressionType::Ln, MatrixType>(m);
     }
 
     template<class MatrixType>

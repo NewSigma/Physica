@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Physics/MD/ForceModel/FreeModel.h"
+
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     RPMD<ScalarType, PosScalarType, Dim>::RPMD(MDCellType cell_,
@@ -91,10 +93,16 @@ namespace Physica::Core {
              class ForceModel,
              class Executor>
     void RPMD<ScalarType, PosScalarType, Dim>::nve_step(KineticModel& kineticModel, const ForceModel& forceModel) {
-        forceStep(timeStep * 0.5);
-        kineticModel.nve_step(ringPolymer, timeStep);
-        updateForce<ForceModel, Executor>(forceModel);
-        forceStep(timeStep * 0.5);
+        constexpr bool isFreeModel = Internal::is_free_model<ForceModel>::value;
+        if (isFreeModel) {
+            kineticModel.nve_step(ringPolymer, timeStep);
+        }
+        else {
+            forceStep(timeStep * 0.5);
+            kineticModel.nve_step(ringPolymer, timeStep);
+            updateForce<ForceModel, Executor>(forceModel);
+            forceStep(timeStep * 0.5);
+        }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -118,12 +126,20 @@ namespace Physica::Core {
             RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        forceStep(timeStep * 0.5);
-        kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-        thermostat.step(ringPolymer, gen, timeStep);
-        kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-        updateForce<ForceModel, Executor>(forceModel);
-        forceStep(timeStep * 0.5);
+        constexpr bool isFreeModel = Internal::is_free_model<ForceModel>::value;
+        if (isFreeModel) {
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            thermostat.step(ringPolymer, gen, timeStep);
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+        }
+        else {
+            forceStep(timeStep * 0.5);
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            thermostat.step(ringPolymer, gen, timeStep);
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            updateForce<ForceModel, Executor>(forceModel);
+            forceStep(timeStep * 0.5);
+        }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

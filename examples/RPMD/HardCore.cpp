@@ -29,24 +29,17 @@ using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
 using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
+using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1>;
 using MDCellType = typename MDType::MDCellType;
+using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
+using KineticModel = HardCore<ScalarType>;
 constexpr double timeStep = 0.001;
-constexpr double latticeSize = 100;
-constexpr size_t numMolecular = 10;
-
-template<class ScalarType>
-class EmptyForceModel final {
-public:
-    /* Operations */
-    template<class Executor>
-    [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-    template<class Executor>
-    [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-    template<class Executor>
-    [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-};
+constexpr double collideFactor = 0.01;
+constexpr double latticeSize = 20;
+constexpr size_t numMolecular = 20;
+constexpr double energy = 20;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -65,22 +58,29 @@ MDCellType makeSystem(std::mt19937& gen) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
+void scaleVelocity(MDType& rpmd) {
+    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
+    auto phase = rpmd.getPhaseMatrix().col(0);
+    auto momentum = phase.head(numMolecular);
+    momentum *= sqrt(ScalarType(energy) / energy1);
+}
+
 int main(int argc, char** argv) {
-    using ForceModel = EmptyForceModel<ScalarType>;
-    using KineticModel = HardCore<ScalarType>;
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
-    KineticModel kineticModel(latticeSize, 0.01);
+    scaleVelocity(rpmd);
+    KineticModel kineticModel(latticeSize, collideFactor);
 
-    MatrixType record(100000, rpmd.getNumParticle());
+    MatrixType record(10000, rpmd.getNumParticle());
     for (size_t i = 0; i < record.getRow(); ++i) {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
         record.row(i) = rpmd.getRingPolymer().makeBeadPos(0);
     }
+    const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());
 
     QApplication app(argc, argv);
     QFont font;
@@ -89,11 +89,11 @@ int main(int argc, char** argv) {
     chart.legend()->setVisible(false);
     {
         constexpr double minX = 0;
-        constexpr double maxX = 100000;
+        constexpr double maxX = 10.1;
         constexpr double minY = 0;
-        constexpr double maxY = 100;
-        constexpr double deltaX = 20000;
-        constexpr double deltaY = 20;
+        constexpr double maxY = 20;
+        constexpr double deltaX = 2;
+        constexpr double deltaY = 5;
         QValueAxis* axisX = new QValueAxis();
         font = axisX->labelsFont();
         font.setPointSize(15);
@@ -105,7 +105,8 @@ int main(int argc, char** argv) {
         axisX->setGridLineVisible(false);
         axisX->setLabelsFont(font);
         axisX->setRange(minX, maxX);
-        axisX->setTitleText("Step");
+        axisX->setTitleText("Time");
+        axisX->setLabelFormat("%d");
         axisX->setTitleFont(font);
         QValueAxis* axisY = new QValueAxis();
         axisY->setTickAnchor(0);
@@ -118,7 +119,8 @@ int main(int argc, char** argv) {
         axisY->setMinorGridLineVisible(false);
         axisY->setLabelsFont(font);
         axisY->setRange(minY, maxY);
-        axisY->setTitleText("X");
+        axisY->setTitleText("x");
+        axisY->setLabelFormat("%d");
         axisY->setTitleFont(font);
         QValueAxis* axisTop = new QValueAxis();
         axisTop->setTickAnchor(0);
@@ -145,7 +147,7 @@ int main(int argc, char** argv) {
         chart.addAxis(axisRight, Qt::AlignRight);
 
         for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
-            auto& spline = plot->line(record.col(i));
+            auto& spline = plot->line(t, record.col(i));
             spline.attachAxis(axisX);
             spline.attachAxis(axisY);
         }
