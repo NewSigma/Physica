@@ -34,16 +34,15 @@ void func([[maybe_unused]] size_t i) {
 int main() {
     std::mt19937 gen{};
     const MatrixType A = MatrixType::random_uniform(4, gen);
-    ThreadPool::initThreadPool(4);
+    ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
 
     VectorType result_seq(4);
     VectorType result_par(4);
     auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).asVector().sum(); };
     SequentialExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
-    ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4);
+    ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4).wait();
 
     pool.shouldExit();
-    ThreadPool::deInitThreadPool();
     return result_seq != result_par;
 }

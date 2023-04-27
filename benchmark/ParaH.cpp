@@ -130,7 +130,7 @@ int main() {
     Cycler::init();
     std::mt19937 gen(3438603950906262893);
 
-    ThreadPool::initThreadPool(4);
+    ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
     {
         auto rpmd = makeSystem(gen);
@@ -150,6 +150,5 @@ int main() {
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
     }
     pool.shouldExit();
-    ThreadPool::deInitThreadPool();
     return 0;
 }

@@ -52,9 +52,13 @@ namespace Physica::Gui {
         template<class VectorType>
         QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool density = false);
         template<class VectorType>
-        QAreaSeries& area(const Core::LValueVector<VectorType>& x,
-                          const Core::LValueVector<VectorType>& lower,
-                          const Core::LValueVector<VectorType>& upper);
+        QAreaSeries& area_boundary(const Core::LValueVector<VectorType>& x,
+                                   const Core::LValueVector<VectorType>& lower,
+                                   const Core::LValueVector<VectorType>& upper);
+        template<class VectorType>
+        QAreaSeries& area_center(const Core::LValueVector<VectorType>& x,
+                                 const Core::LValueVector<VectorType>& center,
+                                 const Core::LValueVector<VectorType>& deviation);
         template<class MatrixType>
         ContourSeries<MatrixType>& contour(const Core::LValueMatrix<MatrixType>& x,
                                            const Core::LValueMatrix<MatrixType>& y,
@@ -186,9 +190,9 @@ namespace Physica::Gui {
     }
 
     template<class VectorType>
-    QAreaSeries& Plot::area(const Core::LValueVector<VectorType>& x,
-                            const Core::LValueVector<VectorType>& lower,
-                            const Core::LValueVector<VectorType>& upper) {
+    QAreaSeries& Plot::area_boundary(const Core::LValueVector<VectorType>& x,
+                                     const Core::LValueVector<VectorType>& lower,
+                                     const Core::LValueVector<VectorType>& upper) {
         assert(x.getLength() == lower.getLength() && x.getLength() == upper.getLength());
 
         QLineSeries* upper_series = new QLineSeries();
@@ -202,6 +206,15 @@ namespace Physica::Gui {
         chart()->addSeries(series);
         update();
         return *series;
+    }
+
+    template<class VectorType>
+    QAreaSeries& Plot::area_center(const Core::LValueVector<VectorType>& x,
+                                   const Core::LValueVector<VectorType>& center,
+                                   const Core::LValueVector<VectorType>& deviation) {
+        const VectorType lower = center - deviation;
+        const VectorType upper = center + deviation;
+        return area_boundary(x, lower, upper);
     }
 
     template<class MatrixType>
@@ -235,7 +248,7 @@ namespace Physica::Gui {
             const Core::LValueVector<VectorType>& x,
             const Core::LValueVector<VectorType>& mean,
             const Core::LValueVector<VectorType>& deviation) {
-        assert(x.getLength() == data.getLength());
+        assert(x.getLength() == mean.getLength() && x.getLength() == deviation.getLength());
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
             auto* set = new QBoxSet();

@@ -110,7 +110,7 @@ int main() {
     constexpr size_t CorrStep = 3000;
     constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
 
-    ThreadPool::initThreadPool(4);
+    ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
     {
         std::mt19937 gen(1082247429173841685);
@@ -152,6 +152,5 @@ int main() {
         }
     }
     pool.shouldExit();
-    ThreadPool::deInitThreadPool();
     return 0;
 }

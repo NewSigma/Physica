@@ -28,13 +28,14 @@
 #include <future>
 #include <sys/sysinfo.h>
 #include "PackagedTask.h"
+#include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core::Parallel {
     /**
      * Reference:
      * Eigen https://eigen.tuxfamily.org/
      */
-    class ThreadPool {
+    class ThreadPool final {
         constexpr static size_t MainThreadID = std::numeric_limits<size_t>::max();
     public:
         struct ThreadData {
@@ -50,11 +51,12 @@ namespace Physica::Core::Parallel {
             size_t numScheduled;
             uint64_t randState;
         };
-    private:
-        static ThreadPool* instance;
-        thread_local static ThreadInfo* info;
 
-        std::vector<ThreadData> thread_data;
+        static unsigned int numThreadRequired;
+    private:
+        thread_local static std::unique_ptr<ThreadInfo> info;
+
+        Utils::Array<ThreadData> thread_data;
         std::mutex poolMutex;
         std::condition_variable cond;
         bool exit;
@@ -69,23 +71,24 @@ namespace Physica::Core::Parallel {
         template<class Function, class... Args>
         std::future<typename std::invoke_result<Function, Args...>::type> schedule(Function func, Args... args);
         std::unique_ptr<Task> steal();
+        void restart();
         /* Getters */
-        [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.size(); }
+        [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.getLength(); }
         /* Setters */
-        void shouldExit() { exit = true; }
+        void shouldExit();
         /* Static Members */
         [[nodiscard]] static ThreadInfo& getThreadInfo();
         [[nodiscard]] static inline bool isMainThread() noexcept;
-        static void initThreadPool(unsigned int threadCount);
-        static void deInitThreadPool() { delete instance; instance = nullptr; }
-        [[nodiscard]] static ThreadPool& getInstance() { return *instance; }
+        [[nodiscard]] static ThreadPool& getInstance();
     private:
         ThreadPool(unsigned int threadCount);
         /* Operations */
+        void waitExit();
         void workerMainLoop(unsigned int thread_id);
         void bindToCore(unsigned int thread_id);
         /* Static Members */
-        [[nodiscard]] static inline unsigned int defaultThreadNum() noexcept { return get_nprocs() * 3 / 4; }
+        [[nodiscard]] static inline unsigned int getNumProcesser() noexcept { return get_nprocs(); }
+        [[nodiscard]] static inline unsigned int makeNumThread() noexcept;
         [[nodiscard]] static inline unsigned int threadRand(uint64_t& state);
     };
 
@@ -112,6 +115,14 @@ namespace Physica::Core::Parallel {
 
     inline bool ThreadPool::isMainThread() noexcept {
         return getThreadInfo().id == MainThreadID;
+    }
+
+    inline unsigned int ThreadPool::makeNumThread() noexcept {
+        const auto numProcesser = getNumProcesser();
+        if (numThreadRequired == 0 || numThreadRequired > numProcesser)
+            return numProcesser * 3 / 4;
+        else
+            return numThreadRequired;
     }
 
     inline unsigned int ThreadPool::threadRand(uint64_t& state) {

@@ -147,8 +147,7 @@ void testMD() {
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
 
-    ThreadPool::initThreadPool(4);
-    ThreadPool& pool = ThreadPool::getInstance();
+    ThreadPool::numThreadRequired = 4;
     {
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
@@ -171,8 +170,7 @@ void testMD() {
             rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(thermo, gen, kineticModel, forceModel);
         }
     }
-    pool.shouldExit();
-    ThreadPool::deInitThreadPool();
+    ThreadPool::getInstance().shouldExit();
     if (!scalarNear(bond, ScalarType(answer), 2E-2))
         exit(EXIT_FAILURE);
 }

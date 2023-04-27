@@ -138,7 +138,7 @@ int main() {
     ScalarType mean = 0;
     ScalarType var = 0;
 
-    ThreadPool::initThreadPool(4);
+    ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
     {
         std::mt19937 gen(3438603950906262893);
@@ -169,7 +169,6 @@ int main() {
         }
     }
     pool.shouldExit();
-    ThreadPool::deInitThreadPool();
 
     constexpr double answer = 61.8;
     const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);

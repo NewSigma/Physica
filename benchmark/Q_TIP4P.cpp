@@ -126,7 +126,7 @@ int main() {
         std::cout << "1 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
     }
     {
-        ThreadPool::initThreadPool(2);
+        ThreadPool::numThreadRequired = 2;
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
         rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
@@ -138,11 +138,11 @@ int main() {
         const auto to = Cycler::toc();
         std::cout << "2 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();
-        ThreadPool::deInitThreadPool();
     }
     {
-        ThreadPool::initThreadPool(4);
+        ThreadPool::numThreadRequired = 4;
         ThreadPool& pool = ThreadPool::getInstance();
+        pool.restart();
         const auto from = Cycler::tic();
         rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
             PhyConst<AU>::secondToTime(5 * 1E-14),
@@ -153,7 +153,6 @@ int main() {
         const auto to = Cycler::toc();
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();
-        ThreadPool::deInitThreadPool();
     }
     return 0;
 }

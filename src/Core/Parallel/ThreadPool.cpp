@@ -19,8 +19,8 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core::Parallel {
-    ThreadPool* ThreadPool::instance = nullptr;
-    thread_local ThreadPool::ThreadInfo* ThreadPool::info = nullptr;
+    unsigned int ThreadPool::numThreadRequired = 0;
+    thread_local std::unique_ptr<ThreadPool::ThreadInfo> ThreadPool::info = nullptr;
 
     ThreadPool::ThreadPool(unsigned int threadCount) : thread_data(threadCount), exit(false) {
         for (unsigned int i = 0; i < threadCount; ++i) {
@@ -29,13 +29,7 @@ namespace Physica::Core::Parallel {
     }
 
     ThreadPool::~ThreadPool() {
-        exit = true;
-        cond.notify_all();
-        for (auto& data : thread_data) {
-            auto& thread = data.thread;
-            if (thread->joinable())
-                thread->join();
-        }
+        waitExit();
     }
 
     std::unique_ptr<Task> ThreadPool::steal() {
@@ -52,6 +46,45 @@ namespace Physica::Core::Parallel {
             }
         }
         return std::unique_ptr<Task>(nullptr);
+    }
+
+    void ThreadPool::restart() {
+        waitExit();
+        exit = false;
+        const unsigned int numThread = makeNumThread();
+        thread_data = Utils::Array<ThreadData>(numThread);
+        for (unsigned int i = 0; i < numThread; ++i) {
+            thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); } ));
+        }
+    }
+
+    void ThreadPool::shouldExit() {
+        exit = true;
+        cond.notify_all();
+    }
+
+    ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() {
+        if (info == nullptr) {
+            info.reset(new ThreadInfo());
+            info->id = MainThreadID;
+            info->numScheduled = 0;
+            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
+        }
+        return *info;
+    }
+
+    ThreadPool& ThreadPool::getInstance() {
+        static ThreadPool pool(makeNumThread());
+        return pool;
+    }
+
+    void ThreadPool::waitExit() {
+        shouldExit();
+        for (auto& data : thread_data) {
+            auto& thread = data.thread;
+            if (thread->joinable())
+                thread->join();
+        }
     }
 
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
@@ -90,21 +123,5 @@ namespace Physica::Core::Parallel {
         CPU_SET(thread_id, &set);
         const pthread_t thread = thread_data[thread_id].thread->native_handle();
         pthread_setaffinity_np(thread, sizeof(cpu_set_t), &set);
-    }
-
-    ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() {
-        if (info == nullptr) {
-            info = new ThreadInfo();
-            info->id = MainThreadID;
-            info->numScheduled = 0;
-            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
-        }
-        return *info;
-    }
-
-    void ThreadPool::initThreadPool(unsigned int threadCount) {
-        if (instance == nullptr) {
-            instance = new ThreadPool(threadCount);
-        }
     }
 }

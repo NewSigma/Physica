@@ -81,7 +81,7 @@ int main() {
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
     KineticModel kineticModel(temperatureT, numReplica);
     {
-        ThreadPool::initThreadPool(4);
+        ThreadPool::numThreadRequired = 4;
         ThreadPool& pool = ThreadPool::getInstance();
         //ProfilerStart("profiler.dat");
         const auto from = Cycler::tic();
@@ -95,7 +95,6 @@ int main() {
         //ProfilerStop();
         std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
         pool.shouldExit();
-        ThreadPool::deInitThreadPool();
     }
     return 0;
 }

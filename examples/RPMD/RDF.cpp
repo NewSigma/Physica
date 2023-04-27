@@ -131,8 +131,7 @@ int main() {
         rdf = RDF<PosScalarType>(std::move(isFromParticle), std::move(isToParticle), PhyConst<AU>::angstormToBohr(0.01), 700);
     }
 
-    ThreadPool::initThreadPool(4);
-    ThreadPool& pool = ThreadPool::getInstance();
+    ThreadPool::numThreadRequired = 4;
     {
         rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, kineticModel, forceModel);
         for (size_t i = 0; i < 1000; ++i) {
@@ -142,8 +141,7 @@ int main() {
                 rdf.sample(rpmd.phaseToCell(j));
         }
     }
-    pool.shouldExit();
-    ThreadPool::deInitThreadPool();
+    ThreadPool::getInstance().shouldExit();
     {
         std::ofstream fout("dists");
         fout << rdf.makeDists();

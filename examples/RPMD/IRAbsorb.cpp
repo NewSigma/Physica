@@ -117,8 +117,7 @@ void testMD() {
 
     Vector<ScalarType> corr(40000);
 
-    ThreadPool::initThreadPool(16);
-    ThreadPool& pool = ThreadPool::getInstance();
+    ThreadPool::numThreadRequired = 16;
     {
         KineticModel kineticModel(temperatureT, numReplica);
         for (size_t path = 0; path < 16; ++path) {
@@ -142,8 +141,7 @@ void testMD() {
             std::cout << path << std::endl;
         }
     }
-    pool.shouldExit();
-    ThreadPool::deInitThreadPool();
+    ThreadPool::getInstance().shouldExit();
 
     IRAbsorb<ScalarType> ir(corr, temperatureT, timeStep, double(rpmd.getVolume()), 128, 4);
     auto spectrum = ir.makeSpectrum();
