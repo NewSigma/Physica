@@ -86,8 +86,8 @@ namespace Physica::Core {
             const ScalarType factor = sqrt(repBeta * mass * numReplica);
             ringPolymer.toNormalRepr(i);
             /* Translational mode */ {
-                const ScalarType viscosityY = Core::reciprocal(thermostatTime);
-                langevinImpl(buffer, 0, deltaT, viscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
+                const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
+                langevinImpl(buffer, 0, deltaT, momentumViscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
             }
             for (size_t j = 1; j < buffer.getColumn(); ++j) {
                 const ScalarType phase = M_PI * j / numReplica;
