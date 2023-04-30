@@ -26,7 +26,6 @@ namespace Physica::Core {
         public:
             std::mutex globalMutex;
         public:
-            ThreadGuardFFTW() = default;
             ThreadGuardFFTW(const ThreadGuardFFTW&) = delete;
             ThreadGuardFFTW(ThreadGuardFFTW&&) noexcept = delete;
             ~ThreadGuardFFTW() = default;
@@ -35,6 +34,8 @@ namespace Physica::Core {
             ThreadGuardFFTW& operator=(ThreadGuardFFTW&&) noexcept = delete;
             /* Static members */
             [[nodiscard]] static ThreadGuardFFTW& getInstance();
+        private:
+            ThreadGuardFFTW() = default;
         };
     }
 
@@ -353,43 +354,47 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     fftw_plan FFT<ScalarType, Dim>::forwardPlan() {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        fftw_plan plan;
         if constexpr (Dim == 2)
             if constexpr (isComplex)
-                return fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], real_buffer, buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], real_buffer, buffer, FFTW_ESTIMATE);
         else if constexpr (Dim == 3)
             if constexpr (isComplex)
-                return fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], real_buffer, buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], real_buffer, buffer, FFTW_ESTIMATE);
         else
             if constexpr (isComplex)
-                return fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_r2c(getDimen(), rSpaceSize.data(), real_buffer, buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_r2c(getDimen(), rSpaceSize.data(), real_buffer, buffer, FFTW_ESTIMATE);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
+        return plan;
     }
     
     template<class ScalarType, size_t Dim>
     fftw_plan FFT<ScalarType, Dim>::backwardPlan() {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        fftw_plan plan;
         if constexpr (Dim == 2)
             if constexpr (isComplex)
-                return fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, real_buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, real_buffer, FFTW_ESTIMATE);
         else if constexpr (Dim == 3)
             if constexpr (isComplex)
-                return fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, real_buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, real_buffer, FFTW_ESTIMATE);
         else
             if constexpr (isComplex)
-                return fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                plan = fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
             else
-                return fftw_plan_dft_c2r(getDimen(), rSpaceSize.data(), buffer, real_buffer, FFTW_ESTIMATE);
+                plan = fftw_plan_dft_c2r(getDimen(), rSpaceSize.data(), buffer, real_buffer, FFTW_ESTIMATE);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
+        return plan;
     }
 
     template<class ScalarType, size_t Dim>
