@@ -129,7 +129,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class LMatrixBlock<MatrixType, 1, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>
-                                              , public RowLVector<MatrixType> {
+                                               , public RowLVector<MatrixType> {
     public:
         using Base = LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>;
         using VectorBase = RowLVector<MatrixType>;
@@ -166,7 +166,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class LMatrixBlock<MatrixType, Dynamic, 1> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>
-                                              , public ColLVector<MatrixType> {
+                                               , public ColLVector<MatrixType> {
     public:
         using Base = LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>;
         using VectorBase = ColLVector<MatrixType>;

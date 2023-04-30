@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RMatrixBlock.h"
+#include "MatrixImpl/RMatrixBlock.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
@@ -109,7 +109,7 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);
 }
 
-#include "RValueMatrixImpl.h"
+#include "MatrixImpl/RValueMatrixImpl.h"
 #ifdef PHYSICA_CUDA
     #include "RValueMatrix.cuh"
 #endif

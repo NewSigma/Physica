@@ -50,5 +50,5 @@ namespace Physica::Core {
 }
 
 #ifdef __CUDA_ARCH__
-    #include "RValueMatrixImpl.cuh"
+    #include "MatrixImpl/RValueMatrixImpl.cuh"
 #endif
