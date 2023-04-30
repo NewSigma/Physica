@@ -27,8 +27,11 @@ namespace Physica::Core {
 
         ScalarType latticeSize;
         ScalarType collideFactor;
+        Vector<ScalarType> repMass;
+        Vector<ScalarType> buffer;
+        Vector<ScalarType> velocity;
     public:
-        HardCore(ScalarType latticeSize_, ScalarType collideFactor_);
+        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;
@@ -36,6 +39,7 @@ namespace Physica::Core {
         HardCore& operator=(HardCore obj) noexcept;
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
+        void updateMass(RingPolymerType& ringPolymer);
         void swap(HardCore& obj) noexcept;
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
@@ -43,9 +47,12 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    HardCore<ScalarType>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_)
+    HardCore<ScalarType>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle)
             : latticeSize(latticeSize_)
-            , collideFactor(collideFactor_) {
+            , collideFactor(collideFactor_)
+            , repMass(numParticle, 0)
+            , buffer(numParticle)
+            , velocity(numParticle) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
@@ -62,14 +69,14 @@ namespace Physica::Core {
         auto phase = ringPolymer.asMatrix().col(0);
         auto momentum = phase.head(numParticle);
         auto pos = phase.tail(numParticle);
-        const Vector<ScalarType> repMass = reciprocal(ringPolymer.getMassVec());
+        assert(numParticle == repMass.getLength());
 
         ScalarType lStep = 0;
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
-        Vector<ScalarType> buffer = pos;
-        Vector<ScalarType> velocity = hadamard(momentum, repMass);
+        buffer = pos;
+        velocity = hadamard(momentum, repMass);
         while (lStep != deltaT) {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
@@ -93,9 +100,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void HardCore<ScalarType>::updateMass(RingPolymerType& ringPolymer) {
+        repMass = reciprocal(ringPolymer.getMassVec());
+    }
+
+    template<class ScalarType>
     void HardCore<ScalarType>::swap(HardCore& obj) noexcept {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
+        repMass.swap(obj.repMass);
+        buffer.swap(obj.buffer);
+        velocity.swap(obj.velocity);
     }
 
     template<class ScalarType>
