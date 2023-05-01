@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
@@ -84,16 +84,16 @@ int main() {
         ThreadPool::numThreadRequired = 4;
         ThreadPool& pool = ThreadPool::getInstance();
         //ProfilerStart("profiler.dat");
-        const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
-            PhyConst<AU>::secondToTime(1 * 1E-13),
-            thermo,
-            gen,
-            kineticModel,
-            forceModel);
-        const auto to = Cycler::toc();
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(forceModel), ThreadExecutor>(
+                PhyConst<AU>::secondToTime(1 * 1E-14),
+                thermo,
+                gen,
+                kineticModel,
+                forceModel);
+        }, 8, 20);
         //ProfilerStop();
-        std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
+        std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
         pool.shouldExit();
     }
     return 0;

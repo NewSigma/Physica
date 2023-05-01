@@ -45,8 +45,9 @@ namespace Physica::Core {
 
     template<class VectorType>
     class LVectorBlock : public LValueVector<LVectorBlock<VectorType>> {
+        using This = LVectorBlock<VectorType>;
     public:
-        using Base = LValueVector<LVectorBlock<VectorType>>;
+        using Base = LValueVector<This>;
         using ScalarType = typename VectorType::ScalarType;
     private:
         VectorType& vec;
@@ -60,12 +61,12 @@ namespace Physica::Core {
         ~LVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        LVectorBlock& operator=(const LVectorBlock& v) { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
-        LVectorBlock& operator=(LVectorBlock&& v) noexcept { Base::operator=(static_cast<const typename Base::Base&>(v)); return *this; }
+        LVectorBlock& operator=(const LVectorBlock& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
+        LVectorBlock& operator=(LVectorBlock&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
         ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
         const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Operations */
-        void resize([[maybe_unused]] size_t length) const { assert(length == Base::getLength()); }
+        void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return to - from; }
     };

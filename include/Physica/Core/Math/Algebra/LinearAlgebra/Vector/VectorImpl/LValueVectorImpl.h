@@ -57,11 +57,11 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    void LValueVector<Derived>::writePacketPartial(size_t index, const PacketType packet) {
+    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
         using TrivialType = typename ScalarType::TrivialType;
         TrivialType buffer[PacketType::size()];
         packet.store(buffer);
-        for (int i = 0; index < Base::getLength(); ++i, ++index)
+        for (size_t i = 0; i < count; ++i, ++index)
             (*this)[index] = buffer[i];
     }
 

@@ -47,7 +47,7 @@ namespace Physica::Core {
                     v1.getDerived().writePacket(i, sum);
                 }
                 const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i) + v2.getDerived().template packetPartial<PacketType>(i);
-                v1.getDerived().writePacketPartial(i, sum);
+                v1.getDerived().writePacketPartial(i, length - i, sum);
             }
         };
     }
@@ -66,7 +66,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    PacketType ContinuousVector<Derived>::packet(size_t index) const {
+    inline PacketType ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + PacketType::size() <= Base::getLength());
         if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
@@ -79,7 +79,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    PacketType ContinuousVector<Derived>::packetPartial(size_t index) const {
+    inline PacketType ContinuousVector<Derived>::packetPartial(size_t index) const {
         if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             const size_t count = Base::getLength() - index;
@@ -92,7 +92,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
+    inline void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
         if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
             packet.store(data_ptr(index));
         else
@@ -101,11 +101,47 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    void ContinuousVector<Derived>::writePacketPartial(size_t index, const PacketType packet) {
+    inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
         if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
-            packet.store_partial(Base::getLength() - index, data_ptr(index));
+            packet.store_partial(count, data_ptr(index));
         else
-            Base::template writePacketPartial(index, packet);
+            Base::template writePacketPartial<PacketType>(index, count, packet);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::head(size_t to) {
+        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::head(size_t to) const {
+        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), 0, to);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::tail(size_t from) {
+        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), from);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::tail(size_t from) const {
+        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) {
+        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), from, to);
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) const {
+        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>

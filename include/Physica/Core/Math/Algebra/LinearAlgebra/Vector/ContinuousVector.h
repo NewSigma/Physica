@@ -19,6 +19,7 @@
 #pragma once
 
 #include "LValueVector.h"
+#include "VectorImpl/ContinuousVectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -41,13 +42,19 @@ namespace Physica::Core {
         using Base::operator=;
         /* Operations */
         template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const;
+        [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index) const;
+        [[nodiscard]] inline PacketType packetPartial(size_t index) const;
         template<class PacketType>
-        void writePacket(size_t index, const PacketType packet);
+        inline void writePacket(size_t index, const PacketType packet);
         template<class PacketType>
-        void writePacketPartial(size_t index, const PacketType packet);
+        inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> head(size_t to);
+        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> head(size_t to) const;
+        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> tail(size_t from);
+        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> tail(size_t from) const;
+        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
     protected:
         ContinuousVector() = default;
         ContinuousVector(const ContinuousVector&) = default;

@@ -45,10 +45,8 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
-        template<class PacketType>
-        void writePacket(size_t index, const PacketType packet);
-        template<class PacketType>
-        void writePacketPartial(size_t index, const PacketType packet);
+        template<class PacketType> void writePacket(size_t index, const PacketType packet);
+        template<class PacketType> void writePacketPartial(size_t index, size_t count, const PacketType packet);
         LVectorBlock<Derived> head(size_t to) { return LVectorBlock<Derived>(Base::getDerived(), 0, to); }
         const LVectorBlock<Derived> head(size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
         LVectorBlock<Derived> tail(size_t from) { return LVectorBlock<Derived>(Base::getDerived(), from); }

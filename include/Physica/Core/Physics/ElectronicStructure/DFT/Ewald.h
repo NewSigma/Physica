@@ -134,9 +134,11 @@ namespace Physica::Core {
                         const ScalarType sum_sin = sin_vec * charges;
                         const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
                         for (size_t i = 0; i < numParticle; ++i) {
-                            auto force_i = kSpaceSum.segment(i * Dim, (i + 1) * Dim);
-                            const ScalarType charge = charges[i];
-                            force_i += ((sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charge)) * delta;
+                            auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
+                            const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
+                            force_i[0] += temp * delta[0];
+                            force_i[1] += temp * delta[1];
+                            force_i[2] += temp * delta[2];
                         }
                     }
                 });
@@ -248,7 +250,7 @@ namespace Physica::Core {
         const ScalarType temp = x * repErfcStep + 0.5;
         const size_t index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
-        auto y = erfc_table.segment(index, index + 3);
+        auto y = erfc_table.template segment<3>(index, index + 3);
         return Internal::quadraticInterpolate(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], x); //Optimize: make use of x1, x2, x3 are equal distance
     }
 
@@ -257,7 +259,7 @@ namespace Physica::Core {
         const ScalarType temp = x * repErfcStep + 0.5;
         const size_t index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
-        auto y = erfc_table.segment(index, index + 3);
+        auto y = erfc_table.template segment<3>(index, index + 3);
         const ScalarType factor = doubleSquareStep * x + std::numeric_limits<ScalarType>::epsilon(); // Avoid divide by zero
         return Internal::quadraticInterpolate_diff1(factor, erfcStep, x1, y[0], y[1], y[2], x);
     }
