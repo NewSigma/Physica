@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Utils/Random.h"
-#include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Parallel;
@@ -141,13 +141,17 @@ int main() {
         PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
         rpmd.updateForce<decltype(pair), ThreadExecutor>(pair);
 
-        ProfilerStart("profiler.dat");
-        const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(PhyConst<AU>::secondToTime(10 * 1E-12), thermo, gen, kineticModel, pair);
-        const auto to = Cycler::toc();
-        ProfilerStop();
-
-        std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
+        //ProfilerStart("profiler.dat");
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(
+                PhyConst<AU>::secondToTime(2 * 1E-13),
+                thermo,
+                gen,
+                kineticModel,
+                pair);
+        }, 8, 20);
+        //ProfilerStop();
+        std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     pool.shouldExit();
     return 0;

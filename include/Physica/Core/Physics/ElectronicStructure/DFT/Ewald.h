@@ -269,26 +269,36 @@ namespace Physica::Core {
         const auto numParticle = getNumParticle();
         Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
         const CellListType cellList(lattice, pos, rSpaceCutoff);
-        for (size_t i = 0; i < numParticle; ++i) {
-            const Index3D center = cellList.getAtomCellMap()[i];
-            cellList.forNeighInRange(center, [this, i, pos, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
-                const Vector3D from = pos.row(i) - translate;
-                Vector3D delta;
-                Vector<ScalarType, Dim> sum(Dim, 0);
-                for (size_t j : cellList(neigh)) {
-                    const auto to = pos.row(j);
-                    delta = from - to;
-                    const ScalarType charge = charges[j];
-                    const ScalarType r2 = delta.squaredNorm();
-                    if (r2 < squareMaxErfcX) {
-                        const ScalarType temp = charge * calcFromTable_diff(sqrt(r2));
-                        sum += temp * delta;
+        Utils::Array<size_t> arr1{};
+        cellList.forCellInList([this, pos, &arr1, &rSpaceSum, &cellList](Index3D center) {
+            for (size_t i : cellList(center))
+                arr1.append(i);
+
+            Utils::Array<size_t> arr2{};
+            cellList.forNeighInRange(center, [this, pos, &arr1, &arr2, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
+                for (size_t j : cellList(neigh))
+                    arr2.append(j);
+                for (size_t i : arr1) {
+                    const Vector3D from = pos.row(i) - translate;
+                    Vector3D delta;
+                    Vector<ScalarType, Dim> sum(Dim, 0);
+                    for (size_t j : arr2) {
+                        const auto to = pos.row(j);
+                        delta = from - to;
+                        const ScalarType charge = charges[j];
+                        const ScalarType r2 = delta.squaredNorm();
+                        if (r2 < squareMaxErfcX) {
+                            const ScalarType temp = charge * calcFromTable_diff(sqrt(r2));
+                            sum += temp * delta;
+                        }
                     }
+                    auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
+                    f += charges[i] * sum;
                 }
-                auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
-                f += charges[i] * sum;
+                arr2.clear();
             });
-        }
+            arr1.clear();
+        });
         return rSpaceSum;
     }
 }

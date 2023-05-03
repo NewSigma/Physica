@@ -20,6 +20,7 @@
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Cycler.h"
 
 namespace Physica::Utils {
