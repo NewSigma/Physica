@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -108,16 +108,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline LMatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
-        return LMatrixBlock<Derived>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
-    }
-
-    template<class Derived>
-    inline const LMatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
-        return LMatrixBlock<Derived>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
-    }
-
-    template<class Derived>
     inline LMatrixBlock<Derived> LValueMatrix<Derived>::topRows(size_t to) {
         return LMatrixBlock<Derived>(Base::getDerived(), 0, to, 0, Base::getColumn());
     }
@@ -135,6 +125,16 @@ namespace Physica::Core {
     template<class Derived>
     inline const LMatrixBlock<Derived> LValueMatrix<Derived>::bottomRows(size_t from) const {
         return LMatrixBlock<Derived>(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getColumn());
+    }
+
+    template<class Derived>
+    inline LMatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
+        return LMatrixBlock<Derived>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
+    }
+
+    template<class Derived>
+    inline const LMatrixBlock<Derived> LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
+        return LMatrixBlock<Derived>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>

@@ -92,11 +92,12 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
+        size_t col;
         size_t fromRow;
         size_t rowCount;
-        size_t col;
     public:
-        ColRVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {
+        ColRVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+                : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }

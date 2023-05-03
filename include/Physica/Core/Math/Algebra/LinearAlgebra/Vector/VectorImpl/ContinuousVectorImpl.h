@@ -41,7 +41,7 @@ namespace Physica::Core {
             static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 const size_t length = v1.getLength();
                 size_t i = 0;
-                const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
                 for (; i < to; i += PacketType::size()) {
                     const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
                     v1.getDerived().writePacket(i, sum);

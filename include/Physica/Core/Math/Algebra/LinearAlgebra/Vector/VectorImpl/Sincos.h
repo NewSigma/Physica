@@ -31,7 +31,7 @@ namespace Physica::Core {
 
         const size_t length = x.getLength();
         size_t i = 0;
-        const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+        const size_t to = length / PacketType::size() * PacketType::size();
         PacketType s_buffer, c_buffer;
         for (; i < to; i += PacketType::size()) {
             sincos(x.getDerived().template packet<PacketType>(i), s_buffer, c_buffer);

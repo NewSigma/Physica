@@ -42,7 +42,7 @@ namespace Physica::Core {
 
             static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
-                    constexpr size_t to = SizeAtCompile >= static_cast<size_t>(PacketType::size()) ? (SizeAtCompile - PacketType::size()) : 0;
+                    constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                     for (size_t i = 0; i < to; i += PacketType::size())
                         v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
                     
@@ -54,7 +54,7 @@ namespace Physica::Core {
                     const size_t length = v1.getLength();
                     if (length != 0) {
                         size_t i = 0;
-                        const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+                        const size_t to = length / PacketType::size() * PacketType::size();
                         for (; i < to; i += PacketType::size())
                             v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
                         v2.getDerived().writePacketPartial(i, length - i, v1.getDerived().template packetPartial<PacketType>(i));
@@ -84,7 +84,7 @@ namespace Physica::Core {
                 if constexpr (enableSIMD) {
                     const size_t length = v1.getLength();
                     size_t i = 0;
-                    const size_t to = length >= static_cast<size_t>(PacketType::size()) ? (length - PacketType::size()) : 0;
+                    const size_t to = length / PacketType::size() * PacketType::size();
                     PacketType buffer(0);
                     for (; i < to; i += PacketType::size())
                         buffer += (v1.getDerived().template packet<PacketType>(i) * v2.getDerived().template packet<PacketType>(i));

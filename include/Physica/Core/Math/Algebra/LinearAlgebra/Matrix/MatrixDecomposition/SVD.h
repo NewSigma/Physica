@@ -81,8 +81,10 @@ namespace Physica::Core {
     private:
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);
-        void leftGivens(LMatrixBlock<WorkingMatrix>& subBlock, Vector<ScalarType, 2>& buffer, size_t i);
-        void rightGivens(LMatrixBlock<WorkingMatrix>& subBlock, Vector<ScalarType, 2>& buffer, size_t i);
+        template<class MatrixType>
+        void leftGivens(LValueMatrix<MatrixType>& mat, Vector<ScalarType, 2>& buffer, size_t i);
+        template<class MatrixType>
+        void rightGivens(LValueMatrix<MatrixType>& mat, Vector<ScalarType, 2>& buffer, size_t i);
     };
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
@@ -237,27 +239,29 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    template<class MatrixType>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::leftGivens(
-            LMatrixBlock<WorkingMatrix>& subBlock,
+            LValueMatrix<MatrixType>& mat,
             Vector<ScalarType, 2>& buffer,
             size_t i) {
-        buffer[0] = subBlock(i, i);
-        buffer[1] = subBlock(i + 1, i);
+        buffer[0] = mat(i, i);
+        buffer[1] = mat(i + 1, i);
         buffer = givens(buffer, 0, 1);
-        applyGivens(buffer, subBlock, i, i + 1);
-        subBlock(i + 1, i) = 0;
+        applyGivens(buffer, mat, i, i + 1);
+        mat(i + 1, i) = 0;
         buffer[1].toOpposite();
         applyGivens(lSingularMat, buffer, i, i + 1);
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    template<class MatrixType>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::rightGivens(
-            LMatrixBlock<WorkingMatrix>& subBlock,
+            LValueMatrix<MatrixType>& mat,
             Vector<ScalarType, 2>& buffer,
             size_t i) {
         buffer = givens(buffer, 0, 1);
         buffer[1].toOpposite();
-        applyGivens(subBlock, buffer, i, i + 1);
+        applyGivens(mat, buffer, i, i + 1);
         applyGivens(rSingularMat, buffer, i, i + 1);
     }
 

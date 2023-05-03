@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include "LValueMatrix.h"
+#include "MatrixImpl/ContinuousMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "MatrixProduct.h"
 #include "InverseMatrix.h"
@@ -62,12 +62,12 @@ namespace Physica::Core {
      * option is combinations of \enum MatrixOption
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix : public LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
+    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>
                       , public Internal::DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, option>
                       , public DenseMatrixDim<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>, Row, Column, MaxRow, MaxColumn> {
         static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
         using This = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>;
-        using Base = LValueMatrix<This>;
+        using Base = ContinuousMatrix<This>;
         using Storage = Internal::DenseMatrixStorage<This, option>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using InitializerType = typename Storage::Base::ValueType;

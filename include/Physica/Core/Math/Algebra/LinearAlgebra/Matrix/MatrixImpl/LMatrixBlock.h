@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,10 +28,8 @@ namespace Physica::Core {
     namespace Internal {
         template<class MatrixType>
         class Traits<RowLVector<MatrixType>> {
-            using VectorType = RowLVector<MatrixType>;
             constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
         public:
-            using Base = typename std::conditional<isRowMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
@@ -40,10 +38,8 @@ namespace Physica::Core {
 
         template<class MatrixType>
         class Traits<ColLVector<MatrixType>> {
-            using VectorType = ColLVector<MatrixType>;
             constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
         public:
-            using Base = typename std::conditional<isColumnMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
@@ -68,9 +64,9 @@ namespace Physica::Core {
      * \class RowLVector and \class ColLVector is designed to implement \class LMatrixBlock, and they can be used indepently.
      */
     template<class MatrixType>
-    class RowLVector : public Internal::Traits<RowLVector<MatrixType>>::Base {
+    class RowLVector : public LValueVector<RowLVector<MatrixType>> {
     public:
-        using Base = typename Internal::Traits<RowLVector<MatrixType>>::Base;
+        using Base = LValueVector<RowLVector<MatrixType>>;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
@@ -98,17 +94,18 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class ColLVector : public Internal::Traits<ColLVector<MatrixType>>::Base {
+    class ColLVector : public LValueVector<ColLVector<MatrixType>> {
     public:
-        using Base = typename Internal::Traits<ColLVector<MatrixType>>::Base;
+        using Base = LValueVector<ColLVector<MatrixType>>;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         MatrixType& mat;
+        size_t col;
         size_t fromRow;
         size_t rowCount;
-        size_t col;
     public:
-        ColLVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : mat(mat_), fromRow(fromRow_), rowCount(rowCount_), col(col_) {
+        ColLVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+                : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }

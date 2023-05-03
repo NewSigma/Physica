@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -60,12 +60,12 @@ namespace Physica::Core {
         [[nodiscard]] inline const ColVector col(size_t c) const;
         [[nodiscard]] inline LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
         [[nodiscard]] inline const LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
-        [[nodiscard]] inline const LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
         [[nodiscard]] inline LMatrixBlock<Derived> topRows(size_t to);
         [[nodiscard]] inline const LMatrixBlock<Derived> topRows(size_t to) const;
         [[nodiscard]] inline LMatrixBlock<Derived> bottomRows(size_t from);
         [[nodiscard]] inline const LMatrixBlock<Derived> bottomRows(size_t from) const;
+        [[nodiscard]] inline LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline const LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
         [[nodiscard]] inline LMatrixBlock<Derived> leftCols(size_t to);
         [[nodiscard]] inline const LMatrixBlock<Derived> leftCols(size_t to) const;
         [[nodiscard]] inline LMatrixBlock<Derived> rightCols(size_t from);
