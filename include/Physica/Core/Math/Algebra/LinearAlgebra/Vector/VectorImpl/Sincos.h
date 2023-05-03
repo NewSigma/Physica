@@ -38,8 +38,10 @@ namespace Physica::Core {
             s.getDerived().writePacket(i, s_buffer);
             c.getDerived().writePacket(i, c_buffer);
         }
-        sincos(x.getDerived().template packetPartial<PacketType>(i), s_buffer, c_buffer);
-        s.getDerived().writePacketPartial(i, length - i, s_buffer);
-        c.getDerived().writePacketPartial(i, length - i, c_buffer);
+        if (to != length) {
+            sincos(x.getDerived().template packetPartial<PacketType>(i), s_buffer, c_buffer);
+            s.getDerived().writePacketPartial(i, length - i, s_buffer);
+            c.getDerived().writePacketPartial(i, length - i, c_buffer);
+        }
     }
 }

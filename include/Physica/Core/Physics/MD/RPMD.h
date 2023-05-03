@@ -37,10 +37,10 @@ namespace Physica::Core {
      * 
      * TODO: replace several ScalarType to PosScalarType
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class RPMD final {
     public:
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
         using MDCellType = typename RingPolymerType::MDCellType;

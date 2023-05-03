@@ -19,16 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * Reference:
      * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class Langevin {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
@@ -42,7 +42,7 @@ namespace Physica::Core {
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
         template<class RandomGenerator>
-        void step(RingPolymerType& RingPolymer, RandomGenerator& gen, ScalarType deltaT) const;
+        void step(RingPolymerType& ringPolymer, RandomGenerator& gen, ScalarType deltaT) const;
         void swap(Langevin& obj) noexcept;
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
@@ -56,21 +56,21 @@ namespace Physica::Core {
             ComplexScalar<ScalarType> random);
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    Langevin<ScalarType, PosScalarType, Dim>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_)
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    Langevin<ScalarType, PosScalarType, Dim, NumReplica>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    Langevin<ScalarType, PosScalarType, Dim>&
-    Langevin<ScalarType, PosScalarType, Dim>::operator=(Langevin<ScalarType, PosScalarType, Dim> obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    Langevin<ScalarType, PosScalarType, Dim, NumReplica>&
+    Langevin<ScalarType, PosScalarType, Dim, NumReplica>::operator=(Langevin<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomGenerator>
-    void Langevin<ScalarType, PosScalarType, Dim>::step(
+    void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             RandomGenerator& gen,
             ScalarType deltaT) const {
@@ -99,8 +99,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::langevinImpl(
             BufferType& buffer,
             size_t mode_index,
             ScalarType deltaT,
@@ -112,8 +112,8 @@ namespace Physica::Core {
         buffer(0, mode_index) = c1 * buffer(0, mode_index) + factor * c2 * random;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void Langevin<ScalarType, PosScalarType, Dim>::swap(Langevin<ScalarType, PosScalarType, Dim>& obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::swap(Langevin<ScalarType, PosScalarType, Dim, NumReplica>& obj) noexcept {
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
     }

@@ -25,11 +25,11 @@ namespace Physica::Core {
      * Reference:
      * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. J. Chem. Phys, 2014, 140(23):5106.
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class TRPMDThermo {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
@@ -42,27 +42,29 @@ namespace Physica::Core {
         TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
         template<class RandomGenerator>
-        void step(RingPolymerType& RingPolymer, RandomGenerator& gen, ScalarType deltaT) const;
+        void step(RingPolymerType& ringPolymer, RandomGenerator& gen, ScalarType deltaT) const;
         void swap(TRPMDThermo& obj) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    TRPMDThermo<ScalarType, PosScalarType, Dim>::TRPMDThermo(ScalarType temperatureT_)
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::TRPMDThermo(ScalarType temperatureT_)
             : temperatureT(temperatureT_) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     TRPMDThermo<ScalarType, PosScalarType, Dim>&
-    TRPMDThermo<ScalarType, PosScalarType, Dim>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
+    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomGenerator>
-    void TRPMDThermo<ScalarType, PosScalarType, Dim>::step(
+    void TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             RandomGenerator& gen,
             ScalarType deltaT) const {
+        if constexpr (NumReplica == 1)
+            return;
         const size_t dof = ringPolymer.getDOF();
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
@@ -90,8 +92,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void TRPMDThermo<ScalarType, PosScalarType, Dim>::swap(TRPMDThermo<ScalarType, PosScalarType, Dim>& obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::swap(TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>& obj) noexcept {
         temperatureT.swap(obj.temperatureT);
     }
 }

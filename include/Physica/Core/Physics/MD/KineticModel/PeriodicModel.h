@@ -19,12 +19,12 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class PeriodicModel {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using MassVector = typename MDCellType::MassVector;
         using BufferType = typename RingPolymerType::BufferType;
@@ -54,11 +54,11 @@ namespace Physica::Core {
         void updateTimeStep(ScalarType deltaT);
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    PeriodicModel<ScalarType, PosScalarType, Dim>::PeriodicModel() : lastTimeStep(0) {}
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::PeriodicModel() : lastTimeStep(0) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    PeriodicModel<ScalarType, PosScalarType, Dim>::PeriodicModel(ScalarType temperatureT, size_t numReplica)
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::PeriodicModel(ScalarType temperatureT, size_t numReplica)
             : omegaW(RingPolymerType::calcOmegaW(temperatureT, numReplica))
             , lastTimeStep(0) {
         const size_t kSpaceSize = RingPolymerType::calcKSpaceSize(numReplica);
@@ -68,8 +68,8 @@ namespace Physica::Core {
             omegaK[i] = omegaW * sin(ScalarType(M_PI * i / numReplica)) * 2;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void PeriodicModel<ScalarType, PosScalarType, Dim>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
         const size_t dof = ringPolymer.getDOF();
@@ -113,9 +113,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class Barostat>
-    void PeriodicModel<ScalarType, PosScalarType, Dim>::npt_step(
+    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::npt_step(
             RingPolymerType& ringPolymer,
             MDCellType& cell,
             Barostat& barostat,
@@ -125,23 +125,23 @@ namespace Physica::Core {
         cell.setLattice(std::move(lattice));
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    PeriodicModel<ScalarType, PosScalarType, Dim>&
-    PeriodicModel<ScalarType, PosScalarType, Dim>::operator=(PeriodicModel<ScalarType, PosScalarType, Dim> obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>&
+    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::operator=(PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void PeriodicModel<ScalarType, PosScalarType, Dim>::swap(PeriodicModel& obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::swap(PeriodicModel& obj) noexcept {
         omegaK.swap(obj.omegaK);
         omegaW.swap(obj.omegaW);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
         lastTimeStep.swap(obj.lastTimeStep);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void PeriodicModel<ScalarType, PosScalarType, Dim>::updateTimeStep(ScalarType deltaT) {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::updateTimeStep(ScalarType deltaT) {
         for (size_t i = 0; i < omegaK.getLength(); ++i) {
             const ScalarType phase = omegaK[i] * deltaT;
             coeffMatrixBase[i] = Vector2D{cos(phase), sin(phase)};

@@ -46,8 +46,10 @@ namespace Physica::Core {
                     const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
                     v1.getDerived().writePacket(i, sum);
                 }
-                const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i) + v2.getDerived().template packetPartial<PacketType>(i);
-                v1.getDerived().writePacketPartial(i, length - i, sum);
+                if (to != length) {
+                    const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i) + v2.getDerived().template packetPartial<PacketType>(i);
+                    v1.getDerived().writePacketPartial(i, length - i, sum);
+                }
             }
         };
     }

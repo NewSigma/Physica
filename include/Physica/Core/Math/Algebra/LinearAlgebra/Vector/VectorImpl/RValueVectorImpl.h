@@ -57,7 +57,8 @@ namespace Physica::Core {
                         const size_t to = length / PacketType::size() * PacketType::size();
                         for (; i < to; i += PacketType::size())
                             v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
-                        v2.getDerived().writePacketPartial(i, length - i, v1.getDerived().template packetPartial<PacketType>(i));
+                        if (to != length)
+                            v2.getDerived().writePacketPartial(i, length - i, v1.getDerived().template packetPartial<PacketType>(i));
                     }
                 }
             }
@@ -88,7 +89,8 @@ namespace Physica::Core {
                     PacketType buffer(0);
                     for (; i < to; i += PacketType::size())
                         buffer += (v1.getDerived().template packet<PacketType>(i) * v2.getDerived().template packet<PacketType>(i));
-                    buffer += v1.getDerived().template packetPartial<PacketType>(i) * v2.getDerived().template packetPartial<PacketType>(i);
+                    if (to != length)
+                        buffer += v1.getDerived().template packetPartial<PacketType>(i) * v2.getDerived().template packetPartial<PacketType>(i);
                     return ResultType(horizontal_add(buffer));
                 }
                 else {
@@ -115,7 +117,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    PacketType RValueVector<Derived>::packet(size_t index) const {
+    inline PacketType RValueVector<Derived>::packet(size_t index) const {
         PacketType packet{};
         for (int i = 0; i < PacketType::size(); ++i, ++index)
             packet.insert(i, calc(index).getTrivial());
@@ -124,7 +126,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    PacketType RValueVector<Derived>::packetPartial(size_t index) const {
+    inline PacketType RValueVector<Derived>::packetPartial(size_t index) const {
         auto packet = PacketType(0);
         for (int i = 0; index < getLength(); ++i, ++index)
             packet.insert(i, calc(index).getTrivial());

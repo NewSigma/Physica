@@ -28,8 +28,10 @@ namespace Physica::Core {
         class Traits<RowContinuousVector<MatrixType, Length>> {
             using VectorType = RowContinuousVector<MatrixType, Length>;
             constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
+            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+            constexpr static bool isRowVector = isElementMatrix && MatrixType::RowAtCompile == 1;
         public:
-            using Base = typename std::conditional<isRowMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
+            using Base = typename std::conditional<isRowMatrix || isRowVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
@@ -40,8 +42,10 @@ namespace Physica::Core {
         class Traits<ColContinuousVector<MatrixType, Length>> {
             using VectorType = ColContinuousVector<MatrixType, Length>;
             constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
+            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+            constexpr static bool isColumnVector = isElementMatrix && MatrixType::ColumnAtCompile == 1;
         public:
-            using Base = typename std::conditional<isColumnMatrix, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
+            using Base = typename std::conditional<isColumnMatrix || isColumnVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
@@ -127,12 +131,16 @@ namespace Physica::Core {
 
     template<class MatrixType, size_t Column>
     class ContinuousMatrixBlock<MatrixType, 1, Column> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
-                                                       , public RowContinuousVector<MatrixType> {
+                                                       , public RowContinuousVector<MatrixType, Column> {
     public:
         using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>;
-        using VectorBase = RowContinuousVector<MatrixType>;
+        using VectorBase = RowContinuousVector<MatrixType, Column>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
+        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
+                : ContinuousMatrixBlock(mat_, fromRow_, fromCol_, colCount_) {
+            assert(rowCount_ == 1);
+        }
         ContinuousMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
@@ -164,12 +172,16 @@ namespace Physica::Core {
 
     template<class MatrixType, size_t Row>
     class ContinuousMatrixBlock<MatrixType, Row, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
-                                                    , public ColContinuousVector<MatrixType> {
+                                                    , public ColContinuousVector<MatrixType, Row> {
     public:
         using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>;
-        using VectorBase = ColContinuousVector<MatrixType>;
+        using VectorBase = ColContinuousVector<MatrixType, Row>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
+        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
+                : ContinuousMatrixBlock(mat_, fromRow_, rowCount_, fromCol_) {
+            assert(colCount_ == 1);
+        }
         ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
@@ -187,6 +199,50 @@ namespace Physica::Core {
         using Base::calc;
         using VectorBase::calc;
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
+        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        using VectorBase::max;
+        using VectorBase::min;
+        /**
+         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
+         */
+        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
+        [[nodiscard]] typename VectorBase::Base& asVector() noexcept { return *this; }
+        [[nodiscard]] const typename VectorBase::Base& asVector() const noexcept { return *this; }
+    };
+
+    template<class MatrixType>
+    class ContinuousMatrixBlock<MatrixType, 1, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>
+                                                  , public ColContinuousVector<MatrixType, 1> {
+    public:
+        using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>;
+        using VectorBase = ColContinuousVector<MatrixType, 1>;
+        using ScalarType = typename MatrixType::ScalarType;
+    public:
+        ContinuousMatrixBlock(MatrixType& mat_, [[maybe_unused]] size_t, [[maybe_unused]] size_t, [[maybe_unused]] size_t)
+                : VectorBase(mat_, 0, 1, 0) {}
+        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
+        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
+        ~ContinuousMatrixBlock() = default;
+        /* Operators */
+        using Base::operator=;
+        using VectorBase::operator=;
+        [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+            assert(row == 0 && col == 0);
+            return VectorBase::operator[](0);
+        }
+        [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) const {
+            assert(row == 0 && col == 0);
+            return VectorBase::operator[](0);
+        }
+        /* Operations */
+        using Base::assignTo;
+        using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == 1); }
+        /* Getters */
+        using Base::calc;
+        using VectorBase::calc;
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;

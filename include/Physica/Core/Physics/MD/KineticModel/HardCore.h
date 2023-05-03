@@ -19,11 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim> class RingPolymer;
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
     template<class ScalarType>
     class HardCore {
-        using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1>;
+        using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1, 1>;
 
         ScalarType latticeSize;
         ScalarType collideFactor;

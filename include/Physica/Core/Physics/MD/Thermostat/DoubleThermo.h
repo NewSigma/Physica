@@ -26,11 +26,11 @@ namespace Physica::Core {
      * Reference:
      * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class DoubleThermo {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
@@ -44,27 +44,27 @@ namespace Physica::Core {
         DoubleThermo& operator=(DoubleThermo obj) noexcept;
         /* Operations */
         template<class RandomGenerator>
-        void step(RingPolymerType& RingPolymer, RandomGenerator& gen, ScalarType deltaT) const;
+        void step(RingPolymerType& ringPolymer, RandomGenerator& gen, ScalarType deltaT) const;
         void swap(DoubleThermo& obj) noexcept;
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    DoubleThermo<ScalarType, PosScalarType, Dim>&
-    DoubleThermo<ScalarType, PosScalarType, Dim>::operator=(DoubleThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>&
+    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomGenerator>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::step(
+    void DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             RandomGenerator& gen,
             ScalarType deltaT) const {
@@ -113,8 +113,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void DoubleThermo<ScalarType, PosScalarType, Dim>::swap(DoubleThermo<ScalarType, PosScalarType, Dim>& obj) noexcept {
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::swap(DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>& obj) noexcept {
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
     }
