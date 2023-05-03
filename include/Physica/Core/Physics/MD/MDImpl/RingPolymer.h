@@ -21,11 +21,12 @@
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     class RingPolymer {
+        constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Column : MatrixOption::Row;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using PhaseMatrix = DenseMatrix<PosScalarType, MatrixOption::Row | MatrixOption::Vector, Dynamic, NumReplica>;
+        using PhaseMatrix = DenseMatrix<PosScalarType, PhaseMatrixMajor | MatrixOption::Vector, Dynamic, NumReplica>;
         using BufferType = DenseMatrix<ComplexScalar<PosScalarType>, MatrixOption::Row | MatrixOption::Vector, 2>;
         using FFTType = FFT<PosScalarType, 1>;
     private:

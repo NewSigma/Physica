@@ -31,7 +31,7 @@ using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, ScalarType, 1>;
+using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
 using KineticModel = HardCore<ScalarType>;
