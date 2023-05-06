@@ -63,4 +63,13 @@ namespace Physica::Gui {
         setChart(chart);
         setRenderHint(QPainter::Antialiasing);
     }
+
+    QScatterSeries& Plot::label(double x, double y, QString text) {
+        using VectorType = Vector<Scalar<Double, false>, 1>;
+        auto& result = scatter(VectorType{x}, VectorType{y});
+        result.setPointLabelsVisible(true);
+        result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
+        result.setMarkerSize(0);
+        return result;
+    }
 }

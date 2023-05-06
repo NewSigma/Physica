@@ -68,6 +68,7 @@ namespace Physica::Gui {
         QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
         template<class VectorType>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& x, const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
+        QScatterSeries& label(double x, double y, QString text);
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);

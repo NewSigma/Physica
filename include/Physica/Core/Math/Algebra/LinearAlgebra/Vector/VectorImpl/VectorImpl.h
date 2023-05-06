@@ -93,19 +93,28 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(size_t len, RandomGenerator& generator) {
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(size_t len, RandomGenerator& gen) {
         Vector<T, Length, MaxLength> result(len);
         for (size_t i = 0; i < len; ++i)
-            result[i] = T::random_uniform(generator);
+            result[i] = T::random_uniform(gen);
         return result;
     }
 
     template<class T, size_t Length, size_t MaxLength>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(const Vector& v1, const Vector& v2, RandomGenerator& generator) {
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random(const Vector& v1, const Vector& v2, RandomGenerator& gen) {
         assert(v1.getLength() == v2.getLength());
-        Vector<T, Length, MaxLength> result = random(v1.getLength(), generator);
+        Vector<T, Length, MaxLength> result = random(v1.getLength(), gen);
         result = v1 + hadamard((v2 - v1), result);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class Distribution, class RandomGenerator>
+    Vector<T, Length, MaxLength> Vector<T, Length, MaxLength>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
+        Vector<T, Length, MaxLength> result(len);
+        for (auto& elem : result)
+            elem = dist(gen);
         return result;
     }
     /**
