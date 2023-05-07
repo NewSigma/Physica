@@ -25,7 +25,7 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
-        using Base = Utils::CRTPBase<Derived>;
+        using Base = Utils::CRTPBase<device_obj<Derived>>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
@@ -37,10 +37,10 @@ namespace Physica::Core {
         void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     };
 }
 
-#ifdef __CUDA_ARCH__
-    #include "VectorImpl/RValueVectorImpl.cuh"
-#endif
+#include "VectorImpl/RValueVectorImpl.cuh"
+#include "VectorImpl/VectorExpression.cuh"
+

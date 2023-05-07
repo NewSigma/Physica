@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -382,7 +382,7 @@ namespace Physica::Core {
     public:
         VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
 
-        typename Base::ScalarType calc(size_t s) const { return reciprocal(exp.calc(s)); }
+        [[nodiscard]] typename Base::ScalarType calc(size_t index) const { return reciprocal(exp.calc(index)); }
         template<class PacketType>
         [[nodiscard]] PacketType packet(size_t index) const { return PacketType(1) / exp.template packet<PacketType>(index); }
         template<class PacketType>

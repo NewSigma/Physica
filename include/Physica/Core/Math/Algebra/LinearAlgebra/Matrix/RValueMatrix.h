@@ -110,6 +110,3 @@ namespace Physica::Core {
 }
 
 #include "MatrixImpl/RValueMatrixImpl.h"
-#ifdef PHYSICA_CUDA
-    #include "RValueMatrix.cuh"
-#endif

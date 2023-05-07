@@ -220,7 +220,7 @@ namespace Physica::Core {
     ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
     inline Scalar<Float, false>::Scalar(const Scalar<Float, true>& s) : Base(s) {}
 
-    inline Scalar<Float, false>::Scalar(const Scalar<Double, false>& s) : Base(float(s)) {}
+    __host__ __device__ inline Scalar<Float, false>::Scalar(const Scalar<Double, false>& s) : Base(float(s)) {}
 
     inline Scalar<Float, true> Scalar<Float, false>::operator*(const Scalar<Float, true>& s) const {
         return Scalar<Float, true>(f * s.f, f * s.getA());
@@ -285,7 +285,7 @@ namespace Physica::Core {
         return s1.getTrivial() == s2.getTrivial();
     }
     ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////
-    inline Scalar<Double, false>::Scalar(const Scalar<Float, false>& s) : Base(double(s)) {}
+    __host__ __device__ inline Scalar<Double, false>::Scalar(const Scalar<Float, false>& s) : Base(double(s)) {}
 
     inline Scalar<Double, false>::Scalar(const Scalar<Double, true>& s) : Base(s) {}
 

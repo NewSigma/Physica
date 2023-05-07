@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,40 +24,36 @@
  * 
  * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
  */
-namespace Physica::Core {
-    namespace Internal {
-        template<class T> class device_obj final : public T {
-            static_assert(std::is_trivial<T>::value, "[Error]: non-trivial class does not have default device_obj");
+namespace Physica {
+    namespace Core {
+        namespace Internal {
+            template<class T> class device_obj;
+        }
+
+        template<class T> class device_obj;
+    }
+
+    namespace Utils {
+        template<class T> class device_obj;
+
+        template<class T>
+        struct is_device_obj {
+            constexpr static bool value = false;
+        };
+
+        template<class T>
+        struct is_device_obj<device_obj<T>> {
+            constexpr static bool value = true;
+        };
+
+        template<class T>
+        struct is_device_obj<Physica::Core::device_obj<T>> {
+            constexpr static bool value = true;
+        };
+
+        template<class T>
+        struct is_device_obj<Physica::Core::Internal::device_obj<T>> {
+            constexpr static bool value = true;
         };
     }
-    template<class T> class device_obj final : public T {
-        static_assert(std::is_trivial<T>::value, "[Error]: non-trivial class does not have default device_obj");
-    };
-}
-
-namespace Physica::Utils {
-
-    template<class T> class device_obj final : public T {
-        static_assert(std::is_trivial<T>::value, "[Error]: non-trivial class does not have default device_obj");
-    };
-
-    template<class T>
-    struct is_device_obj {
-        constexpr static bool value = false;
-    };
-
-    template<class T>
-    struct is_device_obj<device_obj<T>> {
-        constexpr static bool value = true;
-    };
-
-    template<class T>
-    struct is_device_obj<Physica::Core::device_obj<T>> {
-        constexpr static bool value = true;
-    };
-
-    template<class T>
-    struct is_device_obj<Physica::Core::Internal::device_obj<T>> {
-        constexpr static bool value = true;
-    };
 }

@@ -20,9 +20,6 @@
 
 #include <cstddef>
 #include "Physica/Config.h"
-#ifdef PHYSICA_CUDA
-    #include <cuda_runtime_api.h>
-#endif
 
 namespace Physica::Utils {
     /**

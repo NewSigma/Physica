@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "RValueMatrix.cuh"
+
 namespace Physica::Core {
     template<class Derived>
     class device_obj<LValueMatrix<Derived>> : public device_obj<RValueMatrix<Derived>> {

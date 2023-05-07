@@ -184,23 +184,23 @@ namespace Physica::Core {
             float f;
         public:
             AbstractScalar() = default;
-            AbstractScalar(float f_) : f(f_) {}
+            __host__ __device__ AbstractScalar(float f_) : f(f_) {}
             AbstractScalar(const AbstractScalar& s) = default;
             AbstractScalar(const Integer& i) : AbstractScalar(float(double(i))) {}
             AbstractScalar(const Rational& r) : AbstractScalar(float(double(r))) {}
             ~AbstractScalar() = default;
             /* Operators */
-            explicit operator float() const { return f; }
-            explicit operator double() const { return f; }
+            __host__ __device__ explicit operator float() const { return f; }
+            __host__ __device__ explicit operator double() const { return f; }
             friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
             /* Helpers */
             static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
-            [[nodiscard]] float getTrivial() const noexcept { return f; }
-            [[nodiscard]] bool isZero() const noexcept { return f == 0; }
-            [[nodiscard]] bool isPositive() const { return f > 0; }
-            [[nodiscard]] bool isNegative() const { return f < 0; }
+            [[nodiscard]] __host__ __device__ float getTrivial() const noexcept { return f; }
+            [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
+            [[nodiscard]] __host__ __device__ bool isPositive() const { return f > 0; }
+            [[nodiscard]] __host__ __device__ bool isNegative() const { return f < 0; }
             [[nodiscard]] bool isInteger() const;
         protected:
             /* Helpers */
@@ -215,23 +215,23 @@ namespace Physica::Core {
             double d;
         public:
             AbstractScalar() = default;
-            AbstractScalar(double d_) : d(d_) {}
+            __host__ __device__ AbstractScalar(double d_) : d(d_) {}
             AbstractScalar(const AbstractScalar& s) = default;
             AbstractScalar(const Integer& i) : AbstractScalar(double(i)) {}
             AbstractScalar(const Rational& r) : AbstractScalar(double(r)) {}
             ~AbstractScalar() = default;
             /* Operators */
-            explicit operator float() const { return d; }
-            explicit operator double() const { return d; }
+            __host__ __device__ explicit operator float() const { return d; }
+            __host__ __device__ explicit operator double() const { return d; }
             friend std::istream& operator>>(std::istream& is, AbstractScalar& scalar);
             /* Helpers */
             static inline bool matchSign(const AbstractScalar& s1, const AbstractScalar& s2) { return (s1.d > 0 && s2.d > 0) || (s1.d < 0 && s2.d < 0); }
             /* Getters */
             [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
-            [[nodiscard]] double getTrivial() const noexcept { return d; }
-            [[nodiscard]] bool isZero() const noexcept{ return d == 0; }
-            [[nodiscard]] bool isPositive() const { return d > 0; }
-            [[nodiscard]] bool isNegative() const { return d < 0; }
+            [[nodiscard]] __host__ __device__ double getTrivial() const noexcept { return d; }
+            [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
+            [[nodiscard]] __host__ __device__ bool isPositive() const { return d > 0; }
+            [[nodiscard]] __host__ __device__ bool isNegative() const { return d < 0; }
             [[nodiscard]] bool isInteger() const;
         protected:
             /* Helpers */
@@ -457,23 +457,23 @@ namespace Physica::Core {
         using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
-        Scalar(float f_) : Base(f_) {}
+        __host__ __device__ Scalar(float f_) : Base(f_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
         inline Scalar(const Scalar<Float, true>& s);
-        inline Scalar(const Scalar<Double, false>& s);
+        __host__ __device__ inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
-        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
-        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
-        Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
-        Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
+        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
+        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
+        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
+        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
         inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
         inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(f * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(f / std::pow(2, i)); }
-        Scalar operator-() const noexcept { return Scalar(-f); }
+        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
@@ -552,24 +552,24 @@ namespace Physica::Core {
         using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
-        Scalar(double d_) : Base(d_) {}
+        __host__ __device__ Scalar(double d_) : Base(d_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
-        inline Scalar(const Scalar<Float, false>& s);
+        __host__ __device__ inline Scalar(const Scalar<Float, false>& s);
         Scalar(const Scalar<Double, true>& s);
         Scalar(const Scalar& s) = default;
         ~Scalar() = default;
         /* Operators */
-        explicit operator double() const { return d; }
-        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
-        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
-        Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
-        Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
+        __host__ __device__ explicit operator double() const { return d; }
+        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
+        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
+        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
+        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
         inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
         inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
-        Scalar operator-() const noexcept { return Scalar(-d); }
+        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }

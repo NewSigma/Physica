@@ -130,7 +130,4 @@ namespace Physica::Core {
     }
 }
 
-#ifdef PHYSICA_CUDA
-    #include "DenseMatrix.cuh"
-#endif
 #include "DenseMatrixImpl/DenseMatrixImpl.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "LValueVector.h"
+#include "RValueVector.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -52,6 +53,6 @@ namespace Physica::Core {
     device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<RValueVector<T>>& v) {
         Base::getDerived().resize(v.getLength());
         v.assignTo(*this);
-        return *this;
+        return Base::getDerived();
     }
 }

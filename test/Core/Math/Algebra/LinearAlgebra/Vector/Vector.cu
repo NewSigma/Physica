@@ -17,7 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
 
+using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = Scalar<Float, false>;
 using VectorType = Vector<ScalarType>;
@@ -27,10 +29,18 @@ int main() {
     auto d_a = a.toDevice();
     device_obj<VectorType> d_b(4);
     d_b = d_a;
-    if (cudaStreamSynchronize(nullptr) != cudaError_t::cudaSuccess)
-        return 1;
+    cudaCheck(cudaStreamSynchronize(nullptr));
     VectorType b = d_b.toHost();
     if (a != b)
         return 1;
+    {
+        const VectorType answer = reciprocal(a);
+        d_b = reciprocal(d_b);
+        cudaCheck(cudaStreamSynchronize(nullptr));
+        VectorType result;
+        d_b.toHost(result);
+        if (!vectorNear(result, answer, 1E-15))
+            return 1;
+    }
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -99,6 +99,3 @@ namespace Physica::Core {
 
 #include "VectorImpl/RValueVectorImpl.h"
 #include "VectorImpl/VectorExpression.h"
-#ifdef PHYSICA_CUDA
-    #include "RValueVector.cuh"
-#endif

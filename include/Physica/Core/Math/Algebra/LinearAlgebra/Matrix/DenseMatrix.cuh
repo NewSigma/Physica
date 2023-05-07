@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "LValueMatrix.cuh"
+#include "DenseMatrixImpl/DenseMatrixStorage.cuh"
+
 namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>>

@@ -18,24 +18,35 @@
  */
 #pragma once
 
+#include "Physica/Utils/CUDA/PlainStruct.h"
+
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
-        __global__ void assignTo_kernel(device_obj<RValueVector<Derived>> source, device_obj<LValueVector<OtherDerived>> target) {
+        __global__ void assignTo_kernel(
+                Physica::PlainStruct<Derived> source,
+                Physica::PlainStruct<OtherDerived> target) {
+            using namespace Physica::Core;
+            using HostDerived = typename Derived::host_obj;
+            using HostOtherDerived = typename OtherDerived::host_obj;
+            static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid template param");
+            static_assert(std::is_base_of<LValueVector<HostOtherDerived>, HostOtherDerived>::value, "[Error]: Invalid template param");
             const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            if (index < getLength())
-                target[index] = source.calc(index);
+            const size_t length = source.getDerived().getLength();
+            if (index < length)
+                target.getDerived()[index] = source.getDerived().calc(index);
         }
     }
 
     template<class Derived>
     template<class OtherDerived>
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
+        using namespace Physica;
         int device;
         cudaGetDevice(&device);
         const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
         const int numBlock = (getLength() + maxThreadsPerBlock) / maxThreadsPerBlock;
-        const int numThread = getLength() >= maxThreadPerBlock ? maxThreadPerBlock : getLength();
-        Internal::assignTo_kernel<<<numBlock, numThread>>>(Base::getDerived(), target.getDerived());
+        const int numThread = getLength() >= maxThreadsPerBlock ? maxThreadsPerBlock : getLength();
+        Internal::assignTo_kernel<<<numBlock, numThread>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     }
 }

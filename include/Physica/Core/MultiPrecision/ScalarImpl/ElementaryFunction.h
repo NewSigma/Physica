@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ELEMENTARYFUNCTION_H
-#define PHYSICA_ELEMENTARYFUNCTION_H
+#pragma once
 /*!
  * This file is part of implementations of \Scalar.
  * Do not include this header file, include Scalar.h instead.
@@ -30,7 +29,7 @@ namespace Physica::Core {
     Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s);
+    __host__ __device__ inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> sqrt(const Scalar<option, errorTrack>& s);
@@ -130,5 +129,3 @@ namespace Physica::Core {
 }
 
 #include "FunctionImpl/ElementaryImpl.h"
-
-#endif

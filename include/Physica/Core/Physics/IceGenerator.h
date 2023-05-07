@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Utils/TestHelper.h"
 

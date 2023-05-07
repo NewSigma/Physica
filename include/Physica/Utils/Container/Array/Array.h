@@ -89,16 +89,16 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
         void insert(const T&, size_t) { assert(false); }
         void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
-        template<class... Args>
-        void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
+        template<class... Args> void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Capacity; }
-        [[nodiscard]] pointer data() noexcept { return arr; }
-        [[nodiscard]] const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
@@ -199,16 +199,15 @@ namespace Physica::Utils {
         void append(rvalue_reference t);
         void append(const Array& t);
         void append(Array&& t);
-        template<class... Args>
-        void insert(size_t index, Args... args);
+        template<class... Args> void insert(size_t index, Args... args);
         void reserve(size_t size);
-        template<class... Args>
-        void resize(size_t size, Args... args);
+        template<class... Args> void resize(size_t size, Args... args);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
         void swap(Array& array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }

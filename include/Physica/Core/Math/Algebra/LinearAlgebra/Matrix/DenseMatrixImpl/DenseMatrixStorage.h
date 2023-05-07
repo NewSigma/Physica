@@ -222,6 +222,3 @@ namespace Physica::Core::Internal {
 }
 
 #include "DenseMatrixStorageImpl.h"
-#ifdef PHYSICA_CUDA
-    #include "DenseMatrixStorage.cuh"
-#endif

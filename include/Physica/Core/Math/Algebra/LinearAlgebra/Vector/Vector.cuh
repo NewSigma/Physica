@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "LValueVector.cuh"
+
 namespace Physica::Core {
     namespace Internal {
         template<class T, size_t Length, size_t MaxLength>
@@ -28,7 +30,9 @@ namespace Physica::Core {
     class device_obj<Vector<T, Length, MaxLength>>
             : public device_obj<LValueVector<Vector<T, Length, MaxLength>>>
             , public Utils::device_obj<Utils::Array<T, Length, MaxLength>> {
+    public:
         using host_obj = Vector<T, Length, MaxLength>;
+    private:
         using Base = device_obj<LValueVector<host_obj>>;
         using Storage = Utils::device_obj<Utils::Array<T, Length, MaxLength>>;
     public:
@@ -42,7 +46,8 @@ namespace Physica::Core {
         using Storage::operator=;
         using Storage::operator[];
         /* Opporations */
-        [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] inline host_obj toHost() const;
+        inline void toHost(host_obj& obj);
         using Storage::swap;
         /* Getters */
         using Storage::getLength;
@@ -62,9 +67,14 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    typename device_obj<Vector<T, Length, MaxLength>>::host_obj
+    inline typename device_obj<Vector<T, Length, MaxLength>>::host_obj
     device_obj<Vector<T, Length, MaxLength>>::toHost() const {
         return host_obj(Storage::toHost());
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    inline void device_obj<Vector<T, Length, MaxLength>>::toHost(host_obj& obj) {
+        Storage::toHost(obj);
     }
 
     template<class T, size_t Length, size_t MaxLength>

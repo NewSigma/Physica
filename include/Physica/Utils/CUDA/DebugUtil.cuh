@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_DEBUGUTIL_H
-#define PHYSICA_DEBUGUTIL_H
+#pragma once
 
 #include <cstring>
 #include <cuda_runtime_api.h>
+#include "Physica/Core/Exception/CudaException.cuh"
 
 //IDEA: A better logger for both C++ and CUDA is required.
 #define cuDebug(x) do { printf("[] [Debug] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
@@ -33,13 +33,10 @@
         exit(EXIT_FAILURE);                                           \
     } while(false)
 #define cuInfo(x) do { printf("[] [Info] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
-#define checkCudaError(x)                                                                                                       \
-    do {                                                                                                                        \
-        if(x) {                                                                                                                 \
-            printf("[] [Fatal] [%s:%d]: CUDA error encountered! Error code: %s\n", __FILENAME__, __LINE__, cudaGetErrorName(x));\
-            cudaDeviceReset();                                                                                                  \
-            exit(EXIT_FAILURE);                                                                                                 \
-        }                                                                                                                       \
-    } while(false)
 
-#endif
+namespace Physica {
+    inline void cudaCheck(cudaError_t err) {
+        if (err != cudaSuccess)
+            throw Physica::Core::CudaException(err);
+    }
+}

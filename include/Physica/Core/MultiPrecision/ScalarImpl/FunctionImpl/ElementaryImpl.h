@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ELEMENTARYIMPL_H
-#define PHYSICA_ELEMENTARYIMPL_H
+#pragma once
 
 #include "Physica/Core/MultiPrecision/ScalarImpl/ProbabilityFunction.h"
 /*!
@@ -90,7 +89,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s) {
+    __host__ __device__ inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s) {
         return Scalar<option, false>(1) / s;
     }
 
@@ -554,5 +553,3 @@ namespace Physica::Core {
     template<>
     Scalar<MultiPrecision, true> arccoth(const Scalar<MultiPrecision, true>& s);
 }
-
-#endif

@@ -135,6 +135,3 @@ namespace Physica::Core {
 }
 
 #include "VectorImpl/VectorImpl.h"
-#ifdef PHYSICA_CUDA
-    #include "Vector.cuh"
-#endif

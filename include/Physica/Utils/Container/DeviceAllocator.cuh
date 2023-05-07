@@ -20,7 +20,6 @@
 
 #include <cstdlib>
 #include <memory>
-#include <thrust/device_ptr.h>
 #include <cuda_runtime.h>
 #include "Physica/Core/Exception/CudaException.cuh"
 #include "Physica/Utils/CUDA/device_obj.cuh"
@@ -34,7 +33,7 @@ namespace std {
     struct allocator_traits<Physica::Utils::DeviceAllocator<T>> {
     public:
         using allocator_type = Physica::Utils::DeviceAllocator<T>;
-        using value_type = typename T::device_obj_type;
+        using value_type = typename std::conditional<std::is_trivial<T>::value, T, typename T::device_obj_type>::type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using void_pointer = void*;
