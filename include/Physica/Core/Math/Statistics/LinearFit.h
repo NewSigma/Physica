@@ -21,6 +21,10 @@
 #include "NumCharacter.h"
 
 namespace Physica::Core {
+    /**
+     * Reference:
+     * [1] 贾俊平、何晓群、金勇. 统计学(第六版)[M]. 北京:中国人民大学出版社, 2015:280-282.
+     */
     template<class VectorType>
     class LinearFit {
         using ScalarType = typename VectorType::ScalarType;
@@ -28,7 +32,7 @@ namespace Physica::Core {
     public:
         static Param fit(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y);
         static ScalarType relatedCoeff(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y);
-        static ScalarType deviation(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y, Param param);
+        static Param deviation(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y, Param param);
     };
 
     template<class VectorType>
@@ -62,10 +66,13 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    typename LinearFit<VectorType>::ScalarType
+    typename LinearFit<VectorType>::Param
     LinearFit<VectorType>::deviation(const LValueVector<VectorType>& x, const LValueVector<VectorType>& y, Param param) {
-        ScalarType result = square(y - param.first * x - param.second).sum();
-        result = sqrt(result / ScalarType(x.getLength() - 2));
-        return result;
+        const ScalarType mean_sse = square(y - param.first * x - param.second).sum() / ScalarType(x.getLength() - 2);
+        const ScalarType mean_x = mean(x);
+        const ScalarType ssx = square(x - mean_x).sum();
+        const ScalarType deviation_k = sqrt(mean_sse / ssx);
+        const ScalarType deviation_b = sqrt(mean_sse);
+        return std::make_pair(deviation_k, deviation_b);
     }
 }

@@ -130,6 +130,16 @@ namespace Physica::Core {
         ScalarType parallel_solve(Function func, const Utils::Array<typename RandomGenerator::result_type>& seeds) const;
         template<class Function, class RandomGenerator>
         ScalarType solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const;
+
+        template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+        ScalarType solve(Functor1 func, Functor2 importance, Distribution& dist, RandomGenerator& generator) const;
+        template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+        ScalarType solve_e(unsigned int numSequence,
+                           Functor1 func,
+                           Functor2 importance,
+                           Distribution& dist,
+                           RandomGenerator& generator,
+                           ScalarType& deviation) const;
     };
 }
 

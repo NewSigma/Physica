@@ -168,4 +168,37 @@ namespace Physica::Core {
         deviation = sqrt(variance);
         return mean;
     }
+
+    template<class ScalarType, size_t dim>
+    template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve(
+            Functor1 func,
+            Functor2 importance,
+            Distribution& dist,
+            RandomGenerator& generator) const {
+        ScalarType result = 0;
+        for (uint64_t i = 0; i < sampleCount; ++i) {
+            const VectorType x = VectorType::template random_any(dim, dist, generator);
+            toNextMean(result, i, func(x) / importance(x));
+        }
+        return result;
+    }
+
+    template<class ScalarType, size_t dim>
+    template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(
+            unsigned int numSequence,
+            Functor1 func,
+            Functor2 importance,
+            Distribution& dist,
+            RandomGenerator& generator,
+            ScalarType& deviation) const {
+        assert(numSequence > 0);
+        ScalarType mean = 0;
+        ScalarType variance = 0;
+        for (unsigned int i = 0; i < numSequence; ++i)
+            toNextVariance(variance, mean, i, solve(func, importance, dist, generator));
+        deviation = sqrt(variance);
+        return mean;
+    }
 }
