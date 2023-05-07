@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,26 +16,37 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 
 int main() {
-    DenseMatrix<Scalar<Double, false>, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-    DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
     {
-        DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
-        for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
-            for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
-                if (*ite1 != Scalar<Double, false>(-2))
-                    return 1;
+        DenseMatrix<Scalar<Double, false>, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
+        {
+            DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
+            for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
+                for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
+                    if (*ite1 != Scalar<Double, false>(-2))
+                        return 1;
+        }
+        {
+            DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
+            for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
+                for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
+                    if (*ite1 != Scalar<Double, false>(3))
+                        return 1;
+        }
     }
-    {
-        DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
-        for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
-            for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
-                if (*ite1 != Scalar<Double, false>(3))
-                    return 1;
+    /* ContinuousMatrixBlock<Derived, 1, 1> */ {
+        using ScalarType = Scalar<Double, false>;
+        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, 1> mat(2, 1);
+        mat(0, 0) = 1.0;
+        mat(1, 0) = 2.0;
+        if (mat.row(1)[0] != ScalarType(2))
+            return 1;
     }
     return 0;
 }

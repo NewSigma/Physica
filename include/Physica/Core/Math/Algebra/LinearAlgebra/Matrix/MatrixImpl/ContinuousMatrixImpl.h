@@ -33,12 +33,20 @@ namespace Physica::Core {
 
     template<class Derived>
     inline ContinuousMatrixBlock<Derived, 1, ContinuousMatrix<Derived>::ColumnAtCompile> ContinuousMatrix<Derived>::row(size_t r) {
-        return {Base::getDerived(), r, 0, Base::getColumn()};
+        const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
+        if constexpr (useSpecialization)
+            return {Base::getDerived(), r, 1, 0};
+        else
+            return {Base::getDerived(), r, 0, Base::getColumn()};
     }
 
     template<class Derived>
     inline const ContinuousMatrixBlock<Derived, 1, ContinuousMatrix<Derived>::ColumnAtCompile> ContinuousMatrix<Derived>::row(size_t r) const {
-        return {Base::getConstCastDerived(), r, 0, Base::getColumn()};
+        const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
+        if constexpr (useSpecialization)
+            return {Base::getConstCastDerived(), r, 1, 0};
+        else
+            return {Base::getConstCastDerived(), r, 0, Base::getColumn()};
     }
 
     template<class Derived>

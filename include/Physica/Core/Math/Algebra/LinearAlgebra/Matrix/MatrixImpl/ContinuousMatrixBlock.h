@@ -219,8 +219,8 @@ namespace Physica::Core {
         using VectorBase = ColContinuousVector<MatrixType, 1>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        ContinuousMatrixBlock(MatrixType& mat_, [[maybe_unused]] size_t, [[maybe_unused]] size_t, [[maybe_unused]] size_t)
-                : VectorBase(mat_, 0, 1, 0) {}
+        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+                : VectorBase(mat_, fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
