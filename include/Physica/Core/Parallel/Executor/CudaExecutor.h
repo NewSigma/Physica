@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,8 @@
  */
 #pragma once
 
-#include <vector>
-
 namespace Physica::Core {
-    template<class FutureType>
-    class FutureGroup {
-        std::vector<FutureType> futures;
-    public:
-        FutureGroup(size_t numFuture) {
-            futures.reserve(numFuture);
-        }
-        /* Operations */
-        void wait() {
-            for (auto& future : futures)
-                future.wait();
-        }
+    class CudaExecutor {
 
-        void append(FutureType future) {
-            futures.push_back(std::move(future));
-        }
-
-        [[nodiscard]] std::vector<FutureType>& getFutures() noexcept { return futures; }
     };
 }

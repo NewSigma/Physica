@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     unsigned int ThreadPool::numThreadRequired = 0;
     thread_local std::unique_ptr<ThreadPool::ThreadInfo> ThreadPool::info = nullptr;
 

@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     class ProcessExecutor {
     public:
         using FutureType = ProcessFuture;

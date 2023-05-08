@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Future/FutureGroup.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     class ThreadExecutor {
     public:
         using FutureType = std::future<void>;

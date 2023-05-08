@@ -55,7 +55,7 @@ namespace Physica::Core {
     }
 
     void VaspWarpper::execute() {
-        future = Parallel::ProcessExecutor::schedule([=]() {
+        future = ProcessExecutor::schedule([=]() {
             int standardErr = dup(STDERR_FILENO);
             if (!logFilePath.empty()) {
                 int log_fd = open(logFilePath.c_str()

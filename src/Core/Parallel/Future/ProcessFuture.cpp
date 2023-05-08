@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Exception/SyscallException.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     ProcessFuture::ProcessFuture() : isValid(false) {}
 
     ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), finished(false), isValid(true) {}

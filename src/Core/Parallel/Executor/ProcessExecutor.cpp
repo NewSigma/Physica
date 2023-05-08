@@ -18,6 +18,6 @@
  */
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     int ProcessExecutor::nice_incr = 0;
 }

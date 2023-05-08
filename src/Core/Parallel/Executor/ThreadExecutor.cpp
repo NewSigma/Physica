@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     void ThreadExecutor::auto_wait(FutureType& future) {
         const auto nano = std::chrono::nanoseconds(1);
         while (future.wait_for(nano) != std::future_status::ready) {

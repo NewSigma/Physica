@@ -22,7 +22,7 @@
 #include "Physica/Utils/Unix/UnixHelper.h"
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     class SubProcess {
     private:
         std::function<void()> task;

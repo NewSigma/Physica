@@ -24,15 +24,6 @@ using ScalarType = Scalar<Float, false>;
 extern const char* outcar;
 
 namespace Physica::Core {
-    namespace Parallel {
-        struct Test {
-            static ProcessFuture makeDummyFuture() {
-                ProcessFuture future{};
-                future.finished = future.isValid = true;
-                return future;
-            }
-        };
-    }
     struct Test {
         static VaspWarpper init() {
             {
@@ -54,8 +45,14 @@ namespace Physica::Core {
             VaspWarpper vasp{};
             vasp.vaspWorkingDir = ".";
             vasp.poscar = Poscar({std::move(lattice), std::move(pos), CrystalCell::Type::Direct}, {2, 6});
-            vasp.future = Parallel::Test::makeDummyFuture();
+            vasp.future = Test::makeDummyFuture();
             return vasp;
+        }
+
+        static ProcessFuture makeDummyFuture() {
+            ProcessFuture future{};
+            future.finished = future.isValid = true;
+            return future;
         }
     };
 }

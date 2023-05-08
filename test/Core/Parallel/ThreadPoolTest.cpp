@@ -22,7 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
-using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = Vector<ScalarType>;

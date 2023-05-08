@@ -100,7 +100,7 @@ void forceTest() {
     constexpr static bool isFloat = ScalarType::option == Float;
     constexpr double prec = isFloat ? 2E-1 : 1E-3; //Poor precision at single precision
 
-    using Executor = Parallel::SequentialExecutor;
+    using Executor = SequentialExecutor;
     using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     using PositionMatrix = typename CrystalCell::PositionMatrix;
     using ScalarType_ = typename CrystalCell::ScalarType;

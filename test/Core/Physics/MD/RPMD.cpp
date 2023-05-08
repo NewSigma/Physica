@@ -25,7 +25,6 @@
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
-using namespace Physica::Core::Parallel;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;

@@ -24,7 +24,7 @@ namespace Physica::Core {
     class SSHWarpper {
         std::string hostname;
         std::string command;
-        mutable Parallel::ProcessFuture future;
+        mutable ProcessFuture future;
     public:
         SSHWarpper() = default;
         SSHWarpper(std::string hostname_, std::string command_);
@@ -36,7 +36,7 @@ namespace Physica::Core {
         /* Operations */
         void execute();
         /* Getters */
-        Parallel::ProcessFuture& getFuture() noexcept { return future; }
+        ProcessFuture& getFuture() noexcept { return future; }
         /* Helpers */
         void swap(SSHWarpper& ssh) noexcept;
     };

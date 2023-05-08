@@ -22,7 +22,7 @@
 #include <cassert>
 #include "Physica/Core/Parallel/Future/DummyFuture.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     class SequentialExecutor {
     public:
         using FutureType = DummyFuture;

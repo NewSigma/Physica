@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include "FutureGroup.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     class ProcessFuture {
         pid_t pid;
         bool finished;

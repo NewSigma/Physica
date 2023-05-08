@@ -27,7 +27,6 @@
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
-using namespace Physica::Core::Parallel;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;

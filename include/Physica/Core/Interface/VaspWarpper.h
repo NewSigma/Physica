@@ -34,7 +34,7 @@ namespace Physica::Core {
         std::string logFilePath;
         size_t core;
         Poscar poscar;
-        mutable Parallel::ProcessFuture future;
+        mutable ProcessFuture future;
     public:
         VaspWarpper();
         VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, Poscar poscar_);

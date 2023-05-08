@@ -30,7 +30,7 @@
 #include "PackagedTask.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
-namespace Physica::Core::Parallel {
+namespace Physica::Core {
     /**
      * Reference:
      * Eigen https://eigen.tuxfamily.org/

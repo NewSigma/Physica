@@ -36,7 +36,7 @@ namespace Physica::Core {
         if (pipe(fd) == -1)
             throw SyscallException();
 
-        future = Parallel::ProcessExecutor::schedule([this, fd]() {
+        future = ProcessExecutor::schedule([this, fd]() {
             int standardErr = dup(STDERR_FILENO);
             close(STDOUT_FILENO);
             close(STDERR_FILENO);
