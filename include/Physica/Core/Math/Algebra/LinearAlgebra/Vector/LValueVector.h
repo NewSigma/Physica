@@ -35,12 +35,12 @@ namespace Physica::Core {
     public:
         ~LValueVector() = default;
         /* Operators */
-        LValueVector& operator=(const LValueVector& v);
-        LValueVector& operator=(LValueVector&& v) noexcept;
+        inline LValueVector& operator=(const LValueVector& v);
+        inline LValueVector& operator=(LValueVector&& v) noexcept;
         template<class OtherVector>
-        Derived& operator=(const RValueVector<OtherVector>& v);
+        inline Derived& operator=(const RValueVector<OtherVector>& v);
         template<class AnyScalar>
-        Derived& operator=(const ScalarBase<AnyScalar>& s);
+        inline Derived& operator=(const ScalarBase<AnyScalar>& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */

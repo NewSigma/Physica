@@ -20,18 +20,18 @@
 
 namespace Physica::Core {
     template<class Derived>
-    LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
+    inline LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
         return Base::getDerived() = v.getDerived();
     }
 
     template<class Derived>
-    LValueVector<Derived>& LValueVector<Derived>::operator=(LValueVector&& v) noexcept {
+    inline LValueVector<Derived>& LValueVector<Derived>::operator=(LValueVector&& v) noexcept {
         return Base::getDerived() = std::move(v.getDerived());
     }
 
     template<class Derived>
     template<class OtherVector>
-    Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v) {
+    inline Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v) {
         Base::getDerived().resize(v.getLength());
         v.getDerived().assignTo(Base::getDerived());
         return Base::getDerived();
@@ -39,7 +39,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class AnyScalar>
-    Derived& LValueVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
+    inline Derived& LValueVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i] = s.getDerived();
         return Base::getDerived();
