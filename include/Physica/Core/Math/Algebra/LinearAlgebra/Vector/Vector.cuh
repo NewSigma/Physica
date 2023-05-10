@@ -78,7 +78,12 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    device_obj<Vector<T, Length, MaxLength>> Vector<T, Length, MaxLength>::toDevice() const {
+    inline device_obj<Vector<T, Length, MaxLength>> Vector<T, Length, MaxLength>::toDevice() const {
         return device_obj<Vector<T, Length, MaxLength>>(*this);
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    inline void Vector<T, Length, MaxLength>::toDevice(device_obj<This>& obj) const {
+        Storage::toDevice(obj);
     }
 }

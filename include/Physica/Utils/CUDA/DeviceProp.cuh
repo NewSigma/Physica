@@ -22,6 +22,9 @@
 
 namespace Physica::Utils {
     class DeviceProp {
+    public:
+        constexpr static unsigned int WarpSize = 32;
+    private:
         int driverVersion;
         int runtimeVersion;
         Array<cudaDeviceProp> propList;

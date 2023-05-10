@@ -64,7 +64,7 @@ namespace Physica::Core {
     FFT<ScalarType, 1>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
-            , buffer(fftw_malloc(fft.rSpaceSize * sizeof(fftw_complex)))
+            , buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(fft.rSpaceSize * sizeof(fftw_complex))))
             , rSpaceSize(fft.rSpaceSize)
             , rSpaceDelta(fft.rSpaceDelta) {
         initializePlan();
@@ -226,7 +226,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     FFT<ScalarType, Dim>::FFT(const FFT& fft)
-            : buffer(fftw_malloc(fft.totalKSpaceSize(0) * sizeof(fftw_complex)))
+            : buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(fft.rSpaceSize * sizeof(fftw_complex))))
             , rSpaceSize(fft.rSpaceSize)
             , kSpaceSize(fft.kSpaceSize)
             , rSpaceDelta(fft.rSpaceDelta) {

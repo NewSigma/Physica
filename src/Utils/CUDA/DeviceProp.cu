@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
 #include "Physica/Core/Exception/CudaException.cuh"
 
@@ -45,6 +46,10 @@ namespace Physica::Utils {
             code = cudaGetDeviceProperties(&propList[i], i);
             if (code != cudaError_t::cudaSuccess)
                 throw Core::CudaException(code);
+            if (getProperty(i).warpSize != WarpSize) {
+                std::cerr << "[Error]: WarpSize is not standard\n";
+                exit(EXIT_FAILURE);
+            }
         }
     }
 }

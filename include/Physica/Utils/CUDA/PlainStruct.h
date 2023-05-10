@@ -31,7 +31,7 @@ namespace Physica {
         PlainStruct& operator=(const PlainStruct&) = default;
         PlainStruct& operator=(PlainStruct&&) noexcept = default;
         /* Getters */
-        [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
+        [[nodiscard]] __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *reinterpret_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *reinterpret_cast<Derived*>(const_cast<PlainStruct*>(this)); }

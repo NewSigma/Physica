@@ -73,6 +73,7 @@ namespace Physica::Core {
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         using Storage::getLength;
         [[nodiscard]] Vector reverse() const;

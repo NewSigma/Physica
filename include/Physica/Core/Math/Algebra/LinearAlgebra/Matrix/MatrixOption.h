@@ -89,32 +89,32 @@ namespace Physica::Core {
         __host__ __device__ constexpr static bool isSameStorage() { return isElementMatrix<Matrix1>() == isElementMatrix<Matrix2>(); }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t selectMajor(size_t row, size_t col) {
+        [[nodiscard]] __host__ __device__ constexpr static size_t selectMajor(size_t row, size_t col) {
             return isColumnMatrix<Matrix>() ? col : row;
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t selectMinor(size_t row, size_t col) {
+        [[nodiscard]] __host__ __device__ constexpr static size_t selectMinor(size_t row, size_t col) {
             return isColumnMatrix<Matrix>() ? row : col;
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
+        [[nodiscard]] static size_t getMaxMajor(const Matrix& mat) noexcept {
             return isColumnMatrix<Matrix>() ? mat.getColumn() : mat.getRow();
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
+        [[nodiscard]] static size_t getMaxMinor(const Matrix& mat) noexcept {
             return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getColumn();
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColumnMatrix<Matrix>() ? minor : major;
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColumnMatrix<Matrix>() ? major : minor;
         }
     private:

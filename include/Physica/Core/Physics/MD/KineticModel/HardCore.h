@@ -21,10 +21,11 @@
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
-    template<class ScalarType>
+    template<class ScalarType, class Executor = SequentialExecutor>
     class HardCore {
+    public:
         using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1, 1>;
-
+    private:
         ScalarType latticeSize;
         ScalarType collideFactor;
         Vector<ScalarType> repMass;
@@ -41,13 +42,14 @@ namespace Physica::Core {
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         void updateMass(RingPolymerType& ringPolymer);
         void swap(HardCore& obj) noexcept;
+        /* Static members */
+        static void handleCollision(ScalarType latticeSize, RingPolymerType& ringPolymer);
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
-        void handleCollision(RingPolymerType& ringPolymer);
     };
 
-    template<class ScalarType>
-    HardCore<ScalarType>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle)
+    template<class ScalarType, class Executor>
+    HardCore<ScalarType, Executor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
             , repMass(numParticle, 0)
@@ -56,14 +58,14 @@ namespace Physica::Core {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
-    template<class ScalarType>
-    HardCore<ScalarType>& HardCore<ScalarType>::operator=(HardCore<ScalarType> obj) noexcept {
+    template<class ScalarType, class Executor>
+    HardCore<ScalarType, Executor>& HardCore<ScalarType, Executor>::operator=(HardCore<ScalarType, Executor> obj) noexcept {
         swap(*this);
         return *this;
     }
 
-    template<class ScalarType>
-    void HardCore<ScalarType>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, class Executor>
+    void HardCore<ScalarType, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = ringPolymer.getNumParticle();
         const ScalarType collideStep = collideFactor * deltaT;
         auto phase = ringPolymer.asMatrix().col(0);
@@ -85,7 +87,7 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                handleCollision(ringPolymer);
+                handleCollision(latticeSize, ringPolymer);
                 velocity = hadamard(momentum, repMass);
             }
 
@@ -99,13 +101,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void HardCore<ScalarType>::updateMass(RingPolymerType& ringPolymer) {
+    template<class ScalarType, class Executor>
+    void HardCore<ScalarType, Executor>::updateMass(RingPolymerType& ringPolymer) {
         repMass = reciprocal(ringPolymer.getMassVec());
     }
 
-    template<class ScalarType>
-    void HardCore<ScalarType>::swap(HardCore& obj) noexcept {
+    template<class ScalarType, class Executor>
+    void HardCore<ScalarType, Executor>::swap(HardCore& obj) noexcept {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
         repMass.swap(obj.repMass);
@@ -113,22 +115,8 @@ namespace Physica::Core {
         velocity.swap(obj.velocity);
     }
 
-    template<class ScalarType>
-    bool HardCore<ScalarType>::checkCollision(const RingPolymerType& ringPolymer) const {
-        const size_t numParticle = ringPolymer.getNumParticle();
-        auto phase = ringPolymer.asMatrix().col(0);
-        auto pos = phase.tail(numParticle);
-        bool isHappened = pos[0].isPositive();
-
-        size_t i = 0;
-        for (; i < numParticle - 1; ++i)
-            isHappened &= pos[i] < pos[i + 1];
-        isHappened &= pos[i] < latticeSize;
-        return !isHappened;
-    }
-
-    template<class ScalarType>
-    void HardCore<ScalarType>::handleCollision(RingPolymerType& ringPolymer) {
+    template<class ScalarType, class Executor>
+    void HardCore<ScalarType, Executor>::handleCollision(ScalarType latticeSize, RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         auto pos = phase.tail(numParticle);
@@ -152,5 +140,19 @@ namespace Physica::Core {
 
         if (pos[i] >= latticeSize)
             phase[i].toOpposite();
+    }
+
+    template<class ScalarType, class Executor>
+    bool HardCore<ScalarType, Executor>::checkCollision(const RingPolymerType& ringPolymer) const {
+        const size_t numParticle = ringPolymer.getNumParticle();
+        auto phase = ringPolymer.asMatrix().col(0);
+        auto pos = phase.tail(numParticle);
+        bool isHappened = pos[0].isPositive();
+
+        size_t i = 0;
+        for (; i < numParticle - 1; ++i)
+            isHappened &= pos[i] < pos[i + 1];
+        isHappened &= pos[i] < latticeSize;
+        return !isHappened;
     }
 }
