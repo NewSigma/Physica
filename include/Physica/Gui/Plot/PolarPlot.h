@@ -21,7 +21,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QPolarChart>
 #include <QtCharts/QSplineSeries>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/RValueVector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h>
 
 namespace Physica::Gui {
     class PolarPlot : public QChartView {

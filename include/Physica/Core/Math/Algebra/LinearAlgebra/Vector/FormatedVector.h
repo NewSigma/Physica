@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueVector.h"
+#include "VectorImpl/RValueVector.h"
 
 namespace Physica::Core {
     template<class VectorType>

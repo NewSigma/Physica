@@ -21,6 +21,6 @@
 namespace Physica::Core {
     class CudaExecutor {
     public:
-        void wait() { cudaCheck(cudaStreamSynchronize(nullptr)); }
+        static void wait() { cudaCheck(cudaStreamSynchronize(nullptr)); }
     };
 }

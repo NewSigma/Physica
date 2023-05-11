@@ -29,8 +29,8 @@ namespace Physica::Core {
             using namespace Physica::Core;
             using HostDerived = typename Derived::host_obj;
             using HostOtherDerived = typename OtherDerived::host_obj;
-            static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid template param");
-            static_assert(std::is_base_of<LValueVector<HostOtherDerived>, HostOtherDerived>::value, "[Error]: Invalid template param");
+            static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid source vector type");
+            static_assert(std::is_base_of<LValueVector<HostOtherDerived>, HostOtherDerived>::value, "[Error]: Invalid target vector type");
             const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = source.getDerived().getLength();
             if (index < length)

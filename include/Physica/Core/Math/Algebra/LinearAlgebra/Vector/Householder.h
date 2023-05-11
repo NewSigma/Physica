@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "LValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Transpose.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Conjugate.h"

@@ -86,6 +86,7 @@ namespace Physica::Core {
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
+        phase.toDevice(d_phase);
         buffer = d_pos;
         velocity = hadamard(d_momentum, repMass);
         while (lStep != deltaT) {
@@ -96,7 +97,7 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                d_momentum.toHost(momentum);
+                d_pos.toHost(pos);
                 HardCore<ScalarType>::handleCollision(latticeSize, ringPolymer);
                 momentum.toDevice(d_momentum);
                 velocity = hadamard(d_momentum, repMass);
@@ -110,6 +111,7 @@ namespace Physica::Core {
                 lStep = to;
             to = (lStep + rStep) * 0.5;
         }
+        d_phase.toHost(phase);
     }
 
     template<class ScalarType>

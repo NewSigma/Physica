@@ -11,7 +11,7 @@ if(${PHYSICA_GUI})
 endif()
 
 function(physica_add_example NAME SOURCES)
-    add_executable(Example-${NAME} ${SOURCES} ${HEADERS})
+    add_executable(Example-${NAME} ${SOURCES} ${ARGN} ${HEADERS})
     target_link_libraries(Example-${NAME} ${PHYSICA_EXAMPLE_LIBS})
     install(TARGETS Example-${NAME} DESTINATION examples)
 endfunction()

@@ -33,12 +33,12 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
-        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *reinterpret_cast<Derived*>(this); }
+        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
         [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *reinterpret_cast<Derived*>(const_cast<PlainStruct*>(this)); }
     };
 
     template<class T>
-    inline PlainStruct<T> asStruct(const T& obj) {
+    __host__ __device__ inline PlainStruct<T> asStruct(const T& obj) {
         return PlainStruct<T>(reinterpret_cast<const PlainStruct<T>&>(obj));
     }
 }

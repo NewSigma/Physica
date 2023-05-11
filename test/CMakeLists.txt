@@ -63,7 +63,7 @@ physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
 physica_add_test(Integer Core/MultiPrecision/IntegerTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 ## Parallel
-physica_add_test(ThreadPool Core/Parallel/ThreadPoolTest.cpp)
+physica_add_test(ThreadPool Core/Parallel/ThreadPool.cpp)
 ## Physics
 physica_add_test(CrystalCell Core/Physics/CrystalCell.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)

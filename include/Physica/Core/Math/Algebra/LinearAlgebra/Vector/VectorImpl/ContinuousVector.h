@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "LValueVector.h"
-#include "VectorImpl/ContinuousVectorBlock.h"
+#include "ContinuousVectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -41,20 +41,23 @@ namespace Physica::Core {
         ContinuousVector& operator=(ContinuousVector&& v) noexcept;
         using Base::operator=;
         /* Operations */
-        template<class PacketType>
-        [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType>
-        [[nodiscard]] inline PacketType packetPartial(size_t index) const;
-        template<class PacketType>
-        inline void writePacket(size_t index, const PacketType packet);
-        template<class PacketType>
-        inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
+        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index) const;
+        template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
+        template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        void resize(size_t length) { Base::getDerived().resize(length); }
+
+        template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
+
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> head(size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> head(size_t to) const;
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> tail(size_t from);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> tail(size_t from) const;
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
+        /* Getters */
+        [[nodiscard]] ScalarType* data() { return &(*this)[0]; }
+        [[nodiscard]] const ScalarType* data() const { return &(*this)[0]; }
     protected:
         ContinuousVector() = default;
         ContinuousVector(const ContinuousVector&) = default;
@@ -79,4 +82,4 @@ namespace Physica::Core {
     void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
-#include "VectorImpl/ContinuousVectorImpl.h"
+#include "ContinuousVectorImpl.h"

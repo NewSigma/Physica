@@ -104,38 +104,31 @@ namespace Physica::Utils {
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     device_obj<Array<T, Length, Capacity, Allocator>>::device_obj(const host_obj& array) : device_obj() {
-        cudaError_t err;
         if constexpr (std::is_trivial<T>::value)
-            err = cudaMemcpy(d_data, array.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice);
+            cudaCheck(cudaMemcpy(d_data, array.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
         else {
             Array<ValueType, Dynamic, Dynamic> buffer(Length);
             for (size_t i = 0; i < Length; ++i)
                 buffer[i] = array[i].toDevice();
-            err = cudaMemcpy(d_data, buffer.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice);
+            cudaCheck(cudaMemcpy(d_data, buffer.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
             buffer.get_allocator().deallocate(buffer.release(), Length);
         }
-        if (err != cudaError_t::cudaSuccess)
-            throw Core::CudaException(err);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     device_obj<Array<T, Length, Capacity, Allocator>>::device_obj(const device_obj<Array<T, Length, Capacity, Allocator>>& obj)
             : alloc(obj.alloc) {
         d_data = alloc.allocate(Capacity);
-        cudaError_t err;
         if constexpr (std::is_trivial<T>::value)
-            err = cudaMemcpy(d_data, obj.d_data, Length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice);
+            cudaCheck(cudaMemcpy(d_data, obj.d_data, Length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice));
         else {
             Array<ValueType, Dynamic, Dynamic> buffer(Length);
             cudaMemcpy(buffer.data(), obj.d_data, Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost);
             Array<ValueType, Dynamic, Dynamic> buffer1 = buffer;
-            err = cudaMemcpy(d_data, buffer1.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice);
+            cudaCheck(cudaMemcpy(d_data, buffer1.data(), Length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
             buffer.get_allocator().deallocate(buffer.release(), Length);
             buffer1.get_allocator().deallocate(buffer1.release(), Length);
         }
-
-        if (err != cudaError_t::cudaSuccess)
-            throw Core::CudaException(err);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>

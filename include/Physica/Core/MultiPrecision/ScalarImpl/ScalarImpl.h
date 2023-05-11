@@ -206,15 +206,15 @@ namespace Physica::Core {
         return fabsf(s1.getTrivial()) >= fabsf(s2.getTrivial());
     }
 
-    inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
         return s1.getTrivial() > s2.getTrivial();
     }
 
-    inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
         return s1.getTrivial() < s2.getTrivial();
     }
 
-    inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
     ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
@@ -273,15 +273,15 @@ namespace Physica::Core {
         return fabs(s1.getTrivial()) >= fabs(s2.getTrivial());
     }
 
-    inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
         return s1.getTrivial() > s2.getTrivial();
     }
 
-    inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
         return s1.getTrivial() < s2.getTrivial();
     }
 
-    inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
     ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////

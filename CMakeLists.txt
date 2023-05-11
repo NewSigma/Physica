@@ -26,13 +26,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 if(${DEBUG_MODE})
-    set(CMAKE_CXX_FLAGS -O0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
 else()
-    set(CMAKE_CXX_FLAGS "-O2 \
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+                         -O2 \
                          -fno-math-errno \
                          -fno-signaling-nans \
                          -fno-trapping-math")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DNDEBUG")
 endif()
 
 if(${PHYSICA_OPTIMIZE})

@@ -19,7 +19,6 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
 
 namespace Physica::AI {

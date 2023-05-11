@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/RValueMatrix.h"
-#include "LValueVector.h"
+#include "VectorImpl/LValueVector.h"
 
 namespace Physica::Core {
     /**

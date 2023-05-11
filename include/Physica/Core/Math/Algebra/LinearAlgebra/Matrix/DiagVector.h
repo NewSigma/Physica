@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
 namespace Physica::Core {
     template<class MatrixType, bool isLValueMatrix> class DiagVector;

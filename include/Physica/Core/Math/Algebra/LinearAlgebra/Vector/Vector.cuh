@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "LValueVector.cuh"
+#include "Vector.h"
+#include "VectorImpl/ContinuousVector.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -28,12 +29,12 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     class device_obj<Vector<T, Length, MaxLength>>
-            : public device_obj<LValueVector<Vector<T, Length, MaxLength>>>
+            : public device_obj<ContinuousVector<Vector<T, Length, MaxLength>>>
             , public Utils::device_obj<Utils::Array<T, Length, MaxLength>> {
     public:
         using host_obj = Vector<T, Length, MaxLength>;
     private:
-        using Base = device_obj<LValueVector<host_obj>>;
+        using Base = device_obj<ContinuousVector<host_obj>>;
         using Storage = Utils::device_obj<Utils::Array<T, Length, MaxLength>>;
     public:
         using Storage::Storage;
@@ -48,9 +49,12 @@ namespace Physica::Core {
         /* Opporations */
         [[nodiscard]] inline host_obj toHost() const;
         inline void toHost(host_obj& obj);
+        using Base::toHost;
+        using Storage::resize;
         using Storage::swap;
         /* Getters */
         using Storage::getLength;
+        using Storage::data;
     };
 
     template<class T, size_t Length, size_t MaxLength>

@@ -540,9 +540,9 @@ namespace Physica::Core {
     };
     /* Compare */
     inline bool absCompare(const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
-    inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
-    inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
-    inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
+    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double, false> : public ScalarBase<Scalar<Double, false>>, public Internal::AbstractScalar<Double> {
@@ -636,9 +636,9 @@ namespace Physica::Core {
     };
     /* Compare */
     inline bool absCompare(const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
-    inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
-    inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
-    inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

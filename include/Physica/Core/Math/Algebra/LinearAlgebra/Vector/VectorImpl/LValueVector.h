@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueVector.h"
-#include "VectorImpl/LVectorBlock.h"
+#include "LVectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -81,5 +81,5 @@ namespace Physica::Core {
     inline void operator/=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
 }
 
-#include "VectorImpl/LValueVectorImpl.h"
-#include "VectorImpl/Sincos.h"
+#include "LValueVectorImpl.h"
+#include "Sincos.h"

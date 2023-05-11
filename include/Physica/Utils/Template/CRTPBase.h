@@ -33,7 +33,7 @@ namespace Physica::Utils {
     public:
         [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
-        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *static_cast<Derived*>(this); }
+        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *static_cast<const Derived*>(this); }
         [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
     };
 }

@@ -19,14 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
-    /**
-     * Reference a part of the given vector
-     */
-    template<class VectorType, size_t Length>
-    class ContinuousVectorBlock;
-
-    template<class Derived>
-    class ContinuousVector;
+    template<class Derived> class ContinuousVector;
+    template<class VectorType, size_t Length> class ContinuousVectorBlock;
 
     namespace Internal {
         template<class T> class Traits;
@@ -59,10 +53,10 @@ namespace Physica::Core {
         ~ContinuousVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        ContinuousVectorBlock& operator=(const ContinuousVectorBlock& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        ContinuousVectorBlock& operator=(ContinuousVectorBlock&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
-        const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
+        inline ContinuousVectorBlock& operator=(const ContinuousVectorBlock& v);
+        inline ContinuousVectorBlock& operator=(ContinuousVectorBlock&& v) noexcept;
+        [[nodiscard]] ScalarType& operator[](size_t index);
+        [[nodiscard]] const ScalarType& operator[](size_t index) const;
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index) const;
@@ -84,6 +78,34 @@ namespace Physica::Core {
     template<class VectorType, size_t Length>
     ContinuousVectorBlock<VectorType, Length>::ContinuousVectorBlock(
         ContinuousVector<VectorType>& vec_, size_t from_) : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
+
+    template<class VectorType, size_t Length>
+    inline ContinuousVectorBlock<VectorType, Length>&
+    ContinuousVectorBlock<VectorType, Length>::operator=(const ContinuousVectorBlock<VectorType, Length>& v) {
+        Base::operator=(v);
+        return *this;
+    }
+    
+    template<class VectorType, size_t Length>
+    inline ContinuousVectorBlock<VectorType, Length>&
+    ContinuousVectorBlock<VectorType, Length>::operator=(ContinuousVectorBlock<VectorType, Length>&& v) noexcept {
+        Base::operator=(std::move(v));
+        return *this;
+    }
+
+    template<class VectorType, size_t Length>
+    inline typename ContinuousVectorBlock<VectorType, Length>::ScalarType&
+    ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) {
+        assert((index + from) < to);
+        return vec[index + from];
+    }
+
+    template<class VectorType, size_t Length>
+    inline const typename ContinuousVectorBlock<VectorType, Length>::ScalarType&
+    ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) const {
+        assert((index + from) < to);
+        return vec[index + from];
+    }
 
     template<class VectorType, size_t Length>
     template<class PacketType>

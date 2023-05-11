@@ -21,7 +21,7 @@
 #include <iosfwd>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
-#include "ContinuousVector.h"
+#include "VectorImpl/ContinuousVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
@@ -68,6 +68,7 @@ namespace Physica::Core {
         using Base::operator=;
         using Storage::operator[];
         /* Operations */
+        using Storage::resize;
         Vector& toOpposite();
         void toUnit();
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
@@ -76,6 +77,7 @@ namespace Physica::Core {
         inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         using Storage::getLength;
+        using Storage::data;
         [[nodiscard]] Vector reverse() const;
         /* Helpers */
         using Storage::swap;

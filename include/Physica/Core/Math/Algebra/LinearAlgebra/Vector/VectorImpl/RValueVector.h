@@ -22,8 +22,8 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
-#include "VectorImpl/BestPacket.h"
-#include "VectorImpl/RVectorBlock.h"
+#include "BestPacket.h"
+#include "RVectorBlock.h"
 
 namespace Physica::Core {
     template<class VectorType> class TransposeVector;
@@ -97,5 +97,5 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v);
 }
 
-#include "VectorImpl/RValueVectorImpl.h"
-#include "VectorImpl/VectorExpression.h"
+#include "RValueVectorImpl.h"
+#include "VectorExpression.h"
