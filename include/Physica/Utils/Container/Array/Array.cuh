@@ -373,24 +373,29 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     template<class... Args>
     void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::resize(size_t size, Args... args) {
-        if (capacity < size) {
+        if (size == length)
+            return;
+        if (capacity < size)
             reserve(size);
-        }
 
-        Array<ValueType, Dynamic, Dynamic> buffer(std::max(length, size));
-        cudaCheck(cudaMemcpy(buffer.data(), d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         if (length > size) {
-            if constexpr (!std::is_trivial<T>::value)
-                for (size_t i = size; i < length; ++i)
-                    buffer[i].~ValueType();
-            length = size;
+            if constexpr (!std::is_trivial<T>::value) {
+                const size_t delta = length - size;
+                Array<ValueType, Dynamic, Dynamic> buffer{};
+                buffer.reserve(delta);
+                cudaCheck(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+                buffer.setLength(delta);
+            }
         }
         else {
-            for (; length < size; ++length)
-                buffer.get_allocator().construct(buffer.data() + length, std::forward<Args>(args)...);
-            cudaCheck(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+            const size_t delta = size - length;
+            Array<ValueType, Dynamic, Dynamic> buffer(delta);
+            for (size_t i = 0; i < delta; ++i)
+                buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
+            cudaCheck(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+            buffer.get_allocator().deallocate(buffer.release(), delta);
         }
-        buffer.get_allocator().deallocate(buffer.release(), length);
+        length = size;
     }
 
     template<class T, class Allocator>

@@ -26,7 +26,6 @@
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
-using namespace Physica::Core::Parallel;
 using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
