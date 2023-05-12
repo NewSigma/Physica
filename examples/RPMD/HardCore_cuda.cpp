@@ -23,7 +23,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Utils/Random.h"
 
@@ -33,44 +32,33 @@ using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 
-void run(unsigned int sys, std::mt19937& gen, const ProbabilityDistributionFunction<ScalarType>& originPdf, MatrixType& record);
+constexpr double timeStep = 0.001;
+constexpr size_t numMolecular = 32;
+constexpr size_t numStep = 10000;
+
+void run(double timeStep, std::mt19937& gen, MatrixType& record);
 
 int main(int argc, char** argv) {
-    const ProbabilityDistributionFunction<ScalarType> pdf(-5, 5, 200);
-    MatrixType record(200, 8);
-    //ProfilerStart("profiler.dat");
-    SequentialExecutor::parallel_for([&record, &pdf](unsigned int sys) {
-        std::mt19937::result_type seed;
-        Physica::Utils::Random::rdrand(seed);
-        std::mt19937 gen(seed);
+    std::mt19937::result_type seed;
+    Physica::Utils::Random::rdrand(seed);
+    std::mt19937 gen(seed);
 
-        run(sys, gen, pdf, record);
-    }, 8, 1).wait();
-    return 0;
-
-    VectorType mean(record.getRow()), devia(record.getRow());
-    for (size_t i = 0; i < mean.getLength(); ++i) {
-        mean[i] = Physica::Core::mean(record.row(i));
-        devia[i] = Physica::Core::deviation(record.row(i));
-    }
-
-    std::ofstream fout("data");
-    fout << mean << devia;
+    MatrixType record(numStep, numMolecular);
+    const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());
+    run(timeStep, gen, record);
 
     QApplication app(argc, argv);
     QFont font;
     Plot* plot = new Plot();
     auto& chart = *plot->chart();
-    chart.legend()->setVisible(true);
-    chart.legend()->setAlignment(Qt::AlignTop);
-    chart.legend()->setMarkerShape(QLegend::MarkerShapeFromSeries);
+    chart.legend()->setVisible(false);
     {
-        double minX = double(pdf.getFromPoint());
-        double maxX = double(pdf.getToPoint());
+        constexpr double minX = 0;
+        constexpr double maxX = 10.1;
         constexpr double minY = 0;
-        constexpr double maxY = 0.4;
+        constexpr double maxY = 32;
         constexpr double deltaX = 2;
-        constexpr double deltaY = 0.1;
+        constexpr double deltaY = 8;
         QValueAxis* axisX = new QValueAxis();
         font = axisX->labelsFont();
         font.setPointSize(15);
@@ -82,7 +70,8 @@ int main(int argc, char** argv) {
         axisX->setGridLineVisible(false);
         axisX->setLabelsFont(font);
         axisX->setRange(minX, maxX);
-        axisX->setTitleText("v");
+        axisX->setTitleText("Time");
+        axisX->setLabelFormat("%d");
         axisX->setTitleFont(font);
         QValueAxis* axisY = new QValueAxis();
         axisY->setTickAnchor(0);
@@ -95,7 +84,8 @@ int main(int argc, char** argv) {
         axisY->setMinorGridLineVisible(false);
         axisY->setLabelsFont(font);
         axisY->setRange(minY, maxY);
-        axisY->setTitleText("P(v)");
+        axisY->setTitleText("x");
+        axisY->setLabelFormat("%d");
         axisY->setTitleFont(font);
         QValueAxis* axisTop = new QValueAxis();
         axisTop->setTickAnchor(0);
@@ -121,34 +111,10 @@ int main(int argc, char** argv) {
         chart.addAxis(axisTop, Qt::AlignTop);
         chart.addAxis(axisRight, Qt::AlignRight);
 
-        VectorType x = pdf.makePotision();
-        {
-            auto& area = plot->area_center(x, mean, devia);
-            area.attachAxis(axisX);
-            area.attachAxis(axisY);
-
-            auto& spline = plot->line(x, mean);
-            spline.setColor(area.color());
+        for (size_t i = 0; i < numMolecular; ++i) {
+            auto& spline = plot->line(t, record.col(i));
             spline.attachAxis(axisX);
             spline.attachAxis(axisY);
-
-            auto color = area.color();
-            color.setAlpha(75);
-            area.setColor(color);
-            spline.setName("Simulation");
-        }
-        {
-            ScalarType mass = M_SQRT2;
-            ScalarType temperatureT = 2;
-            VectorType y = sqrt(mass / (temperatureT * (2 * M_PI))) * exp(-square(x) * (mass / (temperatureT * 2.0)));
-            auto& spline = plot->line(x, y);
-            auto pen = spline.pen();
-            pen.setColor(Qt::blue);
-            pen.setStyle(Qt::DashLine);
-            spline.setPen(pen);
-            spline.attachAxis(axisX);
-            spline.attachAxis(axisY);
-            spline.setName("Boltzmann");
         }
     }
     plot->show();

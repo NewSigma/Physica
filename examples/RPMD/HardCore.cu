@@ -22,12 +22,9 @@
 #include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
 
 using namespace Physica::Core;
-constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
-constexpr double latticeSize = 50;
-constexpr size_t numMolecular = 50;
-constexpr double energy = 50;
-constexpr size_t numStep = 100000000;
+constexpr double latticeSize = 32;
+constexpr double energy = 32;
 
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
@@ -37,7 +34,7 @@ using MDCellType = typename MDType::MDCellType;
 using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, CudaExecutor>;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem(size_t numMolecular, std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
@@ -55,27 +52,25 @@ MDCellType makeSystem(std::mt19937& gen) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-void scaleVelocity(MDType& rpmd) {
+void scaleVelocity(size_t numMolecular, MDType& rpmd) {
     const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
     auto phase = rpmd.getPhaseMatrix().col(0);
     auto momentum = phase.head(numMolecular);
     momentum *= sqrt(ScalarType(energy) / energy1);
 }
 
-void run(unsigned int sys, std::mt19937& gen, const ProbabilityDistributionFunction<ScalarType>& originPdf, MatrixType& record) {
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
+void run(double timeStep, std::mt19937& gen, MatrixType& record) {
+    const size_t numStep = record.getRow();
+    const size_t numMolecular = record.getColumn();
+
+    MDType rpmd = MDType(makeSystem(numMolecular, gen), 1, 1, 1, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, numMolecular);
     kineticModel.updateMass(rpmd.getRingPolymer());
-
     rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
+    scaleVelocity(numMolecular, rpmd);
 
-    ProbabilityDistributionFunction<ScalarType> pdf(originPdf.getFromPoint(), originPdf.getToPoint(), originPdf.getNumBin());
-    for (size_t i = 0; i < numStep; ++i) {
+    for (size_t i = 0; i < record.getRow(); ++i) {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
-        pdf.sample(rpmd.getPhaseMatrix()(numMolecular / 2, 0));
-        if (i % 10000 == 0)
-            scaleVelocity(rpmd);
+        record.row(i).asVector() = rpmd.getRingPolymer().makeBeadPos(0).col(0);
     }
-    record[sys] = pdf.makeDistribution();
 }

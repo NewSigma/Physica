@@ -60,6 +60,7 @@ if(${PHYSICA_CUDA})
     ${CMAKE_CUDA_FLAGS} \
     --relocatable-device-code=true \
     --diag-suppress 20011 \
+    --diag-suppress 186 \
     -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
 endif()
 

@@ -111,12 +111,13 @@ namespace Physica::Core {
                 lStep = to;
             to = (lStep + rStep) * 0.5;
         }
-        d_phase.toHost(phase);
+        d_pos.toHost(pos);
     }
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
         ringPolymer.getMassVec().toDevice(repMass);
+        repMass = reciprocal(repMass);
     }
 
     template<class ScalarType>
@@ -140,30 +141,33 @@ namespace Physica::Core {
             auto pos = phase.getDerived().tail(numParticle);
 
             __shared__ ScalarType buffer[WarpSize + 1];
+            buffer[index + 1] = latticeSize;
+            bool flag = false;
+            {
+                size_t i = 0;
+                const size_t delta = warpSize - 1;
+                const size_t to = numParticle - delta;
+                for (; i < to; i += delta) {
+                    buffer[index] = pos[i + index];
+                    __syncwarp();
+                    flag |= buffer[index] > buffer[index + 1];
+                }
+
+                buffer[index] = latticeSize;
+                if (i + index < numParticle) {
+                    buffer[index] = pos[i + index];
+                    __syncwarp();
+                    flag |= buffer[index] > buffer[index + 1];
+                }
+            }
             __shared__ bool flags[WarpSize];
-            if (index == 0)
-                buffer[warpSize] = latticeSize;
+            flags[index] = flag;
             __syncwarp();
-
-            size_t i = 0;
-            const size_t delta = warpSize - 1;
-            const size_t to = numParticle - delta;
-            for (; i < to; i += delta) {
-                buffer[index] = pos[i + index];
-                flags[index] |= buffer[index] > buffer[index + 1];
-            }
-
-            buffer[index] = latticeSize;
-            if (i + index < numParticle) {
-                buffer[index] = pos[i + index];
-                flags[index] |= buffer[index] > buffer[index + 1];
-            }
-
             for (int i = warpSize / 2; i != 0; i /= 2)
                 if (index < i)
                     flags[index] |= flags[index + i];
             if (index == 0 && flags[0])
-                pos[0] = latticeSize;
+                pos[0] = -latticeSize;
         }
     }
 
@@ -177,6 +181,6 @@ namespace Physica::Core {
         Internal::checkCollision_kernel<<<numBlock, numThread>>>(asStruct(d_phase), latticeSize, getNumParticle());
         Vector<ScalarType, 1> temp{};
         d_phase.segment(getNumParticle(), getNumParticle() + 1).toHost(temp);
-        return temp[0] == latticeSize;
+        return temp[0].isNegative();
     }
 }
