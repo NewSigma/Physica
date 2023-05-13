@@ -34,6 +34,8 @@ int main() {
     {
         BandGrid<ScalarType, true> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14, 8);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, true>>(Si, cutEnergy, 2, std::move(grid));
+        solver.initWaveFunc(gen);
+        solver.initDensity();
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
         Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
@@ -44,6 +46,8 @@ int main() {
     {
         BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14, 8);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(Si, cutEnergy, 2, std::move(grid));
+        solver.initWaveFunc(gen);
+        solver.initDensity();
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
         Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);

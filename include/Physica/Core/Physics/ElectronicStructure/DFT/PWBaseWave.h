@@ -27,7 +27,7 @@ namespace Physica::Core {
      * Plain wave base wave function
      */
     template<class ScalarType>
-    class PWBaseWave : private KSpaceGrid<ComplexScalar<ScalarType>> {
+    class PWBaseWave : public KSpaceGrid<ComplexScalar<ScalarType>> {
     public:
         using ComplexType = ComplexScalar<ScalarType>;
         using Base = KSpaceGrid<ComplexType>;
@@ -81,7 +81,7 @@ namespace Physica::Core {
             Vector<ScalarType, 3> k, Vector<ScalarType, 3> r) const {
         using Index3D = typename Base::Index3D;
         ComplexType result = ComplexType::Zero();
-        Base::forKIndexInGrid(getDim(), repCell, [this, &result, &k, &r](Vector<ScalarType, 3> K, Index3D index) {
+        Base::forKIndexInGrid(*this, repCell, [this, &result, &k, &r](Vector<ScalarType, 3> K, Index3D index) {
             const ScalarType phase = (k + K) * r;
             ScalarType s, c;
             sincos(phase, s, c);

@@ -235,6 +235,7 @@ namespace Physica::Core {
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::initExternalPot() {
         using GridType = KSpaceGrid<ScalarType>;
+        using Index3D = typename GridType::Index3D;
         using VectorType = Vector<ScalarType, 3>;
         externalPot = GridType::makeGrid(cutEnergy, repCell.getLattice());
         externalPot.asVector() = ScalarType::Zero();
@@ -244,16 +245,14 @@ namespace Physica::Core {
         const std::unordered_set<uint16_t> species = cell.getSpecies();
         for (uint16_t element : species) {
             const ScalarType coeff = ScalarType(-4 * M_PI * PhyConst<AU>::unitCharge * PhyConst<AU>::unitCharge) * getCharge(element) / cell.getVolume();
-            const auto& grid = factorGrids[i++];
-            size_t j = 0;
-            GridType::forReducedKInGrid(grid.getDim(), repCell.getLattice(), [this, coeff, &grid, &j](VectorType k) {
+            const auto& grid = factorGrids[i];
+            GridType::forReducedKIndexInGrid(externalPot, repCell.getLattice(), [this, coeff, &grid](VectorType k, Index3D index) {
                 const ScalarType squaredNorm = k.squaredNorm();
                 const bool isNotGammaPoint = squaredNorm > std::numeric_limits<ScalarType>::min();
                 if (isNotGammaPoint)
-                    externalPot.asVector()[j] += coeff * grid.asVector()[j] / squaredNorm;
-                j += 1;
+                    externalPot(index) += coeff * grid(index) / squaredNorm;
             });
-            ++i;
+            i += 1;
         }
         externalPot(0, 0, 0) = ComplexType::Zero();
     }
@@ -266,7 +265,7 @@ namespace Physica::Core {
             h[SpinState::Down] = ScalarType::Zero();
 
         size_t i = 0;
-        KSpaceGrid<ComplexType>::forKInGrid(orbits[SpinState::Up][0].getDim(), repCell.getLattice(), [this, &i, &k](VectorType K) {
+        KSpaceGrid<ComplexType>::forKInGrid(orbits[SpinState::Up][0], repCell.getLattice(), [this, &i, &k](VectorType K) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
             const ScalarType kinetic = (k + K).squaredNorm() * factor;
             h[SpinState::Up](i, i) = kinetic;
@@ -300,7 +299,7 @@ namespace Physica::Core {
         }
 
         size_t row = 0;
-        KSpaceGrid<ComplexType>::forKIndexInGrid(orbits[SpinState::Up][0].getDim(), repCell.getLattice(),
+        KSpaceGrid<ComplexType>::forKIndexInGrid(orbits[SpinState::Up][0], repCell.getLattice(),
             [this, &row, &kSpaceDencity, &kSpaceXC_up, &kSpaceXC_down](VectorType k1, SignedIndex3D index) {
                 const ScalarType coeff = 1 / PhyConst<AU>::vacuumDielectric;
                 const ScalarType repVolume = reciprocal(cell.getVolume());

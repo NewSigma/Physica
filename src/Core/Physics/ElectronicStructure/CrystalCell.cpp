@@ -64,7 +64,7 @@ namespace Physica::Core {
         for (uint16_t element : species) {
             GridType& grid = factorGrids[i];
             size_t j = 0;
-            GridType::forReducedKInGrid(grid.getDim(), lattice, [this, element, &i, &j, &grid](VectorType k) {
+            GridType::forReducedKInGrid(grid, lattice, [this, element, &i, &j, &grid](VectorType k) {
                 ComplexType factor = ComplexType::Zero();
                 for (size_t ion = 0; ion < getAtomCount(); ++ion) {
                     if (getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
@@ -77,7 +77,7 @@ namespace Physica::Core {
                 grid.asVector()[j] = factor;
                 j += 1;
             });
-            ++i;
+            i += 1;
         }
         return factorGrids;
     }

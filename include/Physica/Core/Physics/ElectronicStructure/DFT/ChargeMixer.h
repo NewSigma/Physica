@@ -103,7 +103,7 @@ namespace Physica::Core {
 
             using GridType = KSpaceGrid<ScalarType>;
             using Index3D = typename GridType::Index3D;
-            GridType::forReducedKIndexInGrid(kSpaceDencity.getDim(), repCell.getLattice(),
+            GridType::forReducedKIndexInGrid(kSpaceDencity, repCell.getLattice(),
                 [&kSpaceDencity](Vector<ScalarType, 3> k, Index3D index) {
                     const ScalarType kNorm = k.squaredNorm();
                     const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));

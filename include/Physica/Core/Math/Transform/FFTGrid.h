@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    class FFTGrid : private KSpaceGrid<ScalarType> {
+    class FFTGrid : public KSpaceGrid<ScalarType> {
         static_assert(!ScalarType::isComplex, "[Error]: Complex version not implemented");
     public:
         using Base = KSpaceGrid<ScalarType>;

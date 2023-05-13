@@ -63,13 +63,13 @@ namespace Physica::Core {
         static typename Base::Index3D makeGridDim(RealType cutEnergy, const LatticeMatrix& repCell);
         static KSpaceGrid<T> makeGrid(RealType cutEnergy, const LatticeMatrix& repCell);
         template<class Functor>
-        inline static void forKInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
+        inline static void forKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
-        static void forReducedKInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
+        static void forReducedKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
-        inline static void forKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
+        inline static void forKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
-        static void forReducedKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func);
+        static void forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         static void normalizeIndex(Index3D& index, const Index3D& range);
     protected:
         KSpaceGrid(Container data, size_t dimX_, size_t dimY_, size_t dimZ_);
@@ -155,13 +155,14 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    inline void KSpaceGrid<T>::forKInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func) {
-        PeriodicCell<RealType, 3>::forCellInRange(dim, repLatt, func);
+    inline void KSpaceGrid<T>::forKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
+        PeriodicCell<RealType, 3>::forCellInRange(grid.getDim(), repLatt, func);
     }
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func) {
+    void KSpaceGrid<T>::forReducedKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
+        const auto dim = grid.getDim();
         if constexpr (isComplex)
             forKInGrid(dim, repLatt, func);
         else {
@@ -185,11 +186,12 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func) {
+    void KSpaceGrid<T>::forKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
         auto a1 = repLatt.row(0);
         auto a2 = repLatt.row(1);
         auto a3 = repLatt.row(2);
 
+        const auto dim = grid.getDim();
         VectorType v1, v2, v3;
         for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
             v1 = RealType(x) * a1.asVector();
@@ -205,7 +207,8 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKIndexInGrid(Index3D dim, const LatticeMatrix& repLatt, Functor func) {
+    void KSpaceGrid<T>::forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
+        const auto dim = grid.getDim();
         if constexpr (isComplex)
             forKIndexInGrid(dim, repLatt, func);
         else {
