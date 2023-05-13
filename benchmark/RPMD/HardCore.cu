@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
-#include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
 
 using namespace Physica::Core;
 constexpr double collideFactor = 0.01;
@@ -59,9 +59,9 @@ void scaleVelocity(size_t numMolecular, MDType& rpmd) {
     momentum *= sqrt(ScalarType(energy) / energy1);
 }
 
-void run(double timeStep, std::mt19937& gen, MatrixType& record) {
-    const size_t numStep = record.getRow();
-    const size_t numMolecular = record.getColumn();
+void run(double timeStep, std::mt19937& gen) {
+    const size_t numStep = 10000;
+    const size_t numMolecular = 1024;
 
     MDType rpmd = MDType(makeSystem(numMolecular, gen), 1, 1, 1, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, numMolecular);
@@ -69,8 +69,7 @@ void run(double timeStep, std::mt19937& gen, MatrixType& record) {
     rpmd.initMomentum(gen);
     scaleVelocity(numMolecular, rpmd);
 
-    for (size_t i = 0; i < record.getRow(); ++i) {
+    for (size_t i = 0; i < numStep; ++i) {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
-        record.row(i).asVector() = rpmd.getRingPolymer().makeBeadPos(0).col(0);
     }
 }
