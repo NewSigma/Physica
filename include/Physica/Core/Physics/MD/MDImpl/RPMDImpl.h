@@ -330,13 +330,7 @@ namespace Physica::Core {
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         return mean(temp);
     }
-    /**
-     * The function has size effect, extend the cell shall ease the problem, refer to [1].
-     * 
-     * Reference:
-     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
-     * [2] Thompson, Plimpton, Mattson, J Chem Phys, 131, 154107 (2009).
-     */
+
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class ForceModel>
     typename RPMD<ScalarType, PosScalarType, Dim, NumReplica>::LatticeMatrix

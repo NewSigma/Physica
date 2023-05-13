@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -148,7 +148,10 @@ namespace Physica::Core {
             });
         return result;
     }
-
+    /**
+     * Reference:
+     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
+     */
     template<class ScalarType, class PosScalarType, class PairFunctor>
     typename PairModel<ScalarType, PosScalarType, PairFunctor>::LatticeMatrix
     PairModel<ScalarType, PosScalarType, PairFunctor>::virial(const MDCellType& cell) const {
@@ -159,12 +162,11 @@ namespace Physica::Core {
         LatticeMatrix result(3, 3, 0);
         for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
             const Index3D center = cellList.getAtomCellMap()[atom1];
-            Vector3D f1(3, 0);
-            cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &f1](Vector3D translate, Index3D neigh) {
+            cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &result](Vector3D translate, Index3D neigh) {
                 const Vector3D from = pos.row(atom1) - translate;
                 const auto& subCell = cellList(neigh);
 
-                Vector3D r, f(3, 0);
+                Vector3D r, f;
                 auto ite = subCell.cbegin();
                 bool isValid = ite != subCell.cend();
                 size_t atomToSolve;
@@ -186,13 +188,11 @@ namespace Physica::Core {
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
                         const ScalarType f_norm = force_functor(dist);
-                        r *= ScalarType(f_norm / dist);
-                        f -= r;
+                        f = r * ScalarType(-f_norm / dist);
+                        result += f * r.transpose();
                     }
                 }
-                f1 += f;
             });
-            result += f1 * pos.row(atom1).asVector().transpose();
         }
         result *= reciprocal(ScalarType(cell.getVolume() * 2.0));
         return result;
