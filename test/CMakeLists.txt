@@ -77,7 +77,7 @@ physica_add_test(Logger Logger/LoggerTest.cpp)
 # Utils
 physica_add_test(DirStack Utils/DirStackTest.cpp)
 
-if(NOT ${DEBUG_MODE})
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     include(SlowTests.cmake)
 endif()
 

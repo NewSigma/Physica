@@ -42,11 +42,9 @@ namespace Physica::Core {
     template<class OtherDerived>
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
         using namespace Physica;
-        int device;
-        cudaGetDevice(&device);
-        const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
-        const int numBlock = (getLength() + maxThreadsPerBlock) / maxThreadsPerBlock;
-        const int numThread = getLength() >= maxThreadsPerBlock ? maxThreadsPerBlock : getLength();
+        constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;
+        const int numBlock = (getLength() + WarpSize - 1) / WarpSize;
+        const int numThread = WarpSize;
         Internal::assignTo_kernel<<<numBlock, numThread>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     }
 }

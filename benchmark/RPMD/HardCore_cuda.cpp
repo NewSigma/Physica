@@ -16,27 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <random>
+#include <iostream>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Utils/Random.h"
+#include "Physica/Utils/BenchmarkHelper.h"
 
-using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
-using VectorType = Vector<ScalarType>;
-using MatrixType = DenseMatrix<ScalarType>;
+using namespace Physica::Utils;
 
 constexpr double timeStep = 0.001;
 
 void run(double timeStep, std::mt19937& gen);
 
 int main() {
+    Cycler::init();
+
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    //ProfilerStart("profiler.dat");
-    run(timeStep, gen);
+    auto pair = Benchmark::run([&gen]() {
+        run(timeStep, gen);
+    }, 6, 6);
+    std::cout << pair.first << '(' << pair.second << ')' << std::endl;
     return 0;
 }

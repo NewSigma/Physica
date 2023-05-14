@@ -17,7 +17,6 @@ option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 include(FindSIMD)
 
-set(DEBUG_MODE ${CMAKE_BUILD_TYPE} MATCHES "Debug")
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies
 cmake_policy(SET CMP0074 NEW)
@@ -25,7 +24,7 @@ cmake_policy(SET CMP0074 NEW)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-if(${DEBUG_MODE})
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
 else()
@@ -35,6 +34,9 @@ else()
                          -fno-signaling-nans \
                          -fno-trapping-math")
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DNDEBUG")
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
+    endif()
 endif()
 
 if(${PHYSICA_OPTIMIZE})
