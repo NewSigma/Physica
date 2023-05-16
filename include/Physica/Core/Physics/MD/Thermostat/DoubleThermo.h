@@ -23,6 +23,8 @@
 
 namespace Physica::Core {
     /**
+     * Note: Velocity rescaling algorithm[1] may give a negative probability at small number of particles condition.
+     * 
      * Reference:
      * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
      */

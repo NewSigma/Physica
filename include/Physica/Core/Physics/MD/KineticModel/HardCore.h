@@ -42,6 +42,8 @@ namespace Physica::Core {
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         void updateMass(RingPolymerType& ringPolymer);
         void swap(HardCore& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const Vector<ScalarType>& getVelocity() const noexcept { return velocity; }
         /* Static members */
         static void handleCollision(ScalarType latticeSize, RingPolymerType& ringPolymer);
     private:

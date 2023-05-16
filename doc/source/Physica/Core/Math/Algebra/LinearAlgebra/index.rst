@@ -4,7 +4,6 @@ LinearAlgebra
 .. toctree::
    :maxdepth: 1
 
-   DenseMatrix
+   EigenSolver
    HouseHolder
-   Matrix
    Schur
