@@ -122,8 +122,11 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         auto pos = phase.tail(numParticle);
-        if (!pos[0].isPositive())
+        bool isDrifted = false;
+        if (!pos[0].isPositive()) {
             phase[0].toOpposite();
+            isDrifted = true;
+        }
 
         const auto& mass = ringPolymer.getMassVec();
         size_t i = 0;
@@ -140,8 +143,12 @@ namespace Physica::Core {
             }
         }
 
-        if (pos[i] >= latticeSize)
+        if (pos[i] >= latticeSize) {
             phase[i].toOpposite();
+            isDrifted = true;
+        }
+        if (isDrifted)
+            ringPolymer.removeDrift();
     }
 
     template<class ScalarType, class Executor>
