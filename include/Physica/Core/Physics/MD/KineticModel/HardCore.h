@@ -149,12 +149,13 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         auto pos = phase.tail(numParticle);
-        bool isGood = pos[0].isPositive();
+        if (pos[0].isNegative()) [[unlikely]]
+            return true;
 
         size_t i = 0;
         for (; i < numParticle - 1; ++i)
-            isGood &= pos[i] < pos[i + 1];
-        isGood &= pos[i] < latticeSize;
-        return !isGood;
+            if(pos[i] > pos[i + 1]) [[unlikely]]
+                return true;
+        return pos[i] > latticeSize;
     }
 }

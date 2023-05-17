@@ -85,7 +85,10 @@ namespace Physica::Core {
                                             std::normal_distribution dist{};
                                             return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
                                         });
-            factor_translational = sqrt(temperatureT / sol[0]);
+            if (sol[0].isPositive()) [[likely]]
+                factor_translational = sqrt(temperatureT / sol[0]);
+            else
+                exit(1);
         }
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
@@ -95,23 +98,27 @@ namespace Physica::Core {
         std::normal_distribution<> dist{};
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = massVec[i / Dim];
-            ringPolymer.toNormalRepr(i);
-            buffer(0, 0) *= factor_translational;
+            if constexpr (NumReplica != 1) {
+                ringPolymer.toNormalRepr(i);
+                buffer(0, 0) *= factor_translational;
 
-            const ScalarType factor = sqrt(repBeta * mass * numReplica);
-            for (size_t j = 1; j < buffer.getColumn(); ++j) {
-                const ScalarType phase = M_PI * j / numReplica;
-                const ScalarType viscosityY = sin(phase) * omegaW;
-                const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
-                Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
-                    buffer,
-                    j,
-                    deltaT,
-                    viscosityY,
-                    factor,
-                    ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                const ScalarType factor = sqrt(repBeta * mass * numReplica);
+                for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                    const ScalarType phase = M_PI * j / numReplica;
+                    const ScalarType viscosityY = sin(phase) * omegaW;
+                    const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
+                    Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
+                        buffer(0, j),
+                        deltaT,
+                        viscosityY,
+                        factor,
+                        ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                }
+                ringPolymer.toBeadRepr(i);
             }
-            ringPolymer.toBeadRepr(i);
+            else {
+                ringPolymer.asMatrix()(i, 0) *= factor_translational;
+            }
         }
     }
 

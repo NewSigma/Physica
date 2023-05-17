@@ -161,6 +161,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -202,6 +203,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

@@ -152,8 +152,7 @@ namespace Physica::Core {
         Vector<ScalarType, Dim> result(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
             const size_t direction = i % Dim;
-            for (size_t j = 0; j < getNumReplica(); ++j)
-                result[direction] += phase(i, j);
+            result[direction] += phase.row(i).asVector().sum();
         }
         return result;
     }

@@ -81,8 +81,7 @@ namespace Physica::Core {
                 const ScalarType viscosityY = sin(phase) * omegaW;
                 const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
                 Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
-                    buffer,
-                    j,
+                    buffer(0, j),
                     deltaT,
                     viscosityY,
                     factor,
