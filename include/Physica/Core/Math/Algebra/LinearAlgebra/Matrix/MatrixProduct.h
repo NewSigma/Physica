@@ -154,9 +154,9 @@ namespace Physica::Core {
         }
         /* Operations */
         template<class OtherDerived>
-        void assignTo(LValueVector<OtherDerived>& target) const;
+        inline void assignTo(LValueVector<OtherDerived>& target) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }

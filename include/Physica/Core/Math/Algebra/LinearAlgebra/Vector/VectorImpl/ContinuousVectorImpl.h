@@ -47,8 +47,9 @@ namespace Physica::Core {
                     v1.getDerived().writePacket(i, sum);
                 }
                 if (to != length) {
-                    const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i) + v2.getDerived().template packetPartial<PacketType>(i);
-                    v1.getDerived().writePacketPartial(i, length - i, sum);
+                    const size_t count = length - i;
+                    const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
+                    v1.getDerived().writePacketPartial(i, count, sum);
                 }
             }
         };
@@ -81,15 +82,14 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    inline PacketType ContinuousVector<Derived>::packetPartial(size_t index) const {
+    inline PacketType ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
         if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
-            const size_t count = Base::getLength() - index;
             packet.load_partial(count, data_ptr(index));
             return packet;
         }
         else
-            return Base::template packetPartial<PacketType>(index);
+            return Base::template packetPartial<PacketType>(index, count);
     }
 
     template<class Derived>

@@ -65,7 +65,7 @@ namespace Physica::Core {
         template<class PacketType>
         [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType>
-        [[nodiscard]] inline PacketType packetPartial(size_t index) const;
+        [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }

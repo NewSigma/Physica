@@ -47,8 +47,10 @@ namespace Physica::Core {
                         v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
                     
                     constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
-                    if constexpr (i != SizeAtCompile)
-                        v2.getDerived().writePacketPartial(i, SizeAtCompile - i, v1.getDerived().template packetPartial<PacketType>(i));
+                    if constexpr (i != SizeAtCompile) {
+                        constexpr size_t count = SizeAtCompile - i;
+                        v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
+                    }
                 }
                 else {
                     const size_t length = v1.getLength();
@@ -57,8 +59,10 @@ namespace Physica::Core {
                         const size_t to = length / PacketType::size() * PacketType::size();
                         for (; i < to; i += PacketType::size())
                             v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
-                        if (to != length)
-                            v2.getDerived().writePacketPartial(i, length - i, v1.getDerived().template packetPartial<PacketType>(i));
+                        if (to != length) {
+                            const size_t count = length - i;
+                            v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
+                        }
                     }
                 }
             }
@@ -89,8 +93,10 @@ namespace Physica::Core {
                     PacketType buffer(0);
                     for (; i < to; i += PacketType::size())
                         buffer += (v1.getDerived().template packet<PacketType>(i) * v2.getDerived().template packet<PacketType>(i));
-                    if (to != length)
-                        buffer += v1.getDerived().template packetPartial<PacketType>(i) * v2.getDerived().template packetPartial<PacketType>(i);
+                    if (to != length) {
+                        const size_t count = length - i;
+                        buffer += v1.getDerived().template packetPartial<PacketType>(i, count) * v2.getDerived().template packetPartial<PacketType>(i, count);
+                    }
                     return ResultType(horizontal_add(buffer));
                 }
                 else {
@@ -126,9 +132,9 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class PacketType>
-    inline PacketType RValueVector<Derived>::packetPartial(size_t index) const {
+    inline PacketType RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
         auto packet = PacketType(0);
-        for (int i = 0; index < getLength(); ++i, ++index)
+        for (size_t i = 0; i < count; ++i, ++index)
             packet.insert(i, calc(index).getTrivial());
         return packet;
     }

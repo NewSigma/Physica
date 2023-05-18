@@ -63,7 +63,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < maxMajor; ++i)
             for (size_t j = 0; j < maxMinor; ++j)
                 target.refFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
-                                                             TargetType::columnFromMajorMinor(i, j));
+                                                      TargetType::columnFromMajorMinor(i, j));
     }
 
     template<class VectorType, class MatrixType>
@@ -73,16 +73,13 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     template<class OtherDerived>
-    void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
+    inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = calc(i);
     }
 
     template<class MatrixType, class VectorType>
-    typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
-        ScalarType result(0);
-        for (size_t i = 0; i < vec.getLength(); ++i)
-            result += ScalarType(mat.calc(index, i) * vec.calc(i));
-        return result;
+    inline typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
+        return mat.row(index) * vec;
     }
 }

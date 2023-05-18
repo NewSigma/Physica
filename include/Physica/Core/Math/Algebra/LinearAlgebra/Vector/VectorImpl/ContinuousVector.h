@@ -42,7 +42,7 @@ namespace Physica::Core {
         using Base::operator=;
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index) const;
+        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
         template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
         void resize(size_t length) { Base::getDerived().resize(length); }

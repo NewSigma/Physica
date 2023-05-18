@@ -159,10 +159,27 @@ namespace Physica::Core {
         if (pos[0].isNegative()) [[unlikely]]
             return true;
 
-        size_t i = 0;
-        for (; i < numParticle - 1; ++i)
-            if(pos[i] > pos[i + 1]) [[unlikely]]
-                return true;
-        return pos[i] > latticeSize;
+        const size_t length = numParticle - 1;
+        auto head = pos.head(length);
+        auto tail = pos.tail(1);
+        {
+            using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
+            size_t i = 0;
+            const size_t to = length / PacketType::size() * PacketType::size();
+
+            for (; i < to; i += PacketType::size()) {
+                const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
+                if (horizontal_or(boolPacket)) [[unlikely]]
+                    return true;
+            }
+
+            [[likely]] if (to != length) {
+                const size_t count = length - i;
+                const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
+                if (horizontal_or(boolPacket)) [[unlikely]]
+                    return true;
+            }
+        }
+        return pos[length] > latticeSize;
     }
 }

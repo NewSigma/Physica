@@ -59,7 +59,7 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const;
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index) const;
+        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
         template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
@@ -115,12 +115,8 @@ namespace Physica::Core {
 
     template<class VectorType, size_t Length>
     template<class PacketType>
-    inline PacketType ContinuousVectorBlock<VectorType, Length>::packetPartial(size_t index) const {
-        const size_t index1 = from + index;
-        if (index1 + PacketType::size() <= vec.getLength())
-            return vec.template packet<PacketType>(from + index);
-        else
-            return vec.template packetPartial<PacketType>(from + index);
+    inline PacketType ContinuousVectorBlock<VectorType, Length>::packetPartial(size_t index, size_t count) const {
+        return vec.template packetPartial<PacketType>(from + index, count);
     }
 
     template<class VectorType, size_t Length>
