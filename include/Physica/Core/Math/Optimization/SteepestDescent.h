@@ -1,0 +1,56 @@
+/*
+ * Copyright 2020-2023 WeiBo He.
+ *
+ * This file is part of Physica.
+
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+
+namespace Physica::Core {
+    template<class ScalarType, size_t Dim>
+    class SteepestDescent {
+        static_assert(Dim > 0, "dim must be at least 1.");
+    public:
+        using VectorType = Vector<ScalarType, Dim>;
+    private:
+        VectorType tryX;
+        VectorType nowX;
+        ScalarType nowY;
+        ScalarType defaultStep;
+        ScalarType stepSize;
+        unsigned char stepMultiple;
+    public:
+        SteepestDescent(VectorType initial, ScalarType defaultStep_);
+        SteepestDescent(const SteepestDescent&) = default;
+        SteepestDescent(SteepestDescent&&) noexcept = default;
+        ~SteepestDescent() = default;
+        /* Operators */
+        SteepestDescent& operator=(SteepestDescent obj) noexcept;
+        /* Operations */
+        template<class Functor> void init(Functor func);
+        template<class Functor, class GradFunctor> bool step(Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> ScalarType solve(Functor func, GradFunctor grad);
+        void swap(SteepestDescent& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] ScalarType getDefaultStep() const noexcept { return defaultStep; }
+        [[nodiscard]] ScalarType getObjectiveValue() const noexcept { return nowY; }
+        /* Setters */
+        void setDefaultStep(ScalarType newStep) { defaultStep = newStep; }
+    };
+}
+
+#include "SteepestDescentImpl.h"

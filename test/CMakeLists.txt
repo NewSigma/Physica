@@ -51,9 +51,10 @@ physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
 ### Geometry
 physica_add_test(GeoBase Core/Math/Geometry/GeoBase.cpp)
 ### Optimization
-physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradientTest.cpp)
+physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradient.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
 physica_add_test(QuadraticProgramming Core/Math/Optimization/QuadraticProgramming.cpp)
+physica_add_test(SteepestDescent Core/Math/Optimization/SteepestDescent.cpp)
 ### Statistics
 physica_add_test(NumCharacter Core/Math/Statistics/NumCharacter.cpp)
 ### Transform

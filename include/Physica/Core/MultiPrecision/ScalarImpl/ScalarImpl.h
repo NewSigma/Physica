@@ -88,21 +88,29 @@ namespace Physica::Core {
         return Scalar<option, errorTrack>(s);
     }
 
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    inline void operator+=(Scalar<option, errorTrack1>& s1
-            , const Scalar<option, errorTrack2>& s2) { s1 = s1 + s2; }
+    template<ScalarOption option, bool errorTrack, class T>
+    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(
+            Scalar<option, errorTrack>& s1, const T& s2) {
+        s1 = s1 + s2;
+    }
 
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    inline void operator-=(Scalar<option, errorTrack1>& s1
-            , const Scalar<option, errorTrack2>& s2) { s1 = s1 - s2; }
+    template<ScalarOption option, bool errorTrack, class T>
+    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(
+            Scalar<option, errorTrack>& s1, const T& s2) {
+        s1 = s1 - s2;
+    }
 
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    inline void operator*=(Scalar<option, errorTrack1>& s1
-            , const Scalar<option, errorTrack2>& s2) { s1 = s1 * s2; }
+    template<ScalarOption option, bool errorTrack, class T>
+    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(
+            Scalar<option, errorTrack>& s1, const T& s2) {
+        s1 = s1 * s2;
+    }
 
-    template<ScalarOption option, bool errorTrack1, bool errorTrack2>
-    inline void operator/=(Scalar<option, errorTrack1>& s1
-            , const Scalar<option, errorTrack2>& s2) { s1 = s1 / s2; }
+    template<ScalarOption option, bool errorTrack, class T>
+    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(
+            Scalar<option, errorTrack>& s1, const T& s2) {
+        s1 = s1 / s2;
+    }
 
     template<ScalarOption option, bool errorTrack>
     inline void operator^=(Scalar<option, errorTrack>& s1

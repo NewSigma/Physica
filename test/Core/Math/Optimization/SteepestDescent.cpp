@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -16,9 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Optimization/HillClimbingAlgorithm.h"
+#include "Physica/Core/Math/Optimization/SteepestDescent.h"
 
-/*!
- * This file is created to help IDE inspect template codes,
- * it is not necessary and may be removed in the future versions.
- */
+using namespace Physica::Core;
+using ScalarType = Scalar<Double, false>;
+using Optimizer = SteepestDescent<ScalarType, 2>;
+using VectorType = typename Optimizer::VectorType;
+
+int main() {
+    const auto func = [](VectorType x) -> ScalarType { return x.squaredNorm(); };
+    const auto grad = [](VectorType x) -> VectorType { return x * ScalarType(2); };
+    Optimizer sd({5, 4}, 0.001);
+    const ScalarType result = sd.solve(func, grad);
+    if (result > 1E-4)
+        return 1;
+    return 0;
+}
