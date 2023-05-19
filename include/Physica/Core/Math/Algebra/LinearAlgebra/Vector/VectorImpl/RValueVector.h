@@ -28,8 +28,10 @@
 namespace Physica::Core {
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
+    template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
     template<class AnyVector1, class AnyVector2> class CrossProduct;
     template<class VectorType> class FormatedVector;
+    template<class Derived> class RValueMatrix;
 
     namespace Internal {
         template<class T> class Traits;
@@ -84,6 +86,14 @@ namespace Physica::Core {
         const RVectorBlock<Derived> tail(size_t from) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from); }
         RVectorBlock<Derived> segment(size_t from, size_t to) { return RVectorBlock<Derived>(Base::getDerived(), from, to); }
         const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
+
+        template<class OtherDerived>
+        ReshapedVector<Derived, OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile, MatrixOption::getMajor<OtherDerived>()>
+        reshape(const RValueMatrix<OtherDerived>& mat) const;
+        template<size_t Row = Dynamic, size_t Column = Dynamic>
+        ReshapedVector<Derived, Row, Column, MatrixOption::Column> reshape_col(size_t row, size_t col) const;
+        template<size_t Row = Dynamic, size_t Column = Dynamic>
+        ReshapedVector<Derived, Row, Column, MatrixOption::Row> reshape_row(size_t row, size_t col) const;
     };
 
     template<class VectorType1, class VectorType2>
