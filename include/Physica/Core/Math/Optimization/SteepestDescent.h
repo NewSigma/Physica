@@ -23,7 +23,6 @@
 namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     class SteepestDescent {
-        static_assert(Dim > 0, "dim must be at least 1.");
     public:
         using VectorType = Vector<ScalarType, Dim>;
     private:
@@ -34,16 +33,16 @@ namespace Physica::Core {
         ScalarType stepSize;
         unsigned char stepMultiple;
     public:
-        SteepestDescent(VectorType initial, ScalarType defaultStep_);
+        SteepestDescent(ScalarType defaultStep_);
         SteepestDescent(const SteepestDescent&) = default;
         SteepestDescent(SteepestDescent&&) noexcept = default;
         ~SteepestDescent() = default;
         /* Operators */
         SteepestDescent& operator=(SteepestDescent obj) noexcept;
         /* Operations */
-        template<class Functor> void init(Functor func);
+        template<class Functor> void init(VectorType initial, Functor func);
         template<class Functor, class GradFunctor> bool step(Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> ScalarType solve(Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> ScalarType solve(VectorType initial, Functor func, GradFunctor grad);
         void swap(SteepestDescent& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getDefaultStep() const noexcept { return defaultStep; }

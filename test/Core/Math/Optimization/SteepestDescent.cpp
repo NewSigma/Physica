@@ -26,9 +26,9 @@ using VectorType = typename Optimizer::VectorType;
 int main() {
     const auto func = [](VectorType x) -> ScalarType { return x.squaredNorm(); };
     const auto grad = [](VectorType x) -> VectorType { return x * ScalarType(2); };
-    Optimizer sd({5, 4}, 0.001);
-    const ScalarType result = sd.solve(func, grad);
-    if (result > 1E-4)
+    Optimizer sd(0.001);
+    const ScalarType result = sd.solve({5, 4}, func, grad);
+    if (result > 1E-7)
         return 1;
     return 0;
 }

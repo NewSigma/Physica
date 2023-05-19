@@ -20,14 +20,11 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Dim>
-    SteepestDescent<ScalarType, Dim>::SteepestDescent(VectorType initial, ScalarType defaultStep_)
-            : tryX(std::move(initial))
-            , nowY(std::numeric_limits<ScalarType>::max())
+    SteepestDescent<ScalarType, Dim>::SteepestDescent(ScalarType defaultStep_)
+            : nowY(std::numeric_limits<ScalarType>::max())
             , defaultStep(defaultStep_)
             , stepSize(defaultStep_)
-            , stepMultiple(0) {
-        nowX = tryX;
-    }
+            , stepMultiple(0) {}
 
     template<class ScalarType, size_t Dim>
     SteepestDescent<ScalarType, Dim>& SteepestDescent<ScalarType, Dim>::operator=(SteepestDescent obj) noexcept {
@@ -37,7 +34,8 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     template<class Functor>
-    void SteepestDescent<ScalarType, Dim>::init(Functor func) {
+    void SteepestDescent<ScalarType, Dim>::init(VectorType initial, Functor func) {
+        tryX = (std::move(initial));
         nowX = tryX;
         nowY = func(tryX);
         stepSize = defaultStep;
@@ -73,8 +71,8 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     template<class Functor, class GradFunctor>
-    ScalarType SteepestDescent<ScalarType, Dim>::solve(Functor func, GradFunctor grad) {
-        init(func);
+    ScalarType SteepestDescent<ScalarType, Dim>::solve(VectorType initial, Functor func, GradFunctor grad) {
+        init(std::move(initial), func);
         while (!step(func, grad));
         return nowY;
     }
