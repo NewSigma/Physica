@@ -46,7 +46,7 @@ namespace Physica::Core {
         using This = ReshapedVector<VectorType, MatrixMajor, Row, Column>;
         using Base = RValueMatrix<This>;
         using ScalarType = typename VectorType::ScalarType;
-
+    public:
         const VectorType& v;
         size_t row;
         size_t column;
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class OtherDerived>
-    ReshapedVector<Derived, OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile, MatrixOption::getMajor<OtherDerived>()>
+    ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
     RValueVector<Derived>::reshape(const RValueMatrix<OtherDerived>& mat) const {
         return {Base::getDerived(), mat.getRow(), mat.getColumn()};
     }

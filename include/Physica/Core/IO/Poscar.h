@@ -41,10 +41,11 @@ namespace Physica::Core {
         using ScalarType = typename CrystalCell::ScalarType;
         using Type = typename CrystalCell::Type;
     private:
+        Utils::Array<uint8_t> elementTypes;
         Utils::Array<size_t> numOfEachType;
     public:
         Poscar();
-        Poscar(Base base, Utils::Array<size_t> numOfEachType_);
+        Poscar(Base base, Utils::Array<uint8_t> elementTypes_, Utils::Array<size_t> numOfEachType_);
         Poscar(CrystalCell cell);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
@@ -54,6 +55,8 @@ namespace Physica::Core {
         void extendInZ(ScalarType factor);
         void superToUnit(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
+        [[nodiscard]] const Utils::Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
+        [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
@@ -61,10 +64,12 @@ namespace Physica::Core {
         void swap(Poscar& poscar) noexcept;
     private:
         using Base::superToUnit;
-        void readNumOfEachType(std::istream& is);
+        void readTypesAndNumber(std::istream& is);
         void readAtomPos(std::istream& is);
         size_t sumNumOfEachType() const;
         void extendInZ_direct(ScalarType factor);
+        /* Static members */
+        [[nodiscard]] static uint8_t elementSymbolToNumber(char ch1, char ch2);
 
         friend class Xdatcar;
     };

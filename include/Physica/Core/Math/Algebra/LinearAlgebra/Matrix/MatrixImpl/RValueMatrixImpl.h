@@ -24,7 +24,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        assert(getRow() == target.getRow() && getColumn() == target.getColumn());
+        assert(getRow() == target.getRow());
+        assert(getColumn() == target.getColumn());
         for (size_t i = 0; i < target.getMaxMajor(); ++i)
             for (size_t j = 0; j < target.getMaxMinor(); ++j)
                 target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));

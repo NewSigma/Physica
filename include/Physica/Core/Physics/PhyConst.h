@@ -54,6 +54,7 @@ namespace Physica::Core {
          */
         constexpr static double relativeMassInKg = 1E-3 / avogadroNa;
         constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
+        constexpr static const char* elementSymbol[10]{"-", "H", "He", "Li", "Be", "B", "C", "N", "O", "F"};
     
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * relativeMassInKg; }

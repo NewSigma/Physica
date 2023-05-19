@@ -88,7 +88,7 @@ namespace Physica::Core {
         const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
 
         template<class OtherDerived>
-        ReshapedVector<Derived, OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile, MatrixOption::getMajor<OtherDerived>()>
+        ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
         reshape(const RValueMatrix<OtherDerived>& mat) const;
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         ReshapedVector<Derived, Row, Column, MatrixOption::Column> reshape_col(size_t row, size_t col) const;

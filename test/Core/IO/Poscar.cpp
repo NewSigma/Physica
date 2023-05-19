@@ -30,6 +30,7 @@ const static char* data1 = "Structure	-97.8256	0.0003\n"
                            "	   22.84502     0.00000     0.00000\n"
                            "	   -5.16077     4.54432     0.00000\n"
                            "	    0.00000     0.00000    12.00000\n"
+                           " O H\n"
                            " 1 2\n"
                            "D\n"
                            "	    0.83817     0.05987     0.02619\n"
@@ -49,6 +50,9 @@ Poscar readTest() {
 
     unlink(tempFile);
 
+    const auto& elements = poscar.getElementTypes();
+    if (!(elements[0] == 8 && elements[1] == 1))
+        exit(EXIT_FAILURE);
     const auto& numOfEachType = poscar.getNumOfEachType();
     if (!(numOfEachType[0] == 1 && numOfEachType[1] == 2))
         exit(EXIT_FAILURE);

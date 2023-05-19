@@ -20,31 +20,42 @@
 #include <unordered_set>
 #include <algorithm>
 #include "Physica/Core/Exception/BadFileFormatException.h"
+#include "Physica/Core/Exception/NotImplementedException.h"
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    Poscar::Poscar() : Base()
-                     , numOfEachType() {}
+    Poscar::Poscar()
+            : Base(), elementTypes(), numOfEachType() {}
 
-    Poscar::Poscar(Base base, Utils::Array<size_t> numOfEachType_)
+    Poscar::Poscar(Base base, Utils::Array<uint8_t> elementTypes_, Utils::Array<size_t> numOfEachType_)
             : Base(std::move(base))
+            , elementTypes(std::move(elementTypes_))
             , numOfEachType(std::move(numOfEachType_)) {
         assert(getAtomCount() == sumNumOfEachType());
+        assert(elementTypes.getLength() == numOfEachType.getLength());
     }
 
     Poscar::Poscar(CrystalCell cell) : Base(std::move(cell)) {
-        std::unordered_set<uint16_t> set{};
-        for (uint16_t elem : cell.getAtomicNumbers())
-            set.insert(elem);
-        numOfEachType.resize(set.size(), 0);
+        /* Get size */ {
+            std::unordered_set<uint16_t> set{};
+            for (uint16_t elem : cell.getAtomicNumbers())
+                set.insert(elem);
+            const size_t size = set.size();
+            elementTypes.resize(size);
+            numOfEachType.resize(size, 0);
+        }
         size_t index = 0;
         uint16_t temp = cell.getAtomicNumbers()[0];
-        for (uint16_t elem : cell.getAtomicNumbers()) {
-            const bool same = temp == elem;
-            index += !same;
+        for (auto atomicNumber : cell.getAtomicNumbers()) {
+            const bool isSame = temp == atomicNumber;
+            if (!isSame) {
+                index += 1;
+                elementTypes[index] = atomicNumber;
+            }
             numOfEachType[index] += 1;
-            temp = elem;
+            temp = atomicNumber;
         }
     }
 
@@ -52,6 +63,11 @@ namespace Physica::Core {
         os << '\n';
         os << 1.0 << '\n';
         os << poscar.lattice;
+        if (!poscar.elementTypes.empty()) {
+            for (auto type : poscar.elementTypes)
+                os << ' ' << PhyConst<SI>::elementSymbol[type];
+            os << '\n';
+        }
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
             os << ' ' << poscar.numOfEachType[i];
         os << '\n';
@@ -68,7 +84,7 @@ namespace Physica::Core {
         is >> poscar.lattice(1, 0) >> poscar.lattice(1, 1) >> poscar.lattice(1, 2);
         is >> poscar.lattice(2, 0) >> poscar.lattice(2, 1) >> poscar.lattice(2, 2);
 
-        poscar.readNumOfEachType(is);
+        poscar.readTypesAndNumber(is);
         /* Read format type */ {
             const int ch = std::tolower(is.get());
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -173,16 +189,33 @@ namespace Physica::Core {
 
     void Poscar::swap(Poscar& poscar) noexcept {
         Base::swap(poscar);
+        elementTypes.swap(poscar.elementTypes);
         numOfEachType.swap(poscar.numOfEachType);
     }
 
-    void Poscar::readNumOfEachType(std::istream& is) {
+    void Poscar::readTypesAndNumber(std::istream& is) {
         size_t count = 0;
-        /* Get first type count */ {
+        /* Read types */ {
             is >> count;
             if (is.fail()) {
                 is.clear();
-                is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                elementTypes.reserve(8);
+                int ch = is.peek();
+                while (ch != '\n') {
+                    while (std::isspace(ch) && ch != '\n') {
+                        is.get();
+                        ch = is.peek();
+                    }
+                    is.get();
+
+                    const int next_ch = is.peek();
+                    const int ch1 = std::isalpha(next_ch) ? next_ch : '\0';
+                    elementTypes.append(elementSymbolToNumber(ch, ch1));
+                    ch = next_ch;
+                }
+                elementTypes.squeeze();
+                is.get();
                 is >> count;
             }
 
@@ -231,5 +264,16 @@ namespace Physica::Core {
             else
                 col[i] *= inv_factor;
         }
+    }
+
+    uint8_t Poscar::elementSymbolToNumber(char ch1, char ch2) {
+        assert(std::isalpha(ch1) && (std::isalpha(ch2) || ch2 == '\0'));
+        uint8_t i = 0;
+        for (const char* symbol : PhyConst<SI>::elementSymbol) {
+            if (symbol[0] == ch1 && symbol[1] == ch2)
+                return i;
+            i += 1;
+        }
+        throw NotImplementedException();
     }
 }

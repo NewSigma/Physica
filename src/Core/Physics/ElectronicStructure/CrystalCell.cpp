@@ -28,7 +28,17 @@ namespace Physica::Core {
         assert(pos.getRow() == atomicNumbers.getLength());
     }
 
-    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)) {}
+    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)) {
+        assert(poscar.isElementTypeInitialized());
+        atomicNumbers.reserve(getNumParticle());
+        size_t index = 0;
+        for (auto num : poscar.getNumOfEachType()) {
+            const uint8_t type = poscar.getElementTypes()[index];
+            for (size_t i = 0; i < num; ++i)
+                atomicNumbers.append(type);
+            index += 1;
+        }
+    }
 
     CrystalCell& CrystalCell::operator=(CrystalCell cell) noexcept {
         swap(cell);
