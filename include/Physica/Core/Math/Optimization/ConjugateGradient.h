@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,205 +18,105 @@
  */
 #pragma once
 
-#include <cassert>
-#include <functional>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
-#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "OptimizationImpl/LineSearch.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class ScalarBase;
-    template<class VectorType> class RValueVector;
-}
-
-namespace Physica::Core::Math {
     /**
      * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.121
+     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.121-122
      */
-    template<class ScalarType, class Function, class VectorType>
+    template<class ScalarType, size_t Dim>
     class ConjugateGradient {
-        constexpr static double c1 = 1E-4;
-        constexpr static double c2 = 0.1;
-        constexpr static size_t maxIteration = 100000;
+        using VectorType = Vector<ScalarType, Dim>;
 
-        Function func;
-        VectorType x;
+        VectorType gradG;
+        VectorType direction;
+        VectorType nowX;
+        ScalarType squaredGradNorm;
+        LineSearch<ScalarType, Dim> lineSearch;
         ScalarType epsilon;
-        ScalarType maxStepSize;
-        ScalarType diffStep;
+        size_t iteration;
     public:
-        ConjugateGradient(Function func_,
-                          const RValueVector<VectorType>& x_,
-                          const ScalarBase<ScalarType>& epsilon_,
-                          const ScalarBase<ScalarType>& maxStepSize_ = ScalarType(1),
-                          const ScalarBase<ScalarType>& diffStep_ = ScalarType(1E-6));
+        ConjugateGradient(ScalarType epsilon_, ScalarType maxStepSize = ScalarType(1));
+        ConjugateGradient(const ConjugateGradient&) = default;
+        ConjugateGradient(ConjugateGradient&&) noexcept = default;
         ~ConjugateGradient() = default;
+        /* Operators */
+        ConjugateGradient& operator=(ConjugateGradient obj) noexcept;
         /* Operations */
-        ScalarType compute();
+        template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> ScalarType solve(VectorType initial, Functor func, GradFunctor grad);
+        void swap(ConjugateGradient& obj) noexcept;
         /* Getters */
-        [[nodiscard]] const VectorType& getX() const noexcept { return x; }
-    private:
-        [[nodiscard]] VectorType getGradient(const VectorType& at) const;
-        [[nodiscard]] ScalarType lineSearch(const VectorType& gradient, const VectorType& direction);
-        [[nodiscard]] ScalarType zoom(const VectorType& gradient, const VectorType& direction, ScalarType step1, ScalarType step2);
-        [[nodiscard]] ScalarType interpolate(const VectorType& direction, const ScalarType& step1, const ScalarType& step2);
+        [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
+        [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
     };
 
-    template<class ScalarType, class Function, class VectorType>
-    ConjugateGradient<ScalarType, Function, VectorType>::ConjugateGradient(Function func_,
-                                                                           const RValueVector<VectorType>& x_,
-                                                                           const ScalarBase<ScalarType>& epsilon_,
-                                                                           const ScalarBase<ScalarType>& maxStepSize_,
-                                                                           const ScalarBase<ScalarType>& diffStep_)
-            : func(func_)
-            , x(x_.getDerived())
-            , epsilon(epsilon_.getDerived())
-            , maxStepSize(maxStepSize_.getDerived())
-            , diffStep(diffStep_.getDerived()) {
-        assert(maxStepSize.isPositive());
-        assert(diffStep.isPositive());
+    template<class ScalarType, size_t Dim>
+    ConjugateGradient<ScalarType, Dim>::ConjugateGradient(ScalarType epsilon_, ScalarType maxStepSize)
+            : lineSearch(maxStepSize)
+            , epsilon(epsilon_)
+            , iteration(0) {}
+
+    template<class ScalarType, size_t Dim>
+    ConjugateGradient<ScalarType, Dim>&
+    ConjugateGradient<ScalarType, Dim>::operator=(ConjugateGradient<ScalarType, Dim> obj) noexcept {
+        swap(obj);
+        return *this;
     }
 
-    template<class ScalarType, class Function, class VectorType>
-    ScalarType ConjugateGradient<ScalarType, Function, VectorType>::compute() {
-        VectorType g = getGradient(x);
-        VectorType direction = -g;
-        ScalarType error = g.squaredNorm();
+    template<class ScalarType, size_t Dim>
+    template<class Functor, class GradFunctor>
+    void ConjugateGradient<ScalarType, Dim>::init(VectorType initial, [[maybe_unused]] Functor func, GradFunctor grad) {
+        nowX = std::move(initial);
+        gradG = grad(nowX);
+        direction = -gradG;
+        squaredGradNorm = gradG.squaredNorm();
+        iteration = 0;
+    }
 
-        size_t ite = 0;
-        const size_t N = x.getLength();
-        while (error > epsilon) {
-            const ScalarType factor = lineSearch(g, direction);
-            x += factor * direction;
+    template<class ScalarType, size_t Dim>
+    template<class Functor, class GradFunctor>
+    void ConjugateGradient<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
+        const size_t dim = nowX.getLength();
+        const ScalarType stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
+        nowX += stepSize * direction;
 
-            const VectorType g1 = getGradient(x);
-            const ScalarType new_error = g1.squaredNorm();
-            if (++ite == N) {
-                direction = -g1;
-                ite = 0;
-            }
-            else {
-                const ScalarType alpha = (new_error - g * g1) / error;
-                direction = alpha * direction - g1;
-            }
-            g = g1;
-            error = new_error;
+        const VectorType gradG1 = grad(nowX);
+        const ScalarType squaredGradNorm1 = gradG1.squaredNorm();
+        if (++iteration == dim) {
+            direction = -gradG1;
+            iteration = 0;
         }
-        return func(std::cref(x));
-    }
-
-    template<class ScalarType, class Function, class VectorType>
-    VectorType ConjugateGradient<ScalarType, Function, VectorType>::getGradient(const VectorType& at) const {
-        const size_t length = at.getLength();
-        VectorType result(length);
-        VectorType copy = at;
-        for (size_t i = 0; i < length; ++i) {
-            const ScalarType buffer = copy[i];
-            result[i] = Differential<ScalarType>::doublePoint([&](ScalarType alpha) {
-                copy[i] = alpha;
-                return func(std::cref(copy));
-            }, buffer, diffStep);
-            copy[i] = buffer;
+        else {
+            const ScalarType alpha = (squaredGradNorm1 - gradG * gradG1) / squaredGradNorm; //Polak-Ribière method[1]
+            direction = -gradG1 + alpha * direction;
         }
-        return result;
+        gradG = gradG1;
+        squaredGradNorm = squaredGradNorm1;
     }
 
-    template<class ScalarType, class Function, class VectorType>
-    ScalarType ConjugateGradient<ScalarType, Function, VectorType>::lineSearch(
-            const VectorType& gradient,
-            const VectorType& direction) {
-        ScalarType step_lower = ScalarType::Zero();
-        const ScalarType step_upper = maxStepSize;
-        ScalarType step = maxStepSize / ScalarType::Two();
-
-        const ScalarType factor1 = ScalarType(c1);
-        const ScalarType factor2 = ScalarType(c2);
-        const ScalarType phi_0 = func(std::cref(x));
-        const ScalarType diff_phi_0 = gradient * direction;
-        assert(diff_phi_0.isNegative());
-
-        ScalarType last_y = phi_0;
-        VectorType x1 = VectorType(x.getLength());
-        size_t i = 0;
-        while (true) {
-            x1 = x + step * direction;
-            const ScalarType y = func(std::cref(x1));
-            const bool violatesWolfe = y > (phi_0 + factor1 * step * diff_phi_0);
-            const bool isIncreased = (y >= last_y) && (i > 0);
-            if (violatesWolfe || isIncreased)
-                return zoom(gradient, direction, step_lower, step);
-            
-            const ScalarType diff_phi = getGradient(x1) * direction;
-            if (abs(diff_phi) <= -factor2 * diff_phi_0)
-                return step;
-            if (!diff_phi.isNegative())
-                return zoom(gradient, direction, step, step_lower);
-            
-            step_lower = step;
-            step = (step_lower + step_upper) / ScalarType::Two();
-            if (abs(step_upper - step) < std::numeric_limits<ScalarType>::epsilon())
-                return step_upper;
-            if (++i > maxIteration)
-                throw BadConvergenceException("Exceed max iteration of ConjugateGradient");
+    template<class ScalarType, size_t Dim>
+    template<class Functor, class GradFunctor>
+    ScalarType ConjugateGradient<ScalarType, Dim>::solve(VectorType initial, Functor func, GradFunctor grad) {
+        init(std::move(initial), func, grad);
+        while (squaredGradNorm > epsilon) {
+            step(func, grad);
         }
-    }
-    /**
-     * \param step1 does not necessarily less than \param step2
-     */
-    template<class ScalarType, class Function, class VectorType>
-    ScalarType ConjugateGradient<ScalarType, Function, VectorType>::zoom(
-            const VectorType& gradient,
-            const VectorType& direction,
-            ScalarType step1,
-            ScalarType step2) {
-        const ScalarType phi_0 = func(std::cref(x));
-        const ScalarType diff_phi_0 = gradient * direction;
-        const ScalarType factor1 = ScalarType(c1);
-        const ScalarType factor2 = ScalarType(c2);
-
-        ScalarType last_y = func(VectorType(x + step1 * direction));
-        VectorType x1 = VectorType(x.getLength());
-        while (true) {
-            const ScalarType step = interpolate(direction, step1, step2);
-
-            x1 = x + step * direction;
-            const ScalarType y = func(std::cref(x1));
-            const bool violatesWolfe = y > (phi_0 + factor1 * step * diff_phi_0);
-            const bool isIncreased = y >= last_y;
-            if (violatesWolfe || isIncreased)
-                step2 = step;
-            else {
-                const ScalarType diff_phi = getGradient(x1) * direction;
-                if (abs(diff_phi) <= -factor2 * diff_phi_0)
-                    return step;
-                if (!(diff_phi * (step2 - step1)).isNegative())
-                    step2 = step1;
-                step1 = step;
-                last_y = y;
-            }
-
-            if (abs(step2 - step1) < std::numeric_limits<ScalarType>::epsilon())
-                return step1;
-        }
+        return func(nowX);
     }
 
-    template<class ScalarType, class Function, class VectorType>
-    ScalarType ConjugateGradient<ScalarType, Function, VectorType>::interpolate(
-            const VectorType& direction,
-            const ScalarType& step1,
-            const ScalarType& step2) {
-        assert(step1 != step2);
-        const VectorType x1 = x + step1 * direction;
-        const VectorType x2 = x + step2 * direction;
-        const ScalarType diff1 = getGradient(x1) * direction;
-        const ScalarType diff2 = getGradient(x2) * direction;
-        const ScalarType delta_step = step1 - step2;
-        const ScalarType d1 = diff1 + diff2 - ScalarType(3) * (func(x1) - func(x2)) / delta_step;
-        const ScalarType squared_d2 = square(d1) - diff1 * diff2;
-        assert(!squared_d2.isNegative());
-        ScalarType d2 = sqrt(squared_d2);
-        if (delta_step.isNegative())
-            d2.toOpposite();
-        return step1 - delta_step * (diff1 + d2 - d1) / (diff1 - diff2 + ScalarType::Two() * d2);
+    template<class ScalarType, size_t Dim>
+    void ConjugateGradient<ScalarType, Dim>::swap(ConjugateGradient& obj) noexcept {
+        gradG.swap(obj.gradG);
+        direction.swap(obj.direction);
+        nowX.swap(obj.nowX);
+        squaredGradNorm.swap(obj.squaredGradNorm);
+        lineSearch.swap(obj.lineSearch);
+        epsilon.swap(obj.epsilon);
+        std::swap(iteration, obj.iteration);
     }
 }

@@ -20,11 +20,9 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Dim>
-    SteepestDescent<ScalarType, Dim>::SteepestDescent(ScalarType defaultStep_)
+    SteepestDescent<ScalarType, Dim>::SteepestDescent(ScalarType maxStepSize, ScalarType decreaseCondNum, ScalarType curvatureCondNum)
             : nowY(std::numeric_limits<ScalarType>::max())
-            , defaultStep(defaultStep_)
-            , stepSize(defaultStep_)
-            , stepMultiple(0) {}
+            , lineSearch(maxStepSize, decreaseCondNum, curvatureCondNum) {}
 
     template<class ScalarType, size_t Dim>
     SteepestDescent<ScalarType, Dim>& SteepestDescent<ScalarType, Dim>::operator=(SteepestDescent obj) noexcept {
@@ -33,47 +31,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    template<class Functor>
-    void SteepestDescent<ScalarType, Dim>::init(VectorType initial, Functor func) {
+    template<class Functor, class GradFunctor>
+    void SteepestDescent<ScalarType, Dim>::init(VectorType initial, Functor func, GradFunctor grad) {
         tryX = (std::move(initial));
         nowX = tryX;
         nowY = func(tryX);
-        stepSize = defaultStep;
-        stepMultiple = 0;
+        gradG = grad(nowX);
     }
 
     template<class ScalarType, size_t Dim>
     template<class Functor, class GradFunctor>
-    bool SteepestDescent<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
-        gradG = grad(tryX);
-        tryX -= gradG * (stepSize / gradG.norm());
-        ScalarType y = func(tryX);
+    void SteepestDescent<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
+        VectorType direction = -gradG;
+        const ScalarType stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
 
-        if (y < nowY) {
-            nowX = tryX;
-            nowY = y;
-            stepSize *= 2.0;
-            stepMultiple += 1;
-            const bool stepIsTooLarge = stepMultiple == std::numeric_limits<unsigned char>::max();
-            if (stepIsTooLarge) [[unlikely]]
-                throw std::invalid_argument("Minimal cannot be achieved with a large step, are we dealing with a minimization problem?");
-        }
-        else {
-            stepSize *= 0.5;
-            stepMultiple -= 1;
-            const bool isConverged = stepMultiple == 0;
-            if (isConverged)
-                return true;
-        }
-        return false;
-    }
-
-    template<class ScalarType, size_t Dim>
-    template<class Functor, class GradFunctor>
-    ScalarType SteepestDescent<ScalarType, Dim>::solve(VectorType initial, Functor func, GradFunctor grad) {
-        init(std::move(initial), func);
-        while (!step(func, grad));
-        return nowY;
+        nowX += direction * stepSize;
+        nowY = func(nowX);
+        gradG = grad(nowX);
     }
 
     template<class ScalarType, size_t Dim>
@@ -82,8 +56,6 @@ namespace Physica::Core {
         tryX.swap(obj.tryX);
         nowX.swap(obj.nowX);
         nowY.swap(obj.nowY);
-        defaultStep.swap(obj.defaultStep);
-        stepSize.swap(obj.stepSize);
-        std::swap(stepMultiple, obj.stepMultiple);
+        lineSearch.swap(obj.lineSearch);
     }
 }

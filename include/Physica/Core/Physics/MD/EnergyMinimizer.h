@@ -38,10 +38,10 @@ namespace Physica::Core {
         /* Operators */
         EnergyMinimizer& operator=(EnergyMinimizer obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Optimizer>
+        template<class ForceModel, class Executor, class Optimizer>
         void init(const ForceModel& model, Optimizer& optimizer);
         template<class ForceModel, class Executor, class Optimizer>
-        bool pos_step(const ForceModel& model, Optimizer& optimizer);
+        void pos_step(const ForceModel& model, Optimizer& optimizer);
         void swap(EnergyMinimizer& obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
@@ -59,17 +59,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    template<class ForceModel, class Optimizer>
-    void EnergyMinimizer<ScalarType, PosScalarType, Dim>::init(const ForceModel& model, Optimizer& optimizer) {
-        optimizer.init(cell.getPos().flatten(), [this, &model](const VectorType& v) -> ScalarType {
-            const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
-            return model.potentialEnergy(temp);
-        });
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<class ForceModel, class Executor, class Optimizer>
-    bool EnergyMinimizer<ScalarType, PosScalarType, Dim>::pos_step(const ForceModel& model, Optimizer& optimizer) {
+    void EnergyMinimizer<ScalarType, PosScalarType, Dim>::init(const ForceModel& model, Optimizer& optimizer) {
         const auto func = [this, &model](const VectorType& v) -> ScalarType {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
             return model.potentialEnergy(temp);
@@ -78,9 +69,22 @@ namespace Physica::Core {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
             return -model.template force<Executor, true>(temp);
         };
-        const bool isDone = optimizer.step(func, grad);
+        optimizer.init(cell.getPos().flatten(), func, grad);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ForceModel, class Executor, class Optimizer>
+    void EnergyMinimizer<ScalarType, PosScalarType, Dim>::pos_step(const ForceModel& model, Optimizer& optimizer) {
+        const auto func = [this, &model](const VectorType& v) -> ScalarType {
+            const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
+            return model.potentialEnergy(temp);
+        };
+        const auto grad = [this, &model](const VectorType& v) -> VectorType {
+            const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
+            return -model.template force<Executor, true>(temp);
+        };
+        optimizer.step(func, grad);
         cell.setPos(optimizer.getArgX().reshape(cell.getPos()));
-        return isDone;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

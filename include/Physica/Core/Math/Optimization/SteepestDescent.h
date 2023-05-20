@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "OptimizationImpl/LineSearch.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t Dim>
@@ -30,28 +31,22 @@ namespace Physica::Core {
         VectorType tryX;
         VectorType nowX;
         ScalarType nowY;
-        ScalarType defaultStep;
-        ScalarType stepSize;
-        unsigned char stepMultiple;
+        LineSearch<ScalarType, Dim> lineSearch;
     public:
-        SteepestDescent(ScalarType defaultStep_);
+        SteepestDescent(ScalarType maxStepSize, ScalarType decreaseCondNum_, ScalarType curvatureCondNum_);
         SteepestDescent(const SteepestDescent&) = default;
         SteepestDescent(SteepestDescent&&) noexcept = default;
         ~SteepestDescent() = default;
         /* Operators */
         SteepestDescent& operator=(SteepestDescent obj) noexcept;
         /* Operations */
-        template<class Functor> void init(VectorType initial, Functor func);
-        template<class Functor, class GradFunctor> bool step(Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> ScalarType solve(VectorType initial, Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
         void swap(SteepestDescent& obj) noexcept;
         /* Getters */
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
         [[nodiscard]] ScalarType getObjectiveValue() const noexcept { return nowY; }
-        [[nodiscard]] ScalarType getDefaultStep() const noexcept { return defaultStep; }
-        /* Setters */
-        void setDefaultStep(ScalarType newStep) { defaultStep = newStep; }
     };
 }
 

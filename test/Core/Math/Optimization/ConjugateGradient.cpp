@@ -19,24 +19,48 @@
 #include "Functions.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 
-using namespace Physica::Core::Math;
+using namespace Physica::Core;
 
 using ScalarType = Scalar<Double, false>;
+using VectorType = Vector<ScalarType, 3>;
+
+template<class Functor>
+VectorType grad(Functor func, const VectorType& at, ScalarType diffStep) {
+    assert(diffStep.isPositive());
+    const size_t length = at.getLength();
+    VectorType result(length);
+    VectorType copy = at;
+    for (size_t i = 0; i < length; ++i) {
+        const ScalarType buffer = copy[i];
+        result[i] = Differential<ScalarType>::doublePoint([&](ScalarType alpha) {
+            copy[i] = alpha;
+            return func(copy);
+        }, buffer, diffStep);
+        copy[i] = buffer;
+    }
+    return result;
+}
 
 int main() {
     {
-        ConjugateGradient cg(func1<ScalarType>, Vector<ScalarType>{-1, -2, -5}, ScalarType(10), ScalarType(1), ScalarType(1E-5));
-        if (!scalarNear(cg.compute(), ScalarType::Zero(), 1E-15))
+        auto func = func1<ScalarType>;
+        ConjugateGradient<ScalarType, 3> cg(10, 1);
+        const ScalarType result = cg.solve({-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
+        if (!scalarNear(result, ScalarType::Zero(), 1E-15))
             return 1;
     }
     {
-        ConjugateGradient cg(func2<ScalarType>, Vector<ScalarType>{1, 3, 2}, ScalarType(1E-15), ScalarType(1), ScalarType(1E-6));
-        if (!scalarNear(cg.compute(), ScalarType(2.25), 1E-14))
+        auto func = func2<ScalarType>;
+        ConjugateGradient<ScalarType, 3> cg(1E-15, 1);
+        const ScalarType result = cg.solve({1, 3, 2}, func, [=](VectorType x) { return grad(func, x, 1E-6); });
+        if (!scalarNear(result, ScalarType(2.25), 1E-14))
             return 1;
     }
     {
-        ConjugateGradient cg(rosenbrock<ScalarType>, Vector<ScalarType>{-1.2, 1}, ScalarType(1E-13), ScalarType(1), ScalarType(3E-6));
-        if (!scalarNear(cg.compute(), ScalarType::Zero(), 1E-19))
+        auto func = rosenbrock<ScalarType>;
+        ConjugateGradient<ScalarType, 3> cg(1E-13, 1);
+        const ScalarType result = cg.solve({-1.2, 1}, func, [=](VectorType x) { return grad(func, x, 3E-6); });
+        if (!scalarNear(result, ScalarType::Zero(), 1E-18))
             return 1;
     }
     return 0;

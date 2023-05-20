@@ -50,7 +50,7 @@ const static char* data1 = "\n"
                            "-1.181259394  3.005724192  2.426948071\n"
                            "-7.517476559   8.71113205  17.57943535\n"
                            "-1.101659656  5.738564014   2.43592453\n"
-                           "-7.458571434  12.59273052  17.58112335\n";
+                           "-7.258571434  12.59273052  17.58112335\n";
 
 Poscar makePoscar() {
     auto tmp = Physica::Utils::TempFile("tmpXXXXXX");
@@ -61,7 +61,7 @@ Poscar makePoscar() {
     std::ifstream fin(tmp.getName());
     Poscar poscar{};
     fin >> poscar;
-    return std::move(poscar);
+    return poscar;
 }
 
 int main() {
@@ -71,14 +71,11 @@ int main() {
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     auto model = ForceModel(cell, PhyConst<AU>::angstormToBohr(9));
     ForceModel::sortPosition(cell);
-    Optimizer sd(1E-5);
+    Optimizer sd(1, 1E-4, 0.1);
     auto minimizer = Minimizer(cell);
-    minimizer.init(model, sd);
-    size_t step = 0;
-    while (!minimizer.pos_step<ForceModel, SequentialExecutor, Optimizer>(model, sd)) {
-        step += 1;
-        if (step == 100)
-            break;
+    minimizer.init<ForceModel, SequentialExecutor, Optimizer>(model, sd);
+    for (int i = 0; i < 100; ++i) {
+        minimizer.pos_step<ForceModel, SequentialExecutor, Optimizer>(model, sd);
     }
 
     std::ofstream fout("POSCAR");

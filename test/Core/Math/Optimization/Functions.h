@@ -21,7 +21,10 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 using namespace Physica::Core;
-
+/**
+ * Data sources:
+ * [1] http://www.sfu.ca/~ssurjano/index.html
+ */
 template<class T>
 T func1(const Vector<T>& v) {
     const T& x = v[0];

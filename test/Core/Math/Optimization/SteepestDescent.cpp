@@ -26,9 +26,12 @@ using VectorType = typename Optimizer::VectorType;
 int main() {
     const auto func = [](VectorType x) -> ScalarType { return x.squaredNorm(); };
     const auto grad = [](VectorType x) -> VectorType { return x * ScalarType(2); };
-    Optimizer sd(0.001);
-    const ScalarType result = sd.solve({5, 4}, func, grad);
-    if (result > 1E-7)
+    Optimizer sd(0.5, 1E-4, 0.1);
+    sd.init({5, 4}, func, grad);
+    do {
+        sd.step(func, grad);
+    } while(sd.getGradG().norm() > 0.001);
+    if (sd.getObjectiveValue() > 1E-8)
         return 1;
     return 0;
 }
