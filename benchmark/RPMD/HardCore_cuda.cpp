@@ -24,9 +24,7 @@
 
 using namespace Physica::Utils;
 
-constexpr double timeStep = 0.001;
-
-void run(double timeStep, std::mt19937& gen);
+void run(std::mt19937& gen);
 
 int main() {
     Cycler::init();
@@ -36,7 +34,7 @@ int main() {
     std::mt19937 gen(seed);
 
     auto pair = Benchmark::run([&gen]() {
-        run(timeStep, gen);
+        run(gen);
     }, 6, 6);
     std::cout << pair.first << '(' << pair.second << ')' << std::endl;
     return 0;

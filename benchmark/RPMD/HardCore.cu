@@ -22,9 +22,13 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 
 using namespace Physica::Core;
+constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 32;
-constexpr double energy = 32;
+constexpr double temperatureT = 2;
+constexpr double energy = numMolecular * temperatureT / 2;
+const size_t numStep = 10000;
+const size_t numMolecular = 1024;
 
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
@@ -34,7 +38,7 @@ using MDCellType = typename MDType::MDCellType;
 using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, CudaExecutor>;
 
-MDCellType makeSystem(size_t numMolecular, std::mt19937& gen) {
+MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
@@ -47,27 +51,24 @@ MDCellType makeSystem(size_t numMolecular, std::mt19937& gen) {
 
     typename MDCellType::MassVector massVec(numMolecular);
     for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = i % 2 == 0 ? M_SQRT2 : 1.0;
+        massVec[i] = i % 2 == 0 ? 3.0 : 1.0;
     }
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-void scaleVelocity(size_t numMolecular, MDType& rpmd) {
+void scaleVelocity(MDType& rpmd) {
     const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
     auto phase = rpmd.getPhaseMatrix().col(0);
     auto momentum = phase.head(numMolecular);
     momentum *= sqrt(ScalarType(energy) / energy1);
 }
 
-void run(double timeStep, std::mt19937& gen) {
-    const size_t numStep = 10000;
-    const size_t numMolecular = 1024;
-
+void run(std::mt19937& gen) {
     MDType rpmd = MDType(makeSystem(numMolecular, gen), 1, 1, 1, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, numMolecular);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
-    scaleVelocity(numMolecular, rpmd);
+    scaleVelocity(rpmd);
 
     for (size_t i = 0; i < numStep; ++i) {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());

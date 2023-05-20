@@ -110,7 +110,7 @@ namespace Physica::Core {
              class ForceModel,
              class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel) {
-        uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
     }
@@ -154,7 +154,7 @@ namespace Physica::Core {
             RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
             nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, gen, kineticModel, forceModel);
     }
@@ -189,7 +189,7 @@ namespace Physica::Core {
             Barostat& barostat,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = double(duration / timeStep) + 0.5;
         for (uint64_t _ = 0; _ < step; ++_)
             npt_step<Thermostat, RandomGenerator, Barostat, KineticModel, ForceModel, Executor>(thermostat, gen, barostat, kineticModel, forceModel);
     }
