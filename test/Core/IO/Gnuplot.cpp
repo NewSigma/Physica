@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
 #include <fstream>
 #include "Physica/Core/IO/Gnuplot.h"
+#include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
 
@@ -34,17 +34,15 @@ const static char* data1 = "# Test Gnuplot\n"
                            "0 0\n";
 
 Gnuplot readTest() {
-    const char* tempFile = tmpnam(nullptr);
-    std::ofstream os(tempFile);
+    auto tmp = Physica::Utils::TempFile("tmpXXXXXX");
+    std::ofstream os(tmp.getName());
     os << data1;
     os.close();
 
     Gnuplot gnu{};
-    std::ifstream is(tempFile);
+    std::ifstream is(tmp.getName());
     is >> gnu;
     is.close();
-
-    unlink(tempFile);
     return gnu;
 }
 

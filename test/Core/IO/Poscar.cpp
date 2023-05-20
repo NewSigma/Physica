@@ -17,10 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <unistd.h>
 #include <fstream>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -38,17 +38,15 @@ const static char* data1 = "Structure\n"
                            "	    0.73317     0.52985     0.03865\n";
 
 Poscar readTest() {
-    const char* tempFile = tmpnam(nullptr);
-    std::ofstream os(tempFile);
+    auto tmp = TempFile("tmpXXXXXX");
+    std::ofstream os(tmp.getName());
     os << data1;
     os.close();
 
     Poscar poscar{};
-    std::ifstream is(tempFile);
+    std::ifstream is(tmp.getName());
     is >> poscar;
     is.close();
-
-    unlink(tempFile);
 
     const auto& elements = poscar.getElementTypes();
     if (!(elements[0] == 8 && elements[1] == 1))

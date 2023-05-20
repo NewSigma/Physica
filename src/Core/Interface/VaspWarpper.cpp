@@ -18,12 +18,12 @@
  */
 #include <iostream>
 #include <cassert>
-#include <unistd.h>
 #include <sstream>
 #include <fstream>
 #include <fcntl.h>
 #include "Physica/Core/Interface/VaspWarpper.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
+#include "Physica/Utils/Unix/TempFile.h"
 #include "Physica/Utils/Unix/UnixHelper.h"
 
 namespace Physica::Core {
@@ -80,18 +80,17 @@ namespace Physica::Core {
 
     typename VaspWarpper::ScalarType VaspWarpper::getPress() const {
         future.wait(errorMsg);
-        const char* tempfile = tmpnam(nullptr);
+        auto tmp = Utils::TempFile("tmpXXXXXX");
         const std::string command = std::string("grep 'in kB' ") +
                                     vaspWorkingDir +
                                     std::string("/OUTCAR | tr -s ' ' | cut -d ' ' -f 4,5,6 >") +
-                                    std::string(tempfile);
+                                    std::string(tmp.getName());
         [[maybe_unused]] int err = system(command.c_str());
         ScalarType press_x, press_y, press_z;
         /* Read data */ {
-            std::ifstream fin(tempfile);
+            std::ifstream fin(tmp.getName());
             fin >> press_x >> press_y >> press_z;
         }
-        unlink(tempfile);
         return (press_x + press_y + press_z) / 3.0f;
     }
 
