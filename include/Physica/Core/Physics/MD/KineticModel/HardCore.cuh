@@ -178,7 +178,7 @@ namespace Physica::Core {
         cudaGetDevice(&device);
         const int numBlock = 1;
         const int numThread = Utils::DeviceProp::getInstance().getProperty(device).warpSize;
-        Internal::checkCollision_kernel<<<numBlock, numThread>>>(asStruct(d_phase), latticeSize, getNumParticle());
+        Internal::checkCollision_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(d_phase), latticeSize, getNumParticle());
         Vector<ScalarType, 1> temp{};
         d_phase.segment(getNumParticle(), getNumParticle() + 1).toHost(temp);
         return temp[0].isNegative();

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/StreamPool.cuh"
+
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
@@ -40,7 +42,7 @@ namespace Physica::Core {
         const size_t minor = getMaxMinor();
         const size_t numThread = minor > maxThreadPerBlock ? maxThreadPerBlock : minor;
         const size_t numBlockX = (minor + maxThreadsPerBlock) / maxThreadsPerBlock;
-        Internal::assignTo_kernel<<<{numBlockX, major}, numThread>>>(Base::getDerived(), target.getDerived());
+        Internal::assignTo_kernel<<<{numBlockX, major}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
     }
 
     template<class Derived>

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Utils/CUDA/PlainStruct.h"
+#include "Physica/Core/Parallel/StreamPool.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -45,6 +46,6 @@ namespace Physica::Core {
         constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;
         const int numBlock = (getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
-        Internal::assignTo_kernel<<<numBlock, numThread>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+        Internal::assignTo_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     }
 }
