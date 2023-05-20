@@ -48,6 +48,7 @@ namespace Physica::Core {
         void resize(size_t length) { Base::getDerived().resize(length); }
 
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
+        template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;
 
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> head(size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> head(size_t to) const;

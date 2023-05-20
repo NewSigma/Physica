@@ -46,6 +46,13 @@ namespace Physica::Core {
         HardCore& operator=(HardCore obj) noexcept;
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
+        void nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT);
+
+        void pre_nve_step(RingPolymerType& ringPolymer);
+        void do_nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
+        void do_nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT);
+        void post_nve_step(RingPolymerType& ringPolymer);
+
         void updateMass(RingPolymerType& ringPolymer);
         void swap(HardCore& obj) noexcept;
         /* Getters */
@@ -73,6 +80,32 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+        pre_nve_step(ringPolymer);
+        do_nve_step(ringPolymer, deltaT);
+        post_nve_step(ringPolymer);
+    }
+
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT) {
+        pre_nve_step(ringPolymer);
+        do_nve_step_for(duration, ringPolymer, deltaT);
+        post_nve_step(ringPolymer);
+    }
+
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::pre_nve_step(RingPolymerType& ringPolymer) {
+        const size_t numParticle = ringPolymer.getNumParticle();
+        auto phase = ringPolymer.asMatrix().col(0);
+        auto d_pos = d_phase.tail(numParticle);
+        auto d_momentum = d_phase.head(numParticle);
+
+        phase.toDeviceAsync(d_phase);
+        buffer = d_pos;
+        velocity = hadamard(d_momentum, repMass);
+    }
+
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::do_nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = ringPolymer.getNumParticle();
         const ScalarType collideStep = collideFactor * deltaT;
         auto phase = ringPolymer.asMatrix().col(0);
@@ -86,9 +119,6 @@ namespace Physica::Core {
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
-        phase.toDevice(d_phase);
-        buffer = d_pos;
-        velocity = hadamard(d_momentum, repMass);
         while (lStep != deltaT) {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
@@ -97,9 +127,10 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                d_pos.toHost(pos);
+                d_pos.toHostAsync(pos);
+                CudaExecutor::wait();
                 HardCore<ScalarType>::handleCollision(latticeSize, ringPolymer);
-                momentum.toDevice(d_momentum);
+                momentum.toDeviceAsync(d_momentum);
                 velocity = hadamard(d_momentum, repMass);
             }
 
@@ -111,12 +142,29 @@ namespace Physica::Core {
                 lStep = to;
             to = (lStep + rStep) * 0.5;
         }
-        d_pos.toHost(pos);
+    }
+
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::do_nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT) {
+        const uint64_t step = double(duration / deltaT) + 0.5;
+        for (uint64_t _ = 0; _ < step; ++_)
+            do_nve_step(ringPolymer, deltaT);
+    }
+
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::post_nve_step(RingPolymerType& ringPolymer) {
+        const size_t numParticle = ringPolymer.getNumParticle();
+        auto phase = ringPolymer.asMatrix().col(0);
+        auto pos = phase.tail(numParticle);
+        auto d_pos = d_phase.tail(numParticle);
+        d_pos.toHostAsync(pos);
+        CudaExecutor::wait();
     }
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
-        ringPolymer.getMassVec().toDevice(repMass);
+        ringPolymer.getMassVec().toDeviceAsync(repMass);
+        CudaExecutor::wait();
         repMass = reciprocal(repMass);
     }
 
@@ -180,7 +228,8 @@ namespace Physica::Core {
         const int numThread = Utils::DeviceProp::getInstance().getProperty(device).warpSize;
         Internal::checkCollision_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(d_phase), latticeSize, getNumParticle());
         Vector<ScalarType, 1> temp{};
-        d_phase.segment(getNumParticle(), getNumParticle() + 1).toHost(temp);
+        d_phase.segment(getNumParticle(), getNumParticle() + 1).toHostAsync(temp);
+        CudaExecutor::wait();
         return temp[0].isNegative();
     }
 }

@@ -38,8 +38,8 @@ namespace Physica::Core {
         using Base::operator=;
         /* Operations */
         void resize(size_t length) { Base::getDerived().resize(length); }
-        template<class OtherDerived>
-        void toHost(ContinuousVector<OtherDerived>& obj) const;
+        template<class OtherDerived> void toHost(ContinuousVector<OtherDerived>& obj) const;
+        template<class OtherDerived> void toHostAsync(ContinuousVector<OtherDerived>& obj) const;
 
         template<size_t Length = Dynamic> __host__ __device__ inline BlockType<Length> head(size_t to);
         template<size_t Length = Dynamic> __host__ __device__ inline const BlockType<Length> head(size_t to) const;
@@ -75,6 +75,13 @@ namespace Physica::Core {
     void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<OtherDerived>& obj) const {
         obj.resize(Base::getLength());
         cudaCheck(cudaMemcpy(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<OtherDerived>& obj) const {
+        obj.resize(Base::getLength());
+        cudaCheck(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
     template<class Derived>
@@ -125,5 +132,13 @@ namespace Physica::Core {
         obj.resize(Base::getLength());
         const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
         cudaCheck(cudaMemcpy((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const {
+        obj.resize(Base::getLength());
+        const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
+        cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice));
     }
 }
