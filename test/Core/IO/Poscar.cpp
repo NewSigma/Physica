@@ -25,7 +25,7 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 
-const static char* data1 = "Structure	-97.8256	0.0003\n"
+const static char* data1 = "Structure\n"
                            "1.0\n"
                            "	   22.84502     0.00000     0.00000\n"
                            "	   -5.16077     4.54432     0.00000\n"

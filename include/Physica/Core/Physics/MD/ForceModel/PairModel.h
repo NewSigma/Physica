@@ -51,12 +51,9 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
+        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
@@ -78,48 +75,78 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
-    template<class Executor>
+    template<class Executor, bool IsSmallCell>
     Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
-        const CellListType cellList(cell, cutoff);
-
         Vector<ScalarType> force(3 * cell.getNumParticle(), 0);
-        Utils::Array<size_t> arr1{};
-        cellList.forCellInList([this, pos, &arr1, &force, &cellList](Index3D center) {
-            for (size_t i : cellList(center))
-                arr1.append(i);
-            
-            Utils::Array<size_t> arr2{};
-            cellList.forNeighInRange(center, [this, pos, &arr1, &arr2, &force, &cellList](Vector3D translate, Index3D neigh) {
-                for (size_t j : cellList(neigh))
-                    arr2.append(j);
-                for (const size_t atom1 : arr1) {
-                    const Vector3D from = pos.row(atom1) - translate;
-                    Vector3D r, f(3, 0);
-                    for (const size_t atom2 : arr2) {
-                        const bool isDoubleCounted = atom2 < atom1;
-                        if (isDoubleCounted)
-                            continue;
-                        const auto to = pos.row(atom2);
-                        auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
-                        r = to.asVector() - from;
-                        const ScalarType r2 = r.squaredNorm();
-                        const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                        if (isNotSelf && r2 < squared_cutoff) {
-                            const ScalarType dist = sqrt(r2);
-                            const ScalarType f_norm = force_functor(dist);
-                            r *= ScalarType(f_norm / dist);
-                            f -= r;
-                            f2 += r;
+        if constexpr (IsSmallCell) {
+            const auto& lattice = cell.getLattice();
+            const auto range = MDCellType::estimateRange(lattice, cutoff);
+            const size_t numParticle = cell.getNumParticle();
+
+            MDCellType::forCellInRange(range, lattice,
+                [this, pos, numParticle, &force](Vector3D delta) {
+                    Vector3D r, from;
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        auto force_i = force.segment(3 * i, 3 * i + 3);
+                        from = pos.row(i) + delta;
+                        for (size_t j = i; j < numParticle; ++j) {
+                            auto force_j = force.segment(3 * j, 3 * j + 3);
+                            auto to = pos.row(j);
+                            r = to.asVector() - from;
+                            const ScalarType r2 = r.squaredNorm();
+                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            if (isNotSelf && r2 < squared_cutoff) {
+                                const ScalarType dist = sqrt(r2);
+                                const ScalarType f_norm = force_functor(dist);
+                                r *= f_norm / dist;
+                                const Vector3D& f = r;
+                                force_i -= f;
+                                force_j += f;
+                            }
                         }
                     }
-                    auto f1 = force.template segment<3>(3 * atom1, 3 * atom1 + 3);
-                    f1 += f;
-                }
-                arr2.clear();
+                });
+        }
+        else {
+            const CellListType cellList(cell, cutoff);
+            Utils::Array<size_t> arr1{};
+            cellList.forCellInList([this, pos, &arr1, &force, &cellList](Index3D center) {
+                for (size_t i : cellList(center))
+                    arr1.append(i);
+                
+                Utils::Array<size_t> arr2{};
+                cellList.forNeighInRange(center, [this, pos, &arr1, &arr2, &force, &cellList](Vector3D translate, Index3D neigh) {
+                    for (size_t j : cellList(neigh))
+                        arr2.append(j);
+                    for (const size_t atom1 : arr1) {
+                        const Vector3D from = pos.row(atom1) - translate;
+                        Vector3D r, f(3, 0);
+                        for (const size_t atom2 : arr2) {
+                            const bool isDoubleCounted = atom2 < atom1;
+                            if (isDoubleCounted)
+                                continue;
+                            const auto to = pos.row(atom2);
+                            auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
+                            r = to.asVector() - from;
+                            const ScalarType r2 = r.squaredNorm();
+                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            if (isNotSelf && r2 < squared_cutoff) {
+                                const ScalarType dist = sqrt(r2);
+                                const ScalarType f_norm = force_functor(dist);
+                                r *= ScalarType(f_norm / dist);
+                                f -= r;
+                                f2 += r;
+                            }
+                        }
+                        auto f1 = force.template segment<3>(3 * atom1, 3 * atom1 + 3);
+                        f1 += f;
+                    }
+                    arr2.clear();
+                });
+                arr1.clear();
             });
-            arr1.clear();
-        });
+        }
         return force;
     }
 

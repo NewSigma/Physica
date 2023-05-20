@@ -92,12 +92,9 @@ namespace Physica::Core {
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
-        template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
+        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
@@ -131,13 +128,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    template<class Executor>
+    template<class Executor, bool IsSmallCell>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
 
         Vector<ScalarType> result;
         auto future = Executor::schedule([this, &cell, &result]() {
-            result = force_short<Executor>(cell);
+            result = force_short<Executor, IsSmallCell>(cell);
         });
 
         const Vector<ScalarType> coulomb = force_long<Executor>(cell);
@@ -147,7 +144,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    template<class Executor>
+    template<class Executor, bool IsSmallCell>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_short(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         using Vector3D = Vector<PosScalarType, Dim>;
@@ -157,7 +154,7 @@ namespace Physica::Core {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
             const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma);
             auto force = shortForce.tail(2 * numMolecule * Dim);
-            force = LJModel.template force<Executor>(cellWithoutH) * factor;
+            force = LJModel.template force<Executor, IsSmallCell>(cellWithoutH) * factor;
         }
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;

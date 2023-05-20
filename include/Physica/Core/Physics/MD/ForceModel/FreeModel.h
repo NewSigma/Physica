@@ -38,7 +38,11 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
     public:
         /* Operations */
-        template<class Executor>
+        /**
+         * \tparam IsSmallCell
+         * Suitable for small cell. Using this force in dynamics may be problematic.
+         */
+        template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }

@@ -53,6 +53,7 @@ namespace Physica::Core {
     public:
         PeriodicCell();
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
+        template<class OtherScalar>  PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell);
         PeriodicCell(const PeriodicCell&) = default;
         PeriodicCell(PeriodicCell&&) noexcept = default;
         ~PeriodicCell() = default;
@@ -112,6 +113,13 @@ namespace Physica::Core {
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
             , type(type_) {}
+
+    template<class ScalarType, unsigned int Dim>
+    template<class OtherScalar>
+    PeriodicCell<ScalarType, Dim>::PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell)
+            : lattice(cell.getLattice())
+            , pos(cell.getPos())
+            , type(cell.getType()) {}
 
     template<class ScalarType, unsigned int Dim>
     PeriodicCell<ScalarType, Dim>& PeriodicCell<ScalarType, Dim>::operator=(PeriodicCell cell) noexcept {

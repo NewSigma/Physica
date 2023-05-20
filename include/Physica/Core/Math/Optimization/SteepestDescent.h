@@ -26,6 +26,7 @@ namespace Physica::Core {
     public:
         using VectorType = Vector<ScalarType, Dim>;
     private:
+        VectorType gradG;
         VectorType tryX;
         VectorType nowX;
         ScalarType nowY;
@@ -45,8 +46,10 @@ namespace Physica::Core {
         template<class Functor, class GradFunctor> ScalarType solve(VectorType initial, Functor func, GradFunctor grad);
         void swap(SteepestDescent& obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType getDefaultStep() const noexcept { return defaultStep; }
+        [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
+        [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
         [[nodiscard]] ScalarType getObjectiveValue() const noexcept { return nowY; }
+        [[nodiscard]] ScalarType getDefaultStep() const noexcept { return defaultStep; }
         /* Setters */
         void setDefaultStep(ScalarType newStep) { defaultStep = newStep; }
     };

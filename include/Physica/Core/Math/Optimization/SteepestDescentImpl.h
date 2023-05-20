@@ -45,9 +45,8 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     template<class Functor, class GradFunctor>
     bool SteepestDescent<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
-        VectorType normalGrad = grad(tryX);
-        normalGrad.toUnit();
-        tryX -= normalGrad * stepSize;
+        gradG = grad(tryX);
+        tryX -= gradG * (stepSize / gradG.norm());
         ScalarType y = func(tryX);
 
         if (y < nowY) {
@@ -79,6 +78,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     void SteepestDescent<ScalarType, Dim>::swap(SteepestDescent& obj) noexcept {
+        gradG.swap(obj.gradG);
         tryX.swap(obj.tryX);
         nowX.swap(obj.nowX);
         nowY.swap(obj.nowY);

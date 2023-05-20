@@ -18,6 +18,7 @@ endif()
 
 physica_add_example(DecisionTree AI/DecisionTree.cpp)
 physica_add_example(Correlation RPMD/Correlation.cpp)
+physica_add_example(EnergyMinimizer RPMD/EnergyMinimizer.cpp)
 physica_add_example(IRAbsorb RPMD/IRAbsorb.cpp)
 physica_add_example(RDF RPMD/RDF.cpp)
 physica_add_example(Ising Ising.cpp)
