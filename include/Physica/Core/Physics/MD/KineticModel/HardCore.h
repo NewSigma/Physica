@@ -47,10 +47,9 @@ namespace Physica::Core {
         void swap(HardCore& obj) noexcept;
         /* Getters */
         [[nodiscard]] const Vector<ScalarType>& getVelocity() const noexcept { return velocity; }
-        /* Static members */
-        static void handleCollision(ScalarType latticeSize, RingPolymerType& ringPolymer);
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
+        void handleCollision(RingPolymerType& ringPolymer);
     };
 
     template<class ScalarType, class Executor>
@@ -97,7 +96,7 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                handleCollision(latticeSize, ringPolymer);
+                handleCollision(ringPolymer);
                 velocity = hadamard(momentum, repMass);
             }
 
@@ -124,40 +123,6 @@ namespace Physica::Core {
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);
         std::swap(maxHandleNum, obj.maxHandleNum);
-    }
-
-    template<class ScalarType, class Executor>
-    void HardCore<ScalarType, Executor>::handleCollision(ScalarType latticeSize, RingPolymerType& ringPolymer) {
-        const size_t numParticle = ringPolymer.getNumParticle();
-        auto phase = ringPolymer.asMatrix().col(0);
-        auto pos = phase.tail(numParticle);
-        bool isDrifted = false;
-        if (!pos[0].isPositive()) {
-            phase[0].toOpposite();
-            isDrifted = true;
-        }
-
-        const auto& mass = ringPolymer.getMassVec();
-        size_t i = 0;
-        for (; i < numParticle - 1; ++i) {
-            if (pos[i] >= pos[i + 1]) {
-                const ScalarType m1 = mass[i];
-                const ScalarType m2 = mass[i + 1];
-                const ScalarType p1 = phase[i];
-                const ScalarType p2 = phase[i + 1];
-                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
-                const ScalarType next_p2 = p1 + p2 - next_p1;
-                phase[i] = next_p1;
-                phase[i + 1] = next_p2;
-            }
-        }
-
-        if (pos[i] >= latticeSize) {
-            phase[i].toOpposite();
-            isDrifted = true;
-        }
-        if (isDrifted)
-            ringPolymer.removeDrift();
     }
 
     template<class ScalarType, class Executor>
@@ -190,5 +155,39 @@ namespace Physica::Core {
             }
         }
         return pos[length] > latticeSize;
+    }
+
+    template<class ScalarType, class Executor>
+    void HardCore<ScalarType, Executor>::handleCollision(RingPolymerType& ringPolymer) {
+        const size_t numParticle = ringPolymer.getNumParticle();
+        auto phase = ringPolymer.asMatrix().col(0);
+        auto pos = phase.tail(numParticle);
+        bool isDrifted = false;
+        if (!pos[0].isPositive()) {
+            phase[0].toOpposite();
+            isDrifted = true;
+        }
+
+        const auto& mass = ringPolymer.getMassVec();
+        size_t i = 0;
+        for (; i < numParticle - 1; ++i) {
+            if (pos[i] > pos[i + 1]) {
+                const ScalarType m1 = mass[i];
+                const ScalarType m2 = mass[i + 1];
+                const ScalarType p1 = phase[i];
+                const ScalarType p2 = phase[i + 1];
+                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
+                const ScalarType next_p2 = p1 + p2 - next_p1;
+                phase[i] = next_p1;
+                phase[i + 1] = next_p2;
+            }
+        }
+
+        if (pos[i] > latticeSize) {
+            phase[i].toOpposite();
+            isDrifted = true;
+        }
+        if (isDrifted)
+            ringPolymer.removeDrift();
     }
 }

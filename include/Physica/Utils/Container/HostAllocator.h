@@ -69,7 +69,7 @@ namespace Physica::Utils {
     }
 
     template<class T>
-    [[nodiscard]] T* HostAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+    T* HostAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
         if constexpr (std::is_trivially_copyable<T>::value)
             return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
         else {

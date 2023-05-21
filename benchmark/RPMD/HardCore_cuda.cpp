@@ -55,8 +55,8 @@ int main() {
         mean *= factor;
         devia *= factor;
 
-        std::ifstream fin("data");
-        fin >> mean >> devia;
+        std::ofstream fout("data");
+        fout << mean << devia;
     }
     return 0;
 }

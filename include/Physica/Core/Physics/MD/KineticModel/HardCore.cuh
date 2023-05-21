@@ -40,7 +40,7 @@ namespace Physica::Core {
         DeviceVector repMass;
         DeviceVector buffer;
         DeviceVector velocity;
-        PageLockedVector lockedPos;
+        PageLockedVector lockedBuffer;
         PageLockedVector1D locked;
         size_t maxHandleNum;
     public:
@@ -65,6 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
     private:
         bool checkCollision();
+        void handleCollision(const RingPolymerType& ringPolymer);
     };
 
     template<class ScalarType>
@@ -75,7 +76,7 @@ namespace Physica::Core {
             , repMass(numParticle)
             , buffer(numParticle)
             , velocity(numParticle)
-            , lockedPos(numParticle)
+            , lockedBuffer(numParticle)
             , locked(1)
             , maxHandleNum(maxHandleNum_) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
@@ -140,11 +141,12 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                d_pos.toHostAsync(pos);
+                d_pos.toHostAsync(lockedBuffer);
                 CudaExecutor::wait();
-                HardCore<ScalarType>::handleCollision(latticeSize, ringPolymer);
-                momentum.toDeviceAsync(d_momentum);
+                handleCollision(ringPolymer);
+                lockedBuffer.toDeviceAsync(d_momentum);
                 velocity = hadamard(d_momentum, repMass);
+                momentum = lockedBuffer;
             }
 
             const ScalarType step = to - from;
@@ -189,7 +191,7 @@ namespace Physica::Core {
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);
-        lockedPos.swap(obj.lockedPos);
+        lockedBuffer.swap(obj.lockedBuffer);
         locked.swap(obj.locked);
         std::swap(maxHandleNum, obj.maxHandleNum);
     }
@@ -245,5 +247,47 @@ namespace Physica::Core {
         d_phase.segment(getNumParticle(), getNumParticle() + 1).toHostAsync(locked);
         CudaExecutor::wait();
         return locked[0].isNegative();
+    }
+    /**
+     * Special implementation to make full use of limited pinned memory.
+     */
+    template<class ScalarType>
+    void HardCore<ScalarType, CudaExecutor>::handleCollision(const RingPolymerType& ringPolymer) {
+        const size_t numParticle = ringPolymer.getNumParticle();
+        auto phase = ringPolymer.asMatrix().col(0);
+
+        size_t i = 0;
+        ScalarType lastPos = 0;
+        bool isDrifted;
+        /* Left side */ {
+            isDrifted = lastPos > lockedBuffer[i];
+            lastPos = lockedBuffer[i];
+            lockedBuffer[i] = isDrifted ? -phase[0] : phase[0];
+            i += 1;
+        }
+        const auto& mass = ringPolymer.getMassVec();
+        for (; i < numParticle; ++i) {
+            const bool flag = lastPos > lockedBuffer[i];
+            lastPos = lockedBuffer[i];
+            if (flag) {
+                const ScalarType m1 = mass[i - 1];
+                const ScalarType m2 = mass[i];
+                const ScalarType p1 = lockedBuffer[i - 1];
+                const ScalarType p2 = phase[i];
+                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
+                const ScalarType next_p2 = p1 + p2 - next_p1;
+                lockedBuffer[i - 1] = next_p1;
+                lockedBuffer[i] = next_p2;
+            }
+            else
+                lockedBuffer[i] = phase[i];
+        }
+
+        if (lastPos > latticeSize) {
+            phase[i - 1].toOpposite();
+            isDrifted = true;
+        }
+        if (isDrifted)
+            lockedBuffer -= lockedBuffer.sum() * ScalarType(numParticle);
     }
 }

@@ -49,28 +49,32 @@ namespace std {
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
     public:
-        [[nodiscard]] __host__ __device__ static pointer allocate(allocator_type& a, size_type n) {
+        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
             return a.allocate(n);
         }
 
-        __host__ __device__ static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
+        static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
             a.deallocate(p, n);
         }
 
+        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
+            return a.reallocate(p, n);
+        }
+
         template<class... Args>
-        __host__ __device__ static void construct(allocator_type& a, pointer p, Args&&... args) {
+        static void construct(allocator_type& a, pointer p, Args&&... args) {
             a.construct(p, std::forward<Args>(args)...);
         }
 
-        __host__ __device__ static void destroy(allocator_type& a, pointer p) {
+        static void destroy(allocator_type& a, pointer p) {
             a.destroy(p);
         }
 
-         __host__ __device__ static constexpr size_type max_size(const allocator_type& a) noexcept {
+        static constexpr size_type max_size(const allocator_type& a) noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
 
-         __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+        static allocator_type select_on_container_copy_construction(const allocator_type& a) {
             allocator_type result = a;
             return result;
         }
@@ -97,6 +101,7 @@ namespace Physica::Utils {
         /* Operations */
         [[nodiscard]] static pointer allocate(size_t n);
         inline static void deallocate(pointer p, size_t n) noexcept;
+        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
         template<class... Args>
         inline void construct(pointer p, Args&&... args);
         inline void destroy(pointer p);
@@ -112,6 +117,19 @@ namespace Physica::Utils {
     template<class T>
     inline void PageLockedAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
         cudaFreeHost(p);
+    }
+
+    template<class T>
+    T* PageLockedAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+        T* new_p = allocate(new_size);
+        if constexpr (std::is_trivially_copyable<T>::value)
+            memcpy(new_p, p, std::min(new_size, old_size) * sizeof(T));
+        else {
+            for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+                construct(new_p + i, std::move(p[i]));
+        }
+        deallocate(p, old_size);
+        return new_p;
     }
 
     template<class T>
