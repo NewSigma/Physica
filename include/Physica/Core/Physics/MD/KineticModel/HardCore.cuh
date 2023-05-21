@@ -22,6 +22,7 @@
 #include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
 #include "Physica/Utils/CUDA/PlainStruct.h"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
+#include "Physica/Utils/Container/PageLockedAllocator.cuh"
 #include "HardCore.h"
 
 namespace Physica::Core {
@@ -30,6 +31,8 @@ namespace Physica::Core {
     public:
         using RingPolymerType = typename HardCore<ScalarType>::RingPolymerType;
         using DeviceVector = device_obj<Vector<ScalarType>>;
+        using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
+        using PageLockedVector1D = Vector<ScalarType, Dynamic, 1, Utils::PageLockedAllocator<ScalarType>>;
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;
@@ -37,6 +40,8 @@ namespace Physica::Core {
         DeviceVector repMass;
         DeviceVector buffer;
         DeviceVector velocity;
+        PageLockedVector lockedPos;
+        PageLockedVector1D locked;
         size_t maxHandleNum;
     public:
         HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
@@ -59,7 +64,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
     private:
-        bool checkCollision() const;
+        bool checkCollision();
     };
 
     template<class ScalarType>
@@ -70,6 +75,8 @@ namespace Physica::Core {
             , repMass(numParticle)
             , buffer(numParticle)
             , velocity(numParticle)
+            , lockedPos(numParticle)
+            , locked(1)
             , maxHandleNum(maxHandleNum_) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
@@ -170,8 +177,8 @@ namespace Physica::Core {
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
         ringPolymer.getMassVec().toDeviceAsync(repMass);
-        CudaExecutor::wait();
         repMass = reciprocal(repMass);
+        CudaExecutor::wait();
     }
 
     template<class ScalarType>
@@ -182,6 +189,8 @@ namespace Physica::Core {
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);
+        lockedPos.swap(obj.lockedPos);
+        locked.swap(obj.locked);
         std::swap(maxHandleNum, obj.maxHandleNum);
     }
 
@@ -226,16 +235,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    bool HardCore<ScalarType, CudaExecutor>::checkCollision() const {
+    bool HardCore<ScalarType, CudaExecutor>::checkCollision() {
         using namespace Physica;
         int device;
         cudaGetDevice(&device);
         const int numBlock = 1;
         const int numThread = Utils::DeviceProp::getInstance().getProperty(device).warpSize;
         Internal::checkCollision_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(d_phase), latticeSize, getNumParticle());
-        Vector<ScalarType, 1> temp{};
-        d_phase.segment(getNumParticle(), getNumParticle() + 1).toHostAsync(temp);
+        d_phase.segment(getNumParticle(), getNumParticle() + 1).toHostAsync(locked);
         CudaExecutor::wait();
-        return temp[0].isNegative();
+        return locked[0].isNegative();
     }
 }

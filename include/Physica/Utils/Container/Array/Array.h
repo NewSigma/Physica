@@ -26,6 +26,7 @@
 
 namespace Physica::Utils {
     constexpr size_t Dynamic = 0;
+    template<class T> class PageLockedAllocator;
     /**
      * Linear storage container.
      * This class is designed to be a dynamic or fixed array, in detail:
@@ -58,6 +59,7 @@ namespace Physica::Utils {
     class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
         static_assert(sizeof(T) * Length <= (1U << 16U), "[Warning]: Allocate large fixed array on stack is not recommanded");
+        static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Capacity, Allocator>;
     public:
         using Base = Internal::ArrayBase<This, Allocator>;
@@ -75,11 +77,10 @@ namespace Physica::Utils {
         allocator_type alloc;
     public:
         Array() = default;
-        template<class... Args>
-        explicit Array(size_t length_, Args... args);
+        template<class... Args> explicit Array(size_t length_, Args... args);
         Array(std::initializer_list<T> list);
-        Array(const Array& array);
-        Array(Array&& array) noexcept;
+        Array(const Array&) = default;
+        Array(Array&&) noexcept = default;
         ~Array() = default;
         /* Operators */
         __host__ __device__ Array& operator=(Array array) noexcept { swap(array); return *this; }
@@ -148,6 +149,7 @@ namespace Physica::Utils {
         void append(const Array& t);
         void append(Array&& t);
         void reserve(size_t size);
+        template<class... Args> void resize(size_t size, Args... args);
         void swap(Array& array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }

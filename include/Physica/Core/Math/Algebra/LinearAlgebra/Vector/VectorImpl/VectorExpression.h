@@ -23,15 +23,11 @@
 #include "Physica/Utils/Template/ExpressionTemplateHelper.h"
 #include "Physica/Utils/Template/CRTPBase.h"
 /**
- * This file contains implementation of expression templates of \class Vector.
- * 
  * Optimize: Add compile time length check, length of two vectors must be equal.
  */
 namespace Physica::Core {
     //Forward declaration
     using Utils::Dynamic;
-    template<class T, size_t Length, size_t MaxLength>
-    class Vector;
     /**
      * \class VectorExpression represents \param T1 \param type \param T2. e.g. vector + scalar, expression * expression
      */

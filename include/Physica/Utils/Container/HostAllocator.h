@@ -45,11 +45,11 @@ namespace Physica::Utils {
         HostAllocator& operator=(HostAllocator&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T* allocate(size_t n);
-        void deallocate(T* p, size_t n) noexcept;
+        inline void deallocate(T* p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
         template<class... Args>
-        void construct(T* p, Args&&... args);
-        void destroy(T* p);
+        inline void construct(T* p, Args&&... args);
+        inline void destroy(T* p);
     };
 
     template<class T>
@@ -64,7 +64,7 @@ namespace Physica::Utils {
     }
 
     template<class T>
-    void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+    inline void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
         free(p);
     }
 
@@ -83,12 +83,12 @@ namespace Physica::Utils {
 
     template<class T>
     template<class... Args>
-    void HostAllocator<T>::construct(T* p, Args&&... args) {
+    inline void HostAllocator<T>::construct(T* p, Args&&... args) {
         ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
     }
 
     template<class T>
-    void HostAllocator<T>::destroy(T* p) {
+    inline void HostAllocator<T>::destroy(T* p) {
         p->~T();
     }
 }

@@ -39,18 +39,6 @@ namespace Physica::Utils {
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             *(arr + i) = *ite;
     }
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(const Array<T, Length, Capacity, Allocator>& array) : Base() {
-        for (size_t i = 0; i < Length; ++i)
-            arr[i] = array[i];
-    }
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    Array<T, Length, Capacity, Allocator>::Array(Array<T, Length, Capacity, Allocator>&& array) noexcept {
-        for (size_t i = 0; i < Length; ++i)
-            arr[i] = std::move(array[i]);
-    }
     /*!
      * Return the sub array of current array. \from is included and \to is excluded.
      */
@@ -188,6 +176,22 @@ namespace Physica::Utils {
     template<class T, size_t Capacity, class Allocator>
     void Array<T, Dynamic, Capacity, Allocator>::reserve(size_t size) {
         assert(size == Capacity);
+    }
+
+    template<class T, size_t Capacity, class Allocator>
+    template<class... Args>
+    void Array<T, Dynamic, Capacity, Allocator>::resize(size_t size, Args... args) {
+        assert(size <= Capacity);
+        if (length > size) {
+            if constexpr (!std::is_trivial<T>::value)
+                for (size_t i = size; i < length; ++i)
+                    (arr + i)->~T();
+            length = size;
+        }
+        else {
+            for (; length < size; ++length)
+                alloc.construct(arr + length, std::forward<Args>(args)...);
+        }
     }
 
     template<class T, size_t Capacity, class Allocator>

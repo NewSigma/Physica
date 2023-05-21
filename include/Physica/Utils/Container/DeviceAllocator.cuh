@@ -20,8 +20,7 @@
 
 #include <cstdlib>
 #include <memory>
-#include <cuda_runtime.h>
-#include "Physica/Core/Exception/CudaException.cuh"
+#include "Physica/Utils/CUDA/DebugUtil.cuh"
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {
@@ -111,9 +110,7 @@ namespace Physica::Utils {
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(value_type)));
     #else
         value_type* p;
-        const auto code = cudaMalloc(&p, n * sizeof(value_type));
-        if (code != cudaError_t::cudaSuccess)
-            throw Core::CudaException(code);
+        cudaCheck(cudaMalloc(&p, n * sizeof(value_type)));
     #endif
         return pointer(p);
     }

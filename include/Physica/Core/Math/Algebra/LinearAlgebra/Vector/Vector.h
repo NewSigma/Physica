@@ -25,12 +25,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length>
+    template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length, class Allocator = Utils::HostAllocator<T>>
     class Vector;
 
     namespace Internal {
-        template<class T, size_t Length, size_t MaxLength>
-        class Traits<Vector<T, Length, MaxLength>> {
+        template<class T, size_t Length, size_t MaxLength, class Allocator>
+        class Traits<Vector<T, Length, MaxLength, Allocator>> {
         public:
             using ScalarType = T;
             constexpr static size_t SizeAtCompile = Length;
@@ -44,11 +44,11 @@ namespace Physica::Core {
     /**
      * T must be either Scalar or ComplexScalar.
      */
-    template<class T, size_t Length, size_t MaxLength>
-    class Vector : public ContinuousVector<Vector<T, Length, MaxLength>>, public Utils::Array<T, Length, MaxLength> {
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
-        using This = Vector<T, Length, MaxLength>;
-        using Storage = Utils::Array<T, Length, MaxLength>;
+        using This = Vector<T, Length, MaxLength, Allocator>;
+        using Storage = Utils::Array<T, Length, MaxLength, Allocator>;
     public:
         using Base = ContinuousVector<This>;
         using device_obj_type = device_obj<This>;
