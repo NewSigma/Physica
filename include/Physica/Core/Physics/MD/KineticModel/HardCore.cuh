@@ -37,8 +37,9 @@ namespace Physica::Core {
         DeviceVector repMass;
         DeviceVector buffer;
         DeviceVector velocity;
+        size_t maxHandleNum;
     public:
-        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle);
+        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;
@@ -62,13 +63,14 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    HardCore<ScalarType, CudaExecutor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle)
+    HardCore<ScalarType, CudaExecutor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
             , d_phase(2 * numParticle)
             , repMass(numParticle)
             , buffer(numParticle)
-            , velocity(numParticle) {
+            , velocity(numParticle)
+            , maxHandleNum(maxHandleNum_) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
@@ -119,9 +121,13 @@ namespace Physica::Core {
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
+        size_t handleNum = 0;
         while (lStep != deltaT) {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
+                if (handleNum == maxHandleNum) [[unlikely]]
+                    throw BadConvergenceException("[Error]: Too many collision with in a step");
+                handleNum += 1;
                 d_pos = buffer + velocity * (rStep - from);
                 buffer += velocity * (lStep - from);
                 from = lStep;
@@ -176,6 +182,7 @@ namespace Physica::Core {
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);
+        std::swap(maxHandleNum, obj.maxHandleNum);
     }
 
     namespace Internal {
@@ -202,11 +209,10 @@ namespace Physica::Core {
                 }
 
                 buffer[index] = latticeSize;
-                if (i + index < numParticle) {
+                if (i + index < numParticle)
                     buffer[index] = pos[i + index];
-                    __syncwarp();
-                    flag |= buffer[index] > buffer[index + 1];
-                }
+                __syncwarp();
+                flag |= buffer[index] > buffer[index + 1];
             }
             __shared__ bool flags[WarpSize];
             flags[index] = flag;

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/BadConvergenceException.h"
+
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
@@ -31,8 +33,9 @@ namespace Physica::Core {
         Vector<ScalarType> repMass;
         Vector<ScalarType> buffer;
         Vector<ScalarType> velocity;
+        size_t maxHandleNum;
     public:
-        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle);
+        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;
@@ -51,12 +54,13 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class Executor>
-    HardCore<ScalarType, Executor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle)
+    HardCore<ScalarType, Executor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
             , repMass(numParticle, 0)
             , buffer(numParticle)
-            , velocity(numParticle) {
+            , velocity(numParticle)
+            , maxHandleNum(maxHandleNum_) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
@@ -81,9 +85,13 @@ namespace Physica::Core {
         ScalarType to = deltaT;
         buffer = pos;
         velocity = hadamard(momentum, repMass);
+        size_t handleNum = 0;
         while (lStep != deltaT) {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
+                if (handleNum == maxHandleNum) [[unlikely]]
+                    throw BadConvergenceException("[Error]: Too many collision with in a step");
+                handleNum += 1;
                 pos = buffer + velocity * (rStep - from);
                 buffer += velocity * (lStep - from);
                 from = lStep;
@@ -115,6 +123,7 @@ namespace Physica::Core {
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);
+        std::swap(maxHandleNum, obj.maxHandleNum);
     }
 
     template<class ScalarType, class Executor>

@@ -33,9 +33,9 @@ else()
                          -fno-math-errno \
                          -fno-signaling-nans \
                          -fno-trapping-math")
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DNDEBUG")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -DNDEBUG")
     if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -G -dopt")
     endif()
 endif()
 
