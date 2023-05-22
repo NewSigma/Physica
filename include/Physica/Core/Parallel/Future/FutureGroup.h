@@ -31,7 +31,7 @@ namespace Physica::Core {
         /* Operations */
         void wait() {
             for (auto& future : futures)
-                future.wait();
+                future.get();
         }
 
         void append(FutureType future) {

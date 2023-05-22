@@ -88,7 +88,7 @@ namespace Physica::Core {
             if (sol[0].isPositive()) [[likely]]
                 factor_translational = sqrt(temperatureT / sol[0]);
             else
-                exit(1);
+                throw std::invalid_argument("[Error]: Number of particle is too small that negative probability is encountered");
         }
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
