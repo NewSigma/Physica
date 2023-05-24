@@ -110,6 +110,16 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class RandomGenerator>
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
+        std::uniform_real_distribution<> dist{};
+        This result(len);
+        for (auto& elem : result)
+            elem = dist(gen);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
     template<class Distribution, class RandomGenerator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
         This result(len);

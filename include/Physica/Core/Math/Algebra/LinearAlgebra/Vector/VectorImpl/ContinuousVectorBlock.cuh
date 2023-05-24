@@ -43,7 +43,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ inline ScalarType& operator[](size_t index);
         [[nodiscard]] __device__ inline const ScalarType& operator[](size_t index) const;
         /* Operations */
-        void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
+        __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
         [[nodiscard]] __device__ inline ScalarType* data();

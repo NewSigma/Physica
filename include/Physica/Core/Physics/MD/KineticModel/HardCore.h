@@ -85,7 +85,19 @@ namespace Physica::Core {
         buffer = pos;
         velocity = hadamard(momentum, repMass);
         size_t handleNum = 0;
-        while (lStep != deltaT) {
+        while (true) {
+            const ScalarType step = to - from;
+            pos = buffer + velocity * step;
+            if (checkCollision(ringPolymer))
+                rStep = to;
+            else
+                lStep = to;
+            to = (lStep + rStep) * 0.5;
+
+            const bool isDone = lStep == deltaT;
+            if (isDone)
+                break;
+
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
                 if (handleNum == maxHandleNum) [[unlikely]]
@@ -99,14 +111,6 @@ namespace Physica::Core {
                 handleCollision(ringPolymer);
                 velocity = hadamard(momentum, repMass);
             }
-
-            const ScalarType step = to - from;
-            pos = buffer + velocity * step;
-            if (checkCollision(ringPolymer))
-                rStep = to;
-            else
-                lStep = to;
-            to = (lStep + rStep) * 0.5;
         }
     }
 

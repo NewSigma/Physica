@@ -104,7 +104,6 @@ void testMergeStep() {
 }
 
 void testCpuGpuCompare() {
-    MatrixType record(10, 1);
     std::mt19937 gen{};
     constexpr double precision = 1E-8;
     constexpr double data[11]{-82.035145, -320.467251, -49.894346, -280.663904, 248.243524, 42.686686, -290.446957, -116.543080, -131.538885, -285.989793, -111.176517};
@@ -114,7 +113,7 @@ void testCpuGpuCompare() {
     rpmd.initMomentum(gen);
     scaleVelocity(rpmd);
 
-    Vector<ScalarType> mean(record.getRow(), 0);
+    Vector<ScalarType> mean(10, 0);
     {
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         if (!scalarNear(calcThermoFlux(rpmd), ScalarType(data[0]), precision))

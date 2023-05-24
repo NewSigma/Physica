@@ -36,7 +36,7 @@
 
 namespace Physica {
     inline void cudaCheck(cudaError_t err) {
-        if (err != cudaSuccess)
+        if (err != cudaSuccess) [[unlikely]]
             throw Physica::Core::CudaException(err);
     }
 }

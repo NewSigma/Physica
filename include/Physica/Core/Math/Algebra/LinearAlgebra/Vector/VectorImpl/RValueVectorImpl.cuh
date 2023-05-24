@@ -24,6 +24,18 @@
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
+        __device__ inline void assignToImpl(const Derived& source, OtherDerived& target) {
+            const unsigned int delta = gridDim.x * blockDim.x;
+            const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
+            const size_t length = source.getLength();
+            for (unsigned int shift = 0; shift < length; shift += delta) {
+                const unsigned int index = id + shift;
+                if (index < length)
+                    target[index] = source.calc(index);
+            }
+        }
+
+        template<class Derived, class OtherDerived>
         __global__ void assignTo_kernel(
                 Physica::PlainStruct<Derived> source,
                 Physica::PlainStruct<OtherDerived> target) {
@@ -32,20 +44,23 @@ namespace Physica::Core {
             using HostOtherDerived = typename OtherDerived::host_obj;
             static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid source vector type");
             static_assert(std::is_base_of<LValueVector<HostOtherDerived>, HostOtherDerived>::value, "[Error]: Invalid target vector type");
-            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            const size_t length = source.getDerived().getLength();
-            if (index < length)
-                target.getDerived()[index] = source.getDerived().calc(index);
+            assignToImpl(source.getDerived(), target.getDerived());
         }
     }
 
     template<class Derived>
     template<class OtherDerived>
+    __host__ __device__
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
+        Internal::assignTo_kernel<device_obj<Derived>, device_obj<OtherDerived>>;
+    #ifndef  __CUDA_ARCH__
         using namespace Physica;
         constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;
         const int numBlock = (getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
         Internal::assignTo_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+    #else
+        Internal::assignToImpl(Base::getDerived(), target.getDerived());
+    #endif
     }
 }

@@ -33,7 +33,7 @@ namespace Physica::Core {
         Physica::PlainStruct<DeviceVector1> v1;
         Physica::PlainStruct<DeviceVector2> v2;
     public:
-        device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
             assert(v1_.getLength() == v2_.getLength());
         }
@@ -56,7 +56,8 @@ namespace Physica::Core {
         Physica::PlainStruct<DeviceVector> v;
         AnyScalar s;
     public:
-        device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_) : v(asStruct(v_.getDerived())), s(s_) {}
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
+                : v(asStruct(v_.getDerived())), s(s_) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -81,7 +82,7 @@ namespace Physica::Core {
         Physica::PlainStruct<DeviceVector1> v1;
         Physica::PlainStruct<DeviceVector2> v2;
     public:
-        device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
             assert(v1_.getLength() == v2_.getLength());
         }
@@ -127,25 +128,25 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class OtherDerived>
-    inline device_obj<VectorExpression<Utils::ExpressionType::Add, Derived, OtherDerived>>
+    inline __host__ __device__ device_obj<VectorExpression<Utils::ExpressionType::Add, Derived, OtherDerived>>
             operator+(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(const device_obj<RValueVector<VectorType>>& v, ScalarType s) {
         return {v.getDerived(), s};
     }
 
     template<class ScalarType, class VectorType>
-    inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(ScalarType s, const device_obj<RValueVector<VectorType>>& v) {
         return v * s;
     }
     
     template<class VectorType1, class VectorType2>
-    inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>>
+    __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>>
     hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) {
         return {v1.getDerived(), v2.getDerived()};
     }

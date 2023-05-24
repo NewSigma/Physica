@@ -35,6 +35,8 @@ namespace Physica::Utils {
         /* Operators */
         DeviceProp& operator=(const DeviceProp&) = delete;
         DeviceProp& operator=(DeviceProp&&) noexcept = delete;
+        /* Operations */
+        std::ostream& printDeviceProp(unsigned int device, std::ostream& os) const;
         /* Getters */
         [[nodiscard]] int getDriverVersion() const { return driverVersion; }
         [[nodiscard]] int getRuntimeVersion() const { return runtimeVersion; }

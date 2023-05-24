@@ -34,7 +34,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }

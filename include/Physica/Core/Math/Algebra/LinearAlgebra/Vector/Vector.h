@@ -86,6 +86,8 @@ namespace Physica::Core {
         static Vector random(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>
         static Vector random(const Vector& v1, const Vector& v2, RandomGenerator& gen);
+        template<class RandomGenerator>
+        static Vector random_uniform(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
         static Vector linspace(T from, T to, size_t count);

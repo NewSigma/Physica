@@ -58,12 +58,14 @@ if(${PHYSICA_CUDA})
     set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     set(CMAKE_CUDA_ARCHITECTURES 75)
+    # Warning 174: Avoid warnings at template explicit instantiation
     set(CMAKE_CUDA_FLAGS "\
-    ${CMAKE_CUDA_FLAGS} \
-    --relocatable-device-code=true \
-    --diag-suppress 20011 \
-    --diag-suppress 186 \
-    -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
+        ${CMAKE_CUDA_FLAGS} \
+        --relocatable-device-code=true \
+        --diag-suppress 174 \
+        --diag-suppress 186 \
+        --diag-suppress 20011 \
+        -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
 endif()
 
 if(${RUN_CHECKS})

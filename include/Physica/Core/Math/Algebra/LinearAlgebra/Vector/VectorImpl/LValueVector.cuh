@@ -29,10 +29,10 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         /* Operators */
-        inline device_obj& operator=(const device_obj& obj);
-        inline device_obj& operator=(device_obj&& obj) noexcept;
+        __host__ __device__ inline device_obj& operator=(const device_obj& obj);
+        __host__ __device__ inline device_obj& operator=(device_obj&& obj) noexcept;
         template<class OtherDerived>
-        device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
+        __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
@@ -40,20 +40,28 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    inline device_obj<LValueVector<Derived>>& device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
+    __host__ __device__
+    inline device_obj<LValueVector<Derived>>&
+    device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
         Base::operator=(obj);
         return *this;
     }
+
     template<class Derived>
-    inline device_obj<LValueVector<Derived>>& device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) noexcept {
+    __host__ __device__
+    inline device_obj<LValueVector<Derived>>&
+    device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) noexcept {
         Base::operator=(std::move(obj));
         return *this;
     }
 
     template<class Derived>
     template<class OtherDerived>
+    __host__ __device__
     device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<RValueVector<OtherDerived>>& v) {
+    #ifndef __CUDA_ARCH__
         Base::getDerived().resize(v.getLength());
+    #endif
         v.assignTo(*this);
         return Base::getDerived();
     }
