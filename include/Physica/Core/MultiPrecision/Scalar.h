@@ -477,7 +477,7 @@ namespace Physica::Core {
         inline Scalar(const Scalar<Float, true>& s);
         __host__ __device__ inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
         __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
@@ -524,7 +524,7 @@ namespace Physica::Core {
         explicit Scalar(const Rational& r, float a_ = 0) : Base(r), a(a_) {}
         Scalar(const Scalar<Float, false>& s) : Base(s), a(0) {}
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
         Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
@@ -572,7 +572,7 @@ namespace Physica::Core {
         __host__ __device__ inline Scalar(const Scalar<Float, false>& s);
         Scalar(const Scalar<Double, true>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         __host__ __device__ explicit operator double() const { return d; }
         __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
@@ -620,7 +620,7 @@ namespace Physica::Core {
         explicit Scalar(const Rational& r, double a_ = 0) : Base(r), a(a_) {}
         inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
         Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }

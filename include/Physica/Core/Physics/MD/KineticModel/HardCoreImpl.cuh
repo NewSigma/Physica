@@ -194,6 +194,71 @@ namespace Physica::Core {
                 momentum[i] -= drift;
             }
         }
+
+        template<class ScalarType>
+        __global__ void step_kernel(
+                ScalarType latticeSize,
+                ScalarType collideFactor,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_,
+                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> mass_,
+                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> repMass_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> stepBuffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> velocity_,
+                size_t maxHandleNum,
+                ScalarType deltaT,
+                size_t handleNum) {
+            constexpr unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
+            const auto& stepBuffer = stepBuffer_.getDerived();
+            const size_t numParticle = mass_.getDerived().getLength();
+            size_t numCollisionBlock = 0;
+            for (size_t i = 0; i < stepBuffer.getLength(); ++i)
+                numCollisionBlock += stepBuffer[i] != deltaT;
+            const bool isDone = numCollisionBlock == 0 && handleNum != 0;
+            if (isDone) {
+                removeDrift_kernel<ScalarType><<<1, 64, 0, cudaStreamTailLaunch>>>(phase_);
+            }
+            else if (handleNum == maxHandleNum) {
+                return;
+            }
+            else {
+                {
+                    const unsigned int numThread = WarpSize;
+                    const unsigned int numBlock = (numParticle + WarpSize - 2) / (WarpSize - 1);
+                    binaryRun_kernel<<<numBlock, numThread, 0>>>(
+                            latticeSize,
+                            collideFactor,
+                            phase_,
+                            repMass_,
+                            buffer_,
+                            stepBuffer_,
+                            velocity_,
+                            deltaT);
+                }
+                {
+                    const unsigned int numThread = WarpSize;
+                    const unsigned int numBlock = (numParticle + WarpSize - 1) / WarpSize;
+                    post_binaryRun_kernel<<<numBlock, numThread, 0>>>(phase_, buffer_, stepBuffer_, velocity_, deltaT);
+                }
+                {
+                    const unsigned int numThread = 2 * WarpSize;
+                    const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
+                    handleCollision_kernel<<<numBlock, numThread, 0>>>(latticeSize, phase_, mass_);
+                }
+                step_kernel<<<1, 1, 0, cudaStreamTailLaunch>>>(
+                        latticeSize,
+                        collideFactor,
+                        phase_,
+                        mass_,
+                        repMass_,
+                        buffer_,
+                        stepBuffer_,
+                        velocity_,
+                        maxHandleNum,
+                        deltaT,
+                        handleNum + 1);
+            }
+        }
     }
 
     template<class ScalarType>
@@ -205,82 +270,13 @@ namespace Physica::Core {
             , repMass(numParticle)
             , buffer(numParticle)
             , velocity(numParticle)
-            , lockedBuffer(numParticle)
+            , lockedBuffer(numParticle * 2)
             , maxHandleNum(maxHandleNum_)
             , deltaT(0) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
-        cudaCheck(cudaGraphCreate(&binaryRunGraph, 0));
-        {
-            constexpr unsigned int numThread = WarpSize;
-            const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
-            stepBuffer.resize(2 * numBlock);
-            binaryRunKernelNodeParams.func = reinterpret_cast<void*>(Internal::binaryRun_kernel<ScalarType>);
-            binaryRunKernelNodeParams.gridDim = dim3{numBlock};
-            binaryRunKernelNodeParams.blockDim = dim3{numThread};
-            binaryRunKernelNodeParams.sharedMemBytes = 0;
-            binaryRunKernelParams[0] = &latticeSize;
-            binaryRunKernelParams[1] = &collideFactor;
-            binaryRunKernelParams[2] = &d_phase;
-            binaryRunKernelParams[3] = &repMass;
-            binaryRunKernelParams[4] = &buffer;
-            binaryRunKernelParams[5] = &stepBuffer;
-            binaryRunKernelParams[6] = &velocity;
-            binaryRunKernelParams[7] = &deltaT;
-            binaryRunKernelNodeParams.kernelParams = &binaryRunKernelParams[0];
-            binaryRunKernelNodeParams.extra = nullptr;
-            cudaCheck(cudaGraphAddKernelNode(&binaryRunKernelNode, binaryRunGraph, nullptr, 0, &binaryRunKernelNodeParams));
-        }
-        {
-            constexpr unsigned int numThread = WarpSize;
-            const unsigned int numBlock = (numParticle + numThread - 1) / numThread;
-            postBinaryRunKernelNodeParams.func = reinterpret_cast<void*>(Internal::post_binaryRun_kernel<ScalarType>);
-            postBinaryRunKernelNodeParams.gridDim = dim3{numBlock};
-            postBinaryRunKernelNodeParams.blockDim = dim3{numThread};
-            postBinaryRunKernelNodeParams.sharedMemBytes = 0;
-            postBinaryRunKernelParams[0] = &d_phase;
-            postBinaryRunKernelParams[1] = &buffer;
-            postBinaryRunKernelParams[2] = &stepBuffer;
-            postBinaryRunKernelParams[3] = &velocity;
-            postBinaryRunKernelParams[4] = &deltaT;
-            postBinaryRunKernelNodeParams.kernelParams = &postBinaryRunKernelParams[0];
-            postBinaryRunKernelNodeParams.extra = nullptr;
-            cudaCheck(cudaGraphAddKernelNode(&postBinaryRunKernelNode, binaryRunGraph, &binaryRunKernelNode, 1, &postBinaryRunKernelNodeParams));
-        }
-        {
-            const unsigned int numThread = 2 * WarpSize;
-            const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
-            handleCollisionKernelNodeParams.func = reinterpret_cast<void*>(Internal::handleCollision_kernel<ScalarType>);
-            handleCollisionKernelNodeParams.gridDim = dim3{numBlock};
-            handleCollisionKernelNodeParams.blockDim = dim3{numThread};
-            handleCollisionKernelNodeParams.sharedMemBytes = 0;
-            handleCollisionKernelParams[0] = &latticeSize;
-            handleCollisionKernelParams[1] = &d_phase;
-            handleCollisionKernelParams[2] = &mass;
-            handleCollisionKernelNodeParams.kernelParams = &handleCollisionKernelParams[0];
-            handleCollisionKernelNodeParams.extra = nullptr;
-            cudaCheck(cudaGraphAddKernelNode(&handleCollisionKernelNode, binaryRunGraph, &postBinaryRunKernelNode, 1, &handleCollisionKernelNodeParams));
-        }
-        cudaCheck(cudaGraphAddMemcpyNode1D(&copyStepsNode, binaryRunGraph, &binaryRunKernelNode, 1, lockedBuffer.data(), stepBuffer.data(), stepBuffer.getLength() * sizeof(ScalarType), cudaMemcpyDeviceToHost));
-        cudaCheck(cudaGraphAddEventRecordNode(&copyDoneEventNode, binaryRunGraph, &copyStepsNode, 1, copyDoneEvent.getEvent()));
-        cudaCheck(cudaGraphInstantiate(&binaryRunGraphExec, binaryRunGraph, nullptr, nullptr, 0));
-
-        cudaCheck(cudaGraphCreate(&binaryRunNoCopyGraph, 0));
-        cudaCheck(cudaGraphAddKernelNode(&binaryRunKernelNode1, binaryRunNoCopyGraph, nullptr, 0, &binaryRunKernelNodeParams));
-        cudaCheck(cudaGraphAddKernelNode(&postBinaryRunKernelNode1, binaryRunNoCopyGraph, &binaryRunKernelNode1, 1, &postBinaryRunKernelNodeParams));
-        cudaCheck(cudaGraphAddKernelNode(&handleCollisionKernelNode1, binaryRunNoCopyGraph, &postBinaryRunKernelNode1, 1, &handleCollisionKernelNodeParams));
-        cudaCheck(cudaGraphInstantiate(&binaryRunNoCopyGraphExec, binaryRunNoCopyGraph, nullptr, nullptr, 0));
-    }
-
-    template<class ScalarType>
-    HardCore<ScalarType, CudaExecutor>::~HardCore() {
-        cudaGraphDestroy(binaryRunGraph);
-        cudaGraphExecDestroy(binaryRunGraphExec);
-        cudaGraphDestroy(binaryRunNoCopyGraph);
-        cudaGraphExecDestroy(binaryRunNoCopyGraphExec);
-        binaryRunGraph = nullptr;
-        binaryRunGraphExec = nullptr;
-        binaryRunNoCopyGraph = nullptr;
-        binaryRunNoCopyGraphExec = nullptr;
+        constexpr unsigned int numThread = WarpSize;
+        const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
+        stepBuffer.resize(2 * numBlock);
     }
 
     template<class ScalarType>
@@ -307,10 +303,8 @@ namespace Physica::Core {
     void HardCore<ScalarType, CudaExecutor>::pre_nve_step(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
-        auto d_pos = d_phase.tail(numParticle);
-        auto d_momentum = d_phase.head(numParticle);
-
-        phase.toDeviceAsync(d_phase);
+        lockedBuffer = phase;
+        lockedBuffer.toDeviceAsync(d_phase);
     }
 
     template<class ScalarType>
@@ -320,35 +314,19 @@ namespace Physica::Core {
         if (deltaT != deltaT_) {
             deltaT = deltaT_;
             stepBuffer = deltaT;
-            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, binaryRunKernelNode, &binaryRunKernelNodeParams));
-            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, postBinaryRunKernelNode, &postBinaryRunKernelNodeParams));
-            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunNoCopyGraphExec, binaryRunKernelNode1, &binaryRunKernelNodeParams));
-            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunNoCopyGraphExec, postBinaryRunKernelNode1, &postBinaryRunKernelNodeParams));
         }
-        
-        size_t handleNum = 0;
-        while (true) {
-            cudaCheck(cudaGraphLaunch(binaryRunGraphExec, StreamPool::getStream()));
-            copyDoneEvent.wait();
-
-            const auto temp = lockedBuffer.head(stepBuffer.getLength() / 2);
-            size_t numCollisionBlock = 0;
-            for (size_t i = 0; i < temp.getLength(); ++i)
-                numCollisionBlock += temp[i] != deltaT;
-            const bool isDone = numCollisionBlock == 0;
-            if (isDone) {
-                Internal::removeDrift_kernel<ScalarType><<<1, 64, 0, StreamPool::getStream()>>>(asStruct(d_phase));
-                break;
-            }
-            else {
-                if (handleNum == maxHandleNum) [[unlikely]]
-                    throw BadConvergenceException("[Error]: Too many collision with in a step");
-                for (size_t i = 0; i < numCollisionBlock / 4; ++i) {
-                    cudaCheck(cudaGraphLaunch(binaryRunNoCopyGraphExec, StreamPool::getStream()));
-                }
-                handleNum += 1;
-            }
-        }
+        Internal::step_kernel<<<1, 1, 0, StreamPool::getStream()>>>(
+                latticeSize,
+                collideFactor,
+                asStruct(d_phase),
+                asStruct(mass),
+                asStruct(repMass),
+                asStruct(buffer),
+                asStruct(stepBuffer),
+                asStruct(velocity),
+                maxHandleNum,
+                deltaT,
+                0);
     }
 
     template<class ScalarType>
@@ -362,8 +340,9 @@ namespace Physica::Core {
     void HardCore<ScalarType, CudaExecutor>::post_nve_step(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
-        d_phase.toHostAsync(phase);
+        d_phase.toHostAsync(lockedBuffer);
         CudaExecutor::wait();
+        phase = lockedBuffer;
     }
 
     template<class ScalarType>
@@ -373,13 +352,17 @@ namespace Physica::Core {
         auto momentum = phase.head(numParticle);
         auto d_momentum = d_phase.head(numParticle);
 
-        momentum.toDeviceAsync(d_momentum);
+        auto head = lockedBuffer.head(getNumParticle());
+        head = momentum;
+        head.toDeviceAsync(d_momentum);
         velocity = hadamard(d_momentum, repMass);
     }
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
-        ringPolymer.getMassVec().toDeviceAsync(mass);
+        auto head = lockedBuffer.head(getNumParticle());
+        head = ringPolymer.getMassVec();
+        head.toDeviceAsync(mass);
         repMass = reciprocal(mass);
         CudaExecutor::wait();
     }
@@ -397,64 +380,5 @@ namespace Physica::Core {
         lockedBuffer.swap(obj.lockedBuffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
         deltaT.swap(obj.deltaT);
-
-        std::swap(binaryRunKernelParams, obj.binaryRunKernelParams);
-        std::swap(postBinaryRunKernelParams, obj.postBinaryRunKernelParams);
-        std::swap(handleCollisionKernelParams, obj.handleCollisionKernelParams);
-        std::swap(binaryRunKernelNodeParams, obj.binaryRunKernelNodeParams);
-        std::swap(postBinaryRunKernelNodeParams, obj.postBinaryRunKernelNodeParams);
-        std::swap(handleCollisionKernelNodeParams, obj.handleCollisionKernelNodeParams);
-        copyDoneEvent.swap(obj.copyDoneEvent);
-
-        std::swap(binaryRunGraphExec, obj.binaryRunGraphExec);
-        std::swap(binaryRunGraph, obj.binaryRunGraph);
-        std::swap(binaryRunKernelNode, obj.binaryRunKernelNode);
-        std::swap(copyStepsNode, obj.copyStepsNode);
-        std::swap(copyDoneEventNode, obj.copyDoneEventNode);
-        std::swap(postBinaryRunKernelNode, obj.postBinaryRunKernelNode);
-        std::swap(handleCollisionKernelNode, obj.handleCollisionKernelNode);
-
-        std::swap(binaryRunNoCopyGraphExec, obj.binaryRunNoCopyGraphExec);
-        std::swap(binaryRunNoCopyGraph, obj.binaryRunNoCopyGraph);
-        std::swap(binaryRunKernelNode1, obj.binaryRunKernelNode1);
-        std::swap(postBinaryRunKernelNode1, obj.postBinaryRunKernelNode1);
-        std::swap(handleCollisionKernelNode1, obj.handleCollisionKernelNode1);
-    }
-    /**
-     * Special implementation to make full use of limited pinned memory.
-     */
-    template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::handleCollision(RingPolymerType& ringPolymer) {
-        const size_t numParticle = ringPolymer.getNumParticle();
-        auto phase = ringPolymer.asMatrix().col(0);
-        auto pos = phase.tail(numParticle);
-        bool isDrifted = false;
-        if (!lockedBuffer[0].isPositive()) {
-            phase[0].toOpposite();
-            isDrifted = true;
-        }
-
-        const auto& mass = ringPolymer.getMassVec();
-        size_t i = 0;
-        for (; i < numParticle - 1; ++i) {
-            if (lockedBuffer[i] > lockedBuffer[i + 1]) {
-                const ScalarType m1 = mass[i];
-                const ScalarType m2 = mass[i + 1];
-                const ScalarType p1 = phase[i];
-                const ScalarType p2 = phase[i + 1];
-                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
-                const ScalarType next_p2 = p1 + p2 - next_p1;
-                phase[i] = next_p1;
-                phase[i + 1] = next_p2;
-            }
-        }
-
-        if (lockedBuffer[i] > latticeSize) {
-            phase[i].toOpposite();
-            isDrifted = true;
-        }
-        if (isDrifted)
-            ringPolymer.removeDrift();
-        lockedBuffer = phase.head(numParticle);
     }
 }
