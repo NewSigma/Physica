@@ -28,7 +28,7 @@ const size_t numMolecular = 512;
 constexpr double latticeSize = 512;
 constexpr double temperatureT = 2;
 constexpr double energy = numMolecular * temperatureT / 2;
-constexpr size_t numSample = 10000;
+constexpr size_t numSample = 1;
 
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
@@ -81,13 +81,13 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
 
     Vector<ScalarType> mean(record.getRow(), 0);
     for (size_t sample = 0; sample < numSample; ++sample) {
-        kineticModel.pre_nve_step(rpmd.getRingPolymer());
-        kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+        kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
         const ScalarType flux0 = calcThermoFlux(rpmd);
         for (size_t j = 0; j < mean.getLength(); ++j) {
             const ScalarType flux = calcThermoFlux(rpmd);
             toNextMean(mean[j], sample, flux0 * flux);
             kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+            kineticModel.post_nve_step(rpmd.getRingPolymer());
             scaleVelocity(rpmd);
             kineticModel.updateMomentum(rpmd.getRingPolymer());
         }

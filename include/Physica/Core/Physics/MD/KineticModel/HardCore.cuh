@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
 #include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/CudaEvent.cuh"
 #include "Physica/Utils/CUDA/PlainStruct.h"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
 #include "Physica/Utils/Container/PageLockedAllocator.cuh"
@@ -38,26 +39,37 @@ namespace Physica::Core {
         ScalarType latticeSize;
         ScalarType collideFactor;
         DeviceVector d_phase;
+        DeviceVector mass;
         DeviceVector repMass;
         DeviceVector buffer;
         DeviceVector stepBuffer;
         DeviceVector velocity;
         PageLockedVector lockedBuffer;
         size_t maxHandleNum;
-
-        ScalarType from;
         ScalarType deltaT;
+
+
+        void* binaryRunKernelParams[8];
+        void* postBinaryRunKernelParams[5];
+        void* handleCollisionKernelParams[3];
+        cudaKernelNodeParams binaryRunKernelNodeParams;
+        cudaKernelNodeParams postBinaryRunKernelNodeParams;
+        cudaKernelNodeParams handleCollisionKernelNodeParams;
+        CudaEvent copyDoneEvent;
 
         cudaGraphExec_t binaryRunGraphExec;
         cudaGraph_t binaryRunGraph;
-        
-        void* binaryRunKernelParams[9];
-        cudaKernelNodeParams binaryRunKernelNodeParams;
         cudaGraphNode_t binaryRunKernelNode;
         cudaGraphNode_t copyStepsNode;
-        void* postBinaryRunKernelParams[5];
-        cudaKernelNodeParams postBinaryRunKernelNodeParams;
+        cudaGraphNode_t copyDoneEventNode;
         cudaGraphNode_t postBinaryRunKernelNode;
+        cudaGraphNode_t handleCollisionKernelNode;
+
+        cudaGraphExec_t binaryRunNoCopyGraphExec;
+        cudaGraph_t binaryRunNoCopyGraph;
+        cudaGraphNode_t binaryRunKernelNode1;
+        cudaGraphNode_t postBinaryRunKernelNode1;
+        cudaGraphNode_t handleCollisionKernelNode1;
     public:
         HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;

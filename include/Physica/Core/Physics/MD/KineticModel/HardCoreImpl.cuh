@@ -29,14 +29,16 @@ namespace Physica::Core {
                 ScalarType collideFactor,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> repMass_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> stepBuffer_,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> velocity_,
-                ScalarType from,
                 ScalarType deltaT) {
             constexpr unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
+            assert(blockDim.x == WarpSize);
+
             const ScalarType collideStep = collideFactor * deltaT;
-            const auto& buffer = buffer_.getDerived();
+            auto& buffer = buffer_.getDerived();
+            auto& stepBuffer = stepBuffer_.getDerived();
             auto& velocity = velocity_.getDerived();
             const size_t numParticle = buffer.getLength();
 
@@ -52,24 +54,21 @@ namespace Physica::Core {
             auto momentum = phase.head(numParticle);
             velocity[index] = hadamard(momentum, repMass).calc(index);
 
+            const bool isNewRun = stepBuffer[0] == deltaT;
+            const ScalarType from = isNewRun ? 0 : stepBuffer[0];
+            if (isNewRun) {
+                auto pos = phase.tail(numParticle);
+                buffer[index] = pos[index];
+            }
             ScalarType lStep = from;
             ScalarType rStep = deltaT;
             ScalarType to = deltaT;
             while (true) {
                 const ScalarType step = to - from;
                 trial[threadIdx.x] = (buffer + velocity * step).calc(index);
-                __syncwarp();
-                bool isCollided;
-                {
-                    __shared__ bool flags[WarpSize];
-                    flags[threadIdx.x] = trial[threadIdx.x] > trial[threadIdx.x + 1] || (!trial[threadIdx.x].isPositive());
-                    __syncwarp();
-                    for (int i = warpSize / 2; i != 0; i /= 2)
-                        if (threadIdx.x < i)
-                            flags[threadIdx.x] |= flags[threadIdx.x + i];
-                    __syncwarp();
-                    isCollided = flags[0];
-                }
+                __syncthreads();
+                const bool flag = trial[threadIdx.x] > trial[threadIdx.x + 1] || (!trial[threadIdx.x].isPositive());
+                const bool isCollided = __syncthreads_or(flag);
                 if (isCollided)
                     rStep = to;
                 else
@@ -81,7 +80,8 @@ namespace Physica::Core {
                 if (isDone || isDeltaSmallEnough)
                     break;
             }
-            auto& stepBuffer = stepBuffer_.getDerived();
+            auto pos = phase.tail(numParticle);
+            pos[index] = from; // Pass from step to next kernel
             stepBuffer[blockIdx.x] = lStep;
             stepBuffer[gridDim.x + blockIdx.x] = rStep;
         }
@@ -89,25 +89,109 @@ namespace Physica::Core {
         template<class ScalarType>
         __global__ void post_binaryRun_kernel(
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> stepBuffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> stepBuffer_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> velocity_,
-                ScalarType from) {
-            const auto numBlock = gridDim.x;
-            const auto& stepBuffer = stepBuffer_.getDerived();
-            ScalarType rStep = stepBuffer[gridDim.x];
-            for (int i = 1; i < numBlock; ++i)
-                if (stepBuffer[gridDim.x + i] < rStep)
-                    rStep = stepBuffer[gridDim.x + i];
-
+                ScalarType deltaT) {
+            ScalarType lStep, rStep;
+            /* Find min step */ {
+                auto& stepBuffer = stepBuffer_.getDerived();
+                ScalarType nextFrom = stepBuffer[0];
+                int index = 0;
+                const int numStep = stepBuffer.getLength() / 2;
+                for (int i = 1; i < numStep; ++i) {
+                    if (stepBuffer[i] < nextFrom) {
+                        nextFrom = stepBuffer[i];
+                        index = i;
+                    }
+                }
+                stepBuffer[0] = nextFrom;
+                lStep = nextFrom;
+                rStep = stepBuffer[numStep + index];
+            }
             const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            const auto& buffer = buffer_.getDerived();
+            auto& buffer = buffer_.getDerived();
             const auto& velocity = velocity_.getDerived();
             const size_t numParticle = buffer.getLength();
             auto& phase = phase_.getDerived();
             auto pos = phase.tail(numParticle);
             if (index < numParticle) {
+                const ScalarType from = pos[index];
                 pos = buffer + velocity * (rStep - from);
+                if (lStep != deltaT)
+                    buffer[index] += velocity[index] * (lStep - from);
+            }
+        }
+
+        template<class ScalarType>
+        __global__ void handleCollision_kernel(
+                ScalarType latticeSize,
+                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_,
+                const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> mass_) {
+            constexpr double MaxDouble = 1.797693E308;
+            constexpr unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
+            constexpr unsigned int NumThread = 2 * WarpSize;
+            assert(blockDim.x == NumThread);
+
+            auto& phase = phase_.getDerived();
+            const auto& mass = mass_.getDerived();
+            const size_t numParticle = phase.getLength() / 2;
+            auto momentum = phase.head(numParticle);
+            auto pos = phase.tail(numParticle);
+
+            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x - blockIdx.x;
+            if (!(index < numParticle))
+                return;
+
+            __shared__ ScalarType buffer[NumThread + 1];
+            buffer[threadIdx.x + 1] = MaxDouble;
+            buffer[threadIdx.x] = pos[index];
+            __syncthreads();
+            if (buffer[threadIdx.x] > buffer[threadIdx.x + 1]) {
+                const ScalarType m1 = mass[index];
+                const ScalarType m2 = mass[index + 1];
+                const ScalarType p1 = momentum[index];
+                const ScalarType p2 = momentum[index + 1];
+                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
+                const ScalarType next_p2 = p1 + p2 - next_p1;
+                momentum[index] = next_p1;
+                momentum[index + 1] = next_p2;
+            }
+            __syncthreads();
+            if (index == 0 && !pos[0].isPositive()) {
+                momentum[0] = -momentum[0];
+            }
+            const size_t lastParticle = numParticle - 1;
+            if (index == lastParticle && pos[lastParticle] > latticeSize) {
+                momentum[lastParticle] = -momentum[lastParticle];
+            }
+        }
+
+        template<class ScalarType>
+        __global__ void removeDrift_kernel(Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_) {
+            constexpr unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
+            constexpr unsigned int NumBlock = 2 * WarpSize;
+            assert(blockDim.x == NumBlock);
+
+            auto& phase = phase_.getDerived();
+            const size_t numParticle = phase.getLength() / 2;
+            auto momentum = phase.head(numParticle);
+
+            ScalarType sum = 0;
+            for (int i = threadIdx.x; i < numParticle; i += NumBlock) {
+                sum += momentum[i];
+            }
+            __shared__ ScalarType buffer[NumBlock];
+            buffer[threadIdx.x] = sum;
+            __syncthreads();
+            for (int i = NumBlock / 2; i != 0; i /= 2) {
+                if (threadIdx.x < i)
+                    buffer[threadIdx.x] += buffer[threadIdx.x + i];
+                __syncthreads();
+            }
+            const ScalarType drift = buffer[0] / ScalarType(numParticle);
+            for (int i = threadIdx.x; i < numParticle; i += NumBlock) {
+                momentum[i] -= drift;
             }
         }
     }
@@ -117,19 +201,22 @@ namespace Physica::Core {
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
             , d_phase(2 * numParticle)
+            , mass(numParticle)
             , repMass(numParticle)
             , buffer(numParticle)
-            , stepBuffer((numParticle + WarpSize - 2) / (WarpSize - 1) * 2)
             , velocity(numParticle)
             , lockedBuffer(numParticle)
-            , maxHandleNum(maxHandleNum_) {
+            , maxHandleNum(maxHandleNum_)
+            , deltaT(0) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
         cudaCheck(cudaGraphCreate(&binaryRunGraph, 0));
-        const unsigned int numBlock = stepBuffer.getLength() / 2;
         {
+            constexpr unsigned int numThread = WarpSize;
+            const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
+            stepBuffer.resize(2 * numBlock);
             binaryRunKernelNodeParams.func = reinterpret_cast<void*>(Internal::binaryRun_kernel<ScalarType>);
             binaryRunKernelNodeParams.gridDim = dim3{numBlock};
-            binaryRunKernelNodeParams.blockDim = dim3{WarpSize};
+            binaryRunKernelNodeParams.blockDim = dim3{numThread};
             binaryRunKernelNodeParams.sharedMemBytes = 0;
             binaryRunKernelParams[0] = &latticeSize;
             binaryRunKernelParams[1] = &collideFactor;
@@ -138,35 +225,62 @@ namespace Physica::Core {
             binaryRunKernelParams[4] = &buffer;
             binaryRunKernelParams[5] = &stepBuffer;
             binaryRunKernelParams[6] = &velocity;
-            binaryRunKernelParams[7] = &from;
-            binaryRunKernelParams[8] = &deltaT;
+            binaryRunKernelParams[7] = &deltaT;
             binaryRunKernelNodeParams.kernelParams = &binaryRunKernelParams[0];
             binaryRunKernelNodeParams.extra = nullptr;
             cudaCheck(cudaGraphAddKernelNode(&binaryRunKernelNode, binaryRunGraph, nullptr, 0, &binaryRunKernelNodeParams));
         }
-        cudaCheck(cudaGraphAddMemcpyNode1D(&copyStepsNode, binaryRunGraph, &binaryRunKernelNode, 1, lockedBuffer.data(), stepBuffer.data(), 2 * numBlock * sizeof(ScalarType), cudaMemcpyDeviceToHost));
         {
+            constexpr unsigned int numThread = WarpSize;
+            const unsigned int numBlock = (numParticle + numThread - 1) / numThread;
             postBinaryRunKernelNodeParams.func = reinterpret_cast<void*>(Internal::post_binaryRun_kernel<ScalarType>);
             postBinaryRunKernelNodeParams.gridDim = dim3{numBlock};
-            postBinaryRunKernelNodeParams.blockDim = dim3{WarpSize};
+            postBinaryRunKernelNodeParams.blockDim = dim3{numThread};
             postBinaryRunKernelNodeParams.sharedMemBytes = 0;
             postBinaryRunKernelParams[0] = &d_phase;
             postBinaryRunKernelParams[1] = &buffer;
             postBinaryRunKernelParams[2] = &stepBuffer;
             postBinaryRunKernelParams[3] = &velocity;
-            postBinaryRunKernelParams[4] = &from;
+            postBinaryRunKernelParams[4] = &deltaT;
             postBinaryRunKernelNodeParams.kernelParams = &postBinaryRunKernelParams[0];
             postBinaryRunKernelNodeParams.extra = nullptr;
             cudaCheck(cudaGraphAddKernelNode(&postBinaryRunKernelNode, binaryRunGraph, &binaryRunKernelNode, 1, &postBinaryRunKernelNodeParams));
         }
+        {
+            const unsigned int numThread = 2 * WarpSize;
+            const unsigned int numBlock = (numParticle + numThread - 2) / (numThread - 1);
+            handleCollisionKernelNodeParams.func = reinterpret_cast<void*>(Internal::handleCollision_kernel<ScalarType>);
+            handleCollisionKernelNodeParams.gridDim = dim3{numBlock};
+            handleCollisionKernelNodeParams.blockDim = dim3{numThread};
+            handleCollisionKernelNodeParams.sharedMemBytes = 0;
+            handleCollisionKernelParams[0] = &latticeSize;
+            handleCollisionKernelParams[1] = &d_phase;
+            handleCollisionKernelParams[2] = &mass;
+            handleCollisionKernelNodeParams.kernelParams = &handleCollisionKernelParams[0];
+            handleCollisionKernelNodeParams.extra = nullptr;
+            cudaCheck(cudaGraphAddKernelNode(&handleCollisionKernelNode, binaryRunGraph, &postBinaryRunKernelNode, 1, &handleCollisionKernelNodeParams));
+        }
+        cudaCheck(cudaGraphAddMemcpyNode1D(&copyStepsNode, binaryRunGraph, &binaryRunKernelNode, 1, lockedBuffer.data(), stepBuffer.data(), stepBuffer.getLength() * sizeof(ScalarType), cudaMemcpyDeviceToHost));
+        cudaCheck(cudaGraphAddEventRecordNode(&copyDoneEventNode, binaryRunGraph, &copyStepsNode, 1, copyDoneEvent.getEvent()));
         cudaCheck(cudaGraphInstantiate(&binaryRunGraphExec, binaryRunGraph, nullptr, nullptr, 0));
+
+        cudaCheck(cudaGraphCreate(&binaryRunNoCopyGraph, 0));
+        cudaCheck(cudaGraphAddKernelNode(&binaryRunKernelNode1, binaryRunNoCopyGraph, nullptr, 0, &binaryRunKernelNodeParams));
+        cudaCheck(cudaGraphAddKernelNode(&postBinaryRunKernelNode1, binaryRunNoCopyGraph, &binaryRunKernelNode1, 1, &postBinaryRunKernelNodeParams));
+        cudaCheck(cudaGraphAddKernelNode(&handleCollisionKernelNode1, binaryRunNoCopyGraph, &postBinaryRunKernelNode1, 1, &handleCollisionKernelNodeParams));
+        cudaCheck(cudaGraphInstantiate(&binaryRunNoCopyGraphExec, binaryRunNoCopyGraph, nullptr, nullptr, 0));
     }
 
     template<class ScalarType>
     HardCore<ScalarType, CudaExecutor>::~HardCore() {
         cudaGraphDestroy(binaryRunGraph);
         cudaGraphExecDestroy(binaryRunGraphExec);
+        cudaGraphDestroy(binaryRunNoCopyGraph);
+        cudaGraphExecDestroy(binaryRunNoCopyGraphExec);
         binaryRunGraph = nullptr;
+        binaryRunGraphExec = nullptr;
+        binaryRunNoCopyGraph = nullptr;
+        binaryRunNoCopyGraphExec = nullptr;
     }
 
     template<class ScalarType>
@@ -201,30 +315,38 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::do_nve_step(RingPolymerType& ringPolymer, ScalarType deltaT_) {
-        const size_t numParticle = getNumParticle();
-        auto d_momentum = d_phase.head(numParticle);
-        auto d_pos = d_phase.tail(numParticle);
-        buffer = d_pos;
-        assert(numParticle == ringPolymer.getNumParticle());
-
-        from = 0;
-        deltaT = deltaT_;
+        assert(getNumParticle() == ringPolymer.getNumParticle());
+        assert(deltaT_.isPositive());
+        if (deltaT != deltaT_) {
+            deltaT = deltaT_;
+            stepBuffer = deltaT;
+            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, binaryRunKernelNode, &binaryRunKernelNodeParams));
+            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, postBinaryRunKernelNode, &postBinaryRunKernelNodeParams));
+            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunNoCopyGraphExec, binaryRunKernelNode1, &binaryRunKernelNodeParams));
+            cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunNoCopyGraphExec, postBinaryRunKernelNode1, &postBinaryRunKernelNodeParams));
+        }
+        
         size_t handleNum = 0;
         while (true) {
-            const auto lStep = binaryRun();
-            const bool isDone = lStep == deltaT;
-            if (isDone)
+            cudaCheck(cudaGraphLaunch(binaryRunGraphExec, StreamPool::getStream()));
+            copyDoneEvent.wait();
+
+            const auto temp = lockedBuffer.head(stepBuffer.getLength() / 2);
+            size_t numCollisionBlock = 0;
+            for (size_t i = 0; i < temp.getLength(); ++i)
+                numCollisionBlock += temp[i] != deltaT;
+            const bool isDone = numCollisionBlock == 0;
+            if (isDone) {
+                Internal::removeDrift_kernel<ScalarType><<<1, 64, 0, StreamPool::getStream()>>>(asStruct(d_phase));
                 break;
+            }
             else {
                 if (handleNum == maxHandleNum) [[unlikely]]
                     throw BadConvergenceException("[Error]: Too many collision with in a step");
+                for (size_t i = 0; i < numCollisionBlock / 4; ++i) {
+                    cudaCheck(cudaGraphLaunch(binaryRunNoCopyGraphExec, StreamPool::getStream()));
+                }
                 handleNum += 1;
-                buffer += velocity * (lStep - from);
-                from = lStep;
-                d_pos.toHostAsync(lockedBuffer);
-                CudaExecutor::wait();
-                handleCollision(ringPolymer);
-                lockedBuffer.toDeviceAsync(d_momentum);
             }
         }
     }
@@ -240,9 +362,7 @@ namespace Physica::Core {
     void HardCore<ScalarType, CudaExecutor>::post_nve_step(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
-        auto pos = phase.tail(numParticle);
-        auto d_pos = d_phase.tail(numParticle);
-        d_pos.toHostAsync(pos);
+        d_phase.toHostAsync(phase);
         CudaExecutor::wait();
     }
 
@@ -259,8 +379,8 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void HardCore<ScalarType, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
-        ringPolymer.getMassVec().toDeviceAsync(repMass);
-        repMass = reciprocal(repMass);
+        ringPolymer.getMassVec().toDeviceAsync(mass);
+        repMass = reciprocal(mass);
         CudaExecutor::wait();
     }
 
@@ -269,39 +389,36 @@ namespace Physica::Core {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
         d_phase.swap(obj.d_phase);
+        mass.swap(obj.mass);
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         stepBuffer.swap(obj.stepBuffer);
         velocity.swap(obj.velocity);
         lockedBuffer.swap(obj.lockedBuffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
+        deltaT.swap(obj.deltaT);
+
+        std::swap(binaryRunKernelParams, obj.binaryRunKernelParams);
+        std::swap(postBinaryRunKernelParams, obj.postBinaryRunKernelParams);
+        std::swap(handleCollisionKernelParams, obj.handleCollisionKernelParams);
+        std::swap(binaryRunKernelNodeParams, obj.binaryRunKernelNodeParams);
+        std::swap(postBinaryRunKernelNodeParams, obj.postBinaryRunKernelNodeParams);
+        std::swap(handleCollisionKernelNodeParams, obj.handleCollisionKernelNodeParams);
+        copyDoneEvent.swap(obj.copyDoneEvent);
+
         std::swap(binaryRunGraphExec, obj.binaryRunGraphExec);
         std::swap(binaryRunGraph, obj.binaryRunGraph);
-        std::swap(binaryRunKernelParams, obj.binaryRunKernelParams);
-        std::swap(binaryRunKernelNodeParams, obj.binaryRunKernelNodeParams);
         std::swap(binaryRunKernelNode, obj.binaryRunKernelNode);
         std::swap(copyStepsNode, obj.copyStepsNode);
-        std::swap(postBinaryRunKernelParams, obj.postBinaryRunKernelParams);
-        std::swap(postBinaryRunKernelNodeParams, obj.postBinaryRunKernelNodeParams);
+        std::swap(copyDoneEventNode, obj.copyDoneEventNode);
         std::swap(postBinaryRunKernelNode, obj.postBinaryRunKernelNode);
-    }
+        std::swap(handleCollisionKernelNode, obj.handleCollisionKernelNode);
 
-    template<class ScalarType>
-    ScalarType HardCore<ScalarType, CudaExecutor>::binaryRun() {
-        const size_t numParticle = getNumParticle();
-        int device;
-        cudaGetDevice(&device);
-        const int numThread = WarpSize;
-        const int numBlock = stepBuffer.getLength() / 2;
-        cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, binaryRunKernelNode, &binaryRunKernelNodeParams));
-        cudaCheck(cudaGraphExecKernelNodeSetParams(binaryRunGraphExec, postBinaryRunKernelNode, &postBinaryRunKernelNodeParams));
-        cudaCheck(cudaGraphLaunch(binaryRunGraphExec, StreamPool::getStream()));
-
-        CudaExecutor::wait();
-
-        auto temp1 = lockedBuffer.head(2 * numBlock);
-        const auto lStep = temp1.head(numBlock).min();
-        return lStep;
+        std::swap(binaryRunNoCopyGraphExec, obj.binaryRunNoCopyGraphExec);
+        std::swap(binaryRunNoCopyGraph, obj.binaryRunNoCopyGraph);
+        std::swap(binaryRunKernelNode1, obj.binaryRunKernelNode1);
+        std::swap(postBinaryRunKernelNode1, obj.postBinaryRunKernelNode1);
+        std::swap(handleCollisionKernelNode1, obj.handleCollisionKernelNode1);
     }
     /**
      * Special implementation to make full use of limited pinned memory.

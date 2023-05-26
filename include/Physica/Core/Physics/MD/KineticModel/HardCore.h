@@ -49,7 +49,7 @@ namespace Physica::Core {
         [[nodiscard]] const Vector<ScalarType>& getVelocity() const noexcept { return velocity; }
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
-        void handleCollision(RingPolymerType& ringPolymer);
+        bool handleCollision(RingPolymerType& ringPolymer);
     };
 
     template<class ScalarType, class Executor>
@@ -85,6 +85,7 @@ namespace Physica::Core {
         buffer = pos;
         velocity = hadamard(momentum, repMass);
         size_t handleNum = 0;
+        bool isDrifted = false;
         while (true) {
             const ScalarType step = to - from;
             pos = buffer + velocity * step;
@@ -108,10 +109,13 @@ namespace Physica::Core {
                 from = lStep;
                 to = deltaT;
                 rStep = deltaT;
-                handleCollision(ringPolymer);
+                isDrifted |= handleCollision(ringPolymer);
                 velocity = hadamard(momentum, repMass);
             }
         }
+
+        if (isDrifted)
+            ringPolymer.removeDrift();
     }
 
     template<class ScalarType, class Executor>
@@ -162,7 +166,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class Executor>
-    void HardCore<ScalarType, Executor>::handleCollision(RingPolymerType& ringPolymer) {
+    bool HardCore<ScalarType, Executor>::handleCollision(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         auto pos = phase.tail(numParticle);
@@ -191,7 +195,6 @@ namespace Physica::Core {
             phase[i].toOpposite();
             isDrifted = true;
         }
-        if (isDrifted)
-            ringPolymer.removeDrift();
+        return isDrifted;
     }
 }

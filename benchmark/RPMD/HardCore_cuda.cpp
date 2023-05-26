@@ -22,6 +22,8 @@
 #include <gperftools/profiler.h>
 #include "Physica/Utils/Random.h"
 #include "Physica/Utils/BenchmarkHelper.h"
+#include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/CUDA/DeviceProp.cuh"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Parallel/StreamPool.cuh"
 
@@ -34,29 +36,17 @@ using MatrixType = DenseMatrix<ScalarType>;
 void run(unsigned int sys, MatrixType& record, std::mt19937& gen);
 
 int main() {
-    MatrixType record(1000, 8);
-    VectorType mean(record.getRow()), devia(record.getRow());
-    ThreadPool::numThreadRequired = 8;
+    Cycler::init();
     {
-        ThreadExecutor::parallel_for([&record](unsigned int sys) {
-            std::mt19937::result_type seed;
-            Physica::Utils::Random::rdrand(seed);
-            std::mt19937 gen(seed);
+        MatrixType record(50, 1);
+        std::mt19937::result_type seed;
+        Physica::Utils::Random::rdrand(seed);
+        std::mt19937 gen(seed);
 
-            run(sys, record, gen);
-        }, record.getColumn(), ThreadPool::numThreadRequired).wait();
-        ThreadPool::getInstance().shouldExit();
-
-        for (size_t i = 0; i < mean.getLength(); ++i) {
-            mean[i] = Physica::Core::mean(record.row(i));
-            devia[i] = Physica::Core::deviation(record.row(i));
-        }
-        const ScalarType factor = reciprocal(mean[0]);
-        mean *= factor;
-        devia *= factor;
-
-        std::ofstream fout("data");
-        fout << mean << devia;
+        auto timeuse = Benchmark::run([&]() {
+            run(0, record, gen);
+        }, 8, 10);
+        std::cout << "Time use(second): " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     return 0;
 }

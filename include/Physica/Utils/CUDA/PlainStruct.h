@@ -26,7 +26,7 @@ namespace Physica {
         PlainStruct() = default;
         PlainStruct(const PlainStruct&) = default;
         PlainStruct(PlainStruct&&) noexcept = default;
-        ~PlainStruct() = default;
+        //~PlainStruct() = default;  /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         PlainStruct& operator=(const PlainStruct&) = default;
         PlainStruct& operator=(PlainStruct&&) noexcept = default;

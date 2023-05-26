@@ -89,25 +89,25 @@ namespace Physica::Core {
     }
 
     template<ScalarOption option, bool errorTrack, class T>
-    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(
             Scalar<option, errorTrack>& s1, const T& s2) {
         s1 = s1 + s2;
     }
 
     template<ScalarOption option, bool errorTrack, class T>
-    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(
             Scalar<option, errorTrack>& s1, const T& s2) {
         s1 = s1 - s2;
     }
 
     template<ScalarOption option, bool errorTrack, class T>
-    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(
             Scalar<option, errorTrack>& s1, const T& s2) {
         s1 = s1 * s2;
     }
 
     template<ScalarOption option, bool errorTrack, class T>
-    inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(
             Scalar<option, errorTrack>& s1, const T& s2) {
         s1 = s1 / s2;
     }
@@ -125,17 +125,17 @@ namespace Physica::Core {
             , int bits) { s = s >> bits; }
 
     template<ScalarOption option>
-    inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 < s2);
     }
 
     template<ScalarOption option>
-    inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 > s2);
     }
 
     template<ScalarOption option>
-    inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
         return !(s1 == s2);
     }
 

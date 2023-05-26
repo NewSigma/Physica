@@ -42,7 +42,6 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, CudaExecutor>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -79,6 +78,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 }
 
 void testMergeStep() {
+    using KineticModel = HardCore<ScalarType, CudaExecutor>;
     std::mt19937 gen{};
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
@@ -104,30 +104,51 @@ void testMergeStep() {
 }
 
 void testCpuGpuCompare() {
-    std::mt19937 gen{};
+    constexpr int NumData = 11;
     constexpr double precision = 1E-8;
-    constexpr double data[11]{-82.035145, -320.467251, -49.894346, -280.663904, 248.243524, 42.686686, -290.446957, -116.543080, -131.538885, -285.989793, -111.176517};
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
-    kineticModel.updateMass(rpmd.getRingPolymer());
-    rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
-
-    Vector<ScalarType> mean(10, 0);
+    ScalarType cpu_data[NumData];
     {
+        using KineticModel = HardCore<ScalarType>;
+        std::mt19937 gen{};
+        MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+        KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
+        kineticModel.updateMass(rpmd.getRingPolymer());
+        rpmd.initMomentum(gen);
+        scaleVelocity(rpmd);
+
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+        cpu_data[0] = calcThermoFlux(rpmd);
+        rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
+        for (size_t j = 0; j < 10; ++j) {
+            cpu_data[j + 1] = calcThermoFlux(rpmd);
+            rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
+            scaleVelocity(rpmd);
+        }
+    }
+    ScalarType gpu_data[NumData];
+    {
+        using KineticModel = HardCore<ScalarType, CudaExecutor>;
+        std::mt19937 gen{};
+        MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+        KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
+        kineticModel.updateMass(rpmd.getRingPolymer());
+        rpmd.initMomentum(gen);
+        scaleVelocity(rpmd);
+
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
-        if (!scalarNear(calcThermoFlux(rpmd), ScalarType(data[0]), precision))
-            exit(EXIT_FAILURE);
-        kineticModel.pre_nve_step(rpmd.getRingPolymer());
-        kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
-        for (size_t j = 0; j < mean.getLength(); ++j) {
-            if (!scalarNear(calcThermoFlux(rpmd), ScalarType(data[j + 1]), precision))
-                exit(EXIT_FAILURE);
+        gpu_data[0] = calcThermoFlux(rpmd);
+        kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+        for (size_t j = 0; j < 10; ++j) {
+            gpu_data[j + 1] = calcThermoFlux(rpmd);
             kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+            kineticModel.post_nve_step(rpmd.getRingPolymer());
             scaleVelocity(rpmd);
             kineticModel.updateMomentum(rpmd.getRingPolymer());
         }
     }
+    for (int i = 0; i < NumData; ++i)
+        if (!scalarNear(gpu_data[i], cpu_data[i], precision))
+            exit(EXIT_FAILURE);
 }
 
 int main() {

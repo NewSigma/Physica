@@ -323,6 +323,20 @@ namespace Physica::Core {
     bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarType>& scalar2, double precision);
     template<ScalarOption option, bool errorTrack>
     std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s);
+    template<ScalarOption option, bool errorTrack, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(Scalar<option, errorTrack>& s1, const T& s2);
+    template<ScalarOption option, bool errorTrack, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(Scalar<option, errorTrack>& s1, const T& s2);
+    template<ScalarOption option, bool errorTrack, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(Scalar<option, errorTrack>& s1, const T& s2);
+    template<ScalarOption option, bool errorTrack, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(Scalar<option, errorTrack>& s1, const T& s2);
+    template<ScalarOption option>
+    __host__ __device__ inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
+    template<ScalarOption option>
+    __host__ __device__ inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
+    template<ScalarOption option>
+    __host__ __device__ inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
     template<>
     class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
