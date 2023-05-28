@@ -299,7 +299,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class ForceModel>
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::getClassicalInternalEnergy(const ForceModel& model) const {
-        return ringPolymer.getClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model) + getClassicalElastic();
+        return ringPolymer.calcClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model) + getClassicalElastic();
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

@@ -50,6 +50,7 @@ namespace Physica::Core {
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
         bool handleCollision(RingPolymerType& ringPolymer);
+        bool checkRepMass() const;
     };
 
     template<class ScalarType, class Executor>
@@ -77,6 +78,7 @@ namespace Physica::Core {
         auto momentum = phase.head(numParticle);
         auto pos = phase.tail(numParticle);
         assert(numParticle == repMass.getLength());
+        assert(checkRepMass());
 
         ScalarType lStep = 0;
         ScalarType rStep = deltaT;
@@ -196,5 +198,13 @@ namespace Physica::Core {
             isDrifted = true;
         }
         return isDrifted;
+    }
+
+    template<class ScalarType, class Executor>
+    bool HardCore<ScalarType, Executor>::checkRepMass() const {
+        bool isGood = true;
+        for (ScalarType elem : repMass)
+            isGood &= elem.isPositive();
+        return isGood;
     }
 }

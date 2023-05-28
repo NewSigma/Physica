@@ -36,6 +36,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     class FreeModel final {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
     public:
         /* Operations */
         /**
@@ -48,5 +49,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
     };
 }
