@@ -23,7 +23,7 @@
  */
 namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s);
+    __host__ __device__ inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s);

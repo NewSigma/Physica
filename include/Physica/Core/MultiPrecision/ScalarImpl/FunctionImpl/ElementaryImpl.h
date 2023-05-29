@@ -25,7 +25,7 @@
  */
 namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s) {
+    __host__ __device__ inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s) {
         using T = Scalar<option, errorTrack>;
         T temp(s);
         return T(std::move(temp.toAbs()));

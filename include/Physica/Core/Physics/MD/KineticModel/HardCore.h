@@ -80,12 +80,12 @@ namespace Physica::Core {
         assert(numParticle == repMass.getLength());
         assert(checkRepMass());
 
+        buffer = pos;
+        velocity = hadamard(momentum, repMass);
         ScalarType lStep = 0;
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
-        buffer = pos;
-        velocity = hadamard(momentum, repMass);
         size_t handleNum = 0;
         bool isDrifted = false;
         while (true) {
@@ -173,10 +173,6 @@ namespace Physica::Core {
         auto phase = ringPolymer.asMatrix().col(0);
         auto pos = phase.tail(numParticle);
         bool isDrifted = false;
-        if (!pos[0].isPositive()) {
-            phase[0].toOpposite();
-            isDrifted = true;
-        }
 
         const auto& mass = ringPolymer.getMassVec();
         size_t i = 0;
@@ -193,8 +189,12 @@ namespace Physica::Core {
             }
         }
 
+        if (!pos[0].isPositive()) {
+            phase[0] = abs(phase[0]);
+            isDrifted = true;
+        }
         if (pos[i] > latticeSize) {
-            phase[i].toOpposite();
+            phase[i] = -abs(phase[i]);
             isDrifted = true;
         }
         return isDrifted;

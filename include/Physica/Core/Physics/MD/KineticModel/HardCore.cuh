@@ -47,34 +47,11 @@ namespace Physica::Core {
         PageLockedVector lockedBuffer;
         size_t maxHandleNum;
         ScalarType deltaT;
-
-
-        void* binaryRunKernelParams[8];
-        void* postBinaryRunKernelParams[5];
-        void* handleCollisionKernelParams[3];
-        cudaKernelNodeParams binaryRunKernelNodeParams;
-        cudaKernelNodeParams postBinaryRunKernelNodeParams;
-        cudaKernelNodeParams handleCollisionKernelNodeParams;
-        CudaEvent copyDoneEvent;
-
-        cudaGraphExec_t binaryRunGraphExec;
-        cudaGraph_t binaryRunGraph;
-        cudaGraphNode_t binaryRunKernelNode;
-        cudaGraphNode_t copyStepsNode;
-        cudaGraphNode_t copyDoneEventNode;
-        cudaGraphNode_t postBinaryRunKernelNode;
-        cudaGraphNode_t handleCollisionKernelNode;
-
-        cudaGraphExec_t binaryRunNoCopyGraphExec;
-        cudaGraph_t binaryRunNoCopyGraph;
-        cudaGraphNode_t binaryRunKernelNode1;
-        cudaGraphNode_t postBinaryRunKernelNode1;
-        cudaGraphNode_t handleCollisionKernelNode1;
     public:
         HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
-        ~HardCore();
+        ~HardCore() = default;
         /* Operators */
         HardCore& operator=(HardCore obj) noexcept;
         /* Operations */
@@ -88,12 +65,9 @@ namespace Physica::Core {
 
         void updateMomentum(RingPolymerType& ringPolymer);
         void updateMass(RingPolymerType& ringPolymer);
-        void swap(HardCore& obj) noexcept; //TODO: graph related
+        void swap(HardCore& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return repMass.getLength(); }
-    private:
-        ScalarType binaryRun();
-        void handleCollision(RingPolymerType& ringPolymer);
     };
 }
 

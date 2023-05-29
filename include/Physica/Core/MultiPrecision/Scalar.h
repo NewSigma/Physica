@@ -205,7 +205,7 @@ namespace Physica::Core {
         protected:
             /* Helpers */
             AbstractScalar& toOpposite() noexcept { f = -f; return *this; }
-            AbstractScalar& toAbs() noexcept { f = fabsf(f); return *this; }
+            __host__ __device__ AbstractScalar& toAbs() noexcept { f = fabsf(f); return *this; }
             void swap(AbstractScalar& s) noexcept { std::swap(f, s.f); }
         };
 
@@ -236,7 +236,7 @@ namespace Physica::Core {
         protected:
             /* Helpers */
             AbstractScalar& toOpposite() noexcept { d = -d; return *this; }
-            AbstractScalar& toAbs() noexcept { d = fabs(d); return *this; }
+            __host__ __device__ AbstractScalar& toAbs() noexcept { d = fabs(d); return *this; }
             void swap(AbstractScalar& s) noexcept { std::swap(d, s.d); }
         };
     }
@@ -477,7 +477,7 @@ namespace Physica::Core {
         inline Scalar(const Scalar<Float, true>& s);
         __host__ __device__ inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
         __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
@@ -490,7 +490,7 @@ namespace Physica::Core {
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
+        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept { Base::swap(s); }
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -524,7 +524,7 @@ namespace Physica::Core {
         explicit Scalar(const Rational& r, float a_ = 0) : Base(r), a(a_) {}
         Scalar(const Scalar<Float, false>& s) : Base(s), a(0) {}
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
         Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
@@ -537,7 +537,7 @@ namespace Physica::Core {
         Scalar operator-() const noexcept { return Scalar(-f, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
+        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept;
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -572,7 +572,7 @@ namespace Physica::Core {
         __host__ __device__ inline Scalar(const Scalar<Float, false>& s);
         Scalar(const Scalar<Double, true>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         __host__ __device__ explicit operator double() const { return d; }
         __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
@@ -586,7 +586,7 @@ namespace Physica::Core {
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
+        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
@@ -620,7 +620,7 @@ namespace Physica::Core {
         explicit Scalar(const Rational& r, double a_ = 0) : Base(r), a(a_) {}
         inline Scalar(const Scalar<Double, false>& s);
         Scalar(const Scalar& s) = default;
-        ~Scalar() = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
         Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
@@ -633,7 +633,7 @@ namespace Physica::Core {
         Scalar operator-() const noexcept { return Scalar(-d, a); }
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
+        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept;
         [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
         [[nodiscard]] static inline Scalar One() { return Scalar(1); }
