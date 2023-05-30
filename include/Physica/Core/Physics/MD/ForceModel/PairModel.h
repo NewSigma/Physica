@@ -27,7 +27,7 @@ namespace Physica::Core {
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class ScalarType, class PosScalarType, class PairFunctor>
-    class PairModel final {
+    class PairModel {
         using ResultType = typename std::invoke_result<PairFunctor, PosScalarType>::type;
         static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");

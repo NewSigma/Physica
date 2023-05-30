@@ -4,9 +4,9 @@ Derivation of $\tilde C_{\mathbf{vv}}(t)$
 
 $$\tilde C_{\mathbf{rr}}(t) = \langle \frac{1}{N} \sum_i^N \mathbf{\overline r}_i(0) \cdot \mathbf{\overline r}_i(t) \rangle$$
 
-$$\frac{\mathrm d}{\mathrm d t}C_{\mathbf{rr}}(t) = \langle \frac{1}{N} \sum_i^N \mathbf{\overline r}_i(0) \cdot \mathbf{\overline p}_i(t) \rangle = -\langle \frac{1}{N} \sum_i^N \mathbf{\overline p}_i(0) \cdot \mathbf{\overline r}_i(t) \rangle$$
+$$\frac{\mathrm d}{\mathrm d t}C_{\mathbf{rr}}(t) = \langle \frac{1}{N} \sum_i^N \mathbf{\overline r}_i(0) \cdot \mathbf{\overline v}_i(t) \rangle = -\langle \frac{1}{N} \sum_i^N \mathbf{\overline v}_i(0) \cdot \mathbf{\overline r}_i(t) \rangle$$
 
-$$\tilde C_{\mathbf{vv}}(t) = -\frac{\mathrm d^2}{\mathrm d t^2}C_{\mathbf{rr}}(t) = \langle \frac{1}{N} \sum_i^N \mathbf{\overline p}_i(0) \cdot \mathbf{\overline p}_i(t) \rangle$$
+$$\tilde C_{\mathbf{vv}}(t) = -\frac{\mathrm d^2}{\mathrm d t^2}C_{\mathbf{rr}}(t) = \langle \frac{1}{N} \sum_i^N \mathbf{\overline v}_i(0) \cdot \mathbf{\overline v}_i(t) \rangle = \langle \frac{1}{N} \sum_i^N \frac{\mathbf{\overline p}_i(0) \cdot \mathbf{\overline p}_i(t) \rangle}{m_i^2}$$
 
 According to classical statistical physics
 

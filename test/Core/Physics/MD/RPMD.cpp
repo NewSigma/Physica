@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -29,6 +29,7 @@ using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
+using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -79,40 +80,6 @@ ScalarType pot_functor(ScalarType r) {
     return result;
 }
 
-ScalarType force(ScalarType r) {
-    constexpr double alpha = 1.713;
-    constexpr double beta = 1.5671;
-    constexpr double gamma = 0.00993;
-    constexpr double cutoff = 8.32;
-    constexpr double c6 = 12.14;
-    constexpr double c8 = 215.2;
-    constexpr double c9 = 143.1;
-    constexpr double c10 = 4813.9;
-
-    const ScalarType r2 = square(r);
-    ScalarType result = exp(-r2 * gamma - r * beta + alpha) * (r * (gamma * 2) + beta);
-    const ScalarType rep_r = reciprocal(r);
-    const ScalarType rep_r2 = square(rep_r);
-    const ScalarType rep_r4 = square(rep_r2);
-    const ScalarType rep_r6 = rep_r4 * rep_r2;
-    const ScalarType rep_r7 = rep_r6 * rep_r;
-    const ScalarType rep_r9 = rep_r7 * rep_r2;
-    const ScalarType rep_r10 = rep_r6 * rep_r4;
-    const ScalarType rep_r11 = rep_r7 * rep_r4;
-
-    const ScalarType d_g = rep_r10 * (9 * c9) - rep_r11 * (10 * c10) - rep_r9 * (8 * c8) - rep_r7 * (6 * c6);
-    if (r < cutoff) {
-        const ScalarType rep_r8 = square(rep_r4);
-        const ScalarType g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
-        const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
-        result += (d_g + g * rep_r * (rep_r2 * (2 * cutoff * cutoff) - rep_r * (2 * cutoff))) * f_cutoff;
-    }
-    else {
-        result += d_g;
-    }
-    return result;
-}
-
 template<class RandomGenerator>
 RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
@@ -148,20 +115,20 @@ int main() {
         if (!testDriftMomentum(rpmd, 1E-12))
             return 1;
 
-        PairModel<ScalarType, PosScalarType, decltype(&force)> pair(ScalarType(pair_cutoff), force, pot_functor);
-        rpmd.updateForce<decltype(pair), ThreadExecutor>(pair);
+        ForceModel forceModel(pair_cutoff);
+        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(
+            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 gen,
                 kineticModel,
-                pair);
+                forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, decltype(pair), ThreadExecutor>(thermo, gen, kineticModel, pair);
+                rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(thermo, gen, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic());
             }
             toNextVariance(var, mean, i, temp);
