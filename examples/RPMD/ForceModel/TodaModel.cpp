@@ -68,7 +68,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     const ForceModel forceModel{};
-    KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
     rpmd.updateForce<ForceModel, SequentialExecutor>(forceModel);

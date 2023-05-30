@@ -30,14 +30,16 @@ namespace Physica::Core {
                 ScalarType latticeSize,
                 ScalarType* sharedBuffer) {
             constexpr double MaxDouble = 1.797693E308;
-            const size_t numParticle = phase.getLength() / 2;
             const unsigned int threadId = threadIdx.x;
+            const size_t numParticle = mass.getLength();
             auto momentum = phase.head(numParticle);
             auto pos = phase.tail(numParticle);
-            sharedBuffer[threadId + 1] = MaxDouble;
+
             sharedBuffer[threadId] = pos[threadId];
+            if (threadId == blockDim.x - 1)
+                sharedBuffer[blockDim.x] = MaxDouble;
             __syncthreads();
-            if (threadId < numParticle - 1 && pos[threadId] > pos[threadId + 1]) {
+            if (sharedBuffer[threadId] > sharedBuffer[threadId + 1]) {
                 const ScalarType m1 = mass[threadId];
                 const ScalarType m2 = mass[threadId + 1];
                 const ScalarType p1 = momentum[threadId];
@@ -52,7 +54,7 @@ namespace Physica::Core {
             }
             __syncthreads();
             const size_t lastParticle = numParticle - 1;
-            if (threadId && lastParticle && pos[lastParticle] > latticeSize) {
+            if (threadId == lastParticle && pos[lastParticle] > latticeSize) {
                 momentum[lastParticle] = -abs(momentum[lastParticle]);
             }
             __syncthreads();
@@ -83,9 +85,39 @@ namespace Physica::Core {
         }
 
         template<class ScalarType>
+        __device__ inline void scaleVelocity(
+                typename HardCore<ScalarType, CudaExecutor>::DeviceVector& phase,
+                const typename HardCore<ScalarType, CudaExecutor>::DeviceVector& repMass,
+                ScalarType temperatureT,
+                ScalarType* sharedBuffer) {
+            const unsigned int numThread = blockDim.x;
+            const unsigned int threadId = threadIdx.x;
+            const size_t numParticle = phase.getLength() / 2;
+            auto momentum = phase.head(numParticle);
+
+            ScalarType sum = 0;
+            for (int i = threadId; i < numParticle; i += numThread)
+                sum += square(momentum[i]) * repMass[i];
+            sharedBuffer[threadId] = sum;
+            
+            for (int shift = (numThread + 1) / 2; shift != 0; shift /= 2) {
+                __syncthreads();
+                if (threadId < shift && threadId + shift < numThread)
+                    sharedBuffer[threadId] += sharedBuffer[threadId + shift];
+            }
+            __syncthreads();
+            const ScalarType temperatureNow = sharedBuffer[0] / ScalarType(numParticle);
+            const ScalarType factor = sqrt(temperatureT / temperatureNow);
+            for (int i = threadId; i < numParticle; i += numThread) {
+                momentum[i] *= factor;
+            }
+        }
+
+        template<class ScalarType>
         __global__ void step_kernel(
                 ScalarType latticeSize,
                 ScalarType collideStep,
+                ScalarType temperatureT,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> phase_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> mass_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> repMass_,
@@ -106,11 +138,9 @@ namespace Physica::Core {
 
             auto momentum = phase.head(numParticle);
             auto pos = phase.tail(numParticle);
-            __shared__ ScalarType sharedBuffer[512 + 1];
+            extern __shared__ ScalarType sharedBuffer[];
             buffer[threadId] = pos[threadId];
             velocity[threadId] = hadamard(momentum, repMass).calc(threadId);
-            sharedBuffer[threadId + 1] = latticeSize;
-
             
             ScalarType lStep = 0;
             ScalarType rStep = deltaT;
@@ -118,9 +148,10 @@ namespace Physica::Core {
             ScalarType to = deltaT;
             size_t handleNum = 0;
             while (true) {
-                __syncthreads();
                 const ScalarType step = to - from;
-                sharedBuffer[threadId] = (buffer + velocity * step).calc(threadId);
+                sharedBuffer[threadId] = buffer[threadId] + velocity[threadId] * step;
+                if (threadId == blockDim.x - 1)
+                    sharedBuffer[blockDim.x] = latticeSize;
                 __syncthreads();
                 const bool flag = sharedBuffer[threadId] > sharedBuffer[threadId + 1]
                                 || (!sharedBuffer[threadId].isPositive());
@@ -139,7 +170,7 @@ namespace Physica::Core {
                 const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
                 if (isDeltaSmallEnough) {
                     if (handleNum == maxHandleNum) [[unlikely]]
-                        return;
+                        __trap();
                     handleNum += 1;
                     pos[threadId] = buffer[threadId] + velocity[threadId] * (rStep - from);
                     buffer[threadId] += velocity[threadId] * (lStep - from);
@@ -148,17 +179,19 @@ namespace Physica::Core {
                     rStep = deltaT;
                     handleCollision(phase, mass_.getDerived(), latticeSize, sharedBuffer);
                     velocity[threadId] = hadamard(momentum, repMass).calc(threadId);
-                    sharedBuffer[threadId + 1] = latticeSize;
                 }
             }
             removeDrift(phase, sharedBuffer);
+            scaleVelocity(phase, repMass, temperatureT, sharedBuffer);
         }
     }
 
     template<class ScalarType>
-    HardCore<ScalarType, CudaExecutor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_)
+    HardCore<ScalarType, CudaExecutor>::HardCore(
+            ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
+            , temperatureT(temperatureT_)
             , d_phase(2 * numParticle)
             , mass(numParticle)
             , repMass(numParticle)
@@ -207,9 +240,10 @@ namespace Physica::Core {
         }
         const size_t numParticle = getNumParticle();
         const unsigned int numThread = numParticle > 1024 ? 1024 : numParticle;
-        Internal::step_kernel<<<1, numThread, 0, StreamPool::getStream()>>>(
+        Internal::step_kernel<<<1, numThread, (numThread + 1) * sizeof(ScalarType), StreamPool::getStream()>>>(
                 latticeSize,
                 collideFactor * deltaT,
+                temperatureT,
                 asStruct(d_phase),
                 asStruct(mass),
                 asStruct(repMass),
@@ -261,6 +295,7 @@ namespace Physica::Core {
     void HardCore<ScalarType, CudaExecutor>::swap(HardCore& obj) noexcept {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
+        temperatureT.swap(obj.temperatureT);
         d_phase.swap(obj.d_phase);
         mass.swap(obj.mass);
         repMass.swap(obj.repMass);

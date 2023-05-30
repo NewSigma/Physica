@@ -32,7 +32,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s) {
+    __host__ __device__ Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s) {
         return s * s;
     }
     /*!
@@ -99,7 +99,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption option>
-    Scalar<option, false> sqrt(const Scalar<option, false>& s) {
+    __host__ __device__ Scalar<option, false> sqrt(const Scalar<option, false>& s) {
         return Scalar<option, false>(std::sqrt(s.getTrivial()));
     }
 

@@ -39,6 +39,7 @@ constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
 constexpr double energy = 20;
+constexpr double temperatureT = 2 * energy / numMolecular;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
     scaleVelocity(rpmd);
-    KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     MatrixType record(10000, rpmd.getNumParticle());

@@ -30,12 +30,13 @@ namespace Physica::Core {
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;
+        ScalarType temperatureT;
         Vector<ScalarType> repMass;
         Vector<ScalarType> buffer;
         Vector<ScalarType> velocity;
         size_t maxHandleNum;
     public:
-        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
+        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;
@@ -54,9 +55,10 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class Executor>
-    HardCore<ScalarType, Executor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_)
+    HardCore<ScalarType, Executor>::HardCore(ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
+            , temperatureT(temperatureT_)
             , repMass(numParticle, 0)
             , buffer(numParticle)
             , velocity(numParticle)
@@ -116,8 +118,15 @@ namespace Physica::Core {
             }
         }
 
-        if (isDrifted)
+        if (isDrifted) {
             ringPolymer.removeDrift();
+            const size_t numParticle = ringPolymer.getNumParticle();
+            const ScalarType energy = temperatureT * ScalarType(numParticle) * 0.5;
+            const ScalarType energy1 = ringPolymer.calcClassicalKinetic();
+            auto phase = ringPolymer.asMatrix().col(0);
+            auto momentum = phase.head(numParticle);
+            momentum *= sqrt(energy / energy1);
+        }
     }
 
     template<class ScalarType, class Executor>
@@ -129,6 +138,7 @@ namespace Physica::Core {
     void HardCore<ScalarType, Executor>::swap(HardCore& obj) noexcept {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
+        temperatureT.swap(temperatureT);
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         velocity.swap(obj.velocity);

@@ -52,7 +52,6 @@ struct ProgramArgs {
 std::unique_ptr<ODE> solveEqu(const ProgramArgs& args) {
     const T m2_h_2 = T(2 * args.reducedMass.getTrivial() / (PhyConst<SI>::reducedPlanck * PhyConst<SI>::reducedPlanck) * PhyConst<SI>::unitCharge * 1E-23) * square(args.rho); //1E-23 for unit conversion
     const T stepSize(0.001);
-    T crossSection = 0;
 
     const T r0 = args.rho * T(0.6);
     const T r0_2 = square(r0);

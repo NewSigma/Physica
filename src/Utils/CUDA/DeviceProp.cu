@@ -30,7 +30,7 @@ namespace Physica::Utils {
         /* Memory amount */
         os << "  Memory amount:\n";
         os << "  Total amount of global memory:                 "
-                  << (float)prop.totalGlobalMem / pow(1024.0, 3) << "GBytes ("
+                  << (float)prop.totalGlobalMem / pow(1024.0, 3) << " GBytes ("
                   << (unsigned long long)prop.totalGlobalMem << " bytes)\n";
         os << "  Shared memory per multiprocessor:              " << prop.sharedMemPerMultiprocessor << " bytes\n";
         os << "  Shared memory per block:                       " << prop.sharedMemPerBlock << " bytes\n";

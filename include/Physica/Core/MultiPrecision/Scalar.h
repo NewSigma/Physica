@@ -33,10 +33,10 @@ namespace Physica::Core {
     Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
 
     template<ScalarOption option>
-    Scalar<option, false> sqrt(const Scalar<option, false>& s);
+    __host__ __device__ Scalar<option, false> sqrt(const Scalar<option, false>& s);
 
     template<ScalarOption option>
-    Scalar<option, true> sqrt(const Scalar<option, true>& s);
+    __host__ __device__ Scalar<option, true> sqrt(const Scalar<option, true>& s);
 
     template<ScalarOption option>
     Scalar<option, false> ln(const Scalar<option, false>& s);
@@ -169,9 +169,9 @@ namespace Physica::Core {
                 template<bool errorTrack>
                 friend Scalar<MultiPrecision, errorTrack> Core::square(const Scalar<MultiPrecision, errorTrack>& s);
                 template<ScalarOption option>
-                friend Scalar<option, false> Core::sqrt(const Scalar<option, false>& s);
+                __host__ __device__ friend Scalar<option, false> Core::sqrt(const Scalar<option, false>& s);
                 template<ScalarOption option>
-                friend Scalar<option, true> Core::sqrt(const Scalar<option, true>& s);
+                __host__ __device__ friend Scalar<option, true> Core::sqrt(const Scalar<option, true>& s);
                 template<ScalarOption option>
                 friend Scalar<option, false> Core::ln(const Scalar<option, false>& s);
                 template<ScalarOption option>
@@ -452,7 +452,7 @@ namespace Physica::Core {
         friend class Internal::AbstractScalar<MultiPrecision>;
         friend class Scalar<MultiPrecision, false>;
         template<ScalarOption option>
-        friend Scalar<option, true> sqrt(const Scalar<option, true>& s);
+        __host__ __device__ friend Scalar<option, true> sqrt(const Scalar<option, true>& s);
         template<ScalarOption option>
         friend Scalar<option, true> ln(const Scalar<option, true>& s);
     };

@@ -26,13 +26,13 @@ namespace Physica::Core {
     __host__ __device__ inline Scalar<option, errorTrack> abs(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s);
+    __host__ __device__ Scalar<option, errorTrack> square(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
     __host__ __device__ inline Scalar<option, errorTrack> reciprocal(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sqrt(const Scalar<option, errorTrack>& s);
+    __host__ __device__ Scalar<option, errorTrack> sqrt(const Scalar<option, errorTrack>& s);
 
     template<ScalarOption option, bool errorTrack>
     Scalar<option, errorTrack> cbrt(const Scalar<option, errorTrack>& s);

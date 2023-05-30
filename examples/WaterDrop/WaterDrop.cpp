@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
         std::thread threads[5];
         for (unsigned int i = 0; i < threadCount; ++i) {
             threads[i] = std::thread([&, i = i]() {
-                WaterDropArgs args{startRadius, sigma, rho, 1, 9.8};
+                WaterDropArgs args{startRadius, sigma, rho, 1, g};
                 args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
                 parallelSolve(args, { r_arr
                                     , lambda_arr

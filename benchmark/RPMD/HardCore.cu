@@ -74,7 +74,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 
 void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    KineticModel kineticModel(latticeSize, collideFactor, numMolecular, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
     scaleVelocity(rpmd);

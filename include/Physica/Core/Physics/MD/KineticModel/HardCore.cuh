@@ -38,6 +38,7 @@ namespace Physica::Core {
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;
+        ScalarType temperatureT;
         DeviceVector d_phase;
         DeviceVector mass;
         DeviceVector repMass;
@@ -48,7 +49,7 @@ namespace Physica::Core {
         size_t maxHandleNum;
         ScalarType deltaT;
     public:
-        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, size_t numParticle, size_t maxHandleNum_);
+        HardCore(ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;

@@ -82,7 +82,7 @@ namespace Physica::Core {
         const size_t dof = ringPolymer.getDOF();
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
-        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+        [[maybe_unused]] const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
         const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
         auto& buffer = ringPolymer.getBuffer();
