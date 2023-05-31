@@ -45,7 +45,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "\
 ${CMAKE_CXX_FLAGS} \
--Wall -Wextra \
+-Wall \
+-Wextra \
 -fPIC \
 -mrdrnd \
 -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'") #Define macro __FILENAME__
@@ -65,7 +66,7 @@ if(${PHYSICA_CUDA})
         --diag-suppress 174 \
         --diag-suppress 186 \
         --diag-suppress 20011 \
-        -D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
+        ${CMAKE_CXX_FLAGS}")
 endif()
 
 if(${RUN_CHECKS})

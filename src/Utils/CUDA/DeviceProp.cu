@@ -101,7 +101,7 @@ namespace Physica::Utils {
             throw Core::CudaException(code);
 
         propList.resize(deviceCount);
-        for (int i = 0; i < propList.getLength(); ++i) {
+        for (size_t i = 0; i < propList.getLength(); ++i) {
             code = cudaGetDeviceProperties(&propList[i], i);
             if (code != cudaError_t::cudaSuccess)
                 throw Core::CudaException(code);

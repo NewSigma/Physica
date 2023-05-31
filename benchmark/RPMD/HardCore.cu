@@ -18,10 +18,18 @@
  */
 #include <algorithm>
 #include <fstream>
+#include <iostream>
+#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
+#include "Physica/Utils/Random.h"
+#include "Physica/Utils/BenchmarkHelper.h"
+#include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/CUDA/DeviceProp.cuh"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
+using namespace Physica::Utils;
 constexpr double timeStep = 0.1;
 constexpr double collideFactor = 0.005;
 const size_t numMolecular = 512;
@@ -93,4 +101,20 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
         }
     }
     record[sys] = std::move(mean);
+}
+
+int main() {
+    Cycler::init();
+    {
+        MatrixType record(50, 1);
+        std::mt19937::result_type seed;
+        Physica::Utils::Random::rdrand(seed);
+        std::mt19937 gen(seed);
+
+        auto timeuse = Benchmark::run([&]() {
+            run(0, record, gen);
+        }, 8, 10);
+        std::cout << "Time use(second): " << timeuse.first << '(' << timeuse.second << ")\n";
+    }
+    return 0;
 }

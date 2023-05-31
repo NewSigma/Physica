@@ -52,7 +52,7 @@ namespace Physica::Core {
     template<class OtherDerived>
     __host__ __device__
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
-        Internal::assignTo_kernel<device_obj<Derived>, device_obj<OtherDerived>>;
+        [[maybe_unused]] const auto _ = Internal::assignTo_kernel<device_obj<Derived>, device_obj<OtherDerived>>;
     #ifndef  __CUDA_ARCH__
         using namespace Physica;
         constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;

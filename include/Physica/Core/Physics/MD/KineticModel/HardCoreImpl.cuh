@@ -24,7 +24,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType>
-        __device__ inline void handleCollision(
+        __device__ inline bool handleCollision(
                 typename HardCore<ScalarType, CudaExecutor>::DeviceVector& phase,
                 const typename HardCore<ScalarType, CudaExecutor>::DeviceVector& mass,
                 ScalarType latticeSize,
@@ -49,15 +49,18 @@ namespace Physica::Core {
                 momentum[threadId] = next_p1;
                 momentum[threadId + 1] = next_p2;
             }
-            if (threadId == 0 && !pos[0].isPositive()) {
+            const bool isRightDrift = !pos[0].isPositive();
+            if (threadId == 0 && isRightDrift) {
                 momentum[0] = abs(momentum[0]);
             }
             __syncthreads();
             const size_t lastParticle = numParticle - 1;
-            if (threadId == lastParticle && pos[lastParticle] > latticeSize) {
+            const bool isLeftDrift = pos[lastParticle] > latticeSize;
+            if (threadId == lastParticle && isLeftDrift) {
                 momentum[lastParticle] = -abs(momentum[lastParticle]);
             }
             __syncthreads();
+            return isRightDrift || isLeftDrift;
         }
 
         template<class ScalarType>
@@ -122,13 +125,11 @@ namespace Physica::Core {
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> mass_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> repMass_,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
-                Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> velocity_,
                 ScalarType deltaT,
                 size_t maxHandleNum) {
             auto& phase = phase_.getDerived();
             const auto& repMass = repMass_.getDerived();
             auto& buffer = buffer_.getDerived();
-            auto& velocity = velocity_.getDerived();
 
             const unsigned int threadId = threadIdx.x;
             const size_t numParticle = buffer.getLength();
@@ -140,16 +141,17 @@ namespace Physica::Core {
             auto pos = phase.tail(numParticle);
             extern __shared__ ScalarType sharedBuffer[];
             buffer[threadId] = pos[threadId];
-            velocity[threadId] = hadamard(momentum, repMass).calc(threadId);
+            ScalarType velocity = hadamard(momentum, repMass).calc(threadId);
             
             ScalarType lStep = 0;
             ScalarType rStep = deltaT;
             ScalarType from = 0;
             ScalarType to = deltaT;
             size_t handleNum = 0;
+            bool isDrifted = false;
             while (true) {
                 const ScalarType step = to - from;
-                sharedBuffer[threadId] = buffer[threadId] + velocity[threadId] * step;
+                sharedBuffer[threadId] = buffer[threadId] + velocity * step;
                 if (threadId == blockDim.x - 1)
                     sharedBuffer[blockDim.x] = latticeSize;
                 __syncthreads();
@@ -172,17 +174,19 @@ namespace Physica::Core {
                     if (handleNum == maxHandleNum) [[unlikely]]
                         __trap();
                     handleNum += 1;
-                    pos[threadId] = buffer[threadId] + velocity[threadId] * (rStep - from);
-                    buffer[threadId] += velocity[threadId] * (lStep - from);
+                    pos[threadId] = buffer[threadId] + velocity * (rStep - from);
+                    buffer[threadId] += velocity * (lStep - from);
                     from = lStep;
                     to = deltaT;
                     rStep = deltaT;
-                    handleCollision(phase, mass_.getDerived(), latticeSize, sharedBuffer);
-                    velocity[threadId] = hadamard(momentum, repMass).calc(threadId);
+                    isDrifted |= handleCollision(phase, mass_.getDerived(), latticeSize, sharedBuffer);
+                    velocity = hadamard(momentum, repMass).calc(threadId);
                 }
             }
-            removeDrift(phase, sharedBuffer);
-            scaleVelocity(phase, repMass, temperatureT, sharedBuffer);
+            if (isDrifted) {
+                removeDrift(phase, sharedBuffer);
+                scaleVelocity(phase, repMass, temperatureT, sharedBuffer);
+            }
         }
     }
 
@@ -196,7 +200,6 @@ namespace Physica::Core {
             , mass(numParticle)
             , repMass(numParticle)
             , buffer(numParticle)
-            , velocity(numParticle)
             , lockedBuffer(numParticle * 2)
             , maxHandleNum(maxHandleNum_)
             , deltaT(0) {
@@ -232,7 +235,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::do_nve_step(RingPolymerType& ringPolymer, ScalarType deltaT_) {
+    void HardCore<ScalarType, CudaExecutor>::do_nve_step([[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT_) {
         assert(getNumParticle() == ringPolymer.getNumParticle());
         assert(deltaT_.isPositive());
         if (deltaT != deltaT_) {
@@ -248,7 +251,6 @@ namespace Physica::Core {
                 asStruct(mass),
                 asStruct(repMass),
                 asStruct(buffer),
-                asStruct(velocity),
                 deltaT,
                 maxHandleNum);
     }
@@ -279,7 +281,6 @@ namespace Physica::Core {
         auto head = lockedBuffer.head(getNumParticle());
         head = momentum;
         head.toDeviceAsync(d_momentum);
-        velocity = hadamard(d_momentum, repMass);
     }
 
     template<class ScalarType>
@@ -300,7 +301,6 @@ namespace Physica::Core {
         mass.swap(obj.mass);
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
-        velocity.swap(obj.velocity);
         lockedBuffer.swap(obj.lockedBuffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
         deltaT.swap(obj.deltaT);

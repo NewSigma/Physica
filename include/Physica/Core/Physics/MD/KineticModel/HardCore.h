@@ -121,11 +121,10 @@ namespace Physica::Core {
         if (isDrifted) {
             ringPolymer.removeDrift();
             const size_t numParticle = ringPolymer.getNumParticle();
-            const ScalarType energy = temperatureT * ScalarType(numParticle) * 0.5;
-            const ScalarType energy1 = ringPolymer.calcClassicalKinetic();
+            const ScalarType temperatureNow = ringPolymer.calcClassicalKinetic() * 2.0 / ScalarType(numParticle);
             auto phase = ringPolymer.asMatrix().col(0);
             auto momentum = phase.head(numParticle);
-            momentum *= sqrt(energy / energy1);
+            momentum *= sqrt(temperatureT / temperatureNow);
         }
     }
 

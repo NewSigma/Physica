@@ -44,7 +44,6 @@ namespace Physica::Core {
         DeviceVector repMass;
         DeviceVector buffer;
         DeviceVector stepBuffer;
-        DeviceVector velocity;
         PageLockedVector lockedBuffer;
         size_t maxHandleNum;
         ScalarType deltaT;

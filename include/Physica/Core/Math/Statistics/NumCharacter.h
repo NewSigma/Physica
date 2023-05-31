@@ -29,7 +29,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void toNextMean(ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+    __host__ __device__ inline void toNextMean(ScalarType& mean, size_t lastNumSample, ScalarType sample) {
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;

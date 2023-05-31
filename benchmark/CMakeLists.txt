@@ -1,9 +1,6 @@
 include(../cmake/Modules/PhysicaAddBenchmark.cmake)
 
-if(${PHYSICA_CUDA})
-    set(SOURCE_HardCore_cuda RPMD/HardCore_cuda.cpp RPMD/HardCore.cu)
-    physica_add_benchmark(HardCore_cuda ${SOURCE_HardCore_cuda})
-endif()
+physica_add_benchmark(HardCore_cuda RPMD/HardCore.cu)
 physica_add_benchmark(KSSolver KSSolver.cpp)
 physica_add_benchmark(ParaH ParaH.cpp)
 physica_add_benchmark(Q_TIP4P Q_TIP4P.cpp)
