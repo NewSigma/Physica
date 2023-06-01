@@ -23,10 +23,7 @@
 namespace Physica::Core {
     IceGenerator::IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_)
             : maxDistOO(maxDistOO_)
-            , maxDistOH(maxDistOH_) {
-        isHydrogenOccupied.resize(getEndIndexH());
-        numHydrogenRequired.resize(getNumMolecule());
-    }
+            , maxDistOH(maxDistOH_) {}
 
     IceGenerator::IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
             : IceGenerator(maxDistOO_, maxDistOH_) {
@@ -102,6 +99,8 @@ namespace Physica::Core {
         initialCell.swap(cell);
         if (initialCell.getType() == CrystalCell::Type::Direct)
             initialCell.toCartesian();
+        isHydrogenOccupied.resize(getEndIndexH());
+        numHydrogenRequired.resize(getNumMolecule());
     }
 
     typename IceGenerator::PositionMatrix IceGenerator::prepareRun() {
