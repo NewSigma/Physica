@@ -16,30 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/StreamWrapper.cuh"
+#pragma once
+
+#include <cuda_runtime.h>
 
 namespace Physica::Core {
-    StreamWrapper::StreamWrapper() {
-        cudaStreamCreate(&stream);
-    }
+    class StreamPool;
 
-    StreamWrapper::StreamWrapper(cudaStream_t stream_) : stream(stream_) {}
+    class CudaStream {
+        cudaStream_t stream;
+    public:
+        CudaStream();
+        CudaStream(const CudaStream&) = delete;
+        CudaStream(CudaStream&& obj) noexcept;
+        ~CudaStream();
+        /* Operators */
+        CudaStream& operator=(CudaStream obj) noexcept;
+        /* Operations */
+        void swap(CudaStream& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] cudaStream_t getStream() const noexcept { return stream; }
+    private:
+        CudaStream(cudaStream_t stream_);
 
-    StreamWrapper::StreamWrapper(StreamWrapper&& obj) noexcept : stream(obj.stream) {
-        obj.stream = nullptr;
-    }
-
-    StreamWrapper::~StreamWrapper() {
-        cudaStreamDestroy(stream);
-        stream = nullptr;
-    }
-
-    StreamWrapper& StreamWrapper::operator=(StreamWrapper obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    void StreamWrapper::swap(StreamWrapper& obj) noexcept {
-        std::swap(stream, obj.stream);
-    }
+        friend class StreamPool;
+    };
 }

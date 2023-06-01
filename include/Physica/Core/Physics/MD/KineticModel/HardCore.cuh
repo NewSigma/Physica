@@ -46,7 +46,6 @@ namespace Physica::Core {
         DeviceVector stepBuffer;
         PageLockedVector lockedBuffer;
         size_t maxHandleNum;
-        ScalarType deltaT;
     public:
         HardCore(ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_);
         HardCore(const HardCore&) = default;
@@ -55,12 +54,12 @@ namespace Physica::Core {
         /* Operators */
         HardCore& operator=(HardCore obj) noexcept;
         /* Operations */
-        void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT_);
-        void nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT_);
+        void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
+        void nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT);
 
         void pre_nve_step(RingPolymerType& ringPolymer);
-        void do_nve_step(RingPolymerType& ringPolymer, ScalarType deltaT_);
-        void do_nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT_);
+        void do_nve_step(ScalarType deltaT, size_t numStep);
+        void do_nve_step_for(ScalarType duration, ScalarType deltaT);
         void post_nve_step(RingPolymerType& ringPolymer);
 
         void updateMomentum(RingPolymerType& ringPolymer);

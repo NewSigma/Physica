@@ -94,7 +94,7 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
         for (size_t j = 0; j < mean.getLength(); ++j) {
             const ScalarType flux = calcThermoFlux(rpmd);
             toNextMean(mean[j], sample, flux0 * flux);
-            kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+            kineticModel.do_nve_step_for(1.0, timeStep);
             kineticModel.post_nve_step(rpmd.getRingPolymer());
             scaleVelocity(rpmd);
             kineticModel.updateMomentum(rpmd.getRingPolymer());

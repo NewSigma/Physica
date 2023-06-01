@@ -93,8 +93,7 @@ void testMergeStep() {
 
     rpmd.getPhaseMatrix() = origin;
     kineticModel.pre_nve_step(rpmd.getRingPolymer());
-    kineticModel.do_nve_step(rpmd.getRingPolymer(), timeStep);
-    kineticModel.do_nve_step(rpmd.getRingPolymer(), timeStep);
+    kineticModel.do_nve_step(timeStep, 2);
     kineticModel.post_nve_step(rpmd.getRingPolymer());
     const MatrixType mat2 = rpmd.getPhaseMatrix();
     if (!matrixNear(mat1, mat2, 1E-5)) {
@@ -105,7 +104,7 @@ void testMergeStep() {
 
 void testCpuGpuCompare() {
     constexpr int NumData = 11;
-    constexpr double precision = 1E-8;
+    constexpr double precision = 1E-14;
     ScalarType cpu_data[NumData];
     {
         using KineticModel = HardCore<ScalarType>;
@@ -140,7 +139,7 @@ void testCpuGpuCompare() {
         kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
         for (size_t j = 0; j < 10; ++j) {
             gpu_data[j + 1] = calcThermoFlux(rpmd);
-            kineticModel.do_nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
+            kineticModel.do_nve_step_for(1.0, timeStep);
             kineticModel.post_nve_step(rpmd.getRingPolymer());
             scaleVelocity(rpmd);
             kineticModel.updateMomentum(rpmd.getRingPolymer());

@@ -21,14 +21,14 @@
 
 namespace Physica::Core {
     cudaStream_t StreamPool::getStream() {
-        thread_local static StreamWrapper wrapper = makeThreadStream();
-        return wrapper.getStream();
+        thread_local static auto stream = CudaStream(nullptr);
+        return stream.getStream();
     }
 
-    StreamWrapper StreamPool::makeThreadStream() {
+    CudaStream StreamPool::makeThreadStream() {
         cudaStream_t stream = nullptr;
         if (!ThreadPool::isMainThread())
             cudaStreamCreate(&stream);
-        return StreamWrapper(stream);
+        return CudaStream(stream);
     }
 }

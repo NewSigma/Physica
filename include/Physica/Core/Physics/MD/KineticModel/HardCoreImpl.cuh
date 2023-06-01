@@ -126,6 +126,7 @@ namespace Physica::Core {
                 const Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> repMass_,
                 Physica::PlainStruct<typename HardCore<ScalarType, CudaExecutor>::DeviceVector> buffer_,
                 ScalarType deltaT,
+                size_t numStep,
                 size_t maxHandleNum) {
             auto& phase = phase_.getDerived();
             const auto& repMass = repMass_.getDerived();
@@ -140,52 +141,54 @@ namespace Physica::Core {
             auto momentum = phase.head(numParticle);
             auto pos = phase.tail(numParticle);
             extern __shared__ ScalarType sharedBuffer[];
-            buffer[threadId] = pos[threadId];
-            ScalarType velocity = hadamard(momentum, repMass).calc(threadId);
-            
-            ScalarType lStep = 0;
-            ScalarType rStep = deltaT;
-            ScalarType from = 0;
-            ScalarType to = deltaT;
-            size_t handleNum = 0;
-            bool isDrifted = false;
-            while (true) {
-                const ScalarType step = to - from;
-                sharedBuffer[threadId] = buffer[threadId] + velocity * step;
-                if (threadId == blockDim.x - 1)
-                    sharedBuffer[blockDim.x] = latticeSize;
-                __syncthreads();
-                const bool flag = sharedBuffer[threadId] > sharedBuffer[threadId + 1]
-                                || (!sharedBuffer[threadId].isPositive());
-                const bool isCollided = __syncthreads_or(flag);
-                if (isCollided)
-                    rStep = to;
-                else
-                    lStep = to;
-                to = (lStep + rStep) * 0.5;
+            for (size_t step = 0; step < numStep; ++step) {
+                buffer[threadId] = pos[threadId];
+                ScalarType velocity = hadamard(momentum, repMass).calc(threadId);
+                
+                ScalarType lStep = 0;
+                ScalarType rStep = deltaT;
+                ScalarType from = 0;
+                ScalarType to = deltaT;
+                size_t handleNum = 0;
+                bool isDrifted = false;
+                while (true) {
+                    const ScalarType step = to - from;
+                    sharedBuffer[threadId] = buffer[threadId] + velocity * step;
+                    if (threadId == blockDim.x - 1)
+                        sharedBuffer[blockDim.x] = latticeSize;
+                    __syncthreads();
+                    const bool flag = sharedBuffer[threadId] > sharedBuffer[threadId + 1]
+                                    || (!sharedBuffer[threadId].isPositive());
+                    const bool isCollided = __syncthreads_or(flag);
+                    if (isCollided)
+                        rStep = to;
+                    else
+                        lStep = to;
+                    to = (lStep + rStep) * 0.5;
 
-                const bool isDone = lStep == deltaT;
-                if (isDone) {
-                    pos[threadId] = sharedBuffer[threadId];
-                    break;
+                    const bool isDone = lStep == deltaT;
+                    if (isDone) {
+                        pos[threadId] = sharedBuffer[threadId];
+                        break;
+                    }
+                    const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
+                    if (isDeltaSmallEnough) {
+                        if (handleNum == maxHandleNum) [[unlikely]]
+                            __trap();
+                        handleNum += 1;
+                        pos[threadId] = buffer[threadId] + velocity * (rStep - from);
+                        buffer[threadId] += velocity * (lStep - from);
+                        from = lStep;
+                        to = deltaT;
+                        rStep = deltaT;
+                        isDrifted |= handleCollision(phase, mass_.getDerived(), latticeSize, sharedBuffer);
+                        velocity = hadamard(momentum, repMass).calc(threadId);
+                    }
                 }
-                const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
-                if (isDeltaSmallEnough) {
-                    if (handleNum == maxHandleNum) [[unlikely]]
-                        __trap();
-                    handleNum += 1;
-                    pos[threadId] = buffer[threadId] + velocity * (rStep - from);
-                    buffer[threadId] += velocity * (lStep - from);
-                    from = lStep;
-                    to = deltaT;
-                    rStep = deltaT;
-                    isDrifted |= handleCollision(phase, mass_.getDerived(), latticeSize, sharedBuffer);
-                    velocity = hadamard(momentum, repMass).calc(threadId);
+                if (isDrifted) {
+                    removeDrift(phase, sharedBuffer);
+                    scaleVelocity(phase, repMass, temperatureT, sharedBuffer);
                 }
-            }
-            if (isDrifted) {
-                removeDrift(phase, sharedBuffer);
-                scaleVelocity(phase, repMass, temperatureT, sharedBuffer);
             }
         }
     }
@@ -201,8 +204,7 @@ namespace Physica::Core {
             , repMass(numParticle)
             , buffer(numParticle)
             , lockedBuffer(numParticle * 2)
-            , maxHandleNum(maxHandleNum_)
-            , deltaT(0) {
+            , maxHandleNum(maxHandleNum_) {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
@@ -213,16 +215,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT_) {
+    void HardCore<ScalarType, CudaExecutor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         pre_nve_step(ringPolymer);
-        do_nve_step(ringPolymer, deltaT_);
+        do_nve_step(deltaT, 1);
         post_nve_step(ringPolymer);
     }
 
     template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT_) {
+    void HardCore<ScalarType, CudaExecutor>::nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT) {
         pre_nve_step(ringPolymer);
-        do_nve_step_for(duration, ringPolymer, deltaT_);
+        do_nve_step_for(duration, deltaT);
         post_nve_step(ringPolymer);
     }
 
@@ -235,12 +237,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::do_nve_step([[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT_) {
+    void HardCore<ScalarType, CudaExecutor>::do_nve_step(ScalarType deltaT, size_t numStep) {
         assert(getNumParticle() == ringPolymer.getNumParticle());
-        assert(deltaT_.isPositive());
-        if (deltaT != deltaT_) {
-            deltaT = deltaT_;
-        }
+        assert(deltaT.isPositive());
         const size_t numParticle = getNumParticle();
         const unsigned int numThread = numParticle > 1024 ? 1024 : numParticle;
         Internal::step_kernel<<<1, numThread, (numThread + 1) * sizeof(ScalarType), StreamPool::getStream()>>>(
@@ -252,14 +251,14 @@ namespace Physica::Core {
                 asStruct(repMass),
                 asStruct(buffer),
                 deltaT,
+                numStep,
                 maxHandleNum);
     }
 
     template<class ScalarType>
-    void HardCore<ScalarType, CudaExecutor>::do_nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT_) {
-        const uint64_t step = double(duration / deltaT_) + 0.5;
-        for (uint64_t _ = 0; _ < step; ++_)
-            do_nve_step(ringPolymer, deltaT_);
+    void HardCore<ScalarType, CudaExecutor>::do_nve_step_for(ScalarType duration, ScalarType deltaT) {
+        const uint64_t step = double(duration / deltaT) + 0.5;
+        do_nve_step(deltaT, step);
     }
 
     template<class ScalarType>
@@ -303,6 +302,5 @@ namespace Physica::Core {
         buffer.swap(obj.buffer);
         lockedBuffer.swap(obj.lockedBuffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
-        deltaT.swap(obj.deltaT);
     }
 }

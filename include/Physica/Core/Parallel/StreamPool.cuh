@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "StreamWrapper.cuh"
+#include "CudaStream.cuh"
 
 namespace Physica::Core {
     class StreamPool {
@@ -26,6 +26,6 @@ namespace Physica::Core {
     public:
         [[nodiscard]] static cudaStream_t getStream();
     private:
-        static StreamWrapper makeThreadStream();
+        static CudaStream makeThreadStream();
     };
 }

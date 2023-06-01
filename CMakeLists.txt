@@ -66,6 +66,7 @@ if(${PHYSICA_CUDA})
         --diag-suppress 174 \
         --diag-suppress 186 \
         --diag-suppress 20011 \
+        --default-stream per-thread \
         ${CMAKE_CXX_FLAGS}")
 endif()
 
