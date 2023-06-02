@@ -49,7 +49,7 @@ int main() {
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
-        const T norm = householder(x, v);
+        [[maybe_unused]] const T norm = householder(x, v);
 
         using MatrixType = DenseMatrix<T, MatrixOption::Column | MatrixOption::Vector, 4, 4>;
         const MatrixType m{x, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};

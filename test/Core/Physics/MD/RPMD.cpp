@@ -20,7 +20,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
-#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
 
@@ -28,7 +28,7 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double, false>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
+using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);

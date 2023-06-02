@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/MD/ForceModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -93,7 +93,7 @@ namespace Physica::Core {
              class ForceModel,
              class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(KineticModel& kineticModel, const ForceModel& forceModel) {
-        constexpr bool isFreeModel = Internal::is_free_model<ForceModel>::value;
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
@@ -126,7 +126,7 @@ namespace Physica::Core {
             RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        constexpr bool isFreeModel = Internal::is_free_model<ForceModel>::value;
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             thermostat.step(ringPolymer, gen, timeStep);

@@ -19,22 +19,22 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim> class FreeModel;
+    template<class ScalarType, class PosScalarType, unsigned int Dim> class EmptyForceModel;
 
     namespace Internal {
         template<class T>
-        struct is_free_model {
+        struct is_empty_force_model {
             constexpr static bool value = false;
         };
 
         template<class ScalarType, class PosScalarType, unsigned int Dim>
-        struct is_free_model<FreeModel<ScalarType, PosScalarType, Dim>> {
+        struct is_empty_force_model<EmptyForceModel<ScalarType, PosScalarType, Dim>> {
             constexpr static bool value = true;
         };
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    class FreeModel final {
+    class EmptyForceModel final {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
     public:

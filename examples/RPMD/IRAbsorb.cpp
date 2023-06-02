@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/KineticModel/PeriodicModel.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/IRAbsorb.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/IO/Poscar.h"
@@ -33,7 +33,7 @@ using ScalarType = Scalar<Double, false>;
 using PosScalarType = Scalar<Double, false>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
-using KineticModel = PeriodicModel<ScalarType, PosScalarType, 3>;
+using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);

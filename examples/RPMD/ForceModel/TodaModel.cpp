@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
-#include "Physica/Core/Physics/MD/ForceModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -38,7 +38,7 @@ using PosScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using ThermostatType = Langevin<ScalarType, PosScalarType, 1, 1>;
-using KineticModel = HardCore<ScalarType>;
+using KineticModel = HardCore<ScalarType, 1>;
 using ForceModel = TodaModel<ScalarType, PosScalarType, 1>;
 using MDType = RPMD<ScalarType, PosScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
@@ -68,7 +68,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     const ForceModel forceModel{};
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
     rpmd.updateForce<ForceModel, SequentialExecutor>(forceModel);

@@ -22,7 +22,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
-    class PeriodicModel {
+    class FreeModel {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -36,18 +36,18 @@ namespace Physica::Core {
         Utils::Array<Vector2D> coeffMatrixBase;
         ScalarType lastTimeStep;
     public:
-        PeriodicModel();
-        PeriodicModel(ScalarType temperatureT, size_t numReplica);
-        PeriodicModel(const PeriodicModel&) = default;
-        PeriodicModel(PeriodicModel&&) noexcept = default;
-        ~PeriodicModel() = default;
+        FreeModel();
+        FreeModel(ScalarType temperatureT, size_t numReplica);
+        FreeModel(const FreeModel&) = default;
+        FreeModel(FreeModel&&) noexcept = default;
+        ~FreeModel() = default;
         /* Operators */
-        PeriodicModel& operator=(PeriodicModel obj) noexcept;
+        FreeModel& operator=(FreeModel obj) noexcept;
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         template<class Barostat>
         void npt_step(RingPolymerType& ringPolymer, MDCellType& cell, Barostat& barostat, ScalarType deltaT);
-        void swap(PeriodicModel& obj) noexcept;
+        void swap(FreeModel& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
     private:
@@ -55,10 +55,10 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::PeriodicModel() : lastTimeStep(0) {}
+    FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::FreeModel() : lastTimeStep(0) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::PeriodicModel(ScalarType temperatureT, size_t numReplica)
+    FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::FreeModel(ScalarType temperatureT, size_t numReplica)
             : omegaW(RingPolymerType::calcOmegaW(temperatureT, numReplica))
             , lastTimeStep(0) {
         const size_t kSpaceSize = RingPolymerType::calcKSpaceSize(numReplica);
@@ -69,7 +69,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
         const size_t dof = ringPolymer.getDOF();
@@ -115,7 +115,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class Barostat>
-    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::npt_step(
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::npt_step(
             RingPolymerType& ringPolymer,
             MDCellType& cell,
             Barostat& barostat,
@@ -126,14 +126,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>&
-    PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::operator=(PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
+    FreeModel<ScalarType, PosScalarType, Dim, NumReplica>&
+    FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::operator=(FreeModel<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::swap(PeriodicModel& obj) noexcept {
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::swap(FreeModel& obj) noexcept {
         omegaK.swap(obj.omegaK);
         omegaW.swap(obj.omegaW);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
@@ -141,7 +141,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void PeriodicModel<ScalarType, PosScalarType, Dim, NumReplica>::updateTimeStep(ScalarType deltaT) {
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::updateTimeStep(ScalarType deltaT) {
         for (size_t i = 0; i < omegaK.getLength(); ++i) {
             const ScalarType phase = omegaK[i] * deltaT;
             coeffMatrixBase[i] = Vector2D{cos(phase), sin(phase)};

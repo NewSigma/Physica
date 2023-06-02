@@ -32,8 +32,8 @@ using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
-using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType>;
+using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
+using KineticModel = HardCore<ScalarType, 1>;
 constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
     scaleVelocity(rpmd);
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     MatrixType record(10000, rpmd.getNumParticle());

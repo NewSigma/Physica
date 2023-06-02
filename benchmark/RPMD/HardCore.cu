@@ -43,8 +43,8 @@ using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
-using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, CudaExecutor>;
+using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
+using KineticModel = HardCore<ScalarType, 1, CudaExecutor>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};

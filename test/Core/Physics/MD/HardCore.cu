@@ -19,11 +19,11 @@
 #include <random>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+#include <fstream>
 #include "Physica/Utils/BenchmarkHelper.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Parallel/StreamPool.cuh"
-#include <algorithm>
-#include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 
@@ -41,7 +41,7 @@ using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
-using ForceModel = FreeModel<ScalarType, ScalarType, 1>;
+using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -78,7 +78,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 }
 
 void testMergeStep() {
-    using KineticModel = HardCore<ScalarType, CudaExecutor>;
+    using KineticModel = HardCore<ScalarType, 1, CudaExecutor>;
     std::mt19937 gen{};
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
@@ -107,10 +107,10 @@ void testCpuGpuCompare() {
     constexpr double precision = 1E-14;
     ScalarType cpu_data[NumData];
     {
-        using KineticModel = HardCore<ScalarType>;
+        using KineticModel = HardCore<ScalarType, 1>;
         std::mt19937 gen{};
         MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-        KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
+        KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
         rpmd.initMomentum(gen);
         scaleVelocity(rpmd);
@@ -126,7 +126,7 @@ void testCpuGpuCompare() {
     }
     ScalarType gpu_data[NumData];
     {
-        using KineticModel = HardCore<ScalarType, CudaExecutor>;
+        using KineticModel = HardCore<ScalarType, 1, CudaExecutor>;
         std::mt19937 gen{};
         MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
