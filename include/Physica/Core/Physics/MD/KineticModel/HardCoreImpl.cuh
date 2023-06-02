@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -266,7 +267,7 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
-        CudaExecutor::wait();
+        StreamFuture::makeFuture()->wait();
         phase = lockedBuffer;
     }
 
