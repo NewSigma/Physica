@@ -27,6 +27,7 @@ namespace Physica::Core {
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using MassVector = typename MDCellType::MassVector;
+        using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using BufferType = typename RingPolymerType::BufferType;
         using VectorType = Vector<ScalarType>;
         using Vector2D = Vector<ScalarType, 2>;
@@ -50,6 +51,8 @@ namespace Physica::Core {
         void swap(FreeModel& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
+    protected:
+        void nve_step_impl(RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT);
     private:
         void updateTimeStep(ScalarType deltaT);
     };
@@ -70,41 +73,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
-        using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
-        const size_t dof = ringPolymer.getDOF();
-        const size_t kSpaceSize = omegaK.getLength();
-        const auto& massVec = ringPolymer.getMassVec();
-        if (lastTimeStep != deltaT)
-            updateTimeStep(deltaT);
-
-        if (ringPolymer.getNumReplica() > 1) {
-            MatrixType matA(2, 2);
-            ComplexVector2D temp{};
-            BufferType& buffer = ringPolymer.getBuffer();
-            assert(kSpaceSize == buffer.getColumn());
-            for (size_t i = 0; i < dof; ++i) {
-                const auto mass = massVec[i / Dim];
-                ringPolymer.toNormalRepr(i);
-                /* Translational mode */ {
-                    buffer(1, 0) += buffer(0, 0) * deltaT / mass;
-                }
-                for (size_t j = 1; j < kSpaceSize; ++j) {
-                    auto col = buffer.col(j);
-                    const ScalarType factor = ScalarType(mass) * omegaK[j];
-                    const ScalarType cosine = coeffMatrixBase[j][0];
-                    const ScalarType sine = coeffMatrixBase[j][1];
-                    matA(0, 0) = cosine;
-                    matA(0, 1) = -factor * sine;
-                    matA(1, 0) = sine / factor;
-                    matA(1, 1) = cosine;
-                    temp = matA * col;
-                    col = temp;
-                }
-                ringPolymer.toBeadRepr(i);
-            }
-        }
+        if constexpr (NumReplica != 1)
+            nve_step_impl(ringPolymer, ringPolymer.asMatrix(), ringPolymer.asMatrix(), deltaT);
         else {
+            const size_t dof = ringPolymer.getDOF();
+            const auto& massVec = ringPolymer.getMassVec();
             auto& phase = ringPolymer.asMatrix();
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
@@ -138,6 +111,44 @@ namespace Physica::Core {
         omegaW.swap(obj.omegaW);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
         lastTimeStep.swap(obj.lastTimeStep);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_impl(
+            RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT) {
+        using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
+        using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
+        assert(NumReplica == 1);
+        assert(omegaK.getLength() == buffer.getColumn());
+        if (lastTimeStep != deltaT)
+            updateTimeStep(deltaT);
+
+        const size_t dof = input.getRow() / 2U;
+        const auto& massVec = ringPolymer.getMassVec();
+        const size_t kSpaceSize = omegaK.getLength();
+        BufferType& buffer = ringPolymer.getBuffer();
+        Matrix2D matA(2, 2);
+        ComplexVector2D temp{};
+        for (size_t i = 0; i < dof; ++i) {
+            const auto mass = massVec[i / Dim];
+            ringPolymer.toNormalRepr(i, input);
+            /* Translational mode */ {
+                buffer(1, 0) += buffer(0, 0) * deltaT / mass;
+            }
+            for (size_t j = 1; j < kSpaceSize; ++j) {
+                auto col = buffer.col(j);
+                const ScalarType factor = ScalarType(mass) * omegaK[j];
+                const ScalarType cosine = coeffMatrixBase[j][0];
+                const ScalarType sine = coeffMatrixBase[j][1];
+                matA(0, 0) = cosine;
+                matA(0, 1) = -factor * sine;
+                matA(1, 0) = sine / factor;
+                matA(1, 1) = cosine;
+                temp = matA * col;
+                col = temp;
+            }
+            ringPolymer.toBeadRepr(i, output);
+        }
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

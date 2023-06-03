@@ -146,6 +146,8 @@ namespace Physica::Core {
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
+        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
+        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
@@ -190,6 +192,8 @@ namespace Physica::Core {
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
+        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
+        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
@@ -231,6 +235,8 @@ namespace Physica::Core {
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
+        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
+        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {

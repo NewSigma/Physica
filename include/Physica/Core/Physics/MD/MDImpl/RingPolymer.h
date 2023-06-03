@@ -47,8 +47,10 @@ namespace Physica::Core {
         void scaleVelocity(ScalarType temperatureT);
         [[nodiscard]] Vector<ScalarType, Dim> makeDriftMomentum() const;
         void removeDrift();
-        void toNormalRepr(size_t posID);
-        void toBeadRepr(size_t posID);
+        inline void toNormalRepr(size_t posID);
+        inline void toBeadRepr(size_t posID);
+        void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase);
+        void toBeadRepr(size_t posID, PhaseMatrix& outer_phase);
         [[nodiscard]] PositionMatrix makeBeadPos(size_t replica) const;
         [[nodiscard]] PositionMatrix makeCentroidPos() const;
         [[nodiscard]] PositionMatrix makeBeadMomentum(size_t replica) const;
@@ -167,26 +169,36 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toNormalRepr(size_t posID) {
-        assert(posID < getDOF());
-        fft.transform(phase.row(posID));
+    inline void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toNormalRepr(size_t posID) {
+        toNormalRepr(posID, phase);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    inline void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toBeadRepr(size_t posID) {
+        toBeadRepr(posID, phase);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toNormalRepr(size_t posID, const PhaseMatrix& outer_phase) {
+        assert(posID < outer_phase.getRow() / 2);
+        fft.transform(outer_phase.row(posID));
         auto momentum = buffer.row(0);
         momentum = fft.getKSpace();
 
-        fft.transform(phase.row(posID + getDOF()));
+        fft.transform(outer_phase.row(posID + getDOF()));
         auto pos = buffer.row(1);
         pos = fft.getKSpace();
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toBeadRepr(size_t posID) {
-        assert(posID < getDOF());
+    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toBeadRepr(size_t posID, PhaseMatrix& outer_phase) {
+        assert(posID < outer_phase.getRow() / 2);
         fft.invTransform(buffer.row(0));
-        auto momentum = phase.row(posID);
+        auto momentum = outer_phase.row(posID);
         momentum = fft.getRSpace();
 
         fft.invTransform(buffer.row(1));
-        auto pos = phase.row(posID + getDOF());
+        auto pos = outer_phase.row(posID + getDOF());
         pos = fft.getRSpace();
     }
 
