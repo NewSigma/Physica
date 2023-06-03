@@ -106,7 +106,7 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
 int main() {
     Cycler::init();
     {
-        MatrixType record(50, 1);
+        MatrixType record(1000, 1);
         std::mt19937::result_type seed;
         Physica::Utils::Random::rdrand(seed);
         std::mt19937 gen(seed);

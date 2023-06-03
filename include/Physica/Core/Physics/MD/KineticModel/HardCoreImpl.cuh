@@ -153,35 +153,35 @@ namespace Physica::Core {
                 size_t handleNum = 0;
                 bool isDrifted = false;
                 while (true) {
-                    const ScalarType step = to - from;
-                    sharedBuffer[threadId] = buffer[threadId] + velocity * step;
-                    if (threadId == blockDim.x - 1)
-                        sharedBuffer[blockDim.x] = latticeSize;
-                    __syncthreads();
-                    const bool flag = sharedBuffer[threadId] > sharedBuffer[threadId + 1]
-                                    || (!sharedBuffer[threadId].isPositive());
-                    const bool isCollided = __syncthreads_or(flag);
-                    if (isCollided)
-                        rStep = to;
-                    else
-                        lStep = to;
-                    to = (lStep + rStep) * 0.5;
-
-                    const bool isDone = lStep == deltaT;
-                    if (isDone) {
-                        pos[threadId] = sharedBuffer[threadId];
-                        break;
+                    /* Try step */ {
+                        const ScalarType pos1 = buffer[threadId] + velocity * (to - from);
+                        sharedBuffer[threadId] = pos1;
+                        if (threadId == blockDim.x - 1)
+                            sharedBuffer[blockDim.x] = latticeSize;
+                        __syncthreads();
+                        const bool flag = pos1 > sharedBuffer[threadId + 1] || (!pos1.isPositive());
+                        const bool isCollided = __syncthreads_or(flag);
+                        if (isCollided)
+                            rStep = to;
+                        else
+                            lStep = to;
+                        to = (lStep + rStep) * 0.5;
+                        const bool isDone = lStep == deltaT;
+                        if (isDone) {
+                            pos[threadId] = pos1;
+                            break;
+                        }
                     }
                     const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
                     if (isDeltaSmallEnough) {
                         if (handleNum == maxHandleNum) [[unlikely]]
                             __trap();
                         handleNum += 1;
-                        pos[threadId] = buffer[threadId] + velocity * (rStep - from);
-                        buffer[threadId] += velocity * (lStep - from);
+                        const ScalarType pos0 = buffer[threadId];
+                        pos[threadId] = pos0 + velocity * (rStep - from);
+                        buffer[threadId] = pos0 + velocity * (lStep - from);
                         from = lStep;
                         to = deltaT;
-                        rStep = deltaT;
                         isDrifted |= handleCollision<ScalarType, NumReplica>(phase, mass_.getDerived(), latticeSize, sharedBuffer);
                         velocity = hadamard(momentum, repMass).calc(threadId);
                     }
@@ -266,7 +266,7 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
-        StreamFuture::makeFuture()->wait();
+        CudaExecutor::wait();
         phase = lockedBuffer;
     }
 

@@ -18,11 +18,16 @@
  */
 #pragma once
 
+#include <thread>
 #include "Physica/Core/Parallel/StreamPool.cuh"
 
 namespace Physica::Core {
     class CudaExecutor {
     public:
-        static void wait() { cudaCheck(cudaStreamSynchronize(StreamPool::getStream())); }
+        static void wait() {
+            const auto stream = StreamPool::getStream();
+            while (cudaStreamQuery(stream) != cudaSuccess)
+                std::this_thread::yield();
+        }
     };
 }

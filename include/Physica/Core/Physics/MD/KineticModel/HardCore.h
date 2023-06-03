@@ -148,7 +148,6 @@ namespace Physica::Core {
                 handleNum += 1;
                 from = lStep;
                 to = deltaT;
-                rStep = deltaT;
                 isDrifted |= handleCollision(ringPolymer);
             }
         }
