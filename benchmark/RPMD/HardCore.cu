@@ -100,7 +100,7 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
             kineticModel.updateMomentum(rpmd.getRingPolymer());
         }
     }
-    record[sys] = std::move(mean);
+    record.asArray()[sys] = std::move(mean);
 }
 
 int main() {

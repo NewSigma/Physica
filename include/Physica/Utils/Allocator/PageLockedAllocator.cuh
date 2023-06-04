@@ -23,6 +23,11 @@
 
 namespace Physica::Utils {
     template<class T> class PageLockedAllocator;
+
+    template<class From, class To>
+    struct ChangeAllocatorValueType<PageLockedAllocator<From>, To> {
+        using Type = PageLockedAllocator<To>;
+    };
 }
 
 namespace std {
@@ -90,6 +95,8 @@ namespace Physica::Utils {
         using size_type = typename std::allocator_traits<PageLockedAllocator>::size_type;
         using difference_type = typename std::allocator_traits<PageLockedAllocator>::difference_type;
         using propagate_on_container_move_assignment = std::true_type;
+        template<class U>
+        using value_type_as = PageLockedAllocator<U>;
     public:
         PageLockedAllocator() noexcept = default;
         PageLockedAllocator(const PageLockedAllocator&) noexcept = default;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/DeviceAllocator.cuh"
+#include "Physica/Utils/Allocator/DeviceAllocator.cuh"
 #include "Physica/Utils/CUDA/DebugUtil.cuh"
 
 namespace Physica::Utils {

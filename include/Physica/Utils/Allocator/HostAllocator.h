@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,6 +21,16 @@
 #include <cstdlib>
 #include <new>
 #include <memory>
+#include "Allocator.h"
+
+namespace Physica::Utils {
+    template<class T> class HostAllocator;
+
+    template<class From, class To>
+    struct ChangeAllocatorValueType<HostAllocator<From>, To> {
+        using Type = HostAllocator<To>;
+    };
+}
 
 namespace Physica::Utils {
     /**
@@ -35,6 +45,8 @@ namespace Physica::Utils {
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using propagate_on_container_move_assignment = std::true_type;
+        template<class U>
+        using value_type_as = HostAllocator<U>;
     public:
         HostAllocator() noexcept = default;
         HostAllocator(const HostAllocator&) noexcept = default;

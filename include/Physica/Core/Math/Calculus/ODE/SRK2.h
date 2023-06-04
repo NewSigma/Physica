@@ -50,8 +50,8 @@ namespace Physica::Core {
         const size_t column_1 = Base::solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             ScalarType temp = Base::x[i];
-            Base::solution[i + 1] = Base::solution[i];
-            step(Base::stepSize, temp, Base::solution[i + 1], func, random);
+            Base::solution.asArray()[i + 1] = Base::solution.col(i);
+            step(Base::stepSize, temp, Base::solution.asArray()[i + 1], func, random);
             Base::x[i + 1] = temp;
         }
     }

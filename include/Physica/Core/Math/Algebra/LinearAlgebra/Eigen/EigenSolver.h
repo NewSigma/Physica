@@ -143,7 +143,7 @@ namespace Physica::Core {
             }
             eigenvalues[i].swap(eigenvalues[index_min]);
             if (computeEigenvectors)
-                rawEigenvectors[i].swap(rawEigenvectors[index_min]);
+                rawEigenvectors.asArray()[i].swap(rawEigenvectors.asArray()[index_min]);
         }
     }
 

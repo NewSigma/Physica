@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -131,8 +131,8 @@ namespace Physica::Core::Internal {
     //////////////////////////////////////////////Column-Vector//////////////////////////////////////////////
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::resize(size_t row, size_t column) {
-        Base::resize(column);
-        for (auto& vector : (*this)) {
+        array.resize(column);
+        for (auto& vector : array) {
             vector.resize(row);
         }
     }
@@ -146,40 +146,32 @@ namespace Physica::Core::Internal {
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
 
-        const auto end = Base::end();
-        auto ite = Base::begin();
+        const auto end = array.end();
+        auto ite = array.begin();
         auto ite1 = v.begin();
         for (; ite != end(); ++ite, ++ite1)
             (*ite).append(*ite1);
     }
 
     template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::removeColumnAt(size_t index) {
-        Derived& matrix = getDerived();
-        assert(index < matrix.getColumn());
-    }
-
-    template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
-        Derived& matrix = getDerived();
-        [[maybe_unused]] const size_t row = matrix.getRow();
+        [[maybe_unused]] const size_t row = Base::getDerived().getRow();
         assert(r1 < row && r2 < row);
-        for (auto& columnVector : matrix)
+        for (auto& columnVector : array)
             columnVector[r1].swap(columnVector[r2]);
     }
 
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::columnSwap(size_t c1, size_t c2) {
-        Derived& matrix = getDerived();
-        [[maybe_unused]] const size_t column = matrix.getColumn();
+        [[maybe_unused]] const size_t column = Base::getDerived().getColumn();
         assert(c1 < column && c2 < column);
-        matrix[c1].swap(matrix[c2]);
+        array[c1].swap(array[c2]);
     }
     //////////////////////////////////////////////Row-Vector//////////////////////////////////////////////
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::resize(size_t row, size_t column) {
-        Base::resize(row);
-        for (auto& vector : (*this)) {
+        array.resize(row);
+        for (auto& vector : array) {
             vector.resize(column);
         }
     }
@@ -193,29 +185,21 @@ namespace Physica::Core::Internal {
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
 
-        Base::append(v);
-    }
-
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::removeColumnAt([[maybe_unused]] size_t index) {
-        [[maybe_unused]] Derived& matrix = getDerived();
-        assert(index < matrix.getColumn());
+        array.append(v);
     }
 
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
-        Derived& matrix = getDerived();
-        [[maybe_unused]] const size_t row = matrix.getRow();
+        [[maybe_unused]] const size_t row = Base::getDerived().getRow();
         assert(r1 < row && r2 < row);
-        matrix[r1].swap(matrix[r2]);
+        array[r1].swap(array[r2]);
     }
 
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::columnSwap(size_t c1, size_t c2) {
-        Derived& matrix = getDerived();
-        const size_t column = matrix.getColumn();
+        const size_t column = Base::getDerived().getColumn();
         assert(c1 < column && c2 < column);
-        for (auto& rowVector : matrix)
+        for (auto& rowVector : array)
             rowVector[c1].swap(rowVector[c2]);
     }
 }

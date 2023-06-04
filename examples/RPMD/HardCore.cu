@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
                     kineticModel.updateMomentum(rpmd.getRingPolymer());
                 }
             }
-            record[sys] = std::move(mean);
+            record.asArray()[sys] = std::move(mean);
         }, record.getColumn(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {

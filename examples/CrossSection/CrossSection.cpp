@@ -110,7 +110,7 @@ T calcCrossSection(double energy) {
 
         Vector<T> waveFunc(solution.getColumn());
         for (size_t i = 0; i < solution.getColumn(); ++i)
-            waveFunc[i] = solution[i][0];
+            waveFunc[i] = solution(0, i);
         const T phase = calcPhase(args, h, waveFunc);
         crossSection += (T(2) * args.radialNum + T(1)) * square(sin(phase));
     }
@@ -126,7 +126,7 @@ void plotPWBaseWave(double energy, double radialNum) {
 
     Vector<T> waveFunc(solution.getColumn());
     for (size_t i = 0; i < solution.getColumn(); ++i)
-        waveFunc[i] = solution[i][0] / (h[i] * args.rho);
+        waveFunc[i] = solution(0, i) / (h[i] * args.rho);
     Plot* plot = new Plot();
     plot->spline(h, waveFunc);
     auto& chart = *plot->chart();

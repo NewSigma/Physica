@@ -34,7 +34,7 @@ int main() {
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
-            const auto& solVector = solution[i];
+            const auto solVector = solution.col(i);
             const auto answer = exp(x[i].getTrivial());
             if (fabs(solVector[0].getTrivial() - answer) > 1E-11 * fabs(answer))
                 return 1;
@@ -51,7 +51,7 @@ int main() {
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
-            const auto& solVector = solution[i];
+            const auto solVector = solution.col(i);
             const auto answer1 = sin(x_i.getTrivial());
             if (fabs(solVector[0].getTrivial() - answer1) > 1E-10 * fabs(answer1))
                 return 1;
@@ -70,7 +70,7 @@ int main() {
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
-            const auto& solVector = solution[i];
+            const auto solVector = solution.col(i);
             const auto answer = exp(x[i].getTrivial());
             if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
                 return 1;
@@ -87,7 +87,7 @@ int main() {
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
-            const auto& solVector = solution[i];
+            const auto solVector = solution.col(i);
             const auto answer = sin(x_i.getTrivial());
             if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
                 return 1;
@@ -108,7 +108,7 @@ int main() {
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
-            const auto& solVector = solution[i];
+            const auto solVector = solution.col(i);
             const auto answer = (x_i * exp(-square(x_i) / 2)).getTrivial();
             if (fabs(solVector[0].getTrivial() - answer) > 1E-8 * fabs(answer))
                 return 1;

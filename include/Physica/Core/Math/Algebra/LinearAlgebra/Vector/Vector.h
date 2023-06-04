@@ -39,11 +39,6 @@ namespace Physica::Core {
         };
     }
 
-    template<class T, int type, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrix;
-    /**
-     * T must be either Scalar or ComplexScalar.
-     */
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");

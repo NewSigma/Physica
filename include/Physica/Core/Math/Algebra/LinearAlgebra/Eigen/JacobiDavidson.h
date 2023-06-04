@@ -150,7 +150,7 @@ namespace Physica::Core {
                 if (startFromInitial) {
                     eigenvector = searchSpace.col(0).asVector();
                     eigenvalue = projectSearchSpace(0, 0);
-                    residule.swap(searchSpace[1]);
+                    residule.swap(searchSpace.asArray()[1]);
                     squaredRes = residule.squaredNorm();
                 }
                 else {
@@ -233,7 +233,7 @@ namespace Physica::Core {
                     index_min = j;
             }
             eigenvalues[i].swap(eigenvalues[index_min]);
-            eigenvectors[i].swap(eigenvectors[index_min]);
+            eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
         }
     }
 
@@ -397,13 +397,14 @@ namespace Physica::Core {
         size_t dim = 0;
         for (; dim < MinSearchDim - 1; ++dim) {
             const size_t index = searchSpace.getColumn() - (MinSearchDim - 1) + dim;
-            searchSpace[dim].swap(searchSpace[index]);
-            dotSpace[dim].swap(dotSpace[index]);
+            searchSpace.asArray()[dim].swap(searchSpace.asArray()[index]);
+            dotSpace.asArray()[dim].swap(dotSpace.asArray()[index]);
             assembleProjects(dim);
         }
-        searchSpace[dim].swap(eigenvectors[eigenIndex]);
-        gramSchmidt(searchSpace.leftCols(dim), searchSpace[dim]);
-        dotSpace[dim] = source.getDerived() * searchSpace[dim];
+        searchSpace.asArray()[dim].swap(eigenvectors.asArray()[eigenIndex]);
+        gramSchmidt(searchSpace.leftCols(dim), searchSpace.asArray()[dim]);
+        auto dot = dotSpace.col(dim);
+        dot = source.getDerived() * searchSpace.col(dim);
         assembleProjects(dim);
     }
 

@@ -119,21 +119,19 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
-            : public Physica::Utils::device_obj<Utils::Array<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>,
-                                                             Traits<Derived>::ColumnAtCompile,
-                                                             Traits<Derived>::MaxColumnAtCompile>>
-            , public Utils::CRTPBase<device_obj<Derived>, 1> {
+            : public Utils::CRTPBase<device_obj<Derived>, 1> {
+        using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
         using T = typename Traits<Derived>::ScalarType;
-        using VectorType = Vector<T, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>;
-        using Base = Physica::Utils::device_obj<Utils::Array<VectorType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
-        using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
+        using VectorType = typename host_obj::VectorType;
+        using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
+        ArrayType array;
         size_t r;
     public:
         device_obj() : r(0) {}
-        device_obj(size_t row, size_t column) : Base(column, row), r(row) {}
-        device_obj(const host_obj& storage) : Base(storage), r(storage.getDerived().getRow()) {}
+        device_obj(size_t row, size_t column) : array(column, row), r(row) {}
+        device_obj(const host_obj& storage) : array(storage.array), r(storage.getDerived().getRow()) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;
         ~device_obj() = default;
@@ -142,24 +140,24 @@ namespace Physica::Core::Internal {
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
-        void swap(device_obj& obj) noexcept { Base::swap(obj); std::swap(r, obj.r); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(r, obj.r); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * Base::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
     };
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::operator()(size_t r, size_t c) {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](c)[r];
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return array[c][r];
     }
 
     template<class Derived>
     __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](c)[r];
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return array[c][r];
     }
 
     template<class Derived>
@@ -170,21 +168,19 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>
-            : public device_obj<Utils::Array<Vector<typename Traits<Derived>::ScalarType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>,
-                                                    Traits<Derived>::RowAtCompile,
-                                                    Traits<Derived>::MaxRowAtCompile>>
-            , public Utils::CRTPBase<device_obj<Derived>, 1> {
+            : public Utils::CRTPBase<device_obj<Derived>, 1> {
+        using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
         using T = typename Traits<Derived>::ScalarType;
-        using VectorType = Vector<T, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile>;
-        using Base = device_obj<Utils::Array<VectorType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
-        using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
+        using VectorType = typename host_obj::VectorType;
+        using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
+        ArrayType array;
         size_t c;
     public:
         device_obj() : c(0) {}
-        device_obj(size_t row, size_t column) : Base(row, column), c(column) {}
-        device_obj(const host_obj& storage) : Base(storage), c(storage.getDerived().getColumn()) {}
+        device_obj(size_t row, size_t column) : array(row, column), c(column) {}
+        device_obj(const host_obj& storage) : array(storage.array), c(storage.getDerived().getColumn()) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;
         ~device_obj() = default;
@@ -193,24 +189,24 @@ namespace Physica::Core::Internal {
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
-        void swap(device_obj& obj) noexcept { Base::swap(obj); std::swap(c, obj.c); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(c, obj.c); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * Base::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
     };
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::operator()(size_t r, size_t c) {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](r)[c];
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return array[r][c];
     }
 
     template<class Derived>
     __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](r)[c];
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        return array[r][c];
     }
 
     template<class Derived>

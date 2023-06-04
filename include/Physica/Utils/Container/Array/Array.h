@@ -21,7 +21,7 @@
 #include <cassert>
 #include <cstdlib>
 #include "DynamicArrayBase.h"
-#include "Physica/Utils/Container/HostAllocator.h"
+#include "Physica/Utils/Allocator/HostAllocator.h"
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {

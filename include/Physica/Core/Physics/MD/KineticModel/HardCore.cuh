@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/CudaEvent.cuh"
 #include "Physica/Utils/CUDA/PlainStruct.h"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Utils/Container/PageLockedAllocator.cuh"
+#include "Physica/Utils/Allocator/PageLockedAllocator.cuh"
 #include "HardCore.h"
 
 namespace Physica::Core {

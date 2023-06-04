@@ -58,7 +58,8 @@ namespace Physica::Core {
         x.setLength(size);
         x[0] = start;
         solution.resize(initial.getLength(), size);
-        solution[0] = initial;
+        auto col = solution.col(0);
+        col = initial;
     }
     /**
      * \tparam Function
@@ -73,8 +74,8 @@ namespace Physica::Core {
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
-            VectorType dy_dx = func(x_i, solution[i]);
-            solution[i + 1] = RungeKuttaDy(i, dy_dx, func);
+            VectorType dy_dx = func(x_i, solution.asArray()[i]);
+            solution.asArray()[i + 1] = RungeKuttaDy(i, dy_dx, func);
             x[i + 1] = x_i + stepSize;
         }
     }
@@ -89,7 +90,7 @@ namespace Physica::Core {
             size_t step, const VectorType& dy_dx, Function func) {
         const VectorType k1 = T(0.5) * stepSize * dy_dx;
         const T temp = x[step] + stepSize * T(0.5);
-        const VectorType& y = solution[step];
+        auto y = solution.col(step);
         const VectorType k2 = stepSize * func(temp, y + k1);
         const VectorType k3 = stepSize * func(temp, y + k2 * T(0.5));
         const VectorType k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);

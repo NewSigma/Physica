@@ -88,7 +88,8 @@ namespace Physica::Core {
                                         Base::RowAtCompile,
                                         Base::ColumnAtCompile,
                                         Base::MaxRowAtCompile,
-                                        Base::MaxColumnAtCompile>;
+                                        Base::MaxColumnAtCompile,
+                                        Utils::HostAllocator<ScalarType>>;
     private:
         const MatrixType1& mat1;
         const MatrixType2& mat2;

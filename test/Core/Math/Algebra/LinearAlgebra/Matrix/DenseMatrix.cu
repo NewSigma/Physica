@@ -28,7 +28,7 @@ int main() {
     const MatrixType A = MatrixType::random_uniform(16, 16, gen);
     const auto d_A = A.toDevice();
     const MatrixType B = d_A.toHost();
-    if (A != B)
+    if (A.asArray() != B.asArray())
         return 1;
     return 0;
 }

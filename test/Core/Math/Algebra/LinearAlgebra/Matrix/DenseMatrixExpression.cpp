@@ -27,16 +27,16 @@ int main() {
         DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
             DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
-            for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
-                for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
-                    if (*ite1 != Scalar<Double, false>(-2))
+            for (size_t i = 0; i < mat.getRow(); ++i)
+                for (size_t j = 0; j < mat.getColumn(); ++j)
+                    if (mat(i, j) != Scalar<Double, false>(-2))
                         return 1;
         }
         {
             DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
-            for (auto ite = mat.cbegin(); ite != mat.cend(); ++ite)
-                for (auto ite1 = (*ite).cbegin(); ite1 != (*ite).cend(); ++ite1)
-                    if (*ite1 != Scalar<Double, false>(3))
+            for (size_t i = 0; i < mat.getRow(); ++i)
+                for (size_t j = 0; j < mat.getColumn(); ++j)
+                    if (mat(i, j) != Scalar<Double, false>(3))
                         return 1;
         }
     }

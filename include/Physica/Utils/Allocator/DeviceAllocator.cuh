@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,9 +22,15 @@
 #include <memory>
 #include "Physica/Utils/CUDA/DebugUtil.cuh"
 #include "Physica/Utils/CUDA/device_obj.cuh"
+#include "Allocator.h"
 
 namespace Physica::Utils {
     template<class T> class DeviceAllocator;
+
+    template<class From, class To>
+    struct ChangeAllocatorValueType<DeviceAllocator<From>, To> {
+        using Type = DeviceAllocator<To>;
+    };
 }
 
 namespace std {
@@ -88,6 +94,8 @@ namespace Physica::Utils {
         using size_type = typename std::allocator_traits<DeviceAllocator>::size_type;
         using difference_type = typename std::allocator_traits<DeviceAllocator>::difference_type;
         using propagate_on_container_move_assignment = std::true_type;
+        template<class U>
+        using value_type_as = DeviceAllocator<U>;
     public:
         DeviceAllocator() noexcept = default;
         DeviceAllocator(const DeviceAllocator&) noexcept = default;
