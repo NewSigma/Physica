@@ -31,6 +31,7 @@ namespace Physica::Core {
             , fftContract(numContract, 1)
             , timeStep(std::move(timeStep_)) {
         assert(0 < numContract && numContract <= numReplica);
+        assert(NumReplica == Dynamic || NumReplica == numReplica);
         ringPolymer = RingPolymerType(cell, numReplica);
 
         const size_t dof = getDOF();
@@ -306,15 +307,13 @@ namespace Physica::Core {
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcKinetic() const {
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const size_t dof = getDOF();
-        Vector<ScalarType> averaged_pos(dof, 0);
-        for (size_t i = 0; i < dof; ++i)
-            averaged_pos[i] = mean(getPhaseMatrix().row(dof + i));
+        const auto centroidPos = ringPolymer.makeCentroidPos();
 
         ScalarType kinetic = repBeta * dof;
         for (size_t replica = 0; replica < getNumReplica(); ++replica) {
             auto phase = getPhaseMatrix().col(replica);
             auto pos = phase.tail(dof);
-            kinetic += (averaged_pos - pos) * forceBuffer.col(replica);
+            kinetic += (centroidPos.flatten() - pos) * forceBuffer.col(replica);
         }
         kinetic /= ScalarType(getNumReplica() * 2);
         return kinetic;

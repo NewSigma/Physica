@@ -143,8 +143,8 @@ namespace Physica::Core::Internal {
             const Vector<T, Length, MaxLength>& v) {
         constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
         static_assert(Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
-        assert(v.getLength() == getDerived().getColumn());
+        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
+        assert(v.getLength() == Base::getDerived().getColumn());
 
         const auto end = array.end();
         auto ite = array.begin();
@@ -182,8 +182,8 @@ namespace Physica::Core::Internal {
             const Vector<T, Length, MaxLength>& v) {
         [[maybe_unused]] constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
         static_assert(Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
-        assert(v.getLength() == getDerived().getColumn());
+        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
+        assert(v.getLength() == Base::getDerived().getColumn());
 
         array.append(v);
     }

@@ -224,7 +224,7 @@ namespace Physica::Core {
         bool isDrifted = false;
         for (size_t replica = 0; replica < numReplica; ++replica) {
             auto momentum = momentumMatrix.col(replica);
-            auto pos = posMatrix.col(numParticle);
+            auto pos = posMatrix.col(replica);
             size_t i = 0;
             for (; i < numParticle - 1; ++i) {
                 if (pos[i] > pos[i + 1]) {

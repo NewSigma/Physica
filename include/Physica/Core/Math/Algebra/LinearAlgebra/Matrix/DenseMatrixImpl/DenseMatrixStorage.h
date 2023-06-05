@@ -150,12 +150,12 @@ namespace Physica::Core::Internal {
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
-            assert(r < getDerived().getRow() && c < getDerived().getColumn());
+            assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
             return array[c][r];
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
-            assert(r < getDerived().getRow() && c < getDerived().getColumn());
+            assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
             return array[c][r];
         }
         /* Operations */
@@ -202,12 +202,12 @@ namespace Physica::Core::Internal {
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
-            assert(r < getDerived().getRow() && c < getDerived().getColumn());
+            assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
             return array[r][c];
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
-            assert(r < getDerived().getRow() && c < getDerived().getColumn());
+            assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
             return array[r][c];
         }
         /* Operations */

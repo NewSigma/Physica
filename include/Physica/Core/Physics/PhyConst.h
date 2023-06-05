@@ -23,7 +23,8 @@
 namespace Physica::Core {
     enum UnitSystem {
         SI,
-        AU
+        AU,
+        ESU
     };
 
     template<UnitSystem unitSystem = SI> class PhyConst;
@@ -99,5 +100,18 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
         [[nodiscard]] constexpr static double pressToGPa(double atomic_press) { return atomic_press * pressInGPa; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electroMass; }
+    };
+
+    template<>
+    class PhyConst<ESU> {
+        constexpr static double esuToCoulombFactor = 3.335640951084828E-10; // std::sqrt(PhyConst<SI>::vacuumDielectric * 4 * M_PI * 10E-9);
+    public:
+        constexpr static double unitCharge = PhyConst<SI>::unitCharge / esuToCoulombFactor;
+    private:
+        constexpr static double debyeToDipoleAUFactor = (10E-10 / unitCharge) * PhyConst<AU>::angstormToBohr(1);
+    public:
+        [[nodiscard]] constexpr static double esuToCoulomb(double esu) { return esu * esuToCoulombFactor; }
+        [[nodiscard]] constexpr static double debyeToDipoleAU(double debye) { return debye * debyeToDipoleAUFactor; }
+        [[nodiscard]] constexpr static double dipoleAUToDebye(double dipole) { return dipole / debyeToDipoleAUFactor; }
     };
 }

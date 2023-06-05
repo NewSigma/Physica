@@ -118,8 +118,8 @@ namespace Physica::Core {
             RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT) {
         using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
         using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
-        assert(NumReplica == 1);
-        assert(omegaK.getLength() == buffer.getColumn());
+        assert(NumReplica != 1);
+        assert(omegaK.getLength() == ringPolymer.getBuffer().getColumn());
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
 

@@ -51,8 +51,8 @@ namespace Physica::Core {
             : temperatureT(temperatureT_) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    TRPMDThermo<ScalarType, PosScalarType, Dim>&
-    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim> obj) noexcept {
+    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>&
+    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
