@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iostream>
 #include "Physica/Utils/Container/Array/Array.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
@@ -29,7 +30,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    __host__ __device__ inline void toNextMean(ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+    __host__ __device__ inline void toNextMean(ScalarBase<ScalarType>& mean_, size_t lastNumSample, ScalarType sample) {
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        ScalarType& mean = mean_.getDerived();
+        mean = (factor1 * mean + sample) * factor2;
+    }
+
+    template<class VectorType1, class VectorType2>
+    inline void toNextMean(LValueVector<VectorType1>& mean, size_t lastNumSample, const RValueVector<VectorType2>& sample) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;

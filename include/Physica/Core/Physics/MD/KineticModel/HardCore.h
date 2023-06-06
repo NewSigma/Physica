@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, class Executor>
     void HardCore<ScalarType, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
-        const size_t numParticle = getNumParticle();
+        [[maybe_unused]] const size_t numParticle = getNumParticle();
         const ScalarType collideStep = collideFactor * deltaT;
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
