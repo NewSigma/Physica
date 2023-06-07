@@ -269,6 +269,25 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
+    class DenseMatrixExpression<Utils::ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sqrt,
+                                                                               MatrixType,
+                                                                               MatrixType,
+                                                                               typename MatrixType::ScalarType::RealType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType::RealType;
+        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Sqrt, MatrixType, MatrixType, ScalarType>>;
+    private:
+        const MatrixType& mat;
+    public:
+        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sqrt(mat.calc(row, col)); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+    };
+
+    template<class MatrixType>
     class DenseMatrixExpression<Utils::ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
             : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<Utils::ExpressionType::Abs,
                                                                                MatrixType,
@@ -432,6 +451,12 @@ namespace Physica::Core {
     DenseMatrixExpression<Utils::ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
     reciprocal(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<Utils::ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
+    }
+
+    template<class MatrixType>
+    DenseMatrixExpression<Utils::ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+    sqrt(const RValueMatrix<MatrixType>& m) {
+        return {m};
     }
 
     template<class MatrixType>

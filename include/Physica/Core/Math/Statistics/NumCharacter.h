@@ -38,8 +38,20 @@ namespace Physica::Core {
     }
 
     template<class VectorType1, class VectorType2>
-    inline void toNextMean(LValueVector<VectorType1>& mean, size_t lastNumSample, const RValueVector<VectorType2>& sample) {
+    inline void toNextMean(LValueVector<VectorType1>& mean_, size_t lastNumSample, const RValueVector<VectorType2>& sample_) {
         using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+        auto& mean = mean_.getDerived();
+        const auto& sample = sample_.getDerived();
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        mean = (factor1 * mean + sample) * factor2;
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    inline void toNextMean(LValueMatrix<MatrixType1>& mean_, size_t lastNumSample, const RValueMatrix<MatrixType2>& sample_) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType, typename MatrixType2::ScalarType>::Type;
+        auto& mean = mean_.getDerived();
+        const auto& sample = sample_.getDerived();
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
@@ -70,7 +82,40 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void toNextVariance(ScalarType& var, ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+    inline void toNextVariance(ScalarBase<ScalarType>& var_, ScalarType& mean, size_t lastNumSample, ScalarType sample) {
+        ScalarType& var = var_.getDerived();
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        toNextMean(mean, lastNumSample, sample);
+    }
+
+    template<class VectorType1, class VectorType2>
+    inline void toNextVariance(
+            LValueVector<VectorType1>& var_,
+            LValueVector<VectorType1>& mean_,
+            size_t lastNumSample,
+            const RValueVector<VectorType2>& sample_) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+        auto& var = var_.getDerived();
+        auto& mean = mean_.getDerived();
+        const auto& sample = sample_.getDerived();
+        const ScalarType factor1 = ScalarType(lastNumSample);
+        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        toNextMean(mean, lastNumSample, sample);
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    inline void toNextVariance(
+            LValueMatrix<MatrixType1>& var_,
+            LValueMatrix<MatrixType1>& mean_,
+            size_t lastNumSample,
+            const RValueMatrix<MatrixType2>& sample_) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType, typename MatrixType2::ScalarType>::Type;
+        auto& var = var_.getDerived();
+        auto& mean = mean_.getDerived();
+        const auto& sample = sample_.getDerived();
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);

@@ -100,7 +100,6 @@ int main(int argc, char** argv) {
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());
             rpmd.initMomentum(gen);
-            scaleVelocity(rpmd);
 
             Vector<ScalarType> mean(record.getRow(), 0);
             for (size_t sample = 0; sample < numSample; ++sample) {

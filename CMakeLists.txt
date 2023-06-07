@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(Physica VERSION 0.0.1 LANGUAGES CXX)
+project(Physica VERSION 0.0.1 LANGUAGES C CXX)
 #include all macros
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include(PhysicaCheck)
@@ -13,6 +13,7 @@ option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
 option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_TORCH "Enable Torch support" OFF)
+option(PHYSICA_HDF5 "Enable HDF5 support" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 include(FindSIMD)
@@ -96,6 +97,11 @@ if(${PHYSICA_TORCH})
     include_directories(${TORCH_INCLUDE_DIRS})
     set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${TORCH_INSTALL_PREFIX}/lib")
     set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CUDA_TOOLKIT_ROOT_DIR}/lib64")
+endif()
+
+if(${PHYSICA_HDF5})
+    find_package(HDF5 REQUIRED)
+    include_directories(${HDF5_INCLUDE_DIRS})
 endif()
 #############################################Project##############################################
 include_directories(./include)

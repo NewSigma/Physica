@@ -137,6 +137,7 @@ namespace Physica::Core {
             auto row = phase.row(i);
             row -= driftMomentum[i % Dim];
         }
+        scaleVelocity(temperatureT);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

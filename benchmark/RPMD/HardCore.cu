@@ -85,7 +85,6 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
 
     Vector<ScalarType> mean(record.getRow(), 0);
     for (size_t sample = 0; sample < numSample; ++sample) {

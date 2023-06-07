@@ -47,18 +47,13 @@ namespace Physica::Core {
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
         /* Static members */
+        template<class OtherScalar>
         static inline void langevinImpl(
-            ComplexScalar<ScalarType>& momentum,
+            OtherScalar& momentum,
             ScalarType deltaT,
             ScalarType viscosityY,
             ScalarType factor,
-            ComplexScalar<ScalarType> random);
-        static inline void langevinImpl(
-            ScalarType& momentum,
-            ScalarType deltaT,
-            ScalarType viscosityY,
-            ScalarType factor,
-            ScalarType random);
+            OtherScalar random);
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -110,24 +105,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class OtherScalar>
     void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::langevinImpl(
-            ComplexScalar<ScalarType>& momentum,
+            OtherScalar& momentum,
             ScalarType deltaT,
             ScalarType viscosityY,
             ScalarType factor,
-            ComplexScalar<ScalarType> random) {
-        const ScalarType c1 = exp(-viscosityY * deltaT);
-        const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
-        momentum = c1 * momentum + factor * c2 * random;
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::langevinImpl(
-            ScalarType& momentum,
-            ScalarType deltaT,
-            ScalarType viscosityY,
-            ScalarType factor,
-            ScalarType random) {
+            OtherScalar random) {
         const ScalarType c1 = exp(-viscosityY * deltaT);
         const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
         momentum = c1 * momentum + factor * c2 * random;

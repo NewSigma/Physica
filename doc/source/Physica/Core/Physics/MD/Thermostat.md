@@ -18,7 +18,7 @@ $$T_{\mathrm{quantum}} = \frac{\sum_i^N \frac{|\mathbf{\overline p}_i(0)|^2}{m_i
 
 while classical estimator is computed using theorem of equipartition of energy
 
-$$T_{\mathrm{classical}} = \frac{1}{3Nnk} \sum_i^N \sum_k^n \frac{|\mathbf p_i^{(k)}|^2}{m_i}$$
+$$T_{\mathrm{classical}} = \frac{1}{3Nn^2k} \sum_i^N \sum_k^n \frac{|\mathbf p_i^{(k)}|^2}{m_i}$$
 
 ## Reference
 

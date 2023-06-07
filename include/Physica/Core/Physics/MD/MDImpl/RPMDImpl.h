@@ -305,7 +305,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcKinetic() const {
-        const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
+        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
         const size_t dof = getDOF();
         const auto centroidPos = ringPolymer.makeCentroidPos();
 

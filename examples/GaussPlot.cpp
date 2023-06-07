@@ -74,7 +74,6 @@ int main(int argc, char** argv) {
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
 

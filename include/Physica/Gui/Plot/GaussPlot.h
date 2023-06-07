@@ -25,9 +25,7 @@ namespace Physica::Gui {
     class GaussPlot : public Plot {
         using Base = Plot;
 
-        double minX;
         double maxX;
-        double minY;
         double maxY;
         double deltaX;
         double deltaY;
@@ -36,7 +34,7 @@ namespace Physica::Gui {
         QValueAxis* axisTop;
         QValueAxis* axisRight;
     public:
-        GaussPlot(double minX_, double maxX_, double minY_, double maxY_, double deltaX_, double deltaY_, unsigned int numSigma);
+        GaussPlot(double maxX_, double maxY_, double deltaX_, double deltaY_, unsigned int numSigma);
         /* Getters */
         [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
         [[nodiscard]] QValueAxis* getAxisY() const noexcept { return axisY; }

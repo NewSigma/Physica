@@ -67,6 +67,8 @@ namespace Physica::Gui {
         template<class VectorType>
         QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
         template<class VectorType>
+        QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
+        template<class VectorType>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& x, const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
         QScatterSeries& label(double x, double y, QString text);
     private:
@@ -242,6 +244,16 @@ namespace Physica::Gui {
 
         update();
         return *series;
+    }
+
+    template<class VectorType>
+    QBoxPlotSeries& Plot::errorBar(
+            const Core::LValueVector<VectorType>& mean,
+            const Core::LValueVector<VectorType>& deviation) {
+        using namespace Physica::Core;
+        using ScalarType = Scalar<Double, false>;
+        const auto x = Vector<ScalarType>::linspace(0, mean.getLength() - 1, mean.getLength());
+        return errorBar(x, mean, deviation);
     }
 
     template<class VectorType>

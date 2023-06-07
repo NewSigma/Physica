@@ -49,7 +49,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
     };
 }

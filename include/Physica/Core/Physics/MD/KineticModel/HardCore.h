@@ -56,6 +56,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }
+        [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
     private:
         bool checkCollision(const RingPolymerType& ringPolymer) const;
         bool handleCollision(const RingPolymerType& ringPolymer);
@@ -68,7 +69,6 @@ namespace Physica::Core {
             : Base(temperatureT_, numReplica)
             , latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
-            , temperatureT(temperatureT_)
             , repMass(numParticle, 0)
             , buffer(numParticle * 2, numReplica)
             , maxHandleNum(maxHandleNum_) {
@@ -169,9 +169,9 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, class Executor>
     void HardCore<ScalarType, NumReplica, Executor>::swap(HardCore& obj) noexcept {
+        Base::swap(obj);
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
-        temperatureT.swap(temperatureT);
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         std::swap(maxHandleNum, obj.maxHandleNum);

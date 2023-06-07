@@ -19,10 +19,8 @@
 #include "Physica/Gui/Plot/GaussPlot.h"
 
 namespace Physica::Gui {
-    GaussPlot::GaussPlot(double minX_, double maxX_, double minY_, double maxY_, double deltaX_, double deltaY_, unsigned int numSigma)
-            : minX(minX_)
-            , maxX(maxX_)
-            , minY(minY_)
+    GaussPlot::GaussPlot(double maxX_, double maxY_, double deltaX_, double deltaY_, unsigned int numSigma)
+            : maxX(maxX_)
             , maxY(maxY_)
             , deltaX(deltaX_)
             , deltaY(deltaY_)
@@ -45,7 +43,7 @@ namespace Physica::Gui {
             axisX->setLinePenColor(Qt::black);
             axisX->setGridLineVisible(false);
             axisX->setLabelsFont(font);
-            axisX->setRange(minX, maxX);
+            axisX->setRange(-maxX, maxX);
             axisX->setTitleFont(font);
 
             axisY->setTickAnchor(0);
@@ -57,7 +55,7 @@ namespace Physica::Gui {
             axisY->setGridLineVisible(false);
             axisY->setMinorGridLineVisible(false);
             axisY->setLabelsFont(font);
-            axisY->setRange(minY, maxY);
+            axisY->setRange(0, maxY);
             axisY->setTitleFont(font);
 
             axisTop->setTickAnchor(0);
@@ -65,7 +63,7 @@ namespace Physica::Gui {
             axisTop->setTickType(QValueAxis::TicksDynamic);
             axisTop->setLabelsVisible(false);
             axisTop->setGridLineVisible(false);
-            axisTop->setRange(minX, maxX);
+            axisTop->setRange(-maxX, maxX);
             axisTop->setLinePenColor(Qt::black);
 
             axisRight->setTickAnchor(0);
@@ -75,7 +73,7 @@ namespace Physica::Gui {
             axisRight->setGridLineVisible(false);
             axisRight->setMinorGridLineVisible(false);
             axisRight->setMinorTickCount(4);
-            axisRight->setRange(minY, maxY);
+            axisRight->setRange(0, maxY);
             axisRight->setLinePenColor(Qt::black);
 
             chart.addAxis(axisX, Qt::AlignBottom);
@@ -84,7 +82,7 @@ namespace Physica::Gui {
             chart.addAxis(axisRight, Qt::AlignRight);
 
             {
-                auto& line = Base::line(VectorType{minX, maxX}, VectorType{0, 0});
+                auto& line = Base::line(VectorType{-maxX, maxX}, VectorType{0, 0});
                 auto pen = line.pen();
                 pen.setColor(Qt::black);
                 pen.setStyle(Qt::DashLine);
@@ -92,18 +90,18 @@ namespace Physica::Gui {
                 line.attachAxis(axisX);
                 line.attachAxis(axisY);
 
-                auto& line1 = Base::line(VectorType{0, 0}, VectorType{minY, maxY});
+                auto& line1 = Base::line(VectorType{0, 0}, VectorType{0, maxY});
                 line1.setPen(pen);
                 line1.attachAxis(axisX);
                 line1.attachAxis(axisY);
 
                 pen.setColor(Qt::blue);
-                auto& line2 = Base::line(VectorType{0, maxX}, VectorType{0, maxY / numSigma});
+                auto& line2 = Base::line(VectorType{0, maxX}, VectorType{0, maxX / numSigma});
                 line2.setPen(pen);
                 line2.attachAxis(axisX);
                 line2.attachAxis(axisY);
 
-                auto& line3 = Base::line(VectorType{minX, 0}, VectorType{maxY / numSigma, 0});
+                auto& line3 = Base::line(VectorType{-maxX, 0}, VectorType{maxX / numSigma, 0});
                 line3.setPen(pen);
                 line3.attachAxis(axisX);
                 line3.attachAxis(axisY);

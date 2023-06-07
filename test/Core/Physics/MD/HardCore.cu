@@ -84,7 +84,6 @@ void testMergeStep() {
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
 
     const MatrixType origin = rpmd.getPhaseMatrix();
     kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
@@ -113,7 +112,6 @@ void testCpuGpuCompare() {
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
         rpmd.initMomentum(gen);
-        scaleVelocity(rpmd);
 
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
         cpu_data[0] = calcThermoFlux(rpmd);
@@ -132,7 +130,6 @@ void testCpuGpuCompare() {
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
         rpmd.initMomentum(gen);
-        scaleVelocity(rpmd);
 
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         gpu_data[0] = calcThermoFlux(rpmd);

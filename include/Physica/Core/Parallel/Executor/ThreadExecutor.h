@@ -32,9 +32,9 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        static FutureType schedule(Functor func, Args... args);
+        [[nodiscard]] static FutureType schedule(Functor func, Args... args);
         template<class Functor>
-        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
         static void auto_wait(FutureType& future);
         static void auto_wait(FutureGroup<FutureType>& group);
         /* Getters */
