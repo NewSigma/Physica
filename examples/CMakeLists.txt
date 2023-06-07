@@ -15,7 +15,7 @@ if(${PHYSICA_GUI})
     physica_add_example(GaussPlot GaussPlot.cpp)
     physica_add_example(HF HF.cpp)
     physica_add_example(Histogram Histogram.cpp)
-    physica_add_example(SurfacePlot SurfacePlot.cpp)
+    physica_add_example(ProbabilityDistributionFunction2D ProbabilityDistributionFunction2D.cpp)
     physica_add_example(VariationalSchrodinger VariationalSchrodinger.cpp)
 endif()
 

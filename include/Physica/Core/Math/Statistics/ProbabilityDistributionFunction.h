@@ -40,7 +40,7 @@ namespace Physica::Core {
         /* Operations */
         void sample(ScalarType data);
         void clear();
-        [[nodiscard]] VectorType makePotision() const;
+        [[nodiscard]] VectorType makePosition() const;
         [[nodiscard]] VectorType makeDistribution() const;
         void swap(This& obj) noexcept;
         /* Getters */
@@ -63,7 +63,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void ProbabilityDistributionFunction<ScalarType>::sample(ScalarType data) {
         const long index = double((data - getFromPoint()) * repDelta);
-        if (0 <= index && size_t(index) < getNumBin())
+        if (data > getFromPoint() && 0 <= index && size_t(index) < getNumBin())
             bucket[index] += 1;
     }
 
@@ -75,7 +75,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename ProbabilityDistributionFunction<ScalarType>::VectorType
-    ProbabilityDistributionFunction<ScalarType>::makePotision() const {
+    ProbabilityDistributionFunction<ScalarType>::makePosition() const {
         const ScalarType delta = (getToPoint() - getFromPoint()) / ScalarType(getNumBin());
         return seperates.head(getNumBin()) + (delta * 0.5);
     }
