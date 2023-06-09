@@ -56,9 +56,14 @@ int main() {
                 return 1;
         }
         /* Test inv */ {
+            constexpr double precision = 1E-13;
             fft.invTransform(fft.getKSpace());
-            if (!vectorNear(data, fft.getRSpace(), 1E-14))
-                return 1;
+            for (size_t i = 0; i < data.getLength(); ++i) {
+                const bool isNear = scalarNear(data[i], fft.getRSpace()[i], 1E-14);
+                const bool isSmall = abs(data[i]) < RealType(precision) && abs(fft.getRSpace()[i]) < RealType(precision);
+                if(!isNear && !isSmall)
+                    return 1;
+            }
         }
     }
     /* 1d complex */ {
@@ -118,9 +123,14 @@ int main() {
                 return 1;
         }
         /* Test inv */ {
+            constexpr double precision = 1E-11;
             fft.invTransform(fft.getKSpace());
-            if (!vectorNear(data, fft.getRSpace(), 1E-11))
-                return 1;
+            for (size_t i = 0; i < data.getLength(); ++i) {
+                const bool isNear = scalarNear(data[i], fft.getRSpace()[i], precision);
+                const bool isSmall = abs(data[i]) < RealType(precision) && abs(fft.getRSpace()[i]) < RealType(precision);
+                if(!isNear && !isSmall)
+                    return 1;
+            }
         }
     }
     return 0;

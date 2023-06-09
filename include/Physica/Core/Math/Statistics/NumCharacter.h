@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include "Physica/Utils/Container/Array/Array.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     template<class VectorType>

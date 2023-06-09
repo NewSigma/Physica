@@ -280,6 +280,10 @@ namespace Physica::Core {
                 return ScalarType(getReal().isNegative() ? -1 : 1);
         }
 
+        [[nodiscard]] RealType norm() const {
+            return sqrt(squaredNorm());
+        }
+
         [[nodiscard]] RealType squaredNorm() const {
             if constexpr (isComplex)
                 return this->getDerived().squaredNorm();
