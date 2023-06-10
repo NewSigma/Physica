@@ -59,20 +59,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
-    template<class RandomGenerator>
-    void Vector<T, Length, MaxLength, Allocator>::random_uniform(RandomGenerator& gen) {
-        for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = T::random_uniform(gen);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    template<class RandomGenerator>
-    void Vector<T, Length, MaxLength, Allocator>::random_normal(RandomGenerator& gen) {
-        for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = T::random_normal(gen);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::reverse() const {
         const size_t length = this->getLength();
         This result(length);
@@ -113,6 +99,16 @@ namespace Physica::Core {
     template<class RandomGenerator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
         std::uniform_real_distribution<> dist{};
+        This result(len);
+        for (auto& elem : result)
+            elem = dist(gen);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class RandomGenerator>
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
+        std::normal_distribution<> dist{};
         This result(len);
         for (auto& elem : result)
             elem = dist(gen);

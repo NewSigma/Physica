@@ -37,29 +37,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType>::ComplexScalar(ComplexScalar&& c) noexcept
-            : real(std::move(c.real)), imag(std::move(c.imag)) {}
-
-    template<class ScalarType>
-    ComplexScalar<ScalarType>& ComplexScalar<ScalarType>::operator=(const ComplexScalar& c) {
-        if(this == &c)
-            return *this;
-        real = c.real;
-        imag = c.imag;
-        return *this;
-    }
-
-    template<class ScalarType>
-    ComplexScalar<ScalarType>& ComplexScalar<ScalarType>::operator=(ComplexScalar&& c) noexcept {
-        real = std::move(c.real);
-        imag = std::move(c.imag);
-        return *this;
-    }
-
-    template<class ScalarType>
-    ComplexScalar<ScalarType>& ComplexScalar<ScalarType>::operator=(const ScalarBase<ScalarType>& s) {
-        real = s.getDerived();
-        imag = ScalarType::Zero();
+    ComplexScalar<ScalarType>& ComplexScalar<ScalarType>::operator=(ComplexScalar c) {
+        swap(c);
         return *this;
     }
 

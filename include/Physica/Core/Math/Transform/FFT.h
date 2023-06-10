@@ -73,8 +73,10 @@ namespace Physica::Core {
         /* Operators */
         FFT& operator=(FFT fft) noexcept;
         /* Operations */
-        template<class VectorType> void transform(const RValueVector<VectorType>& data);
-        template<class VectorType> void invTransform(const RValueVector<VectorType>& data);
+        inline void transform();
+        template<class VectorType> inline void transform(const RValueVector<VectorType>& data);
+        void invTransform();
+        template<class VectorType> inline void invTransform(const RValueVector<VectorType>& data);
         void swap(FFT& fft) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getDimen() { return 1; }
@@ -90,8 +92,6 @@ namespace Physica::Core {
         [[nodiscard]] inline static int rSizeToKSize(int rSize) noexcept;
     private:
         void initializePlan();
-        void transform();
-        void invTransform();
 
         friend class FFTRSpace<This>;
         friend class FFTKSpace<This>;

@@ -48,16 +48,14 @@ namespace Physica::Core {
         ComplexScalar(const ScalarType& real_, const ScalarType& imag_);
         ComplexScalar(std::initializer_list<ScalarType> list);
         ComplexScalar(const ComplexScalar& c) = default;
-        ComplexScalar(ComplexScalar&& c) noexcept;
+        ComplexScalar(ComplexScalar&& c) noexcept = default;
         /* Operators */
-        ComplexScalar& operator=(const ComplexScalar& c);
-        ComplexScalar& operator=(ComplexScalar&& c) noexcept;
-        ComplexScalar& operator=(const ScalarBase<ScalarType>& s);
+        ComplexScalar& operator=(ComplexScalar c);
         void operator<<=(int i) { real <<= i; imag<<= i; }
         void operator>>=(int i) { real >>= i; imag>>= i; }
         bool operator==(const ComplexScalar<ScalarType>& c) const;
         bool operator!=(const ComplexScalar<ScalarType>& c) const { return !(operator==(c)); }
-        /* Helpers */
+        /* Operations */
         void swap(ComplexScalar& c) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType squaredNorm() const;

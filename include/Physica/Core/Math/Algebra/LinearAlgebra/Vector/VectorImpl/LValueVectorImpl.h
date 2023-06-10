@@ -71,6 +71,20 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class RandomGenerator>
+    void LValueVector<Derived>::random_uniform(RandomGenerator& gen) {
+        for (size_t i = 0; i < this->getLength(); ++i)
+            this->operator[](i) = ScalarType::random_uniform(gen);
+    }
+
+    template<class Derived>
+    template<class RandomGenerator>
+    void LValueVector<Derived>::random_normal(RandomGenerator& gen) {
+        for (size_t i = 0; i < this->getLength(); ++i)
+            this->operator[](i) = ScalarType::random_normal(gen);
+    }
+
+    template<class Derived>
     bool LValueVector<Derived>::isZero() const {
         for(size_t i = 0; i < Base::getLength(); ++i)
             if (!(*this)[i].isZero())

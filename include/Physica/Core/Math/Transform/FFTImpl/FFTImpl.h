@@ -104,11 +104,35 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline void FFT<ScalarType, 1>::transform() {
+        if constexpr (isSinglePrec)
+            fftwf_execute(forward_plan);
+        else
+            fftw_execute(forward_plan);
+    }
+
+    template<class ScalarType>
     template<class VectorType>
     inline void FFT<ScalarType, 1>::transform(const RValueVector<VectorType>& data) {
         assert(data.getLength() == getRSpaceSize());
         getRSpace() = data;
         transform();
+    }
+
+    template<class ScalarType>
+    void FFT<ScalarType, 1>::invTransform() {
+        if constexpr (isSinglePrec)
+            fftwf_execute(backward_plan);
+        else
+            fftw_execute(backward_plan);
+
+        const ScalarType factor = RealType(1.0 / rSpaceSize);
+        for (int i = 0; i < rSpaceSize; ++i) {
+            if constexpr (isComplex)
+                complex_buffer[i] *= factor;
+            else
+                real_buffer[i] *= factor;
+        }
     }
 
     template<class ScalarType>
@@ -163,30 +187,6 @@ namespace Physica::Core {
             }
         }
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
-    }
-
-    template<class ScalarType>
-    inline void FFT<ScalarType, 1>::transform() {
-        if constexpr (isSinglePrec)
-            fftwf_execute(forward_plan);
-        else
-            fftw_execute(forward_plan);
-    }
-
-    template<class ScalarType>
-    inline void FFT<ScalarType, 1>::invTransform() {
-        if constexpr (isSinglePrec)
-            fftwf_execute(backward_plan);
-        else
-            fftw_execute(backward_plan);
-
-        const ScalarType factor = RealType(1.0 / rSpaceSize);
-        for (int i = 0; i < rSpaceSize; ++i) {
-            if constexpr (isComplex)
-                complex_buffer[i] *= factor;
-            else
-                real_buffer[i] *= factor;
-        }
     }
 
     template<class ScalarType, size_t Dim>

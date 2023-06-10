@@ -42,6 +42,7 @@ namespace Physica::Core {
         ~ProbabilityDistributionFunction2D() = default;
         /* Operators */
         This& operator=(This obj) noexcept;
+        [[nodiscard]] This operator+(const This& pdf);
         /* Operations */
         void sample(ScalarType x, ScalarType y);
         void clear();
@@ -70,6 +71,23 @@ namespace Physica::Core {
             , repDeltaY(ScalarType(numBinY) / (toY - fromY)) {
         assert(fromX < toX);
         assert(fromY < toY);
+    }
+
+    template<class ScalarType>
+    ProbabilityDistributionFunction2D<ScalarType>& ProbabilityDistributionFunction2D<ScalarType>::operator=(
+            ProbabilityDistributionFunction2D<ScalarType> obj) noexcept {
+        swap(obj);
+        return *this;
+    }
+
+    template<class ScalarType>
+    ProbabilityDistributionFunction2D<ScalarType> ProbabilityDistributionFunction2D<ScalarType>::operator+(
+            const This& pdf) {
+        This result(*this);
+        for (size_t i = 0; i < result.bucket.getDimX(); ++i)
+            for (size_t j = 0; j < result.bucket.getDimY(); ++j)
+                result.bucket(i, j, 0) += pdf.bucket(i, j, 0);
+        return result;
     }
 
     template<class ScalarType>
@@ -102,17 +120,12 @@ namespace Physica::Core {
     ProbabilityDistributionFunction2D<ScalarType>::makeDistribution() const {
         const ScalarType factor = repDeltaX * repDeltaY / ScalarType(calcNumSample());
         MatrixType result(getNumBinX(), getNumBinY());
-        for (size_t i = 0; i < result.getRow(); ++i)
-            for (size_t j = 0; j < result.getColumn(); ++j)
-                result(i, j) = ScalarType(bucket(i, j, 0)) * factor;
+        for (size_t i = 0; i < result.getColumn(); ++i) {
+            auto col = result.col(i);
+            for (size_t j = 0; j < result.getRow(); ++j)
+                col[j] = ScalarType(bucket(i, j, 0)) * factor;
+        }
         return result;
-    }
-
-    template<class ScalarType>
-    ProbabilityDistributionFunction2D<ScalarType>& ProbabilityDistributionFunction2D<ScalarType>::operator=(
-            ProbabilityDistributionFunction2D<ScalarType> obj) noexcept {
-        swap(obj);
-        return *this;
     }
 
     template<class ScalarType>

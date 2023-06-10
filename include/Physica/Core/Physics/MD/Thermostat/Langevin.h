@@ -77,28 +77,36 @@ namespace Physica::Core {
         const size_t dof = ringPolymer.getDOF();
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
-        [[maybe_unused]] const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
         const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
-        auto& buffer = ringPolymer.getBuffer();
         std::normal_distribution<> dist{};
-        for (size_t i = 0; i < dof; ++i) {
-            const auto mass = massVec[i / Dim];
-            const ScalarType factor = sqrt(repBeta * mass * numReplica);
-            if constexpr (NumReplica != 1) {
+        if constexpr (NumReplica != 1) {
+            const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+            FFT<ScalarType, 1> fft(numReplica, 1);
+            for (size_t i = 0; i < dof; ++i) {
+                const auto mass = massVec[i / Dim];
+                const ScalarType factor = sqrt(repBeta * mass);
+
+                auto& buffer = ringPolymer.getBuffer();
                 ringPolymer.toNormalRepr(i);
+
+                fft.getRSpace().random_normal(gen);
+                fft.transform();
                 /* Translational mode */ {
-                    langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, ComplexScalar<ScalarType>(dist(gen)));
+                    langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
                 }
                 for (size_t j = 1; j < buffer.getColumn(); ++j) {
                     const ScalarType phase = M_PI * j / numReplica;
                     const ScalarType viscosityY = sin(phase) * omegaW;
-                    const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
-                    langevinImpl(buffer(0, j), deltaT, viscosityY, factor, ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                    langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i);
             }
-            else {
+        }
+        else {
+            for (size_t i = 0; i < dof; ++i) {
+                const auto mass = massVec[i / Dim];
+                const ScalarType factor = sqrt(repBeta * mass);
                 langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType(dist(gen)));
             }
         }

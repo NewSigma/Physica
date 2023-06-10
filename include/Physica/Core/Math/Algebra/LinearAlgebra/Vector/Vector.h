@@ -64,10 +64,10 @@ namespace Physica::Core {
         using Storage::operator[];
         /* Operations */
         using Storage::resize;
+        using Base::random_uniform;
+        using Base::random_normal;
         Vector& toOpposite();
         void toUnit();
-        template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         [[nodiscard]] inline device_obj<This> toDevice() const;
         inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
@@ -83,6 +83,8 @@ namespace Physica::Core {
         static Vector random(const Vector& v1, const Vector& v2, RandomGenerator& gen);
         template<class RandomGenerator>
         static Vector random_uniform(size_t len, RandomGenerator& gen);
+        template<class RandomGenerator>
+        static Vector random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
         static Vector linspace(T from, T to, size_t count);

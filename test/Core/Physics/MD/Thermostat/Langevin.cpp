@@ -1,0 +1,107 @@
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include <algorithm>
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
+#include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+
+using namespace Physica::Core;
+using ScalarType = Scalar<Double, false>;
+using VectorType = Vector<ScalarType>;
+using MatrixType = DenseMatrix<ScalarType>;
+using MDType = RPMD<ScalarType, ScalarType, 1, Dynamic>;
+using MDCellType = typename MDType::MDCellType;
+using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
+using ThermostatType = Langevin<ScalarType, ScalarType, 1, Dynamic>;
+using KineticModel = HardCore<ScalarType, Dynamic>;
+constexpr double timeStepLambda = 0.01;
+constexpr double collideFactor = 0.01;
+constexpr double latticeSize = 20;
+constexpr size_t numMolecular = 20;
+constexpr double temperatureT = 2;
+constexpr double thermostatTime = 0.01;
+constexpr double unitMassM = 1;
+constexpr size_t numReplica = 8;
+constexpr size_t maxHandleNum = 100;
+constexpr size_t numSystem = 8;
+constexpr size_t numStep = 20000;
+
+MDCellType makeSystem(std::mt19937& gen) {
+    typename MDCellType::LatticeMatrix lattice{latticeSize};
+
+    std::uniform_real_distribution dist{};
+    Vector<ScalarType> posVec(numMolecular);
+    for (auto& elem : posVec)
+        elem = dist(gen) * latticeSize;
+    std::sort(posVec.begin(), posVec.end());
+    typename MDCellType::PositionMatrix pos(numMolecular, 1);
+    pos.col(0) = posVec;
+
+    typename MDCellType::MassVector massVec(numMolecular);
+    for (size_t i = 0; i < numMolecular; ++i) {
+        massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+    }
+    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+}
+
+int main() {
+    const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
+    std::mt19937 gen(15502868121535481991UL);
+
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
+    ThermostatType thermo(temperatureT, thermostatTime);
+
+    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
+    rpmd.initMomentum(gen);
+    kineticModel.updateMass(rpmd.getRingPolymer());
+
+    MatrixType meanCorr(numMolecular, numReplica);
+    MatrixType varCorr(numMolecular, numReplica);
+    MatrixType temp(numMolecular, numReplica);
+    ScalarType meanTemperature = 0;
+    ScalarType varTemperature = 0;
+    const ScalarType factor = reciprocal(ScalarType(temperatureT * numReplica));
+    for (size_t sys = 0; sys < numSystem; ++sys) {
+        MatrixType buffer(numMolecular, numReplica, 0);
+        ScalarType temperature_sample = 0;
+        for (size_t i = 0; i < numStep; ++i) {
+            rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, SequentialExecutor>(thermo, gen, kineticModel, ForceModel());
+            auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
+            for (size_t replica = 0; replica < numReplica; ++replica) {
+                auto col = temp.col(replica);
+                col = hadamard(hadamard(momentum.col(replica).asVector(), momentum.col((replica + 1) % numReplica).asVector()), kineticModel.getRepMass()) * factor;
+            }
+            toNextMean(buffer, i, temp);
+            toNextMean(temperature_sample, i, rpmd.getRingPolymer().calcTemperature());
+        }
+        toNextVariance(varCorr, meanCorr, sys, buffer);
+        toNextVariance(varTemperature, meanTemperature, sys, temperature_sample);
+    }
+    const MatrixType deviaCorr = sqrt(varCorr);
+
+    for (size_t i = 0; i < numReplica; ++i)
+        for (size_t j = 0; j < numMolecular; ++j)
+            if (abs(meanCorr(j, i)) > deviaCorr(j, i) * ScalarType(2.0))
+                return 1;
+    if (abs(ScalarType(temperatureT) - meanTemperature) > ScalarType(2.0) * sqrt(varTemperature))
+        return 1;
+    return 0;
+}
