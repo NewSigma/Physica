@@ -92,31 +92,33 @@ namespace Physica::Core {
         }
         const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
-        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
         const auto& massVec = ringPolymer.getMassVec();
-        auto& buffer = ringPolymer.getBuffer();
-        std::normal_distribution<> dist{};
-        for (size_t i = 0; i < dof; ++i) {
-            const auto mass = massVec[i / Dim];
-            if constexpr (NumReplica != 1) {
-                ringPolymer.toNormalRepr(i);
-                buffer(0, 0) *= factor_translational;
+        if constexpr (NumReplica != 1) {
+            const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+            FFT<ScalarType, 1> fft(numReplica, 1);
+            for (size_t i = 0; i < dof; ++i) {
+                const auto mass = massVec[i / Dim];
+                const ScalarType factor = sqrt(repBeta * mass);
 
-                const ScalarType factor = sqrt(repBeta * mass * numReplica);
+                auto& buffer = ringPolymer.getBuffer();
+                ringPolymer.toNormalRepr(i);
+
+                fft.getRSpace().random_normal(gen);
+                fft.transform();
+                /* Translational mode */ {
+                    buffer(0, 0) *= factor_translational;
+                }
                 for (size_t j = 1; j < buffer.getColumn(); ++j) {
                     const ScalarType phase = M_PI * j / numReplica;
                     const ScalarType viscosityY = sin(phase) * omegaW;
-                    const ScalarType normalized_rand = M_SQRT1_2 * dist(gen);
                     Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
-                        buffer(0, j),
-                        deltaT,
-                        viscosityY,
-                        factor,
-                        ComplexScalar<ScalarType>(normalized_rand, normalized_rand));
+                            buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i);
             }
-            else {
+        }
+        else {
+            for (size_t i = 0; i < dof; ++i) {
                 ringPolymer.asMatrix()(i, 0) *= factor_translational;
             }
         }

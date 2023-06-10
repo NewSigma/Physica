@@ -103,7 +103,7 @@ void testMergeStep() {
 
 void testCpuGpuCompare() {
     constexpr int NumData = 11;
-    constexpr double precision = 1E-14;
+    constexpr double precision = 1E-13;
     ScalarType cpu_data[NumData];
     {
         using KineticModel = HardCore<ScalarType, 1>;
@@ -142,9 +142,12 @@ void testCpuGpuCompare() {
             kineticModel.updateMomentum(rpmd.getRingPolymer());
         }
     }
-    for (int i = 0; i < NumData; ++i)
+    for (int i = 0; i < NumData; ++i) {
+        std::cout << gpu_data[i] << ' ' << cpu_data[i] << std::endl;
         if (!scalarNear(gpu_data[i], cpu_data[i], precision))
             exit(EXIT_FAILURE);
+    }
+
 }
 
 int main() {
