@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/NotImplementedException.h"
+
 namespace Physica::Core {
     namespace Internal {
         template<class T1, class T2, bool enableSIMD>
@@ -144,6 +146,36 @@ namespace Physica::Core {
     template<size_t Length>
     inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) const {
         return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from, to);
+    }
+
+    template<class Derived>
+    void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
+                                         const H5::DataSpace& mem_space,
+                                         const H5::DataSpace& file_space,
+                                         const H5::DSetMemXferPropList& xfer_plist) {
+        constexpr bool isFloat = std::is_same<TrivialType, float>::value;
+        constexpr bool isDouble = std::is_same<TrivialType, double>::value;
+        if constexpr (isFloat)
+            dataset.read(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
+        else if constexpr (isDouble)
+            dataset.read(data(), H5::PredType::NATIVE_DOUBLE, mem_space, file_space, xfer_plist);
+        else
+            throw NotImplementedException();
+    }
+
+    template<class Derived>
+    void ContinuousVector<Derived>::write(H5::DataSet& dataset,
+                                          const H5::DataSpace& mem_space,
+                                          const H5::DataSpace& file_space,
+                                          const H5::DSetMemXferPropList& xfer_plist) const {
+        constexpr bool isFloat = std::is_same<TrivialType, float>::value;
+        constexpr bool isDouble = std::is_same<TrivialType, double>::value;
+        if constexpr (isFloat)
+            dataset.write(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
+        else if constexpr (isDouble)
+            dataset.write(data(), H5::PredType::NATIVE_DOUBLE, mem_space, file_space, xfer_plist);
+        else
+            throw NotImplementedException();
     }
 
     template<class Derived>

@@ -17,7 +17,8 @@ This project uses the following packages:
 
 [fftw](http://www.fftw.org)  3.3.10  
 [Qt](https://www.qt.io/)  6.2.1  (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  11.4  (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.10.4 (Optional)
 
 To use Physica, compile and link Physica to your program.
 

@@ -20,6 +20,7 @@
 
 #include "LValueVector.h"
 #include "ContinuousVectorBlock.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica::Core {
     /**
@@ -56,6 +57,15 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> tail(size_t from) const;
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
+
+        void read(const H5::DataSet& dataset,
+                  const H5::DataSpace& mem_space = H5::DataSpace::ALL,
+                  const H5::DataSpace& file_space = H5::DataSpace::ALL,
+                  const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        void write(H5::DataSet& dataset, 
+                   const H5::DataSpace& mem_space = H5::DataSpace::ALL,
+                   const H5::DataSpace& file_space = H5::DataSpace::ALL,
+                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
         [[nodiscard]] ScalarType* data() { return &(*this)[0]; }
         [[nodiscard]] const ScalarType* data() const { return &(*this)[0]; }
