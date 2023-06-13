@@ -176,22 +176,20 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, class Executor>
     bool HardCore<ScalarType, NumReplica, Executor>::checkCollision(const RingPolymerType& ringPolymer) const {
-        const size_t numReplica = getNumReplica();
+        using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
         const size_t numParticle = getNumParticle();
-        for (size_t replica = 0; replica < numReplica; ++replica) {
-            auto phase = ringPolymer.asMatrix().col(replica);
+        const size_t length = numParticle - 1;
+        const size_t to = length / PacketType::size() * PacketType::size();
+        if constexpr (NumReplica == 1) { // Both constexpr if branches are not merged into a single function because of worse performance, current compiler: GCC 9.4.0
+            auto phase = ringPolymer.asMatrix().col(0);
             auto pos = phase.tail(numParticle);
             if (pos[0].isNegative()) [[unlikely]]
                 return true;
 
-            const size_t length = numParticle - 1;
             auto head = pos.head(length);
             auto tail = pos.tail(1);
             {
-                using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
                 size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-
                 for (; i < to; i += PacketType::size()) {
                     const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
                     if (horizontal_or(boolPacket)) [[unlikely]]
@@ -207,6 +205,35 @@ namespace Physica::Core {
             }
             if (pos[length] > latticeSize) [[unlikely]]
                 return true;
+        }
+        else {
+            const size_t numReplica = getNumReplica();
+            for (size_t replica = 0; replica < numReplica; ++replica) {
+                auto phase = ringPolymer.asMatrix().col(replica);
+                auto pos = phase.tail(numParticle);
+                if (pos[0].isNegative()) [[unlikely]]
+                    return true;
+
+                auto head = pos.head(length);
+                auto tail = pos.tail(1);
+                {
+                    size_t i = 0;
+                    for (; i < to; i += PacketType::size()) {
+                        const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
+                        if (horizontal_or(boolPacket)) [[unlikely]]
+                            return true;
+                    }
+
+                    [[likely]] if (to != length) {
+                        const size_t count = length - i;
+                        const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
+                        if (horizontal_or(boolPacket)) [[unlikely]]
+                            return true;
+                    }
+                }
+                if (pos[length] > latticeSize) [[unlikely]]
+                    return true;
+            }
         }
         return false;
     }

@@ -39,7 +39,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<RealType> fft(data, RealType(t_max / N));
+        FFT<RealType> fft(data, RealType(t_max / N), FFT<RealType>::Measure);
         const Vector<RealType> intense = toNormVector(fft.getKSpace());
 
         /* Parseval theorem */ {
@@ -80,7 +80,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<ComplexType> fft(data, RealType(t_max / N));
+        FFT<ComplexType> fft(data, RealType(t_max / N), FFT<ComplexType>::Estimate);
         Vector<ComplexType> trans(N);
         for (size_t i = 0; i < N; ++i) {
             ComplexType temp(0);

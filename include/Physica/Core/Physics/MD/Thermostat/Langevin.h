@@ -79,7 +79,6 @@ namespace Physica::Core {
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
-        std::normal_distribution<> dist{};
         if constexpr (NumReplica != 1) {
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
             FFT<ScalarType, 1> fft(numReplica, 1);
@@ -91,7 +90,7 @@ namespace Physica::Core {
                 ringPolymer.toNormalRepr(i);
 
                 fft.getRSpace().random_normal(gen);
-                fft.transform();
+                FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
                     langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
                 }
@@ -104,6 +103,7 @@ namespace Physica::Core {
             }
         }
         else {
+            std::normal_distribution<> dist{};
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const ScalarType factor = sqrt(repBeta * mass);

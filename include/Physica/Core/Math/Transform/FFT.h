@@ -53,6 +53,13 @@ namespace Physica::Core {
 
         static_assert(sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
         static_assert(sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
+    public:
+        enum PlanFlag {
+            Measure = FFTW_MEASURE,
+            Estimate = FFTW_ESTIMATE,
+            Patient = FFTW_PATIENT,
+            Exhaustive = FFTW_EXHAUSTIVE
+        };
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -63,10 +70,12 @@ namespace Physica::Core {
         };
         int rSpaceSize;
         RealType rSpaceDelta;
+        PlanFlag planFlag;
     public:
         FFT();
         FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_);
-        FFT(const Vector<ScalarType>& data, const RealType& rSpaceDelta_);
+        FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_, PlanFlag planFlag);
+        FFT(const Vector<ScalarType>& data, const RealType& rSpaceDelta_, PlanFlag planFlag);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT();
@@ -75,7 +84,7 @@ namespace Physica::Core {
         /* Operations */
         inline void transform();
         template<class VectorType> inline void transform(const RValueVector<VectorType>& data);
-        void invTransform();
+        inline void invTransform();
         template<class VectorType> inline void invTransform(const RValueVector<VectorType>& data);
         void swap(FFT& fft) noexcept;
         /* Getters */
@@ -90,6 +99,8 @@ namespace Physica::Core {
         [[nodiscard]] const FFTKSpace<This>& getKSpace() const { return *this; }
         /* Static members */
         [[nodiscard]] inline static int rSizeToKSize(int rSize) noexcept;
+        static void transform(const This& planProvider, This& bufferProvider);
+        static void invTransform(const This& planProvider, This& bufferProvider);
     private:
         void initializePlan();
 

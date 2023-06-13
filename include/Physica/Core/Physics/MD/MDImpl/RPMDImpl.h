@@ -28,7 +28,7 @@ namespace Physica::Core {
                                                            ScalarType temperatureT_,
                                                            ScalarType timeStep_)
             : cell(std::move(cell_))
-            , fftContract(numContract, 1)
+            , fftContract(numContract, 1, FFT<PosScalarType, 1>::Estimate)
             , timeStep(std::move(timeStep_)) {
         assert(0 < numContract && numContract <= numReplica);
         assert(NumReplica == Dynamic || NumReplica == numReplica);

@@ -104,7 +104,7 @@ namespace Physica::Core {
                 ringPolymer.toNormalRepr(i);
 
                 fft.getRSpace().random_normal(gen);
-                fft.transform();
+                FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
                     buffer(0, 0) *= factor_translational;
                 }

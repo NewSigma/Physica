@@ -37,6 +37,7 @@ namespace Physica::Core {
         ~ProbabilityDistributionFunction() = default;
         /* Operators */
         This& operator=(This obj) noexcept;
+        void operator+=(const This& pdf);
         /* Operations */
         void sample(ScalarType data);
         void clear();
@@ -95,6 +96,12 @@ namespace Physica::Core {
             ProbabilityDistributionFunction<ScalarType> obj) noexcept {
         swap(obj);
         return *this;
+    }
+
+    template<class ScalarType>
+    void ProbabilityDistributionFunction<ScalarType>::operator+=(const ProbabilityDistributionFunction<ScalarType>& pdf) {
+        for (size_t i = 0; i < bucket.getLength(); ++i)
+            bucket[i] += pdf.bucket[i];
     }
 
     template<class ScalarType>

@@ -70,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] const MassVector& getMassVec() const noexcept { return massVec; }
         [[nodiscard]] FFT<PosScalarType, 1>& getCanonicalFFT() noexcept { return fft; }
 
+        [[nodiscard]] const FFTType& getFFT() const noexcept { return fft; }
         [[nodiscard]] const BufferType& getBuffer() const noexcept { return buffer; }
         [[nodiscard]] BufferType& getBuffer() noexcept { return buffer; }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getColumn(); }
@@ -86,7 +87,7 @@ namespace Physica::Core {
     RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::RingPolymer(const MDCellType& cell, size_t numReplica)
             : phase(2 * cell.getDOF(), numReplica)
             , massVec(cell.getMassVec())
-            , fft(numReplica, 1) {
+            , fft(numReplica, 1, FFTType::Estimate) {
         assert(NumReplica == Dynamic || NumReplica == numReplica);
         const size_t dof = getDOF();
         buffer.resize(2, fft.getKSpaceSize());
