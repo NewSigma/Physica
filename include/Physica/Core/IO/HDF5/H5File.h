@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <H5Cpp.h>
-
 namespace Physica::Core {
     class H5File : public H5::H5File {
         using Base = H5::H5File;

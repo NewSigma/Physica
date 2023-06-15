@@ -21,7 +21,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
-#include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Utils/Random.h"
@@ -31,20 +30,16 @@ using namespace Physica::Gui;
 using ScalarType = Scalar<Double, false>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, ScalarType, 1, Dynamic>;
+using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using ThermostatType = Langevin<ScalarType, ScalarType, 1, Dynamic>;
-using KineticModel = HardCore<ScalarType, Dynamic>;
-constexpr double timeStepLambda = 0.01;
+using KineticModel = HardCore<ScalarType, 1>;
+constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
-constexpr double temperatureT = 2;
-constexpr double thermostatTime = 0.01;
-constexpr double unitMassM = 1;
-constexpr size_t numReplica = 8;
-constexpr size_t maxHandleNum = 100;
+constexpr double energy = 20;
+constexpr double temperatureT = 2 * energy / numMolecular;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -58,33 +53,35 @@ MDCellType makeSystem(std::mt19937& gen) {
     pos.col(0) = posVec;
 
     typename MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
-    }
+    for (auto& elem : massVec)
+        elem = dist(gen);
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-int main(int argc, char** argv) {
-    const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    const double criteria = (numMolecular / latticeSize) / std::sqrt(2 * M_PI * unitMassM * temperatureT);
-    printf("Timestep: %f\tCriteria: %f\n", timeStep, criteria);
+void scaleVelocity(MDType& rpmd) {
+    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
+    auto phase = rpmd.getPhaseMatrix().col(0);
+    auto momentum = phase.head(numMolecular);
+    momentum *= sqrt(ScalarType(energy) / energy1);
+}
 
+int main(int argc, char** argv) {
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
+    MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
+    scaleVelocity(rpmd);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    ThermostatType thermo(temperatureT, thermostatTime);
 
-    VectorType record(20000);
-    for (size_t i = 0; i < record.getLength(); ++i) {
-        rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, SequentialExecutor>(thermo, gen, kineticModel, ForceModel());
-        record[i] = rpmd.getRingPolymer().calcTemperature();
+    MatrixType record(10000, rpmd.getNumParticle());
+    for (size_t i = 0; i < record.getRow(); ++i) {
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+        record.row(i) = rpmd.getRingPolymer().makeBeadPos(0);
     }
-    const VectorType t = VectorType::linspace(0, record.getLength() * timeStep, record.getLength());
+    const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());
 
     QApplication app(argc, argv);
     QFont font;
@@ -93,11 +90,11 @@ int main(int argc, char** argv) {
     chart.legend()->setVisible(false);
     {
         constexpr double minX = 0;
-        constexpr double maxX = 100;
+        constexpr double maxX = 10.1;
         constexpr double minY = 0;
-        constexpr double maxY = 4;
-        constexpr double deltaX = 25;
-        constexpr double deltaY = 1;
+        constexpr double maxY = 20;
+        constexpr double deltaX = 2;
+        constexpr double deltaY = 5;
         QValueAxis* axisX = new QValueAxis();
         font = axisX->labelsFont();
         font.setPointSize(15);
@@ -123,7 +120,7 @@ int main(int argc, char** argv) {
         axisY->setMinorGridLineVisible(false);
         axisY->setLabelsFont(font);
         axisY->setRange(minY, maxY);
-        axisY->setTitleText("Temperature");
+        axisY->setTitleText("x");
         axisY->setLabelFormat("%d");
         axisY->setTitleFont(font);
         QValueAxis* axisTop = new QValueAxis();
@@ -150,8 +147,8 @@ int main(int argc, char** argv) {
         chart.addAxis(axisTop, Qt::AlignTop);
         chart.addAxis(axisRight, Qt::AlignRight);
 
-        {
-            auto& spline = plot->line(t, record);
+        for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
+            auto& spline = plot->line(t, record.col(i));
             spline.attachAxis(axisX);
             spline.attachAxis(axisY);
         }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/H5File.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica::Core {
     H5File::H5File(

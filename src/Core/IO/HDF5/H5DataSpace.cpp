@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
-#ifdef PHYSICA_HDF5
-    #include <H5Cpp.h>
+namespace Physica::Core {
+    H5DataSpace::H5DataSpace(const H5::DataSpace& obj) : Base(obj) {}
 
-    #include "H5File.h"
-    #include "H5DataSpace.h"
-#endif
+    void H5DataSpace::selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) {
+        assert(count.getLength() == getDim());
+        assert(start.getLength() == getDim());
+        Base::selectHyperslab(op, count.data(), start.data());
+    }
+}

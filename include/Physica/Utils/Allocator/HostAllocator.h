@@ -46,7 +46,7 @@ namespace Physica::Utils {
         using difference_type = std::ptrdiff_t;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using value_type_as = HostAllocator<U>;
+        using rebind = HostAllocator<U>;
     public:
         HostAllocator() noexcept = default;
         HostAllocator(const HostAllocator&) noexcept = default;

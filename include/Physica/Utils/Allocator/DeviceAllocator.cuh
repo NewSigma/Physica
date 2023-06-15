@@ -95,7 +95,7 @@ namespace Physica::Utils {
         using difference_type = typename std::allocator_traits<DeviceAllocator>::difference_type;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using value_type_as = DeviceAllocator<U>;
+        using rebind = DeviceAllocator<U>;
     public:
         DeviceAllocator() noexcept = default;
         DeviceAllocator(const DeviceAllocator&) noexcept = default;

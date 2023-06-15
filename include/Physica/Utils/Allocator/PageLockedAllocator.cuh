@@ -96,7 +96,7 @@ namespace Physica::Utils {
         using difference_type = typename std::allocator_traits<PageLockedAllocator>::difference_type;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using value_type_as = PageLockedAllocator<U>;
+        using rebind = PageLockedAllocator<U>;
     public:
         PageLockedAllocator() noexcept = default;
         PageLockedAllocator(const PageLockedAllocator&) noexcept = default;

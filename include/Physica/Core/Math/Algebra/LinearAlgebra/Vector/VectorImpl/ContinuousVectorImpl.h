@@ -150,11 +150,11 @@ namespace Physica::Core {
 
     template<class Derived>
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
-                                         const H5::DataSpace& mem_space,
                                          const H5::DataSpace& file_space,
                                          const H5::DSetMemXferPropList& xfer_plist) {
         constexpr bool isFloat = std::is_same<TrivialType, float>::value;
         constexpr bool isDouble = std::is_same<TrivialType, double>::value;
+        const auto mem_space = H5DataSpace::makeDataSpace<1>({Base::getLength()});
         if constexpr (isFloat)
             dataset.read(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
         else if constexpr (isDouble)
@@ -165,11 +165,11 @@ namespace Physica::Core {
 
     template<class Derived>
     void ContinuousVector<Derived>::write(H5::DataSet& dataset,
-                                          const H5::DataSpace& mem_space,
                                           const H5::DataSpace& file_space,
                                           const H5::DSetMemXferPropList& xfer_plist) const {
         constexpr bool isFloat = std::is_same<TrivialType, float>::value;
         constexpr bool isDouble = std::is_same<TrivialType, double>::value;
+        const auto mem_space = H5DataSpace::makeDataSpace<1>({Base::getLength()});
         if constexpr (isFloat)
             dataset.write(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
         else if constexpr (isDouble)
