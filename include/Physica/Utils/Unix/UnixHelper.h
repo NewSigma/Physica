@@ -28,6 +28,7 @@ namespace Physica::Utils {
     long getMaxPathLength();
     Array<char> getPathBuffer();
     Array<char> makePath(const char* format, ...);
+    bool fileExists(const char* path);
     void ensureNotExist(const char* path);
     pid_t waitCheck(const char* message);
     void copyFile(const char* from, const char* to);

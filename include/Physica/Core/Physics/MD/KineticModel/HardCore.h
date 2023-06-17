@@ -58,7 +58,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }
         [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
     private:
-        bool checkCollision(const RingPolymerType& ringPolymer) const;
+        bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
         bool handleCollision(const RingPolymerType& ringPolymer);
         bool checkRepMass() const;
     };
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, class Executor>
     void HardCore<ScalarType, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
-        [[maybe_unused]] const size_t numParticle = getNumParticle();
+        const size_t numParticle = getNumParticle();
         const ScalarType collideStep = collideFactor * deltaT;
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
@@ -101,8 +101,18 @@ namespace Physica::Core {
         bool isDrifted = false;
         while (true) {
             const ScalarType step = to - from;
-            if constexpr (NumReplica != 1)
-                Base::nve_step_impl(ringPolymer, buffer, phase, step);
+            if constexpr (NumReplica != 1) {
+                Base::pre_nve_step_impl(ringPolymer, step);
+                for (size_t i = 0; i < numParticle; ++i) {
+                    Base::do_nve_step_impl(i, ringPolymer, buffer, phase, step);
+                    [[unlikely]] if (checkCollision(i, ringPolymer)) {
+                        rStep = to;
+                        goto done;
+                    }
+                }
+                lStep = to;
+            done:;
+            }
             else {
                 auto col = phase.col(0);
                 auto pos = col.tail(numParticle);
@@ -110,12 +120,12 @@ namespace Physica::Core {
                 auto momentum_buffer = col1.head(numParticle);
                 auto pos_buffer = col1.tail(numParticle);
                 pos = pos_buffer + hadamard(momentum_buffer, repMass) * step;
+                constexpr int unused = 0;
+                if (checkCollision(unused, ringPolymer))
+                    rStep = to;
+                else
+                    lStep = to;
             }
-
-            if (checkCollision(ringPolymer))
-                rStep = to;
-            else
-                lStep = to;
             to = (lStep + rStep) * 0.5;
 
             const bool isDone = lStep == deltaT;
@@ -175,12 +185,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t NumReplica, class Executor>
-    bool HardCore<ScalarType, NumReplica, Executor>::checkCollision(const RingPolymerType& ringPolymer) const {
+    bool HardCore<ScalarType, NumReplica, Executor>::checkCollision(
+            [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
         const size_t numParticle = getNumParticle();
-        const size_t length = numParticle - 1;
-        const size_t to = length / PacketType::size() * PacketType::size();
-        if constexpr (NumReplica == 1) { // Both constexpr if branches are not merged into a single function because of worse performance, current compiler: GCC 9.4.0
+        if constexpr (NumReplica == 1) {
+            const size_t length = numParticle - 1;
+            const size_t to = length / PacketType::size() * PacketType::size();
             auto phase = ringPolymer.asMatrix().col(0);
             auto pos = phase.tail(numParticle);
             if (pos[0].isNegative()) [[unlikely]]
@@ -196,7 +207,7 @@ namespace Physica::Core {
                         return true;
                 }
 
-                [[likely]] if (to != length) {
+                if (to != length) {
                     const size_t count = length - i;
                     const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
                     if (horizontal_or(boolPacket)) [[unlikely]]
@@ -208,31 +219,57 @@ namespace Physica::Core {
         }
         else {
             const size_t numReplica = getNumReplica();
-            for (size_t replica = 0; replica < numReplica; ++replica) {
-                auto phase = ringPolymer.asMatrix().col(replica);
-                auto pos = phase.tail(numParticle);
-                if (pos[0].isNegative()) [[unlikely]]
-                    return true;
+            const size_t to = numReplica / PacketType::size() * PacketType::size();
+            auto pos = ringPolymer.asMatrix().row(numParticle + id_dof);
+            [[unlikely]] if (id_dof == 0) {
+                const PacketType zeros(0);
+                size_t i = 0;
+                for (; i < to; i += PacketType::size()) {
+                    const auto boolPacket = pos.template packet<PacketType>(i) < zeros;
+                    if (horizontal_or(boolPacket)) [[unlikely]]
+                        return true;
+                }
 
-                auto head = pos.head(length);
-                auto tail = pos.tail(1);
-                {
+                if (to != numReplica) {
+                    const size_t count = numReplica - i;
+                    const auto boolPacket = pos.template packetPartial<PacketType>(i, count) < zeros;
+                    if (horizontal_or(boolPacket)) [[unlikely]]
+                        return true;
+                }
+            }
+            else {
+                /* Particles far from the wall */ {
+                    auto pos0 = ringPolymer.asMatrix().row(numParticle + id_dof - 1);
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
-                        const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
+                        const auto boolPacket = pos0.template packet<PacketType>(i) > pos.template packet<PacketType>(i);
                         if (horizontal_or(boolPacket)) [[unlikely]]
                             return true;
                     }
 
-                    [[likely]] if (to != length) {
-                        const size_t count = length - i;
-                        const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
+                    if (to != numReplica) {
+                        const size_t count = numReplica - i;
+                        const auto boolPacket = pos0.template packetPartial<PacketType>(i, count) > pos.template packetPartial<PacketType>(i, count);
                         if (horizontal_or(boolPacket)) [[unlikely]]
                             return true;
                     }
                 }
-                if (pos[length] > latticeSize) [[unlikely]]
-                    return true;
+                [[unlikely]] if (id_dof == numParticle - 1) {
+                    const PacketType latticeSizes(latticeSize.getTrivial());
+                    size_t i = 0;
+                    for (; i < to; i += PacketType::size()) {
+                        const auto boolPacket = pos.template packet<PacketType>(i) > latticeSizes;
+                        if (horizontal_or(boolPacket)) [[unlikely]]
+                            return true;
+                    }
+
+                    if (to != numReplica) {
+                        const size_t count = numReplica - i;
+                        const auto boolPacket = pos.template packetPartial<PacketType>(i, count) > latticeSizes;
+                        if (horizontal_or(boolPacket)) [[unlikely]]
+                            return true;
+                    }
+                }
             }
         }
         return false;

@@ -31,7 +31,7 @@ namespace Physica::Core {
         using BufferType = typename RingPolymerType::BufferType;
         using VectorType = Vector<ScalarType>;
         using Vector2D = Vector<ScalarType, 2>;
-
+    private:
         VectorType omegaK;
         ScalarType omegaW;
         Utils::Array<Vector2D> coeffMatrixBase;
@@ -52,6 +52,13 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
     protected:
+        inline void pre_nve_step_impl([[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT);
+        inline void do_nve_step_impl(
+                size_t id_dof,
+                RingPolymerType& ringPolymer,
+                const PhaseMatrix& input,
+                PhaseMatrix& output,
+                ScalarType deltaT);
         void nve_step_impl(RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT);
     private:
         void updateTimeStep(ScalarType deltaT);
@@ -114,41 +121,53 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_impl(
-            RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT) {
-        using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 2, 2>;
-        using ComplexVector2D = Vector<ComplexScalar<ScalarType>, 2>;
+    inline void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::pre_nve_step_impl(
+            [[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT) {
         assert(NumReplica != 1);
         assert(omegaK.getLength() == ringPolymer.getBuffer().getColumn());
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
+    }
 
-        const size_t dof = input.getRow() / 2U;
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    inline void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::do_nve_step_impl(
+            size_t id_dof,
+            RingPolymerType& ringPolymer,
+            const PhaseMatrix& input,
+            PhaseMatrix& output,
+            ScalarType deltaT) {
         const auto& massVec = ringPolymer.getMassVec();
         const size_t kSpaceSize = omegaK.getLength();
         BufferType& buffer = ringPolymer.getBuffer();
-        Matrix2D matA(2, 2);
-        ComplexVector2D temp{};
-        for (size_t i = 0; i < dof; ++i) {
-            const auto mass = massVec[i / Dim];
-            ringPolymer.toNormalRepr(i, input);
-            /* Translational mode */ {
-                buffer(1, 0) += buffer(0, 0) * deltaT / mass;
-            }
-            for (size_t j = 1; j < kSpaceSize; ++j) {
-                auto col = buffer.col(j);
-                const ScalarType factor = ScalarType(mass) * omegaK[j];
-                const ScalarType cosine = coeffMatrixBase[j][0];
-                const ScalarType sine = coeffMatrixBase[j][1];
-                matA(0, 0) = cosine;
-                matA(0, 1) = -factor * sine;
-                matA(1, 0) = sine / factor;
-                matA(1, 1) = cosine;
-                temp = matA * col;
-                col = temp;
-            }
-            ringPolymer.toBeadRepr(i, output);
+
+        const auto mass = massVec[id_dof / Dim];
+        ringPolymer.toNormalRepr(id_dof, input);
+        /* Translational mode */ {
+            buffer(1, 0) = buffer(1, 0) + buffer(0, 0) * (deltaT / mass);
         }
+        for (size_t j = 1; j < kSpaceSize; ++j) {
+            const ScalarType factor = mass * omegaK[j];
+            const ScalarType cosine = coeffMatrixBase[j][0];
+            const ScalarType sine = coeffMatrixBase[j][1];
+            auto col = buffer.col(j);
+            const auto pack1 = col[0].packet();
+            const auto pack2 = col[1].packet();
+            const auto new_pack1 = cosine.getTrivial() * pack1 - (factor * sine).getTrivial() * pack2;
+            const auto new_pack2 = (sine / factor).getTrivial() * pack1 + cosine.getTrivial() * pack2;
+            col[0].writePacket(new_pack1);
+            col[1].writePacket(new_pack2);
+        }
+        ringPolymer.toBeadRepr(id_dof, output);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_impl(
+            RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT) {
+        pre_nve_step_impl(ringPolymer, deltaT);
+
+        const size_t dof = input.getRow() / 2U;
+        for (size_t i = 0; i < dof; ++i)
+            do_nve_step_impl(i, ringPolymer, input, output, deltaT);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

@@ -39,10 +39,17 @@ namespace Physica::Core {
         /* Static members */
         template<size_t Dim>
         [[nodiscard]] static inline H5DataSpace makeDataSpace(const Utils::Array<hsize_t, Dim>& dims);
+        template<size_t Dim>
+        [[nodiscard]] static inline H5DataSpace makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims);
     };
 
     template<size_t Dim>
     inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims) {
         return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data()));
+    }
+
+    template<size_t Dim>
+    inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims) {
+        return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data()), maxdims.data());
     }
 }

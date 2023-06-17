@@ -88,6 +88,19 @@ namespace Physica::Utils {
         }
         return buffer;
     }
+
+    bool fileExists(const char* path) {
+        struct stat st{};
+        errno = 0;
+        if (stat(path, &st) != 0) {
+            [[unlikely]] if (errno != ENOENT) {
+                perror("[Error]: Failed to fetch stat of file");
+                exit(EXIT_FAILURE);
+            }
+            return false;
+        }
+        return true;
+    }
     /**
      * Ensure the file(regular file or directory) is not exist. If it exists, remove it.
      * @param path
@@ -100,6 +113,7 @@ namespace Physica::Utils {
                 perror("[Error]: Failed to fetch stat of file");
                 exit(EXIT_FAILURE);
             }
+            return;
         }
         if(S_ISDIR(st.st_mode))
             forceRemoveDir(path);

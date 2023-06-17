@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -45,6 +45,18 @@ namespace Physica::Core {
     template<class ScalarType>
     bool ComplexScalar<ScalarType>::operator==(const ComplexScalar<ScalarType>& c) const {
         return real == c.real && imag == c.imag;
+    }
+
+    template<class ScalarType>
+    inline typename ComplexScalar<ScalarType>::PacketType ComplexScalar<ScalarType>::packet() const {
+        PacketType packet{};
+        packet.load(reinterpret_cast<TrivialType*>(const_cast<ScalarType*>(&real)));
+        return packet;
+    }
+
+    template<class ScalarType>
+    inline void ComplexScalar<ScalarType>::writePacket(const PacketType packet) {
+        packet.store(reinterpret_cast<TrivialType*>(&real));
     }
 
     template<class ScalarType>

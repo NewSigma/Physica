@@ -26,13 +26,14 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Length>
     class PacketHelper {
         constexpr static bool isSinglePrec = ScalarType::option == Float;
+        constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static bool isDynamic = Length == Utils::Dynamic;
         using Packet128 = typename std::conditional<isSinglePrec, Vec4f, Vec2d>::type;
         using Packet256 = typename std::conditional<isSinglePrec, Vec8f, Vec4d>::type;
         using Packet512 = typename std::conditional<isSinglePrec, Vec16f, Vec8d>::type;
-        constexpr static size_t size128 = isSinglePrec ? 4 : 2;
-        constexpr static size_t size256 = isSinglePrec ? 8 : 4;
-        constexpr static size_t size512 = isSinglePrec ? 16 : 8;
+        constexpr static size_t size128 = isComplex ? (isSinglePrec ? 2 : 1) : (isSinglePrec ? 4 : 2);
+        constexpr static size_t size256 = isComplex ? (isSinglePrec ? 4 : 2) : (isSinglePrec ? 8 : 4);
+        constexpr static size_t size512 = isComplex ? (isSinglePrec ? 8 : 4) : (isSinglePrec ? 16 : 8);
         constexpr static bool support128 = INSTRSET >= 2;
         constexpr static bool support256 = INSTRSET >= 7;
         constexpr static bool support512 = INSTRSET >= 9;
@@ -62,7 +63,8 @@ namespace Physica::Core::Internal {
      */
     template<class ScalarType, size_t Length>
     class BestPacket {
-        static_assert((ScalarType::option == Float || ScalarType::option == Double) && !ScalarType::errorTrack, "Unsupported float type");
+        using RealType = typename ScalarType::RealType;
+        static_assert((RealType::option == Float || RealType::option == Double) && !RealType::errorTrack, "Unsupported float type");
     public:
         using Type = typename PacketHelper<ScalarType, Length>::Type;
         constexpr static size_t Size = PacketHelper<ScalarType, Length>::Size;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/BestPacket.h"
 
 namespace Physica::Core {
     template<class ScalarType> class ComplexScalar;
@@ -39,6 +40,11 @@ namespace Physica::Core {
     template<class ScalarType>
     class ComplexScalar : public ScalarBase<ComplexScalar<ScalarType>> {
         static_assert(!ScalarType::isComplex);
+        using Base = ScalarBase<ComplexScalar<ScalarType>>;
+        using PacketType = typename Internal::BestPacket<ScalarType, 2>::Type;
+    public:
+        using typename Base::TrivialType;
+        constexpr static bool enableSIMD = !std::is_same<ScalarType, PacketType>::value;
     private:
         ScalarType real;
         ScalarType imag;
@@ -56,6 +62,8 @@ namespace Physica::Core {
         bool operator==(const ComplexScalar<ScalarType>& c) const;
         bool operator!=(const ComplexScalar<ScalarType>& c) const { return !(operator==(c)); }
         /* Operations */
+        [[nodiscard]] inline PacketType packet() const;
+        inline void writePacket(const PacketType packet);
         void swap(ComplexScalar& c) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType squaredNorm() const;
