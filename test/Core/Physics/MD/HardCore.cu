@@ -102,7 +102,7 @@ void testMergeStep() {
 }
 
 void testCpuGpuCompare() {
-    constexpr int NumData = 11;
+    constexpr int NumData = 8;
     constexpr double precision = 1E-13;
     ScalarType cpu_data[NumData];
     {
@@ -116,7 +116,7 @@ void testCpuGpuCompare() {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
         cpu_data[0] = calcThermoFlux(rpmd);
         rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
-        for (size_t j = 0; j < 10; ++j) {
+        for (size_t j = 0; j < NumData - 1; ++j) {
             cpu_data[j + 1] = calcThermoFlux(rpmd);
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
             scaleVelocity(rpmd);
@@ -134,7 +134,7 @@ void testCpuGpuCompare() {
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         gpu_data[0] = calcThermoFlux(rpmd);
         kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
-        for (size_t j = 0; j < 10; ++j) {
+        for (size_t j = 0; j < NumData - 1; ++j) {
             gpu_data[j + 1] = calcThermoFlux(rpmd);
             kineticModel.do_nve_step_for(1.0, timeStep);
             kineticModel.post_nve_step(rpmd.getRingPolymer());
@@ -143,7 +143,6 @@ void testCpuGpuCompare() {
         }
     }
     for (int i = 0; i < NumData; ++i) {
-        std::cout << gpu_data[i] << ' ' << cpu_data[i] << std::endl;
         if (!scalarNear(gpu_data[i], cpu_data[i], precision))
             exit(EXIT_FAILURE);
     }

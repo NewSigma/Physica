@@ -43,6 +43,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept;
         [[nodiscard]] This operator+(const This& pdf);
+        void operator+=(const This& pdf);
         /* Operations */
         void sample(ScalarType x, ScalarType y);
         void clear();
@@ -88,6 +89,13 @@ namespace Physica::Core {
             for (size_t j = 0; j < result.bucket.getDimY(); ++j)
                 result.bucket(i, j, 0) += pdf.bucket(i, j, 0);
         return result;
+    }
+
+    template<class ScalarType>
+    void ProbabilityDistributionFunction2D<ScalarType>::operator+=(const This& pdf) {
+        for (size_t i = 0; i < bucket.getDimX(); ++i)
+            for (size_t j = 0; j < bucket.getDimY(); ++j)
+                bucket(i, j, 0) += pdf.bucket(i, j, 0);
     }
 
     template<class ScalarType>

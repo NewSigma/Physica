@@ -163,10 +163,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::removeDrift() {
-        Vector<ScalarType, Dim> averageDrift = makeDriftMomentum() * reciprocal(ScalarType(getNumParticle() * getNumReplica()));
+        const Vector<ScalarType, Dim> driftVelocity = makeDriftMomentum() * reciprocal(ScalarType(getNumReplica()) * massVec.sum());
         for (size_t i = 0; i < getDOF(); ++i) {
+            const auto mass = massVec[i / Dim];
             auto row = phase.row(i);
-            row -= averageDrift[i % Dim];
+            row -= mass * driftVelocity[i % Dim];
         }
     }
 
