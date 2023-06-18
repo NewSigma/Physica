@@ -154,7 +154,7 @@ namespace Physica::Core {
                                          const H5::DSetMemXferPropList& xfer_plist) {
         constexpr bool isFloat = std::is_same<TrivialType, float>::value;
         constexpr bool isDouble = std::is_same<TrivialType, double>::value;
-        const auto mem_space = H5DataSpace::makeDataSpace<1>({Base::getLength()});
+        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
         if constexpr (isFloat)
             dataset.read(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
         else if constexpr (isDouble)
@@ -169,7 +169,7 @@ namespace Physica::Core {
                                           const H5::DSetMemXferPropList& xfer_plist) const {
         constexpr bool isFloat = std::is_same<TrivialType, float>::value;
         constexpr bool isDouble = std::is_same<TrivialType, double>::value;
-        const auto mem_space = H5DataSpace::makeDataSpace<1>({Base::getLength()});
+        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
         if constexpr (isFloat)
             dataset.write(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
         else if constexpr (isDouble)

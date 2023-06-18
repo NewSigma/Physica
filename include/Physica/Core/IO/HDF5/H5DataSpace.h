@@ -21,9 +21,11 @@
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
+    template<size_t Dim>
     class H5DataSpace : public H5::DataSpace {
         using Base = H5::DataSpace;
-        using SizeArray = Utils::Array<hsize_t>;
+        using SizeArray = Utils::Array<hsize_t, Dim>;
+        constexpr static auto Dynamic = Physica::Utils::Dynamic;
     public:
         H5DataSpace(const H5::DataSpace& obj);
         H5DataSpace(const H5DataSpace&) = default;
@@ -35,26 +37,52 @@ namespace Physica::Core {
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         /* Getters */
-        [[nodiscard]] size_t getDim() const noexcept { return getSimpleExtentNdims(); }
+        [[nodiscard]] size_t getDim() const noexcept;
+        [[nodiscard]] size_t getSize(size_t dim) const noexcept;
         /* Static members */
-        template<size_t Dim>
-        [[nodiscard]] static inline H5DataSpace makeDataSpace(const Utils::Array<hsize_t, Dim>& dims);
-        template<size_t Dim>
-        [[nodiscard]] static inline H5DataSpace makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims);
+        [[nodiscard]] static inline H5DataSpace makeDataSpace(const SizeArray& dims);
+        [[nodiscard]] static inline H5DataSpace makeDataSpace(const SizeArray& dims, const SizeArray& maxdims);
     };
 
-    inline H5DataSpace& H5DataSpace::operator=(const H5DataSpace& obj) {
+    template<size_t Dim>
+    H5DataSpace<Dim>::H5DataSpace(const H5::DataSpace& obj) : Base(obj) {}
+
+    template<size_t Dim>
+    void H5DataSpace<Dim>::selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) {
+        assert(count.getLength() == getDim());
+        assert(start.getLength() == getDim());
+        Base::selectHyperslab(op, count.data(), start.data());
+    }
+
+    template<size_t Dim>
+    inline H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(const H5DataSpace& obj) {
         Base::operator=(obj);
         return *this;
     }
 
     template<size_t Dim>
-    inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims) {
+    size_t H5DataSpace<Dim>::getDim() const noexcept {
+        if constexpr (Dim == Dynamic)
+            return getSimpleExtentNdims();
+        else
+            return Dim;
+    }
+
+    template<size_t Dim>
+    size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
+        SizeArray sizes(getDim());
+        [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
+        assert(d == Dim);
+        return sizes[dim];
+    }
+
+    template<size_t Dim>
+    inline H5DataSpace<Dim> H5DataSpace<Dim>::makeDataSpace(const SizeArray& dims) {
         return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data()));
     }
 
     template<size_t Dim>
-    inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims) {
+    inline H5DataSpace<Dim> H5DataSpace<Dim>::makeDataSpace(const SizeArray& dims, const SizeArray& maxdims) {
         return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data(), maxdims.data()));
     }
 }
