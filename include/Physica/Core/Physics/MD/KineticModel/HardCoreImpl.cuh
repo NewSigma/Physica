@@ -25,7 +25,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, size_t NumReplica>
-        __device__ inline bool handleCollision(
+        __device__ inline void handleCollision(
                 typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& phase,
                 const typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& mass,
                 ScalarType latticeSize,
@@ -50,90 +50,16 @@ namespace Physica::Core {
                 momentum[threadId] = next_p1;
                 momentum[threadId + 1] = next_p2;
             }
-            const bool isRightDrift = !pos[0].isPositive();
-            if (threadId == 0 && isRightDrift) {
+
+            if (threadId == 0 && (!pos[0].isPositive())) {
                 momentum[0] = abs(momentum[0]);
             }
             __syncthreads();
             const size_t lastParticle = numParticle - 1;
-            const bool isLeftDrift = pos[lastParticle] > latticeSize;
-            if (threadId == lastParticle && isLeftDrift) {
+            if (threadId == lastParticle && (pos[lastParticle] > latticeSize)) {
                 momentum[lastParticle] = -abs(momentum[lastParticle]);
             }
             __syncthreads();
-            return isRightDrift || isLeftDrift;
-        }
-
-        template<class ScalarType, size_t NumReplica>
-        __device__ inline void removeDrift(
-                typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& phase,
-                const typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& mass,
-                ScalarType* sharedBuffer) {
-            const unsigned int numThread = blockDim.x;
-            const unsigned int threadId = threadIdx.x;
-            const size_t numParticle = phase.getLength() / 2;
-            auto momentum = phase.head(numParticle);
-
-            ScalarType sum = 0;
-            {
-                for (int i = threadId; i < numParticle; i += numThread)
-                    sum += momentum[i];
-                sharedBuffer[threadId] = sum;
-                
-                for (int shift = (numThread + 1) / 2; shift != 0; shift /= 2) {
-                    __syncthreads();
-                    if (threadId < shift && threadId + shift < numThread)
-                        sharedBuffer[threadId] += sharedBuffer[threadId + shift];
-                }
-                __syncthreads();
-            }
-            const ScalarType totalMomentum = sharedBuffer[0];
-            {
-                sum = 0;
-                for (int i = threadId; i < numParticle; i += numThread)
-                    sum += mass[i];
-                sharedBuffer[threadId] = sum;
-                
-                for (int shift = (numThread + 1) / 2; shift != 0; shift /= 2) {
-                    __syncthreads();
-                    if (threadId < shift && threadId + shift < numThread)
-                        sharedBuffer[threadId] += sharedBuffer[threadId + shift];
-                }
-                __syncthreads();
-            }
-            const ScalarType drift = totalMomentum / sharedBuffer[0];
-            for (int i = threadId; i < numParticle; i += numThread) {
-                momentum[i] -= mass[i] * drift;
-            }
-        }
-
-        template<class ScalarType, size_t NumReplica>
-        __device__ inline void scaleVelocity(
-                typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& phase,
-                const typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& repMass,
-                ScalarType temperatureT,
-                ScalarType* sharedBuffer) {
-            const unsigned int numThread = blockDim.x;
-            const unsigned int threadId = threadIdx.x;
-            const size_t numParticle = phase.getLength() / 2;
-            auto momentum = phase.head(numParticle);
-
-            ScalarType sum = 0;
-            for (int i = threadId; i < numParticle; i += numThread)
-                sum += square(momentum[i]) * repMass[i];
-            sharedBuffer[threadId] = sum;
-            
-            for (int shift = (numThread + 1) / 2; shift != 0; shift /= 2) {
-                __syncthreads();
-                if (threadId < shift && threadId + shift < numThread)
-                    sharedBuffer[threadId] += sharedBuffer[threadId + shift];
-            }
-            __syncthreads();
-            const ScalarType temperatureNow = sharedBuffer[0] / ScalarType(numParticle);
-            const ScalarType factor = sqrt(temperatureT / temperatureNow);
-            for (int i = threadId; i < numParticle; i += numThread) {
-                momentum[i] *= factor;
-            }
         }
 
         template<class ScalarType, size_t NumReplica>
@@ -171,7 +97,6 @@ namespace Physica::Core {
                 ScalarType from = 0;
                 ScalarType to = deltaT;
                 size_t handleNum = 0;
-                bool isDrifted = false;
                 while (true) {
                     /* Try step */ {
                         const ScalarType pos1 = buffer[threadId] + velocity * (to - from);
@@ -202,13 +127,9 @@ namespace Physica::Core {
                         buffer[threadId] = pos0 + velocity * (lStep - from);
                         from = lStep;
                         to = deltaT;
-                        isDrifted |= handleCollision<ScalarType, NumReplica>(phase, mass, latticeSize, sharedBuffer);
+                        handleCollision<ScalarType, NumReplica>(phase, mass, latticeSize, sharedBuffer);
                         velocity = hadamard(momentum, repMass).calc(threadId);
                     }
-                }
-                if (isDrifted) {
-                    removeDrift<ScalarType, NumReplica>(phase, mass, sharedBuffer);
-                    scaleVelocity<ScalarType, NumReplica>(phase, repMass, temperatureT, sharedBuffer);
                 }
             }
         }

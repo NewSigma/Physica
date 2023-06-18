@@ -59,7 +59,7 @@ namespace Physica::Core {
         [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
     private:
         bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
-        bool handleCollision(const RingPolymerType& ringPolymer);
+        void handleCollision(const RingPolymerType& ringPolymer);
         bool checkRepMass() const;
     };
 
@@ -98,7 +98,6 @@ namespace Physica::Core {
         ScalarType from = 0;
         ScalarType to = deltaT;
         size_t handleNum = 0;
-        bool isDrifted = false;
         while (true) {
             const ScalarType step = to - from;
             if constexpr (NumReplica != 1) {
@@ -158,14 +157,8 @@ namespace Physica::Core {
                 handleNum += 1;
                 from = lStep;
                 to = deltaT;
-                isDrifted |= handleCollision(ringPolymer);
+                handleCollision(ringPolymer);
             }
-        }
-
-        if (isDrifted) {
-            const ScalarType temperatureT = ringPolymer.calcTemperature();
-            ringPolymer.removeDrift();
-            ringPolymer.scaleVelocity(temperatureT);
         }
     }
 
@@ -276,13 +269,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t NumReplica, class Executor>
-    bool HardCore<ScalarType, NumReplica, Executor>::handleCollision(const RingPolymerType& ringPolymer) {
+    void HardCore<ScalarType, NumReplica, Executor>::handleCollision(const RingPolymerType& ringPolymer) {
         const size_t numReplica = getNumReplica();
         const size_t numParticle = getNumParticle();
         const auto& mass = ringPolymer.getMassVec();
         auto momentumMatrix = buffer.topRows(numParticle);
         auto posMatrix = ringPolymer.asMatrix().bottomRows(numParticle);
-        bool isDrifted = false;
         for (size_t replica = 0; replica < numReplica; ++replica) {
             auto momentum = momentumMatrix.col(replica);
             auto pos = posMatrix.col(replica);
@@ -299,16 +291,12 @@ namespace Physica::Core {
                     momentum[i + 1] = next_p2;
                 }
             }
-            if (!pos[0].isPositive()) {
+            if (!pos[0].isPositive())
                 momentum[0] = abs(momentum[0]);
-                isDrifted = true;
-            }
-            if (pos[i] > latticeSize) {
+
+            if (pos[i] > latticeSize)
                 momentum[i] = -abs(momentum[i]);
-                isDrifted = true;
-            }
         }
-        return isDrifted;
     }
 
     template<class ScalarType, size_t NumReplica, class Executor>
