@@ -30,7 +30,7 @@ namespace Physica::Core {
         H5DataSpace(H5DataSpace&&) noexcept = delete;
         virtual ~H5DataSpace() = default;
         /* Operators */
-        H5DataSpace& operator=(const H5DataSpace&) = default;
+        inline H5DataSpace& operator=(const H5DataSpace& obj);
         H5DataSpace& operator=(H5DataSpace&&) noexcept = delete;
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
@@ -43,6 +43,11 @@ namespace Physica::Core {
         [[nodiscard]] static inline H5DataSpace makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims);
     };
 
+    inline H5DataSpace& H5DataSpace::operator=(const H5DataSpace& obj) {
+        Base::operator=(obj);
+        return *this;
+    }
+
     template<size_t Dim>
     inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims) {
         return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data()));
@@ -50,6 +55,6 @@ namespace Physica::Core {
 
     template<size_t Dim>
     inline H5DataSpace H5DataSpace::makeDataSpace(const Utils::Array<hsize_t, Dim>& dims, const Utils::Array<hsize_t, Dim>& maxdims) {
-        return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data()), maxdims.data());
+        return H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data(), maxdims.data()));
     }
 }
