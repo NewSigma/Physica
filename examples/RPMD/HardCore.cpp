@@ -33,7 +33,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, 1>;
+using KineticModel = HardCore<ScalarType, true, 1>;
 constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
@@ -58,13 +58,6 @@ MDCellType makeSystem(std::mt19937& gen) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-void scaleVelocity(MDType& rpmd) {
-    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
-    auto phase = rpmd.getPhaseMatrix().col(0);
-    auto momentum = phase.head(numMolecular);
-    momentum *= sqrt(ScalarType(energy) / energy1);
-}
-
 int main(int argc, char** argv) {
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
@@ -72,7 +65,6 @@ int main(int argc, char** argv) {
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
     rpmd.initMomentum(gen);
-    scaleVelocity(rpmd);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
 
@@ -91,8 +83,8 @@ int main(int argc, char** argv) {
     {
         constexpr double minX = 0;
         constexpr double maxX = 10.1;
-        constexpr double minY = 0;
-        constexpr double maxY = 20;
+        constexpr double minY = 0 - 5;
+        constexpr double maxY = 20 + 5;
         constexpr double deltaX = 2;
         constexpr double deltaY = 5;
         QValueAxis* axisX = new QValueAxis();
@@ -151,6 +143,17 @@ int main(int argc, char** argv) {
             auto& spline = plot->line(t, record.col(i));
             spline.attachAxis(axisX);
             spline.attachAxis(axisY);
+        }
+        {
+            auto& line1 = plot->line(VectorType{minX, maxX}, VectorType{0, 0});
+            line1.setColor(Qt::black);
+            line1.attachAxis(axisX);
+            line1.attachAxis(axisY);
+
+            auto& line2 = plot->line(VectorType{minX, maxX}, VectorType{latticeSize, latticeSize});
+            line2.setColor(Qt::black);
+            line2.attachAxis(axisX);
+            line2.attachAxis(axisY);
         }
     }
     plot->show();

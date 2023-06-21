@@ -24,53 +24,59 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, size_t NumReplica>
+        template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
         __device__ inline void handleCollision(
-                typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& phase,
-                const typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector& mass,
+                typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector& phase,
+                const typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector& mass,
                 ScalarType latticeSize,
                 ScalarType* sharedBuffer) {
-            constexpr double MaxDouble = 1.797693E308;
             const unsigned int threadId = threadIdx.x;
             const size_t numParticle = mass.getLength();
             auto momentum = phase.head(numParticle);
             auto pos = phase.tail(numParticle);
 
             sharedBuffer[threadId] = pos[threadId];
-            if (threadId == blockDim.x - 1)
-                sharedBuffer[blockDim.x] = MaxDouble;
             __syncthreads();
-            if (sharedBuffer[threadId] > sharedBuffer[threadId + 1]) {
+            const unsigned int threadId1 = (threadId + 1) % numParticle;
+            bool isCollided = false;
+            if (threadId != blockDim.x - 1)
+                isCollided = sharedBuffer[threadId] > sharedBuffer[threadId1];
+            else {
+                if constexpr (!IsFixedBoundary)
+                    isCollided = sharedBuffer[threadId] > sharedBuffer[0] + latticeSize;
+            }
+
+            if (isCollided) {
                 const ScalarType m1 = mass[threadId];
-                const ScalarType m2 = mass[threadId + 1];
+                const ScalarType m2 = mass[threadId1];
                 const ScalarType p1 = momentum[threadId];
-                const ScalarType p2 = momentum[threadId + 1];
+                const ScalarType p2 = momentum[threadId1];
                 const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
                 const ScalarType next_p2 = p1 + p2 - next_p1;
                 momentum[threadId] = next_p1;
-                momentum[threadId + 1] = next_p2;
+                momentum[threadId1] = next_p2;
             }
-
-            if (threadId == 0 && (!pos[0].isPositive())) {
-                momentum[0] = abs(momentum[0]);
-            }
-            __syncthreads();
-            const size_t lastParticle = numParticle - 1;
-            if (threadId == lastParticle && (pos[lastParticle] > latticeSize)) {
-                momentum[lastParticle] = -abs(momentum[lastParticle]);
+            if constexpr (IsFixedBoundary) {
+                if (threadId == 0 && (!pos[0].isPositive()))
+                    momentum[0] = abs(momentum[0]);
+                __syncthreads();
+                const size_t lastParticle = numParticle - 1;
+                if (threadId == lastParticle && (pos[lastParticle] > latticeSize)) {
+                    momentum[lastParticle] = -abs(momentum[lastParticle]);
+                }
             }
             __syncthreads();
         }
 
-        template<class ScalarType, size_t NumReplica>
+        template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
         __global__ void step_kernel(
                 ScalarType latticeSize,
                 ScalarType collideStep,
                 ScalarType temperatureT,
-                Physica::PlainStruct<typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector> phase_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector> mass_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector> repMass_,
-                Physica::PlainStruct<typename HardCore<ScalarType, NumReplica, CudaExecutor>::DeviceVector> buffer_,
+                Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> phase_,
+                const Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> mass_,
+                const Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> repMass_,
+                Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> buffer_,
                 ScalarType deltaT,
                 size_t numStep,
                 size_t maxHandleNum) {
@@ -101,10 +107,20 @@ namespace Physica::Core {
                     /* Try step */ {
                         const ScalarType pos1 = buffer[threadId] + velocity * (to - from);
                         sharedBuffer[threadId] = pos1;
-                        if (threadId == blockDim.x - 1)
-                            sharedBuffer[blockDim.x] = latticeSize;
                         __syncthreads();
-                        const bool flag = pos1 > sharedBuffer[threadId + 1] || (!pos1.isPositive());
+                        bool flag = false;
+                        if constexpr (IsFixedBoundary) {
+                            if (threadId != blockDim.x - 1)
+                                flag = pos1 > sharedBuffer[threadId + 1] || (!pos1.isPositive());
+                            else
+                                flag = pos1 > latticeSize;
+                        }
+                        else {
+                            if (threadId != blockDim.x - 1)
+                                flag = pos1 > sharedBuffer[threadId + 1];
+                            else
+                                flag = pos1 > sharedBuffer[0] + latticeSize;
+                        }
                         const bool isCollided = __syncthreads_or(flag);
                         if (isCollided)
                             rStep = to;
@@ -127,7 +143,7 @@ namespace Physica::Core {
                         buffer[threadId] = pos0 + velocity * (lStep - from);
                         from = lStep;
                         to = deltaT;
-                        handleCollision<ScalarType, NumReplica>(phase, mass, latticeSize, sharedBuffer);
+                        handleCollision<ScalarType, IsFixedBoundary, NumReplica>(phase, mass, latticeSize, sharedBuffer);
                         velocity = hadamard(momentum, repMass).calc(threadId);
                     }
                 }
@@ -135,8 +151,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t NumReplica>
-    HardCore<ScalarType, NumReplica, CudaExecutor>::HardCore(
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::HardCore(
             ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t maxHandleNum_)
             : latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
@@ -150,40 +166,40 @@ namespace Physica::Core {
         assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
     }
 
-    template<class ScalarType, size_t NumReplica>
-    HardCore<ScalarType, NumReplica, CudaExecutor>& HardCore<ScalarType, NumReplica, CudaExecutor>::operator=(HardCore<ScalarType, NumReplica, CudaExecutor> obj) noexcept {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>& HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::operator=(HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor> obj) noexcept {
         swap(*this);
         return *this;
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         pre_nve_step(ringPolymer);
         do_nve_step(deltaT, 1);
         post_nve_step(ringPolymer);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::nve_step_for(ScalarType duration, RingPolymerType& ringPolymer, ScalarType deltaT) {
         pre_nve_step(ringPolymer);
         do_nve_step_for(duration, deltaT);
         post_nve_step(ringPolymer);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::pre_nve_step(RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::pre_nve_step(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         lockedBuffer = phase;
         lockedBuffer.toDeviceAsync(d_phase);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::do_nve_step(ScalarType deltaT, size_t numStep) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::do_nve_step(ScalarType deltaT, size_t numStep) {
         assert(deltaT.isPositive());
         const size_t numParticle = getNumParticle();
         const unsigned int numThread = numParticle > 1024 ? 1024 : numParticle;
-        Internal::step_kernel<ScalarType, NumReplica><<<1, numThread, (numThread + 1) * sizeof(ScalarType), StreamPool::getStream()>>>(
+        Internal::step_kernel<ScalarType, IsFixedBoundary, NumReplica><<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(
                 latticeSize,
                 collideFactor * deltaT,
                 temperatureT,
@@ -196,14 +212,14 @@ namespace Physica::Core {
                 maxHandleNum);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::do_nve_step_for(ScalarType duration, ScalarType deltaT) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::do_nve_step_for(ScalarType duration, ScalarType deltaT) {
         const uint64_t step = double(duration / deltaT) + 0.5;
         do_nve_step(deltaT, step);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::post_nve_step(RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::post_nve_step(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
@@ -211,8 +227,8 @@ namespace Physica::Core {
         phase = lockedBuffer;
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::updateMomentum(RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::updateMomentum(RingPolymerType& ringPolymer) {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         auto momentum = phase.head(numParticle);
@@ -223,8 +239,8 @@ namespace Physica::Core {
         head.toDeviceAsync(d_momentum);
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::updateMass(RingPolymerType& ringPolymer) {
         auto head = lockedBuffer.head(getNumParticle());
         head = ringPolymer.getMassVec();
         head.toDeviceAsync(mass);
@@ -232,8 +248,8 @@ namespace Physica::Core {
         CudaExecutor::wait();
     }
 
-    template<class ScalarType, size_t NumReplica>
-    void HardCore<ScalarType, NumReplica, CudaExecutor>::swap(HardCore& obj) noexcept {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::swap(HardCore& obj) noexcept {
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
         temperatureT.swap(obj.temperatureT);

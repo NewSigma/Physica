@@ -40,7 +40,7 @@ constexpr double collideFactor = 0.005;
 const size_t numMolecular = 512;
 constexpr double latticeSize = 512;
 constexpr double temperatureT = 2;
-constexpr double energy = numMolecular * temperatureT / 2;
+[[maybe_unused]] constexpr double energy = numMolecular * temperatureT / 2;
 constexpr size_t numSample = 5000;
 constexpr bool IsComputeMode = true;
 
@@ -50,7 +50,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, 1, CudaExecutor>;
+using KineticModel = HardCore<ScalarType, false, 1, CudaExecutor>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
@@ -68,13 +68,6 @@ MDCellType makeSystem(std::mt19937& gen) {
         massVec[i] = i % 2 == 0 ? 3.0 : 1.0;
     }
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
-}
-
-void scaleVelocity(MDType& rpmd) {
-    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
-    auto phase = rpmd.getPhaseMatrix().col(0);
-    auto momentum = phase.head(numMolecular);
-    momentum *= sqrt(ScalarType(energy) / energy1);
 }
 
 ScalarType calcThermoFlux(MDType& rpmd) {
@@ -110,7 +103,7 @@ int main(int argc, char** argv) {
                     toNextMean(mean[j], sample, flux0 * flux);
                     kineticModel.do_nve_step_for(1.0, timeStep);
                     kineticModel.post_nve_step(rpmd.getRingPolymer());
-                    scaleVelocity(rpmd);
+                    rpmd.getRingPolymer().removeDrift();
                     kineticModel.updateMomentum(rpmd.getRingPolymer());
                 }
             }

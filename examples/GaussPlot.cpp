@@ -33,7 +33,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, 1>;
+using KineticModel = HardCore<ScalarType, true, 1>;
 constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 512;
@@ -60,21 +60,14 @@ MDCellType makeSystem(std::mt19937& gen) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-void scaleVelocity(MDType& rpmd) {
-    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
-    auto phase = rpmd.getPhaseMatrix().col(0);
-    auto momentum = phase.head(numMolecular);
-    momentum *= sqrt(ScalarType(energy) / energy1);
-}
-
 int main(int argc, char** argv) {
     std::mt19937::result_type seed;
     Physica::Utils::Random::rdrand(seed);
     std::mt19937 gen(seed);
 
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);
+    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     rpmd.initMomentum(gen);
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 1000);
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     const VectorType repMass = reciprocal(rpmd.getMassVec());

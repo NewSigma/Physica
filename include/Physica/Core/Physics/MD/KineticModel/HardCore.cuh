@@ -27,13 +27,13 @@
 #include "HardCore.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t NumReplica>
-    class HardCore<ScalarType, NumReplica, CudaExecutor> {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    class HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor> {
         constexpr static unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
         static_assert(std::is_pointer_v<cudaGraph_t>);
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
     public:
-        using RingPolymerType = typename HardCore<ScalarType, NumReplica>::RingPolymerType;
+        using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica>::RingPolymerType;
         using DeviceVector = device_obj<Vector<ScalarType>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:

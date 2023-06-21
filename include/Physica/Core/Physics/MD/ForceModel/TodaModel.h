@@ -23,7 +23,7 @@ namespace Physica::Core {
      * Reference:
      * [1] T. Hatano, Phys. Rev. E 59, R1(R) (1999)
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
     class TodaModel {
         static_assert(Dim == 1, "[Error]: TodaModel must be 1-dimensional");
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
@@ -35,19 +35,30 @@ namespace Physica::Core {
             const size_t numParticle = cell.getNumParticle();
             const auto& pos = cell.getPos();
             Vector<ScalarType> force(numParticle, 0);
-            /* First */ {
-                const ScalarType delta = pos(0, 0) - SpringLength;
-                force[0] = ScalarType(-1.0) + exp(-delta);
+            if constexpr (IsFixedBoundary) {
+                /* First */ {
+                    const ScalarType delta = pos(0, 0) - SpringLength;
+                    force[0] = ScalarType(-1.0) + exp(-delta);
+                }
+                for (size_t i = 0; i < numParticle - 1; ++i) {
+                    const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+                    const ScalarType f = exp(-delta);
+                    force[i] -= f;
+                    force[i + 1] += f;
+                }
+                /* Last */ {
+                    const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+                    force[numParticle - 1] += ScalarType(1.0) - exp(-delta);
+                }
             }
-            for (size_t i = 0; i < numParticle - 1; ++i) {
-                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
-                const ScalarType f = exp(-delta);
-                force[i] -= f;
-                force[i + 1] += f;
-            }
-            /* Last */ {
-                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
-                force[numParticle - 1] += ScalarType(1.0) - exp(-delta);
+            else {
+                for (size_t i = 0; i < numParticle; ++i) {
+                    const size_t i1 = (i + 1) % numParticle;
+                    const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
+                    const ScalarType f = exp(-delta);
+                    force[i] -= f;
+                    force[i1] += f;
+                }
             }
             return force;
         }
@@ -59,46 +70,66 @@ namespace Physica::Core {
             const size_t numParticle = cell.getNumParticle();
             const auto& pos = cell.getPos();
             ScalarType energy = 0;
-            /* First */ {
-                const ScalarType delta = pos(0, 0) - SpringLength;
-                energy = delta + exp(-delta);
+            if constexpr (IsFixedBoundary) {
+                /* First */ {
+                    const ScalarType delta = pos(0, 0) - SpringLength;
+                    energy = delta + exp(-delta);
+                }
+                    for (size_t i = 0; i < numParticle - 1; ++i) {
+                        const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+                        energy += delta + exp(-delta);
+                    }
+                /* Last */ {
+                    const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+                    energy += delta + exp(-delta);
+                }
             }
-            for (size_t i = 0; i < numParticle - 1; ++i) {
-                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
-                energy += delta + exp(-delta);
-            }
-            /* Last */ {
-                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
-                energy += delta + exp(-delta);
+            else {
+                for (size_t i = 0; i < numParticle; ++i) {
+                    const size_t i1 = (i + 1) % numParticle;
+                    const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
+                    energy += delta + exp(-delta);
+                }
             }
             return energy;
         }
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename TodaModel<ScalarType, PosScalarType, Dim>::LatticeMatrix
-    TodaModel<ScalarType, PosScalarType, Dim>::virial(const MDCellType& cell) const {
+    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    typename TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::LatticeMatrix
+    TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType result = 0;
-        /* First */ {
-            const ScalarType r = pos(0, 0);
-            const ScalarType delta = r - SpringLength;
-            const ScalarType f = exp(-delta) - ScalarType(1.0);
-            result += r * f;
+        if constexpr (IsFixedBoundary) {
+            /* First*/ {
+                const ScalarType r = pos(0, 0);
+                const ScalarType delta = r - SpringLength;
+                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                result += r * f;
+            }
+            for (size_t i = 0; i < numParticle - 1; ++i) {
+                const ScalarType r = pos(i + 1, 0) - pos(i, 0);
+                const ScalarType delta = r - SpringLength;
+                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                result += r * f;
+            }
+            /* Last */ {
+                const ScalarType r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
+                const ScalarType delta = r - SpringLength;
+                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                result += r * f;
+            }
         }
-        for (size_t i = 0; i < numParticle - 1; ++i) {
-            const ScalarType r = pos(i + 1, 0) - pos(i, 0);
-            const ScalarType delta = r - SpringLength;
-            const ScalarType f = exp(-delta) - ScalarType(1.0);
-            result += r * f;
-        }
-        /* Last */ {
-            const ScalarType r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
-            const ScalarType delta = r - SpringLength;
-            const ScalarType f = exp(-delta) - ScalarType(1.0);
-            result += r * f;
+        else {
+            for (size_t i = 0; i < numParticle; ++i) {
+                const size_t i1 = (i + 1) % numParticle;
+                const ScalarType r = cell.minDistVector(i, i1).norm();
+                const ScalarType delta = r - SpringLength;
+                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                result += r * f;
+            }
         }
         result /= (ScalarType(Dim) * cell.getVolume());
         return LatticeMatrix{result};

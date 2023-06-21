@@ -57,8 +57,7 @@ namespace Physica::Core {
                 size_t id_dof,
                 RingPolymerType& ringPolymer,
                 const PhaseMatrix& input,
-                PhaseMatrix& output,
-                ScalarType deltaT);
+                PhaseMatrix& output);
         void nve_step_impl(RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT);
     private:
         void updateTimeStep(ScalarType deltaT);
@@ -134,8 +133,7 @@ namespace Physica::Core {
             size_t id_dof,
             RingPolymerType& ringPolymer,
             const PhaseMatrix& input,
-            PhaseMatrix& output,
-            ScalarType deltaT) {
+            PhaseMatrix& output) {
         const auto& massVec = ringPolymer.getMassVec();
         const size_t kSpaceSize = omegaK.getLength();
         BufferType& buffer = ringPolymer.getBuffer();
@@ -143,7 +141,7 @@ namespace Physica::Core {
         const auto mass = massVec[id_dof / Dim];
         ringPolymer.toNormalRepr(id_dof, input);
         /* Translational mode */ {
-            buffer(1, 0) = buffer(1, 0) + buffer(0, 0) * (deltaT / mass);
+            buffer(1, 0) = buffer(1, 0) + buffer(0, 0) * (lastTimeStep / mass);
         }
         for (size_t j = 1; j < kSpaceSize; ++j) {
             const ScalarType factor = mass * omegaK[j];
@@ -167,7 +165,7 @@ namespace Physica::Core {
 
         const size_t dof = input.getRow() / 2U;
         for (size_t i = 0; i < dof; ++i)
-            do_nve_step_impl(i, ringPolymer, input, output, deltaT);
+            do_nve_step_impl(i, ringPolymer, input, output);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
