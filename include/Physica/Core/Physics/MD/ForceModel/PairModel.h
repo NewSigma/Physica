@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 
@@ -28,9 +29,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, class PairFunctor>
     class PairModel {
-        using ResultType = typename std::invoke_result<PairFunctor, PosScalarType>::type;
         static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
-        static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid PairFunctor");
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -41,10 +40,8 @@ namespace Physica::Core {
         ScalarType cutoff;
         ScalarType squared_cutoff;
         ScalarType pot_shift;
-        PairFunctor force_functor;
-        PairFunctor pot_functor;
     public:
-        PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_);
+        PairModel(ScalarType cutoff_);
         PairModel(const PairModel&) = default;
         PairModel(PairModel&&) noexcept = default;
         ~PairModel() = default;
@@ -60,12 +57,10 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
-    PairModel<ScalarType, PosScalarType, PairFunctor>::PairModel(ScalarType cutoff_, PairFunctor functor_, PairFunctor pot_functor_)
-            : cutoff(std::move(cutoff_))
-            , force_functor(std::move(functor_))
-            , pot_functor(std::move(pot_functor_)) {
+    PairModel<ScalarType, PosScalarType, PairFunctor>::PairModel(ScalarType cutoff_)
+            : cutoff(std::move(cutoff_)) {
         squared_cutoff = square(cutoff);
-        pot_shift = pot_functor(cutoff);
+        pot_shift = PairFunctor::pot_functor(cutoff, squared_cutoff);
     }
 
     template<class ScalarType, class PosScalarType, class PairFunctor>
@@ -98,7 +93,7 @@ namespace Physica::Core {
                             const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                             if (isNotSelf && r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(dist);
+                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
                                 r *= f_norm / dist;
                                 const Vector3D& f = r;
                                 force_i -= f;
@@ -114,26 +109,47 @@ namespace Physica::Core {
             cellList.forCellInList([this, pos, &arr1, &force, &cellList](Index3D center) {
                 for (size_t i : cellList(center))
                     arr1.append(i);
-                
+                /* Current cell */ {
+                    const size_t length = arr1.getLength();
+                    for (size_t i = 0; i + 1 < length; ++i) {
+                        const size_t atom1 = arr1[i];
+                        Vector3D f(3, 0);
+                        const auto from = pos.row(atom1);
+                        for (size_t j = i + 1; j < length; ++j) {
+                            const size_t atom2 = arr1[j];
+                            const auto to = pos.row(atom2);
+                            Vector3D r = to.asVector() - from;
+                            const ScalarType r2 = r.squaredNorm();
+                            if (r2 < squared_cutoff) {
+                                const ScalarType dist = sqrt(r2);
+                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
+                                r *= ScalarType(f_norm / dist);
+                                f -= r;
+                                auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
+                                f2 += r;
+                            }
+                        }
+                        auto f1 = force.template segment<3>(3 * atom1, 3 * atom1 + 3);
+                        f1 += f;
+                    }
+                }
                 Utils::Array<size_t> arr2{};
-                cellList.forNeighInRange(center, [this, pos, &arr1, &arr2, &force, &cellList](Vector3D translate, Index3D neigh) {
+                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &force, &cellList](Vector3D translate, Index3D neigh) {
                     for (size_t j : cellList(neigh))
                         arr2.append(j);
+                    std::sort(arr2.begin(), arr2.end());
+
                     for (const size_t atom1 : arr1) {
                         const Vector3D from = pos.row(atom1) - translate;
                         Vector3D r, f(3, 0);
                         for (const size_t atom2 : arr2) {
-                            const bool isDoubleCounted = atom2 < atom1;
-                            if (isDoubleCounted)
-                                continue;
                             const auto to = pos.row(atom2);
-                            auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
                             r = to.asVector() - from;
                             const ScalarType r2 = r.squaredNorm();
-                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
-                            if (isNotSelf && r2 < squared_cutoff) {
+                            if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(dist);
+                                auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
+                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 f2 += r;
@@ -167,7 +183,7 @@ namespace Physica::Core {
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
                             const ScalarType dist = sqrt(r2);
-                            temp += pot_functor(dist) - pot_shift;
+                            temp += PairFunctor::pot_functor(dist, r2) - pot_shift;
                         }
                     }
                 }
@@ -214,7 +230,7 @@ namespace Physica::Core {
                     const ScalarType r2 = r.squaredNorm();
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
-                        const ScalarType f_norm = force_functor(dist);
+                        const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
                         f = r * ScalarType(-f_norm / dist);
                         result += f * r.transpose();
                     }
@@ -230,7 +246,5 @@ namespace Physica::Core {
         cutoff.swap(pair.cutoff);
         squared_cutoff.swap(squared_cutoff);
         pot_shift.swap(pot_shift);
-        std::swap(force_functor, force_functor);
-        std::swap(pot_functor, pot_functor);
     }
 }

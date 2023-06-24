@@ -38,15 +38,14 @@ namespace Physica::Core {
         public:
             constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
 
-            static inline ScalarType lennardJonesPot(PosScalarType r) {
-                constexpr double squared_sigma = sigma * sigma;
-                const ScalarType rep_r2 = ScalarType(squared_sigma) / square(r);
-                const ScalarType rep_r4 = square(rep_r2);
-                const ScalarType rep_r6 = rep_r4 * rep_r2;
-                const ScalarType rep_r12 = square(rep_r6);
-                return rep_r12 - rep_r6;
+            static inline ScalarType force_functor(PosScalarType r, [[maybe_unused]] PosScalarType r2) {
+                return lennardJonesForce(r);
             }
 
+            static inline ScalarType pot_functor([[maybe_unused]] PosScalarType r, PosScalarType r2) {
+                return lennardJonesPot(r2);
+            }
+        private:
             static inline ScalarType lennardJonesForce(PosScalarType r) {
                 const ScalarType rep_r = ScalarType(sigma) / r;
                 const ScalarType rep_r2 = square(rep_r);
@@ -55,6 +54,14 @@ namespace Physica::Core {
                 const ScalarType rep_r7 = rep_r6 * rep_r;
                 const ScalarType rep_r13 = rep_r7 * rep_r6;
                 return rep_r13 * 2 - rep_r7;
+            }
+
+            static inline ScalarType lennardJonesPot(PosScalarType r2) {
+                const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
+                const ScalarType rep_r4 = square(rep_r2);
+                const ScalarType rep_r6 = rep_r4 * rep_r2;
+                const ScalarType rep_r12 = square(rep_r6);
+                return rep_r12 - rep_r6;
             }
         };
     }
@@ -70,7 +77,7 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
-        using LJModelType = PairModel<ScalarType, PosScalarType, decltype(&Internal::Traits<This>::lennardJonesPot)>;
+        using LJModelType = PairModel<ScalarType, PosScalarType, Internal::Traits<This>>;
     public:
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double charge = 1.1128;
@@ -116,7 +123,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_)
             : numMolecule(refer_cell.getNumParticle() / 3)
-            , LJModel(std::move(cutoff_), Internal::Traits<This>::lennardJonesForce, Internal::Traits<This>::lennardJonesPot) {
+            , LJModel(std::move(cutoff_)) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }

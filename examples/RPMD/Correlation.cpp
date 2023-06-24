@@ -21,6 +21,7 @@ constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 25.6;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
+constexpr size_t CorrStep = 3000;
 
 template<class RandomGenerator>
 RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
@@ -43,26 +44,24 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    constexpr size_t CorrStep = 3000;
-    constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
-
     ThreadPool::numThreadRequired = 4;
-    ThreadPool& pool = ThreadPool::getInstance();
+    Vector<ScalarType> corr(CorrStep, 0);
+    Vector<ScalarType> corr_var(CorrStep, 0);
     {
-        std::mt19937 gen(1082247429173841685);
+        constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
+        std::mt19937::result_type seed;
+        Physica::Utils::Random::rdrand(seed);
+        std::mt19937 gen(seed);
         RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
-        auto& ringPolymer = rpmd.getRingPolymer();
-        const ThermostatType thermo(temperatureT, thermostatTime);
         rpmd.initMomentum(gen);
 
         ForceModel forceModel(pair_cutoff);
         rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         KineticModel kineticModel(temperatureT, numReplica);
+        const ThermostatType thermo(temperatureT, thermostatTime);
 
-        Vector<ScalarType> corr(CorrStep, 0);
-        Vector<ScalarType> corr_var(CorrStep, 0);
+        auto& ringPolymer = rpmd.getRingPolymer();
         Vector<ScalarType> temp(CorrStep);
-
         for (unsigned int i = 0; i < 6; ++i) {
             temp = ScalarType(0);
             for (unsigned int j = 0; j < 100; ++j) {
@@ -73,9 +72,7 @@ int main() {
                     rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(thermo, gen, kineticModel, forceModel);
                 }
             }
-
-            for (unsigned int k = 0; k < CorrStep; ++k)
-                toNextVariance(corr_var[k], corr[k], i, temp[k]);
+            toNextVariance(corr_var, corr, i, temp);
         }
 
         {
@@ -87,6 +84,6 @@ int main() {
             fout << corr_var;
         }
     }
-    pool.shouldExit();
+    ThreadPool::getInstance().shouldExit();
     return 0;
 }

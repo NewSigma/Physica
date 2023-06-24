@@ -25,16 +25,16 @@
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     class CellList {
+    public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellGrid = RSpaceGrid<std::forward_list<size_t>>;
         using Vector3D = Vector<PosScalarType, 3>;
-    public:
         using Index3D = typename CellGrid::Index3D;
     private:
         LatticeMatrix lattice;
-        PositionMatrix buffer;
+        PositionMatrix directPos;
         CellGrid cellGrid;
         ScalarType cutoff;
         Utils::Array<Index3D> atomCellMap;
@@ -60,6 +60,8 @@ namespace Physica::Core {
         void forCellInList(Functor func) const;
         template<class Functor>
         void forNeighInRange(Index3D centerCell, Functor func) const;
+        template<class Functor>
+        void forReducedNeighInRange(Index3D centerCell, Functor func) const;
     private:
         Index3D posToIndex(size_t atomId) const;
         /* Helpers */
@@ -73,14 +75,14 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     CellList<ScalarType, PosScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_)
             : lattice(std::move(lattice_))
-            , buffer(std::move(pos))
+            , directPos(std::move(pos))
             , cutoff(cutoff_)
             , neighShifts(3 * 3 * 3) {
-        atomCellMap.resize(buffer.getRow());
+        atomCellMap.resize(directPos.getRow());
         const auto dim = makeGridDim(lattice, cutoff);
         cellGrid.resize(dim[0], dim[1], dim[2]);
 
-        PeriodicCell<PosScalarType, 3>::toDirect(buffer, lattice);
+        PeriodicCell<PosScalarType, 3>::toDirect(directPos, lattice);
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D index = posToIndex(i);
             atomCellMap[i] = index;
@@ -92,14 +94,14 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     CellList<ScalarType, PosScalarType>::CellList(const MDCellType& mdCell, ScalarType cutoff_)
             : lattice(mdCell.getLattice())
-            , buffer(mdCell.getPos())
+            , directPos(mdCell.getPos())
             , cutoff(cutoff_)
             , atomCellMap(mdCell.getNumParticle())
             , neighShifts(3 * 3 * 3) {
         const auto dim = makeGridDim(lattice, cutoff);
         cellGrid.resize(dim[0], dim[1], dim[2]);
 
-        mdCell.toDirect(buffer);
+        mdCell.toDirect(directPos);
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D index = posToIndex(i);
             atomCellMap[i] = index;
@@ -116,8 +118,8 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void CellList<ScalarType, PosScalarType>::update(const MDCellType& mdCell) {
-        buffer = mdCell.getPos();
-        mdCell.toDirect(buffer);
+        directPos = mdCell.getPos();
+        mdCell.toDirect(directPos);
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D indexNewCell = posToIndex(i);
             if (atomCellMap[i] != indexNewCell) {
@@ -134,7 +136,7 @@ namespace Physica::Core {
         cellGrid.swap(list.cellGrid);
         cutoff.swap(list.cutoff);
         atomCellMap.swap(list.atomCellMap);
-        buffer.swap(list.buffer);
+        directPos.swap(list.directPos);
         neighShifts.swap(list.neighShifts);
     }
 
@@ -166,6 +168,34 @@ namespace Physica::Core {
                 const size_t centerZ = centerCell[2];
 
                 for (int deltaZ = -1; deltaZ <= 1; ++deltaZ) {
+                    if (deltaX == 0 && deltaY == 0 && deltaZ == 0) [[unlikely]]
+                        continue;
+                    const int indexShiftZ = findNeighbor<2>(centerZ, deltaZ, index);
+                    const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
+                    func(neighShifts[indexShift], index);
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Functor>
+    void CellList<ScalarType, PosScalarType>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
+        auto a1 = lattice.row(0);
+        auto a2 = lattice.row(1);
+        auto a3 = lattice.row(2);
+
+        Index3D index{};
+        const size_t centerX = centerCell[0];
+        for (int deltaX = 0; deltaX <= 1; ++deltaX) {
+            const int indexShiftX = findNeighbor<0>(centerX, deltaX, index);
+            const size_t centerY = centerCell[1];
+
+            for (int deltaY = (deltaX == 0 ? 0 : -1); deltaY <= 1; ++deltaY) {
+                const int indexShiftY = findNeighbor<1>(centerY, deltaY, index);
+                const size_t centerZ = centerCell[2];
+
+                for (int deltaZ = ((deltaX == 0 && deltaY == 0) ? 1 : -1); deltaZ <= 1; ++deltaZ) {
                     const int indexShiftZ = findNeighbor<2>(centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
                     func(neighShifts[indexShift], index);
@@ -177,12 +207,12 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     typename CellList<ScalarType, PosScalarType>::Index3D
     CellList<ScalarType, PosScalarType>::posToIndex(size_t atomId) const {
-        assert(PosScalarType(0) <= buffer(atomId, 0) && buffer(atomId, 0) <= PosScalarType(1));
-        assert(PosScalarType(0) <= buffer(atomId, 1) && buffer(atomId, 1) <= PosScalarType(1));
-        assert(PosScalarType(0) <= buffer(atomId, 2) && buffer(atomId, 2) <= PosScalarType(1));
-        const ScalarType x0 = abs(buffer(atomId, 0) - std::numeric_limits<ScalarType>::epsilon());
-        const ScalarType y0 = abs(buffer(atomId, 1) - std::numeric_limits<ScalarType>::epsilon());
-        const ScalarType z0 = abs(buffer(atomId, 2) - std::numeric_limits<ScalarType>::epsilon());
+        assert(PosScalarType(0) <= directPos(atomId, 0) && directPos(atomId, 0) <= PosScalarType(1));
+        assert(PosScalarType(0) <= directPos(atomId, 1) && directPos(atomId, 1) <= PosScalarType(1));
+        assert(PosScalarType(0) <= directPos(atomId, 2) && directPos(atomId, 2) <= PosScalarType(1));
+        const ScalarType x0 = abs(directPos(atomId, 0) - std::numeric_limits<ScalarType>::epsilon());
+        const ScalarType y0 = abs(directPos(atomId, 1) - std::numeric_limits<ScalarType>::epsilon());
+        const ScalarType z0 = abs(directPos(atomId, 2) - std::numeric_limits<ScalarType>::epsilon());
         const size_t x = size_t(double(x0 * ScalarType(cellGrid.getDimX())));
         const size_t y = size_t(double(y0 * ScalarType(cellGrid.getDimY())));
         const size_t z = size_t(double(z0 * ScalarType(cellGrid.getDimZ())));

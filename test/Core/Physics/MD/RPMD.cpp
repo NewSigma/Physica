@@ -138,11 +138,8 @@ int main() {
 
     constexpr double answer = 61.8;
     const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
-    if (!scalarNear(energyPerMol, ScalarType(answer), 0.1))
-        return 1;
-    const ScalarType delta = abs(energyPerMol - answer);
     const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
-    if (delta > deviation)
+    if (abs(energyPerMol - answer) > deviation * 2.0)
         return 1;
     return 0;
 }

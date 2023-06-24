@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iostream>
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
@@ -273,27 +274,56 @@ namespace Physica::Core {
         cellList.forCellInList([this, pos, &arr1, &rSpaceSum, &cellList](Index3D center) {
             for (size_t i : cellList(center))
                 arr1.append(i);
-
-            Utils::Array<size_t> arr2{};
-            cellList.forNeighInRange(center, [this, pos, &arr1, &arr2, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
-                for (size_t j : cellList(neigh))
-                    arr2.append(j);
-                for (size_t i : arr1) {
-                    const Vector3D from = pos.row(i) - translate;
+            {
+                const size_t length = arr1.getLength();
+                for (size_t i = 0; i + 1 < length; ++i) {
+                    const size_t atom1 = arr1[i];
+                    const Vector3D from = pos.row(atom1);
                     Vector3D delta;
-                    Vector<ScalarType, Dim> sum(Dim, 0);
-                    for (size_t j : arr2) {
-                        const auto to = pos.row(j);
+                    Vector<ScalarType, Dim> f(Dim, 0);
+                    const ScalarType charge1 = charges[atom1];
+                    for (size_t j = i + 1; j < length; ++j) {
+                        const size_t atom2 = arr1[j];
+                        const auto to = pos.row(atom2);
                         delta = from - to;
-                        const ScalarType charge = charges[j];
+                        const ScalarType charge2 = charges[atom2];
                         const ScalarType r2 = delta.squaredNorm();
                         if (r2 < squareMaxErfcX) {
-                            const ScalarType temp = charge * calcFromTable_diff(sqrt(r2));
-                            sum += temp * delta;
+                            const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
+                            delta *= factor;
+                            auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
+                            f += delta;
+                            f2 -= delta;
                         }
                     }
-                    auto f = rSpaceSum.segment(i * Dim, (i + 1) * Dim);
-                    f += charges[i] * sum;
+                    auto f1 = rSpaceSum.segment(atom1 * Dim, (atom1 + 1) * Dim);
+                    f1 += f;
+                }
+            }
+            Utils::Array<size_t> arr2{};
+            cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
+                for (size_t j : cellList(neigh))
+                    arr2.append(j);
+                for (size_t atom1 : arr1) {
+                    const Vector3D from = pos.row(atom1) - translate;
+                    Vector3D delta;
+                    Vector<ScalarType, Dim> f(Dim, 0);
+                    const ScalarType charge1 = charges[atom1];
+                    for (size_t atom2 : arr2) {
+                        const auto to = pos.row(atom2);
+                        delta = from - to;
+                        const ScalarType charge2 = charges[atom2];
+                        const ScalarType r2 = delta.squaredNorm();
+                        if (r2 < squareMaxErfcX) {
+                            const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
+                            delta *= factor;
+                            auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
+                            f += delta;
+                            f2 -= delta;
+                        }
+                    }
+                    auto f1 = rSpaceSum.segment(atom1 * Dim, (atom1 + 1) * Dim);
+                    f1 += f;
                 }
                 arr2.clear();
             });

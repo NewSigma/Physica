@@ -28,7 +28,7 @@ namespace Physica::Core {
      * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
      */
     template<class ScalarType, class PosScalarType>
-    class SilveraGoldman final : public PairModel<ScalarType, PosScalarType, ScalarType (*)(ScalarType)> {
+    class SilveraGoldman final : public PairModel<ScalarType, PosScalarType, SilveraGoldman<ScalarType, PosScalarType>> {
         constexpr static double alpha = 1.713;
         constexpr static double beta = 1.5671;
         constexpr static double gamma = 0.00993;
@@ -38,7 +38,8 @@ namespace Physica::Core {
         constexpr static double c9 = 143.1;
         constexpr static double c10 = 4813.9;
 
-        using Base = PairModel<ScalarType, PosScalarType, ScalarType (*)(ScalarType)>;
+        using This = SilveraGoldman<ScalarType, PosScalarType>;
+        using Base = PairModel<ScalarType, PosScalarType, This>;
     public:
         SilveraGoldman(ScalarType cutoff_);
         SilveraGoldman(const SilveraGoldman&) = default;
@@ -48,13 +49,13 @@ namespace Physica::Core {
         SilveraGoldman& operator=(SilveraGoldman obj) noexcept;
         /* Operations */
         void swap(SilveraGoldman& obj) noexcept;
-    private:
-        static ScalarType force_functor(ScalarType r);
-        static ScalarType pot_functor(ScalarType r);
+        /* Static members */
+        static inline ScalarType force_functor(ScalarType r, ScalarType r2);
+        static inline ScalarType pot_functor(ScalarType r, ScalarType r2);
     };
 
     template<class ScalarType, class PosScalarType>
-    SilveraGoldman<ScalarType, PosScalarType>::SilveraGoldman(ScalarType cutoff_) : Base(cutoff_, force_functor, pot_functor) {}
+    SilveraGoldman<ScalarType, PosScalarType>::SilveraGoldman(ScalarType cutoff_) : Base(cutoff_) {}
 
     template<class ScalarType, class PosScalarType>
     SilveraGoldman<ScalarType, PosScalarType>& SilveraGoldman<ScalarType, PosScalarType>::operator=(SilveraGoldman obj) noexcept {
@@ -68,24 +69,27 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(ScalarType r) {
-        const ScalarType r2 = square(r);
-        ScalarType result = exp(-r2 * gamma - r * beta + alpha) * (r * (gamma * 2) + beta);
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(ScalarType r, ScalarType r2) {
+        using PacketType = typename Internal::BestPacket<ScalarType, 4>::Type;
+        static_assert(!std::is_same<ScalarType, PacketType>::value, "[Error]: SIMD is inavailable, implementation must be revised");
+
+        const ScalarType factor = r * (gamma * 2) + beta;
+        ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);
+        const ScalarType rep_r3 = rep_r * rep_r2;
         const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r6 = rep_r4 * rep_r2;
-        const ScalarType rep_r7 = rep_r6 * rep_r;
-        const ScalarType rep_r9 = rep_r7 * rep_r2;
-        const ScalarType rep_r10 = rep_r6 * rep_r4;
-        const ScalarType rep_r11 = rep_r7 * rep_r4;
+        const ScalarType rep_r5 = rep_r2 * rep_r3;
+        const PacketType rep(rep_r.getTrivial(), rep_r3.getTrivial(), rep_r4.getTrivial(), rep_r5.getTrivial());
 
-        const ScalarType d_g = rep_r10 * (9 * c9) - rep_r11 * (10 * c10) - rep_r9 * (8 * c8) - rep_r7 * (6 * c6);
+        const ScalarType rep_r6 = rep_r5 * rep_r;
+        const PacketType rep1 = rep * rep_r6.getTrivial();
+        const PacketType const1(-6 * c6, -8 * c8, 9 * c9, -10 * c10);
+        const ScalarType d_g = horizontal_add(rep1 * const1);
         if (r < cutoff) {
-            const ScalarType rep_r8 = square(rep_r4);
-            const ScalarType g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
+            const ScalarType g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 + rep_r6 * c10) * rep_r4;
             const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
-            result += (d_g + g * rep_r * (rep_r2 * (2 * cutoff * cutoff) - rep_r * (2 * cutoff))) * f_cutoff;
+            result += (d_g + g * (rep_r3 * (2 * cutoff * cutoff) - rep_r2 * (2 * cutoff))) * f_cutoff;
         }
         else {
             result += d_g;
@@ -94,8 +98,7 @@ namespace Physica::Core {
     }
     
     template<class ScalarType, class PosScalarType>
-    ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(ScalarType r) {
-        const ScalarType r2 = square(r);
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(ScalarType r, ScalarType r2) {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);

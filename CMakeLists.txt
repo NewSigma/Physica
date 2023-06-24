@@ -107,6 +107,8 @@ if(${PHYSICA_HDF5})
     find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
     include_directories(${HDF5_INCLUDE_DIR})
     add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
+    string(REPLACE include lib HDF5_LIBRARY_DIR ${HDF5_INCLUDE_DIR}) # Cmake file of HDF5-1.14.1 seems do not provide HDF5_LIBRARY_DIR
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${HDF5_LIBRARY_DIR}")
 endif()
 #############################################Project##############################################
 include_directories(./include)
