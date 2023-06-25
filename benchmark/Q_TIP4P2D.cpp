@@ -70,7 +70,6 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
 }
 
 int main() {
-    Cycler::init();
     std::mt19937 gen{};
 
     auto cell = makeSystem(5);

@@ -22,7 +22,6 @@
 
 void initPhysica() {
     using namespace Physica::Logger;
-    Physica::Utils::Cycler::init();
     LoggerRuntime::getInstance();
 
     std::atexit(deInitPhysica);

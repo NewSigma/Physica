@@ -63,7 +63,6 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    Cycler::init();
     std::mt19937 gen(3438603950906262893);
 
     ThreadPool::numThreadRequired = 4;

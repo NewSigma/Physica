@@ -41,13 +41,8 @@ namespace Physica::Utils {
      * [2] NanoLog (https://github.com/PlatformLab/NanoLog)
      */
     class Cycler {
-        /*!
-         * Conversion factor between cycles and the seconds; computed by Cycler::init.
-         */
-        static double localCyclesPerSec;
     public:
         /* Static Members */
-        static void init();
         /**
          * Return the current value of the fine-grain CPU cycle counter
          *
@@ -104,17 +99,20 @@ namespace Physica::Utils {
          * Returns the conversion factor between cycles in seconds, using
          * a mock value for testing when appropriate.
          */
-        [[nodiscard]] static __inline __attribute__((always_inline))
-        double getCyclesPerSec() { return localCyclesPerSec; }
+        [[nodiscard]] static __inline __attribute__((always_inline)) double getCyclesPerSec() {
+            static const double localCyclesPerSec = makeCyclesPerSec();
+            return localCyclesPerSec;
+        }
 
-        static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
-        static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
-        static uint64_t toMillisecond(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
-        static double toSeconds(uint64_t cycles, double cyclesPerSec = localCyclesPerSec);
-        static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = localCyclesPerSec);
-        static uint64_t fromSeconds(double seconds, double cyclesPerSec = localCyclesPerSec);
+        static uint64_t toNanoseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
+        static uint64_t toMicroseconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
+        static uint64_t toMillisecond(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
+        static double toSeconds(uint64_t cycles, double cyclesPerSec = getCyclesPerSec());
+        static uint64_t fromNanoseconds(uint64_t ns, double cyclesPerSec = getCyclesPerSec());
+        static uint64_t fromSeconds(double seconds, double cyclesPerSec = getCyclesPerSec());
     private:
         Cycler() = default;
+        static double makeCyclesPerSec();
     };
 }
 

@@ -22,57 +22,9 @@
 #include <iostream>
 #include <cassert>
 #include "Physica/Utils/Cycler.h"
-
+#include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Utils {
-    double Cycler::localCyclesPerSec = 0;
-    /*!
-     * Perform once-only overall initialization for the Cycler class, such
-     * as calibrating the clock frequency.  This method is invoked automatically
-     * during initialization, but it may be invoked explicitly by other modules
-     * to ensure that initialization occurs before those modules initialize
-     * themselves.
-     *
-     * Optimize: init() can be called only once on each machine and save the result persistently.
-     */
-    void Cycler::init() {
-        if (localCyclesPerSec != 0)
-            return;
-        struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
-        uint64_t startCycles, stopCycles, micros;
-        double oldCycles;
-        // There is one tricky aspect, which is that we could get interrupted
-        // between calling gettimeofday and reading the cycle counter, in which
-        // case we won't have corresponding readings.  To handle this (unlikely)
-        // case, compute the overall result repeatedly, and wait until we get
-        // two successive calculations that are within 0.001% of each other (or
-        // in other words, a drift of up to 10µs per second).
-        oldCycles = 0;
-        while (true) {
-            if (gettimeofday(&startTime, nullptr) != 0)
-                printf("[%s:%d] Initialization failed. %s", __FILENAME__, __LINE__, strerror(errno));
-
-            startCycles = now();
-            while (true) {
-                if (gettimeofday(&stopTime, nullptr) != 0)
-                    printf("[%s:%d] Initialization failed. %s", __FILENAME__, __LINE__, strerror(errno));
-
-                stopCycles = now();
-                micros = (stopTime.tv_usec - startTime.tv_usec) +
-                         (stopTime.tv_sec - startTime.tv_sec) * 1000000;
-                if (micros > 10000) {
-                    localCyclesPerSec = static_cast<double>(stopCycles - startCycles);
-                    localCyclesPerSec = 1000000.0 * localCyclesPerSec / static_cast<double>(micros);
-                    break;
-                }
-            }
-            double delta = localCyclesPerSec / 100000.0;
-            if (((localCyclesPerSec - delta) < oldCycles) && (oldCycles < (localCyclesPerSec + delta)))
-                return;
-
-            oldCycles = localCyclesPerSec;
-        }
-    }
     /*!
      * Given an elapsed time measured in cycles, return an integer
      * giving the corresponding time in nanoseconds. Note: toSeconds()
@@ -187,5 +139,41 @@ namespace Physica::Utils {
          * Avoid using library function lround() for performance.
          */
         return (uint64_t)(seconds * cyclesPerSec + 0.5); //NOLINT second > 0, cyclesPerSec > 0, rounding is safe
+    }
+
+    double Cycler::makeCyclesPerSec() {
+        struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
+        // There is one tricky aspect, which is that we could get interrupted
+        // between calling gettimeofday and reading the cycle counter, in which
+        // case we won't have corresponding readings.  To handle this (unlikely)
+        // case, compute the overall result repeatedly, and wait until we get
+        // two successive calculations that are within 0.001% of each other (or
+        // in other words, a drift of up to 10µs per second).
+        double oldCycles = 0;
+        double result = 0;
+        while (true) {
+            oldCycles = result;
+            if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
+                throw Core::SyscallException();
+
+            const uint64_t startCycles = now();
+            while (true) {
+                if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
+                    throw Core::SyscallException();
+
+                const uint64_t stopCycles = now();
+                const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) +
+                                        (stopTime.tv_sec - startTime.tv_sec) * 1000000;
+                if (micros > 10000) {
+                    result = static_cast<double>(stopCycles - startCycles);
+                    result = 1000000.0 * result / static_cast<double>(micros);
+                    break;
+                }
+            }
+            const double delta = result / 100000.0;
+            if (((result - delta) < oldCycles) && (oldCycles < (result + delta)))
+                break;
+        }
+        return result;
     }
 }
