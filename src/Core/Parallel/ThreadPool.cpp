@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -88,7 +88,6 @@ namespace Physica::Core {
     }
 
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
-        bindToCore(thread_id);
         auto& threadInfo = getThreadInfo();
         threadInfo.id = thread_id;
         auto& data = thread_data[thread_id];
@@ -115,13 +114,5 @@ namespace Physica::Core {
                 }
             }
         }
-    }
-
-    void ThreadPool::bindToCore(unsigned int thread_id) {
-        cpu_set_t set;
-        CPU_ZERO(&set);
-        CPU_SET(thread_id, &set);
-        const pthread_t thread = thread_data[thread_id].thread->native_handle();
-        pthread_setaffinity_np(thread, sizeof(cpu_set_t), &set);
     }
 }

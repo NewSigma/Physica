@@ -22,8 +22,11 @@
 
 namespace Physica::Core {
     class NotImplementedException : public std::exception {
+        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
+        const char* msg;
     public:
+        NotImplementedException(const char* msg_ = DefaultMsg) : msg(msg_) {}
         ~NotImplementedException() noexcept override = default;
-        const char* what() const noexcept override { return "[Error]: Not implemented."; }
+        const char* what() const noexcept override { return msg; }
     };
 }

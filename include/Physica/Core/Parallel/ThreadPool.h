@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -85,7 +85,6 @@ namespace Physica::Core {
         /* Operations */
         void waitExit();
         void workerMainLoop(unsigned int thread_id);
-        void bindToCore(unsigned int thread_id);
         /* Static Members */
         [[nodiscard]] static inline unsigned int getNumProcesser() noexcept { return get_nprocs(); }
         [[nodiscard]] static inline unsigned int makeNumThread() noexcept;
