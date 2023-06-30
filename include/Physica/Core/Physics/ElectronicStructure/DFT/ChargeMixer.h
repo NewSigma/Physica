@@ -91,17 +91,17 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized>
     void ChargeMixer<ScalarType, isSpinPolarized>::updateOutputDensity(const DensityType& output) {
         const DensityType& input = oldDensities[mixIteration];
-        residules[mixIteration][SpinState::Up].asVector() = output[SpinState::Up].asVector() - input[SpinState::Up].asVector();
+        residules[mixIteration][SpinState::Up].flatten() = output[SpinState::Up].flatten() - input[SpinState::Up].flatten();
     }
 
     template<class ScalarType, bool isSpinPolarized>
     void ChargeMixer<ScalarType, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
             const auto& deltaRho = residules[0][SpinState::Up];
-            fft.transform(deltaRho.asVector());
+            fft.transform(deltaRho.flatten());
             FFTGrid<ScalarType> kSpaceDencity(fft);
 
-            using GridType = KSpaceGrid<ScalarType>;
+            using GridType = typename FFTGrid<ScalarType>::Base;
             using Index3D = typename GridType::Index3D;
             GridType::forReducedKIndexInGrid(kSpaceDencity, repCell.getLattice(),
                 [&kSpaceDencity](Vector<ScalarType, 3> k, Index3D index) {
@@ -109,10 +109,10 @@ namespace Physica::Core {
                     const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
                     kSpaceDencity(index) *= factor;
                 });
-            fft.invTransform(kSpaceDencity.asVector());
+            fft.invTransform(kSpaceDencity.flatten());
 
-            const auto& rho_old = oldDensities[0][SpinState::Up].asVector();
-            auto& rho_new = result[SpinState::Up].asVector();
+            const auto& rho_old = oldDensities[0][SpinState::Up].flatten();
+            auto& rho_new = result[SpinState::Up].flatten();
             rho_new = rho_old + fft.getRSpace();
         }
         else {
@@ -123,7 +123,7 @@ namespace Physica::Core {
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
                     for (size_t j = i; j < diisMat.getColumn(); ++j) {
-                        ScalarType temp = residules[i - 1][SpinState::Up].asVector() * residules[j - 1][SpinState::Up].asVector();
+                        ScalarType temp = residules[i - 1][SpinState::Up].flatten() * residules[j - 1][SpinState::Up].flatten();
                         diisMat(i, j) = temp;
                         diisMat(j, i) = temp;
                     }
@@ -137,11 +137,11 @@ namespace Physica::Core {
                 x = inv_A * b;
             }
 
-            auto& rho_new = result[SpinState::Up].asVector();
+            auto& rho_new = result[SpinState::Up].flatten();
             rho_new = ScalarType::Zero();
             for (size_t i = 1; i < x.getLength(); ++i) {
-                const auto& rho_old = oldDensities[i - 1][SpinState::Up].asVector();
-                const auto& residule = residules[i - 1][SpinState::Up].asVector();
+                const auto& rho_old = oldDensities[i - 1][SpinState::Up].flatten();
+                const auto& residule = residules[i - 1][SpinState::Up].flatten();
                 rho_new += (rho_old + ScalarType(pulay_mix) * residule) * x[i];
             }
 

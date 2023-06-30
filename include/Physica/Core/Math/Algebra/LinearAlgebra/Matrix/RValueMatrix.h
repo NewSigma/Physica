@@ -44,6 +44,7 @@ namespace Physica::Core {
         constexpr static size_t MaxColumnAtCompile = Internal::Traits<Derived>::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        constexpr static bool isComplex = ScalarType::isComplex;
 
         constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();

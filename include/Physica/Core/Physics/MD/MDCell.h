@@ -23,7 +23,19 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3>
+    template<class ScalarType, class PosScalarType, unsigned int Dim = 3> class MDCell;
+
+    namespace Internal {
+        template<class T, class U, unsigned int D>
+        class Traits<MDCell<T, U, D>> {
+        public:
+            using ScalarType = T;
+            using PosScalarType = U;
+            constexpr static unsigned int Dim = D;
+        };
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
     class MDCell : public PeriodicCell<PosScalarType, Dim> {
     public:
         using Base = PeriodicCell<PosScalarType, Dim>;
@@ -43,6 +55,7 @@ namespace Physica::Core {
         void normalize();
         void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
+        template<ExtendCellOption Option>
         void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
@@ -108,9 +121,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<ExtendCellOption Option>
     void MDCell<ScalarType, PosScalarType, Dim>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
         toDirect();
-        Base::unitToSuper_direct(x, y, z);
+        Base::template unitToSuperImpl<Option>(x, y, z);
         Base::toCartesian();
     }
 

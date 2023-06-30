@@ -29,8 +29,14 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     class EigenSolver {
+    public:
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
+        using EigenvalueVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
+        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
+                                              MatrixOption::Column | MatrixOption::Vector,
+                                              MatrixType::RowAtCompile,
+                                              MatrixType::RowAtCompile>;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
         using RawEigenvectorType = DenseMatrix<ScalarType,
@@ -38,13 +44,7 @@ namespace Physica::Core {
                                                MatrixType::RowAtCompile,
                                                MatrixType::RowAtCompile>;
         using WorkingMatrix = typename Schur<MatrixType>::WorkingMatrix;
-    public:
-        using EigenvalueVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
-                                              MatrixOption::Column | MatrixOption::Vector,
-                                              MatrixType::RowAtCompile,
-                                              MatrixType::RowAtCompile>;
-    private:
+
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;
         bool computeEigenvectors;

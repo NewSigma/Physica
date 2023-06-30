@@ -22,15 +22,33 @@
 #include "RSpaceGrid.h"
 
 namespace Physica::Core {
+    template<class T> class KSpaceGrid;
+
+    namespace Internal {
+        template<class T>
+        class Traits<KSpaceGrid<T>> {
+            constexpr static bool isScalar = is_scalar<T>::value;
+            constexpr static bool isComplex = T::isComplex;
+            using ScalarType = typename T::ScalarType;
+            using RealType = typename ScalarType::RealType;
+            using ComplexType = ComplexScalar<RealType>;
+            using ScalarCase = typename std::conditional<isComplex, ComplexType, RealType>::type;
+        public:
+            using Base = RSpaceGrid<typename std::conditional<isScalar, ScalarCase, T>::type>;
+        };
+    }
+
     template<class T>
-    class KSpaceGrid : private RSpaceGrid<typename std::conditional<T::isComplex, T, ComplexScalar<T>>::type> {
+    class KSpaceGrid : private Internal::Traits<KSpaceGrid<T>>::Base {
         constexpr static bool isComplex = T::isComplex;
-        using RealType = typename T::RealType;
+        using ScalarType = typename T::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     public:
-        using Base = RSpaceGrid<ComplexType>;
+        using Base = typename Internal::Traits<KSpaceGrid<T>>::Base;
         using typename Base::Container;
+        using typename Base::ValueType;
         using Index3D = Utils::Array<ssize_t, 3>;
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
     public:
@@ -41,10 +59,10 @@ namespace Physica::Core {
         ~KSpaceGrid() = default;
         /* Operators */
         KSpaceGrid& operator=(KSpaceGrid grid) noexcept;
-        [[nodiscard]] ComplexType& operator()(ssize_t x, ssize_t y, ssize_t z);
-        [[nodiscard]] const ComplexType& operator()(ssize_t x, ssize_t y, ssize_t z) const;
-        [[nodiscard]] ComplexType& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const ComplexType& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] ValueType& operator()(ssize_t x, ssize_t y, ssize_t z);
+        [[nodiscard]] const ValueType& operator()(ssize_t x, ssize_t y, ssize_t z) const;
+        [[nodiscard]] ValueType& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] const ValueType& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
         template<class T1>
         friend std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid);
         template<class T1>
@@ -53,7 +71,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType calc(ssize_t x, ssize_t y, ssize_t z) const;
         void swap(KSpaceGrid& grid) noexcept { Base::swap(grid); }
         /* Getters */
-        using Base::asVector;
+        using Base::flatten;
         [[nodiscard]] inline size_t getSize() const noexcept;
         [[nodiscard]] ssize_t getDimX() const noexcept { return Base::getDimX() / 2U; }
         [[nodiscard]] ssize_t getDimY() const noexcept { return Base::getDimY() / 2U; }
@@ -90,7 +108,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    typename KSpaceGrid<T>::ComplexType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) {
+    typename KSpaceGrid<T>::ValueType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) {
         assert(-getDimX() <= x && x <= getDimX());
         assert(-getDimY() <= y && y <= getDimY());
         assert(-getDimZ() <= z && z <= getDimZ());
@@ -103,7 +121,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    const typename KSpaceGrid<T>::ComplexType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
+    const typename KSpaceGrid<T>::ValueType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
         assert(-getDimX() <= x && x <= getDimX());
         assert(-getDimY() <= y && y <= getDimY());
         assert(-getDimZ() <= z && z <= getDimZ());
@@ -155,21 +173,21 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    inline void KSpaceGrid<T>::forKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
+    inline void KSpaceGrid<T>::forKInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
         PeriodicCell<RealType, 3>::forCellInRange(grid.getDim(), repLatt, func);
     }
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
-        const auto dim = grid.getDim();
+    void KSpaceGrid<T>::forReducedKInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
         if constexpr (isComplex)
-            forKInGrid(dim, repLatt, func);
+            forKInGrid(grid, repLatt, func);
         else {
             auto a1 = repLatt.row(0);
             auto a2 = repLatt.row(1);
             auto a3 = repLatt.row(2);
 
+            const auto dim = grid.getDim();
             VectorType v1, v2, v3;
             for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
                 v1 = RealType(x) * a1.asVector();
@@ -186,7 +204,7 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
+    void KSpaceGrid<T>::forKIndexInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
         auto a1 = repLatt.row(0);
         auto a2 = repLatt.row(1);
         auto a3 = repLatt.row(2);
@@ -207,15 +225,15 @@ namespace Physica::Core {
 
     template<class T>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func) {
-        const auto dim = grid.getDim();
+    void KSpaceGrid<T>::forReducedKIndexInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
         if constexpr (isComplex)
-            forKIndexInGrid(dim, repLatt, func);
+            forKIndexInGrid(grid, repLatt, func);
         else {
             auto a1 = repLatt.row(0);
             auto a2 = repLatt.row(1);
             auto a3 = repLatt.row(2);
 
+            const auto dim = grid.getDim();
             VectorType v1, v2, v3;
             for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
                 v1 = RealType(x) * a1.asVector();

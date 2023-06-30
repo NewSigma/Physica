@@ -22,61 +22,62 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/BestPacket.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class ComplexScalar;
+    template<class T> class ComplexScalar;
 
     namespace Internal {
-        template<class ScalarType>
-        class Traits<ComplexScalar<ScalarType>> {
+        template<class T>
+        class Traits<ComplexScalar<T>> {
         public:
-            using RealType = ScalarType;
-            using ComplexType = ComplexScalar<ScalarType>;
-            using TrivialType = typename ScalarType::TrivialType;
-            static constexpr ScalarOption option = Traits<ScalarType>::option;
-            static constexpr bool errorTrack = Traits<ScalarType>::errorTrack;
+            using RealType = T;
+            using ComplexType = ComplexScalar<T>;
+            using TrivialType = typename T::TrivialType;
+            static constexpr ScalarOption option = Traits<T>::option;
+            static constexpr bool errorTrack = Traits<T>::errorTrack;
             static constexpr bool isComplex = true;
         };
     }
 
-    template<class ScalarType>
-    class ComplexScalar : public ScalarBase<ComplexScalar<ScalarType>> {
-        static_assert(!ScalarType::isComplex);
-        using Base = ScalarBase<ComplexScalar<ScalarType>>;
-        using PacketType = typename Internal::BestPacket<ScalarType, 2>::Type;
+    template<class T>
+    class ComplexScalar : public ScalarBase<ComplexScalar<T>> {
+        static_assert(!T::isComplex);
+        using Base = ScalarBase<ComplexScalar<T>>;
+        using PacketType = typename Internal::BestPacket<T, 2>::Type;
     public:
+        using typename Base::ScalarType;
         using typename Base::TrivialType;
-        constexpr static bool enableSIMD = !std::is_same<ScalarType, PacketType>::value;
+        constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     private:
-        ScalarType real;
-        ScalarType imag;
+        T real;
+        T imag;
     public:
         ComplexScalar() = default;
-        ComplexScalar(const ScalarType& real_);
-        ComplexScalar(const ScalarType& real_, const ScalarType& imag_);
-        ComplexScalar(std::initializer_list<ScalarType> list);
+        ComplexScalar(const T& real_);
+        ComplexScalar(const T& real_, const T& imag_);
+        ComplexScalar(std::initializer_list<T> list);
         ComplexScalar(const ComplexScalar& c) = default;
         ComplexScalar(ComplexScalar&& c) noexcept = default;
         /* Operators */
         ComplexScalar& operator=(ComplexScalar c);
         void operator<<=(int i) { real <<= i; imag<<= i; }
         void operator>>=(int i) { real >>= i; imag>>= i; }
-        bool operator==(const ComplexScalar<ScalarType>& c) const;
-        bool operator!=(const ComplexScalar<ScalarType>& c) const { return !(operator==(c)); }
+        bool operator==(const ComplexScalar<T>& c) const;
+        bool operator!=(const ComplexScalar<T>& c) const { return !(operator==(c)); }
         /* Operations */
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
         void swap(ComplexScalar& c) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType squaredNorm() const;
-        [[nodiscard]] inline ScalarType norm() const;
-        [[nodiscard]] ScalarType arg() const;
+        [[nodiscard]] T squaredNorm() const;
+        [[nodiscard]] inline T norm() const;
+        [[nodiscard]] T arg() const;
         [[nodiscard]] ComplexScalar unit() const { return *this * reciprocal(norm()); }
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
-        [[nodiscard]] const ScalarType& getReal() const { return real; }
-        [[nodiscard]] const ScalarType& getImag() const { return imag; }
+        [[nodiscard]] const T& getReal() const { return real; }
+        [[nodiscard]] const T& getImag() const { return imag; }
         [[nodiscard]] bool isZero() const { return real.isZero() && imag.isZero(); }
         /* Setters */
-        void setReal(const ScalarType& s) { real = s; }
-        void setImag(const ScalarType& s) { imag = s; }
+        void setReal(const T& s) { real = s; }
+        void setImag(const T& s) { imag = s; }
         /* Static Members */
         static inline ComplexScalar Zero();
         static inline ComplexScalar One();
@@ -87,27 +88,27 @@ namespace Physica::Core {
         [[nodiscard]] static ComplexScalar random_normal(RandomGenerator& gen);
     };
 
-    template<class ScalarType>
-    bool scalarNear(const ComplexScalar<ScalarType>& s1, const ComplexScalar<ScalarType>& s2, double precision);
+    template<class T>
+    bool scalarNear(const ComplexScalar<T>& s1, const ComplexScalar<T>& s2, double precision);
 
-    template<class ScalarType>
-    std::ostream& operator<<(std::ostream& os, const ComplexScalar<ScalarType>& c);
+    template<class T>
+    std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c);
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator+(
-            const ComplexScalar<ScalarType>& c1, const ComplexScalar<ScalarType>& c2);
+    template<class T>
+    ComplexScalar<T> operator+(
+            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator-(
-            const ComplexScalar<ScalarType>& c1, const ComplexScalar<ScalarType>& c2);
+    template<class T>
+    ComplexScalar<T> operator-(
+            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator*(
-            const ComplexScalar<ScalarType>& c1, const ComplexScalar<ScalarType>& c2);
+    template<class T>
+    ComplexScalar<T> operator*(
+            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator/(
-            const ComplexScalar<ScalarType>& c1, const ComplexScalar<ScalarType>& c2);
+    template<class T>
+    ComplexScalar<T> operator/(
+            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
     template<class ScalarType1, class ScalarType2>
     ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator+(
@@ -141,33 +142,33 @@ namespace Physica::Core {
     ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator/(
             const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c);
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator<<(const ComplexScalar<ScalarType>& c, int i) {
-        return ComplexScalar<ScalarType>(c.getReal() << i, c.getImag() << i);
+    template<class T>
+    ComplexScalar<T> operator<<(const ComplexScalar<T>& c, int i) {
+        return ComplexScalar<T>(c.getReal() << i, c.getImag() << i);
     }
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator>>(const ComplexScalar<ScalarType>& c, int i) {
-        return ComplexScalar<ScalarType>(c.getReal() >> i, c.getImag() >> i);
+    template<class T>
+    ComplexScalar<T> operator>>(const ComplexScalar<T>& c, int i) {
+        return ComplexScalar<T>(c.getReal() >> i, c.getImag() >> i);
     }
 
-    template<class ScalarType>
-    ComplexScalar<ScalarType> operator-(const ComplexScalar<ScalarType>& c) { return ComplexScalar(-c.getReal(), -c.getImag()); }
+    template<class T>
+    ComplexScalar<T> operator-(const ComplexScalar<T>& c) { return ComplexScalar(-c.getReal(), -c.getImag()); }
 
-    template<class ScalarType>
-    void swap(ComplexScalar<ScalarType>& c1, ComplexScalar<ScalarType>& c2) noexcept { c1.swap(c2); }
+    template<class T>
+    void swap(ComplexScalar<T>& c1, ComplexScalar<T>& c2) noexcept { c1.swap(c2); }
 
-    template<class ScalarType, class T>
-    void operator+=(ComplexScalar<ScalarType>& c, const T& t) { c = c + t; }
+    template<class T, class ScalarType>
+    void operator+=(ComplexScalar<T>& c, const ScalarType& t) { c = c + t; }
 
-    template<class ScalarType, class T>
-    void operator-=(ComplexScalar<ScalarType>& c, const T& t) { c = c - t; }
+    template<class T, class ScalarType>
+    void operator-=(ComplexScalar<T>& c, const ScalarType& t) { c = c - t; }
 
-    template<class ScalarType, class T>
-    void operator*=(ComplexScalar<ScalarType>& c, const T& t) { c = c * t; }
+    template<class T, class ScalarType>
+    void operator*=(ComplexScalar<T>& c, const ScalarType& t) { c = c * t; }
 
-    template<class ScalarType, class T>
-    void operator/=(ComplexScalar<ScalarType>& c, const T& t) { c = c / t; }
+    template<class T, class ScalarType>
+    void operator/=(ComplexScalar<T>& c, const ScalarType& t) { c = c / t; }
 }
 
 namespace std {

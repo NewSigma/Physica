@@ -63,7 +63,7 @@ namespace Physica::Core {
     }
 
     typename CrystalCell::StructureFactorType CrystalCell::makeStructureFactor(ScalarType cutEnergy) const {
-        using GridType = KSpaceGrid<ScalarType>;
+        using GridType = typename StructureFactorType::ValueType;
         using VectorType = Vector<ScalarType, 3>;
         const auto species = getSpecies();
         const auto repCell = Base::reciprocal();
@@ -84,7 +84,7 @@ namespace Physica::Core {
                         factor += ComplexType(c, s);
                     }
                 }
-                grid.asVector()[j] = factor;
+                grid.flatten()[j] = factor;
                 j += 1;
             });
             i += 1;

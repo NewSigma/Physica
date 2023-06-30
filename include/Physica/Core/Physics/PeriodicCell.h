@@ -34,10 +34,17 @@ namespace Physica::Core {
         };
     }
 
+    enum class ExtendCellOption {
+        DOFMajor,
+        CellMajor
+    };
+
     template<class ScalarType, unsigned int Dim>
     class PeriodicCell : public Internal::PeriodicCellImpl {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(Dim == 1 || Dim == 2 || Dim == 3, "[Error]: Unsupported dimention");
+
+        using Base = Internal::PeriodicCellImpl;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
@@ -92,14 +99,17 @@ namespace Physica::Core {
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice);
-        static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
         void normalize_direct();
         void scale_direct(ScalarType factor);
         void scale_cartesian(ScalarType factor);
+        template<ExtendCellOption Option>
+        void unitToSuperImpl(unsigned int x, unsigned int y, unsigned int z);
+        void superToUnitImpl(unsigned int x, unsigned int y, unsigned int z);
+        /* Static members */
+        static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
+        template<ExtendCellOption Option>
         static void unitToSuper_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         static void superToUnit_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
-        void unitToSuper_direct(unsigned int x, unsigned int y, unsigned int z);
-        void superToUnit_direct(unsigned int x, unsigned int y, unsigned int z);
     };
 
     template<class ScalarType, unsigned int Dim>
@@ -269,22 +279,22 @@ namespace Physica::Core {
     void PeriodicCell<ScalarType, Dim>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
-            unitToSuper_direct(x, y, z);
+            unitToSuperImpl<ExtendCellOption::DOFMajor>(x, y, z);
             toCartesian();
         }
         else
-            unitToSuper_direct(x, y, z);
+            unitToSuperImpl<ExtendCellOption::DOFMajor>(x, y, z);
     }
 
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::superToUnit(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
-            superToUnit_direct(x, y, z);
+            superToUnitImpl(x, y, z);
             toCartesian();
         }
         else
-            superToUnit_direct(x, y, z);
+            superToUnitImpl(x, y, z);
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -445,11 +455,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
-        target *= invLattice;
-    }
-
-    template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::normalize_direct() {
         for (auto& elem : pos) {
             elem -= floor(elem);
@@ -473,21 +478,72 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    template<ExtendCellOption Option>
+    void PeriodicCell<ScalarType, Dim>::unitToSuperImpl(unsigned int x, unsigned int y, unsigned int z) {
+        assert(type == Type::Direct);
+        unitToSuper_direct<ExtendCellOption::DOFMajor>(pos, x, y, z);
+        auto rowX = lattice.row(0);
+        rowX *= ScalarType(x);
+        auto rowY = lattice.row(1);
+        rowY *= ScalarType(y);
+        auto rowZ = lattice.row(2);
+        rowZ *= ScalarType(z);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::superToUnitImpl(unsigned int x, unsigned int y, unsigned int z) {
+        assert(type == Type::Direct);
+        superToUnit_direct(pos, x, y, z);
+        const ScalarType inv_x = Core::reciprocal(ScalarType(x));
+        const ScalarType inv_y = Core::reciprocal(ScalarType(y));
+        const ScalarType inv_z = Core::reciprocal(ScalarType(z));
+
+        auto rowX = lattice.row(0);
+        rowX *= inv_x;
+        auto rowY = lattice.row(1);
+        rowY *= inv_y;
+        auto rowZ = lattice.row(2);
+        rowZ *= inv_z;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
+        target *= invLattice;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    template<ExtendCellOption Option>
     void PeriodicCell<ScalarType, Dim>::unitToSuper_direct(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
         assert(Dim == 3);
         assert(x > 0 && y > 0 && z > 0);
         const size_t numParticle = target.getRow();
-        const size_t newNumParticle = x * y * z * target.getRow();
+        const size_t newNumParticle = x * y * z * numParticle;
         PositionMatrix new_pos(newNumParticle, Dim);
         size_t index = 0;
-        for (size_t i = 0; i < numParticle; ++i) {
+        if constexpr (Option == ExtendCellOption::DOFMajor) {
+            for (size_t i = 0; i < numParticle; ++i) {
+                for (unsigned int x_ = 0; x_ < x; ++x_) {
+                    for (unsigned int y_ = 0; y_ < y; ++y_) {
+                        for (unsigned int z_ = 0; z_ < z; ++z_) {
+                            new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
+                            new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
+                            new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
+                            ++index;
+                        }
+                    }
+                }
+            }
+        }
+        else {
             for (unsigned int x_ = 0; x_ < x; ++x_) {
                 for (unsigned int y_ = 0; y_ < y; ++y_) {
                     for (unsigned int z_ = 0; z_ < z; ++z_) {
-                        new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
-                        new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
-                        new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
-                        ++index;
+                        for (size_t i = 0; i < numParticle; ++i) {
+                            new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
+                            new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
+                            new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
+                            ++index;
+                        }
                     }
                 }
             }
@@ -526,31 +582,5 @@ namespace Physica::Core {
             }
         }
         target.swap(new_pos);
-    }
-
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::unitToSuper_direct(unsigned int x, unsigned int y, unsigned int z) {
-        unitToSuper_direct(pos, x, y, z);
-        auto rowX = lattice.row(0);
-        rowX *= ScalarType(x);
-        auto rowY = lattice.row(1);
-        rowY *= ScalarType(y);
-        auto rowZ = lattice.row(2);
-        rowZ *= ScalarType(z);
-    }
-
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::superToUnit_direct(unsigned int x, unsigned int y, unsigned int z) {
-        superToUnit_direct(pos, x, y, z);
-        const ScalarType inv_x = Core::reciprocal(ScalarType(x));
-        const ScalarType inv_y = Core::reciprocal(ScalarType(y));
-        const ScalarType inv_z = Core::reciprocal(ScalarType(z));
-
-        auto rowX = lattice.row(0);
-        rowX *= inv_x;
-        auto rowY = lattice.row(1);
-        rowY *= inv_y;
-        auto rowZ = lattice.row(2);
-        rowZ *= inv_z;
     }
 }

@@ -85,7 +85,7 @@ namespace Physica::Core {
             for (size_t y = 1; y <= kPointY; ++y) {
                 kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPointGrid.asVector()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
+                    kPointGrid.flatten()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
                     kz += stepZ;
                     ++kPointID;
                 }

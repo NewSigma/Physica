@@ -22,11 +22,23 @@
 #include "FFT.h"
 
 namespace Physica::Core {
+    template<class ScalarType> class FFTGrid;
+
+    namespace Internal {
+        template<class ScalarType>
+        class Traits<FFTGrid<ScalarType>> {
+            using RealType = typename ScalarType::RealType;
+            using ComplexType = ComplexScalar<RealType>;
+        public:
+            using Base = KSpaceGrid<ComplexType>;
+        };
+    }
+
     template<class ScalarType>
-    class FFTGrid : public KSpaceGrid<ScalarType> {
+    class FFTGrid : public Internal::Traits<FFTGrid<ScalarType>>::Base {
         static_assert(!ScalarType::isComplex, "[Error]: Complex version not implemented");
     public:
-        using Base = KSpaceGrid<ScalarType>;
+        using Base = typename Internal::Traits<FFTGrid<ScalarType>>::Base;
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
         using typename Base::Index3D;
@@ -44,7 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType calc(ssize_t x, ssize_t y, ssize_t z) const;
         void swap(FFTGrid& grid) noexcept { Base::swap(grid); }
         /* Getters */
-        using Base::asVector;
+        using Base::flatten;
         using Base::getSize;
         using Base::getDimX;
         using Base::getDimY;

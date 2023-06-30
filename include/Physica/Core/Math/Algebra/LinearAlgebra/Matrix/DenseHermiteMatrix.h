@@ -53,6 +53,7 @@ namespace Physica::Core {
         using ColMatrix = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
         using RowMatrix = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
+        constexpr static bool isComplex = true;
     public:
         template<class OtherMatrix>
         DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat);

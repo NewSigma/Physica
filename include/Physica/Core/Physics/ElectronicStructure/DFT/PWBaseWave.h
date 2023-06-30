@@ -55,7 +55,7 @@ namespace Physica::Core {
         /* Operations */
         void swap(PWBaseWave& wave) noexcept;
         /* Getters */
-        using Base::asVector;
+        using Base::flatten;
         using Base::getDimX;
         using Base::getDimY;
         using Base::getDimZ;
@@ -93,7 +93,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class VectorType>
     PWBaseWave<ScalarType>& PWBaseWave<ScalarType>::operator=(const RValueVector<VectorType>& newCoeffs) {
-        asVector() = newCoeffs;
+        flatten() = newCoeffs;
         return *this;
     }
 

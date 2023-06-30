@@ -57,7 +57,7 @@ namespace Physica::Core {
         EigenSolverType eigSolver;
         DensityType density;
         ChargeMixer<ScalarType, isSpinPolarized> chargeMixer;
-        KSpaceGrid<ScalarType> externalPot;
+        KSpaceGrid<ComplexType> externalPot;
         PotType xcPot;
         XCProvider xcProvider;
         FFT<ScalarType, 3> fft;
@@ -146,11 +146,11 @@ namespace Physica::Core {
                 assembleH(k);
                 /* Solve band */ {
                     {
-                        eigSolver[SpinState::Up].compute(h[SpinState::Up], orbits[SpinState::Up][0].asVector());
+                        eigSolver[SpinState::Up].compute(h[SpinState::Up], orbits[SpinState::Up][0].flatten());
                         eigSolver[SpinState::Up].sort();
                     }
                     if constexpr (isSpinPolarized) {
-                        eigSolver[SpinState::Down].compute(h[SpinState::Down], orbits[SpinState::Down][0].asVector());
+                        eigSolver[SpinState::Down].compute(h[SpinState::Down], orbits[SpinState::Down][0].flatten());
                         eigSolver[SpinState::Down].sort();
                     }
                 }
@@ -158,7 +158,7 @@ namespace Physica::Core {
                 updateDensity(k);
 
                 if (iteration != 0) {
-                    const auto& delta_rho = chargeMixer.getResidule()[SpinState::Up].asVector();
+                    const auto& delta_rho = chargeMixer.getResidule()[SpinState::Up].flatten();
                     const ScalarType error = delta_rho.squaredNorm();
                     const bool isConverged = error < criteria;
                     std::cout << error << std::endl;
@@ -181,11 +181,11 @@ namespace Physica::Core {
     void KSSolver<ScalarType, XCProvider>::initDensity() {
         const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
         {
-            auto& rho = density[SpinState::Up].asVector();
+            auto& rho = density[SpinState::Up].flatten();
             rho = averageDensity;
         }
         if constexpr (isSpinPolarized) {
-            auto& zeta = density[SpinState::Down].asVector();
+            auto& zeta = density[SpinState::Down].flatten();
             zeta = ScalarType::Zero();
         }
     }
@@ -200,11 +200,11 @@ namespace Physica::Core {
     void KSSolver<ScalarType, XCProvider>::initWaveFunc(RandomGenerator& gen) {
         {
             auto& waveUp = orbits[SpinState::Up][0];
-            waveUp.asVector().random_normal(gen);
+            waveUp.flatten().random_normal(gen);
         }
         if constexpr (isSpinPolarized) {
             auto& waveDown = orbits[SpinState::Down][0];
-            waveDown.asVector().random_normal(gen);
+            waveDown.flatten().random_normal(gen);
         }
     }
 
@@ -216,7 +216,7 @@ namespace Physica::Core {
         const ssize_t dimZ = std::min(initial[SpinState::Up].getDimZ(), orbits[SpinState::Up][0].getDimZ());
         {
             auto& waveUp = orbits[SpinState::Up][0];
-            waveUp.asVector().random_normal(gen);
+            waveUp.flatten().random_normal(gen);
             for (ssize_t x = -dimX; x <= dimX; ++x)
                 for (ssize_t y = -dimY; y <= dimY; ++y)
                     for (ssize_t z = 0; z <= dimZ; ++z)
@@ -224,7 +224,7 @@ namespace Physica::Core {
         }
         if constexpr (isSpinPolarized) {
             auto& waveDown = orbits[SpinState::Down][0];
-            waveDown.asVector().random_normal(gen);
+            waveDown.flatten().random_normal(gen);
             for (ssize_t x = -dimX; x <= dimX; ++x)
                 for (ssize_t y = -dimY; y <= dimY; ++y)
                     for (ssize_t z = 0; z <= dimZ; ++z)
@@ -234,11 +234,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::initExternalPot() {
-        using GridType = KSpaceGrid<ScalarType>;
+        using GridType = KSpaceGrid<ComplexType>;
         using Index3D = typename GridType::Index3D;
         using VectorType = Vector<ScalarType, 3>;
         externalPot = GridType::makeGrid(cutEnergy, repCell.getLattice());
-        externalPot.asVector() = ScalarType::Zero();
+        externalPot.flatten() = ScalarType::Zero();
         const auto factorGrids = cell.makeStructureFactor(cutEnergy);
 
         size_t i = 0;
@@ -287,14 +287,14 @@ namespace Physica::Core {
         /* To kSpace */ {
             xcProvider.fill(density, xcPot);
             {
-                fft.transform(xcPot[SpinState::Up].asVector());
+                fft.transform(xcPot[SpinState::Up].flatten());
                 kSpaceXC_up = FFTGrid<ScalarType>(fft);
             }
             if constexpr (isSpinPolarized) {
-                fft.transform(xcPot[SpinState::Down].asVector());
+                fft.transform(xcPot[SpinState::Down].flatten());
                 kSpaceXC_down = FFTGrid<ScalarType>(fft);
             }
-            fft.transform(density[SpinState::Up].asVector());
+            fft.transform(density[SpinState::Up].flatten());
             kSpaceDencity = FFTGrid<ScalarType>(fft);
         }
 
@@ -380,11 +380,11 @@ namespace Physica::Core {
                         rho_down += orbit(k, pos).squaredNorm();
                     density_down(index) = rho_down;
                 });
-            density_up.asVector() *= inv_volume;
-            density_down.asVector() *= inv_volume;
+            density_up.flatten() *= inv_volume;
+            density_down.flatten() *= inv_volume;
             /* Change format */ {
-                auto& rho = density_up.asVector();
-                auto& zeta = density_down.asVector();
+                auto& rho = density_up.flatten();
+                auto& zeta = density_down.flatten();
                 rho += zeta;
                 zeta = divide(rho - zeta * ScalarType::Two(), rho);
             }
@@ -400,7 +400,7 @@ namespace Physica::Core {
                     rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(int(cell.getElectronCount() % 2U == 0) + 1);
                     density_up(index) = rho_up;
                 });
-            density_up.asVector() *= inv_volume;
+            density_up.flatten() *= inv_volume;
         }
         chargeMixer.updateOutputDensity(density);
     }

@@ -29,6 +29,7 @@ namespace Physica::Core {
         constexpr static bool isScalar = is_scalar<T>::value;
     public:
         using Container = typename std::conditional<isScalar, Vector<T>, Utils::Array<T>>::type;
+        using ValueType = T;
         using Index3D = Utils::Array<size_t, 3>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
@@ -71,8 +72,8 @@ namespace Physica::Core {
         auto crbegin() const noexcept { return values.crbegin(); }
         auto crend() const noexcept { return values.crend(); }
         /* Getters */
-        [[nodiscard]] Container& asVector() noexcept { return values; }
-        [[nodiscard]] const Container& asVector() const noexcept { return values; }
+        [[nodiscard]] Container& flatten() noexcept { return values; }
+        [[nodiscard]] const Container& flatten() const noexcept { return values; }
         [[nodiscard]] size_t getSize() const noexcept { return values.getLength(); }
         [[nodiscard]] size_t getDimX() const noexcept { return dimX; }
         [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
@@ -131,7 +132,7 @@ namespace Physica::Core {
         using Index3D = typename RSpaceGrid<T>::Index3D;
         const Index3D dim = grid.getDim();
         os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
-        os << grid.asVector();
+        os << grid.flatten();
         return os;
     }
 
@@ -141,7 +142,7 @@ namespace Physica::Core {
         Index3D dim;
         is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
         grid.resize(dim[0], dim[1], dim[2]);
-        is >> grid.asVector();
+        is >> grid.flatten();
         return is;
     }
 

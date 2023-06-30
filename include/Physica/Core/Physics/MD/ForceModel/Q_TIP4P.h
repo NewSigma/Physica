@@ -71,14 +71,15 @@ namespace Physica::Core {
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class ScalarType, class PosScalarType>
-    class Q_TIP4P final {
+    class Q_TIP4P {
         constexpr static unsigned int Dim = 3;
         using This = Q_TIP4P<ScalarType, PosScalarType>;
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
         using LJModelType = PairModel<ScalarType, PosScalarType, Internal::Traits<This>>;
     public:
+        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using PositionMatrix = typename MDCellType::PositionMatrix;
+
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double charge = 1.1128;
         constexpr static double gamma = 0.73612;
@@ -102,6 +103,8 @@ namespace Physica::Core {
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
@@ -275,6 +278,14 @@ namespace Physica::Core {
             }
         }
         return coulomb;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor, bool IsSmallCell>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        sortPosition(copy);
+        return force<Executor, IsSmallCell>(copy);
     }
 
     template<class ScalarType, class PosScalarType>

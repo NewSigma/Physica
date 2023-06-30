@@ -31,7 +31,7 @@ namespace Physica::Core {
         using ScalarType = Scalar<Float, false>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
-        using StructureFactorType = Utils::Array<KSpaceGrid<ScalarType>>;
+        using StructureFactorType = Utils::Array<KSpaceGrid<ComplexType>>;
     private:
         AtomicArray atomicNumbers;
     public:
