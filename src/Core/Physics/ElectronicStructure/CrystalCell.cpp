@@ -45,9 +45,9 @@ namespace Physica::Core {
         return *this;
     }
 
-    void CrystalCell::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+    void CrystalCell::toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        Base::unitToSuper(x, y, z);
+        Base::toSuperCellInPlace<ExtendCellOption::DOFMajor>(x, y, z);
         
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
@@ -60,6 +60,12 @@ namespace Physica::Core {
             }
         }
         atomicNumbers.swap(new_atomic);
+    }
+
+    CrystalCell CrystalCell::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+        CrystalCell result = *this;
+        result.toSuperCellInPlace(x, y, z);
+        return result;
     }
 
     typename CrystalCell::StructureFactorType CrystalCell::makeStructureFactor(ScalarType cutEnergy) const {

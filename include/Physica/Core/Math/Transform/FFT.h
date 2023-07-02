@@ -73,9 +73,8 @@ namespace Physica::Core {
         PlanFlag planFlag;
     public:
         FFT();
-        FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_);
-        FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_, PlanFlag planFlag);
-        FFT(const Vector<ScalarType>& data, const RealType& rSpaceDelta_, PlanFlag planFlag);
+        FFT(size_t rSpaceSize_, RealType rSpaceDelta_, PlanFlag planFlag);
+        FFT(const Vector<ScalarType>& data, RealType rSpaceDelta_, PlanFlag planFlag);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT();
@@ -98,10 +97,13 @@ namespace Physica::Core {
         [[nodiscard]] const FFTRSpace<This>& getRSpace() const { return *this; }
         [[nodiscard]] const FFTKSpace<This>& getKSpace() const { return *this; }
         /* Static members */
+        [[nodiscard]] inline static FFT<ScalarType, 1> makeEmptyFFT(size_t rSpaceSize, RealType rSpaceDelta);
         [[nodiscard]] inline static int rSizeToKSize(int rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
+        FFT(size_t rSpaceSize_, RealType rSpaceDelta_);
+        /* Operations */
         void initializePlan();
 
         friend class FFTRSpace<This>;

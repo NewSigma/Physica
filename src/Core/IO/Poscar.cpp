@@ -135,8 +135,8 @@ namespace Physica::Core {
             extendInZ_direct(factor);
     }
 
-    void Poscar::superToUnit(unsigned int x, unsigned int y, unsigned int z) {
-        Base::superToUnit(x, y, z);
+    void Poscar::toUnitCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
+        Base::toUnitCellInPlace(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
     }

@@ -55,6 +55,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return atomCellMap.getLength(); }
         [[nodiscard]] const Utils::Array<Index3D>& getAtomCellMap() const noexcept { return atomCellMap; }
+        [[nodiscard]] size_t getNumCell() const noexcept { return cellGrid.getSize(); }
         /* Static members */
         template<class Functor>
         void forCellInList(Functor func) const;

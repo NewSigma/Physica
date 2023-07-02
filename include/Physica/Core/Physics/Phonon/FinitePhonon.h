@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/Container/KSpaceGrid.h"
+#include "Physica/Core/Physics/Container/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
@@ -35,7 +35,8 @@ namespace Physica::Core {
         using Size3D = Utils::Array<size_t, 3>;
         using MatrixType = DenseMatrix<ComplexScalar<ScalarType>>;
         using EigenSolverType = EigenSolver<MatrixType>;
-        using QPointGrid = KSpaceGrid<EigenSolverType>;
+        using QPointGrid = RSpaceGrid<EigenSolverType>;
+        using FFT1D = FFT<ScalarType, 1>;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -55,7 +56,7 @@ namespace Physica::Core {
         template<class ForceModel>
         void diagonalize(const ForceModel& model, ScalarType displace);
         template<class ForceModel>
-        KSpaceGrid<MatrixType> makeDynamicMatrix(const ForceModel& model, ScalarType displace);
+        RSpaceGrid<MatrixType> makeDynamicMatrix(const ForceModel& model, ScalarType displace);
         void swap(FinitePhonon& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * unitCell.getNumParticle(); }
@@ -68,7 +69,7 @@ namespace Physica::Core {
     FinitePhonon<ScalarType, PosScalarType>::FinitePhonon(MDCellType unitCell_, Size3D superSize_)
             : unitCell(std::move(unitCell_))
             , superSize(superSize_)
-            , qPoints(superSize_[0], superSize_[1], superSize_[2]) {}
+            , qPoints(superSize_[0], superSize_[1], FFT1D::rSizeToKSize(superSize_[2])) {}
 
     template<class ScalarType, class PosScalarType>
     FinitePhonon<ScalarType, PosScalarType>& FinitePhonon<ScalarType, PosScalarType>::operator=(FinitePhonon obj) noexcept {
@@ -79,22 +80,22 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
     void FinitePhonon<ScalarType, PosScalarType>::diagonalize(const ForceModel& model, ScalarType displace) {
-        auto dynamicMatrixGrid = makeDynamicMatrix(model, displace);
+        const auto dynamicMatrixGrid = makeDynamicMatrix(model, displace);
         for (size_t i = 0; i < dynamicMatrixGrid.flatten().getLength(); ++i)
             qPoints.flatten()[i].compute(dynamicMatrixGrid.flatten()[i], true);
     }
 
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
-    KSpaceGrid<typename FinitePhonon<ScalarType, PosScalarType>::MatrixType>
+    RSpaceGrid<typename FinitePhonon<ScalarType, PosScalarType>::MatrixType>
     FinitePhonon<ScalarType, PosScalarType>::makeDynamicMatrix(const ForceModel& model, ScalarType displace) {
+        const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
-        MDCellType superCell = unitCell;
-        superCell.template unitToSuper<ExtendCellOption::CellMajor>(superSize[0], superSize[1], superSize[2]);
+        const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
         PositionMatrix pos = superCell.getPos();
-        KSpaceGrid<MatrixType> dynamicMatrixGrid(superSize[0], superSize[1], superSize[2]);
-        FFT<ScalarType, 1> fft(getNumCell(), 1);
-        for (size_t row = 0; row < getUnitCellDOF(); ++row) {
+        RSpaceGrid<MatrixType> dynamicMatrixGrid(qPoints.getDimX(), qPoints.getDimY(), qPoints.getDimZ(), unitCellDOF, unitCellDOF);
+        FFT1D fft(getNumCell(), 1, FFT1D::Estimate);
+        for (size_t row = 0; row < unitCellDOF; ++row) {
             ScalarType& toDisplace = pos(row / Dim, row % Dim);
             const ScalarType copy = toDisplace;
             toDisplace += displace;
@@ -102,14 +103,17 @@ namespace Physica::Core {
                     model.template force<SequentialExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
             toDisplace = copy;
 
-            for (size_t col = row; col < getUnitCellDOF(); ++col) {
-                const size_t shift = getUnitCellDOF();
+            for (size_t col = row; col < unitCellDOF; ++col) {
+                const size_t shift = unitCellDOF;
                 for (size_t cell = 0; cell < getNumCell(); ++cell)
                     fft.getRSpace()[cell] = forceConst[col + cell * shift];
                 fft.transform();
                 auto& matrixArray = dynamicMatrixGrid.flatten();
-                for (size_t i = 0; i < matrixArray.getLength(); ++i)
-                    matrixArray[i](row, col) = fft.getKSpace()[i];
+                for (size_t i = 0; i < matrixArray.getLength(); ++i) {
+                    auto& mat = matrixArray[i];
+                    mat(row, col) = fft.getKSpace()[i];
+                    mat(col, row) = fft.getKSpace()[i].conjugate();
+                }
             }
         }
         return dynamicMatrixGrid;

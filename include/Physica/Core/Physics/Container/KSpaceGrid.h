@@ -53,7 +53,8 @@ namespace Physica::Core {
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
     public:
         KSpaceGrid() = default;
-        KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ);
+        template<class... Args>
+        KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ, Args... args);
         KSpaceGrid(const KSpaceGrid&) = default;
         KSpaceGrid(KSpaceGrid&&) noexcept = default;
         ~KSpaceGrid() = default;
@@ -94,8 +95,9 @@ namespace Physica::Core {
     };
 
     template<class T>
-    KSpaceGrid<T>::KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ)
-            : Base(2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1)) {}
+    template<class... Args>
+    KSpaceGrid<T>::KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ, Args... args)
+            : Base(2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1), std::forward<Args>(args)...) {}
 
     template<class T>
     KSpaceGrid<T>::KSpaceGrid(Container data, size_t dimX, size_t dimY, size_t dimZ)

@@ -99,7 +99,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
         atomicNumbers[i] = 8;
 
     CrystalCell cell({std::move(lattice), std::move(pos), CrystalCell::Type::Cartesian}, std::move(atomicNumbers));
-    cell.unitToSuper(cellSize, cellSize, cellSize);
+    cell.toSuperCellInPlace(cellSize, cellSize, cellSize);
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }
 

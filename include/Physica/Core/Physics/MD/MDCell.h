@@ -56,7 +56,17 @@ namespace Physica::Core {
         void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
         template<ExtendCellOption Option>
-        void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
+        void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
+        template<ExtendCellOption Option>
+        void toSuperCell(Utils::Array<size_t, 3> size) { toSuperCell<Option>(size[0], size[1], size[2]); }
+        template<ExtendCellOption Option>
+        void toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z);
+        template<ExtendCellOption Option>
+        void toSuperCellInPlace(Utils::Array<size_t, 3> size) { toSuperCellInPlace<Option>(size[0], size[1], size[2]); }
+        template<ExtendCellOption Option>
+        MDCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
+        template<ExtendCellOption Option>
+        MDCell makeSuperCell(Utils::Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
@@ -122,10 +132,19 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
-    void MDCell<ScalarType, PosScalarType, Dim>::unitToSuper(unsigned int x, unsigned int y, unsigned int z) {
+    void MDCell<ScalarType, PosScalarType, Dim>::toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
         toDirect();
-        Base::template unitToSuperImpl<Option>(x, y, z);
+        Base::template toSuperCellInPlaceDirect<Option>(x, y, z);
         Base::toCartesian();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<ExtendCellOption Option>
+    MDCell<ScalarType, PosScalarType, Dim>
+    MDCell<ScalarType, PosScalarType, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+        MDCell result = *this;
+        result.toSuperCellInPlace<Option>(x, y, z);
+        return result;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

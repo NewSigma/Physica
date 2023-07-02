@@ -43,7 +43,7 @@ namespace Physica::Core {
     FFT<ScalarType, 1>::FFT() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), rSpaceSize(0), rSpaceDelta(), planFlag(Measure) {}
 
     template<class ScalarType>
-    FFT<ScalarType, 1>::FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_)
+    FFT<ScalarType, 1>::FFT(size_t rSpaceSize_, RealType rSpaceDelta_)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
             , rSpaceSize(static_cast<int>(rSpaceSize_))
@@ -54,14 +54,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    FFT<ScalarType, 1>::FFT(size_t rSpaceSize_, const RealType& rSpaceDelta_, PlanFlag planFlag_)
+    FFT<ScalarType, 1>::FFT(size_t rSpaceSize_, RealType rSpaceDelta_, PlanFlag planFlag_)
             : FFT(rSpaceSize_, rSpaceDelta_) {
         planFlag = planFlag_;
         initializePlan();
     }
 
     template<class ScalarType>
-    FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data_, const RealType& rSpaceDelta_, PlanFlag planFlag)
+    FFT<ScalarType, 1>::FFT(const Vector<ScalarType>& data_, RealType rSpaceDelta_, PlanFlag planFlag)
             : FFT(data_.getLength(), rSpaceDelta_, planFlag) {
         transform(data_);
     }
@@ -149,6 +149,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline FFT<ScalarType, 1> FFT<ScalarType, 1>::makeEmptyFFT(size_t rSpaceSize, RealType rSpaceDelta) {
+        return FFT<ScalarType, 1>(rSpaceSize, rSpaceDelta);
+    }
+
+    template<class ScalarType>
     int FFT<ScalarType, 1>::rSizeToKSize(int size_data) noexcept {
         if constexpr (isComplex)
             return size_data;
@@ -158,9 +163,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void FFT<ScalarType, 1>::transform(const This& planProvider, This& bufferProvider) {
-        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
+        assert(forward_plan != nullptr);
+        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(forward_plan, buffer, buffer);
@@ -177,9 +183,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void FFT<ScalarType, 1>::invTransform(const This& planProvider, This& bufferProvider) {
-        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
+        assert(backward_plan != nullptr);
+        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(backward_plan, buffer, buffer);

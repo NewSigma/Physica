@@ -44,7 +44,8 @@ namespace Physica::Core {
         /* Operators */
         CrystalCell& operator=(CrystalCell cell) noexcept;
         /* Operations */
-        void unitToSuper(unsigned int x, unsigned int y, unsigned int z);
+        void toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z);
+        [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] StructureFactorType makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
@@ -56,6 +57,6 @@ namespace Physica::Core {
         /* Helpers */
         void swap(CrystalCell& cell) noexcept;
     private:
-        using Base::unitToSuper;
+        using Base::toSuperCellInPlace;
     };
 }

@@ -49,8 +49,7 @@ int main() {
         0.8333333333333333, 0.7500000000000000, 0.5000000000000000
     };
     const Physica::Utils::Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
-    CrystalCell supercell_direct = cell_direct;
-    supercell_direct.unitToSuper(3, 2, 1);
+    CrystalCell supercell_direct = cell_direct.makeSuperCell(3, 2, 1);
     if (!matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15))
         return 1;
     if (!matrixNear(answer_pos, supercell_direct.getPos(), 1E-15))
@@ -59,9 +58,8 @@ int main() {
         if (answer_atomic[i] != supercell_direct.getAtomicNumber(i))
             return 1;
 
-    CrystalCell supercell_cartesian = cell_direct;
+    CrystalCell supercell_cartesian = cell_direct.makeSuperCell(3, 2, 1);
     supercell_cartesian.toCartesian();
-    supercell_cartesian.unitToSuper(3, 2, 1);
     if (!matrixNear(answer_lattice, supercell_cartesian.getLattice(), 1E-15))
         return 1;
     supercell_direct.toCartesian();

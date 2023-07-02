@@ -95,7 +95,7 @@ namespace Physica::Core {
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
-            FFT<ScalarType, 1> fft(numReplica, 1);
+            auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const ScalarType factor = sqrt(repBeta * mass);
