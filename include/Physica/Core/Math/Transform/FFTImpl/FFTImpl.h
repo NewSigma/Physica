@@ -40,7 +40,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    FFT<ScalarType, 1>::FFT() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), rSpaceSize(0), rSpaceDelta(), planFlag(Measure) {}
+    FFT<ScalarType, 1>::FFT()
+            : forward_plan(nullptr)
+            , backward_plan(nullptr)
+            , buffer(nullptr)
+            , rSpaceSize(0)
+            , rSpaceDelta()
+            , planFlag(PlanFlag::Measure) {}
 
     template<class ScalarType>
     FFT<ScalarType, 1>::FFT(size_t rSpaceSize_, RealType rSpaceDelta_)
@@ -48,7 +54,7 @@ namespace Physica::Core {
             , backward_plan(nullptr)
             , rSpaceSize(static_cast<int>(rSpaceSize_))
             , rSpaceDelta(rSpaceDelta_)
-            , planFlag(Measure) {
+            , planFlag(PlanFlag::Measure) {
         assert(rSpaceSize_ <= static_cast<size_t>(std::numeric_limits<int>::max()));
         buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(getKSpaceSize() * sizeof(ComplexTypeFFTW)));
     }
@@ -117,24 +123,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class VectorType>
-    inline void FFT<ScalarType, 1>::transform(const RValueVector<VectorType>& data) {
-        assert(data.getLength() == getRSpaceSize());
-        getRSpace() = data;
-        transform();
-    }
-
-    template<class ScalarType>
     inline void FFT<ScalarType, 1>::invTransform() {
         invTransform(*this, *this);
-    }
-
-    template<class ScalarType>
-    template<class VectorType>
-    inline void FFT<ScalarType, 1>::invTransform(const RValueVector<VectorType>& data) {
-        assert(data.getLength() == getKSpaceSize());
-        getKSpace() = data;
-        invTransform();
     }
 
     template<class ScalarType>
@@ -201,10 +191,7 @@ namespace Physica::Core {
         }
 
         const ScalarType factor = RealType(1.0 / planProvider.getRSpaceSize());
-        if constexpr (isComplex)
-            bufferProvider.getKSpace() *= factor;
-        else
-            bufferProvider.getRSpace() *= factor;
+        bufferProvider.getRSpace() *= factor;
     }
 
     template<class ScalarType>
@@ -237,37 +224,47 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT() : forward_plan(nullptr), backward_plan(nullptr), buffer(nullptr), rSpaceSize(Dim, 0), kSpaceSize(Dim, 0), rSpaceDelta() {}
+    FFT<ScalarType, Dim>::FFT()
+            : forward_plan(nullptr)
+            , backward_plan(nullptr)
+            , buffer(nullptr)
+            , rSpaceSize(Dim, 0)
+            , kSpaceSize(Dim, 0)
+            , rSpaceDelta()
+            , planFlag(PlanFlag::Measure) {}
 
     template<class ScalarType, size_t Dim>
     FFT<ScalarType, Dim>::FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, Utils::Array<RealType, Dim> rSpaceDelta_)
-            : rSpaceSize(rSpaceSize_.getLength()), rSpaceDelta(std::move(rSpaceDelta_)) {
+            : forward_plan(nullptr)
+            , backward_plan(nullptr)
+            , rSpaceSize(rSpaceSize_.getLength())
+            , rSpaceDelta(std::move(rSpaceDelta_))
+            , planFlag(PlanFlag::Measure) {
         assert(checkSize(rSpaceSize_));
         for (size_t i = 0; i < rSpaceSize_.getLength(); ++i)
             rSpaceSize[i] = static_cast<int>(rSpaceSize_[i]);
-        kSpaceSize = makeKSpaceSize();
+        kSpaceSize = rSizeToKSize(rSpaceSize);
 
-        buffer = reinterpret_cast<fftw_complex*>(fftw_malloc(totalKSpaceSize(0) * sizeof(fftw_complex)));
-        forward_plan = forwardPlan();
-        backward_plan = backwardPlan();
+        buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(sumKSpaceSize(0) * sizeof(ComplexTypeFFTW)));
     }
 
     template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT(
-            const Vector<ScalarType>& data,
-            const Utils::Array<size_t, Dim>& rSpaceSize_,
-            Utils::Array<RealType, Dim> rSpaceDelta_) : FFT(rSpaceSize_, std::move(rSpaceDelta_)) {
-        transform(data);
+    FFT<ScalarType, Dim>::FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, Utils::Array<RealType, Dim> rSpaceDelta_, PlanFlag planFlag_)
+            : FFT(rSpaceSize_, std::move(rSpaceDelta_)) {
+        planFlag = planFlag_;
+        initializePlan();
     }
 
     template<class ScalarType, size_t Dim>
     FFT<ScalarType, Dim>::FFT(const FFT& fft)
-            : buffer(reinterpret_cast<fftw_complex*>(fftw_malloc(fft.rSpaceSize * sizeof(fftw_complex))))
+            : forward_plan(nullptr)
+            , backward_plan(nullptr)
+            , buffer(reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(fft.rSpaceSize * sizeof(ComplexTypeFFTW))))
             , rSpaceSize(fft.rSpaceSize)
             , kSpaceSize(fft.kSpaceSize)
-            , rSpaceDelta(fft.rSpaceDelta) {
-        forward_plan = forwardPlan();
-        backward_plan = backwardPlan();
+            , rSpaceDelta(fft.rSpaceDelta)
+            , planFlag(fft.planFlag) {
+        initializePlan();
     }
 
     template<class ScalarType, size_t Dim>
@@ -277,7 +274,8 @@ namespace Physica::Core {
             , buffer(fft.buffer)
             , rSpaceSize(std::move(fft.rSpaceSize))
             , kSpaceSize(std::move(fft.kSpaceSize))
-            , rSpaceDelta(std::move(fft.rSpaceDelta)) {
+            , rSpaceDelta(std::move(fft.rSpaceDelta))
+            , planFlag(fft.planFlag) {
         fft.forward_plan = nullptr;
         fft.backward_plan = nullptr;
         fft.buffer = nullptr;
@@ -286,8 +284,14 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     FFT<ScalarType, Dim>::~FFT() {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
-        fftw_destroy_plan(forward_plan);
-        fftw_destroy_plan(backward_plan);
+        if constexpr (isSinglePrec) {
+            fftwf_destroy_plan(forward_plan);
+            fftwf_destroy_plan(backward_plan);
+        }
+        else {
+            fftw_destroy_plan(forward_plan);
+            fftw_destroy_plan(backward_plan);
+        }
         fftw_free(buffer);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
@@ -299,54 +303,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    bool FFT<ScalarType, Dim>::checkSize(const Utils::Array<size_t, Dim>& rSpaceSize) {
-        for (size_t elem : rSpaceSize)
-            if (elem > static_cast<size_t>(std::numeric_limits<int>::max()))
-                return false;
-        return true;
+    inline void FFT<ScalarType, Dim>::transform() {
+        transform(*this, *this);
     }
 
     template<class ScalarType, size_t Dim>
-    Utils::Array<int, Dim> FFT<ScalarType, Dim>::makeKSpaceSize() const {
-        Utils::Array<int, Dim> result(getDimen());
-        size_t i = 0;
-        for (; i < getDimen() - 1; ++i)
-            result[i] = getRSpaceSize()[i];
-        result[i] = FFT<ScalarType>::rSizeToKSize(getRSpaceSize()[i]);
-        return result;
-    }
-
-    template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::transform(const Vector<ScalarType>& data) {
-        assert(data.getLength() == totalRSpaceSize(0));
-        if constexpr (isComplex) {
-            for (size_t i = 0; i < data.getLength(); ++i) {
-                buffer[i][0] = double(data[i].getReal());
-                buffer[i][1] = double(data[i].getImag());
-            }
-        }
-        else {
-            const size_t lastDimSize = getRSpaceSize(getDimen() - 1);
-            const size_t paddingCount = (lastDimSize / 2 + 1) * 2 - lastDimSize;
-            size_t j = 0;
-            for (size_t i = 0; i < data.getLength(); ++i, ++j) {
-                if (i % lastDimSize == 0 && i != 0)
-                    j += paddingCount;
-                real_buffer[j] = double(data[i]);
-            }
-        }
-        transform();
-    }
-
-    template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::invTransform(const Vector<ComplexType>& data) {
-        assert(data.getLength() == totalKSpaceSize(0));
-        for (size_t i = 0; i < data.getLength(); ++i) {
-            const auto& complex = data[i];
-            buffer[i][0] = double(complex.getReal());
-            buffer[i][1] = double(complex.getImag());
-        }
-        invTransform();
+    inline void FFT<ScalarType, Dim>::invTransform() {
+        invTransform(*this, *this);
     }
 
     template<class ScalarType, size_t Dim>
@@ -357,129 +320,186 @@ namespace Physica::Core {
         rSpaceSize.swap(fft.rSpaceSize);
         kSpaceSize.swap(fft.kSpaceSize);
         rSpaceDelta.swap(fft.rSpaceDelta);
+        std::swap(planFlag, fft.planFlag);
     }
 
     template<class ScalarType, size_t Dim>
-    Vector<ScalarType> FFT<ScalarType, Dim>::getRSpace() const {
-        Vector<ScalarType> result = Vector<ScalarType>(totalRSpaceSize(0));
-        if constexpr (isComplex) {
-            for (size_t i = 0; i < result.getLength(); ++i)
-                result[i] = ComplexType(buffer[i][0], buffer[i][1]);
+    Utils::Array<int, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Utils::Array<int, Dim>& rSize) {
+        Utils::Array<int, Dim> result(rSize.getLength());
+        size_t i = 0;
+        for (; i < rSize.getLength() - 1; ++i)
+            result[i] = rSize[i];
+        result[i] = FFT<ScalarType>::rSizeToKSize(rSize[i]);
+        return result;
+    }
+
+    template<class ScalarType, size_t Dim>
+    inline void FFT<ScalarType, Dim>::transform(const This& planProvider, This& bufferProvider) {
+        const auto forward_plan = planProvider.forward_plan;
+        const auto buffer = bufferProvider.buffer;
+        assert(forward_plan != nullptr);
+        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        if constexpr (isSinglePrec) {
+            if constexpr (isComplex)
+                fftwf_execute_dft(forward_plan, buffer, buffer);
+            else
+                fftwf_execute_dft_r2c(forward_plan, reinterpret_cast<float*>(buffer), buffer);
         }
         else {
-            const size_t lastDimSize = getRSpaceSize(getDimen() - 1);
-            const size_t paddingCount = (lastDimSize / 2 + 1) * 2 - lastDimSize;
-            size_t j = 0;
-            for (size_t i = 0; i < result.getLength(); ++i, ++j) {
-                if (i % lastDimSize == 0 && i != 0)
-                    j += paddingCount;
-                result[i] = RealType(real_buffer[j]);
-            }
-        }    
-        return result;
+            if constexpr (isComplex)
+                fftw_execute_dft(forward_plan, buffer, buffer);
+            else
+                fftw_execute_dft_r2c(forward_plan, reinterpret_cast<double*>(buffer), buffer);
+        }
     }
 
     template<class ScalarType, size_t Dim>
-    Vector<typename FFT<ScalarType, Dim>::ComplexType> FFT<ScalarType, Dim>::getKSpace() const {
-        Vector<ComplexType> result = Vector<ComplexType>(totalKSpaceSize(0));
-        for (size_t i = 0; i < result.getLength(); ++i)
-            result[i] = ComplexType(RealType(buffer[i][0]), RealType(buffer[i][1]));
-        return result;
+    inline void FFT<ScalarType, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
+        const auto backward_plan = planProvider.backward_plan;
+        const auto buffer = bufferProvider.buffer;
+        assert(backward_plan != nullptr);
+        assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        if constexpr (isSinglePrec) {
+            if constexpr (isComplex)
+                fftwf_execute_dft(backward_plan, buffer, buffer);
+            else
+                fftwf_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<float*>(buffer));
+        }
+        else {
+            if constexpr (isComplex)
+                fftw_execute_dft(backward_plan, buffer, buffer);
+            else
+                fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
+        }
+        const ScalarType factor = RealType(1.0 / planProvider.sumRSpaceSize(0));
+        bufferProvider.getRSpace() *= factor;
     }
 
     template<class ScalarType, size_t Dim>
-    fftw_plan FFT<ScalarType, Dim>::forwardPlan() {
+    void FFT<ScalarType, Dim>::initializePlan() {
+        assert(forward_plan == nullptr);
+        assert(backward_plan == nullptr);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
-        fftw_plan plan;
-        if constexpr (Dim == 2)
-            if constexpr (isComplex)
-                plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], real_buffer, buffer, FFTW_ESTIMATE);
-        else if constexpr (Dim == 3)
-            if constexpr (isComplex)
-                plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], real_buffer, buffer, FFTW_ESTIMATE);
-        else
-            if constexpr (isComplex)
-                plan = fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_r2c(getDimen(), rSpaceSize.data(), real_buffer, buffer, FFTW_ESTIMATE);
+        forward_plan = makeForwardPlan();
+        backward_plan = makeBackwardPlan();
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
+    }
+
+    template<class ScalarType, size_t Dim>
+    fftw_plan FFT<ScalarType, Dim>::makeForwardPlan() {
+        fftw_plan plan;
+        if constexpr (Dim == 2) {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+            }
+        }
+        else if constexpr (Dim == 3) {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+            }
+        }
+        else {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_FORWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+            }
+        }
         return plan;
     }
     
     template<class ScalarType, size_t Dim>
-    fftw_plan FFT<ScalarType, Dim>::backwardPlan() {
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+    fftw_plan FFT<ScalarType, Dim>::makeBackwardPlan() {
         fftw_plan plan;
-        if constexpr (Dim == 2)
-            if constexpr (isComplex)
-                plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, real_buffer, FFTW_ESTIMATE);
-        else if constexpr (Dim == 3)
-            if constexpr (isComplex)
-                plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, real_buffer, FFTW_ESTIMATE);
-        else
-            if constexpr (isComplex)
-                plan = fftw_plan_dft(getDimen(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
-            else
-                plan = fftw_plan_dft_c2r(getDimen(), rSpaceSize.data(), buffer, real_buffer, FFTW_ESTIMATE);
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
+        if constexpr (Dim == 2) {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_2d(rSpaceSize[0], rSpaceSize[1], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+            }
+        }
+        else if constexpr (Dim == 3) {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+            }
+        }
+        else {
+            if constexpr (isComplex) {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft(getDim(), rSpaceSize.data(), buffer, buffer, FFTW_BACKWARD, FFTW_ESTIMATE);
+            }
+            else {
+                if constexpr (isSinglePrec)
+                    plan = fftwf_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                else
+                    plan = fftw_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+            }
+        }
         return plan;
     }
 
     template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::transform() {
-        fftw_execute(forward_plan);
-    }
-
-    template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::invTransform() {
-        fftw_execute(backward_plan);
-        const size_t totalSize = totalRSpaceSize(0);
-        const double factor = 1.0 / totalSize;
-        if constexpr (isComplex) {
-            for (size_t i = 0; i < totalSize; ++i) {
-                buffer[i][0] *= factor;
-                buffer[i][1] *= factor;
-            }
-        }
-        else {
-            const size_t lastDimSize = getRSpaceSize(getDimen() - 1);
-            const size_t paddingCount = (lastDimSize / 2 + 1) * 2 - lastDimSize;
-            size_t j = 0;
-            for (size_t i = 0; i < totalSize; ++i, ++j) {
-                if (i % lastDimSize == 0 && i != 0)
-                    j += paddingCount;
-                real_buffer[j] *= factor;
-            }
-        }
-    }
-
-    template<class ScalarType, size_t Dim>
-    size_t FFT<ScalarType, Dim>::totalRSpaceSize(size_t from_dim) const {
+    size_t FFT<ScalarType, Dim>::sumRSpaceSize(size_t from_dim) const {
         size_t result = 1;
-        for (size_t i = from_dim; i < getDimen(); ++i)
-            result *= getRSpaceSize(i);
+        for (size_t i = from_dim; i < getDim(); ++i)
+            result *= getRSpaceSize()[i];
         return result;
     }
 
     template<class ScalarType, size_t Dim>
-    size_t FFT<ScalarType, Dim>::totalKSpaceSize(size_t from_dim) const {
+    size_t FFT<ScalarType, Dim>::sumKSpaceSize(size_t from_dim) const {
         size_t result = 1;
-        for (size_t i = from_dim; i < getDimen(); ++i)
-            result *= getKSpaceSize(i);
+        for (size_t i = from_dim; i < getDim(); ++i)
+            result *= getKSpaceSize()[i];
         return result;
     }
 
     template<class ScalarType, size_t Dim>
     void FFT<ScalarType, Dim>::normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const {
-        for (size_t i = 0; i < getDimen(); ++i) {
+        for (size_t i = 0; i < getDim(); ++i) {
             const int size_i = rSpaceSize[i];
             ssize_t index = indexes[i];
             assert(index <= size_i / 2);
@@ -501,11 +521,11 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     size_t FFT<ScalarType, Dim>::componentsSizeFrom(size_t dim) const {
         size_t result = 1;
-        for (size_t i = dim; i < getDimen(); ++i) {
+        for (size_t i = dim; i < getDim(); ++i) {
             if constexpr (isComplex)
                 result *= rSpaceSize[i] / 2 * 2 + 1;
             else {
-                if (i == getDimen() - 1)
+                if (i == getDim() - 1)
                     result *= rSpaceSize[i] / 2 + 1;
                 else
                     result *= rSpaceSize[i] / 2 * 2 + 1;
@@ -517,20 +537,28 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     Utils::Array<ssize_t, Dim> FFT<ScalarType, Dim>::linearIndexToDim(size_t index) const {
-        Utils::Array<ssize_t, Dim> result(getDimen());
-        for (size_t i = 0; i < getDimen(); ++i) {
+        Utils::Array<ssize_t, Dim> result(getDim());
+        for (size_t i = 0; i < getDim(); ++i) {
             const size_t componentsSizeFrom_i = componentsSizeFrom(i + 1);
             ssize_t dim_i = index / componentsSizeFrom_i;
             index -= componentsSizeFrom_i * dim_i;
             if constexpr (isComplex)
                 result[i] = dim_i - rSpaceSize[i] / 2;
             else {
-                if (i == getDimen() - 1)
+                if (i == getDim() - 1)
                     result[i] = dim_i;
                 else
                     result[i] = dim_i - rSpaceSize[i] / 2;
             }
         }
         return result;
+    }
+
+    template<class ScalarType, size_t Dim>
+    bool FFT<ScalarType, Dim>::checkSize(const Utils::Array<size_t, Dim>& rSpaceSize) {
+        for (size_t elem : rSpaceSize)
+            if (elem > static_cast<size_t>(std::numeric_limits<int>::max()))
+                return false;
+        return true;
     }
 }

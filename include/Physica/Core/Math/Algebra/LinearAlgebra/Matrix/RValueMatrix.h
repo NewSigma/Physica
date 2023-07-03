@@ -111,3 +111,4 @@ namespace Physica::Core {
 }
 
 #include "MatrixImpl/RValueMatrixImpl.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"

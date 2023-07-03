@@ -43,7 +43,8 @@ namespace Physica::Core {
         using EigenSolverType = SpinPair<JacobiDavidson<ComplexType>, isSpinPolarized>;
         using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
         using PotType = SpinPair<RSpaceGrid<ScalarType>, isSpinPolarized>;
-        using FFTxc = SpinPair<FFT<ScalarType, 3>, isSpinPolarized>;
+        using FFT3D = FFT<ScalarType, 3>;
+        using FFTxc = SpinPair<FFT3D, isSpinPolarized>;
     protected:
         CrystalCell cell;
         RepCellType repCell;
@@ -60,7 +61,7 @@ namespace Physica::Core {
         KSpaceGrid<ComplexType> externalPot;
         PotType xcPot;
         XCProvider xcProvider;
-        FFT<ScalarType, 3> fft;
+        FFT3D fft;
     public:
         KSSolver(CrystalCell cell_, ScalarType cutEnergy_, ScalarType fftDimFactor, BandType band_);
         KSSolver(const KSSolver&) = delete;
@@ -131,7 +132,7 @@ namespace Physica::Core {
                 Utils::Array<ScalarType, 3> fftDeltaTs{};
                 for (int i = 0; i < 3; ++i)
                     fftDeltaTs[i] = ScalarType(2 * M_PI) / repCell.getLattice().row(i).norm();
-                fft = FFT<ScalarType, 3>(dim, fftDeltaTs);
+                fft = FFT3D(dim, fftDeltaTs, FFT3D::PlanFlag::Estimate);
             }
         }
         initExternalPot();
@@ -287,14 +288,17 @@ namespace Physica::Core {
         /* To kSpace */ {
             xcProvider.fill(density, xcPot);
             {
-                fft.transform(xcPot[SpinState::Up].flatten());
+                fft.getRSpace().flatten() = xcPot[SpinState::Up].flatten();
+                fft.transform();
                 kSpaceXC_up = FFTGrid<ScalarType>(fft);
             }
             if constexpr (isSpinPolarized) {
-                fft.transform(xcPot[SpinState::Down].flatten());
+                fft.getRSpace().flatten() = xcPot[SpinState::Down].flatten();
+                fft.transform();
                 kSpaceXC_down = FFTGrid<ScalarType>(fft);
             }
-            fft.transform(density[SpinState::Up].flatten());
+            fft.getRSpace().flatten() = density[SpinState::Up].flatten();
+            fft.transform();
             kSpaceDencity = FFTGrid<ScalarType>(fft);
         }
 

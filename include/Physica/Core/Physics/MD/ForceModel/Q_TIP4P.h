@@ -20,7 +20,6 @@
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Flatten.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"

@@ -51,8 +51,8 @@ namespace Physica::Core {
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
             constexpr static size_t MaxColumnAtCompile = MaxColumn;
-            constexpr static size_t SizeAtCompile = Row * Column;
-            constexpr static size_t MaxSizeAtCompile = MaxRow * MaxColumn;
+            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
             using AllocatorType = Allocator;
         };
     }

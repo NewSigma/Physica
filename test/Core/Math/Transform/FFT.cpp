@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -57,7 +58,7 @@ int main() {
         }
         /* Test inv */ {
             constexpr double precision = 1E-13;
-            fft.invTransform(fft.getKSpace());
+            fft.invTransform();
             for (size_t i = 0; i < data.getLength(); ++i) {
                 const bool isNear = scalarNear(data[i], fft.getRSpace()[i], 1E-14);
                 const bool isSmall = abs(data[i]) < RealType(precision) && abs(fft.getRSpace()[i]) < RealType(precision);
@@ -90,7 +91,7 @@ int main() {
             }
             trans[i] = temp;
         }
-        fft.invTransform(fft.getKSpace());
+        fft.invTransform();
         if (!vectorNear(data, fft.getRSpace(), 1E-14))
             return 1;
     }
@@ -102,20 +103,17 @@ int main() {
         constexpr double freq1 = 10;
         constexpr double freq2 = 5;
 
-        Vector<RealType> data(N1 * N2);
-        {
-            size_t index = 0;
-            for (size_t i = 0; i < N1; ++i) {
-                for (size_t j = 0; j < N2; ++j) {
-                    data[index++] = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
-                }
-            }
-        }
-        FFT<RealType, 2> fft(data, {N1, N2}, {deltaX, deltaY});
+        DenseMatrix<RealType, MatrixOption::Row | MatrixOption::Vector> data(N1, N2);
+        for (size_t i = 0; i < N1; ++i)
+            for (size_t j = 0; j < N2; ++j)
+                data(i, j) = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
+
+        FFT<RealType, 2> fft({N1, N2}, {deltaX, deltaY}, FFT<RealType, 2>::PlanFlag::Estimate);
+        fft.transform(data);
         /* Test freq */ {
-            auto intense = toNormVector(fft.getKSpace());
-            const RealType freq1_power = intense[size_t(freq1 / double(fft.getKSpaceDelta(0))) * fft.getKSpaceSize(1)];
-            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / double(fft.getKSpaceDelta(0)))) * fft.getKSpaceSize(1)];
+            auto intense = toNormVector(fft.getKSpace().flatten());
+            const RealType freq1_power = intense[size_t(freq1 / double(fft.getKSpaceDelta(0))) * fft.getKSpaceSize()[1]];
+            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / double(fft.getKSpaceDelta(0)))) * fft.getKSpaceSize()[1]];
             const RealType freq2_power = intense[freq2 / double(fft.getKSpaceDelta(1))];
             if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
                 return 1;
@@ -124,12 +122,14 @@ int main() {
         }
         /* Test inv */ {
             constexpr double precision = 1E-11;
-            fft.invTransform(fft.getKSpace());
-            for (size_t i = 0; i < data.getLength(); ++i) {
-                const bool isNear = scalarNear(data[i], fft.getRSpace()[i], precision);
-                const bool isSmall = abs(data[i]) < RealType(precision) && abs(fft.getRSpace()[i]) < RealType(precision);
-                if(!isNear && !isSmall)
-                    return 1;
+            fft.invTransform();
+            for (size_t i = 0; i < data.getRow(); ++i) {
+                for (size_t j = 0; j < data.getColumn(); ++j) {
+                    const bool isNear = scalarNear(data(i, j), fft.getRSpace()(i, j), precision);
+                    const bool isSmall = abs(data(i, j)) < RealType(precision) && abs(fft.getRSpace()(i, j)) < RealType(precision);
+                    if(!isNear && !isSmall)
+                        return 1;
+                }
             }
         }
     }

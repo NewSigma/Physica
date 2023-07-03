@@ -66,7 +66,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     FFTGrid<ScalarType>::FFTGrid(const FFT<RealType, 3>& fft)
-            : Base(fft.getKSpace(), fft.getKSpaceSize(0) / 2, fft.getKSpaceSize(1) / 2, fft.getKSpaceSize(2) - 1) {}
+            : Base(Vector<ComplexType>(fft.getKSpace().flatten()), fft.getKSpaceSize()[0] / 2, fft.getKSpaceSize()[1] / 2, fft.getKSpaceSize()[2] - 1) {}
 
     template<class ScalarType>
     FFTGrid<ScalarType>& FFTGrid<ScalarType>::operator=(FFTGrid<ScalarType> grid) noexcept {

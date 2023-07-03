@@ -30,10 +30,11 @@ namespace Physica::Core {
         using ComplexType = ComplexScalar<ScalarType>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
         using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
+        using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
         constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();
 
-        FFT<ScalarType, 3> fft;
+        FFT3D fft;
         size_t numAtomUnitCell;
         size_t superSizeX;
         size_t superSizeY;

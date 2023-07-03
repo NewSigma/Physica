@@ -37,11 +37,12 @@ namespace Physica::Core {
         using RepCellType = ReciprocalCell<typename CrystalCell::ScalarType>;
         using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
         using DensityArray = Utils::Array<DensityType, DIISBufferSize>;
+        using FFT3D = FFT<ScalarType, 3>;
     private:
         RepCellType repCell;
         DensityArray oldDensities;
         DensityArray residules;
-        FFT<ScalarType, 3> fft;
+        FFT3D fft;
         size_t mixIteration;
     public:
         ChargeMixer() = default;
@@ -65,7 +66,7 @@ namespace Physica::Core {
             : repCell(std::move(repCell_))
             , oldDensities(DIISBufferSize, dimX, dimY, dimZ)
             , residules(DIISBufferSize, dimX, dimY, dimZ)
-            , fft({dimX, dimY, dimZ}, {1, 1, 1})
+            , fft({dimX, dimY, dimZ}, {1, 1, 1}, FFT3D::PlanFlag::Estimate)
             , mixIteration(0) {}
 
     template<class ScalarType, bool isSpinPolarized>
@@ -98,7 +99,8 @@ namespace Physica::Core {
     void ChargeMixer<ScalarType, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
             const auto& deltaRho = residules[0][SpinState::Up];
-            fft.transform(deltaRho.flatten());
+            fft.getRSpace().flatten() = deltaRho.flatten();
+            fft.transform();
             FFTGrid<ScalarType> kSpaceDencity(fft);
 
             using GridType = typename FFTGrid<ScalarType>::Base;
@@ -109,11 +111,12 @@ namespace Physica::Core {
                     const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
                     kSpaceDencity(index) *= factor;
                 });
-            fft.invTransform(kSpaceDencity.flatten());
+            fft.getKSpace().flatten() = kSpaceDencity.flatten();
+            fft.invTransform();
 
             const auto& rho_old = oldDensities[0][SpinState::Up].flatten();
             auto& rho_new = result[SpinState::Up].flatten();
-            rho_new = rho_old + fft.getRSpace();
+            rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
             using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element>;

@@ -26,7 +26,7 @@ namespace Physica::Core {
                        size_t superSizeX_,
                        size_t superSizeY_,
                        size_t superSizeZ_)
-            : fft({superSizeX_, superSizeY_, superSizeZ_}, {1, 1, 1})
+            : fft({superSizeX_, superSizeY_, superSizeZ_}, {1, 1, 1}, FFT3D::PlanFlag::Estimate)
             , numAtomUnitCell(numAtomUnitCell_)
             , superSizeX(superSizeX_)
             , superSizeY(superSizeY_)
@@ -131,13 +131,15 @@ namespace Physica::Core {
         for (size_t r = 0; r < dof; ++r) {
             for (size_t c = r; c < dof; ++c) {
                 const size_t offset_corr = force_corr.accessingIndex(r, c);
-                fft.transform(force_corr[offset_corr]);
+                fft.getRSpace().flatten() = force_corr[offset_corr];
+                fft.transform();
                 for (size_t cell = 0; cell < getNumCell(); ++cell)
-                    kSpaceForceCorr[cell](r, c) = fft.getKSpace()[cell];
+                    kSpaceForceCorr[cell](r, c) = fft.getKSpace().flatten()[cell];
 
-                fft.transform(momentum_corr[offset_corr]);
+                fft.getRSpace().flatten() = momentum_corr[offset_corr];
+                fft.transform();
                 for (size_t cell = 0; cell < getNumCell(); ++cell)
-                    kSpaceMomentumCorr[cell](r, c) = fft.getKSpace()[cell];
+                    kSpaceMomentumCorr[cell](r, c) = fft.getKSpace().flatten()[cell];
             }
         }
     }

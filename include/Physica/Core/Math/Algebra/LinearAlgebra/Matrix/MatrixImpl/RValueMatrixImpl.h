@@ -217,17 +217,17 @@ namespace Physica::Core {
 
     template<class Derived>
     Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
-        return Transpose<Derived>(this->getDerived());
+        return Transpose<Derived>(Base::getDerived());
     }
 
     template<class Derived>
     Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
-        return Conjugate<Derived>(this->getDerived());
+        return Conjugate<Derived>(Base::getDerived());
     }
 
     template<class Derived>
     Flatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
-        return Flatten<Derived>(this->getDerived());
+        return Flatten<Derived>(Base::getDerived());
     }
 
     template<class MatrixType, class MatrixType2>
