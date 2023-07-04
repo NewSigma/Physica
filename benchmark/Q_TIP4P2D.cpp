@@ -64,7 +64,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
 
     CrystalCell cell({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstormToBohr(1));
-    cell.toSuperCellInPlace(cellSize, cellSize, 1);
+    cell.toSuperCell(cellSize, cellSize, 1);
     cell.toCartesian();
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }

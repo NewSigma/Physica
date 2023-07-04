@@ -28,6 +28,7 @@ namespace Physica::Core {
         using Base = SpinPair<RSpaceGrid<ScalarType>, isSpinPolarized>;
         using VectorType = typename RSpaceGrid<ScalarType>::VectorType;
         using LatticeMatrix = typename RSpaceGrid<ScalarType>::LatticeMatrix;
+    public:
         using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
     public:
         using Base::Base;
@@ -55,9 +56,9 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     void DensityGrid<ScalarType, isSpinPolarized>::resize(size_t x, size_t y, size_t z) {
-        Base::operator[](SpinState::Up).resize(x, y, z);
+        Base::operator[](SpinState::Up).resize({x, y, z});
         if constexpr (isSpinPolarized)
-            Base::operator[](SpinState::Down).resize(x, y, z);;
+            Base::operator[](SpinState::Down).resize({x, y, z});;
     }
 
     template<class ScalarType, bool isSpinPolarized>

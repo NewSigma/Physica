@@ -81,7 +81,7 @@ namespace Physica::Core {
             , neighShifts(3 * 3 * 3) {
         atomCellMap.resize(directPos.getRow());
         const auto dim = makeGridDim(lattice, cutoff);
-        cellGrid.resize(dim[0], dim[1], dim[2]);
+        cellGrid.resize(dim);
 
         PeriodicCell<PosScalarType, 3>::toDirect(directPos, lattice);
         for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -100,7 +100,7 @@ namespace Physica::Core {
             , atomCellMap(mdCell.getNumParticle())
             , neighShifts(3 * 3 * 3) {
         const auto dim = makeGridDim(lattice, cutoff);
-        cellGrid.resize(dim[0], dim[1], dim[2]);
+        cellGrid.resize(dim);
 
         mdCell.toDirect(directPos);
         for (size_t i = 0; i < getNumParticle(); ++i) {

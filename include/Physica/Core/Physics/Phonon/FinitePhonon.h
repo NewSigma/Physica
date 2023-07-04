@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iostream>
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/Container/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
@@ -32,21 +33,21 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     class FinitePhonon {
         using This = FinitePhonon<ScalarType, PosScalarType>;
-        using Size3D = Utils::Array<size_t, 3>;
+        using Index3D = Utils::Array<size_t, 3>;
         using MatrixType = DenseMatrix<ComplexScalar<ScalarType>>;
         using EigenSolverType = EigenSolver<MatrixType>;
         using QPointGrid = RSpaceGrid<EigenSolverType>;
-        using FFT1D = FFT<ScalarType, 1>;
+        using FFT3D = FFT<ScalarType, 3>;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         constexpr static size_t Dim = Internal::Traits<MDCellType>::Dim;
     private:
         MDCellType unitCell;
-        Size3D superSize;
+        Index3D superSize;
         QPointGrid qPoints;
     public:
-        FinitePhonon(MDCellType unitCell_, Size3D superSize_);
+        FinitePhonon(MDCellType unitCell_, Index3D superSize_);
         FinitePhonon(const FinitePhonon&) = default;
         FinitePhonon(FinitePhonon&&) noexcept = default;
         ~FinitePhonon() = default;
@@ -61,15 +62,20 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * unitCell.getNumParticle(); }
         [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
+        [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
         [[nodiscard]] const QPointGrid& getQPoints() const noexcept { return qPoints; }
+        [[nodiscard]] Vector<ScalarType> makeFreq(size_t x, size_t y, size_t z) const;
+    private:
+        void removeDriftForce(MatrixType& dynamicMatrix);
     };
 
     template<class ScalarType, class PosScalarType>
-    FinitePhonon<ScalarType, PosScalarType>::FinitePhonon(MDCellType unitCell_, Size3D superSize_)
+    FinitePhonon<ScalarType, PosScalarType>::FinitePhonon(MDCellType unitCell_, Index3D superSize_)
             : unitCell(std::move(unitCell_))
-            , superSize(superSize_)
-            , qPoints(superSize_[0], superSize_[1], FFT1D::rSizeToKSize(superSize_[2])) {}
+            , superSize(superSize_) {
+        qPoints.resize(FFT3D::rSizeToKSize(superSize), getUnitCellDOF());
+    }
 
     template<class ScalarType, class PosScalarType>
     FinitePhonon<ScalarType, PosScalarType>& FinitePhonon<ScalarType, PosScalarType>::operator=(FinitePhonon obj) noexcept {
@@ -81,8 +87,10 @@ namespace Physica::Core {
     template<class ForceModel>
     void FinitePhonon<ScalarType, PosScalarType>::diagonalize(const ForceModel& model, ScalarType displace) {
         const auto dynamicMatrixGrid = makeDynamicMatrix(model, displace);
-        for (size_t i = 0; i < dynamicMatrixGrid.flatten().getLength(); ++i)
+        for (size_t i = 0; i < dynamicMatrixGrid.flatten().getLength(); ++i) {
             qPoints.flatten()[i].compute(dynamicMatrixGrid.flatten()[i], true);
+            qPoints.flatten()[i].sort();
+        }
     }
 
     template<class ScalarType, class PosScalarType>
@@ -92,9 +100,10 @@ namespace Physica::Core {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
         const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
+        
+        RSpaceGrid<MatrixType> result(qPoints.getDim(), unitCellDOF, unitCellDOF);
         PositionMatrix pos = superCell.getPos();
-        RSpaceGrid<MatrixType> dynamicMatrixGrid(qPoints.getDimX(), qPoints.getDimY(), qPoints.getDimZ(), unitCellDOF, unitCellDOF);
-        FFT1D fft(getNumCell(), 1, FFT1D::Estimate);
+        FFT3D fft(superSize, {1, 1, 1}, FFT3D::Estimate);
         for (size_t row = 0; row < unitCellDOF; ++row) {
             ScalarType& toDisplace = pos(row / Dim, row % Dim);
             const ScalarType copy = toDisplace;
@@ -106,17 +115,35 @@ namespace Physica::Core {
             for (size_t col = row; col < unitCellDOF; ++col) {
                 const size_t shift = unitCellDOF;
                 for (size_t cell = 0; cell < getNumCell(); ++cell)
-                    fft.getRSpace()[cell] = forceConst[col + cell * shift];
+                    fft.getRSpace().flatten()[cell] = forceConst[col + cell * shift];
                 fft.transform();
-                auto& matrixArray = dynamicMatrixGrid.flatten();
+
+                auto& matrixArray = result.flatten();
+                auto kSpace = fft.getKSpace().flatten();
                 for (size_t i = 0; i < matrixArray.getLength(); ++i) {
                     auto& mat = matrixArray[i];
-                    mat(row, col) = fft.getKSpace()[i];
-                    mat(col, row) = fft.getKSpace()[i].conjugate();
+                    mat(row, col) = kSpace[i];
+                    mat(col, row) = kSpace[i].conjugate();
                 }
             }
         }
-        return dynamicMatrixGrid;
+        removeDriftForce(result(0, 0, 0));
+        for (size_t row = 0; row < unitCellDOF; ++row) {
+            const size_t atom1 = row / Dim;
+            const ScalarType mass1 = unitCell.getMass(atom1);
+            for (size_t col = row; col < unitCellDOF; ++col) {
+                const size_t atom2 = col / Dim;
+                const ScalarType mass2 = unitCell.getMass(atom2);
+                const ScalarType repMass = reciprocal(sqrt(mass1 * mass2));
+                auto& matrixArray = result.flatten();
+                for (size_t i = 0; i < matrixArray.getLength(); ++i) {
+                    auto& mat = matrixArray[i];
+                    mat(row, col) *= repMass;
+                    mat(col, row) *= repMass;
+                }
+            }
+        }
+        return result;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -124,5 +151,34 @@ namespace Physica::Core {
         unitCell.swap(obj.unitCell);
         superSize.swap(obj.superSize);
         qPoints.swap(obj.qPoints);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    Vector<ScalarType> FinitePhonon<ScalarType, PosScalarType>::makeFreq(size_t x, size_t y, size_t z) const {
+        Vector<ScalarType> result(getUnitCellDOF());
+        const Vector<ScalarType> eigenvalues = toRealVector(qPoints(x, y, z).getEigenvalues());
+        for (size_t i = 0; i < getUnitCellDOF(); ++i)
+            result[i] = eigenvalues[i].isNegative() ? -1 : 1;
+        result = hadamard(result, sqrt(abs(eigenvalues)));
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void FinitePhonon<ScalarType, PosScalarType>::removeDriftForce(MatrixType& dynamicMatrix) {
+        const ScalarType factor = reciprocal(ScalarType(unitCell.getNumParticle()));
+        const size_t unitCellDOF = getUnitCellDOF();
+        for (size_t row = 0; row < unitCellDOF; ++row) {
+            for (size_t dim = 0; dim < Dim; ++dim) {
+                ScalarType drift = 0;
+                for (size_t col = dim; col < unitCellDOF; col += Dim)
+                    drift += dynamicMatrix(row, col).getReal();
+                drift *= factor;
+                for (size_t col = dim; col < unitCellDOF; col += Dim) {
+                    const ScalarType temp = dynamicMatrix(row, col).getReal() - drift;
+                    dynamicMatrix(row, col) = temp;
+                    dynamicMatrix(col, row) = temp;
+                }
+            }
+        }
     }
 }

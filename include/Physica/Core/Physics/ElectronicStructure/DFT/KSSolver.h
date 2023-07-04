@@ -125,9 +125,9 @@ namespace Physica::Core {
         /* Mesh grids */ {
             const auto dim = makeFFTDim(fftDimFactor);
             xcProvider = XCProvider(dim[0] * dim[1] * dim[2]);
-            xcPot = PotType(dim[0], dim[1], dim[2]);
+            xcPot = PotType(dim);
             density.resize(dim[0], dim[1], dim[2]);
-            chargeMixer = ChargeMixer<ScalarType, isSpinPolarized>(repCell, dim[0], dim[1], dim[2]);
+            chargeMixer = ChargeMixer<ScalarType, isSpinPolarized>(repCell, dim);
             /* Allocate fft */ {
                 Utils::Array<ScalarType, 3> fftDeltaTs{};
                 for (int i = 0; i < 3; ++i)

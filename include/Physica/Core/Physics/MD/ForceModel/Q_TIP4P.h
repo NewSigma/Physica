@@ -107,12 +107,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
+        [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Helpers */
         void swap(Q_TIP4P& model) noexcept;
         /* Static members */
         [[nodiscard]] static PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
-        static PermutationMatrix<PosScalarType> sortPosition(PeriodicCell<PosScalarType, 3>& cell);
+        static PermutationMatrix<PosScalarType> sortPosition(MDCellType& cell);
     private:
         Vector<ScalarType> makeCharges() const;
         PositionMatrix makeChargePos(const MDCellType& cell) const;
@@ -120,6 +121,7 @@ namespace Physica::Core {
         ScalarType ewaldEnergy(const MDCellType& cell) const;
         static ScalarType modifiedMorsePot(ScalarType r);
         static ScalarType modifiedMorseForce(ScalarType r);
+        static bool isCellOrdered(const MDCellType& cell);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -156,6 +158,7 @@ namespace Physica::Core {
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_short(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
+        assert(isCellOrdered(cell));
         using Vector3D = Vector<PosScalarType, Dim>;
 
         Vector<ScalarType> shortForce(3 * numMolecule * Dim, 0);
@@ -227,6 +230,7 @@ namespace Physica::Core {
     template<class Executor>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
+        assert(isCellOrdered(cell));
         using Vector3D = Vector<PosScalarType, Dim>;
 
         Vector<ScalarType> coulomb;
@@ -283,7 +287,7 @@ namespace Physica::Core {
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_unsort(const MDCellType& cell) const {
         MDCellType copy = cell;
-        sortPosition(copy);
+        const auto permute = sortPosition(copy);
         return force<Executor, IsSmallCell>(copy);
     }
 
@@ -315,7 +319,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    PermutationMatrix<PosScalarType> Q_TIP4P<ScalarType, PosScalarType>::sortPosition(PeriodicCell<PosScalarType, 3>& cell) {
+    PermutationMatrix<PosScalarType> Q_TIP4P<ScalarType, PosScalarType>::sortPosition(MDCellType& cell) {
+        using MassVector = typename MDCellType::MassVector;
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
         assert(numAtom % 3 == 0);
@@ -323,47 +328,63 @@ namespace Physica::Core {
         const size_t numO = numAtom / 3;
 
         PositionMatrix new_pos(source.getRow(), 3);
-        Utils::Array<size_t> order(numAtom);
-        for (size_t i = 0; i < numO; ++i) {
-            const size_t indexO = i + numH;
-            auto posO = new_pos.row(indexO);
-            posO = source.row(indexO).asVector();
-
-            size_t indexH1 = 0, indexH2 = 0;
-            /* Make indexH1, indexH2 */ {
-                PosScalarType dist1, dist2;
-                dist1 = dist2 = std::numeric_limits<PosScalarType>::max();
-                
-                for (size_t j = 0; j < numH; ++j) {
-                    auto posOH = cell.minDistVector(indexO, j);
-                    const PosScalarType dist = posOH.squaredNorm();
-                    if (dist1 > dist2) {
-                        if (dist1 > dist) {
-                            dist1 = dist;
-                            indexH1 = j;
-                        }
-                    }
-                    else {
-                        if (dist2 > dist) {
-                            dist2 = dist;
-                            indexH2 = j;
-                        }
-                    }
-                }
-                if (indexH1 > indexH2)
-                    std::swap(indexH1, indexH2);
+        MassVector new_mass(numAtom);
+        Utils::Array<size_t> orderStage1(numAtom);
+        /* Stage 1: Classify H and O */ {
+            size_t indexH = 0, indexO = numH;
+            for (size_t i = 0; i < numAtom; ++i) {
+                const bool isHydrogen = cell.getMass(i) == PhyConst<AU>::atomMass(1);
+                const size_t index = isHydrogen ? indexH : indexO;
+                new_pos.row(index) = source.row(i);
+                new_mass[i] = i < numH ? PhyConst<AU>::atomMass(1) : PhyConst<AU>::atomMass(8);
+                orderStage1[index] = i;
+                indexH += isHydrogen;
+                indexO += !isHydrogen;
             }
-            auto posH1 = new_pos.row(2 * i);
-            posH1 = source.row(indexH1).asVector();
-            order[2 * i] = indexH1;
-
-            auto posH2 = new_pos.row(2 * i + 1);
-            posH2 = source.row(indexH2).asVector();
-            order[2 * i + 1] = indexH2;
-            order[indexO] = indexO;
+            assert(indexH == numH);
+            assert(indexO == numAtom);
+            cell.setPos(new_pos);
         }
-        cell.setPos(new_pos);
-        return PermutationMatrix<PosScalarType>(std::move(order));
+        Utils::Array<size_t> orderStage2(numAtom);
+        /* Stage 2: Sort H */ {
+            for (size_t i = 0; i < numO; ++i) {
+                const size_t indexO = i + numH;
+                size_t indexH1 = 0, indexH2 = 0;
+                /* Make indexH1, indexH2 */ {
+                    PosScalarType dist1, dist2;
+                    dist1 = dist2 = std::numeric_limits<PosScalarType>::max();
+                    
+                    for (size_t j = 0; j < numH; ++j) {
+                        auto posOH = cell.minDistVector(indexO, j);
+                        const PosScalarType dist = posOH.squaredNorm();
+                        if (dist1 > dist2) {
+                            if (dist1 > dist) {
+                                dist1 = dist;
+                                indexH1 = j;
+                            }
+                        }
+                        else {
+                            if (dist2 > dist) {
+                                dist2 = dist;
+                                indexH2 = j;
+                            }
+                        }
+                    }
+                    if (indexH1 > indexH2)
+                        std::swap(indexH1, indexH2);
+                }
+                auto posH1 = new_pos.row(2 * i);
+                posH1 = source.row(indexH1).asVector();
+                orderStage2[2 * i] = orderStage1[indexH1];
+
+                auto posH2 = new_pos.row(2 * i + 1);
+                posH2 = source.row(indexH2).asVector();
+                orderStage2[2 * i + 1] = orderStage1[indexH2];
+                orderStage2[indexO] = orderStage1[indexO];
+            }
+            cell = MDCellType(cell.getLattice(), std::move(new_pos), std::move(new_mass));
+        }
+        return PermutationMatrix<PosScalarType>(std::move(orderStage2));
     }
 
     template<class ScalarType, class PosScalarType>
@@ -376,7 +397,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < maxIndexH; ++i)
             charges[i] = ScalarType(charge * 0.5);
         
-        for (size_t i = maxIndexH; i < maxIndexO; ++i)
+        for (size_t i = minIndexO; i < maxIndexO; ++i)
             charges[i] = ScalarType(-charge);
         return charges;
     }
@@ -466,5 +487,24 @@ namespace Physica::Core {
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         return -(delta * 2 - delta2 * 3 + delta3 * (7.0 / 3)) * (Dr * alphaR);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    bool Q_TIP4P<ScalarType, PosScalarType>::isCellOrdered(const MDCellType& cell) {
+        const size_t numParticle= cell.getNumParticle();
+        const size_t maxIndexH = 2 * numParticle / 3;
+        const size_t minIndexO = maxIndexH;
+        const size_t maxIndexO = minIndexO + numParticle / 3;
+        for (size_t i = 0; i < maxIndexH; ++i) {
+            const bool isHydrogen = cell.getMass(i) == PhyConst<AU>::atomMass(1);
+            if (!isHydrogen)
+                return false;
+        }
+        for (size_t i = minIndexO; i < maxIndexO; ++i) {
+            const bool isOxygen = cell.getMass(i) == PhyConst<AU>::atomMass(8);
+            if (!isOxygen)
+                return false;
+        }
+        return true;
     }
 }

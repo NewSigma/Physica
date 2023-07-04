@@ -144,7 +144,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    int FFT<ScalarType, 1>::rSizeToKSize(int size_data) noexcept {
+    template<class IndexType>
+    IndexType FFT<ScalarType, 1>::rSizeToKSize(IndexType size_data) noexcept {
         if constexpr (isComplex)
             return size_data;
         else
@@ -324,8 +325,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    Utils::Array<int, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Utils::Array<int, Dim>& rSize) {
-        Utils::Array<int, Dim> result(rSize.getLength());
+    template<class IndexType>
+    Utils::Array<IndexType, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize) {
+        Utils::Array<IndexType, Dim> result(rSize.getLength());
         size_t i = 0;
         for (; i < rSize.getLength() - 1; ++i)
             result[i] = rSize[i];

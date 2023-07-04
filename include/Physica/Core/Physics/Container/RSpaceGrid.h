@@ -41,8 +41,7 @@ namespace Physica::Core {
     public:
         RSpaceGrid() = default;
         template<class... Args>
-        RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_, Args... args);
-        RSpaceGrid(Index3D dim);
+        RSpaceGrid(Index3D index, Args... args);
         RSpaceGrid(const RSpaceGrid&) = default;
         RSpaceGrid(RSpaceGrid&&) noexcept = default;
         ~RSpaceGrid() = default;
@@ -58,7 +57,7 @@ namespace Physica::Core {
         friend std::istream& operator>>(std::istream& is, RSpaceGrid<T1>& grid);
         /* Operations */
         template<class... Args>
-        void resize(size_t x, size_t y, size_t z, Args... args);
+        void resize(Index3D index, Args... args);
         void swap(RSpaceGrid& grid) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
@@ -92,15 +91,12 @@ namespace Physica::Core {
 
     template<class T>
     template<class... Args>
-    RSpaceGrid<T>::RSpaceGrid(size_t dimX_, size_t dimY_, size_t dimZ_, Args... args)
-            : dimX(dimX_)
-            , dimY(dimY_)
-            , dimZ(dimZ_) {
+    RSpaceGrid<T>::RSpaceGrid(Index3D index, Args... args)
+            : dimX(index[0])
+            , dimY(index[1])
+            , dimZ(index[2]) {
         values.resize(dimX * dimY * dimZ, std::forward<Args>(args)...);
     }
-
-    template<class T>
-    RSpaceGrid<T>::RSpaceGrid(Index3D dim) : RSpaceGrid(dim[0], dim[1], dim[2]) {}
 
     template<class T>
     RSpaceGrid<T>::RSpaceGrid(Container values_, size_t dimX_, size_t dimY_, size_t dimZ_)
@@ -141,18 +137,18 @@ namespace Physica::Core {
         using Index3D = typename RSpaceGrid<T>::Index3D;
         Index3D dim;
         is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
-        grid.resize(dim[0], dim[1], dim[2]);
+        grid.resize(dim);
         is >> grid.flatten();
         return is;
     }
 
     template<class T>
     template<class... Args>
-    void RSpaceGrid<T>::resize(size_t x, size_t y, size_t z, Args... args) {
-        values.resize(x * y * z, std::forward<Args>(args)...);
-        dimX = x;
-        dimY = y;
-        dimZ = z;
+    void RSpaceGrid<T>::resize(Index3D index, Args... args) {
+        dimX = index[0];
+        dimY = index[1];
+        dimZ = index[2];
+        values.resize(dimX * dimY * dimZ, std::forward<Args>(args)...);
     }
 
     template<class T>

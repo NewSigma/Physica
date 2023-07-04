@@ -114,7 +114,8 @@ namespace Physica::Core {
         [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
         [[nodiscard]] inline static FFT<ScalarType, 1> makeEmptyFFT(size_t rSpaceSize, RealType rSpaceDelta);
-        [[nodiscard]] inline static int rSizeToKSize(int rSize) noexcept;
+        template<class IndexType>
+        [[nodiscard]] inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
@@ -183,7 +184,8 @@ namespace Physica::Core {
         [[nodiscard]] const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] static Utils::Array<int, Dim> rSizeToKSize(const Utils::Array<int, Dim>& rSize);
+        template<class IndexType>
+        [[nodiscard]] static Utils::Array<IndexType, Dim> rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:

@@ -74,8 +74,8 @@ namespace Physica::Core {
         void toDirect() { toDirect(makeInvLattice()); }
         void toCartesian();
         template<ExtendCellOption Option>
-        void toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z);
-        void toUnitCellInPlace(unsigned int x, unsigned int y, unsigned int z);
+        void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
+        void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         template<ExtendCellOption Option>
         [[nodiscard]] PeriodicCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] PeriodicCell makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const;
@@ -107,8 +107,8 @@ namespace Physica::Core {
         void scale_direct(ScalarType factor);
         void scale_cartesian(ScalarType factor);
         template<ExtendCellOption Option>
-        void toSuperCellInPlaceDirect(unsigned int x, unsigned int y, unsigned int z);
-        void toUnitCellInPlaceDirect(unsigned int x, unsigned int y, unsigned int z);
+        void toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z);
+        void toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z);
         /* Static members */
         static void toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice);
         template<ExtendCellOption Option>
@@ -281,39 +281,39 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
-    void PeriodicCell<ScalarType, Dim>::toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<ScalarType, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
-            toSuperCellInPlaceDirect<Option>(x, y, z);
+            toSuperCellDirect<Option>(x, y, z);
             toCartesian();
         }
         else
-            toSuperCellInPlaceDirect<Option>(x, y, z);
+            toSuperCellDirect<Option>(x, y, z);
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toUnitCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<ScalarType, Dim>::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
-            toUnitCellInPlaceDirect(x, y, z);
+            toUnitCellDirect(x, y, z);
             toCartesian();
         }
         else
-            toUnitCellInPlaceDirect(x, y, z);
+            toUnitCellDirect(x, y, z);
     }
 
     template<class ScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
     PeriodicCell<ScalarType, Dim> PeriodicCell<ScalarType, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         PeriodicCell<ScalarType, Dim> result = *this;
-        result.toSuperCellInPlace<Option>(x, y, z);
+        result.toSuperCell<Option>(x, y, z);
         return result;
     }
 
     template<class ScalarType, unsigned int Dim>
     PeriodicCell<ScalarType, Dim> PeriodicCell<ScalarType, Dim>::makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const {
         PeriodicCell<ScalarType, Dim> result = *this;
-        result.toUnitCellInPlace(x, y, z);
+        result.toUnitCell(x, y, z);
         return result;
     }
 
@@ -499,9 +499,9 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
-    void PeriodicCell<ScalarType, Dim>::toSuperCellInPlaceDirect(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<ScalarType, Dim>::toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z) {
         assert(type == Type::Direct);
-        toSuperPosDirect<ExtendCellOption::DOFMajor>(pos, x, y, z);
+        toSuperPosDirect<Option>(pos, x, y, z);
         auto rowX = lattice.row(0);
         rowX *= ScalarType(x);
         auto rowY = lattice.row(1);
@@ -511,7 +511,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toUnitCellInPlaceDirect(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<ScalarType, Dim>::toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z) {
         assert(type == Type::Direct);
         toUnitPosDirect(pos, x, y, z);
         const ScalarType inv_x = Core::reciprocal(ScalarType(x));

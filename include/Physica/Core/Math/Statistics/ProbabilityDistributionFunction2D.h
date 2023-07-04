@@ -65,7 +65,7 @@ namespace Physica::Core {
     template<class ScalarType>
     ProbabilityDistributionFunction2D<ScalarType>::ProbabilityDistributionFunction2D(
             ScalarType fromX, ScalarType toX, ScalarType fromY, ScalarType toY, size_t numBinX, size_t numBinY)
-            : bucket(numBinX, numBinY, 1, 0)
+            : bucket({numBinX, numBinY, 1}, 0)
             , seperatesX(VectorType::linspace(fromX, toX, numBinX + 1))
             , seperatesY(VectorType::linspace(fromY, toY, numBinY + 1))
             , repDeltaX(ScalarType(numBinX) / (toX - fromX))

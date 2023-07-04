@@ -60,17 +60,13 @@ namespace Physica::Core {
         template<ExtendCellOption Option>
         void toSuperCell(Utils::Array<size_t, 3> size) { toSuperCell<Option>(size[0], size[1], size[2]); }
         template<ExtendCellOption Option>
-        void toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z);
-        template<ExtendCellOption Option>
-        void toSuperCellInPlace(Utils::Array<size_t, 3> size) { toSuperCellInPlace<Option>(size[0], size[1], size[2]); }
-        template<ExtendCellOption Option>
         MDCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         template<ExtendCellOption Option>
         MDCell makeSuperCell(Utils::Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
-        [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
+        [[nodiscard]] ScalarType getMass(size_t particleID) const;
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
@@ -115,7 +111,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void MDCell<ScalarType, PosScalarType, Dim>::normalize() {
-        Base::toDirect(invLattice);
+        toDirect();
         Base::normalize_direct();
         Base::toCartesian();
     }
@@ -132,10 +128,35 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
-    void MDCell<ScalarType, PosScalarType, Dim>::toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
+    void MDCell<ScalarType, PosScalarType, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
+        /* Extend mass */ {
+            const size_t oldNumParticle = Base::getNumParticle();
+            const unsigned int numCell = x * y * z;
+            MassVector newMass(oldNumParticle * numCell);        
+            if constexpr (Option == ExtendCellOption::DOFMajor) {
+                size_t k = 0;
+                for (size_t i = 0; i < oldNumParticle; ++i) {
+                    for (unsigned int j = 0; j < numCell; ++j) {
+                        newMass[k] = massVec[i];
+                        k += 1;
+                    }
+                }
+            }
+            else {
+                size_t k = 0;
+                for (unsigned int i = 0; i < numCell; ++i) {
+                    for (size_t j = 0; j < oldNumParticle; ++j) {
+                        newMass[k] = massVec[j];
+                        k += 1;
+                    }
+                }
+            }
+            massVec = std::move(newMass);
+        }
         toDirect();
-        Base::template toSuperCellInPlaceDirect<Option>(x, y, z);
+        Base::template toSuperCellDirect<Option>(x, y, z);
         Base::toCartesian();
+        invLattice = Base::makeInvLattice();
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -143,8 +164,14 @@ namespace Physica::Core {
     MDCell<ScalarType, PosScalarType, Dim>
     MDCell<ScalarType, PosScalarType, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         MDCell result = *this;
-        result.toSuperCellInPlace<Option>(x, y, z);
+        result.toSuperCell<Option>(x, y, z);
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    inline ScalarType MDCell<ScalarType, PosScalarType, Dim>::getMass(size_t particleID) const {
+        assert(particleID < Base::getNumParticle());
+        return massVec[particleID];
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

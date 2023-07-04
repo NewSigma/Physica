@@ -97,7 +97,7 @@ namespace Physica::Core {
     template<class T>
     template<class... Args>
     KSpaceGrid<T>::KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ, Args... args)
-            : Base(2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1), std::forward<Args>(args)...) {}
+            : Base({2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1)}, std::forward<Args>(args)...) {}
 
     template<class T>
     KSpaceGrid<T>::KSpaceGrid(Container data, size_t dimX, size_t dimY, size_t dimZ)

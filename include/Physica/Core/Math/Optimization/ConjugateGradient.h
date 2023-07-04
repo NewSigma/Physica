@@ -36,10 +36,9 @@ namespace Physica::Core {
         VectorType nowX;
         ScalarType squaredGradNorm;
         LineSearch<ScalarType, Dim> lineSearch;
-        ScalarType epsilon;
         size_t iteration;
     public:
-        ConjugateGradient(ScalarType epsilon_, ScalarType maxStepSize = ScalarType(1));
+        ConjugateGradient(ScalarType maxStepSize);
         ConjugateGradient(const ConjugateGradient&) = default;
         ConjugateGradient(ConjugateGradient&&) noexcept = default;
         ~ConjugateGradient() = default;
@@ -48,7 +47,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> ScalarType solve(VectorType initial, Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> ScalarType solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad);
         void swap(ConjugateGradient& obj) noexcept;
         /* Getters */
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
@@ -56,9 +55,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, size_t Dim>
-    ConjugateGradient<ScalarType, Dim>::ConjugateGradient(ScalarType epsilon_, ScalarType maxStepSize)
+    ConjugateGradient<ScalarType, Dim>::ConjugateGradient(ScalarType maxStepSize)
             : lineSearch(maxStepSize)
-            , epsilon(epsilon_)
             , iteration(0) {}
 
     template<class ScalarType, size_t Dim>
@@ -101,7 +99,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     template<class Functor, class GradFunctor>
-    ScalarType ConjugateGradient<ScalarType, Dim>::solve(VectorType initial, Functor func, GradFunctor grad) {
+    ScalarType ConjugateGradient<ScalarType, Dim>::solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad) {
         init(std::move(initial), func, grad);
         while (squaredGradNorm > epsilon) {
             step(func, grad);
@@ -116,7 +114,6 @@ namespace Physica::Core {
         nowX.swap(obj.nowX);
         squaredGradNorm.swap(obj.squaredGradNorm);
         lineSearch.swap(obj.lineSearch);
-        epsilon.swap(obj.epsilon);
         std::swap(iteration, obj.iteration);
     }
 }

@@ -61,7 +61,7 @@ namespace Physica::Core {
                                                     size_t kPointZ,
                                                     size_t electronCount_,
                                                     size_t numBand_)
-            : kPointGrid(kPointX, kPointY, kPointZ)
+            : kPointGrid({kPointX, kPointY, kPointZ})
             , repLatt(std::move(repLatt_))
             , electronCount(electronCount_)
             , numBand(numBand_) {

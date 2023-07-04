@@ -117,8 +117,8 @@ namespace Physica::Core {
         inline void invTransform(const RValueMatrix<MatrixType>& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getColumn()); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
-        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
+        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
+        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
     };
 
     template<class Derived>
@@ -157,9 +157,9 @@ namespace Physica::Core {
         template<class GridType>
         inline void invTransform(const LValueGrid<GridType>& data);
         /* Getters */
-        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
-        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
-        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
+        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
+        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
+        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
     };
 
     template<class Derived>

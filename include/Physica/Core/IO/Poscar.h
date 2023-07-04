@@ -53,7 +53,7 @@ namespace Physica::Core {
         /* Operations */
         void standrizeLattice();
         void extendInZ(ScalarType factor);
-        void toUnitCellInPlace(unsigned int x, unsigned int y, unsigned int z);
+        void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         /* Getters */
         [[nodiscard]] const Utils::Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
@@ -63,7 +63,7 @@ namespace Physica::Core {
         /* Helpers */
         void swap(Poscar& poscar) noexcept;
     private:
-        using Base::toUnitCellInPlace;
+        using Base::toUnitCell;
         void readTypesAndNumber(std::istream& is);
         void readAtomPos(std::istream& is);
         size_t sumNumOfEachType() const;

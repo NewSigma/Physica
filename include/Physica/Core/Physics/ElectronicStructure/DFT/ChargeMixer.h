@@ -38,6 +38,7 @@ namespace Physica::Core {
         using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
         using DensityArray = Utils::Array<DensityType, DIISBufferSize>;
         using FFT3D = FFT<ScalarType, 3>;
+        using Index3D = typename DensityType::Index3D;
     private:
         RepCellType repCell;
         DensityArray oldDensities;
@@ -46,7 +47,7 @@ namespace Physica::Core {
         size_t mixIteration;
     public:
         ChargeMixer() = default;
-        ChargeMixer(RepCellType repCell_, size_t dimX, size_t dimY, size_t dimZ);
+        ChargeMixer(RepCellType repCell_, Index3D dim);
         ChargeMixer(const ChargeMixer&) = default;
         ChargeMixer(ChargeMixer&&) noexcept = default;
         ~ChargeMixer() = default;
@@ -62,11 +63,11 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool isSpinPolarized>
-    ChargeMixer<ScalarType, isSpinPolarized>::ChargeMixer(RepCellType repCell_, size_t dimX, size_t dimY, size_t dimZ)
+    ChargeMixer<ScalarType, isSpinPolarized>::ChargeMixer(RepCellType repCell_, Index3D dim)
             : repCell(std::move(repCell_))
-            , oldDensities(DIISBufferSize, dimX, dimY, dimZ)
-            , residules(DIISBufferSize, dimX, dimY, dimZ)
-            , fft({dimX, dimY, dimZ}, {1, 1, 1}, FFT3D::PlanFlag::Estimate)
+            , oldDensities(DIISBufferSize, dim)
+            , residules(DIISBufferSize, dim)
+            , fft(dim, {1, 1, 1}, FFT3D::PlanFlag::Estimate)
             , mixIteration(0) {}
 
     template<class ScalarType, bool isSpinPolarized>

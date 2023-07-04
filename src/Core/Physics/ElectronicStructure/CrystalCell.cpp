@@ -45,9 +45,9 @@ namespace Physica::Core {
         return *this;
     }
 
-    void CrystalCell::toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
+    void CrystalCell::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        Base::toSuperCellInPlace<ExtendCellOption::DOFMajor>(x, y, z);
+        Base::toSuperCell<ExtendCellOption::DOFMajor>(x, y, z);
         
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
@@ -64,7 +64,7 @@ namespace Physica::Core {
 
     CrystalCell CrystalCell::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         CrystalCell result = *this;
-        result.toSuperCellInPlace(x, y, z);
+        result.toSuperCell(x, y, z);
         return result;
     }
 

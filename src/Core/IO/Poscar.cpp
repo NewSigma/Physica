@@ -77,6 +77,7 @@ namespace Physica::Core {
     }
 
     std::istream& operator>>(std::istream& is, Poscar& poscar) {
+        assert(is.good());
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -135,8 +136,8 @@ namespace Physica::Core {
             extendInZ_direct(factor);
     }
 
-    void Poscar::toUnitCellInPlace(unsigned int x, unsigned int y, unsigned int z) {
-        Base::toUnitCellInPlace(x, y, z);
+    void Poscar::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
+        Base::toUnitCell(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
     }

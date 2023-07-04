@@ -44,22 +44,22 @@ VectorType grad(Functor func, const VectorType& at, ScalarType diffStep) {
 int main() {
     {
         auto func = func1<ScalarType>;
-        ConjugateGradient<ScalarType, 3> cg(10, 1);
-        const ScalarType result = cg.solve({-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
+        ConjugateGradient<ScalarType, 3> cg(1);
+        const ScalarType result = cg.solve(10, {-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
         if (!scalarNear(result, ScalarType::Zero(), 1E-15))
             return 1;
     }
     {
         auto func = func2<ScalarType>;
-        ConjugateGradient<ScalarType, 3> cg(1E-15, 1);
-        const ScalarType result = cg.solve({1, 3, 2}, func, [=](VectorType x) { return grad(func, x, 1E-6); });
+        ConjugateGradient<ScalarType, 3> cg(1);
+        const ScalarType result = cg.solve(1E-15, {1, 3, 2}, func, [=](VectorType x) { return grad(func, x, 1E-6); });
         if (!scalarNear(result, ScalarType(2.25), 1E-14))
             return 1;
     }
     {
         auto func = rosenbrock<ScalarType>;
-        ConjugateGradient<ScalarType, 3> cg(1E-13, 1);
-        const ScalarType result = cg.solve({-1.2, 1}, func, [=](VectorType x) { return grad(func, x, 3E-6); });
+        ConjugateGradient<ScalarType, 3> cg(1);
+        const ScalarType result = cg.solve(1E-13, {-1.2, 1}, func, [=](VectorType x) { return grad(func, x, 3E-6); });
         if (!scalarNear(result, ScalarType::Zero(), 1E-18))
             return 1;
     }

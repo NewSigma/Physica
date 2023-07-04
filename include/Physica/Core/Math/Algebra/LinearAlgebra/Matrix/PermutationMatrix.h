@@ -66,7 +66,7 @@ namespace Physica::Core {
     template<class ScalarType>
     PermutationMatrix<ScalarType>::PermutationMatrix(size_t order) : indexes(order) {
         for (size_t i = 0; i < order; ++i)
-            indexes[i] = order;
+            indexes[i] = i;
     }
 
     template<class ScalarType>

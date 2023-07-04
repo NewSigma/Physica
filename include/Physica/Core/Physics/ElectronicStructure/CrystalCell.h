@@ -44,7 +44,7 @@ namespace Physica::Core {
         /* Operators */
         CrystalCell& operator=(CrystalCell cell) noexcept;
         /* Operations */
-        void toSuperCellInPlace(unsigned int x, unsigned int y, unsigned int z);
+        void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] StructureFactorType makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
@@ -57,6 +57,6 @@ namespace Physica::Core {
         /* Helpers */
         void swap(CrystalCell& cell) noexcept;
     private:
-        using Base::toSuperCellInPlace;
+        using Base::toSuperCell;
     };
 }
