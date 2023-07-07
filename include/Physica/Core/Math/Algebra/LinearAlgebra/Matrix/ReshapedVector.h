@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueMatrix.h"
+#include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
     template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;

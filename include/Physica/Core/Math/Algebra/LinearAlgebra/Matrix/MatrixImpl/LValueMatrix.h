@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.h"
-#include "MatrixImpl/LMatrixBlock.h"
+#include "LMatrixBlock.h"
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
@@ -130,4 +130,4 @@ namespace Physica::Core {
     inline void operator*=(LValueMatrix<MatrixType>& m, const Scalar<option, errorTrack>& s) { m = m * s; }
 }
 
-#include "MatrixImpl/LValueMatrixImpl.h"
+#include "LValueMatrixImpl.h"

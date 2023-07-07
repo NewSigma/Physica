@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueMatrix.h"
+#include "MatrixImpl/RValueMatrix.h"
 #include "MatrixOption.h"
 
 namespace Physica::Core {

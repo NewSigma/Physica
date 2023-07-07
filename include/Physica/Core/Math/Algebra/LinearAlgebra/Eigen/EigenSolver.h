@@ -110,10 +110,8 @@ namespace Physica::Core {
 
         WorkingMatrix& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
-        if constexpr (isComplex) {
-            for (size_t i = 0; i < order; ++i)
-                eigenvalues[i] = matrixT(i, i);
-        }
+        if constexpr (isComplex)
+            eigenvalues = matrixT.diag();
         else
             computeRealMatEigenvalues(matrixT);
 
@@ -125,9 +123,9 @@ namespace Physica::Core {
 
             const auto& matrixU = schur.getMatrixU();
             for (size_t i = 0; i < order; ++i) {
-                auto topRows = matrixT.topRows(i + 1);
+                const auto col = matrixT.col(i);
                 auto toCol = rawEigenvectors.col(i);
-                toCol = (matrixU.leftCols(i + 1) * topRows.col(i));
+                toCol = (matrixU.leftCols(i + 1) * col.head(i + 1));
             }
         }
     }
@@ -316,8 +314,9 @@ namespace Physica::Core {
             auto col = block.col(i);
             col[i] = ScalarType::One();
             for (size_t j = i - 1; j < i; --j) {
+                assert(!scalarNear(eigenvalues[i], eigenvalues[j], 1E-14)); //TODO: handle degeneracy
                 auto row = block.row(j);
-                col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]); //TODO: handle degeneracy
+                col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
             }
         }
     }

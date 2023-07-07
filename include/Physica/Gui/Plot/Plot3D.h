@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtDataVisualization/Q3DSurface>
 #include <QtDataVisualization/QSurfaceDataProxy>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica::Gui {
     class Plot3D : public QWidget {

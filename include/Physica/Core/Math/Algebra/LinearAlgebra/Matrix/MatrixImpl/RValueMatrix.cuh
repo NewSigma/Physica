@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -50,5 +50,5 @@ namespace Physica::Core {
 }
 
 #ifdef __CUDA_ARCH__
-    #include "MatrixImpl/RValueMatrixImpl.cuh"
+    #include "RValueMatrixImpl.cuh"
 #endif

@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Conjugate.h"
-
 namespace Physica::Core {
     template<class ScalarType>
     class IterateSolver {

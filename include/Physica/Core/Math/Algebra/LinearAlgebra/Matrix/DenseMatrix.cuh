@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "LValueMatrix.cuh"
+#include "MatrixImpl/LValueMatrix.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
 
 namespace Physica::Core {

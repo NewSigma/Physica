@@ -23,7 +23,6 @@
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "MatrixProduct.h"
 #include "InverseMatrix.h"
-#include "Transpose.h"
 #include "MatrixDecomposition/LUDecomposition.h"
 #include "DenseMatrixImpl/DenseMatrixStorage.h"
 #include "DenseMatrixImpl/DenseMatrixDim.h"

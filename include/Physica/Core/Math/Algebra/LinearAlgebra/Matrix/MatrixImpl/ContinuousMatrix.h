@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/LValueMatrix.h"
+#include "LValueMatrix.h"
 #include "ContinuousMatrixBlock.h"
 
 namespace Physica::Core {

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <unordered_set>
-#include "RValueMatrix.h"
+#include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
     template<class ScalarType> class PermutationMatrix;
