@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -56,6 +56,7 @@ namespace Physica::Core {
         PermutationMatrix& operator=(PermutationMatrix obj) noexcept;
         /* Operations */
         void swapRows(size_t row1, size_t row2);
+        [[nodiscard]] PermutationMatrix inverse() const noexcept;
         void swap(PermutationMatrix& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -90,6 +91,14 @@ namespace Physica::Core {
     template<class ScalarType>
     void PermutationMatrix<ScalarType>::swapRows(size_t row1, size_t row2) {
         std::swap(indexes[row1], indexes[row2]);
+    }
+
+    template<class ScalarType>
+    PermutationMatrix<ScalarType> PermutationMatrix<ScalarType>::inverse() const noexcept {
+        Utils::Array<size_t> result(indexes.getLength());
+        for (size_t i = 0; i < result.getLength(); ++i)
+            result[indexes[i]] = i;
+        return PermutationMatrix<ScalarType>(std::move(result));
     }
 
     template<class ScalarType>

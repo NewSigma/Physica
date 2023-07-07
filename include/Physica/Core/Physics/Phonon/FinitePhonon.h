@@ -128,21 +128,6 @@ namespace Physica::Core {
             }
         }
         removeDriftForce(result(0, 0, 0));
-        for (size_t row = 0; row < unitCellDOF; ++row) {
-            const size_t atom1 = row / Dim;
-            const ScalarType mass1 = unitCell.getMass(atom1);
-            for (size_t col = row; col < unitCellDOF; ++col) {
-                const size_t atom2 = col / Dim;
-                const ScalarType mass2 = unitCell.getMass(atom2);
-                const ScalarType repMass = reciprocal(sqrt(mass1 * mass2));
-                auto& matrixArray = result.flatten();
-                for (size_t i = 0; i < matrixArray.getLength(); ++i) {
-                    auto& mat = matrixArray[i];
-                    mat(row, col) *= repMass;
-                    mat(col, row) *= repMass;
-                }
-            }
-        }
         return result;
     }
 
@@ -157,8 +142,11 @@ namespace Physica::Core {
     Vector<ScalarType> FinitePhonon<ScalarType, PosScalarType>::makeFreq(size_t x, size_t y, size_t z) const {
         Vector<ScalarType> result(getUnitCellDOF());
         const Vector<ScalarType> eigenvalues = toRealVector(qPoints(x, y, z).getEigenvalues());
-        for (size_t i = 0; i < getUnitCellDOF(); ++i)
-            result[i] = eigenvalues[i].isNegative() ? -1 : 1;
+        for (size_t i = 0; i < getUnitCellDOF(); ++i) {
+            const ScalarType mass = unitCell.getMass(i / Dim);
+            const ScalarType factor = reciprocal(sqrt(mass));
+            result[i] = eigenvalues[i].isNegative() ? -factor : factor;
+        }
         result = hadamard(result, sqrt(abs(eigenvalues)));
         return result;
     }
@@ -174,6 +162,7 @@ namespace Physica::Core {
                     drift += dynamicMatrix(row, col).getReal();
                 drift *= factor;
                 for (size_t col = dim; col < unitCellDOF; col += Dim) {
+                    assert(dynamicMatrix(row, col).getImag().isZero());
                     const ScalarType temp = dynamicMatrix(row, col).getReal() - drift;
                     dynamicMatrix(row, col) = temp;
                     dynamicMatrix(col, row) = temp;

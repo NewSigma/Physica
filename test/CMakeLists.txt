@@ -32,6 +32,7 @@ physica_add_test(Tridiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/Matri
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)
 physica_add_test(MatrixProduct Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct.cpp)
+physica_add_test(PermutationMatrix Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.cpp)
 physica_add_test(SparseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.cpp)
 physica_add_test(Givens Core/Math/Algebra/LinearAlgebra/Vector/Givens.cpp)
 physica_add_test(HouseHolder Core/Math/Algebra/LinearAlgebra/Vector/HouseHolder.cpp)

@@ -45,6 +45,7 @@ namespace Physica::Core {
     class ReshapedVector : public RValueMatrix<ReshapedVector<VectorType, MatrixMajor, Row, Column>> {
         using This = ReshapedVector<VectorType, MatrixMajor, Row, Column>;
         using Base = RValueMatrix<This>;
+    public:
         using ScalarType = typename VectorType::ScalarType;
     public:
         const VectorType& v;

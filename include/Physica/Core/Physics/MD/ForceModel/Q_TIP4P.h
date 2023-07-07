@@ -105,6 +105,7 @@ namespace Physica::Core {
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }
@@ -288,12 +289,22 @@ namespace Physica::Core {
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_unsort(const MDCellType& cell) const {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        return force<Executor, IsSmallCell>(copy);
+        const Vector<ScalarType> sort_f = force<Executor, IsSmallCell>(copy);
+        const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
+        return unsort_f.flatten();
     }
 
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
+        assert(isCellOrdered(cell));
         return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        const auto permute = sortPosition(copy);
+        return potentialEnergyWithoutEwald(copy) + ewaldEnergy(copy);
     }
 
     template<class ScalarType, class PosScalarType>
