@@ -91,9 +91,9 @@ namespace Physica::Core {
         ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
         reshape(const RValueMatrix<OtherDerived>& mat) const;
         template<size_t Row = Dynamic, size_t Column = Dynamic>
-        ReshapedVector<Derived, Row, Column, MatrixOption::Column> reshape_col(size_t row, size_t col) const;
+        ReshapedVector<Derived, MatrixOption::Column, Row, Column> reshape_col(size_t row, size_t col) const;
         template<size_t Row = Dynamic, size_t Column = Dynamic>
-        ReshapedVector<Derived, Row, Column, MatrixOption::Row> reshape_row(size_t row, size_t col) const;
+        ReshapedVector<Derived, MatrixOption::Row, Row, Column> reshape_row(size_t row, size_t col) const;
     };
 
     template<class VectorType1, class VectorType2>

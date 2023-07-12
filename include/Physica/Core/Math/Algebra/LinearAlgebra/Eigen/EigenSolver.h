@@ -126,6 +126,7 @@ namespace Physica::Core {
                 const auto col = matrixT.col(i);
                 auto toCol = rawEigenvectors.col(i);
                 toCol = (matrixU.leftCols(i + 1) * col.head(i + 1));
+                toCol.toUnit();
             }
         }
     }

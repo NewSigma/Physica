@@ -100,8 +100,6 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
-        [[nodiscard]] ScalarType max() const;
-        [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
         [[nodiscard]] ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;

@@ -95,20 +95,16 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c);
 
     template<class T>
-    ComplexScalar<T> operator+(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
+    inline ComplexScalar<T> operator+(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
     template<class T>
-    ComplexScalar<T> operator-(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
+    inline ComplexScalar<T> operator-(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
     template<class T>
-    ComplexScalar<T> operator*(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
+    ComplexScalar<T> operator*(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
     template<class T>
-    ComplexScalar<T> operator/(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
+    ComplexScalar<T> operator/(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
     template<class ScalarType1, class ScalarType2>
     ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator+(

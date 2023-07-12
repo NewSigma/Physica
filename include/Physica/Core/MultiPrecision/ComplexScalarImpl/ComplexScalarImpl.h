@@ -131,20 +131,17 @@ namespace Physica::Core {
     }
 
     template<class T>
-    ComplexScalar<T> operator+(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    inline ComplexScalar<T> operator+(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
         return ComplexScalar<T>(c1.getReal() + c2.getReal(), c1.getImag() + c2.getImag());
     }
 
     template<class T>
-    ComplexScalar<T> operator-(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    inline ComplexScalar<T> operator-(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
         return ComplexScalar<T>(c1.getReal() - c2.getReal(), c1.getImag() - c2.getImag());
     }
 
     template<class T>
-    ComplexScalar<T> operator*(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    ComplexScalar<T> operator*(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
         const auto& real_1 = c1.getReal();
         const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();
@@ -163,8 +160,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    ComplexScalar<T> operator/(
-            const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    ComplexScalar<T> operator/(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
         const auto& real_1 = c1.getReal();
         const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();

@@ -49,7 +49,7 @@ namespace Physica::Core::Internal {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, value) {}
         DenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -97,7 +97,7 @@ namespace Physica::Core::Internal {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : Base(row * column, t) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, value) {}
         DenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -146,7 +146,7 @@ namespace Physica::Core::Internal {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : array(column, row) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : array(column, row, t) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : array(column, row, value) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -198,7 +198,7 @@ namespace Physica::Core::Internal {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : array(row, column) {}
-        DenseMatrixStorage(size_t row, size_t column, const T& t) : array(row, column, t) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : array(row, column, value) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {

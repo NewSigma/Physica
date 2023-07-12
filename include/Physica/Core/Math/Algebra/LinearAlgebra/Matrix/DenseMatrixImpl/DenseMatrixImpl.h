@@ -25,7 +25,7 @@ namespace Physica::Core {
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column) : Storage(row, column), Dim(row, column) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column, const T& t) : Storage(row, column, t), Dim(row, column) {}
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column, T value) : Storage(row, column, std::move(value)), Dim(row, column) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(std::initializer_list<InitializerType> list) : Storage(std::move(list)) {

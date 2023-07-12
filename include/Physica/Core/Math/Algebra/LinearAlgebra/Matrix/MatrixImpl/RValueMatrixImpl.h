@@ -207,6 +207,50 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
+        ScalarType result;
+        if constexpr (isColumnMatrix) {
+            result = col(0).max();
+            for (size_t i = 1; i < getColumn(); ++i) {
+                ScalarType temp = col(i).max();
+                if (temp > result)
+                    result = temp;
+            }
+        }
+        else {
+            result = row(0).max();
+            for (size_t i = 1; i < getRow(); ++i) {
+                ScalarType temp = row(i).max();
+                if (temp > result)
+                    result = temp;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
+        ScalarType result;
+        if constexpr (isColumnMatrix) {
+            result = col(0).min();
+            for (size_t i = 1; i < getColumn(); ++i) {
+                ScalarType temp = col(i).min();
+                if (temp < result)
+                    result = temp;
+            }
+        }
+        else {
+            result = row(0).min();
+            for (size_t i = 1; i < getRow(); ++i) {
+                ScalarType temp = row(i).min();
+                if (temp < result)
+                    result = temp;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
         assert(getRow() == getColumn());
         ScalarType result = ScalarType::Zero();

@@ -83,7 +83,7 @@ namespace Physica::Core {
     public:
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t column);
-        DenseMatrix(size_t row, size_t column, const T& t);
+        DenseMatrix(size_t row, size_t column, T value);
         DenseMatrix(std::initializer_list<InitializerType> list);
         template<class OtherMatrix>
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
