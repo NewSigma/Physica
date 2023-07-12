@@ -23,4 +23,5 @@
 
     #include "H5File.h"
     #include "H5DataSpace.h"
+    #include "H5DataSet.h"
 #endif
