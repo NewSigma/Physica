@@ -50,6 +50,7 @@ namespace Physica::Core {
         template<class Functor, class GradFunctor> ScalarType solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad);
         void swap(ConjugateGradient& obj) noexcept;
         /* Getters */
+        [[nodiscard]] inline size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
     };
@@ -115,5 +116,12 @@ namespace Physica::Core {
         squaredGradNorm.swap(obj.squaredGradNorm);
         lineSearch.swap(obj.lineSearch);
         std::swap(iteration, obj.iteration);
+    }
+
+    template<class ScalarType, size_t Dim>
+    inline size_t ConjugateGradient<ScalarType, Dim>::getDim() const noexcept {
+        if constexpr (Dim != Dynamic)
+            return Dim;
+        return gradG.getLength();
     }
 }

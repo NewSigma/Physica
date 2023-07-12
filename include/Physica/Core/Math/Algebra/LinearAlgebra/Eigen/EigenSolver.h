@@ -126,7 +126,8 @@ namespace Physica::Core {
                 const auto col = matrixT.col(i);
                 auto toCol = rawEigenvectors.col(i);
                 toCol = (matrixU.leftCols(i + 1) * col.head(i + 1));
-                toCol.toUnit();
+                if constexpr (isComplex)
+                    toCol.toUnit();
             }
         }
     }
@@ -154,9 +155,8 @@ namespace Physica::Core {
 
     template<class MatrixType>
     typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const {
-        if (isComplex) {
+        if constexpr (isComplex)
             return rawEigenvectors;
-        }
         else {
             const size_t order = eigenvalues.getLength();
             EigenvectorMatrix result = EigenvectorMatrix(order, order);
@@ -164,6 +164,7 @@ namespace Physica::Core {
                 if (eigenvalues[i].getImag().isZero()) {
                     auto toCol = result.col(i);
                     toCol.asVector() = rawEigenvectors.col(i);
+                    toCol.toUnit();
                 }
                 else {
                     auto toCol1 = result.col(i);
@@ -174,6 +175,8 @@ namespace Physica::Core {
                         toCol1[j] = ComplexScalar<RealType>(fromCol1[j].getReal(), fromCol2[j].getReal());
                         toCol2[j] = ComplexScalar<RealType>(fromCol1[j].getReal(), -fromCol2[j].getReal());
                     }
+                    toCol1.toUnit();
+                    toCol2.toUnit();
                     ++i;
                 }
             }

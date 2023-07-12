@@ -30,36 +30,36 @@ namespace Physica::Core {
     class Differential {
     public:
         template<class Function>
-        [[nodiscard]] static ScalarType forward(Function func, const ScalarType& x, const ScalarType& step);
+        [[nodiscard]] static ScalarType forward(Function func, ScalarType x, ScalarType step);
         template<class Function>
-        [[nodiscard]] static ScalarType backward(Function func, const ScalarType& x, const ScalarType& step);
+        [[nodiscard]] static ScalarType backward(Function func, ScalarType x, ScalarType step);
         template<class Function>
-        [[nodiscard]] static ScalarType doublePoint(Function func, const ScalarType& x, const ScalarType& step);
+        [[nodiscard]] static ScalarType doublePoint(Function func, ScalarType x, ScalarType step);
         template<class Function>
-        [[nodiscard]] static ScalarType ridders(Function func, const ScalarType& x, const ScalarType& step);
+        [[nodiscard]] static ScalarType ridders(Function func, ScalarType x, ScalarType step);
     };
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Differential<ScalarType>::forward(Function func, const ScalarType& x, const ScalarType& step) {
+    ScalarType Differential<ScalarType>::forward(Function func, ScalarType x, ScalarType step) {
         return (func(x + step) - func(x)) / step;
     }
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Differential<ScalarType>::backward(Function func, const ScalarType& x, const ScalarType& step) {
+    ScalarType Differential<ScalarType>::backward(Function func, ScalarType x, ScalarType step) {
         return (func(x) - func(x - step)) / step;
     }
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Differential<ScalarType>::doublePoint(Function func, const ScalarType& x, const ScalarType& step) {
+    ScalarType Differential<ScalarType>::doublePoint(Function func, ScalarType x, ScalarType step) {
         return (func(x + step) - func(x - step)) / (step  * ScalarType::Two());
     }
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Differential<ScalarType>::ridders(Function func, const ScalarType& x, const ScalarType& step) {
+    ScalarType Differential<ScalarType>::ridders(Function func, ScalarType x, ScalarType step) {
         constexpr static size_t TableSize = 10;
         constexpr static double Factor = 1.4;
         constexpr static double RepFactor = 1 / Factor;

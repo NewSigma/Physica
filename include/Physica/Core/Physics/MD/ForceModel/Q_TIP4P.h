@@ -77,6 +77,7 @@ namespace Physica::Core {
         using LJModelType = PairModel<ScalarType, PosScalarType, Internal::Traits<This>>;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
 
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
@@ -106,6 +107,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
+        inline void updateLattice(LatticeMatrix lattice);
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }
@@ -232,6 +234,7 @@ namespace Physica::Core {
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
+        assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");
         using Vector3D = Vector<PosScalarType, Dim>;
 
         Vector<ScalarType> coulomb;
@@ -304,13 +307,19 @@ namespace Physica::Core {
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy_unsort(const MDCellType& cell) const {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        return potentialEnergyWithoutEwald(copy) + ewaldEnergy(copy);
+        return potentialEnergy(cell);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::updateLattice(LatticeMatrix lattice) {
+        ewald.setLattice(std::move(lattice));
     }
 
     template<class ScalarType, class PosScalarType>
     void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
         std::swap(numMolecule, model.numMolecule);
         ewald.swap(model.ewald);
+        LJModel.swap(model.LJModel);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -465,6 +474,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::ewaldEnergy(const MDCellType& cell) const {
+        assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");
         const PositionMatrix chargePos = makeChargePos(cell);
         const size_t numMolecule = getNumMolecule();
         ScalarType selfCoulomb = 0;

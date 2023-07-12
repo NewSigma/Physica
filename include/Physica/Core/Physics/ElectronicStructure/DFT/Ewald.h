@@ -62,7 +62,6 @@ namespace Physica::Core {
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
-        Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<ScalarType> charges_);
         Ewald(const Ewald&) = default;
         Ewald(Ewald&&) noexcept = default;
         ~Ewald() = default;
@@ -76,6 +75,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
+        /* Setters */
+        void setLattice(LatticeMatrix lattice_);
     private:
         void initIntegralLimit(PosScalarType volume);
         void makeTables();
@@ -88,23 +89,9 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     Ewald<ScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_)
-            : Ewald(lattice_, ReciprocalCell(lattice_), std::move(charges_)) {}
-
-    template<class ScalarType, class PosScalarType>
-    Ewald<ScalarType, PosScalarType>::Ewald(LatticeMatrix lattice_, ReciprocalCell<PosScalarType> repCell_, Vector<ScalarType> charges_)
-            : lattice(std::move(lattice_))
-            , repCell(std::move(repCell_))
-            , charges(std::move(charges_))
+            : charges(std::move(charges_))
             , erfc_table(ErfcTableSize + 1) {
-        const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
-        inv_volume = reciprocal(ScalarType(volume));
-        initIntegralLimit(volume);
-        rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
-        rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
-        selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
-                   + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
-        makeTables();
+        setLattice(std::move(lattice_));
     }
 
     template<class ScalarType, class PosScalarType>
@@ -215,6 +202,21 @@ namespace Physica::Core {
         repErfcStep.swap(ewald.repErfcStep);
         doubleSquareStep.swap(ewald.doubleSquareStep);
         squareMaxErfcX.swap(ewald.squareMaxErfcX);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void Ewald<ScalarType, PosScalarType>::setLattice(LatticeMatrix lattice_) {
+        lattice = std::move(lattice_);
+        repCell = ReciprocalCell(lattice);
+        const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
+        inv_volume = reciprocal(ScalarType(volume));
+        initIntegralLimit(volume);
+        rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
+        rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
+        kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
+        selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
+                   + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
+        makeTables();
     }
 
     template<class ScalarType, class PosScalarType>

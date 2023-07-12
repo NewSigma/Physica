@@ -73,7 +73,7 @@ int main() {
     ForceModel::sortPosition(cell);
     Optimizer sd(1, 1E-4, 0.1);
     auto minimizer = Minimizer(cell);
-    minimizer.init<ForceModel, SequentialExecutor, Optimizer>(model, sd);
+    minimizer.pre_pos_step<ForceModel, SequentialExecutor, Optimizer>(model, sd);
     for (int i = 0; i < 100; ++i) {
         minimizer.pos_step<ForceModel, SequentialExecutor, Optimizer>(model, sd);
     }
