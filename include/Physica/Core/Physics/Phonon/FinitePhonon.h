@@ -56,10 +56,8 @@ namespace Physica::Core {
         FinitePhonon& operator=(FinitePhonon obj) noexcept;
         /* Operations */
         template<class ForceModel>
-        [[nodiscard]] QPointGrid diagonalize(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration);
-        template<class ForceModel>
-        [[nodiscard]] RSpaceGrid<MatrixType> makeDynamicMatrix(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration);
-        [[nodiscard]] RSpaceGrid<MatrixType> interpolateForceConstant(Index3D newSize, const RSpaceGrid<MatrixType> forceConstants) const;
+        [[nodiscard]] RSpaceGrid<MatrixType> makeForceConstants(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration);
+        [[nodiscard]] RSpaceGrid<MatrixType> interpolateForceConstants(Index3D newSize, const RSpaceGrid<MatrixType> forceConstants) const;
         void toDynamicMatrix(RSpaceGrid<MatrixType>& forceConstants);
         void swap(FinitePhonon& obj) noexcept;
         /* Getters */
@@ -85,25 +83,13 @@ namespace Physica::Core {
         swap(obj);
         return *this;
     }
-
-    template<class ScalarType, class PosScalarType>
-    template<class ForceModel>
-    typename FinitePhonon<ScalarType, PosScalarType>::QPointGrid FinitePhonon<ScalarType, PosScalarType>::diagonalize(
-            const ForceModel& model,
-            ScalarType displace,
-            ScalarType translationPrec,
-            size_t maxIteration) {
-        auto matrixGrid = makeDynamicMatrix(model, displace, translationPrec, maxIteration);
-        toDynamicMatrix(matrixGrid);
-        return diagonalize(matrixGrid);
-    }
     /**
      * Use iteration method to apply translational invariance and while keep force constant matrix symmetric as introduced in [1].
      */
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
     RSpaceGrid<typename FinitePhonon<ScalarType, PosScalarType>::MatrixType>
-    FinitePhonon<ScalarType, PosScalarType>::makeDynamicMatrix(
+    FinitePhonon<ScalarType, PosScalarType>::makeForceConstants(
             const ForceModel& model,
             ScalarType displace,
             ScalarType translationPrec,
@@ -191,25 +177,24 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     RSpaceGrid<typename FinitePhonon<ScalarType, PosScalarType>::MatrixType>
-    FinitePhonon<ScalarType, PosScalarType>::interpolateForceConstant(Index3D newSize, const RSpaceGrid<MatrixType> forceConstants) const {
+    FinitePhonon<ScalarType, PosScalarType>::interpolateForceConstants(Index3D newSize, const RSpaceGrid<MatrixType> forceConstants) const {
         assert(newSize[0] >= superSize[0]);
         assert(newSize[1] >= superSize[1]);
         assert(newSize[2] >= superSize[2]);
         const size_t unitCellDOF = getUnitCellDOF();
         const size_t numInterpolateCell = newSize[0] * newSize[1] * newSize[2];
         const size_t interpolateDOF = unitCellDOF * numInterpolateCell;
-        RSpaceGrid<MatrixType> result(FFT3D::rSizeToKSize(newSize), unitCellDOF, unitCellDOF, ScalarType(0));
+        RSpaceGrid<MatrixType> result(FFT3D::rSizeToKSize(newSize), unitCellDOF, unitCellDOF);
         auto& newFcMatrixes = result.flatten();
         FFT3D superFFT(superSize, {1, 1, 1}, FFT3D::Estimate);
         FFT3D interpolateFFT(newSize, {1, 1, 1}, FFT3D::Estimate);
 
-        Vector<ScalarType> forceConst(interpolateDOF);
+        Vector<ScalarType> forceConst(interpolateDOF, 0);
         for (size_t row = 0; row < unitCellDOF; ++row) {
-            forceConst = ScalarType(0);
             /* kSpace to rSpace */ {
                 auto& fcMatrixies = forceConstants.flatten();
-                auto kSpace = superFFT.getKSpace();
-                auto rSpace = superFFT.getRSpace();
+                auto kSpace = superFFT.getKSpace().flatten();
+                auto rSpace = superFFT.getRSpace().flatten();
                 for (size_t col = 0; col < unitCellDOF; ++col) {
                     for (size_t i = 0; i < fcMatrixies.getLength(); ++i) {
                         auto& fcMatrix = fcMatrixies[i];
@@ -218,13 +203,20 @@ namespace Physica::Core {
                     superFFT.invTransform(); // TODO: normalize is not necessary
 
                     const size_t shift = unitCellDOF;
-                    for (size_t cell = 0; cell < getNumCell(); ++cell)
-                        forceConst[col + cell * shift] = rSpace[cell];
+                    for (size_t x = 0; x < superSize[0]; ++x) {
+                        for (size_t y = 0; y < superSize[1]; ++y) {
+                            for (size_t z = 0; z < superSize[2]; ++z) {
+                                const size_t cell0 = (x * superSize[1] + y) * superSize[2] + z;
+                                const size_t cell = (x * newSize[1] + y) * newSize[2] + z;
+                                forceConst[col + cell * shift] = rSpace[cell0];
+                            }
+                        }
+                    }
                 }
             }
             /* rSpace to extended kSpace */ {
-                auto kSpace = interpolateFFT.getKSpace();
-                auto rSpace = interpolateFFT.getRSpace();
+                auto kSpace = interpolateFFT.getKSpace().flatten();
+                auto rSpace = interpolateFFT.getRSpace().flatten();
                 for (size_t col = 0; col < unitCellDOF; ++col) {
                     const size_t shift = unitCellDOF;
                     for (size_t cell = 0; cell < numInterpolateCell; ++cell)
