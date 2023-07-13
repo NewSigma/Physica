@@ -59,36 +59,27 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     /* t-x */ {
-        Plot* t_x = new Plot();
+        Plot* t_x = new Plot(0, 200, -1.5, 1.5, 50, 1);
         t_x->spline(t, x);
-        auto& chart = *t_x->chart();
-        chart.setTitle("t-x");
-        chart.legend()->hide();
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("t");
-        chart.axes(Qt::Vertical).first()->setTitleText("x");
+        t_x->chart()->legend()->hide();
+        t_x->getAxisX()->setTitleText("t");
+        t_x->getAxisY()->setTitleText("x");
         t_x->show();
     }
     /* t-p */ {
-        Plot* t_p = new Plot();
+        Plot* t_p = new Plot(0, 200, -2.5, 2, 50, 1);
         t_p->spline(t, p);
-        auto& chart = *t_p->chart();
-        chart.setTitle("t-p");
-        chart.legend()->hide();
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("t");
-        chart.axes(Qt::Vertical).first()->setTitleText("p");
+        t_p->chart()->legend()->hide();
+        t_p->getAxisX()->setTitleText("t");
+        t_p->getAxisY()->setTitleText("p");
         t_p->show();
     }
     /* x-p */ {
-        Plot* x_p = new Plot();
+        Plot* x_p = new Plot(-1.5, 1.5, -2.5, 2, 1, 1);
         x_p->spline(x, p);
-        auto& chart = *x_p->chart();
-        chart.setTitle("x-p");
-        chart.legend()->hide();
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("x");
-        chart.axes(Qt::Vertical).first()->setTitleText("p");
+        x_p->chart()->legend()->hide();
+        x_p->getAxisX()->setTitleText("x");
+        x_p->getAxisY()->setTitleText("p");
         x_p->show();
     }
     return QApplication::exec();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QtCharts/QChartView>
+#include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QScatterSeries>
@@ -32,10 +33,20 @@ using Physica::Core::MultiScalar;
 
 namespace Physica::Gui {
     class Plot : public QChartView {
+        using Base = QChartView;
+
+        QValueAxis* axisX;
+        QValueAxis* axisY;
+        QValueAxis* axisTop;
+        QValueAxis* axisRight;
     public:
-        Plot(QWidget* parent = nullptr);
-        Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin
-                , const MultiScalar& end, QWidget* parent = nullptr);
+        Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
+        Plot(const Plot&) = default;
+        Plot(Plot&&) noexcept = default;
+        ~Plot() = default;
+        /* Operators */
+        Plot& operator=(const Plot&) = delete;
+        Plot& operator=(Plot&&) noexcept = delete;
         /* Operations */
         template<class VectorType>
         QLineSeries& line(const Core::LValueVector<VectorType>& y);
@@ -71,6 +82,11 @@ namespace Physica::Gui {
         template<class VectorType>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& x, const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
         QScatterSeries& label(double x, double y, QString text);
+        /* Getters */
+        [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
+        [[nodiscard]] QValueAxis* getAxisY() const noexcept { return axisY; }
+        [[nodiscard]] QValueAxis* getAxisTop() const noexcept { return axisTop; }
+        [[nodiscard]] QValueAxis* getAxisRight() const noexcept { return axisRight; }
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);
@@ -91,6 +107,8 @@ namespace Physica::Gui {
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
 
         update();
         return *series;
@@ -109,6 +127,8 @@ namespace Physica::Gui {
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
 
         update();
         return *series;
@@ -127,6 +147,8 @@ namespace Physica::Gui {
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
         chart()->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
 
         update();
         return *series;
@@ -187,6 +209,8 @@ namespace Physica::Gui {
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
 
         chart()->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
 
         update();
         return *series;
@@ -207,6 +231,8 @@ namespace Physica::Gui {
         }
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
         chart()->addSeries(series);
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
         update();
         return *series;
     }
@@ -227,6 +253,8 @@ namespace Physica::Gui {
                                              Utils::Array<double> levels) {
         auto* series = new ContourSeries<MatrixType>(x, y, z, std::move(levels));
         series->attachTo(*chart());
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
         update();
         return *series;
     }
@@ -241,7 +269,8 @@ namespace Physica::Gui {
             series->append(set);
         }
         chart()->addSeries(series);
-
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
         update();
         return *series;
     }
@@ -274,7 +303,8 @@ namespace Physica::Gui {
             series->append(set);
         }
         chart()->addSeries(series);
-
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
         update();
         return *series;
     }

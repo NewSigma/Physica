@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,52 +16,71 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Math/Calculus/Differential.h>
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 
 namespace Physica::Gui {
-    Plot::Plot(QWidget* parent) : QChartView(parent) {
+    Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent)
+            : QChartView(parent)
+            , axisX(new QValueAxis())
+            , axisY(new QValueAxis())
+            , axisTop(new QValueAxis())
+            , axisRight(new QValueAxis()) {
         setAttribute(Qt::WA_DeleteOnClose);
 
         setChart(new QChart());
         setRenderHint(QPainter::Antialiasing);
-    }
 
-    Plot::Plot(MultiScalar (*func)(const MultiScalar&), const MultiScalar& begin, const MultiScalar& end, QWidget* parent)
-            : QChartView(parent) {
-        setAttribute(Qt::WA_DeleteOnClose);
+        auto& chart = *Base::chart();
+        {
+            QFont font = axisX->labelsFont();
+            font.setPointSize(15);
+            axisX->setTickAnchor(0);
+            axisX->setTickInterval(deltaX);
+            axisX->setTickType(QValueAxis::TicksDynamic);
+            axisX->setMinorGridLineVisible(false);
+            axisX->setLinePenColor(Qt::black);
+            axisX->setGridLineVisible(false);
+            axisX->setLabelsFont(font);
+            axisX->setRange(minX, maxX);
+            axisX->setTitleFont(font);
 
-        MultiScalar maxStepSize = (end - begin) / BasicConst::getInstance().plotPoints;
-        MultiScalar point = MultiScalar(begin);
-        QSplineSeries* series = new QSplineSeries();
-        do {
-            MultiScalar y = func(point);
-            *series << QPointF(double(point), double(y));
-            /*
-            //Changeable step size depending on current derivative.
-            MultiScalar derivative = D_right(type, point);
-            std::cout << derivative << point << std::endl;
-            if(derivative.getPower() > basicConst->MaxPower) {
-                qWarning("StepSize is too small, suspect encountered a singularity. Ignoring...");
-                derivative = basicConst->get_0();
-            }
-            point += maxStepSize / (basicConst->get_1() + derivative * derivative);
-             */
-            point += maxStepSize;
-            point.clearA();
-        } while(point < end);
-        //Handle l = 1.
-        MultiScalar y = func(point);
-        *series << QPointF(double(point), double(y));
+            axisY->setTickAnchor(0);
+            axisY->setTickInterval(deltaY);
+            axisY->setTickType(QValueAxis::TicksDynamic);
+            axisY->setMinorGridLineVisible(false);
+            axisY->setMinorTickCount(4);
+            axisY->setLinePenColor(Qt::black);
+            axisY->setGridLineVisible(false);
+            axisY->setMinorGridLineVisible(false);
+            axisY->setLabelsFont(font);
+            axisY->setRange(minY, maxY);
+            axisY->setTitleFont(font);
 
-        auto chart = new QChart();
-        chart->addSeries(series);
-        chart->createDefaultAxes();
+            axisTop->setTickAnchor(0);
+            axisTop->setTickInterval(deltaX);
+            axisTop->setTickType(QValueAxis::TicksDynamic);
+            axisTop->setLabelsVisible(false);
+            axisTop->setGridLineVisible(false);
+            axisTop->setRange(minX, maxX);
+            axisTop->setLinePenColor(Qt::black);
 
-        setChart(chart);
-        setRenderHint(QPainter::Antialiasing);
+            axisRight->setTickAnchor(0);
+            axisRight->setTickInterval(deltaY);
+            axisRight->setTickType(QValueAxis::TicksDynamic);
+            axisRight->setLabelsVisible(false);
+            axisRight->setGridLineVisible(false);
+            axisRight->setMinorGridLineVisible(false);
+            axisRight->setMinorTickCount(4);
+            axisRight->setRange(minY, maxY);
+            axisRight->setLinePenColor(Qt::black);
+
+            chart.addAxis(axisX, Qt::AlignBottom);
+            chart.addAxis(axisY, Qt::AlignLeft);
+            chart.addAxis(axisTop, Qt::AlignTop);
+            chart.addAxis(axisRight, Qt::AlignRight);
+        }
     }
 
     QScatterSeries& Plot::label(double x, double y, QString text) {

@@ -117,9 +117,12 @@ int main(int argc, char** argv) {
         }
     }
     QApplication app(argc, argv);
-    Plot* plot = new Plot();
+    Plot* plot = new Plot(1, 6.8, 0, 650, 2, 200);
     plot->spline(t, Cv);
-    plot->chart()->createDefaultAxes();
+    plot->getAxisX()->setLabelFormat("%d");
+    plot->getAxisY()->setLabelFormat("%d");
+    plot->getAxisX()->setTitleText("T");
+    plot->getAxisY()->setTitleText("C<sub>v</sub>");
     plot->show();
     return QApplication::exec();
 }

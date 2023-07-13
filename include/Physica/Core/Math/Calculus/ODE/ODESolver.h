@@ -33,7 +33,6 @@ namespace Physica::Core {
     public:
         ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial);
         /* Operations */
-        void reset() { x.resize(1); }
         template<class Function>
         void rungeKutta4(Function func);
         template<class Function>
@@ -41,8 +40,10 @@ namespace Physica::Core {
         template<class Function>
         void degenerate_numerov(Function func, const T& tangent);
         /* Getters */
-        const Vector<T>& getX() const noexcept { return x; }
-        const SolutionType& getSolution() const noexcept { return solution; }
+        [[nodiscard]] const Vector<T>& getX() const noexcept { return x; }
+        [[nodiscard]] const SolutionType& getSolution() const noexcept { return solution; }
+        [[nodiscard]] size_t getNumStep() const noexcept { return x.getLength(); }
+        /* Static members */
         [[nodiscard]] static size_t getNumStep(T start, T end, T stepSize);
     private:
         template<class Function>

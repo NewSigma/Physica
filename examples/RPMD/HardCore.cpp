@@ -76,86 +76,27 @@ int main(int argc, char** argv) {
     const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());
 
     QApplication app(argc, argv);
-    QFont font;
-    Plot* plot = new Plot();
+    constexpr double minX = 0;
+    constexpr double maxX = 10.1;
+    Plot* plot = new Plot(minX, maxX, 0 - 5, 20 + 5, 2, 5);
     auto& chart = *plot->chart();
     chart.legend()->setVisible(false);
-    {
-        constexpr double minX = 0;
-        constexpr double maxX = 10.1;
-        constexpr double minY = 0 - 5;
-        constexpr double maxY = 20 + 5;
-        constexpr double deltaX = 2;
-        constexpr double deltaY = 5;
-        QValueAxis* axisX = new QValueAxis();
-        font = axisX->labelsFont();
-        font.setPointSize(15);
-        axisX->setTickAnchor(0);
-        axisX->setTickInterval(deltaX);
-        axisX->setTickType(QValueAxis::TicksDynamic);
-        axisX->setMinorGridLineVisible(false);
-        axisX->setLinePenColor(Qt::black);
-        axisX->setGridLineVisible(false);
-        axisX->setLabelsFont(font);
-        axisX->setRange(minX, maxX);
-        axisX->setTitleText("Time");
-        axisX->setLabelFormat("%d");
-        axisX->setTitleFont(font);
-        QValueAxis* axisY = new QValueAxis();
-        axisY->setTickAnchor(0);
-        axisY->setTickInterval(deltaY);
-        axisY->setTickType(QValueAxis::TicksDynamic);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setMinorTickCount(4);
-        axisY->setLinePenColor(Qt::black);
-        axisY->setGridLineVisible(false);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setLabelsFont(font);
-        axisY->setRange(minY, maxY);
-        axisY->setTitleText("x");
-        axisY->setLabelFormat("%d");
-        axisY->setTitleFont(font);
-        QValueAxis* axisTop = new QValueAxis();
-        axisTop->setTickAnchor(0);
-        axisTop->setTickInterval(deltaX);
-        axisTop->setTickType(QValueAxis::TicksDynamic);
-        axisTop->setLabelsVisible(false);
-        axisTop->setGridLineVisible(false);
-        axisTop->setRange(minX, maxX);
-        axisTop->setLinePenColor(Qt::black);
-        QValueAxis* axisRight = new QValueAxis();
-        axisRight->setTickAnchor(0);
-        axisRight->setTickInterval(deltaY);
-        axisRight->setTickType(QValueAxis::TicksDynamic);
-        axisRight->setLabelsVisible(false);
-        axisRight->setGridLineVisible(false);
-        axisRight->setMinorGridLineVisible(false);
-        axisRight->setMinorTickCount(4);
-        axisRight->setRange(minY, maxY);
-        axisRight->setLinePenColor(Qt::black);
+    plot->getAxisX()->setLabelFormat("%d");
+    plot->getAxisY()->setLabelFormat("%d");
+    plot->getAxisX()->setTitleText("Time");
+    plot->getAxisY()->setTitleText("x");
 
-        chart.addAxis(axisX, Qt::AlignBottom);
-        chart.addAxis(axisY, Qt::AlignLeft);
-        chart.addAxis(axisTop, Qt::AlignTop);
-        chart.addAxis(axisRight, Qt::AlignRight);
-
-        for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
-            auto& spline = plot->line(t, record.col(i));
-            spline.attachAxis(axisX);
-            spline.attachAxis(axisY);
-        }
-        {
-            auto& line1 = plot->line(VectorType{minX, maxX}, VectorType{0, 0});
-            line1.setColor(Qt::black);
-            line1.attachAxis(axisX);
-            line1.attachAxis(axisY);
-
-            auto& line2 = plot->line(VectorType{minX, maxX}, VectorType{latticeSize, latticeSize});
-            line2.setColor(Qt::black);
-            line2.attachAxis(axisX);
-            line2.attachAxis(axisY);
-        }
+    for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
+        auto& line = plot->line(t, record.col(i));
     }
+    {
+        auto& line1 = plot->line(VectorType{minX, maxX}, VectorType{0, 0});
+        line1.setColor(Qt::black);
+
+        auto& line2 = plot->line(VectorType{minX, maxX}, VectorType{latticeSize, latticeSize});
+        line2.setColor(Qt::black);
+    }
+
     plot->show();
     return QApplication::exec();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -127,15 +127,13 @@ void plotPWBaseWave(double energy, double radialNum) {
     Vector<T> waveFunc(solution.getColumn());
     for (size_t i = 0; i < solution.getColumn(); ++i)
         waveFunc[i] = solution(0, i) / (h[i] * args.rho);
-    Plot* plot = new Plot();
+    waveFunc *= reciprocal(waveFunc.max());
+    Plot* plot = new Plot(0.6, 6.8, -0.2, 1.1, 1, 0.25);
+    plot->chart()->legend()->hide();
     plot->spline(h, waveFunc);
-    auto& chart = *plot->chart();
-    chart.setTitle("h-wave function");
-    chart.legend()->hide();
-    auto axes = chart.axes();
-    chart.createDefaultAxes();
-    chart.axes(Qt::Horizontal).first()->setTitleText("h");
-    chart.axes(Qt::Vertical).first()->setTitleText("wave function");
+    plot->getAxisX()->setLabelFormat("%d");
+    plot->getAxisX()->setTitleText("h");
+    plot->getAxisY()->setTitleText("Wave function");
     plot->show();
 }
 /**
@@ -162,14 +160,13 @@ int main(int argc, char** argv) {
     }
     QApplication app(argc, argv);
 
-    Plot* plot = new Plot();
+    Plot* plot = new Plot(0.2, 3.5, -10, 180, 1, 50);
+    plot->chart()->legend()->hide();
     plot->spline(energyArr, crossSectionArr);
-    auto& chart = *plot->chart();
-    chart.setTitle("E-cross section");
-    chart.legend()->hide();
-    chart.createDefaultAxes();
-    chart.axes(Qt::Horizontal).first()->setTitleText("E/meV");
-    chart.axes(Qt::Vertical).first()->setTitleText("cross section/rho^2");
+    plot->getAxisX()->setLabelFormat("%d");
+    plot->getAxisY()->setLabelFormat("%d");
+    plot->getAxisX()->setTitleText("E/meV");
+    plot->getAxisY()->setTitleText("Cross section/rho^2");
     plot->show();
 
     plotPWBaseWave(0.4764, 4);

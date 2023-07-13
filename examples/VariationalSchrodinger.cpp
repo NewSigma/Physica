@@ -56,20 +56,18 @@ public:
         }
 
         QApplication app(argc, argv);
-        Plot* numerical = new Plot();
+        Plot* numerical = new Plot(-1, 1, -1.2, 1.2, 0.5, 0.5);
         numerical->chart()->setTitle("Numerical solution");
         numerical->chart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotWave(*numerical, solver, i);
-        numerical->chart()->createDefaultAxes();
         numerical->show();
 
-        Plot* analytical = new Plot();
+        Plot* analytical = new Plot(-1, 1, -1.2, 1.2, 0.5, 0.5);
         analytical->chart()->setTitle("Analytical solution");
         analytical->chart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotReferenceWave(*analytical, i);
-        analytical->chart()->createDefaultAxes();
         analytical->show();
         return QApplication::exec();
     }
@@ -176,7 +174,7 @@ public:
                 groundStateIndex = i;
         }
         QApplication app(argc, argv);
-        Plot* plot = new Plot();
+        Plot* plot = new Plot(0, 5, 0, 0.6001, 1, 0.2);
 
         auto eigenvectors = solver.getEigenvectors();
         auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
@@ -184,7 +182,7 @@ public:
         plotWave(*plot, real_eigenvector);
 
         plotReferenceWave(*plot);
-        plot->chart()->createDefaultAxes();
+        plot->getAxisX()->setLabelFormat("%d");
         plot->show();
         return QApplication::exec();
     }
@@ -294,9 +292,8 @@ public:
         std::cout << "Ground state energy: " << groundStateEnergy(trial_solution) << std::endl;
 
         QApplication app(argc, argv);
-        Plot* plot = new Plot();
+        Plot* plot = new Plot(0, 5, 0, 1.5, 1, 0.5);
         plotWave(*plot, trial_solution);
-        plot->chart()->createDefaultAxes();
         plot->show();
         return QApplication::exec();
     }

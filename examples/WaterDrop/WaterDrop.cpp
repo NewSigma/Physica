@@ -77,7 +77,6 @@ WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
 T WaterDropSolver::solve() {
     return bisection([&](const T& lambda) { //We use bisection method by experience and without any prove
                setLambda(lambda);
-               solver.reset();
                solver.rungeKutta4([&](const T& r, const Vector<T, 2>& v) -> Vector<T, 2> {
                        const T momentum = v[1];
                        const T momentum_2_1 = momentum * momentum + T(1);
@@ -104,17 +103,16 @@ int WaterDropSolver::output() {
         z[i] = temp1;
         volumeHelper += temp1 * r[i];
     }
-    std::cout << "Volume is " << abs(volumeHelper * stepSize) << " m^3" << std::endl;
+    std::cout << "Volume is " << abs(volumeHelper * stepSize * T(1E9)) << " mm^3" << std::endl;
     std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
     /* Plot z */ {
-        Plot* r_z = new Plot();
-        r_z->spline(r, z);
-        auto& chart = *r_z->chart();
-        chart.setTitle("r-z");
-        chart.legend()->hide();
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
-        chart.axes(Qt::Vertical).first()->setTitleText("z/m");
+        const Vector<T> scaled_r = r * T(1E3);
+        z *= T(1E3);
+        Plot* r_z = new Plot(-0.1, 0.001, 0, 0.05, 0.02, 0.02);
+        r_z->spline(scaled_r, z);
+        r_z->chart()->legend()->hide();
+        r_z->getAxisX()->setTitleText("r/mm");
+        r_z->getAxisY()->setTitleText("z/mm");
         r_z->show();
     }
     return QApplication::exec();
@@ -205,30 +203,30 @@ int main(int argc, char** argv) {
         for (unsigned int i = 0; i < threadCount; ++i)
             threads[i].join();
     }
+
+    const Vector<T> scaled_r = r_arr * T(1E3);
     /* Plot lambda */ {
-        Plot* r_lambda = new Plot();
-        r_lambda->spline(r_arr, lambda_arr);
-        auto& chart = *r_lambda->chart();
-        chart.legend()->hide();
-        chart.setTitle("r-lambda");
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
-        chart.axes(Qt::Vertical).first()->setTitleText("lambda");
+        Plot* r_lambda = new Plot(0, 5, -1.2, 0.1, 1, 0.25);
+        r_lambda->spline(scaled_r, lambda_arr);
+        r_lambda->chart()->legend()->hide();
+        r_lambda->getAxisX()->setLabelFormat("%d");
+        r_lambda->getAxisX()->setTitleText("r/mm");
+        r_lambda->getAxisY()->setTitleText("&lambda;");
         r_lambda->show();
     }
     /* Plot volume */ {
-        Plot* r_volume = new Plot();
-        r_volume->spline(r_arr, volume_arr);
-        auto& chart = *r_volume->chart();
-        chart.legend()->hide();
-        chart.setTitle("r-volume");
-        chart.createDefaultAxes();
-        chart.axes(Qt::Horizontal).first()->setTitleText("r/m");
-        chart.axes(Qt::Vertical).first()->setTitleText("volume/m^3");
+        const Vector<T> scaled_v = volume_arr * T(1E9);
+        Plot* r_volume = new Plot(0, 5, 0, 12, 1, 5);
+        r_volume->spline(scaled_r, scaled_v);
+        r_volume->chart()->legend()->hide();
+        r_volume->getAxisX()->setLabelFormat("%d");
+        r_volume->getAxisY()->setLabelFormat("%d");
+        r_volume->getAxisX()->setTitleText("r/mm");
+        r_volume->getAxisY()->setTitleText("Volume/mm<sub>3</sub>");
         r_volume->show();
     }
 
-    WaterDropSolver solver({startRadius, sigma, rho, 1, 9.8}, rmin, solveStepSize);
+    WaterDropSolver solver({startRadius, sigma, rho, 1, g}, rmin, solveStepSize);
     const T lambda = solver.solve();
     std::cout << "Lambda is " << lambda << std::endl;
     return solver.output();

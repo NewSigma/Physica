@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
     std::cout << "Minimum energy: " << totalEnergy[minEnergyIndex] << " At: " << r[minEnergyIndex] << std::endl;
 
     QApplication app(argc, argv);
-    Plot* plot = new Plot();
+    Plot* plot = new Plot(0, 8, -3, 6, 2, 2);
 
     auto& line1 = plot->spline(r, electronEnergy);
     line1.setName("Electron energy");
@@ -107,10 +107,9 @@ int main(int argc, char** argv) {
 
     auto& chart = *plot->chart();
     chart.setTitle("Energy in hytrogen molecule");
-    chart.legend()->setAlignment(Qt::AlignRight);
-    chart.createDefaultAxes();
-    chart.axes(Qt::Horizontal).first()->setTitleText("R/Bohr radii");
-    chart.axes(Qt::Vertical).first()->setTitleText("Energy/Hartree");
+    chart.legend()->setAlignment(Qt::AlignTop);
+    plot->getAxisX()->setTitleText("R/Bohr radii");
+    plot->getAxisY()->setTitleText("Energy/Hartree");
     plot->show();
     return QApplication::exec();
 }

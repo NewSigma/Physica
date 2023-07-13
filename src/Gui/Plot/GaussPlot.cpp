@@ -19,93 +19,26 @@
 #include "Physica/Gui/Plot/GaussPlot.h"
 
 namespace Physica::Gui {
-    GaussPlot::GaussPlot(double maxX_, double maxY_, double deltaX_, double deltaY_, unsigned int numSigma)
-            : maxX(maxX_)
-            , maxY(maxY_)
-            , deltaX(deltaX_)
-            , deltaY(deltaY_)
-            , axisX(new QValueAxis())
-            , axisY(new QValueAxis())
-            , axisTop(new QValueAxis())
-            , axisRight(new QValueAxis()) {
+    GaussPlot::GaussPlot(double maxX, double maxY, double deltaX, double deltaY, unsigned int numSigma)
+            : Base(-maxX, maxX, 0, maxY, deltaX, deltaY) {
         using namespace Physica::Core;
         using ScalarType = Scalar<Double, false>;
         using VectorType = Vector<ScalarType>;
-        auto& chart = *Base::chart();
-        chart.legend()->setVisible(false);
-        {
-            QFont font = axisX->labelsFont();
-            font.setPointSize(15);
-            axisX->setTickAnchor(0);
-            axisX->setTickInterval(deltaX);
-            axisX->setTickType(QValueAxis::TicksDynamic);
-            axisX->setMinorGridLineVisible(false);
-            axisX->setLinePenColor(Qt::black);
-            axisX->setGridLineVisible(false);
-            axisX->setLabelsFont(font);
-            axisX->setRange(-maxX, maxX);
-            axisX->setTitleFont(font);
 
-            axisY->setTickAnchor(0);
-            axisY->setTickInterval(deltaY);
-            axisY->setTickType(QValueAxis::TicksDynamic);
-            axisY->setMinorGridLineVisible(false);
-            axisY->setMinorTickCount(4);
-            axisY->setLinePenColor(Qt::black);
-            axisY->setGridLineVisible(false);
-            axisY->setMinorGridLineVisible(false);
-            axisY->setLabelsFont(font);
-            axisY->setRange(0, maxY);
-            axisY->setTitleFont(font);
+        auto& line = Base::line(VectorType{-maxX, maxX}, VectorType{0, 0});
+        auto pen = line.pen();
+        pen.setColor(Qt::black);
+        pen.setStyle(Qt::DashLine);
+        line.setPen(pen);
 
-            axisTop->setTickAnchor(0);
-            axisTop->setTickInterval(deltaX);
-            axisTop->setTickType(QValueAxis::TicksDynamic);
-            axisTop->setLabelsVisible(false);
-            axisTop->setGridLineVisible(false);
-            axisTop->setRange(-maxX, maxX);
-            axisTop->setLinePenColor(Qt::black);
+        auto& line1 = Base::line(VectorType{0, 0}, VectorType{0, maxY});
+        line1.setPen(pen);
 
-            axisRight->setTickAnchor(0);
-            axisRight->setTickInterval(deltaY);
-            axisRight->setTickType(QValueAxis::TicksDynamic);
-            axisRight->setLabelsVisible(false);
-            axisRight->setGridLineVisible(false);
-            axisRight->setMinorGridLineVisible(false);
-            axisRight->setMinorTickCount(4);
-            axisRight->setRange(0, maxY);
-            axisRight->setLinePenColor(Qt::black);
+        pen.setColor(Qt::blue);
+        auto& line2 = Base::line(VectorType{0, maxX}, VectorType{0, maxX / numSigma});
+        line2.setPen(pen);
 
-            chart.addAxis(axisX, Qt::AlignBottom);
-            chart.addAxis(axisY, Qt::AlignLeft);
-            chart.addAxis(axisTop, Qt::AlignTop);
-            chart.addAxis(axisRight, Qt::AlignRight);
-
-            {
-                auto& line = Base::line(VectorType{-maxX, maxX}, VectorType{0, 0});
-                auto pen = line.pen();
-                pen.setColor(Qt::black);
-                pen.setStyle(Qt::DashLine);
-                line.setPen(pen);
-                line.attachAxis(axisX);
-                line.attachAxis(axisY);
-
-                auto& line1 = Base::line(VectorType{0, 0}, VectorType{0, maxY});
-                line1.setPen(pen);
-                line1.attachAxis(axisX);
-                line1.attachAxis(axisY);
-
-                pen.setColor(Qt::blue);
-                auto& line2 = Base::line(VectorType{0, maxX}, VectorType{0, maxX / numSigma});
-                line2.setPen(pen);
-                line2.attachAxis(axisX);
-                line2.attachAxis(axisY);
-
-                auto& line3 = Base::line(VectorType{-maxX, 0}, VectorType{maxX / numSigma, 0});
-                line3.setPen(pen);
-                line3.attachAxis(axisX);
-                line3.attachAxis(axisY);
-            }
-        }
+        auto& line3 = Base::line(VectorType{-maxX, 0}, VectorType{maxX / numSigma, 0});
+        line3.setPen(pen);
     }
 }

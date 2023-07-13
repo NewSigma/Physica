@@ -98,85 +98,20 @@ void plotPress(const VectorType& lattices, const VectorType& density) {
     }, lattices.getLength(), 4).wait();
 
     QFont font;
-    Plot* plot = new Plot();
-    auto& chart = *plot->chart();
-    chart.legend()->setVisible(false);
+    Plot* plot = new Plot(0.6, 1.4, -0.5, 0.5, 0.4, 0.5);
+    plot->chart()->legend()->setVisible(false);
+    plot->getAxisX()->setLabelFormat("%.1f");
+    plot->getAxisY()->setLabelFormat("%.1f");
+    plot->getAxisX()->setTitleText("&rho;");
+    plot->getAxisY()->setTitleText("p");
     {
-        constexpr double minX = 0.6;
-        constexpr double maxX = 1.4;
-        constexpr double minY = -0.5;
-        constexpr double maxY = 0.5;
-        constexpr double deltaX = 0.4;
-        constexpr double deltaY = 0.5;
-        QValueAxis* axisX = new QValueAxis();
-        font = axisX->labelsFont();
-        font.setPointSize(15);
-        axisX->setTickAnchor(0);
-        axisX->setTickInterval(deltaX);
-        axisX->setTickType(QValueAxis::TicksDynamic);
-        axisX->setMinorGridLineVisible(false);
-        axisX->setMinorTickCount(4);
-        axisX->setLinePenColor(Qt::black);
-        axisX->setGridLineVisible(false);
-        axisX->setLabelsFont(font);
-        axisX->setRange(minX, maxX);
-        axisX->setTitleText("&rho;");
-        axisX->setLabelFormat("%.1f");
-        axisX->setTitleFont(font);
-        QValueAxis* axisY = new QValueAxis();
-        axisY->setTickAnchor(0);
-        axisY->setTickInterval(deltaY);
-        axisY->setTickType(QValueAxis::TicksDynamic);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setMinorTickCount(4);
-        axisY->setLinePenColor(Qt::black);
-        axisY->setGridLineVisible(false);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setLabelsFont(font);
-        axisY->setRange(minY, maxY);
-        axisY->setTitleText("p");
-        axisY->setLabelFormat("%.1f");
-        axisY->setTitleFont(font);
-        QValueAxis* axisTop = new QValueAxis();
-        axisTop->setTickAnchor(0);
-        axisTop->setTickInterval(deltaX);
-        axisTop->setTickType(QValueAxis::TicksDynamic);
-        axisTop->setLabelsVisible(false);
-        axisTop->setMinorTickCount(4);
-        axisTop->setGridLineVisible(false);
-        axisTop->setMinorGridLineVisible(false);
-        axisTop->setRange(minX, maxX);
-        axisTop->setLinePenColor(Qt::black);
-        QValueAxis* axisRight = new QValueAxis();
-        axisRight->setTickAnchor(0);
-        axisRight->setTickInterval(deltaY);
-        axisRight->setTickType(QValueAxis::TicksDynamic);
-        axisRight->setLabelsVisible(false);
-        axisRight->setGridLineVisible(false);
-        axisRight->setMinorGridLineVisible(false);
-        axisRight->setMinorTickCount(4);
-        axisRight->setRange(minY, maxY);
-        axisRight->setLinePenColor(Qt::black);
+        auto& area = plot->area_center(density, meanPress, deviaPress);
+        auto& spline = plot->line(density, meanPress);
+        spline.setColor(area.color());
 
-        chart.addAxis(axisX, Qt::AlignBottom);
-        chart.addAxis(axisY, Qt::AlignLeft);
-        chart.addAxis(axisTop, Qt::AlignTop);
-        chart.addAxis(axisRight, Qt::AlignRight);
-
-        {
-            auto& area = plot->area_center(density, meanPress, deviaPress);
-            area.attachAxis(axisX);
-            area.attachAxis(axisY);
-
-            auto& spline = plot->line(density, meanPress);
-            spline.setColor(area.color());
-            spline.attachAxis(axisX);
-            spline.attachAxis(axisY);
-
-            auto color = area.color();
-            color.setAlpha(75);
-            area.setColor(color);
-        }
+        auto color = area.color();
+        color.setAlpha(75);
+        area.setColor(color);
     }
     plot->show();
 }
@@ -204,75 +139,13 @@ void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) 
         deltaFreeEnergy *= perParticleFactor;
     }
     QFont font;
-    Plot* plot = new Plot();
-    auto& chart = *plot->chart();
-    chart.legend()->setVisible(false);
-    {
-        constexpr double minX = 0.6;
-        constexpr double maxX = 1.4;
-        constexpr double minY = -0.11;
-        constexpr double maxY = 0.01;
-        constexpr double deltaX = 0.4;
-        constexpr double deltaY = 0.02;
-        QValueAxis* axisX = new QValueAxis();
-        font = axisX->labelsFont();
-        font.setPointSize(15);
-        axisX->setTickAnchor(0);
-        axisX->setTickInterval(deltaX);
-        axisX->setTickType(QValueAxis::TicksDynamic);
-        axisX->setMinorGridLineVisible(false);
-        axisX->setMinorTickCount(4);
-        axisX->setLinePenColor(Qt::black);
-        axisX->setGridLineVisible(false);
-        axisX->setLabelsFont(font);
-        axisX->setRange(minX, maxX);
-        axisX->setTitleText("&rho;");
-        axisX->setLabelFormat("%.1f");
-        axisX->setTitleFont(font);
-        QValueAxis* axisY = new QValueAxis();
-        axisY->setTickAnchor(0);
-        axisY->setTickInterval(deltaY);
-        axisY->setTickType(QValueAxis::TicksDynamic);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setMinorTickCount(4);
-        axisY->setLinePenColor(Qt::black);
-        axisY->setGridLineVisible(false);
-        axisY->setMinorGridLineVisible(false);
-        axisY->setLabelsFont(font);
-        axisY->setRange(minY, maxY);
-        axisY->setTitleText("&Delta;f");
-        axisY->setLabelFormat("%.2f");
-        axisY->setTitleFont(font);
-        QValueAxis* axisTop = new QValueAxis();
-        axisTop->setTickAnchor(0);
-        axisTop->setTickInterval(deltaX);
-        axisTop->setTickType(QValueAxis::TicksDynamic);
-        axisTop->setLabelsVisible(false);
-        axisTop->setMinorTickCount(4);
-        axisTop->setGridLineVisible(false);
-        axisTop->setMinorGridLineVisible(false);
-        axisTop->setRange(minX, maxX);
-        axisTop->setLinePenColor(Qt::black);
-        QValueAxis* axisRight = new QValueAxis();
-        axisRight->setTickAnchor(0);
-        axisRight->setTickInterval(deltaY);
-        axisRight->setTickType(QValueAxis::TicksDynamic);
-        axisRight->setLabelsVisible(false);
-        axisRight->setGridLineVisible(false);
-        axisRight->setMinorGridLineVisible(false);
-        axisRight->setMinorTickCount(4);
-        axisRight->setRange(minY, maxY);
-        axisRight->setLinePenColor(Qt::black);
-
-        chart.addAxis(axisX, Qt::AlignBottom);
-        chart.addAxis(axisY, Qt::AlignLeft);
-        chart.addAxis(axisTop, Qt::AlignTop);
-        chart.addAxis(axisRight, Qt::AlignRight);
-
-        auto& spline = plot->line(density, deltaFreeEnergy);
-        spline.attachAxis(axisX);
-        spline.attachAxis(axisY);
-    }
+    Plot* plot = new Plot(0.6, 0.4, -0.11, 0.01, 0.4, 0.02);
+    plot->chart()->legend()->setVisible(false);
+    plot->getAxisX()->setLabelFormat("%.1f");
+    plot->getAxisY()->setLabelFormat("%.2f");
+    plot->getAxisX()->setTitleText("&rho;");
+    plot->getAxisY()->setTitleText("&Delta;f");
+    plot->line(density, deltaFreeEnergy);
     plot->show();
 }
 /**
