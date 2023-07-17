@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,26 +22,23 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class Outcar {
+    class QE_scf {
         using ScalarType = Scalar<Double, false>;
 
         Vector<ScalarType> force;
-        ScalarType internalEnergy;
     public:
-        Outcar(const char* path, unsigned int numAtom);
-        Outcar(const Outcar&) = default;
-        Outcar(Outcar&&) noexcept = default;
-        ~Outcar() = default;
+        QE_scf(const char* path, size_t numAtom);
+        QE_scf(const QE_scf&) = default;
+        QE_scf(QE_scf&&) noexcept = default;
+        ~QE_scf() = default;
         /* Operators */
-        Outcar& operator=(Outcar& outcar) noexcept;
+        QE_scf& operator=(QE_scf obj) noexcept;
         /* Operations */
-        void swap(Outcar& outcar) noexcept;
+        void swap(QE_scf& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }
-        [[nodiscard]] ScalarType getInternalEnergy() const noexcept { return internalEnergy; }
     private:
         void readForce(std::ifstream& fin, Utils::Array<char>& buffer);
-        void readEnergy(std::ifstream& fin, Utils::Array<char>& buffer);
     };
 }

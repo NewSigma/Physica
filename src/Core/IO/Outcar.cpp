@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    Outcar::Outcar(const char* path, unsigned int numAtom_) : numAtom(numAtom_) {
+    Outcar::Outcar(const char* path, unsigned int numAtom) : force(numAtom * 3) {
         std::ifstream fin(path);
         if (!fin)
             throw IOException();
@@ -41,20 +41,20 @@ namespace Physica::Core {
 
     void Outcar::swap(Outcar& outcar) noexcept {
         force.swap(outcar.force);
+        internalEnergy.swap(outcar.internalEnergy);
     }
 
     void Outcar::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
 
         std::string str{};
-        force.resize(3 * numAtom);
         do {
             fin.getline(buffer.data(), buffer.getLength());
             str = buffer.data();
             const bool success = str.find("TOTAL-FORCE") != std::string::npos;
             if (success) {
                 fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                MatrixType pos_force(numAtom, 6);
+                MatrixType pos_force(getNumAtom(), 6);
                 fin >> pos_force;
                 size_t index = 0;
                 for (size_t r = 0; r < pos_force.getRow(); ++r) {
