@@ -87,6 +87,21 @@ namespace Physica::Gui {
         [[nodiscard]] QValueAxis* getAxisY() const noexcept { return axisY; }
         [[nodiscard]] QValueAxis* getAxisTop() const noexcept { return axisTop; }
         [[nodiscard]] QValueAxis* getAxisRight() const noexcept { return axisRight; }
+        [[nodiscard]] double getMinX() const noexcept { return axisX->min(); }
+        [[nodiscard]] double getMaxX() const noexcept { return axisX->max(); }
+        [[nodiscard]] double getMinY() const noexcept { return axisY->min(); }
+        [[nodiscard]] double getMaxY() const noexcept { return axisY->max(); }
+        /* Setters */
+        inline void setAxisX(QValueAxis* axis);
+        inline void setAxisY(QValueAxis* axis);
+        inline void setAxisTop(QValueAxis* axis);
+        inline void setAxisRight(QValueAxis* axis);
+        inline void setMinX(double value) noexcept;
+        inline void setMaxX(double value) noexcept;
+        inline void setMinY(double value) noexcept;
+        inline void setMaxY(double value) noexcept;
+        inline void setDeltaX(double value) noexcept;
+        inline void setDeltaY(double value) noexcept;
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);
@@ -335,5 +350,63 @@ namespace Physica::Gui {
             auto left = sorted_v[count / 2 - 1 + from];
             return double((right + left) * 0.5);
         }
+    }
+
+    inline void Plot::setAxisX(QValueAxis* axis) {
+        auto* chart = Base::chart();
+        chart->removeAxis(axisX);
+        chart->addAxis(axis, Qt::AlignBottom);
+        axisX = axis;
+    }
+
+    inline void Plot::setAxisY(QValueAxis* axis) {
+        auto* chart = Base::chart();
+        chart->removeAxis(axisY);
+        chart->addAxis(axis, Qt::AlignLeft);
+        axisY = axis;
+    }
+
+    inline void Plot::setAxisTop(QValueAxis* axis) {
+        auto* chart = Base::chart();
+        chart->removeAxis(axisTop);
+        chart->addAxis(axis, Qt::AlignTop);
+        axisTop = axis;
+    }
+
+    inline void Plot::setAxisRight(QValueAxis* axis) {
+        auto* chart = Base::chart();
+        chart->removeAxis(axisRight);
+        chart->addAxis(axis, Qt::AlignRight);
+        axisRight = axis;
+    }
+
+    inline void Plot::setMinX(double value) noexcept {
+        axisX->setMin(value);
+        axisTop->setMin(value);
+    }
+
+    inline void Plot::setMaxX(double value) noexcept {
+        axisX->setMax(value);
+        axisTop->setMin(value);
+    }
+
+    inline void Plot::setMinY(double value) noexcept {
+        axisY->setMin(value);
+        axisRight->setMin(value);
+    }
+
+    inline void Plot::setMaxY(double value) noexcept {
+        axisY->setMax(value);
+        axisRight->setMax(value);
+    }
+
+    inline void Plot::setDeltaX(double value) noexcept {
+        axisX->setTickInterval(value);
+        axisTop->setTickInterval(value);
+    }
+
+    inline void Plot::setDeltaY(double value) noexcept {
+        axisY->setTickInterval(value);
+        axisRight->setTickInterval(value);
     }
 }

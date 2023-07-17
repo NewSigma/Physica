@@ -20,11 +20,11 @@
 
 namespace Physica::Core {
     template<class T>
-    ComplexScalar<T>::ComplexScalar(const T& real_)
+    ComplexScalar<T>::ComplexScalar(T real_)
             : real(real_), imag(T::Zero()) {}
 
     template<class T>
-    ComplexScalar<T>::ComplexScalar(const T& real_, const T& imag_)
+    ComplexScalar<T>::ComplexScalar(T real_, T imag_)
             : real(real_), imag(imag_) {}
 
     template<class T>
