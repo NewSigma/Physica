@@ -89,7 +89,7 @@ namespace Physica::Core {
 
         Scalar result = Scalar<MultiPrecision>(static_cast<SignedMPUnit>(1));
         for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
-            result = (result + Scalar<MultiPrecision>::divNoError(copy_s, result)) >> 1U;
+            result = (result + Scalar<MultiPrecision>::div(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
     }
@@ -101,8 +101,8 @@ namespace Physica::Core {
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
-        auto temp_1 = Scalar<MultiPrecision>::subNoError(s, _1)
-                      / Scalar<MultiPrecision>::addNoError(s, _1);
+        auto temp_1 = Scalar<MultiPrecision>::sub(s, _1)
+                      / Scalar<MultiPrecision>::add(s, _1);
         Scalar<MultiPrecision> copy_temp_1(temp_1);
         Scalar<MultiPrecision> rank(static_cast<SignedMPUnit>(1));
 

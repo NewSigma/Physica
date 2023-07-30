@@ -30,34 +30,33 @@
 //Forward declaration
 namespace Physica::Core {
     template<ScalarOption option>
-    inline bool operator!=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
+    inline bool operator!=(const Scalar<option>& s1, const Scalar<option>& s2);
 }
 
-namespace Physica::Core::Internal {
+namespace Physica::Core {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
-    inline Scalar<MultiPrecision> AbstractScalar<MultiPrecision>::addNoError (
-            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
+    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::add(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         if(s1.isZero())
             return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s2));
         else if(s2.isZero())
             return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s1));
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
-                auto result = subNoError(s1, shallow_copy);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                auto result = sub(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
-                auto result = subNoError(s2, shallow_copy);
+                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+                auto result = sub(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
         }
         else {
-            const AbstractScalar* big;
-            const AbstractScalar* small;
+            const Scalar* big;
+            const Scalar* small;
             if (s1.power > s2.power) {
                 big = &s1;
                 small = &s2;
@@ -109,22 +108,21 @@ namespace Physica::Core::Internal {
         }
     }
 
-    inline Scalar<MultiPrecision> AbstractScalar<MultiPrecision>::subNoError(
-            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
+    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::sub(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         if(s1.isZero())
             return Scalar<MultiPrecision>(static_cast<Scalar<MultiPrecision>&&>(-s2));
         else if(s2.isZero())
             return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s1));
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                AbstractScalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = addNoError(s1, shallow_copy);
+                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar result = add(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                const AbstractScalar* big;
-                const AbstractScalar* small;
+                const Scalar* big;
+                const Scalar* small;
                 bool changeSign = false;
                 if (s1.power > s2.power) {
                     big = &s1;
@@ -185,24 +183,23 @@ namespace Physica::Core::Internal {
             }
         }
         else {
-            AbstractScalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
-                Scalar result = addNoError(shallow_copy, s2);
+                Scalar result = add(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                AbstractScalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = subNoError(shallow_copy_1, shallow_copy);
+                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                Scalar result = sub(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 return result;
             }
         }
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-    inline Scalar<MultiPrecision> AbstractScalar<MultiPrecision>::mulNoError(
-            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
+    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::mul(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         if (s1.isZero() || s2.isZero())
             return Scalar<MultiPrecision>(0);
         if (s1 == BasicConst::getInstance()._1)
@@ -227,8 +224,7 @@ namespace Physica::Core::Internal {
         return Scalar<MultiPrecision>(byte, matchSign(s1, s2) ? length : -length, power);
     }
 
-    inline Scalar<MultiPrecision> AbstractScalar<MultiPrecision>::divNoError(
-            const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
+    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::div(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         if(s2.isZero())
             throw DivideByZeroException();
 
@@ -284,7 +280,7 @@ namespace Physica::Core::Internal {
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
      * Return true if array is cut.
      */
-    inline bool AbstractScalar<MultiPrecision>::cutLength(Scalar<MultiPrecision>& s) {
+    inline bool Scalar<MultiPrecision>::cutLength(Scalar<MultiPrecision>& s) {
         bool result = false;
         int size = s.getSize();
 

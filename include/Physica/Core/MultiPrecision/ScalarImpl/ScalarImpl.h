@@ -26,35 +26,6 @@
  * Do not include this header file, include \file Scalar.h instead.
  */
 namespace Physica::Core {
-    namespace Internal {
-        /**
-         * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
-         * This function provide a quick sign check compare to using isPositive() and isNegative().
-         */
-        inline bool AbstractScalar<MultiPrecision>::matchSign(
-                const AbstractScalar<MultiPrecision>& s1, const AbstractScalar<MultiPrecision>& s2) {
-            assert(!s1.isZero() && !s2.isZero());
-            return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
-        }
-        /**
-         * Cut zeros from the beginning.
-         */
-        inline void AbstractScalar<MultiPrecision>::cutZero() {
-            const int size = getSize();
-            int id = size - 1;
-            while(byte[id] == 0 && id > 0)
-                --id;
-            ++id;
-
-            if(id != size) {
-                int shorten = size - id;
-                byte = reinterpret_cast<MPUnit*>(realloc(byte, id * sizeof(MPUnit)));
-                length = length > 0 ? id : -id;
-                auto temp = power;
-                power = byte[id - 1] != 0 ? (temp - shorten) : 0;
-            }
-        }
-    }
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<class ScalarType>
     ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
@@ -122,17 +93,17 @@ namespace Physica::Core {
     inline void operator>>=(Scalar<option>& s, int bits) { s = s >> bits; }
 
     template<ScalarOption option>
-    __host__ __device__ inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator>=(const Scalar<option>& s1, const Scalar<option>& s2) {
         return !(s1 < s2);
     }
 
     template<ScalarOption option>
-    __host__ __device__ inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator<=(const Scalar<option>& s1, const Scalar<option>& s2) {
         return !(s1 > s2);
     }
 
     template<ScalarOption option>
-    __host__ __device__ inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
+    __host__ __device__ inline bool operator!= (const Scalar<option>& s1, const Scalar<option>& s2) {
         return !(s1 == s2);
     }
 
@@ -141,6 +112,33 @@ namespace Physica::Core {
         s1.swap(s2);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
+    /**
+     * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
+     * This function provide a quick sign check compare to using isPositive() and isNegative().
+     */
+    inline bool Scalar<MultiPrecision>::matchSign(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+        assert(!s1.isZero() && !s2.isZero());
+        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
+    }
+    /**
+     * Cut zeros from the beginning.
+     */
+    inline void Scalar<MultiPrecision>::cutZero() {
+        const int size = getSize();
+        int id = size - 1;
+        while(byte[id] == 0 && id > 0)
+            --id;
+        ++id;
+
+        if(id != size) {
+            int shorten = size - id;
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, id * sizeof(MPUnit)));
+            length = length > 0 ? id : -id;
+            auto temp = power;
+            power = byte[id - 1] != 0 ? (temp - shorten) : 0;
+        }
+    }
+
     inline Scalar<MultiPrecision>& operator++(Scalar<MultiPrecision>& s) {
         s += BasicConst::getInstance()._1;
         return s;
@@ -162,8 +160,9 @@ namespace Physica::Core {
         s -= BasicConst::getInstance()._1;
         return temp;
     }
-    ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
     /////////////////////////////////////////////Float////////////////////////////////////////////////
+    __host__ __device__ inline Scalar<Float>::Scalar(const Scalar<Double>& s) : f(float(s)) {}
+
     inline Scalar<Float>& operator++(Scalar<Float>& s) {
         s += 1.0F;
         return s;
@@ -186,23 +185,21 @@ namespace Physica::Core {
         return temp;
     }
 
-    inline bool absCompare(const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    inline bool absCompare(const Scalar<Float>& s1, const Scalar<Float>& s2) {
         return fabsf(s1.getTrivial()) >= fabsf(s2.getTrivial());
     }
 
-    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator> (const Scalar<Float>& s1, const Scalar<Float>& s2) {
         return s1.getTrivial() > s2.getTrivial();
     }
 
-    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator< (const Scalar<Float>& s1, const Scalar<Float>& s2) {
         return s1.getTrivial() < s2.getTrivial();
     }
 
-    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
+    __host__ __device__ inline bool operator== (const Scalar<Float>& s1, const Scalar<Float>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
-
-    __host__ __device__ inline Scalar<Float>::Scalar(const Scalar<Double>& s) : Base(float(s)) {}
 
     template<class RandomGenerator>
     Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
@@ -216,6 +213,8 @@ namespace Physica::Core {
         return Scalar(dist(gen));
     }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
+    __host__ __device__ inline Scalar<Double>::Scalar(const Scalar<Float>& s) : d(double(s)) {}
+
     inline Scalar<Double>& operator++(Scalar<Double>& s) {
         s += 1.0;
         return s;
@@ -238,23 +237,21 @@ namespace Physica::Core {
         return temp;
     }
 
-    inline bool absCompare(const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    inline bool absCompare(const Scalar<Double>& s1, const Scalar<Double>& s2) {
         return fabs(s1.getTrivial()) >= fabs(s2.getTrivial());
     }
 
-    __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator> (const Scalar<Double>& s1, const Scalar<Double>& s2) {
         return s1.getTrivial() > s2.getTrivial();
     }
 
-    __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator< (const Scalar<Double>& s1, const Scalar<Double>& s2) {
         return s1.getTrivial() < s2.getTrivial();
     }
 
-    __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
+    __host__ __device__ inline bool operator== (const Scalar<Double>& s1, const Scalar<Double>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
-
-    __host__ __device__ inline Scalar<Double>::Scalar(const Scalar<Float>& s) : Base(double(s)) {}
 
     template<class RandomGenerator>
     Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {

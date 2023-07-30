@@ -21,271 +21,188 @@
 #include "Physica/Core/MultiPrecision/BasicImpl/Convert.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        AbstractScalar<MultiPrecision>::AbstractScalar() noexcept
-                : byte(nullptr), length(0), power(0) {}
+    //////////////////////////////////MultiPrecision///////////////////////////////////
+    Scalar<MultiPrecision>::Scalar() : byte(nullptr), length(0), power(0) {}
 
-        AbstractScalar<MultiPrecision>::AbstractScalar(int length_, int power_)
-                : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
-                , length(length_), power(power_) {
-            /*
-            * Length of scalar must not equal to INT_MIN or -length will make no sense.
-            */
-            assert(length != INT_MIN);
-        }
+    Scalar<MultiPrecision>::Scalar(int length_, int power_)
+            : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
+            , length(length_), power(power_) {
+        /**
+         * Length of scalar must not equal to INT_MIN or -length will make no sense.
+         */
+        assert(length != INT_MIN);
+    }
 
-        AbstractScalar<MultiPrecision>::AbstractScalar(const AbstractScalar<MultiPrecision>& s)
-                : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
-                , length(s.length), power(s.power) {
-            memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
-        }
+    Scalar<MultiPrecision>::Scalar(int i) : Scalar(static_cast<SignedMPUnit>(i)) {}
 
-        AbstractScalar<MultiPrecision>::AbstractScalar(AbstractScalar<MultiPrecision>&& s) noexcept
-                : byte(s.byte), length(s.length), power(s.power) {
-            s.byte = nullptr;
-        }
-
-        AbstractScalar<MultiPrecision>::AbstractScalar(int i) : AbstractScalar(static_cast<SignedMPUnit>(i)) {}
-
-        AbstractScalar<MultiPrecision>::AbstractScalar(SignedMPUnit unit)
-                : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
-                , length(unit > 0 ? 1 : -1), power(0) {
+    Scalar<MultiPrecision>::Scalar(SignedMPUnit unit)
+            : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
+            , length(unit > 0 ? 1 : -1), power(0) {
             byte[0] = unit > 0 ? unit : -unit;
-        }
+    }
 
-        AbstractScalar<MultiPrecision>::AbstractScalar(double d) {
-            if(d == 0) {
-                byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
-                length = 1;
-                byte[0] = power = 0;
-                return;
-            }
-            double_extract extract{d};
-            auto quotient = static_cast<int>(extract.exp) - 1023;
-            power = quotient / __WORDSIZE;
-            //Have power * __WORDSIZE < extract.exp, so that remainder > 0.
-            if(quotient < 0)
-                --power;
-            unsigned int remainder = quotient - power * __WORDSIZE;
-        #ifdef PHYSICA_64BIT
-            if(remainder < 52) {
-                length = 2;
-                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-                //Hidden bit
-                byte[1] = 1;
-                byte[1] <<= remainder;
-                if(remainder <= 20) {
-                    byte[1] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
-                    byte[0] = static_cast<MPUnit>(extract.high) << (44 + remainder);
-                    byte[0] += static_cast<MPUnit>(extract.low) << (32 - (20 - remainder));
-                }
-                else {
-                    byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
-                    byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
-                    byte[0] = static_cast<MPUnit>(extract.low) << (32 + (remainder - 20));
-                }
+    Scalar<MultiPrecision>::Scalar(double d) {
+        if(d == 0) {
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+            length = 1;
+            byte[0] = power = 0;
+            return;
+        }
+        double_extract extract{d};
+        auto quotient = static_cast<int>(extract.exp) - 1023;
+        power = quotient / __WORDSIZE;
+        //Have power * __WORDSIZE < extract.exp, so that remainder > 0.
+        if(quotient < 0)
+            --power;
+        unsigned int remainder = quotient - power * __WORDSIZE;
+    #ifdef PHYSICA_64BIT
+        if(remainder < 52) {
+            length = 2;
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            //Hidden bit
+            byte[1] = 1;
+            byte[1] <<= remainder;
+            if(remainder <= 20) {
+                byte[1] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+                byte[0] = static_cast<MPUnit>(extract.high) << (44 + remainder);
+                byte[0] += static_cast<MPUnit>(extract.low) << (32 - (20 - remainder));
             }
             else {
-                length = 1;
-                byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
-                //Hidden bit
-                byte[0] = 1;
-                byte[0] <<= 20U;
-                byte[0] += static_cast<MPUnit>(extract.high);
-                byte[0] <<= 32U;
-                byte[0] += static_cast<MPUnit>(extract.low);
-                byte[0] <<= remainder - 52;
-            }
-        #endif
-        #ifdef PHYSICA_32BIT
-            if(remainder < 20) {
-                length = 3;
-                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-                //Hidden bit
-                byte[2] = 1;
-                byte[2] <<= remainder;
-                byte[2] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
-                byte[1] = static_cast<MPUnit>(extract.high) << (32 - (20 - remainder));
-                byte[1] +=  static_cast<MPUnit>(extract.low) >> (20 - remainder);
-                byte[0] = static_cast<MPUnit>(extract.low) << remainder;
-            }
-            else {
-                length = 2;
-                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-                //Hidden bit
-                byte[1] = 1;
-                byte[1] <<= remainder;
                 byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
                 byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
-                byte[0] = static_cast<MPUnit>(extract.low) << (remainder - 20);
+                byte[0] = static_cast<MPUnit>(extract.low) << (32 + (remainder - 20));
             }
-        #endif
-            if(extract.sign)
-                length = -length;
         }
-
-        AbstractScalar<MultiPrecision>::AbstractScalar(const Integer& i)
-                : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
-                , length(i.getLength())
-                , power(i.getSize() - 1) {
-            memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
+        else {
+            length = 1;
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+            //Hidden bit
+            byte[0] = 1;
+            byte[0] <<= 20U;
+            byte[0] += static_cast<MPUnit>(extract.high);
+            byte[0] <<= 32U;
+            byte[0] += static_cast<MPUnit>(extract.low);
+            byte[0] <<= remainder - 52;
         }
-
-        AbstractScalar<MultiPrecision>::AbstractScalar(const Rational& r) {
-            Scalar<MultiPrecision> numerator(r.getNumerator());
-            Scalar<MultiPrecision> denominator(r.getDenominator());
-            Scalar<MultiPrecision> result = numerator / denominator;
-            byte = result.byte;
-            result.byte = nullptr;
-            length = result.length;
-            power = result.power;
+    #endif
+    #ifdef PHYSICA_32BIT
+        if(remainder < 20) {
+            length = 3;
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            //Hidden bit
+            byte[2] = 1;
+            byte[2] <<= remainder;
+            byte[2] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+            byte[1] = static_cast<MPUnit>(extract.high) << (32 - (20 - remainder));
+            byte[1] +=  static_cast<MPUnit>(extract.low) >> (20 - remainder);
+            byte[0] = static_cast<MPUnit>(extract.low) << remainder;
         }
-        /*!
-        * Not accurate.
-        */
-        AbstractScalar<MultiPrecision>::AbstractScalar(const char* s) : AbstractScalar(strtod(s, nullptr)) {}
-        /*!
-        * Not accurate.
-        */
-        AbstractScalar<MultiPrecision>::AbstractScalar(const wchar_t* s) {
-            size_t size = wcslen(s);
-            char str[size + 1];
-            str[size] = '\0';
-            for(size_t i = 0; i < size; ++i)
-                str[i] = (char)s[i];
-            AbstractScalar<MultiPrecision> temp(str);
-            byte = temp.byte;
-            temp.byte = nullptr;
-            length = temp.length;
-            power = temp.power;
+        else {
+            length = 2;
+            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            //Hidden bit
+            byte[1] = 1;
+            byte[1] <<= remainder;
+            byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
+            byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
+            byte[0] = static_cast<MPUnit>(extract.low) << (remainder - 20);
         }
-
-        AbstractScalar<MultiPrecision>::~AbstractScalar() {
-            free(byte);
-        }
-
-        AbstractScalar<MultiPrecision>& AbstractScalar<MultiPrecision>::operator= (
-                const AbstractScalar<MultiPrecision>& s) {
-            if(this == &s)
-                return *this;
-            length = s.length;
-            int size = getSize();
-            this->~AbstractScalar();
-            byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
-            memcpy(byte, s.byte, size * sizeof(MPUnit));
-            power = s.power;
-            return *this;
-        }
-
-        AbstractScalar<MultiPrecision>& AbstractScalar<MultiPrecision>::operator=(
-                AbstractScalar<MultiPrecision>&& s) noexcept {
-            this->~AbstractScalar();
-            byte = s.byte;
-            s.byte = nullptr;
-            length = s.length;
-            power = s.power;
-            return *this;
-        }
-
-        AbstractScalar<MultiPrecision>::operator double() const {
-            if(isZero())
-                return 0.0;
-            return Internal::convertDoubleImpl(length, power, byte);
-        }
-
-        AbstractScalar<MultiPrecision> AbstractScalar<MultiPrecision>::operator-() const {
-            AbstractScalar result(-length, power);
-            memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
-            return result;
-        }
-
-        void AbstractScalar<MultiPrecision>::swap(AbstractScalar<MultiPrecision>& s) noexcept {
-            std::swap(byte, s.byte);
-            std::swap(length, s.length);
-            std::swap(power, s.power);
-        }
-
-        std::istream& operator>>(std::istream& is, AbstractScalar<Float>& scalar) {
-            is >> scalar.f;
-            return is;
-        }
-
-        std::istream& operator>>(std::istream& is, AbstractScalar<Double>& scalar) {
-            is >> scalar.d;
-            return is;
-        }
-
-        bool AbstractScalar<Float>::isInteger() const {
-            float_extract extract{f};
-            const auto exp = extract.exp;
-            if(exp == 0U)
-                return extract.value == 0;
-
-            unsigned int zeros;
-            if(extract.low == 0U) {
-                if(extract.high == 0U)
-                    return true;
-                else
-                    zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
-            }
-            else
-                zeros = countBackZeros(extract.low);
-            /*
-            * exp + zeros - 127 >= 23
-            * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
-            * We move 127 to the right hand side to avoid underflow.
-            */
-            return exp + zeros >= 150;
-        }
-
-        bool AbstractScalar<Double>::isInteger() const {
-            double_extract extract{d};
-            const auto exp = extract.exp;
-            if(exp == 0U)
-                return extract.value == 0;
-
-            unsigned int zeros;
-            if(extract.low == 0U) {
-                if(extract.high == 0U)
-                    return true;
-                else
-                    zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
-            }
-            else
-                zeros = countBackZeros(extract.low);
-            /*
-            * exp + zeros - 1023 >= 52
-            * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.
-            * We move 1023 to the right hand side to avoid underflow.
-            */
-            return exp + zeros >= 1075;
-        }
+    #endif
+        if(extract.sign)
+            length = -length;
     }
-    //////////////////////////////////MultiPrecision///////////////////////////////////
+
+    Scalar<MultiPrecision>::Scalar(const Integer& i)
+            : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
+            , length(i.getLength())
+            , power(i.getSize() - 1) {
+        memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
+    }
+
+    Scalar<MultiPrecision>::Scalar(const Rational& r) {
+        Scalar<MultiPrecision> numerator(r.getNumerator());
+        Scalar<MultiPrecision> denominator(r.getDenominator());
+        Scalar<MultiPrecision> result = numerator / denominator;
+        byte = result.byte;
+        result.byte = nullptr;
+        length = result.length;
+        power = result.power;
+    }
+    /**
+     * Not accurate.
+     */
+    Scalar<MultiPrecision>::Scalar(const char* s) : Scalar(strtod(s, nullptr)) {}
+    /**
+    * Not accurate.
+    */
+    Scalar<MultiPrecision>::Scalar(const wchar_t* s) {
+        size_t size = wcslen(s);
+        char str[size + 1];
+        str[size] = '\0';
+        for(size_t i = 0; i < size; ++i)
+            str[i] = (char)s[i];
+        Scalar<MultiPrecision> temp(str);
+        byte = temp.byte;
+        temp.byte = nullptr;
+        length = temp.length;
+        power = temp.power;
+    }
+
+    Scalar<MultiPrecision>& Scalar<MultiPrecision>::operator=(Scalar<MultiPrecision> s) noexcept {
+        swap(s);
+        return *this;
+    }
+
+    MPUnit Scalar<MultiPrecision>::operator[](unsigned int index) const {
+        assert(index < static_cast<unsigned int>(getSize()));
+        return byte[index];
+    }
+
+    Scalar<MultiPrecision>::operator double() const {
+        if(isZero())
+            return 0.0;
+        return Internal::convertDoubleImpl(length, power, byte);
+    }
+
+    Scalar<MultiPrecision>::Scalar(const Scalar<MultiPrecision>& s)
+            : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
+            , length(s.length), power(s.power) {
+        memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
+    }
+
+    Scalar<MultiPrecision>::Scalar(Scalar<MultiPrecision>&& s) noexcept
+            : byte(s.byte), length(s.length), power(s.power) {
+        s.byte = nullptr;
+    }
+
+    Scalar<MultiPrecision>::~Scalar() {
+        free(byte);
+    }
+
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator+(
             const Scalar<MultiPrecision>& s) const {
-        auto result = addNoError(*this, s);
+        auto result = add(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-(
             const Scalar<MultiPrecision>& s) const {
-        auto result = subNoError(*this, s);
+        auto result = sub(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator*(
             const Scalar<MultiPrecision>& s) const {
-        auto result = mulNoError(*this, s);
+        auto result = mul(*this, s);
         cutLength(result);
         return result;
     }
 
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator/(
             const Scalar<MultiPrecision>& s) const {
-        return divNoError(*this, s);
+        return div(*this, s);
     }
 
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator<<(int bits) const {
@@ -346,7 +263,15 @@ namespace Physica::Core {
     }
 
     Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-() const {
-        return static_cast<Scalar<MultiPrecision>&&>(Base::operator-());
+        Scalar result(-length, power);
+        memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
+        return result;
+    }
+
+    void Scalar<MultiPrecision>::swap(Scalar<MultiPrecision>& s) noexcept {
+        std::swap(byte, s.byte);
+        std::swap(length, s.length);
+        std::swap(power, s.power);
     }
     /*!
      * return true if the abstract value of s1 is larger or equal than the abstract value of s2.
@@ -355,14 +280,14 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool absCompare(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
+    bool absCompare(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         if(s1.isZero() || s2.isZero())
             return true;
         if(s1.getPower() > s2.getPower())
             return true;
         if(s1.getPower() < s2.getPower())
             return false;
-        const Internal::AbstractScalar<MultiPrecision>* longer, *shorter;
+        const Scalar<MultiPrecision>* longer, *shorter;
         int longer_length, shorter_length;
         /* Compare length */ {
             const auto n1_length = s1.getLength(), n2_length = s2.getLength();
@@ -386,7 +311,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator>(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
+    bool operator>(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -419,7 +344,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator<(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
+    bool operator<(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -449,7 +374,7 @@ namespace Physica::Core {
         return result;
     }
 
-    bool operator==(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
+    bool operator==(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
         auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
         return s1.getPower() == s2.getPower()
@@ -457,6 +382,62 @@ namespace Physica::Core {
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
                && Scalar<MultiPrecision>(scalar1 - scalar2).isZero();
+    }
+    ///////////////////////////////////////////Float////////////////////////////////////////////////
+    std::istream& operator>>(std::istream& is, Scalar<Float>& scalar) {
+        is >> scalar.f;
+        return is;
+    }
+
+    bool Scalar<Float>::isInteger() const {
+        float_extract extract{f};
+        const auto exp = extract.exp;
+        if(exp == 0U)
+            return extract.value == 0;
+
+        unsigned int zeros;
+        if(extract.low == 0U) {
+            if(extract.high == 0U)
+                return true;
+            else
+                zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
+        }
+        else
+            zeros = countBackZeros(extract.low);
+        /**
+         * exp + zeros - 127 >= 23
+         * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
+         * We move 127 to the right hand side to avoid underflow.
+         */
+        return exp + zeros >= 150;
+    }
+    ///////////////////////////////////////////Double////////////////////////////////////////////////
+    std::istream& operator>>(std::istream& is, Scalar<Double>& scalar) {
+        is >> scalar.d;
+        return is;
+    }
+
+    bool Scalar<Double>::isInteger() const {
+        double_extract extract{d};
+        const auto exp = extract.exp;
+        if(exp == 0U)
+            return extract.value == 0;
+
+        unsigned int zeros;
+        if(extract.low == 0U) {
+            if(extract.high == 0U)
+                return true;
+            else
+                zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
+        }
+        else
+            zeros = countBackZeros(extract.low);
+        /**
+         * exp + zeros - 1023 >= 52
+         * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.
+         * We move 1023 to the right hand side to avoid underflow.
+         */
+        return exp + zeros >= 1075;
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
     template<>
