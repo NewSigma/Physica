@@ -72,8 +72,8 @@ namespace Physica::Core {
         const ScalarType& to = Base::to()[0];
         ScalarType result = func(from) + func(to);
 
-        ScalarType odd = ScalarType::Zero();
-        ScalarType even = ScalarType::Zero();
+        ScalarType odd = ScalarType(0);
+        ScalarType even = ScalarType(0);
         bool b = true;
         ScalarType start = from + stepSize;
         while(start < to) {

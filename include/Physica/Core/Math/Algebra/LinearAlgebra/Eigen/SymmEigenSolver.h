@@ -102,7 +102,7 @@ namespace Physica::Core {
         typename MatrixType::RealMatrix buffer = abs(source);
         const RealType factor = buffer.max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
-            eigenvalues = RealType::Zero();
+            eigenvalues = RealType(0);
             return;
         }
         const RealType inv_factor = reciprocal(factor);

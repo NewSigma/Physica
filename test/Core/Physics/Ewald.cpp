@@ -142,11 +142,11 @@ void forceTest() {
 }
 
 int main() {
-    VASPTest<Scalar<Double, false>>();
-    VASPTest<Scalar<Float, false>>();
-    madelungTest<Scalar<Double, false>>();
-    madelungTest<Scalar<Float, false>>();
-    forceTest<Scalar<Double, false>>();
-    forceTest<Scalar<Float, false>>();
+    VASPTest<Scalar<Double>>();
+    VASPTest<Scalar<Float>>();
+    madelungTest<Scalar<Double>>();
+    madelungTest<Scalar<Float>>();
+    forceTest<Scalar<Double>>();
+    forceTest<Scalar<Float>>();
     return 0;
 }

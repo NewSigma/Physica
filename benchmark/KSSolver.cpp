@@ -26,7 +26,7 @@
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 constexpr bool isSpinPolarized = false;
 

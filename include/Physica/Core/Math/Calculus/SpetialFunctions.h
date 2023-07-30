@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -59,100 +59,100 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> lnGamma(const Scalar<option, errorTrack>& s);
+    template<ScalarOption option>
+    Scalar<option> lnGamma(const Scalar<option>& s);
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> gamma(const Scalar<option, errorTrack>& s);
+    template<ScalarOption option>
+    inline Scalar<option> gamma(const Scalar<option>& s);
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> beta(const Scalar<option, errorTrack>& s1, const Scalar<option, errorTrack>& s2);
+    template<ScalarOption option>
+    inline Scalar<option> beta(const Scalar<option>& s1, const Scalar<option>& s2);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> gammaP(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> gammaP(const Scalar<option>& a, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> gammaQ(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> gammaQ(const Scalar<option>& a, const Scalar<option>& x);
 
     template<class ScalarType>
     ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> erf(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> erf(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> erfc(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> erfc(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> standardNormalDistribution(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> standardNormalDistribution(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ0(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselJ0(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ1(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselJ1(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJn(const Integer& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselJn(const Integer& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ(const Integer& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselJ(const Integer& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselY0(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselY0(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselY1(const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselY1(const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselYn(const Integer& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselYn(const Integer& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
+    template<ScalarOption option>
     void besselJn_Yn_dJn_dYn(
-            const Scalar<option, errorTrack>& n
-            , const Scalar<option, errorTrack>& x
-            , Scalar<option, errorTrack>& __restrict Jn
-            , Scalar<option, errorTrack>& __restrict Yn
-            , Scalar<option, errorTrack>& __restrict dJn
-            , Scalar<option, errorTrack>& __restrict dYn);
+            const Scalar<option>& n
+            , const Scalar<option>& x
+            , Scalar<option>& __restrict Jn
+            , Scalar<option>& __restrict Yn
+            , Scalar<option>& __restrict dJn
+            , Scalar<option>& __restrict dYn);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselJn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besseldJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besseldJn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besselYn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besseldYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> besseldYn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    void sphericalBesselJn_Yn_dJn_dYn(const Scalar<option, errorTrack>& n
-            , const Scalar<option, errorTrack>& x
-            , Scalar<option, errorTrack>& __restrict jn
-            , Scalar<option, errorTrack>& __restrict yn
-            , Scalar<option, errorTrack>& __restrict djn
-            , Scalar<option, errorTrack>& __restrict dyn);
+    template<ScalarOption option>
+    void sphericalBesselJn_Yn_dJn_dYn(const Scalar<option>& n
+            , const Scalar<option>& x
+            , Scalar<option>& __restrict jn
+            , Scalar<option>& __restrict yn
+            , Scalar<option>& __restrict djn
+            , Scalar<option>& __restrict dyn);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesselJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> sphericalBesselJn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesseldJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> sphericalBesseldJn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesselYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> sphericalBesselYn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesseldYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> sphericalBesseldYn(const Scalar<option>& n, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> legendreP(unsigned int l, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> legendreP(unsigned int l, const Scalar<option>& x);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<option, errorTrack>& x);
+    template<ScalarOption option>
+    Scalar<option> legendreP(unsigned int l, unsigned int m, const Scalar<option>& x);
 
     template<class ScalarType>
     ComplexScalar<ScalarType> sphericalHarmomicY(unsigned int l,

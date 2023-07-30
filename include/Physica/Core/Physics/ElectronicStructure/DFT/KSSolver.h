@@ -187,7 +187,7 @@ namespace Physica::Core {
         }
         if constexpr (isSpinPolarized) {
             auto& zeta = density[SpinState::Down].flatten();
-            zeta = ScalarType::Zero();
+            zeta = ScalarType(0);
         }
     }
 
@@ -239,7 +239,7 @@ namespace Physica::Core {
         using Index3D = typename GridType::Index3D;
         using VectorType = Vector<ScalarType, 3>;
         externalPot = GridType::makeGrid(cutEnergy, repCell.getLattice());
-        externalPot.flatten() = ScalarType::Zero();
+        externalPot.flatten() = ScalarType(0);
         const auto factorGrids = cell.makeStructureFactor(cutEnergy);
 
         size_t i = 0;
@@ -255,15 +255,15 @@ namespace Physica::Core {
             });
             i += 1;
         }
-        externalPot(0, 0, 0) = ComplexType::Zero();
+        externalPot(0, 0, 0) = ComplexType(0);
     }
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::assembleH(Vector3D k) {
         using VectorType = typename KSpaceGrid<ComplexType>::VectorType;
-        h[SpinState::Up] = ScalarType::Zero();
+        h[SpinState::Up] = ScalarType(0);
         if constexpr (isSpinPolarized)
-            h[SpinState::Down] = ScalarType::Zero();
+            h[SpinState::Down] = ScalarType(0);
 
         size_t i = 0;
         KSpaceGrid<ComplexType>::forKInGrid(orbits[SpinState::Up][0], repCell.getLattice(), [this, &i, &k](VectorType K) {
@@ -374,12 +374,12 @@ namespace Physica::Core {
 
             RSpaceGrid<ScalarType>::forPointIndexInGrid(density_up, cell.getLattice(),
                 [this, k, &density_up, &density_down](VectorType pos, UnsignedIndex3D index) {
-                    ScalarType rho_up = ScalarType::Zero();
+                    ScalarType rho_up = ScalarType(0);
                     for (const auto& orbit : orbits[SpinState::Up])
                         rho_up += orbit(k, pos).squaredNorm();
                     density_up(index) = rho_up;
 
-                    ScalarType rho_down = ScalarType::Zero();
+                    ScalarType rho_down = ScalarType(0);
                     for (const auto& orbit : orbits[SpinState::Down])
                         rho_down += orbit(k, pos).squaredNorm();
                     density_down(index) = rho_down;
@@ -390,17 +390,17 @@ namespace Physica::Core {
                 auto& rho = density_up.flatten();
                 auto& zeta = density_down.flatten();
                 rho += zeta;
-                zeta = divide(rho - zeta * ScalarType::Two(), rho);
+                zeta = divide(rho - zeta * ScalarType(2), rho);
             }
         }
         else {
             RSpaceGrid<ScalarType>::forPointIndexInGrid(density_up, cell.getLattice(),
                 [this, k, &density_up](VectorType pos, UnsignedIndex3D index) {
-                    auto rho_up = ScalarType::Zero();
+                    auto rho_up = ScalarType(0);
                     const auto& orbitsUp = orbits[SpinState::Up];
                     size_t i = 0;
                     for (; i < orbitsUp.getLength() - 1; ++i)
-                        rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType::Two();
+                        rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(2);
                     rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(int(cell.getElectronCount() % 2U == 0) + 1);
                     density_up(index) = rho_up;
                 });

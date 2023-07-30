@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     class QE_scf {
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Double>;
 
         Vector<ScalarType> force;
     public:

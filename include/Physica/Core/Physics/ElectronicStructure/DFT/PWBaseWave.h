@@ -80,7 +80,7 @@ namespace Physica::Core {
     typename PWBaseWave<ScalarType>::ComplexType PWBaseWave<ScalarType>::operator()(
             Vector<ScalarType, 3> k, Vector<ScalarType, 3> r) const {
         using Index3D = typename Base::Index3D;
-        ComplexType result = ComplexType::Zero();
+        ComplexType result = ComplexType(0);
         Base::forKIndexInGrid(*this, repCell, [this, &result, &k, &r](Vector<ScalarType, 3> K, Index3D index) {
             const ScalarType phase = (k + K) * r;
             ScalarType s, c;

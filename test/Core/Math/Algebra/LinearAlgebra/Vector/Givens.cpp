@@ -24,7 +24,7 @@
 using namespace Physica::Core;
 
 int main() {
-    using RealType = Scalar<Double, false>;
+    using RealType = Scalar<Double>;
     using ComplexType = ComplexScalar<RealType>;
     {
         Vector<RealType, 2> v{2, 1};

@@ -87,7 +87,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
-        return MatrixType{ScalarType::Two() / (topRight[0] - bottomLeft[0]), 0, 0, ScalarType::Two() / (topRight[1] - bottomLeft[1])};
+        return MatrixType{ScalarType(2) / (topRight[0] - bottomLeft[0]), 0, 0, ScalarType(2) / (topRight[1] - bottomLeft[1])};
     }
 
     template<class ScalarType>

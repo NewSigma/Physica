@@ -100,7 +100,7 @@ namespace Physica::Core {
                     return ResultType(horizontal_add(buffer));
                 }
                 else {
-                    auto result = ResultType::Zero();
+                    auto result = ResultType(0);
                     for(size_t i = 0; i < v1.getLength(); ++i)
                         result += ResultType(v1.calc(i)) * ResultType(v2.calc(i));
                     return result;
@@ -146,7 +146,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
-        auto result = RealType::Zero();
+        auto result = RealType(0);
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();
         return result;
@@ -179,7 +179,7 @@ namespace Physica::Core {
     template<class VectorType>
     typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::sum() const {
         assert(getLength() != 0);
-        ScalarType result = ScalarType::Zero();
+        auto result = ScalarType(0);
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i);
         return result;

@@ -51,8 +51,8 @@ namespace Physica::Core {
             target[0] = (factor1 / factor).getReal();
             return norm;
         }
-        target[0] = ScalarType::Two();
-        target.tail(1) = ScalarType::Zero();
+        target[0] = ScalarType(2);
+        target.tail(1) = ScalarType(0);
         return sqrt(sourceNorm0);
     }
 
@@ -67,7 +67,7 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
         using T = Vector<ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
         T copy = householder;
-        ScalarType temp = ScalarType::One();
+        auto temp = ScalarType(1);
         swap(temp, copy[0]);
         const T temp1 = copy * temp;
         mat -= temp1 * (copy.transpose().conjugate() * mat).compute();
@@ -79,7 +79,7 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
         using T = Vector<ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
         T copy = householder;
-        ScalarType temp = ScalarType::One();
+        ScalarType temp = ScalarType(1);
         swap(temp, copy[0]);
         using ProductType = decltype(mat * copy);
         using T1 = Vector<ScalarType, ProductType::SizeAtCompile, ProductType::MaxSizeAtCompile>;

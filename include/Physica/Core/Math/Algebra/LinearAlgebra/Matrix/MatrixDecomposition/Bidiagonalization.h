@@ -186,7 +186,7 @@ namespace Physica::Core {
     template<class MatrixType>
     template<class OtherMatrix>
     void BiDiagMatrixB<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        target = ScalarType::Zero();
+        target = ScalarType(0);
         const size_t col_1 = target.getColumn() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             target(i, i) = bidiag.mainDiag[i];

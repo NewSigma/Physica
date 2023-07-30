@@ -91,7 +91,7 @@ namespace Physica::Core {
 
             ScalarType unit;
             if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = ScalarType::One();
+                unit = ScalarType(1);
             else
                 unit = temp[0].unit();
 
@@ -134,7 +134,7 @@ namespace Physica::Core {
             copy = fromCol.head(i + 1);
             toCol[i + 1] = hess.normVector[i];
             auto zero = toCol.tail(i + 2);
-            zero = ScalarType::Zero();
+            zero = ScalarType(0);
         }
         auto copy = target.rightCols(i);
         copy = hess.working.rightCols(i);

@@ -121,7 +121,7 @@ namespace Physica::Core {
         Base::toDirect(target, invLattice);
         for (auto& elem : target) {
             elem -= floor(elem);
-            assert(PosScalarType::Zero() <= elem && elem <= PosScalarType::One());
+            assert(PosScalarType(0) <= elem && elem <= PosScalarType(0));
         }
         Base::toCartesian(target, Base::getLattice());
     }

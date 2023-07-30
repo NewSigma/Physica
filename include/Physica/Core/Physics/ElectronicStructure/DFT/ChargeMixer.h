@@ -123,7 +123,7 @@ namespace Physica::Core {
             using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element>;
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
             MatrixType diisMat = MatrixType(numValidRecord + 1, numValidRecord + 1, 1.0);
-            diisMat(0, 0) = ScalarType::Zero();
+            diisMat(0, 0) = ScalarType(0);
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
                     for (size_t j = i; j < diisMat.getColumn(); ++j) {
@@ -142,7 +142,7 @@ namespace Physica::Core {
             }
 
             auto& rho_new = result[SpinState::Up].flatten();
-            rho_new = ScalarType::Zero();
+            rho_new = ScalarType(0);
             for (size_t i = 1; i < x.getLength(); ++i) {
                 const auto& rho_old = oldDensities[i - 1][SpinState::Up].flatten();
                 const auto& residule = residules[i - 1][SpinState::Up].flatten();

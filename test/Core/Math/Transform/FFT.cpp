@@ -22,7 +22,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using RealType = Scalar<Double, false>;
+using RealType = Scalar<Double>;
 using ComplexType = ComplexScalar<RealType>;
 
 int main() {
@@ -34,7 +34,7 @@ int main() {
         
         Vector<RealType> data(N);
         {
-            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N + 1);
+            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
@@ -75,7 +75,7 @@ int main() {
         
         Vector<ComplexType> data(N);
         {
-            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType::Zero(), RealType(t_max), N + 1);
+            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;

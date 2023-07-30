@@ -132,9 +132,9 @@ namespace Physica::Core {
         }
 
         AbstractScalar<MultiPrecision>::AbstractScalar(const Rational& r) {
-            Scalar<MultiPrecision, false> numerator(r.getNumerator());
-            Scalar<MultiPrecision, false> denominator(r.getDenominator());
-            Scalar<MultiPrecision, false> result = numerator / denominator;
+            Scalar<MultiPrecision> numerator(r.getNumerator());
+            Scalar<MultiPrecision> denominator(r.getDenominator());
+            Scalar<MultiPrecision> result = numerator / denominator;
             byte = result.byte;
             result.byte = nullptr;
             length = result.length;
@@ -261,70 +261,34 @@ namespace Physica::Core {
             return exp + zeros >= 1075;
         }
     }
-    //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
-    Scalar<MultiPrecision, false>::Scalar(const Scalar<MultiPrecision, true>& s) : Base(s) {}
-
-    Scalar<MultiPrecision, false>::Scalar(Scalar<MultiPrecision, true>&& s) : Base(std::move(s)) {}
-
-    Scalar<MultiPrecision, false>& Scalar<MultiPrecision, false>::operator=(const Scalar<MultiPrecision, true>& s) {
-        Base::operator=(s);
-        return *this;
-    }
-
-    Scalar<MultiPrecision, false>& Scalar<MultiPrecision, false>::operator=(Scalar<MultiPrecision, true>&& s) noexcept {
-        Base::operator=(std::move(s));
-        return *this;
-    }
-
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator+(
-            const Scalar<MultiPrecision, false>& s) const {
+    //////////////////////////////////MultiPrecision///////////////////////////////////
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator+(
+            const Scalar<MultiPrecision>& s) const {
         auto result = addNoError(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-(
-            const Scalar<MultiPrecision, false>& s) const {
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-(
+            const Scalar<MultiPrecision>& s) const {
         auto result = subNoError(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator*(
-            const Scalar<MultiPrecision, false>& s) const {
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator*(
+            const Scalar<MultiPrecision>& s) const {
         auto result = mulNoError(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator/(
-            const Scalar<MultiPrecision, false>& s) const {
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator/(
+            const Scalar<MultiPrecision>& s) const {
         return divNoError(*this, s);
     }
 
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator*(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = mulWithError(*this, s);
-        cutLength(result);
-        if(s.getA() != 0)
-            result.applyError(*this * s.getAccuracy());
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, false>::operator/(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = divWithError(*this, s);
-        if(s.getA() != 0) {
-            const Scalar<MultiPrecision, false>& casted = s;
-            Scalar s_a = s.getAccuracy();
-            Scalar temp_1 = *this * s_a;
-            Scalar temp_2 = casted * (casted - s_a);
-            result.applyError(temp_1 / temp_2);
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator<<(int bits) const {
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator<<(int bits) const {
         if(bits == 0)
             return Scalar(*this);
         if(bits < 0)
@@ -353,7 +317,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator>>(int bits) const {
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator>>(int bits) const {
         if(bits == 0)
             return Scalar(*this);
         if(bits < 0)
@@ -381,8 +345,8 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, false>::operator-() const {
-        return static_cast<Scalar<MultiPrecision, false>&&>(Base::operator-());
+    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-() const {
+        return static_cast<Scalar<MultiPrecision>&&>(Base::operator-());
     }
     /*!
      * return true if the abstract value of s1 is larger or equal than the abstract value of s2.
@@ -442,11 +406,11 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = !positive;
         else {
-            auto scalar1 = static_cast<const Scalar<MultiPrecision, false>&>(s1);
-            auto scalar2 = static_cast<const Scalar<MultiPrecision, false>&>(s2);
+            auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
+            auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<MultiPrecision, false> subtract = scalar1 - scalar2;
+            Scalar<MultiPrecision> subtract = scalar1 - scalar2;
             result = subtract.isPositive();
         }
         return result;
@@ -475,308 +439,28 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = positive;
         else {
-            auto scalar1 = static_cast<const Scalar<MultiPrecision, false>&>(s1);
-            auto scalar2 = static_cast<const Scalar<MultiPrecision, false>&>(s2);
+            auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
+            auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<MultiPrecision, false> subtract = scalar1 - scalar2;
+            Scalar<MultiPrecision> subtract = scalar1 - scalar2;
             result = subtract.isNegative();
         }
         return result;
     }
 
     bool operator==(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2) {
-        auto scalar1 = static_cast<const Scalar<MultiPrecision, false>&>(s1);
-        auto scalar2 = static_cast<const Scalar<MultiPrecision, false>&>(s2);
+        auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
+        auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
         return s1.getPower() == s2.getPower()
                //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-               && Scalar<MultiPrecision, false>(scalar1 - scalar2).isZero();
-    }
-    ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
-    Scalar<MultiPrecision, true>::Scalar() noexcept : AbstractScalar<MultiPrecision>(), a(0) {}
-
-    Scalar<MultiPrecision, true>::Scalar(int length_, int power_, MPUnit a_) noexcept
-            : AbstractScalar<MultiPrecision>(length_, power_), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(const Scalar<MultiPrecision, true>& s) : AbstractScalar<MultiPrecision>(s) {
-        a = s.a;
-    }
-
-    Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, true>&& s) noexcept
-            : AbstractScalar<MultiPrecision>(std::move(s)), a(s.a) {}
-
-    Scalar<MultiPrecision, true>::Scalar(int i, MPUnit a_)
-            : AbstractScalar<MultiPrecision>(i), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(SignedMPUnit unit, MPUnit a_)
-            : AbstractScalar<MultiPrecision>(unit), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(double d, MPUnit a_)
-            : AbstractScalar<MultiPrecision>(d), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(const char* s, MPUnit a_)
-            : AbstractScalar<MultiPrecision>(s), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(const wchar_t* s, MPUnit a_)
-            : AbstractScalar<MultiPrecision>(s), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(const Scalar<MultiPrecision, false>& s, MPUnit a_) : Base(s), a(a_) {}
-
-    Scalar<MultiPrecision, true>::Scalar(Scalar<MultiPrecision, false>&& s, MPUnit a_) : Base(std::move(s)), a(a_) {}
-
-    Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(const Scalar<MultiPrecision, false>& s) {
-        Base::operator=(s);
-        a = 0;
-        return *this;
-    }
-
-    Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::operator=(Scalar<MultiPrecision, false>&& s) noexcept {
-        Base::operator=(std::move(s));
-        a = 0;
-        return *this;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
-            const Scalar<MultiPrecision, false>& s) const {
-        auto result = mulWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0)
-            result.applyError(s * getAccuracy());
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator/(
-            const Scalar<MultiPrecision, false>& s) const {
-        auto result = divWithError(*this, s);
-        if(getA() != 0)
-            result.applyError(getAccuracy() / s);
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator+(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = addWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0 || s.getA() != 0) {
-            if(getA() == 0)
-                result.applyError(s.getAccuracy());
-            else if(s.getA() == 0)
-                result.applyError(getAccuracy());
-            else
-                result.applyError(getAccuracy() + s.getAccuracy());
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = subWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0 || s.getA() != 0) {
-            if(getA() == 0)
-                result.applyError(s.getAccuracy());
-            else if(s.getA() == 0)
-                result.applyError(getAccuracy());
-            else
-                result.applyError(getAccuracy() + s.getAccuracy());
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator*(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = mulWithError(*this, s);
-        cutLength(result);
-        if(getA() != 0 || s.getA() != 0) {
-            const Scalar<MultiPrecision, false>& casted = s;
-            if(getA() == 0)
-                result.applyError(static_cast<const Scalar<MultiPrecision, false>&>(*this) * s.getAccuracy());
-            else if(s.getA() == 0)
-                result.applyError(casted * getAccuracy());
-            else {
-                Scalar<MultiPrecision, false> this_a = getAccuracy();
-                Scalar<MultiPrecision, false> s_a = s.getAccuracy();
-                Scalar<MultiPrecision, false> temp1 = this_a * s_a;
-                Scalar<MultiPrecision, false> temp2
-                        = static_cast<const Scalar<MultiPrecision, false>&>(*this) * s_a + casted * this_a;
-                result.applyError(temp1 + temp2);
-            }
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator/(
-            const Scalar<MultiPrecision, true>& s) const {
-        auto result = divWithError(*this, s);
-        if(getA() != 0 || s.getA() != 0) {
-            const Scalar<MultiPrecision, false>& casted = s;
-            if(getA() == 0) {
-                Scalar<MultiPrecision, false> s_a = s.getAccuracy();
-                Scalar<MultiPrecision, false> temp_1
-                        = static_cast<const Scalar<MultiPrecision, false>&>(*this) * s_a;
-                Scalar<MultiPrecision, false> temp_2 = casted * (casted - s_a);
-                result.applyError(temp_1 / temp_2);
-            }
-            else if(s.getA() == 0)
-                result.applyError(getAccuracy() / s);
-            else {
-                Scalar<MultiPrecision, false> s_a = s.getAccuracy();
-                Scalar<MultiPrecision, false> temp_1
-                        = static_cast<const Scalar<MultiPrecision, false>&>(*this) * s_a + casted * getAccuracy();
-                Scalar<MultiPrecision, false> temp_2 = casted * (casted - s_a);
-                result.applyError(temp_1 / temp_2);
-            }
-        }
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator<<(int bits) const {
-        if(bits == 0)
-            return Scalar(*this);
-        if(bits < 0)
-            return *this >> -bits;
-        int size = getSize();
-        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * MPUnitWidth;
-        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
-        if(remainder == 0) {
-            Scalar copy(*this);
-            copy.power += quotient;
-            return copy;
-        }
-
-        const int size_1 = size - 1;
-        const bool carry = countLeadingZeros(byte[size_1]) < remainder;
-        const bool a_carry = countLeadingZeros(a) < remainder;
-        Scalar result(length >= 0 ? (size + carry - a_carry) : -(size + carry - a_carry), power + quotient + carry,
-                      a_carry ? a >> (MPUnitWidth - remainder) : a << remainder); //Add 1 to a if a_carry is true to get more accurate estimation.
-        const auto byte_start = byte + a_carry;
-        size -= a_carry;
-        result.byte[0] = 0;
-        for(int i = 0; i < size_1; ++i) {
-            result.byte[i] |= byte_start[i] << remainder;
-            result.byte[i + 1] = byte_start[i] >> (MPUnitWidth - remainder);
-        }
-        result.byte[size_1] |= byte_start[size_1] << remainder;
-        if(carry)
-            result.byte[size] = byte_start[size_1] >> (MPUnitWidth - remainder);
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator>>(int bits) const {
-        if(bits == 0)
-            return Scalar(*this);
-        if(bits < 0)
-            return *this << -bits;
-        const int size = getSize();
-        const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * MPUnitWidth;
-        //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
-        if(remainder == 0) {
-            Scalar copy(*this);
-            copy.power -= quotient;
-            return copy;
-        }
-
-        const int size_1 = size - 1;
-        const bool carry = (countLeadingZeros(byte[size_1]) + remainder) < MPUnitWidth;
-        const MPUnit accuracy = a >> remainder;
-        Scalar result(length >= 0 ? (size + carry) : -(size + carry)
-                , power - quotient + carry - 1, accuracy > 0 ? accuracy : 0);
-        if(carry)
-            result.byte[size] = byte[size_1] >> remainder;
-
-        for(int i = size_1; i > 0; --i) {
-            result.byte[i] = byte[i] << (MPUnitWidth - remainder);
-            result.byte[i] |= byte[i - 1] >> remainder;
-        }
-        result.byte[0] = byte[0] << (MPUnitWidth - remainder);
-        return result;
-    }
-
-    Scalar<MultiPrecision, true> Scalar<MultiPrecision, true>::operator-() const {
-        return Scalar<MultiPrecision, true>(static_cast<Scalar<MultiPrecision, false>&&>(Base::operator-()), a);
-    }
-    /*!
-     * Add error to this and adjust this->length as well as this->byte.
-     */
-    Scalar<MultiPrecision, true>& Scalar<MultiPrecision, true>::applyError(
-            const Scalar<MultiPrecision, false>& error) {
-        assert(!error.isNegative());
-        if(power == error.getPower() || (power > error.getPower() && power - error.getPower() > 0)) {
-            int size = getSize();
-            const int copy = size;
-            const int temp = power - error.getPower() - size + 1;//Equals to (power - size + 1 - error.getPower()). Exchanged the order to avoid overflow.
-            MPUnit copy_a = a;
-            if(temp <= 0) {
-                if(temp < 0) {
-                    Scalar<MultiPrecision, false> error_1 = getAccuracy() + error;
-                    size += temp;
-                    //Use (a += error_1.byte[error_1.getSize() - 1] + 1) for more conservative error estimate.
-                    a += error_1[error_1.getSize() - 1];
-                }
-                else
-                    //Use (a += error.byte[error.getSize() - 1] + 1) for more conservative error estimate.
-                    a += error[error.getSize() - 1];
-            }
-
-            if(a < copy_a) {
-                //Use (a = 2) for more conservative error estimate.
-                a = 1;
-                --size;
-            }
-
-            if(size < 1) {
-                power += 1 - size;
-                goto errorOverflow;
-            }
-
-            if(size < copy) {
-                auto new_byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
-                memcpy(new_byte, byte + copy - size, size * sizeof(MPUnit));
-                this->~Scalar();
-                byte = new_byte;
-            }
-            length = length < 0 ? -size : size;
-        }
-        else if(power < error.getPower()) {
-            power = error.getPower();
-            goto errorOverflow;
-        }
-        return *this;
-    //Handle error overflow, power must be set before goto here.
-    errorOverflow:
-        Warning(0, "Accumulated too many errors.");
-        length = length < 0 ? -1 : 1;
-        return *this;
-    }
-
-    void Scalar<MultiPrecision, true>::swap(
-            Scalar<MultiPrecision, true>& s) noexcept {
-        Base::swap(s);
-        std::swap(a, s.a);
-    }
-    //!Return accuracy in class Scalar.
-    Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getAccuracy() const {
-        Scalar<MultiPrecision, false> result(1, power - Scalar<MultiPrecision, true>::getSize() + 1);
-        result.byte[0] = a;
-        return result;
-    }
-    ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
-    void Scalar<Float, true>::swap(Scalar<Float, true>& s) noexcept {
-        Base::swap(s);
-        std::swap(a, s.a);
-    }
-
-    void Scalar<Double, true>::swap(Scalar<Double, true>& s) noexcept {
-        Base::swap(s);
-        std::swap(a, s.a);
+               && Scalar<MultiPrecision>(scalar1 - scalar2).isZero();
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
     template<>
-    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision, false>& s) {
+    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision>& s) {
         const auto& basicConst = BasicConst::getInstance();
         const int power = s.getPower();
         int exp = int(power * basicConst.ln_2_10);

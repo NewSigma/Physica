@@ -27,7 +27,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Physics;
 using namespace Physica::Gui;
 
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEnergy) {
     Molecular<ScalarType> H2 = Molecular<ScalarType>(2);

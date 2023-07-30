@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_POW_H
-#define PHYSICA_POW_H
+#pragma once
 
 namespace Physica::Core {
     //!Compute a ^ unit.
-    template<bool errorTrack>
-    inline Scalar<MultiPrecision, errorTrack> powWord(
-            const Scalar<MultiPrecision, errorTrack>& a, MPUnit unit) {
-        Scalar<MultiPrecision, errorTrack> result(a);
+    inline Scalar<MultiPrecision> powWord(const Scalar<MultiPrecision>& a, MPUnit unit) {
+        Scalar<MultiPrecision> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
         for(unsigned int j = 0; j < MPUnitWidth - lastUnitBits; ++j) {
             result = square(result);
@@ -34,11 +31,10 @@ namespace Physica::Core {
         }
         return result;
     }
-    template<bool errorTrack>
+
     //!Compute a ^ unit, the highest bit of unit must be set.
-    inline Scalar<MultiPrecision, errorTrack> powFullWord(
-            const Scalar<MultiPrecision, errorTrack>& a, MPUnit unit) {
-        Scalar<MultiPrecision, errorTrack> result(a);
+    inline Scalar<MultiPrecision> powFullWord(const Scalar<MultiPrecision>& a, MPUnit unit) {
+        Scalar<MultiPrecision> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
@@ -52,11 +48,9 @@ namespace Physica::Core {
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
      */
-    template<bool errorTrack1, bool errorTrack2>
-    inline Scalar<MultiPrecision, errorTrack1 | errorTrack2> powScalar(
-            const Scalar<MultiPrecision, errorTrack1>& a, const Scalar<MultiPrecision, errorTrack2>& n) {
+    inline Scalar<MultiPrecision> powScalar(const Scalar<MultiPrecision>& a, const Scalar<MultiPrecision>& n) {
         const auto size = n.getSize();
-        Scalar<MultiPrecision, errorTrack1 | errorTrack2> result(a);
+        Scalar<MultiPrecision> result(a);
         if(n.getLength() < 0)
             result = reciprocal(a);
 
@@ -66,5 +60,3 @@ namespace Physica::Core {
         return result;
     }
 }
-
-#endif

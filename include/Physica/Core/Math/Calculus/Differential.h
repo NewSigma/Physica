@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -54,7 +54,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class Function>
     ScalarType Differential<ScalarType>::doublePoint(Function func, ScalarType x, ScalarType step) {
-        return (func(x + step) - func(x - step)) / (step  * ScalarType::Two());
+        return (func(x + step) - func(x - step)) / (step  * ScalarType(2));
     }
 
     template<class ScalarType>

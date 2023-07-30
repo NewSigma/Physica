@@ -425,7 +425,7 @@ namespace Physica::Core {
         PositionMatrix centroid = ringPolymer.makeCentroidPos();
         cell.toDirect(centroid);
         for (auto& elem : centroid)
-            if (!(PosScalarType::Zero() <= elem && elem <= PosScalarType::One()))
+            if (!(PosScalarType(0) <= elem && elem <= PosScalarType(0)))
                 return !isGood;
         return isGood;
     }

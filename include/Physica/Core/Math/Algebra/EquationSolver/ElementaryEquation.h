@@ -50,7 +50,7 @@ namespace Physica::Core {
 
         const ScalarType half = ScalarType(0.5);
         ScalarType result = (x1 + x2) * half;
-        ScalarType y_result = ScalarType::One();
+        ScalarType y_result(1);
 
         ScalarType error = ScalarType(x1 - x2).toAbs() * half;
         ScalarType x_left(x1);
@@ -73,7 +73,6 @@ namespace Physica::Core {
             result = (x_left + x_right) * half;
             error *= half;
         } while(abs(result * std::numeric_limits<ScalarType>::epsilon()) < error);
-        result.toUnitA();
         return result;
     }
     /**

@@ -21,7 +21,7 @@
 using namespace Physica::Core;
 
 int main() {
-    using Matrix = DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Vector, 2, 2>;
+    using Matrix = DenseMatrix<Scalar<Float>, MatrixOption::Column | MatrixOption::Vector, 2, 2>;
     const Matrix m1{{1, 2}, {2, 1}};
     const Matrix m2{{3, 3}, {1, 5}};
     const Matrix result = m1 * m2;

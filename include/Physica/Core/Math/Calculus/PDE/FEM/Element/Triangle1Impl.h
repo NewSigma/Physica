@@ -79,7 +79,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename Triangle1<ScalarType>::VectorType Triangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
-        return (ScalarType::One() - localPos[0] - localPos[1]) * pos[0] + localPos[0] * pos[1] + localPos[1] * pos[2];
+        return (ScalarType(1) - localPos[0] - localPos[1]) * pos[0] + localPos[0] * pos[1] + localPos[1] * pos[2];
     }
 
     template<class ScalarType>
@@ -93,7 +93,7 @@ namespace Physica::Core {
         ScalarType temp;
         switch (localNode) {
             case 0:
-                temp = ScalarType::One() - p[0] - p[1];
+                temp = ScalarType(1) - p[0] - p[1];
                 break;
             case 1:
                 temp = p[0];

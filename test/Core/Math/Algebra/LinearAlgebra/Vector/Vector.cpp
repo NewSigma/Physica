@@ -22,13 +22,11 @@
 using namespace Physica::Core;
 
 int main() {
-    using T = Scalar<Float, false>;
+    using T = Scalar<Float>;
     Vector<T> v1{3.845971,0.000000,0.000000};
     Vector<T> v2{-0.007733,3.835502,0.000000};
     Vector<T> v3(v1.crossProduct(v2));
-    std::ofstream fout("data", std::ios_base::binary | std::ios_base::out);
-    fout << v1;
-    if (!scalarNear(v3.norm() / T::Two(), T(7.375614), 1E-7))
+    if (!scalarNear(v3.norm() / T(2), T(7.375614), 1E-7))
         return 1;
     return 0;
 }

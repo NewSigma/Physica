@@ -95,11 +95,11 @@ namespace Physica::Core {
         template<class VectorType>
         class RealVectorReturnType {
             using ComplexType = typename VectorType::ScalarType;
-            using ScalarType = Scalar<Traits<ComplexType>::option, Traits<ComplexType>::errorTrack>;
+            using RealType = typename ComplexType::RealType;
             constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
         public:
-            using Type = Vector<ScalarType, SizeAtCompile, MaxSizeAtCompile>;
+            using Type = Vector<RealType, SizeAtCompile, MaxSizeAtCompile>;
         };
     }
 

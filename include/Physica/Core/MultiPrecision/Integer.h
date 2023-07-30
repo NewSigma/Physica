@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_INTEGER_H
-#define PHYSICA_INTEGER_H
+#pragma once
 
 #include <cmath>
 #include <cassert>
@@ -39,10 +38,9 @@ namespace Physica::Core {
         int length;
     public:
         Integer(int i); //NOLINT Conversion is always available.
-        template<ScalarOption option, bool errorTrack>
-        explicit Integer(const Scalar<option, errorTrack>& s);
-        template<bool errorTrack>
-        explicit Integer(const Scalar<MultiPrecision, errorTrack>& s);
+        template<ScalarOption option>
+        explicit Integer(const Scalar<option>& s);
+        explicit Integer(const Scalar<MultiPrecision>& s);
         Integer(const Integer& toCopy);
         Integer(Integer&& toMove) noexcept;
         ~Integer();
@@ -118,5 +116,3 @@ namespace std {
 }
 
 #include "IntegerImpl/IntegerImpl.h"
-
-#endif

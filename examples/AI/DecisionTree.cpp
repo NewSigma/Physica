@@ -23,7 +23,7 @@
 using namespace Physica::Core;
 using namespace Physica::AI;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 /*
  * Reference:

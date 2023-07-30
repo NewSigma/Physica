@@ -28,7 +28,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;

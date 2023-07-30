@@ -33,8 +33,8 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double, false>;
-using PosScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
+using PosScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using ThermostatType = Langevin<ScalarType, PosScalarType, 1, 1>;

@@ -143,7 +143,7 @@ namespace Physica::Core {
         size_t blockedAt;
         const ScalarType step = nextStepSize(direction, blockedAt);
         x = x + step * direction;
-        if (step != ScalarType::One()) {
+        if (step != ScalarType(1)) {
             assert(activeConstraintFlags[blockedAt] == false);
             activeConstraintFlags[blockedAt] = true;
         }
@@ -151,7 +151,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType QuadraticProgramming<ScalarType>::nextStepSize(const Vector<ScalarType, Dynamic>& direction, size_t& blockedAt) {
-        ScalarType result = ScalarType::One();
+        ScalarType result = ScalarType(1);
         for (size_t i = 0; i < activeConstraintFlags.getLength(); ++i) {
             const bool isActive = activeConstraintFlags[i];
             if (!isActive) {

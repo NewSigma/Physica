@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 
 int main() {
-    using T = Scalar<Double, false>;
+    using T = Scalar<Double>;
     constexpr double stepSize = 0.0001;
     /**
      * y' = y

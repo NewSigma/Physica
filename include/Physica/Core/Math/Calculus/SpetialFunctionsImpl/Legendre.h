@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,9 +21,9 @@
 #include <cassert>
 
 namespace Physica::Core {
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> legendreP(unsigned int l, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> legendreP(unsigned int l, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(abs(x) <= T(1));
         T legendre_n(1);
         if (l == 0)
@@ -42,9 +42,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:189
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> legendreP(unsigned int l, unsigned int m, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> legendreP(unsigned int l, unsigned int m, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(m <= l && abs(x) <= T(1));
         //Get P^m_m
         T legendre_m_n(1);

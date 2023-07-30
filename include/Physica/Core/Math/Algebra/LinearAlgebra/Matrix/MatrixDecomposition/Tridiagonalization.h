@@ -93,7 +93,7 @@ namespace Physica::Core {
 
             ScalarType unit;
             if (temp.calc(0).squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = ScalarType::One();
+                unit = ScalarType(1);
             else
                 unit = temp.calc(0).unit();
 
@@ -105,7 +105,7 @@ namespace Physica::Core {
 
             if (!norm.isZero()) {
                 const ScalarType factor = working(i, i + 1);
-                working(i, i + 1) = ScalarType::One();
+                working(i, i + 1) = ScalarType(1);
                 auto corner = working.bottomRightCorner(i + 1);
                 p = factor * (corner * temp);
                 p -= (p.conjugate() * temp * factor * ScalarType(0.5)) * temp;
@@ -149,7 +149,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     void TridiagonalMatrixT<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         const size_t order = getRow();
-        target = RealType::Zero();
+        target = RealType(0);
         target(0, 0) = tri.working.calc(0, 0);
         target(1, 0) = tri.normBuffer[0];
         size_t i = 1;

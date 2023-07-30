@@ -107,7 +107,7 @@ namespace Physica::Core {
                 auto topRight = equationMatA.topRightCorner(degreeOfFreedom, degreeOfFreedom);
                 topRight = matA.transpose();
                 auto bottomRight = equationMatA.bottomRightCorner(degreeOfFreedom);
-                bottomRight = ScalarType::Zero();
+                bottomRight = ScalarType(0);
             }
             else
                 equationMatA = objectiveMatG;

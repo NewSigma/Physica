@@ -57,7 +57,7 @@ namespace Physica::AI {
             : mixing(mixing_)
             , numConverge(numConverge_)
             , maxIteration(maxIteration_) {
-        assert((mixing.isZero() || mixing.isPositive()) && mixing < ScalarType::One());
+        assert((mixing.isZero() || mixing.isPositive()) && mixing < ScalarType(1));
         responsibility.resize(size, size);
         availabilities.resize(size, size);
     }
@@ -71,11 +71,11 @@ namespace Physica::AI {
     template<class ScalarType>
     void AP<ScalarType>::compute(const SimilarMatrix& similarity) {
         const size_t order = similarity.getOrder();
-        const ScalarType mixing2 = ScalarType::One() - mixing;
+        const ScalarType mixing2 = ScalarType(1) - mixing;
 
         Core::Vector<ScalarType> buffer(order);
         exemplars.clear();
-        availabilities = ScalarType::Zero();
+        availabilities = ScalarType(0);
 
         unsigned int iteration = 0;
         unsigned int converge = 0;
@@ -101,9 +101,9 @@ namespace Physica::AI {
                     for (size_t i = 0; i < order; ++i) {
                         if (i == r || i == c)
                             continue;
-                        temp += std::max(ScalarType::Zero(), responsibility(i, c));
+                        temp += std::max(ScalarType(0), responsibility(i, c));
                     }
-                    const ScalarType update = isDiag ? temp : std::min(ScalarType::Zero(), responsibility(c, c) + temp);
+                    const ScalarType update = isDiag ? temp : std::min(ScalarType(0), responsibility(c, c) + temp);
                     availabilities(r, c) = availabilities(r, c) * mixing + update * mixing2;
                 }
             }

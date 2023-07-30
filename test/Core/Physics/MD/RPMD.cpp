@@ -25,7 +25,7 @@
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
@@ -44,7 +44,7 @@ bool testDriftMomentum(const RPMD<ScalarType, PosScalarType>& rpmd, double preci
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
             sum += rpmd.getPhaseMatrix().row(j).asVector().sum();
-        if (!scalarNear(sum, ScalarType::Zero(), precision))
+        if (!scalarNear(sum, ScalarType(0), precision))
             return false;
     }
     return true;

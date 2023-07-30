@@ -25,7 +25,7 @@
 
 namespace Physica::Core {
     class PIPhonon final {
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Double>;
         using ComplexType = ComplexScalar<ScalarType>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
         using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;

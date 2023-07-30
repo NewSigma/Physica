@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,35 +29,28 @@ namespace Physica::Core {
     //Forward declarations
     template<class AnyScalar> class ComplexScalar;
 
-    template<bool errorTrack>
-    Scalar<MultiPrecision, errorTrack> square(const Scalar<MultiPrecision, errorTrack>& s);
+    template<ScalarOption option>
+    __host__ __device__ Scalar<option> square(const Scalar<option>& s);
 
     template<ScalarOption option>
-    __host__ __device__ Scalar<option, false> sqrt(const Scalar<option, false>& s);
+    __host__ __device__ Scalar<option> sqrt(const Scalar<option>& s);
 
     template<ScalarOption option>
-    __host__ __device__ Scalar<option, true> sqrt(const Scalar<option, true>& s);
-
-    template<ScalarOption option>
-    Scalar<option, false> ln(const Scalar<option, false>& s);
-
-    template<ScalarOption option>
-    Scalar<option, true> ln(const Scalar<option, true>& s);
+    Scalar<option> ln(const Scalar<option>& s);
 
     namespace Internal {
         template<class T>
         class Traits;
 
-        template<ScalarOption option_, bool errorTrack_>
-        class Traits<Scalar<option_, errorTrack_>> {
+        template<ScalarOption option_>
+        class Traits<Scalar<option_>> {
             using Helper = typename std::conditional<option_ == Float, float, double>::type;
         public:
-            using ScalarType = Scalar<option_, errorTrack_>;
+            using ScalarType = Scalar<option_>;
             using RealType = ScalarType;
             using ComplexType = ComplexScalar<ScalarType>;
-            using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_, false>, Helper>::type;
+            using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
             static constexpr ScalarOption option = option_;
-            static constexpr bool errorTrack = errorTrack_;
             static constexpr bool isComplex = false;
         };
         /**
@@ -68,18 +61,9 @@ namespace Physica::Core {
             static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
                                                                               ? Traits<AnyScalar1>::option
                                                                               : Traits<AnyScalar2>::option;
-            static constexpr bool errorTrack = Traits<AnyScalar1>::errorTrack || Traits<AnyScalar2>::errorTrack;
             static constexpr bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
         public:
-            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option, errorTrack>>, Scalar<option, errorTrack>>::type;
-        };
-
-        template<class ScalarType>
-        class RemoveErrorTrack {
-            static constexpr ScalarOption option = Traits<ScalarType>::option;
-            static constexpr bool isComplex = Traits<ScalarType>::isComplex;
-        public:
-            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option, false>>, Scalar<option, false>>::type;
+            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option>>, Scalar<option>>::type;
         };
 
         template<ScalarOption option>
@@ -154,28 +138,19 @@ namespace Physica::Core {
                 AbstractScalar& toAbs() noexcept { length = getSize(); return *this; }
                 inline void cutZero();
                 /* Static members */
-                inline static Scalar<MultiPrecision, true> addWithError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, false> addNoError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, true> subWithError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, false> subNoError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, true> mulWithError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, false> mulNoError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, true> divWithError(const AbstractScalar& s1, const AbstractScalar& s2);
-                inline static Scalar<MultiPrecision, false> divNoError(const AbstractScalar& s1, const AbstractScalar& s2);
-                template<bool errorTrack>
-                inline static bool cutLength(Scalar<MultiPrecision, errorTrack>& s);
+                inline static Scalar<MultiPrecision> addNoError(const AbstractScalar& s1, const AbstractScalar& s2);
+                inline static Scalar<MultiPrecision> subNoError(const AbstractScalar& s1, const AbstractScalar& s2);
+                inline static Scalar<MultiPrecision> mulNoError(const AbstractScalar& s1, const AbstractScalar& s2);
+                inline static Scalar<MultiPrecision> divNoError(const AbstractScalar& s1, const AbstractScalar& s2);
+                inline static bool cutLength(Scalar<MultiPrecision>& s);
                 /* Friends */
                 friend class Core::Integer;
-                template<bool errorTrack>
-                friend Scalar<MultiPrecision, errorTrack> Core::square(const Scalar<MultiPrecision, errorTrack>& s);
                 template<ScalarOption option>
-                __host__ __device__ friend Scalar<option, false> Core::sqrt(const Scalar<option, false>& s);
+                __host__ __device__ friend Scalar<option> Core::square(const Scalar<option>& s);
                 template<ScalarOption option>
-                __host__ __device__ friend Scalar<option, true> Core::sqrt(const Scalar<option, true>& s);
+                __host__ __device__ friend Scalar<option> Core::sqrt(const Scalar<option>& s);
                 template<ScalarOption option>
-                friend Scalar<option, false> Core::ln(const Scalar<option, false>& s);
-                template<ScalarOption option>
-                friend Scalar<option, true> Core::ln(const Scalar<option, true>& s);
+                friend Scalar<option> Core::ln(const Scalar<option>& s);
         };
 
         template<>
@@ -249,7 +224,6 @@ namespace Physica::Core {
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
-        static constexpr bool errorTrack = Internal::Traits<Derived>::errorTrack;
         static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
 
         [[nodiscard]] const RealType& getReal() const {
@@ -263,7 +237,7 @@ namespace Physica::Core {
             if constexpr (isComplex)
                 return this->getDerived().getImag();
             else
-                return Derived::Zero();
+                return Derived(0);
         }
 
         [[nodiscard]] ScalarType conjugate() const {
@@ -325,28 +299,38 @@ namespace Physica::Core {
     template<class ScalarType> ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2);
     template<class ScalarType>
     bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarType>& scalar2, double precision);
+    template<ScalarOption option>
+    std::ostream& operator<<(std::ostream& os, const Scalar<option>& s);
+    template<ScalarOption option>
+    inline Scalar<option> operator+(const Scalar<option>& s);
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator+=(Scalar<option>& s1, const T& s2);
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator-=(Scalar<option>& s1, const T& s2);
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator*=(Scalar<option>& s1, const T& s2);
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator/=(Scalar<option>& s1, const T& s2);
+    template<ScalarOption option>
+    inline void operator^=(Scalar<option>& s1, const Scalar<option>& s2);
     template<ScalarOption option, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s);
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(Scalar<option, errorTrack>& s1, const T& s2);
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(Scalar<option, errorTrack>& s1, const T& s2);
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(Scalar<option, errorTrack>& s1, const T& s2);
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(Scalar<option, errorTrack>& s1, const T& s2);
+    inline void operator<<=(Scalar<option>& s, int bits);
+    template<ScalarOption option, bool errorTrack>
+    inline void operator>>=(Scalar<option>& s, int bits);
     template<ScalarOption option>
     __host__ __device__ inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
     template<ScalarOption option>
     __host__ __device__ inline bool operator<=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
     template<ScalarOption option>
     __host__ __device__ inline bool operator!= (const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2);
+    template<ScalarOption option>
+    inline void swap(Scalar<option>& s1, Scalar<option>& s2) noexcept;
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
     template<>
-    class Scalar<MultiPrecision, false> : public ScalarBase<Scalar<MultiPrecision, false>>, public Internal::AbstractScalar<MultiPrecision> {
+    class Scalar<MultiPrecision> : public ScalarBase<Scalar<MultiPrecision>>, public Internal::AbstractScalar<MultiPrecision> {
     public:
         using Base = Internal::AbstractScalar<MultiPrecision>;
-        using ScalarType = Scalar<MultiPrecision, false>;
+        using ScalarType = Scalar<MultiPrecision>;
     public:
         Scalar() : Base() {}
         Scalar(int length_, int power_) : Base(length_, power_) {}
@@ -357,109 +341,33 @@ namespace Physica::Core {
         Scalar(const Rational& r) : Base(r) {}
         explicit Scalar(const char* s) : Base(s) {}
         explicit Scalar(const wchar_t* s) : Base(s) {}
-        Scalar(const Scalar<MultiPrecision, true>& s);
-        Scalar(Scalar<MultiPrecision, true>&& s);
         Scalar(const Scalar& s) = default;
         Scalar(Scalar&& s) noexcept = default;
         ~Scalar() = default;
         /* Operators */
         Scalar& operator=(const Scalar& s) = default;
         Scalar& operator=(Scalar&& s) noexcept = default;
-        Scalar& operator=(const Scalar<MultiPrecision, true>& s);
-        Scalar& operator=(Scalar<MultiPrecision, true>&& s) noexcept;
         Scalar operator+(const Scalar& s) const;
         Scalar operator-(const Scalar& s) const;
         Scalar operator*(const Scalar& s) const;
         Scalar operator/(const Scalar& s) const;
-        Scalar<MultiPrecision> operator*(const Scalar<MultiPrecision>& s) const;
-        Scalar<MultiPrecision> operator/(const Scalar<MultiPrecision>& s) const;
         Scalar operator<<(int bits) const;
         Scalar operator>>(int bits) const;
         Scalar operator-() const;
         /* Helpers */
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(static_cast<SignedMPUnit>(0)); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(static_cast<SignedMPUnit>(1)); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(static_cast<SignedMPUnit>(2)); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        /* Setters */
-        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
-        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
     protected:
         Scalar(MPUnit* byte_, int length_, int power_) : AbstractScalar(byte_, length_, power_) {}
         /* Friends */
         friend class Internal::AbstractScalar<MultiPrecision>;
-        friend class Scalar<MultiPrecision, true>;
     };
-    static_assert(sizeof(Scalar<MultiPrecision, false>) == sizeof(Internal::AbstractScalar<MultiPrecision>), "Algorithms are based on this assumption.");
+    static_assert(sizeof(Scalar<MultiPrecision>) == sizeof(Internal::AbstractScalar<MultiPrecision>), "Algorithms are based on this assumption.");
 
-    template<>
-    class Scalar<MultiPrecision, true> : public ScalarBase<Scalar<MultiPrecision, true>>, public Internal::AbstractScalar<MultiPrecision> {
-    protected:
-        //Accuracy
-        MPUnit a;
-    public:
-        using Base = Internal::AbstractScalar<MultiPrecision>;
-        using ScalarType = Scalar<MultiPrecision, true>;
-    public:
-        Scalar() noexcept;
-        Scalar(int length_, int power_, MPUnit a_ = 0) noexcept;
-        Scalar(const Scalar& s);
-        Scalar(Scalar&& s) noexcept;
-        explicit Scalar(int i, MPUnit a_ = 0);
-        explicit Scalar(SignedMPUnit unit, MPUnit a_ = 0);
-        explicit Scalar(double d, MPUnit a_ = 0);
-        explicit Scalar(const Integer& i, MPUnit a_ = 0) : Base(i), a(a_) {}
-        explicit Scalar(const Rational& r, MPUnit a_ = 0) : Base(r), a(a_) {}
-        explicit Scalar(const char* s, MPUnit a_ = 0);
-        explicit Scalar(const wchar_t* s, MPUnit a_ = 0);
-        Scalar(const Scalar<MultiPrecision, false>& s, MPUnit a_ = 0);
-        Scalar(Scalar<MultiPrecision, false>&& s, MPUnit a_ = 0);
-        ~Scalar() = default;
-        /* Operators */
-        Scalar& operator=(const Scalar& s) = default;
-        Scalar& operator=(Scalar&& s) noexcept = default;
-        Scalar& operator=(const Scalar<MultiPrecision, false>& s);
-        Scalar& operator=(Scalar<MultiPrecision, false>&& s) noexcept;
-        Scalar operator+(const Scalar& s) const;
-        Scalar operator-(const Scalar& s) const;
-        Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, false>& s) const;
-        Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, false>& s) const;
-        Scalar<MultiPrecision, true> operator*(const Scalar<MultiPrecision, true>& s) const;
-        Scalar<MultiPrecision, true> operator/(const Scalar<MultiPrecision, true>& s) const;
-        Scalar operator<<(int bits) const;
-        Scalar operator>>(int bits) const;
-        Scalar operator-() const;
-        /* Helpers */
-        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        void swap(Scalar& s) noexcept;
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(static_cast<SignedMPUnit>(0)); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(static_cast<SignedMPUnit>(1)); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(static_cast<SignedMPUnit>(2)); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
-        [[nodiscard]] MPUnit getA() const noexcept { return a; }
-        [[nodiscard]] Scalar<MultiPrecision, false> getAccuracy() const;
-        [[nodiscard]] inline Scalar<MultiPrecision, false> getMaximum() const;
-        [[nodiscard]] inline Scalar<MultiPrecision, false> getMinimum() const;
-        /* Setters */
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
-    private:
-        Scalar(MPUnit* byte_, int length_, int power_, MPUnit a_ = 0)
-                : AbstractScalar<MultiPrecision>(byte_, length_, power_), a(a_) {}
-        Scalar& applyError(const Scalar<MultiPrecision, false>& error);
-        /* Friends */
-        friend class Internal::AbstractScalar<MultiPrecision>;
-        friend class Scalar<MultiPrecision, false>;
-        template<ScalarOption option>
-        __host__ __device__ friend Scalar<option, true> sqrt(const Scalar<option, true>& s);
-        template<ScalarOption option>
-        friend Scalar<option, true> ln(const Scalar<option, true>& s);
-    };
+    inline Scalar<MultiPrecision>& operator++(Scalar<MultiPrecision>& s);
+    inline Scalar<MultiPrecision>& operator--(Scalar<MultiPrecision>& s);
+    inline Scalar<MultiPrecision> operator++(Scalar<MultiPrecision>& s, int);
+    inline Scalar<MultiPrecision> operator--(Scalar<MultiPrecision>& s, int);
     /* Compare */
     bool absCompare(const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2);
     bool operator> (const Internal::AbstractScalar<MultiPrecision>& s1, const Internal::AbstractScalar<MultiPrecision>& s2);
@@ -468,18 +376,17 @@ namespace Physica::Core {
     //IDEA: Comparisons between Scalar<MultiPrecision, true> may consider their accuracy.
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
-    class Scalar<Float, false> : public ScalarBase<Scalar<Float, false>>, public Internal::AbstractScalar<Float> {
+    class Scalar<Float> : public ScalarBase<Scalar<Float>>, public Internal::AbstractScalar<Float> {
     public:
         using Base = Internal::AbstractScalar<Float>;
-        using ScalarType = Scalar<Float, false>;
+        using ScalarType = Scalar<Float>;
         using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
         __host__ __device__ Scalar(float f_) : Base(f_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
-        inline Scalar(const Scalar<Float, true>& s);
-        __host__ __device__ inline Scalar(const Scalar<Double, false>& s);
+        __host__ __device__ inline Scalar(const Scalar<Double>& s);
         Scalar(const Scalar& s) = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
@@ -487,8 +394,6 @@ namespace Physica::Core {
         __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
         __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
         __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
-        inline Scalar<Float, true> operator*(const Scalar<Float, true>& s) const;
-        inline Scalar<Float, true> operator/(const Scalar<Float, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(f * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(f / std::pow(2, i)); }
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
@@ -496,66 +401,17 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept { Base::swap(s); }
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        [[nodiscard]] constexpr static float getA() { return 0; }
-        /* Setters */
-        static void setA([[maybe_unused]] float value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
-        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
-        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Static Members */
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
-        /* Friends */
-        friend class Scalar<Float, true>;
     };
 
-    template<>
-    class Scalar<Float, true> : public ScalarBase<Scalar<Float, true>>, public Internal::AbstractScalar<Float> {
-        float a;
-    public:
-        using Base = Internal::AbstractScalar<Float>;
-        using ScalarType = Scalar<Float, true>;
-    public:
-        Scalar() : Base(), a(0) {}
-        explicit Scalar(float f_, float a_ = 0) : Base(f_), a(fabsf(a_)) {}
-        explicit Scalar(const Integer& i, float a_ = 0) : Base(i), a(a_) {}
-        explicit Scalar(const Rational& r, float a_ = 0) : Base(r), a(a_) {}
-        Scalar(const Scalar<Float, false>& s) : Base(s), a(0) {}
-        Scalar(const Scalar& s) = default;
-        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
-        /* Operators */
-        Scalar operator*(const Scalar<Float, false>& s) const { return Scalar(f * s.f, s.f * getA()); }
-        Scalar operator/(const Scalar<Float, false>& s) const { return Scalar(a / s.f); }
-        Scalar operator+(const Scalar& s) const { return Scalar(f + s.f, a + s.a); }
-        Scalar operator-(const Scalar& s) const { return Scalar(f - s.f, a + s.a); }
-        Scalar operator*(const Scalar& s) const { return Scalar(f * s.f, f * s.a + s.f * a + a * s.a); }
-        Scalar operator/(const Scalar& s) const { return Scalar(f / s.f, (f * a + s.f * s.a) / (s.f * (s.f - s.a))); }
-        Scalar operator<<(int i) const { const float power = std::pow(2, i); return Scalar(f * power, a * power); }
-        Scalar operator>>(int i) const { const float power = std::pow(2, i); return Scalar(f / power, a / power); }
-        Scalar operator-() const noexcept { return Scalar(-f, a); }
-        /* Helpers */
-        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        void swap(Scalar& s) noexcept;
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        [[nodiscard]] float getA() const noexcept { return a; }
-        /* Setters */
-        void setA(float f_) { a = f_; }
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
-        /* Friends */
-        friend class Scalar<Float, false>;
-    };
+    inline Scalar<Float>& operator++(Scalar<Float>& s);
+    inline Scalar<Float>& operator--(Scalar<Float>& s);
+    inline Scalar<Float> operator++(Scalar<Float>& s, int);
+    inline Scalar<Float> operator--(Scalar<Float>& s, int);
     /* Compare */
     inline bool absCompare(const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
     __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
@@ -563,18 +419,17 @@ namespace Physica::Core {
     __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
-    class Scalar<Double, false> : public ScalarBase<Scalar<Double, false>>, public Internal::AbstractScalar<Double> {
+    class Scalar<Double> : public ScalarBase<Scalar<Double>>, public Internal::AbstractScalar<Double> {
     public:
         using Base = Internal::AbstractScalar<Double>;
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Double>;
         using device_obj_type = device_obj<ScalarType>;
     public:
         Scalar() = default;
         __host__ __device__ Scalar(double d_) : Base(d_) {}
         Scalar(const Integer& i) : Base(i) {}
         Scalar(const Rational& r) : Base(r) {}
-        __host__ __device__ inline Scalar(const Scalar<Float, false>& s);
-        Scalar(const Scalar<Double, true>& s);
+        __host__ __device__ inline Scalar(const Scalar<Float>& s);
         Scalar(const Scalar& s) = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
@@ -583,8 +438,6 @@ namespace Physica::Core {
         __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
         __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
         __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
-        inline Scalar<Double, true> operator*(const Scalar<Double, true>& s) const;
-        inline Scalar<Double, true> operator/(const Scalar<Double, true>& s) const;
         Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
@@ -592,71 +445,25 @@ namespace Physica::Core {
         Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
         __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return false; }
-        [[nodiscard]] constexpr static double getA() { return 0; }
-        /* Setters */
-        static void setA([[maybe_unused]] double value) { assert(value == 0); /* Nothing, for the convenience of implement templates */ }
-        Scalar& toUnitA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
-        Scalar& clearA() noexcept { return *this; /* Nothing, for the convenience of implement templates */ }
         /* Static Members */
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
-        /* Friends */
-        friend class Scalar<Double, true>;
     };
 
-    template<>
-    class Scalar<Double, true> : public ScalarBase<Scalar<Double, true>>, public Internal::AbstractScalar<Double> {
-        double a;
-    public:
-        using Base = Internal::AbstractScalar<Double>;
-        using ScalarType = Scalar<Double, true>;
-    public:
-        Scalar() : Base(), a(0) {}
-        explicit Scalar(double d_, double a_ = 0) : Base(d_), a(fabs(a_)) {}
-        explicit Scalar(const Integer& i, double a_ = 0) : Base(i), a(a_) {}
-        explicit Scalar(const Rational& r, double a_ = 0) : Base(r), a(a_) {}
-        inline Scalar(const Scalar<Double, false>& s);
-        Scalar(const Scalar& s) = default;
-        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
-        /* Operators */
-        Scalar operator*(const Scalar<Double, false>& s) const { return Scalar(d * s.d, s.d * getA()); }
-        Scalar operator/(const Scalar<Double, false>& s) const { return Scalar(a / s.d); }
-        Scalar operator+(const Scalar& s) const { return Scalar(d + s.d, a + s.a); }
-        Scalar operator-(const Scalar& s) const { return Scalar(d - s.d, a + s.a); }
-        Scalar operator*(const Scalar& s) const { return Scalar(d * s.d, d * s.a + s.d * a + a * s.a); }
-        Scalar operator/(const Scalar& s) const { return Scalar(d / s.d, (d * a + s.d * s.a) / (s.d * (s.d - s.a))); }
-        Scalar operator<<(int i) const { const double power = std::pow(2, i); return Scalar(d * power, a * power); }
-        Scalar operator>>(int i) const { const double power = std::pow(2, i); return Scalar(d / power, a / power); }
-        Scalar operator-() const noexcept { return Scalar(-d, a); }
-        /* Helpers */
-        Scalar& toOpposite() noexcept { return static_cast<Scalar&>(Base::toOpposite()); }
-        __host__ __device__ Scalar& toAbs() noexcept { return static_cast<Scalar&>(Base::toAbs()); }
-        void swap(Scalar& s) noexcept;
-        [[nodiscard]] static inline Scalar Zero() { return Scalar(0); }
-        [[nodiscard]] static inline Scalar One() { return Scalar(1); }
-        [[nodiscard]] static inline Scalar Two() { return Scalar(2); }
-        /* Getters */
-        [[nodiscard]] constexpr static bool getErrorTrack() { return true; }
-        [[nodiscard]] double getA() const noexcept { return a; }
-        /* Setters */
-        void setA(double d_) { a = d_; }
-        Scalar& toUnitA() noexcept { a = 1; return *this; }
-        Scalar& clearA() noexcept { a = 0; return *this; }
-        /* Friends */
-        friend class Scalar<Double, false>;
-    };
+    inline Scalar<Double>& operator++(Scalar<Double>& s);
+    inline Scalar<Double>& operator--(Scalar<Double>& s);
+    inline Scalar<Double> operator++(Scalar<Double>& s, int);
+    inline Scalar<Double> operator--(Scalar<Double>& s, int);
     /* Compare */
     inline bool absCompare(const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     __host__ __device__ inline bool operator> (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     __host__ __device__ inline bool operator< (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
     __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2);
+
+    template<ScalarOption option>
+    inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;
@@ -666,22 +473,22 @@ namespace Physica::Core {
 #include "Const.h"
 
 namespace std {
-    template<bool errorTrack>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::MultiPrecision, errorTrack>> {
-        using T = Physica::Core::Scalar<Physica::Core::MultiPrecision, errorTrack>;
+    template<>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::MultiPrecision>> {
+        using T = Physica::Core::Scalar<Physica::Core::MultiPrecision>;
     public:
-        static constexpr T epsilon() noexcept {
-            T result = T::One();
+        static T epsilon() noexcept {
+            auto result = T(static_cast<SignedMPUnit>(1));
             result.setPower(1 - Physica::Core::GlobalPrecision);
             return result;
         }
     };
 
-    template<bool errorTrack>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float, errorTrack>> : public numeric_limits<float> {};
+    template<>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float>> : public numeric_limits<float> {};
 
-    template<bool errorTrack>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double, errorTrack>> : public numeric_limits<double> {};
+    template<>
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double>> : public numeric_limits<double> {};
 }
 
 #include "ScalarImpl/ScalarImpl.h"

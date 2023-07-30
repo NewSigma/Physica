@@ -146,7 +146,7 @@ namespace Physica::Core {
             if (index == minor)
                 return elements[i];
         }
-        return ScalarType::Zero();
+        return ScalarType(0);
     }
 
     template<class ScalarType, int option>

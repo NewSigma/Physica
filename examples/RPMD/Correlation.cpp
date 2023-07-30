@@ -8,8 +8,8 @@
 #include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
-using PosScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
+using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;

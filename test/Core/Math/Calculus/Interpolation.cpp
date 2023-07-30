@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 int main() {
     const Vector<ScalarType> x{0, 1, 2};

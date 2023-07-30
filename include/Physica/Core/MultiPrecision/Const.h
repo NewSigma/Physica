@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_CONST_H
-#define PHYSICA_CONST_H
+#pragma once
 
 #include <iosfwd>
 /*!
@@ -37,20 +36,20 @@ namespace Physica::Core {
         double ln_2;
         double ln_10;
         double ln_2_10;
-        Scalar<MultiPrecision, false> plotPoints;
-        Scalar<MultiPrecision, false> expectedRelativeError;
-        Scalar<MultiPrecision, false> stepSize;
-        Scalar<MultiPrecision, false> R_MAX;
-        Scalar<MultiPrecision, false> _0;
-        Scalar<MultiPrecision, false> _1;
-        Scalar<MultiPrecision, false> Minus_1;
-        Scalar<MultiPrecision, false> _2;
-        Scalar<MultiPrecision, false> Minus_2;
-        Scalar<MultiPrecision, false> _3;
-        Scalar<MultiPrecision, false> Minus_3;
-        Scalar<MultiPrecision, false> _4;
-        Scalar<MultiPrecision, false> Minus_4;
-        Scalar<MultiPrecision, false> _10;
+        Scalar<MultiPrecision> plotPoints;
+        Scalar<MultiPrecision> expectedRelativeError;
+        Scalar<MultiPrecision> stepSize;
+        Scalar<MultiPrecision> R_MAX;
+        Scalar<MultiPrecision> _0;
+        Scalar<MultiPrecision> _1;
+        Scalar<MultiPrecision> Minus_1;
+        Scalar<MultiPrecision> _2;
+        Scalar<MultiPrecision> Minus_2;
+        Scalar<MultiPrecision> _3;
+        Scalar<MultiPrecision> Minus_3;
+        Scalar<MultiPrecision> _4;
+        Scalar<MultiPrecision> Minus_4;
+        Scalar<MultiPrecision> _10;
     public:
         BasicConst(const BasicConst&) = delete;
         BasicConst(BasicConst&&) noexcept = delete;
@@ -96,5 +95,3 @@ namespace Physica::Core {
         return mathConst;
     }
 }
-
-#endif

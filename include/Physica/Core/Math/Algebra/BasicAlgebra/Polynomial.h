@@ -55,7 +55,7 @@ namespace Physica::Core {
     Polynomial<ScalarType, Power>::operator()(const ScalarBase<AnyScalar>& x) const {
         using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, AnyScalar>::Type;
         if (coeffs.empty())
-            return ResultType::Zero();
+            return ResultType(0);
         ResultType result = ResultType(coeffs[0]);
         AnyScalar temp = x.getDerived();
         const auto length = coeffs.getLength();
@@ -80,7 +80,7 @@ namespace Physica::Core {
         const size_t power = poly.getPower();
         MatrixType companion = MatrixType::Zeros(power);
         for (size_t i = 0; i < power - 1; ++i)
-            companion(i + 1, i) = ScalarType::One();
+            companion(i + 1, i) = ScalarType(1);
         auto col = companion.col(power - 1);
         col = -poly.getCoeffVector();
 

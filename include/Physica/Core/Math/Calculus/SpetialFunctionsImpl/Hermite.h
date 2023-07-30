@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,24 +20,24 @@
 
 namespace Physica::Core {
     template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> lnGamma(const Scalar<option, errorTrack>& s);
+    Scalar<option> lnGamma(const Scalar<option>& s);
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {
         using std::swap;
         if (n == 0)
-            return ScalarType::One();
-        const ScalarType double_x = ScalarType::Two() * x.getDerived();
+            return ScalarType(1);
+        const ScalarType double_x = ScalarType(2) * x.getDerived();
         if (n == 1)
             return double_x;
 
-        ScalarType old_H = ScalarType::One();
+        ScalarType old_H = ScalarType(1);
         ScalarType H = double_x;
         ScalarType float_i = ScalarType(1);
         for (unsigned int i = 1; i != n; ++i) {
-            old_H = double_x * H - float_i * old_H * ScalarType::Two();
+            old_H = double_x * H - float_i * old_H * ScalarType(2);
             swap(old_H, H);
-            float_i += ScalarType::One();
+            float_i += ScalarType(1);
         }
         return H;
     }

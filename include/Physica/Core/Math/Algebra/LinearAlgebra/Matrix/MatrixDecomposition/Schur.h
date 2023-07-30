@@ -71,7 +71,7 @@ namespace Physica::Core {
         typename MatrixType::RealMatrix buffer = abs(source);
         const RealType factor = buffer.max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
-            matrixT = RealType::Zero();
+            matrixT = RealType(0);
             return;
         }
         const RealType inv_factor = reciprocal(factor);
@@ -159,7 +159,7 @@ namespace Physica::Core {
             auto block2 = matrixT.topRows(index_1 + 1);
             givensVector[1].toOpposite();
             applyGivens(block2, givensVector, index, index_1);
-            matrixT(index_1, index) = ScalarType::Zero();
+            matrixT(index_1, index) = ScalarType(0);
             if (computeMatrixU)
                 applyGivens(matrixU, givensVector, index, index_1);
         }
@@ -226,7 +226,7 @@ namespace Physica::Core {
             auto target_col = block.col(lower + i);
             const auto norm = householder(target_col, householderVector3D);
             target_col[0] = target_col[0].isNegative() ? norm : -norm;
-            target_col.tail(1) = ScalarType::Zero();
+            target_col.tail(1) = ScalarType(0);
             {
                 auto rightCols = matrixT.rightCols(lower + i + 1);
                 auto rows = rightCols.rows(lower + i + 1, 3);
@@ -247,7 +247,7 @@ namespace Physica::Core {
         auto target_col = block.col(lower + sub_order - 3);
         const auto norm = householder(target_col, householderVector2D);
         target_col[0] = target_col[0].isNegative() ? norm : -norm;
-        target_col[1] = ScalarType::Zero();
+        target_col[1] = ScalarType(0);
         {
             auto rightCols = matrixT.rightCols(lower + sub_order - 2);
             auto rows = rightCols.rows(lower + sub_order - 2, 2);
@@ -314,7 +314,7 @@ namespace Physica::Core {
             auto givensVec = givens(Vector2D{matrixT(i, i - 1), matrixT(i + 1, i - 1)}, 0, 1);
             auto rightCols = matrixT.rightCols(i - 1);
             applyGivens(givensVec, rightCols, i, i + 1);
-            matrixT(i + 1, i - 1) = ScalarType::Zero();
+            matrixT(i + 1, i - 1) = ScalarType(0);
             givensVec[1] = -givensVec[1];
             auto topRows = matrixT.topRows(std::min(i + 2, upper) + 1);
             applyGivens(topRows, givensVec, i, i + 1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "Physica/Core/MultiPrecision/Integer.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
 #include "Physica/Core/MultiPrecision/BasicImpl/Convert.h"
 
@@ -28,6 +29,19 @@ namespace Physica::Core {
             : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(i >= 0 ? 1 : -1) {
         byte[0] = i >= 0 ? i : -i;
+    }
+
+    Integer::Integer(const Scalar<MultiPrecision>& s) {
+        const auto power = s.getPower();
+        if (power < 0) {
+            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+            byte[0] = 0;
+            length = 1;
+        }
+        length = power + 1;
+        const size_t size = length * sizeof(MPUnit);
+        byte = reinterpret_cast<MPUnit*>(malloc(size));
+        memcpy(byte, s.byte, length * sizeof(MPUnit));
     }
 
     Integer::Integer(const Integer& toCopy)

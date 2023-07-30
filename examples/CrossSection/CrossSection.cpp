@@ -26,7 +26,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using T = Scalar<Double, false>;
+using T = Scalar<Double>;
 using ODE = ODESolver<T, 1>;
 
 struct ProgramArgs {

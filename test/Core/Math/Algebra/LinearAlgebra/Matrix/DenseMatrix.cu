@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float, false>;
+using ScalarType = Scalar<Float>;
 using MatrixType = DenseMatrix<ScalarType>;
 
 int main() {

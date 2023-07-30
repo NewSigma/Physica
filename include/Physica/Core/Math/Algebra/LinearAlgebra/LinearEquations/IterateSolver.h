@@ -80,7 +80,7 @@ namespace Physica::Core {
         VectorType residual = -b.getDerived();
         VectorType p = b.getDerived();
         AnyVector& x = b.getDerived();
-        x = ScalarType::Zero();
+        x = ScalarType(0);
         VectorType dot(b.getLength());
 
         RealType squaredRes = residual.squaredNorm();

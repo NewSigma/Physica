@@ -56,7 +56,7 @@ namespace Physica::Core {
             result = (x_left + x_right) / T(2);
             error /= T(2);
         } while(error > abs(epsilon * result));
-        return T(result).toUnitA();
+        return result;
     }
 
     template<class T, class Function>

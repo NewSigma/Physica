@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Triangle1.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType, 2>;
 
 constexpr double width = 2;
@@ -56,9 +56,9 @@ int main() {
     {
         using ElementType = Rectangle1<ScalarType>;
         auto mesh = ElementType::rectangle({0, 0}, {width, height}, 21, 21);
-        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType::Zero(), 1E-5)
+        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType(0), 1E-5)
                                                         || scalarNear(p[0], ScalarType(width), 1E-5)
-                                                        || scalarNear(p[1], ScalarType::Zero(), 1E-5)
+                                                        || scalarNear(p[1], ScalarType(0), 1E-5)
                                                         || scalarNear(p[1], ScalarType(height), 1E-5); },
                                 []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 
@@ -80,9 +80,9 @@ int main() {
     {
         using ElementType = Triangle1<ScalarType>;
         auto mesh = ElementType::rectangle({0, 0}, {width, height}, 20, 20);
-        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType::Zero(), 1E-5)
+        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType(0), 1E-5)
                                                         || scalarNear(p[0], ScalarType(width), 1E-5)
-                                                        || scalarNear(p[1], ScalarType::Zero(), 1E-5)
+                                                        || scalarNear(p[1], ScalarType(0), 1E-5)
                                                         || scalarNear(p[1], ScalarType(height), 1E-5); },
                                 []([[maybe_unused]] VectorType p) { return ScalarType(0); });
 

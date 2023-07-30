@@ -139,8 +139,8 @@ namespace Physica::Core {
             size_t lower = Base::activeWindowUpDiag(working, upper);
             for (size_t i = lower; i <= upper; ++i) {
                 if (abs(working(i, i)) <= ScalarType(std::numeric_limits<ScalarType>::epsilon() * 10)) { //TODO: absolute criteria is unrelirable, use relative criteria instead 
-                    working(i, i) = ScalarType::Zero();
-                    working(i, i + (i + 1 < order)) = ScalarType::Zero();
+                    working(i, i) = ScalarType(0);
+                    working(i, i + (i + 1 < order)) = ScalarType(0);
                     if (i < upper - 1) {
                         lower = i + 1;
                         break;

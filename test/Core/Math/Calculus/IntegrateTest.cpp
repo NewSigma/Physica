@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 ScalarType func(ScalarType x) {
     return ScalarType(M_PI_2) * x * sin(ScalarType(M_PI) * x);
@@ -30,15 +30,15 @@ int main() {
     {
         IntegrateRange<ScalarType, 1> range({-1}, {1});
         Integrate<Rectangular, ScalarType, 1> rec(range, 0.01);
-        if (!scalarNear(ScalarType::One(), rec.solve(func), 1E-4))
+        if (!scalarNear(ScalarType(1), rec.solve(func), 1E-4))
             return 1;
 
         Integrate<Ladder, ScalarType, 1> ladder(range, 0.01);
-        if (!scalarNear(ScalarType::One(), ladder.solve(func), 1E-4))
+        if (!scalarNear(ScalarType(1), ladder.solve(func), 1E-4))
             return 1;
 
         Integrate<Simpson, ScalarType, 1> simpson(range, 0.01);
-        if (!scalarNear(ScalarType::One(), simpson.solve(func), 1E-8))
+        if (!scalarNear(ScalarType(1), simpson.solve(func), 1E-8))
             return 1;
     }
     {

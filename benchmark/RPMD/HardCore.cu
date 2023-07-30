@@ -38,7 +38,7 @@ constexpr double temperatureT = 2;
 constexpr double energy = numMolecular * temperatureT / 2;
 constexpr size_t numSample = 1;
 
-using ScalarType = Scalar<Float, false>;
+using ScalarType = Scalar<Float>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;

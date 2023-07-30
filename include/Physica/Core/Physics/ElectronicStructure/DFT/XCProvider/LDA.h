@@ -111,8 +111,8 @@ namespace Physica::Core {
         auto& buffer6 = xc_down;
 
         buffer = pow(rho, ScalarType(1.0 / 3));
-        buffer1 = -zeta + ScalarType::One();
-        buffer2 = zeta + ScalarType::One();
+        buffer1 = -zeta + ScalarType(1);
+        buffer2 = zeta + ScalarType(1);
         buffer3 = pow(buffer1, ScalarType(1.0 / 3));
         buffer5 = hadamard(buffer3, buffer3);
         buffer5 = hadamard(buffer5, buffer5);
@@ -124,7 +124,7 @@ namespace Physica::Core {
         buffer6 = hadamard(buffer6, buffer6);
 
         auto& unnormalized_f = buffer5;
-        unnormalized_f = buffer5 + buffer6 - ScalarType::Two();
+        unnormalized_f = buffer5 + buffer6 - ScalarType(2);
         auto& epsilon = buffer5;
         epsilon = ScalarType(4.0 / 3) * hadamard(ScalarType(factor0) + unnormalized_f * ScalarType(factor_f * (factor1 - factor0)), buffer);
         buffer6 = epsilon;
@@ -144,7 +144,7 @@ namespace Physica::Core {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;
             constexpr double factor2 = 33.851831034345862;
-            buffer = ScalarType(factor1) * ln(ScalarType::One() + ScalarType(factor2) * buffer);
+            buffer = ScalarType(factor1) * ln(ScalarType(1) + ScalarType(factor2) * buffer);
             xc_up += buffer;
             xc_down += buffer;
         }
@@ -226,7 +226,7 @@ namespace Physica::Core {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;
             constexpr double factor2 = 33.851831034345862;
-            buffer = ScalarType(factor1) * ln(ScalarType::One() + ScalarType(factor2) * buffer);
+            buffer = ScalarType(factor1) * ln(ScalarType(1) + ScalarType(factor2) * buffer);
             V += buffer;
         }
     }

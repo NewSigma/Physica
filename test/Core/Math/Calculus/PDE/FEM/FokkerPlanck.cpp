@@ -23,7 +23,7 @@
 #include "Physica/Core/IO/VTKFile.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType, 2>;
 
 constexpr double gammaY = 0.1;

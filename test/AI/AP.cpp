@@ -20,7 +20,7 @@
 #include "Physica/AI/Clustering/AP.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 bool testCluster(const std::forward_list<size_t>& cluster) {
     const size_t first = cluster.front();

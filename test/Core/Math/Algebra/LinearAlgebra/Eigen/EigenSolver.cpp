@@ -25,7 +25,7 @@ template<class VectorType>
 bool vectorNearZero(const LValueVector<VectorType>& v, double precision) {
     using ScalarType = typename VectorType::ScalarType;
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (!scalarNear(v[i], ScalarType::Zero(), precision))
+        if (!scalarNear(v[i], ScalarType(0), precision))
             return false;
     return true;
 }
@@ -56,7 +56,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
 }
 
 int main() {
-    using RealType = Scalar<Double, false>;
+    using RealType = Scalar<Double>;
     using ComplexType = ComplexScalar<RealType>;
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;

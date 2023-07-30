@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,9 +26,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ0(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselJ0(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T ax = x;
         ax.toAbs();
         T y, ans1, ans2;
@@ -53,9 +53,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ1(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselJ1(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T ax = x;
         ax.toAbs();
         T y, ans1, ans2;
@@ -81,9 +81,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJn(const Integer& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselJn(const Integer& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         constexpr int iexp = std::numeric_limits<typename T::TrivialType>::max_exponent / 2;
         constexpr int acc = 160;
 
@@ -136,8 +136,8 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJ(const Integer& n, const Scalar<option, errorTrack>& x) {
+    template<ScalarOption option>
+    Scalar<option> besselJ(const Integer& n, const Scalar<option>& x) {
         assert(!n.isNegative());
         if (n == 0)
             return besselJ0(x);
@@ -150,9 +150,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselY0(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselY0(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T y, ans1, ans2;
         if (x < T(8)) {
             y = square(x);
@@ -175,9 +175,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:172
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselY1(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselY1(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T y, ans1, ans2;
         if (x < T(8)) {
             y = square(x);
@@ -200,9 +200,9 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselYn(const Integer& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselYn(const Integer& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(n > 1);
         const T two_x = T(2) / x;
         T bym = besselY0(x);
@@ -221,14 +221,14 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:182
          */
-        template<ScalarOption option, bool errorTrack>
+        template<ScalarOption option>
         void besselChebyshevHelper(
-                const Scalar<option, errorTrack>& x
-                , Scalar<option, errorTrack>& gamma1
-                , Scalar<option, errorTrack>& gamma2
-                , Scalar<option, errorTrack>& gamma_plus
-                , Scalar<option, errorTrack>& gamma_minus) {
-            using T = Scalar<option, errorTrack>;
+                const Scalar<option>& x
+                , Scalar<option>& gamma1
+                , Scalar<option>& gamma2
+                , Scalar<option>& gamma_plus
+                , Scalar<option>& gamma_minus) {
+            using T = Scalar<option>;
             assert(abs(x) <= T(0.5));
             const static Utils::Array<T> coeff1{-1.142022680371168, 6.5165112670737E-3, 3.087090173086E-4, -3.4706269647E-6, 6.9437664E-9, 3.67795E-11, -1.356E-13};
             const static Utils::Array<T> coeff2{1.843740587300905, -7.68528408447867E-2, 1.2719271366546E-3, -4.9717367042E-6, -3.31261198E-8, 2.423096E-10, -1.702E-13, -1.49E-15};
@@ -249,15 +249,15 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:180
      */
-    template<ScalarOption option, bool errorTrack>
+    template<ScalarOption option>
     void besselJn_Yn_dJn_dYn(
-            const Scalar<option, errorTrack>& n
-            , const Scalar<option, errorTrack>& x
-            , Scalar<option, errorTrack>& __restrict Jn
-            , Scalar<option, errorTrack>& __restrict Yn
-            , Scalar<option, errorTrack>& __restrict dJn
-            , Scalar<option, errorTrack>& __restrict dYn) {
-        using T = Scalar<option, errorTrack>;
+            const Scalar<option>& n
+            , const Scalar<option>& x
+            , Scalar<option>& __restrict Jn
+            , Scalar<option>& __restrict Yn
+            , Scalar<option>& __restrict dJn
+            , Scalar<option>& __restrict dYn) {
+        using T = Scalar<option>;
         constexpr double xmin = 2;
         constexpr double half = 0.5;
         constexpr double pi_trivial = M_PI;
@@ -424,46 +424,46 @@ namespace Physica::Core {
         dYn = n * reciprocal_x * Yv - Yv_1;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselJn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return Jn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besseldJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besseldJn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return dJn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besselYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besselYn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return Yn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> besseldYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> besseldYn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return dYn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    void sphericalBesselJn_Yn_dJn_dYn(const Scalar<option, errorTrack>& n
-            , const Scalar<option, errorTrack>& x
-            , Scalar<option, errorTrack>& __restrict jn
-            , Scalar<option, errorTrack>& __restrict yn
-            , Scalar<option, errorTrack>& __restrict djn
-            , Scalar<option, errorTrack>& __restrict dyn) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    void sphericalBesselJn_Yn_dJn_dYn(const Scalar<option>& n
+            , const Scalar<option>& x
+            , Scalar<option>& __restrict jn
+            , Scalar<option>& __restrict yn
+            , Scalar<option>& __restrict djn
+            , Scalar<option>& __restrict dyn) {
+        using T = Scalar<option>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -477,9 +477,9 @@ namespace Physica::Core {
         dyn = factor * (dYn - Yn / (x * T(2)));
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesselJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> sphericalBesselJn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -490,9 +490,9 @@ namespace Physica::Core {
         return factor * Jn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesseldJn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> sphericalBesseldJn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -503,9 +503,9 @@ namespace Physica::Core {
         return factor * (dJn - Jn / (x * T(2)));
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesselYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> sphericalBesselYn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -516,9 +516,9 @@ namespace Physica::Core {
         return factor * Yn;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> sphericalBesseldYn(const Scalar<option, errorTrack>& n, const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> sphericalBesseldYn(const Scalar<option>& n, const Scalar<option>& x) {
+        using T = Scalar<option>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);

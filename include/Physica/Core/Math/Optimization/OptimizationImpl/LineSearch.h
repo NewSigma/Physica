@@ -84,9 +84,9 @@ namespace Physica::Core {
             const VectorType& direction) const {
         if (gradient.squaredNorm() < std::numeric_limits<ScalarType>::min())
             return 0;
-        ScalarType step_lower = ScalarType::Zero();
+        ScalarType step_lower = ScalarType(0);
         const ScalarType step_upper = maxStepSize;
-        ScalarType step = maxStepSize / ScalarType::Two();
+        ScalarType step = maxStepSize / ScalarType(2);
 
         const ScalarType phi_0 = func(x);
         const ScalarType diff_phi_0 = gradient * direction;
@@ -110,7 +110,7 @@ namespace Physica::Core {
                 return zoom(func, grad, x, gradient, direction, step, step_lower);
             
             step_lower = step;
-            step = (step_lower + step_upper) / ScalarType::Two();
+            step = (step_lower + step_upper) / ScalarType(2);
             if (abs(step_upper - step) < std::numeric_limits<ScalarType>::epsilon())
                 return step_upper;
             if (++i > maxIteration)
@@ -188,6 +188,6 @@ namespace Physica::Core {
         ScalarType d2 = sqrt(squared_d2);
         if (delta_step.isNegative())
             d2.toOpposite();
-        return step1 - delta_step * (diff1 + d2 - d1) / (diff1 - diff2 + ScalarType::Two() * d2);
+        return step1 - delta_step * (diff1 + d2 - d1) / (diff1 - diff2 + ScalarType(2) * d2);
     }
 }

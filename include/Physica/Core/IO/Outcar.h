@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     class Outcar {
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Double>;
 
         Vector<ScalarType> force;
         ScalarType internalEnergy;

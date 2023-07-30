@@ -23,7 +23,7 @@
 using namespace Physica::Core;
 
 int main() {
-    using T = Scalar<Double, false>;
+    using T = Scalar<Double>;
     {
         using VectorType = Vector<T, 4>;
         const VectorType x{2, 3, 4, 5};

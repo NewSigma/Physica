@@ -25,10 +25,10 @@ namespace Physica::Core {
     class Poscar;
     template<class T> class KSpaceGrid;
 
-    class CrystalCell final : public PeriodicCell<Scalar<Float, false>, 3> {
+    class CrystalCell final : public PeriodicCell<Scalar<Float>, 3> {
     public:
-        using Base = PeriodicCell<Scalar<Float, false>, 3>;
-        using ScalarType = Scalar<Float, false>;
+        using Base = PeriodicCell<Scalar<Float>, 3>;
+        using ScalarType = Scalar<Float>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
         using StructureFactorType = Utils::Array<KSpaceGrid<ComplexType>>;

@@ -120,7 +120,7 @@ namespace Physica::Core {
                 row = -row.asVector();
             }
         }
-        temp(1, 0) = temp(2, 0) = temp(2, 1) = ScalarType::Zero(); //Clear numeric error
+        temp(1, 0) = temp(2, 0) = temp(2, 1) = ScalarType(0); //Clear numeric error
         lattice = temp.transpose();
     }
     /**
@@ -261,7 +261,7 @@ namespace Physica::Core {
         auto col = pos.col(2);
         for (size_t i = 0; i < col.getLength(); ++i) {
             if (col[i] > ScalarType(0.5))
-                col[i] += (ScalarType::One() - col[i]) * inv_factor;
+                col[i] += (ScalarType(1) - col[i]) * inv_factor;
             else
                 col[i] *= inv_factor;
         }

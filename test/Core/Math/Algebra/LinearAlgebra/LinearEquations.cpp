@@ -23,7 +23,7 @@ using namespace Physica::Utils;
 using namespace Physica::Core;
 
 int main() {
-    using ScalarType = Scalar<Double, false>;
+    using ScalarType = Scalar<Double>;
     using VectorType = Vector<ScalarType, 4>;
     const DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 5> A
             {{0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553, 4.316511702487202E-1},

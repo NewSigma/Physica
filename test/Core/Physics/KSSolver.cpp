@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 
 int main() {
@@ -40,7 +40,7 @@ int main() {
         const auto& band = solver.getBand();
         Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
-            if (scalarNear(delta.calc(i), ComplexType::Zero(), 1E-15))
+            if (scalarNear(delta.calc(i), ComplexType(0), 1E-15))
                 return 1;
     }
     {
@@ -52,7 +52,7 @@ int main() {
         const auto& band = solver.getBand();
         Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
-            if (scalarNear(delta.calc(i), ComplexType::Zero(), 1E-15))
+            if (scalarNear(delta.calc(i), ComplexType(0), 1E-15))
                 return 1;
     }
     return 0;

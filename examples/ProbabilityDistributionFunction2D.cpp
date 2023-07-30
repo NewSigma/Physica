@@ -29,7 +29,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;

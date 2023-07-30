@@ -27,7 +27,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
@@ -86,16 +86,12 @@ int main(int argc, char** argv) {
     plot->getAxisX()->setTitleText("Time");
     plot->getAxisY()->setTitleText("x");
 
-    for (size_t i = 0; i < rpmd.getNumParticle(); ++i) {
-        auto& line = plot->line(t, record.col(i));
-    }
-    {
-        auto& line1 = plot->line(VectorType{minX, maxX}, VectorType{0, 0});
-        line1.setColor(Qt::black);
-
-        auto& line2 = plot->line(VectorType{minX, maxX}, VectorType{latticeSize, latticeSize});
-        line2.setColor(Qt::black);
-    }
+    for (size_t i = 0; i < rpmd.getNumParticle(); ++i)
+        plot->line(t, record.col(i));
+    auto& line1 = plot->line(VectorType{minX, maxX}, VectorType{0, 0});
+    line1.setColor(Qt::black);
+    auto& line2 = plot->line(VectorType{minX, maxX}, VectorType{latticeSize, latticeSize});
+    line2.setColor(Qt::black);
 
     plot->show();
     return QApplication::exec();

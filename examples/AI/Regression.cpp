@@ -170,7 +170,7 @@ public:
 };
 
 RegressionDataset readTrainData() {
-    using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
+    using MatrixType = DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector>;
     MatrixType data(1460, numFeature + 1);
     std::ifstream fin("../../data/train_num.csv");
     fin >> data;
@@ -179,7 +179,7 @@ RegressionDataset readTrainData() {
 }
 
 TensorDataset readTestData() {
-    using MatrixType = DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector>;
+    using MatrixType = DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector>;
     MatrixType data(1459, numFeature);
     std::ifstream fin("../../data/test_num.csv");
     fin >> data;

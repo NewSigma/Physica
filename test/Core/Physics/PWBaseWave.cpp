@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/PWBaseWave.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 int main() {
     const ScalarType cutOffE = ScalarType(10);

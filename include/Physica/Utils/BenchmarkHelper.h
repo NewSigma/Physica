@@ -25,7 +25,7 @@
 
 namespace Physica::Utils {
     class Benchmark {
-        using ScalarType = Core::Scalar<Core::Double, false>;
+        using ScalarType = Core::Scalar<Core::Double>;
     public:
         template<class Functor>
         static std::pair<ScalarType, ScalarType> run(Functor func, unsigned int numTest, unsigned int numSample) {

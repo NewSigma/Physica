@@ -46,5 +46,5 @@ T func2(const Vector<T>& v) {
 
 template<class ScalarType>
 ScalarType rosenbrock(const Vector<ScalarType>& v) {
-    return ScalarType(100) * square(v[1] - square(v[0])) + square(ScalarType::One() - v[0]);
+    return ScalarType(100) * square(v[1] - square(v[0])) + square(ScalarType(1) - v[0]);
 }

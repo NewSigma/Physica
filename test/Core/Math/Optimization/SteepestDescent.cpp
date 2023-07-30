@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Optimization/SteepestDescent.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using Optimizer = SteepestDescent<ScalarType, 2>;
 using VectorType = typename Optimizer::VectorType;
 

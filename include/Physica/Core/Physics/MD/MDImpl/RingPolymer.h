@@ -93,7 +93,7 @@ namespace Physica::Core {
         buffer.resize(2, fft.getKSpaceSize());
 
         auto momentum = phase.topRows(dof);
-        momentum = ScalarType::Zero();
+        momentum = ScalarType(0);
         /* Fill pos */ {
             size_t index = dof;
             for (auto elem : cell.getPos()) {

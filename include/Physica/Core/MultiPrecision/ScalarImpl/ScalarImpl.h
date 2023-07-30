@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -64,7 +64,7 @@ namespace Physica::Core {
         const ScalarType min = std::numeric_limits<ScalarType>::min();
         const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
         const ScalarType delta = s1 - s2;
-        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType::Two());
+        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType(2));
         return error;
     }
 
@@ -76,53 +76,50 @@ namespace Physica::Core {
         return relativeError(scalar1.getDerived(), scalar2.getDerived()) < ScalarType(precision);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    std::ostream& operator<<(std::ostream& os, const Scalar<option, errorTrack>& s) {
+    template<ScalarOption option>
+    std::ostream& operator<<(std::ostream& os, const Scalar<option>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
                   << double(s)
                   << std::setprecision(6); //6 is the default precision.
     }
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> operator+(const Scalar<option, errorTrack>& s) {
-        return Scalar<option, errorTrack>(s);
+    template<ScalarOption option>
+    inline Scalar<option> operator+(const Scalar<option>& s) {
+        return Scalar<option>(s);
     }
 
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator+=(
-            Scalar<option, errorTrack>& s1, const T& s2) {
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator+=(
+            Scalar<option>& s1, const T& s2) {
         s1 = s1 + s2;
     }
 
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator-=(
-            Scalar<option, errorTrack>& s1, const T& s2) {
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator-=(
+            Scalar<option>& s1, const T& s2) {
         s1 = s1 - s2;
     }
 
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator*=(
-            Scalar<option, errorTrack>& s1, const T& s2) {
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator*=(
+            Scalar<option>& s1, const T& s2) {
         s1 = s1 * s2;
     }
 
-    template<ScalarOption option, bool errorTrack, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option, errorTrack>>::value, void> operator/=(
-            Scalar<option, errorTrack>& s1, const T& s2) {
+    template<ScalarOption option, class T>
+    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator/=(
+            Scalar<option>& s1, const T& s2) {
         s1 = s1 / s2;
     }
 
-    template<ScalarOption option, bool errorTrack>
-    inline void operator^=(Scalar<option, errorTrack>& s1
-            , const Scalar<option, errorTrack>& s2) { s1 = s1 ^ s2; }
+    template<ScalarOption option>
+    inline void operator^=(Scalar<option>& s1, const Scalar<option>& s2) { s1 = s1 ^ s2; }
 
-    template<ScalarOption option, bool errorTrack>
-    inline void operator<<=(Scalar<option, errorTrack>& s
-            , int bits) { s = s << bits; }
+    template<ScalarOption option>
+    inline void operator<<=(Scalar<option>& s, int bits) { s = s << bits; }
 
-    template<ScalarOption option, bool errorTrack>
-    inline void operator>>=(Scalar<option, errorTrack>& s
-            , int bits) { s = s >> bits; }
+    template<ScalarOption option>
+    inline void operator>>=(Scalar<option>& s, int bits) { s = s >> bits; }
 
     template<ScalarOption option>
     __host__ __device__ inline bool operator>=(const Internal::AbstractScalar<option>& s1, const Internal::AbstractScalar<option>& s2) {
@@ -139,73 +136,52 @@ namespace Physica::Core {
         return !(s1 == s2);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    inline void swap(Scalar<option, errorTrack>& s1, Scalar<option, errorTrack>& s2) noexcept {
+    template<ScalarOption option>
+    inline void swap(Scalar<option>& s1, Scalar<option>& s2) noexcept {
         s1.swap(s2);
     }
     ///////////////////////////////////////////MultiPrecision/////////////////////////////////////////
-    template<bool errorTrack>
-    inline Scalar<MultiPrecision, errorTrack>& operator++(Scalar<MultiPrecision, errorTrack>& s) {
+    inline Scalar<MultiPrecision>& operator++(Scalar<MultiPrecision>& s) {
         s += BasicConst::getInstance()._1;
         return s;
     }
-    
-    template<bool errorTrack>
-    inline Scalar<MultiPrecision, errorTrack>& operator--(Scalar<MultiPrecision, errorTrack>& s) {
+
+    inline Scalar<MultiPrecision>& operator--(Scalar<MultiPrecision>& s) {
         s -= BasicConst::getInstance()._1;
         return s;
     }
 
-    template<bool errorTrack>
-    inline Scalar<MultiPrecision, errorTrack> operator++(Scalar<MultiPrecision, errorTrack>& s, int) { //NOLINT confusing-warning
-        Scalar<MultiPrecision, errorTrack> temp(s);
+    inline Scalar<MultiPrecision> operator++(Scalar<MultiPrecision>& s, int) {
+        Scalar<MultiPrecision> temp(s);
         s += BasicConst::getInstance()._1;
         return temp;
     }
 
-    template<bool errorTrack>
-    inline Scalar<MultiPrecision, errorTrack> operator--(Scalar<MultiPrecision, errorTrack>& s, int) { //NOLINT confusing-warning
-        Scalar<MultiPrecision, errorTrack> temp(s);
+    inline Scalar<MultiPrecision> operator--(Scalar<MultiPrecision>& s, int) {
+        Scalar<MultiPrecision> temp(s);
         s -= BasicConst::getInstance()._1;
         return temp;
-    }
-    //////////////////////////////////MultiPrecision-WithoutError///////////////////////////////////
-    ///////////////////////////////////MultiPrecision-WithError/////////////////////////////////////
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getMaximum() const {
-        return static_cast<const Scalar<MultiPrecision, false>&>(*this) + getAccuracy();
-    }
-
-    inline Scalar<MultiPrecision, false> Scalar<MultiPrecision, true>::getMinimum() const {
-        return static_cast<const Scalar<MultiPrecision, false>&>(*this) - getAccuracy();
     }
     ///////////////////////////////////////////Float-Double////////////////////////////////////////////////
     /////////////////////////////////////////////Float////////////////////////////////////////////////
-    template<bool errorTrack>
-    inline Scalar<Float, errorTrack>& operator++(
-            Scalar<Float, errorTrack>& s) {
+    inline Scalar<Float>& operator++(Scalar<Float>& s) {
         s += 1.0F;
         return s;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Float, errorTrack>& operator--(
-            Scalar<Float, errorTrack>& s) {
+    inline Scalar<Float>& operator--(Scalar<Float>& s) {
         s -= 1.0F;
         return s;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Float, errorTrack> operator++( //NOLINT confusing-warning
-            Scalar<Float, errorTrack>& s, int) {
-        Scalar<Float, errorTrack> temp(s);
+    inline Scalar<Float> operator++(Scalar<Float>& s, int) {
+        Scalar<Float> temp(s);
         s += 1.0F;
         return temp;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Float, errorTrack> operator--( //NOLINT confusing-warning
-            Scalar<Float, errorTrack>& s, int) {
-        Scalar<Float, errorTrack> temp(s);
+    inline Scalar<Float> operator--(Scalar<Float>& s, int) {
+        Scalar<Float> temp(s);
         s -= 1.0F;
         return temp;
     }
@@ -225,54 +201,39 @@ namespace Physica::Core {
     __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Float>& s1, const Internal::AbstractScalar<Float>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
-    ////////////////////////////////////////Float-WithoutError///////////////////////////////////////////
-    inline Scalar<Float, false>::Scalar(const Scalar<Float, true>& s) : Base(s) {}
 
-    __host__ __device__ inline Scalar<Float, false>::Scalar(const Scalar<Double, false>& s) : Base(float(s)) {}
-
-    inline Scalar<Float, true> Scalar<Float, false>::operator*(const Scalar<Float, true>& s) const {
-        return Scalar<Float, true>(f * s.f, f * s.getA());
-    }
-
-    inline Scalar<Float, true> Scalar<Float, false>::operator/(const Scalar<Float, true>& s) const {
-        return Scalar<Float, true>(f / s.f, fabsf((s.f * s.getA()) / (s.f * (s.f - s.getA()))));
-    }
+    __host__ __device__ inline Scalar<Float>::Scalar(const Scalar<Double>& s) : Base(float(s)) {}
 
     template<class RandomGenerator>
-    Scalar<Float, false> Scalar<Float, false>::random_uniform(RandomGenerator& gen) {
+    Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator>
-    Scalar<Float, false> Scalar<Float, false>::random_normal(RandomGenerator& gen) {
+    Scalar<Float> Scalar<Float>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<float> dist{};
         return Scalar(dist(gen));
     }
-    /////////////////////////////////////////Float-WithError////////////////////////////////////////////////
     /////////////////////////////////////////////Double////////////////////////////////////////////////
-    template<bool errorTrack>
-    inline Scalar<Double, errorTrack>& operator++(Scalar<Double, errorTrack>& s) {
+    inline Scalar<Double>& operator++(Scalar<Double>& s) {
         s += 1.0;
         return s;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Double, errorTrack>& operator--(Scalar<Double, errorTrack>& s) {
+    inline Scalar<Double>& operator--(Scalar<Double>& s) {
         s -= 1.0;
         return s;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Double, errorTrack> operator++(Scalar<Double, errorTrack>& s, int) {  //NOLINT confusing-warning
-        Scalar<Double, errorTrack> temp(s);
+    inline Scalar<Double> operator++(Scalar<Double>& s, int) {
+        Scalar<Double> temp(s);
         s += 1.0;
         return temp;
     }
 
-    template<bool errorTrack>
-    inline Scalar<Double, errorTrack> operator--(Scalar<Double, errorTrack>& s, int) { //NOLINT confusing-warning
-        Scalar<Double, errorTrack> temp(s);
+    inline Scalar<Double> operator--(Scalar<Double>& s, int) {
+        Scalar<Double> temp(s);
         s -= 1.0;
         return temp;
     }
@@ -292,31 +253,20 @@ namespace Physica::Core {
     __host__ __device__ inline bool operator== (const Internal::AbstractScalar<Double>& s1, const Internal::AbstractScalar<Double>& s2) {
         return s1.getTrivial() == s2.getTrivial();
     }
-    ////////////////////////////////////////Double-WithoutError///////////////////////////////////////////
-    __host__ __device__ inline Scalar<Double, false>::Scalar(const Scalar<Float, false>& s) : Base(double(s)) {}
 
-    inline Scalar<Double, false>::Scalar(const Scalar<Double, true>& s) : Base(s) {}
-
-    inline Scalar<Double, true> Scalar<Double, false>::operator*(const Scalar<Double, true>& s) const {
-        return Scalar<Double, true>(d * s.d, d * s.getA());
-    }
-
-    inline Scalar<Double, true> Scalar<Double, false>::operator/(const Scalar<Double, true>& s) const {
-        return Scalar<Double, true>(d / s.d, fabs((s.d * s.getA()) / (s.d * (s.d - s.getA()))));
-    }
+    __host__ __device__ inline Scalar<Double>::Scalar(const Scalar<Float>& s) : Base(double(s)) {}
 
     template<class RandomGenerator>
-    Scalar<Double, false> Scalar<Double, false>::random_uniform(RandomGenerator& gen) {
+    Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<double> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator>
-    Scalar<Double, false> Scalar<Double, false>::random_normal(RandomGenerator& gen) {
+    Scalar<Double> Scalar<Double>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
         return Scalar(dist(gen));
     }
-    /////////////////////////////////////////Double-WithError///////////////////////////////////////////
 }
 
 #include "ScalarArithmetic.h"
@@ -325,56 +275,12 @@ namespace Physica::Core {
 
 namespace Physica::Core {
     template<ScalarOption option>
-    inline Scalar<option, false> operator^(
-            const Scalar<option, false>& s1, const Scalar<option, false>& s2) {
-        return Scalar<option, false>(std::pow(s1.getTrivial(), s2.getTrivial()));
-    }
-
-    template<ScalarOption option>
-    inline Scalar<option, true> operator^(
-            const Scalar<option, true>& s1, const Scalar<option, false>& s2) {
-        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<option, true>(result, std::pow(s1.getTrivial(), s2.getTrivial() + s2.getA()) - result);
-    }
-
-    template<ScalarOption option>
-    inline Scalar<option, true> operator^(
-            const Scalar<option, false>& s1, const Scalar<option, true>& s2) {
-        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<option, true>(result
-                , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA()), s2.getTrivial()) - result);
-    }
-
-    template<ScalarOption option>
-    inline Scalar<option, true> operator^(
-            const Scalar<option, true>& s1, const Scalar<option, true>& s2) {
-        const auto result = std::pow(s1.getTrivial(), s2.getTrivial());
-        return Scalar<option, true>(result
-                , std::pow(s1.getTrivial() + (s1.getTrivial() > 1 ? s1.getA() : -s1.getA())
-                        , s2.getTrivial() + s2.getA()) - result);
+    inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2) {
+        return pow(s1, s2);
     }
 
     template<>
-    inline Scalar<MultiPrecision, false> operator^(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, false>& s2) {
+    inline Scalar<MultiPrecision> operator^(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
         return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
-    }
-
-    template<>
-    inline Scalar<MultiPrecision, true> operator^(
-            const Scalar<MultiPrecision, true>& s1, const Scalar<MultiPrecision, false>& s2) {
-        return exp(ln(s1) * s2);
-    }
-
-    template<>
-    inline Scalar<MultiPrecision, true> operator^(
-            const Scalar<MultiPrecision, false>& s1, const Scalar<MultiPrecision, true>& s2) {
-        return exp(ln(s1) * s2);
-    }
-
-    template<>
-    inline Scalar<MultiPrecision, true> operator^(
-            const Scalar<MultiPrecision, true>& s1, const Scalar<MultiPrecision, true>& s2) {
-        return exp(ln(s1) * s2);
     }
 }

@@ -23,25 +23,25 @@ using namespace Physica::Core;
 
 int main() {
     {
-        DenseMatrix<Scalar<Double, false>, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-        DenseMatrix<Scalar<Float, false>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
+        DenseMatrix<Scalar<Double>, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        DenseMatrix<Scalar<Float>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
-            DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
+            DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getColumn(); ++j)
-                    if (mat(i, j) != Scalar<Double, false>(-2))
+                    if (mat(i, j) != Scalar<Double>(-2))
                         return 1;
         }
         {
-            DenseMatrix<Scalar<Double, false>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
+            DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getColumn(); ++j)
-                    if (mat(i, j) != Scalar<Double, false>(3))
+                    if (mat(i, j) != Scalar<Double>(3))
                         return 1;
         }
     }
     /* ContinuousMatrixBlock<Derived, 1, 1> */ {
-        using ScalarType = Scalar<Double, false>;
+        using ScalarType = Scalar<Double>;
         DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, 1> mat(2, 1);
         mat(0, 0) = 1.0;
         mat(1, 0) = 2.0;

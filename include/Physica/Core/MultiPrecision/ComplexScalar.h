@@ -2,7 +2,7 @@
  * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -79,9 +79,6 @@ namespace Physica::Core {
         void setReal(const T& s) { real = s; }
         void setImag(const T& s) { imag = s; }
         /* Static Members */
-        static inline ComplexScalar Zero();
-        static inline ComplexScalar One();
-        static inline ComplexScalar Two();
         template<class RandomGenerator>
         [[nodiscard]] static ComplexScalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>

@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 using namespace Physica::Core;
-using T = Scalar<Double, false>;
+using T = Scalar<Double>;
 
 template<class Function>
 void testFit(Function func) {

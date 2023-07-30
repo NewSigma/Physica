@@ -26,7 +26,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Float, false>;
+using ScalarType = Scalar<Float>;
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:304-308

@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;
 
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 namespace Physica::Core::Physics {
     class Test {
@@ -67,7 +67,7 @@ ScalarType attraction_1s_1s(const ScalarType& alpha1,
     const ScalarType alpha_sum = alpha1 + alpha2;
     const ScalarType factor = ScalarType(2 * M_PI) / alpha_sum;
     const ScalarType temp1 = alpha1 / alpha_sum;
-    const ScalarType temp2 = ScalarType::One() - temp1;
+    const ScalarType temp2 = ScalarType(1) - temp1;
     const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v2;
     const ScalarType squaredNorm = (v1 - v2).squaredNorm();
     return factor * exp(-temp1 * alpha2 * squaredNorm) * Test::helper_F(0, alpha_sum * (vector_p - corePos).squaredNorm());
@@ -85,11 +85,11 @@ ScalarType repulsion_1s_1s(const ScalarType& alpha1,
     const ScalarType alpha_sum2 = alpha2 + alpha4;
     const ScalarType factor = ScalarType(2 * std::pow(M_PI, 2.5)) / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
     const ScalarType temp1 = alpha1 / alpha_sum1;
-    const ScalarType temp2 = ScalarType::One() - temp1;
+    const ScalarType temp2 = ScalarType(1) - temp1;
     const Vector<ScalarType, 3> vector_p = temp1 * v1 + temp2 * v3;
     const ScalarType squaredNorm1 = (v1 - v3).squaredNorm();
     const ScalarType temp3 = alpha2 / alpha_sum2;
-    const ScalarType temp4 = ScalarType::One() - temp3;
+    const ScalarType temp4 = ScalarType(1) - temp3;
     const Vector<ScalarType, 3> vector_q = temp3 * v2 + temp4 * v4;
     const ScalarType squaredNorm2 = (v2 - v4).squaredNorm();
     return factor * exp(-temp1 * alpha3 * squaredNorm1) * exp(-temp3 * alpha4 * squaredNorm2)
@@ -130,7 +130,7 @@ int main() {
         Vector<ScalarType, 3> v{0, 0, 0};
         GaussBase<ScalarType> base1(v, 0.89, 1, 0, 0);
         GaussBase<ScalarType> base2(v, 12.7, 2, 0, 0);
-        if (!scalarNear(BaseFunc::overlap(base1, base2), ScalarType::Zero(), 1E-15))
+        if (!scalarNear(BaseFunc::overlap(base1, base2), ScalarType(0), 1E-15))
             return 1;
         GaussBase<ScalarType> base3(v, 0.89, 2, 0, 0);
         if (!scalarNear(BaseFunc::overlap(base2, base3), ScalarType(0.0004513547048841694), 1E-15))

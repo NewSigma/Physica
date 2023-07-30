@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SVD.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
 
 template<class MatrixType>
@@ -30,7 +30,7 @@ bool doTest(const MatrixType& source, double tolerance) {
     MatrixType V = svd.getMatrixV();
     auto v = svd.getSingulars();
     MatrixType A(source.getRow(), source.getColumn());
-    A = ScalarType::Zero();
+    A = ScalarType(0);
     for (size_t i = 0; i < v.getLength(); ++i)
         A += U.col(i) * V.col(i).asVector().transpose() * v[i];
     if (!matrixNear(A, source, tolerance))

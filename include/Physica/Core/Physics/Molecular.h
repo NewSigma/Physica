@@ -117,7 +117,7 @@ namespace Physica::Core::Physics {
      */
     template<class ScalarType>
     ScalarType Molecular<ScalarType>::getNuclearRepulsionEnergy() const {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         const size_t atomCount = getAtomCount();
         for (size_t i = 0; i < atomCount - 1; ++i) {
             const ScalarType atomicNumber1 = ScalarType(getAtomicNumber(i));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,17 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> floor(const Scalar<option, errorTrack>& s);
+    template<ScalarOption option>
+    inline Scalar<option> floor(const Scalar<option>& s);
     
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> ceil(const Scalar<option, errorTrack>& s);
+    template<ScalarOption option>
+    inline Scalar<option> ceil(const Scalar<option>& s);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> arrangement(const Scalar<option, errorTrack>& s1, const Scalar<option, errorTrack>& s2);
+    template<ScalarOption option>
+    Scalar<option> arrangement(const Scalar<option>& s1, const Scalar<option>& s2);
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> combination(const Scalar<option, errorTrack>& s1, const Scalar<option, errorTrack>& s2);
+    template<ScalarOption option>
+    Scalar<option> combination(const Scalar<option>& s1, const Scalar<option>& s2);
 }
 
 #include "FunctionImpl/ProbabilityImpl.h"

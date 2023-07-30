@@ -107,7 +107,7 @@ namespace Physica::Core {
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             const size_t numParticle = getNumParticle();
             Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-            const ScalarType factor1 = reciprocal(square(ScalarType::Two() * integralLimit));
+            const ScalarType factor1 = reciprocal(square(ScalarType(2) * integralLimit));
             Vector<ScalarType> dots(numParticle);
             Vector<ScalarType> sin_vec(numParticle);
             Vector<ScalarType> cos_vec(numParticle);
@@ -164,7 +164,7 @@ namespace Physica::Core {
             });
         
         ScalarType kSpaceSum = 0;
-        const ScalarType factor = reciprocal(square(ScalarType::Two() * integralLimit));
+        const ScalarType factor = reciprocal(square(ScalarType(2) * integralLimit));
         PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
@@ -215,7 +215,7 @@ namespace Physica::Core {
         rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
         kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
         selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
-                   + square(charges.sum()) * ScalarType(M_PI) / (ScalarType::Two() * square(integralLimit)) * inv_volume;
+                   + square(charges.sum()) * ScalarType(M_PI) / (ScalarType(2) * square(integralLimit)) * inv_volume;
         makeTables();
     }
 

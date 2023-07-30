@@ -140,7 +140,7 @@ namespace Physica::Core::Physics {
         const ScalarType factor = temp * sqrt(temp);
 
         const ScalarType temp1 = base1.alpha * inv_alpha_sum;
-        const ScalarType temp2 = ScalarType::One() - temp1;
+        const ScalarType temp2 = ScalarType(1) - temp1;
         const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
         const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
@@ -168,7 +168,7 @@ namespace Physica::Core::Physics {
             copy.n += 2;
             const ScalarType temp3 = overlap(base1, copy);
             copy.n -= 2;
-            result -= ScalarType::Two() * square(base2.alpha) * (temp1 + temp2 + temp3);
+            result -= ScalarType(2) * square(base2.alpha) * (temp1 + temp2 + temp3);
         }
         if (base2.l >= 2) {
             copy.l -= 2;
@@ -195,9 +195,9 @@ namespace Physica::Core::Physics {
                                                         const Vector<ScalarType, 3>& corePos) {
         const ScalarType alpha_sum = base1.alpha + base2.alpha;
         const ScalarType inv_alpha_sum = reciprocal(alpha_sum);
-        const ScalarType factor = ScalarType::Two() * ScalarType(M_PI) / alpha_sum;
+        const ScalarType factor = ScalarType(2) * ScalarType(M_PI) / alpha_sum;
         const ScalarType temp1 = base1.alpha * inv_alpha_sum;
-        const ScalarType temp2 = ScalarType::One() - temp1;
+        const ScalarType temp2 = ScalarType(1) - temp1;
         const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
         const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
@@ -205,7 +205,7 @@ namespace Physica::Core::Physics {
         const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
         const Vector<ScalarType, 3> vector_cp = corePos - vector_p;
         const ScalarType temp = alpha_sum * vector_cp.squaredNorm();
-        ScalarType factor3 = ScalarType::Zero();
+        ScalarType factor3 = ScalarType(0);
         for (size_t i = 0; i <= base1.l + base2.l; ++i) {
             for (size_t j = 0; j <= base1.m + base2.m; ++j) {
                 for (size_t k = 0; k <= base1.n + base2.n; ++k) {
@@ -227,17 +227,17 @@ namespace Physica::Core::Physics {
         const ScalarType alpha_sum1 = base1.alpha + base3.alpha;
         const ScalarType alpha_sum2 = base2.alpha + base4.alpha;
 
-        const ScalarType factor = ScalarType::Two() * square(ScalarType(M_PI)) * sqrt(ScalarType(M_PI))
+        const ScalarType factor = ScalarType(2) * square(ScalarType(M_PI)) * sqrt(ScalarType(M_PI))
                                 / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
 
         const ScalarType inv_alpha_sum1 = reciprocal(alpha_sum1);
         const ScalarType temp1 = base1.alpha * inv_alpha_sum1;
-        const ScalarType temp2 = ScalarType::One() - temp1;
+        const ScalarType temp2 = ScalarType(1) - temp1;
         const ScalarType factor1 = exp(-temp1 * base3.alpha * (base1.center - base3.center).squaredNorm());
         
         const ScalarType inv_alpha_sum2 = reciprocal(alpha_sum2);
         const ScalarType temp3 = base2.alpha * inv_alpha_sum2;
-        const ScalarType temp4 = ScalarType::One() - temp3;
+        const ScalarType temp4 = ScalarType(1) - temp3;
         const ScalarType factor2 = exp(-temp3 * base4.alpha * (base2.center - base4.center).squaredNorm());
 
         const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base3.center;
@@ -252,7 +252,7 @@ namespace Physica::Core::Physics {
         const ScalarType epsilon2 = reciprocal(ScalarType(4) * alpha_sum2);
         const ScalarType delta = epsilon1 + epsilon2;
         const ScalarType temp = vector_pq.squaredNorm() / (inv_alpha_sum1 + inv_alpha_sum2);
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i <= base1.l + base2.l + base3.l + base4.l; ++i) {
             for (size_t j = 0; j <= base1.m + base2.m + base3.m + base4.m; ++j) {
                 for (size_t k = 0; k <= base1.n + base2.n + base3.n + base4.n; ++k) {
@@ -285,14 +285,14 @@ namespace Physica::Core::Physics {
                                                   size_t index1,
                                                   size_t index2) {
         using Physica::Core::Internal::doubleFactorial;
-        ScalarType result = ScalarType::Zero();
-        ScalarType i_float = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
+        ScalarType i_float = ScalarType(0);
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
             const ScalarType temp = doubleFactorial<ScalarType>(i != 0 ? (2 * i - 1) : size_t(0))
-                                   / pow(ScalarType::Two() * alpha_sum, i_float);
+                                   / pow(ScalarType(2) * alpha_sum, i_float);
             const ScalarType temp_x = helper_f(2 * i, index1, index2, element_pa, element_pb);
             result += temp_x * temp;
-            i_float += ScalarType::One();
+            i_float += ScalarType(1);
         }
         return result;
     }
@@ -307,7 +307,7 @@ namespace Physica::Core::Physics {
                                                        const ScalarType& alpha_sum) {
         const size_t lower = (2 * i > (index1 + index2)) ? (2 * i - index1 - index2) : size_t(0);
         const ScalarType epsilon = reciprocal(ScalarType(4) * alpha_sum);
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t lambda = lower; lambda <= i; ++lambda)
             result += attractionHelperH(i, lambda, index1, index2, element_pa, element_pb, epsilon) * pow(element_cp, ScalarType(lambda));
         return result;
@@ -323,7 +323,7 @@ namespace Physica::Core::Physics {
                                                                const ScalarType& element_pb,
                                                                const ScalarType& epsilon) {
         using Physica::Core::Internal::factorial;
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t l = 0; l <= (index1 + index2); ++l) {
             const ScalarType temp = factorial<ScalarType>(l) * helper_f(l, index1, index2, element_pa, element_pb);
             for (size_t q = 0; q <= l / 2; ++q)
@@ -344,7 +344,7 @@ namespace Physica::Core::Physics {
                                                                const ScalarType& element_pb,
                                                                const ScalarType& epsilon) {
         using Physica::Core::Internal::factorial;
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t L = 0; L <= (index1 + index2); ++L) {
             const ScalarType temp = attractionHelperG(L, index1, index2, element_pa, element_pb, epsilon);
             for (size_t t = 0; t <= L / 2; ++t)
@@ -369,7 +369,7 @@ namespace Physica::Core::Physics {
                                                       const ScalarType& epsilon2,
                                                       const ScalarType& delta) {
         using Physica::Core::Internal::factorial;
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
             const ScalarType factor1 = repulsionHelperH(L1, index1, index2, element_pa, element_pb, epsilon1, false);
             for (size_t L2 = 0; L2 <= index3 + index4; ++L2) {
@@ -398,7 +398,7 @@ namespace Physica::Core::Physics {
                                                               const ScalarType& epsilon,
                                                               bool type) {
         using Physica::Core::Internal::factorial;
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         const ScalarType factor = reciprocal(factorial<ScalarType>(L));
         for (size_t l = 0; l <= index1 + index2; ++l) {
             const ScalarType temp = factorial<ScalarType>(l) * helper_f(l, index1, index2, element1, element2);
@@ -418,11 +418,11 @@ namespace Physica::Core::Physics {
         const size_t lower = j > m ? (j - m) : 0;
         const size_t upper = std::min(j, l);
 
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         ScalarType temp1 = pow(a, ScalarType(l - lower));
         ScalarType temp2 = pow(b, ScalarType(m + lower - j));
         const ScalarType const_1 = factorial<ScalarType>(l) * factorial<ScalarType>(m);
-        const ScalarType inv_a = a.isZero() ? ScalarType::Zero() : reciprocal(a);
+        const ScalarType inv_a = a.isZero() ? ScalarType(0) : reciprocal(a);
         for (size_t i = lower; i <= upper; ++i) {
             const ScalarType temp = const_1 / (factorial<ScalarType>(i)
                                               * factorial<ScalarType>(l - i)

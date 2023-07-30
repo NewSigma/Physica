@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType, 3>;
 
 template<class Functor>
@@ -46,7 +46,7 @@ int main() {
         auto func = func1<ScalarType>;
         ConjugateGradient<ScalarType, 3> cg(1);
         const ScalarType result = cg.solve(10, {-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
-        if (!scalarNear(result, ScalarType::Zero(), 1E-15))
+        if (!scalarNear(result, ScalarType(0), 1E-15))
             return 1;
     }
     {
@@ -60,7 +60,7 @@ int main() {
         auto func = rosenbrock<ScalarType>;
         ConjugateGradient<ScalarType, 3> cg(1);
         const ScalarType result = cg.solve(1E-13, {-1.2, 1}, func, [=](VectorType x) { return grad(func, x, 3E-6); });
-        if (!scalarNear(result, ScalarType::Zero(), 1E-18))
+        if (!scalarNear(result, ScalarType(0), 1E-18))
             return 1;
     }
     return 0;

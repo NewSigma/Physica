@@ -26,7 +26,7 @@
 
 namespace Physica::Core {
     class VaspWarpper final {
-        using ScalarType = Scalar<Float, false>;
+        using ScalarType = Scalar<Float>;
         static const char* errorMsg;
     private:
         std::string pathToVasp;

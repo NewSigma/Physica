@@ -53,9 +53,9 @@ namespace Physica::Core {
     template<class ScalarType, class VectorType>
     Adam<ScalarType, VectorType>::Adam(const Utils::Array<ScalarType, 6>& args_) : args(args_), params() {
         assert(args[0].isPositive());
-        assert(args[1].isPositive() && args[1] < ScalarType::One());
-        assert(args[2].isPositive() && args[2] < ScalarType::One());
-        assert(args[3].isPositive() && args[3] < ScalarType::One());
+        assert(args[1].isPositive() && args[1] < ScalarType(1));
+        assert(args[2].isPositive() && args[2] < ScalarType(1));
+        assert(args[3].isPositive() && args[3] < ScalarType(1));
         assert(args[4].isPositive());
         assert(args[5].isPositive());
     }
@@ -78,10 +78,10 @@ namespace Physica::Core {
         bool stop = false;
         do {
             VectorType g = gradient(func);
-            const ScalarType beta1_1 = ScalarType::One() - beta1;
+            const ScalarType beta1_1 = ScalarType(1) - beta1;
             m = m * beta1 + g * beta1_1;
-            v = v * args[2] + hadamard(g, g) * ScalarType(ScalarType::One() -  args[2]);
-            const ScalarType alpha = args[0] / beta1_1 * sqrt(ScalarType(ScalarType::One() - args[2]));
+            v = v * args[2] + hadamard(g, g) * ScalarType(ScalarType(1) -  args[2]);
+            const ScalarType alpha = args[0] / beta1_1 * sqrt(ScalarType(ScalarType(1) - args[2]));
             temp = params - alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
             beta1 *= args[3];
             ++count;

@@ -80,7 +80,7 @@ namespace Physica::Core {
             for (size_t major = 1; major < order; ++major) {
                 size_t minor = 0;
                 for (; minor < major; ++minor)
-                    target.refFromMajorMinor(major, minor) = ScalarType::Zero();
+                    target.refFromMajorMinor(major, minor) = ScalarType(0);
 
                 ScalarType diag = source(major, major);
                 /* major == minor */ {

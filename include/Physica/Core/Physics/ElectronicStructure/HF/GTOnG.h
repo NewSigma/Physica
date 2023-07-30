@@ -71,7 +71,7 @@ namespace Physica::Core::Physics {
 
     template<class ScalarType, size_t Size>
     ScalarType GTOnG<ScalarType, Size>::overlap(const GTOnG& base1, const GTOnG& base2) {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::overlap(base1.bases[i], base2.bases[j]);
@@ -80,7 +80,7 @@ namespace Physica::Core::Physics {
 
     template<class ScalarType, size_t Size>
     ScalarType GTOnG<ScalarType, Size>::kinetic(const GTOnG& base1, const GTOnG& base2) {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::kinetic(base1.bases[i], base2.bases[j]);
@@ -91,7 +91,7 @@ namespace Physica::Core::Physics {
     ScalarType GTOnG<ScalarType, Size>::nuclearAttraction(const GTOnG& base1,
                                                           const GTOnG& base2,
                                                           const Vector<ScalarType, 3>& corePos) {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::nuclearAttraction(base1.bases[i], base2.bases[j], corePos);
@@ -103,7 +103,7 @@ namespace Physica::Core::Physics {
                                                           const GTOnG& base2,
                                                           const GTOnG& base3,
                                                           const GTOnG& base4) {
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i < Size; ++i) {
             for (size_t j = 0; j < Size; ++j) {
                 const ScalarType temp = base1.coeffs[i] * base2.coeffs[j];

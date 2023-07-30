@@ -69,8 +69,8 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    template<ScalarOption option, bool errorTrack>
-    Derived& LValueMatrix<Derived>::operator=(const Scalar<option, errorTrack>& s) {
+    template<ScalarOption option>
+    Derived& LValueMatrix<Derived>::operator=(const Scalar<option>& s) {
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                 refFromMajorMinor(i, j) = ScalarType(s);

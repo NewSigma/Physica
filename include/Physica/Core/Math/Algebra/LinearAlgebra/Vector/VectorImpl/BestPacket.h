@@ -64,7 +64,7 @@ namespace Physica::Core::Internal {
     template<class ScalarType, size_t Length>
     class BestPacket {
         using RealType = typename ScalarType::RealType;
-        static_assert((RealType::option == Float || RealType::option == Double) && !RealType::errorTrack, "Unsupported float type");
+        static_assert(RealType::option == Float || RealType::option == Double, "Unsupported float type");
     public:
         using Type = typename PacketHelper<ScalarType, Length>::Type;
         constexpr static size_t Size = PacketHelper<ScalarType, Length>::Size;
@@ -77,9 +77,9 @@ namespace Physica::Core::Internal {
     };
 
     template<ScalarOption option, size_t Length>
-    struct EnableSIMDHelper<Scalar<option, false>, Length> {
+    struct EnableSIMDHelper<Scalar<option>, Length> {
         constexpr static bool good_scalar = true;
-        constexpr static int packet_size = BestPacket<Scalar<option, false>, Length>::Size;
+        constexpr static int packet_size = BestPacket<Scalar<option>, Length>::Size;
     };
 
     template<class VectorType1, class VectorType2>

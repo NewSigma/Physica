@@ -139,8 +139,8 @@ namespace Physica::Core::Physics {
         auto fockMatrices = MatrixBuffer(MatrixBufferSize, MatrixType::Zeros(baseSetSize, baseSetSize));
         MatrixType fock;
         auto errorMatrices = DIISBuffer(DIISBufferSize - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
-        DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType::One());
-        DIISMat(0, 0) = ScalarType::Zero();
+        DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType(1));
+        DIISMat(0, 0) = ScalarType(0);
         Vector<ScalarType, EDIISBufferSize> energyBuffer{};
 
         iteration = 0;
@@ -184,7 +184,7 @@ namespace Physica::Core::Physics {
         const size_t baseSetSize = getBaseSetSize();
         for (size_t i = 0; i < baseSetSize; ++i) {
             for (size_t j = i; j < baseSetSize; ++j) {
-                ScalarType temp = ScalarType::Zero();
+                ScalarType temp = ScalarType(0);
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
                     temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).v())
                             * ScalarType(molecular.getAtomicNumber(k));
@@ -222,8 +222,8 @@ namespace Physica::Core::Physics {
             }
 
             for (; j < baseSetSize; ++j) {
-                ScalarType temp1 = ScalarType::Zero();
-                ScalarType temp2 = ScalarType::Zero();
+                ScalarType temp1 = ScalarType(0);
+                ScalarType temp2 = ScalarType(0);
                 for (size_t k = 0; k < numOccupiedOrbit; ++k) {
                     const size_t orbitPos = electronConfig.getOccupiedOrbitPos(k);
                     const auto orbitState = electronConfig.getOrbitState(orbitPos);
@@ -231,7 +231,7 @@ namespace Physica::Core::Physics {
                     const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
                     auto orbit = wave.col(k);
                     const ScalarType dot = orbit[i] * orbit[j];
-                    temp1 += isSingleOccupacy ? dot : ScalarType::Two() * dot;
+                    temp1 += isSingleOccupacy ? dot : ScalarType(2) * dot;
                     temp2 += dot;
                 }
                 electronDensity(j, i) = temp1;
@@ -248,7 +248,7 @@ namespace Physica::Core::Physics {
         auto& fock = *fockMatrices.begin();
         for (size_t p = 0; p < size; ++p) {
             for (size_t q = 0; q < size; ++q) {
-                ScalarType temp = ScalarType::Zero();
+                ScalarType temp = ScalarType(0);
                 for (size_t r = 0; r < size; ++r) {
                     for (size_t s = 0; s < size; ++s) {
                         const ScalarType coulomb = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[q], baseSet[s]);
@@ -294,7 +294,7 @@ namespace Physica::Core::Physics {
                                                     EDIISBuffer& densityMatrices,
                                                     const Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
         constexpr size_t problemDim = EDIISBuffer::getLength();
-        auto G = DenseSymmMatrix<ScalarType>(problemDim, ScalarType::Zero());
+        auto G = DenseSymmMatrix<ScalarType>(problemDim, ScalarType(0));
         MatrixType deltaFock;
         MatrixType deltaDensity;
         constexpr size_t offset = MatrixBuffer::getLength() - problemDim;
@@ -306,18 +306,18 @@ namespace Physica::Core::Physics {
             }
         }
 
-        auto equalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 1, Dynamic>(1, problemDim + 1, ScalarType::One());
-        auto inequalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>(problemDim, problemDim + 1, ScalarType::Zero());
+        auto equalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, 1, Dynamic>(1, problemDim + 1, ScalarType(1));
+        auto inequalityConstraint = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>(problemDim, problemDim + 1, ScalarType(0));
         auto block = inequalityConstraint.leftCols(problemDim);
         block.toUnitMatrix();
-        auto initial = Vector<ScalarType>(problemDim, ScalarType::Zero());
+        auto initial = Vector<ScalarType>(problemDim, ScalarType(0));
         QuadraticProgramming<ScalarType> QP(G, energyBuffer, equalityConstraint, inequalityConstraint, initial);
         QP.compute_nonconvex(ScalarType(1E-10));
 
         auto& newFock = deltaFock;
         auto& newDensity = deltaDensity;
-        newFock = ScalarType::Zero();
-        newDensity = ScalarType::Zero();
+        newFock = ScalarType(0);
+        newDensity = ScalarType(0);
         for (size_t i = 0; i < problemDim; ++i) {
             newFock += fockMatrices[offset + i] * QP.getSolution()[i];
             newDensity += densityMatrices[i] * QP.getSolution()[i];
@@ -336,8 +336,8 @@ namespace Physica::Core::Physics {
                                                                                           DIISMatrix& DIISMat) {
         Vector<ScalarType, DIISBufferSize> x{};
         /* Solve linear equation */ {
-            Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType::Zero());
-            b[0] = -ScalarType::One();
+            Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType(0));
+            b[0] = -ScalarType(1);
             const DIISMatrix inv_A = DIISMat.inverse();
             x = inv_A * b;
         }
@@ -366,7 +366,7 @@ namespace Physica::Core::Physics {
             swap(energyBuffer[i], energyBuffer[i + 1]);
 
         const auto& eigenvalues = eigenSolver.getEigenvalues();
-        selfConsistentEnergy = ScalarType::Zero();
+        selfConsistentEnergy = ScalarType(0);
         for (size_t i = 0; i < wave.getColumn(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             ScalarType temp = eigenvalues[orbitPos].getReal();
@@ -375,7 +375,7 @@ namespace Physica::Core::Physics {
             const auto orbitState = electronConfig.getOrbitState(orbitPos);
             assert(orbitState != ElectronConfig::NoOccupacy);
             const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;
-            selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType::Two() * temp);
+            selfConsistentEnergy += isSingleOccupacy ? temp : (ScalarType(2) * temp);
         }
         selfConsistentEnergy *= ScalarType(0.5);
         auto ite = energyBuffer.rbegin();

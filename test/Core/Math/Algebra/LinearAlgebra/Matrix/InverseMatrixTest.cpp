@@ -21,7 +21,7 @@
 using namespace Physica::Core;
 
 int main() {
-    typedef DenseMatrix<Scalar<Double, false>, MatrixOption::Column | MatrixOption::Vector, 4, 4, 4, 4> Matrix4x4;
+    typedef DenseMatrix<Scalar<Double>, MatrixOption::Column | MatrixOption::Vector, 4, 4, 4, 4> Matrix4x4;
     const Matrix4x4 input{{1, 1, 1, 1}, {1, 1, -1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}};
     InverseMatrix inv(input);
     const Matrix4x4 result(inv);

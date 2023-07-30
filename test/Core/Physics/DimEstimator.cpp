@@ -19,7 +19,7 @@
 #include "Physica/Core/Physics/Experiment/DimEstimator.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 int main() {
     /**

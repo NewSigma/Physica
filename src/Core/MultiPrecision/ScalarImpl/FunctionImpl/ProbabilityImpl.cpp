@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,25 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_FUNCTIONPRINTER_H
-#define PHYSICA_FUNCTIONPRINTER_H
-
-#include <iosfwd>
-#include "TreeFunction.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    template<ScalarOption option = MultiPrecision, bool errorTrack = true>
-    class FunctionPrinter {
-        const TreeFunctionData<option, errorTrack>& f;
-        std::ostream& os;
-    public:
-        FunctionPrinter(const TreeFunctionData<option, errorTrack>& f_, std::ostream& os);
-        void print() { printImpl(f.getTree()); }
-    private:
-        void printImpl(const TreeFunctionData<option, errorTrack>& functionTree);
-    };
+    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) {
+        if(s.isInteger())
+            return Scalar(s);
+        const auto size = s.getSize();
+        const auto power = s.getPower();
+        const auto power_1 = power + 1;
+        auto length = size > power_1 ? power_1 : size;
+        length = s.isNegative() ? -length : length;
+        Scalar<MultiPrecision> result(length, power);
+        for(int i = 0; i < length; ++i)
+            result.setByte(i, s[i]);
+        return result;
+    }
 }
-
-#include "Physica/Core/Math/Calculus/Function/TreeFunction/TreeFunctionImpl/FunctionPrinterImpl.h"
-
-#endif

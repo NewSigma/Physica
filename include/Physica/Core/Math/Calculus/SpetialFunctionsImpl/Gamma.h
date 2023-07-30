@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,69 +24,62 @@ namespace Physica::Core {
     /**
      * Return the logarithm of gamma(s). s must be positive.
      * 
-     * Implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
-     * 
-     * TODO: The implementation is less precise than the implementation in STL, try to find out the difference
-     * 
-     * Compare:
-     * The implementation use different number of series term for float and double, while STL provided only one implementation,
-     * this version should run faster.
-     * 
      * Reference:
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> lnGamma(const Scalar<option, errorTrack>& s) {
-        using T = Scalar<option, false>;
+    template<ScalarOption option>
+    Scalar<option> lnGamma(const Scalar<option>& s) {
+        using T = Scalar<option>;
         assert(s.isPositive());
-        constexpr static int count = 9;
-        constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
-        Scalar<option, errorTrack> temp = s + T(6.5);
-        temp -= (s + T(0.5)) * ln(temp);
-        Scalar<option, errorTrack> ser(1.000000000000123);
-        Scalar<option, errorTrack> copy(s);
-        for (int j = 0; j < count; ++j) {
-            copy += T(1);
-            ser += T(coeffcients[j]) / copy;
+        if constexpr (option == Double) {
+            /**
+             * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
+             * 
+             * TODO: The implementation is less precise than the implementation in STL, try to find out the difference
+             * 
+             * Compare:
+             * The implementation use different number of series term for float and double, while STL provided only one implementation,
+             * this version should run faster.
+             */
+            constexpr static int count = 9;
+            constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
+            T temp = s + T(6.5);
+            temp -= (s + T(0.5)) * ln(temp);
+            T ser(1.000000000000123);
+            T copy(s);
+            for (int j = 0; j < count; ++j) {
+                copy += T(1);
+                ser += T(coeffcients[j]) / copy;
+            }
+            return -temp + T(0.91893853320467274178) + ln(ser / s);
         }
-        return -temp + T(0.91893853320467274178) + ln(ser / s);
-    }
-    /**
-     * Return the logarithm of gamma(s). s must be positive.
-     * 
-     * Implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
-     *
-     * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:32
-     * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
-     */
-    template<bool errorTrack>
-    Scalar<Float, errorTrack> lnGamma(const Scalar<Float, errorTrack>& s) {
-        using T = Scalar<Float, false>;
-        assert(s.isPositive());
-        constexpr static int count = 4;
-        constexpr static float coeffcients[count]{7.6845130, -3.284681, 0.05832037, 0.0001856071};
-        Scalar<Float, errorTrack> temp = s + T(3.5);
-        temp -= (s + T(0.5)) * ln(temp);
-        Scalar<Float, errorTrack> ser(0.9999998);
-        Scalar<Float, errorTrack> copy(s);
-        for (int j = 0; j < count; ++j) {
-            copy += T(1);
-            ser += T(coeffcients[j]) / copy;
+        else {
+            /**
+             * float version is implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
+             */
+            constexpr static int count = 4;
+            constexpr static float coeffcients[count]{7.6845130, -3.284681, 0.05832037, 0.0001856071};
+            T temp = s + T(3.5);
+            temp -= (s + T(0.5)) * ln(temp);
+            T ser(0.9999998);
+            T copy(s);
+            for (int j = 0; j < count; ++j) {
+                copy += T(1);
+                ser += T(coeffcients[j]) / copy;
+            }
+            return -temp + T(0.91893853320467274178) + ln(ser / s);
         }
-        return -temp + T(0.91893853320467274178) + ln(ser / s);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> gamma(const Scalar<option, errorTrack>& s) {
+    template<ScalarOption option>
+    inline Scalar<option> gamma(const Scalar<option>& s) {
         return exp(lnGamma(s));
     }
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> beta(const Scalar<option, errorTrack>& s1, const Scalar<option, errorTrack>& s2) {
+    template<ScalarOption option>
+    inline Scalar<option> beta(const Scalar<option>& s1, const Scalar<option>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
@@ -96,9 +89,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
          */
-        template<ScalarOption option, bool errorTrack>
-        Scalar<option, errorTrack> incompGamma1(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
-            using T = Scalar<option, errorTrack>;
+        template<ScalarOption option>
+        Scalar<option> incompGamma1(const Scalar<option>& a, const Scalar<option>& x) {
+            using T = Scalar<option>;
             assert(a.isPositive() && !x.isNegative());
             assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
             T ap = a;
@@ -116,9 +109,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
          */
-        template<ScalarOption option, bool errorTrack>
-        Scalar<option, errorTrack> incompGamma2(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
-            using T = Scalar<option, errorTrack>;
+        template<ScalarOption option>
+        Scalar<option> incompGamma2(const Scalar<option>& a, const Scalar<option>& x) {
+            using T = Scalar<option>;
             assert(a.isPositive() && !x.isNegative());
             assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
             constexpr typename T::TrivialType epsilon = std::numeric_limits<typename T::TrivialType>::epsilon();
@@ -151,42 +144,42 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> gammaP(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
+    template<ScalarOption option>
+    Scalar<option> gammaP(const Scalar<option>& a, const Scalar<option>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<option, errorTrack>;
+        using T = Scalar<option>;
         return (x < a + T(1)) ? Internal::incompGamma1(a, x) : (T(1) - Internal::incompGamma2(a, x));
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> gammaQ(const Scalar<option, errorTrack>& a, const Scalar<option, errorTrack>& x) {
+    template<ScalarOption option>
+    Scalar<option> gammaQ(const Scalar<option>& a, const Scalar<option>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<option, errorTrack>;
+        using T = Scalar<option>;
         return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
     }
 
     template<class ScalarType>
     ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step) {
-        return Differential<ScalarType>::ridders(lnGamma<ScalarType::option, ScalarType::errorTrack>, x.getDerived(), step);
+        return Differential<ScalarType>::ridders(lnGamma<ScalarType::option>, x.getDerived(), step);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> erf(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> erf(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> erfc(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> erfc(const Scalar<option>& x) {
+        using T = Scalar<option>;
         T x2 = square(x);
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> standardNormalDistribution(const Scalar<option, errorTrack>& x) {
-        using T = Scalar<option, errorTrack>;
+    template<ScalarOption option>
+    Scalar<option> standardNormalDistribution(const Scalar<option>& x) {
+        using T = Scalar<option>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }
 }

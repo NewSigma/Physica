@@ -77,7 +77,7 @@ bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
 }
 
 int main() {
-    using RealType = Scalar<Double, false>;
+    using RealType = Scalar<Double>;
     using ComplexType = ComplexScalar<RealType>;
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector>;

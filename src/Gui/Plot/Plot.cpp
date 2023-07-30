@@ -84,7 +84,7 @@ namespace Physica::Gui {
     }
 
     QScatterSeries& Plot::label(double x, double y, QString text) {
-        using VectorType = Vector<Scalar<Double, false>, 1>;
+        using VectorType = Vector<Scalar<Double>, 1>;
         auto& result = scatter(VectorType{x}, VectorType{y});
         result.setPointLabelsVisible(true);
         result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));

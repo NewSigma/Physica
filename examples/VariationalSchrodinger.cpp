@@ -26,7 +26,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 class InfiniteDeepWell {
     constexpr static size_t baseSetCount = 8;
@@ -78,8 +78,8 @@ private:
             for (size_t j = i % 2; j < baseSetCount; j += 2) {
                 const ScalarType sum = ScalarType(i + j);
                 const ScalarType pro = ScalarType(i * j);
-                const ScalarType numerator = ScalarType::One() - sum - ScalarType::Two() * pro;
-                const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType::One()) * (sum - ScalarType::One());
+                const ScalarType numerator = ScalarType(1) - sum - ScalarType(2) * pro;
+                const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType(1)) * (sum - ScalarType(1));
                 result(i, j) = ScalarType(-8) * numerator / denominator;
             }
         }
@@ -91,7 +91,7 @@ private:
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = i % 2; j < baseSetCount; j += 2) {
                 const ScalarType sum = ScalarType(i + j);
-                const ScalarType term1 = ScalarType::Two() * (reciprocal(sum + ScalarType::One()) + reciprocal(sum + ScalarType(5)));
+                const ScalarType term1 = ScalarType(2) * (reciprocal(sum + ScalarType(1)) + reciprocal(sum + ScalarType(5)));
                 const ScalarType term2 = ScalarType(4) * reciprocal(sum + ScalarType(3));
                 result(i, j) = term1 - term2;
             }
@@ -100,7 +100,7 @@ private:
     }
 
     ScalarType baseFunction(const ScalarType& s, size_t n) {
-        return pow(s, ScalarType(n)) * (square(s) - ScalarType::One());
+        return pow(s, ScalarType(n)) * (square(s) - ScalarType(1));
     }
 
     template<class MatrixType>
@@ -108,11 +108,11 @@ private:
         constexpr size_t sampleCount = 100;
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
-        ScalarType temp_x = -ScalarType::One();
+        const ScalarType step = ScalarType(2) / ScalarType(sampleCount);
+        ScalarType temp_x = -ScalarType(1);
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp_x;
-            ScalarType temp_y = ScalarType::Zero();
+            ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
                 temp_y += solver.getEigenvectors().col(n)[j].getReal() * baseFunction(temp_x, j);
             y[i] = temp_y;
@@ -127,8 +127,8 @@ private:
         constexpr size_t sampleCount = 100;
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType::Two() / ScalarType(sampleCount);
-        ScalarType temp = -ScalarType::One();
+        const ScalarType step = ScalarType(2) / ScalarType(sampleCount);
+        ScalarType temp = -ScalarType(1);
         const ScalarType factor = square(ScalarType(n * M_PI * 0.25));
         if (n % 2U == 0) {
             for (size_t i = 0; i < sampleCount; ++i) {
@@ -223,10 +223,10 @@ private:
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
-        ScalarType temp_x = ScalarType::Zero();
+        ScalarType temp_x = ScalarType(0);
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp_x;
-            ScalarType temp_y = ScalarType::Zero();
+            ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
                 temp_y += coeff[j] * baseFunction(temp_x, j);
             y[i] = temp_y;
@@ -241,7 +241,7 @@ private:
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
-        ScalarType temp = ScalarType::Zero();
+        ScalarType temp = ScalarType(0);
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp;
             y[i] = exp(-temp) / sqrt(ScalarType(M_PI)); //The wave function in [1] is not normalized
@@ -306,7 +306,7 @@ private:
         MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
-                ScalarType coulomb2 = ScalarType::Zero();
+                ScalarType coulomb2 = ScalarType(0);
                 for (size_t m = 0; m < baseSetCount; ++m)
                     for (size_t n = 0; n < baseSetCount; ++n)
                         coulomb2 += Q_value(i, m, j, n) * trial_solution[m] * trial_solution[n];
@@ -340,15 +340,15 @@ private:
         const ScalarType sum = ScalarType(baseSetCoeff[p] + baseSetCoeff[q]);
         const ScalarType sum1 = ScalarType(baseSetCoeff[r] + baseSetCoeff[s]);
         const ScalarType demoninator = sum * sum1 * sqrt(sum + sum1);
-        const ScalarType numerator = ScalarType::Two() * sqrt(ScalarType(M_PI)) * square(ScalarType(M_PI));
+        const ScalarType numerator = ScalarType(2) * sqrt(ScalarType(M_PI)) * square(ScalarType(M_PI));
         return numerator / demoninator;
     }
 
     ScalarType groundStateEnergy(const VectorType& solution) {
-        ScalarType energy = ScalarType::Zero();
+        ScalarType energy = ScalarType(0);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
-                energy += ScalarType::Two() * solution[i] * solution[j] * h_value(i, j);
+                energy += ScalarType(2) * solution[i] * solution[j] * h_value(i, j);
                 for (size_t m = 0; m < baseSetCount; ++m)
                     for (size_t n = 0; n < baseSetCount; ++n)
                         energy += Q_value(i, m, j, n) * solution[i] * solution[j] * solution[m] * solution[n];
@@ -363,10 +363,10 @@ private:
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
         const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
-        ScalarType temp_x = ScalarType::Zero();
+        ScalarType temp_x = ScalarType(0);
         for (size_t i = 0; i < sampleCount; ++i) {
             x[i] = temp_x;
-            ScalarType temp_y = ScalarType::Zero();
+            ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
                 temp_y += coeff[j] * baseFunction(temp_x, j);
             y[i] = temp_y;

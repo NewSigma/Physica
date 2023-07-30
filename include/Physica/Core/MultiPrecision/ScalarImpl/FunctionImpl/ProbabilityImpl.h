@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,28 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<bool errorTrack>
-    Scalar<MultiPrecision, errorTrack> floor(const Scalar<MultiPrecision, errorTrack>& s) {
-        if(s.isInteger())
-            return Scalar(s);
-        const auto size = s.getSize();
-        const auto power = s.getPower();
-        const auto power_1 = power + 1;
-        auto length = size > power_1 ? power_1 : size;
-        length = s.isNegative() ? -length : length;
-        Scalar<MultiPrecision, errorTrack> result(length, power);
-        for(int i = 0; i < length; ++i)
-            result.setByte(i, s[i]);
-        return result;
+    template<ScalarOption option>
+    Scalar<option> floor(const Scalar<option>& s) {
+        return Scalar<option>(std::floor(s.getTrivial()));
     }
 
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option, errorTrack> floor(const Scalar<option, errorTrack>& s) {
-        return Scalar<option, errorTrack>(std::floor(s.getTrivial()));
-    }
+    template<>
+    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s);
 
-    template<ScalarOption option, bool errorTrack>
-    inline Scalar<option, errorTrack> ceil(const Scalar<option, errorTrack>& s) {
-        return Scalar<option, errorTrack>(std::ceil(s.getTrivial()));
+    template<ScalarOption option>
+    inline Scalar<option> ceil(const Scalar<option>& s) {
+        return Scalar<option>(std::ceil(s.getTrivial()));
     }
 }

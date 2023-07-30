@@ -81,7 +81,7 @@ namespace Physica::Core {
             GridType& grid = factorGrids[i];
             size_t j = 0;
             GridType::forReducedKInGrid(grid, lattice, [this, element, &i, &j, &grid](VectorType k) {
-                ComplexType factor = ComplexType::Zero();
+                auto factor = ComplexType(0);
                 for (size_t ion = 0; ion < getAtomCount(); ++ion) {
                     if (getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
                         const ScalarType phase = k * getPos().row(ion).asVector();

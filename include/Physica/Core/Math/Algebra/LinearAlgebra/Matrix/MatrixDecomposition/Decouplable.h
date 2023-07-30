@@ -52,7 +52,7 @@ namespace Physica::Core {
             temp = std::max(abs(temp * std::numeric_limits<RealType>::epsilon()),
                             RealType(std::numeric_limits<RealType>::epsilon() * std::numeric_limits<RealType>::epsilon()));
             if (abs(mat(lower, lower_1)) < temp) {
-                mat(lower, lower_1) = ScalarType::Zero();
+                mat(lower, lower_1) = ScalarType(0);
                 break;
             }
         }
@@ -71,7 +71,7 @@ namespace Physica::Core {
             RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
             temp = std::max(abs(temp * RealType(std::numeric_limits<ScalarType>::epsilon())), RealType(std::numeric_limits<ScalarType>::min()));
             if (abs(mat(lower_1, lower)) < temp) {
-                mat(lower_1, lower) = ScalarType::Zero();
+                mat(lower_1, lower) = ScalarType(0);
                 break;
             }
         }

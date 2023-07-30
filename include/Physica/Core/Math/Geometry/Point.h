@@ -25,7 +25,7 @@ namespace Physica::Core {
     /*!
      * By default, point do not need high precision, so @param type is set to @enum ScalarType::Float.
      */
-    template<size_t dim, class ScalarType = Scalar<Float, false>>
+    template<size_t dim, class ScalarType = Scalar<Float>>
     class Point {
         static_assert(dim > 0, "0 dim point is not allowed\n");
     public:

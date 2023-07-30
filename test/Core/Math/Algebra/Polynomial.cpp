@@ -27,14 +27,14 @@ bool testPolyRoot(const RValueVector<VectorType>& coeffs, double precision) {
     auto roots = polyRoot(poly);
     for (const auto& root : roots) {
         auto result = poly(root);
-        if (!scalarNear(result, decltype(result)::Zero(), precision))
+        if (!scalarNear(result, decltype(result)(0), precision))
             return false;
     }
     return true;
 }
 
 int main() {
-    using ScalarType = Scalar<Double, false>;
+    using ScalarType = Scalar<Double>;
     Vector<ScalarType, 6> coeffs{1, 2, 3, 4, 5, 6};
     if (!testPolyRoot(coeffs, 1E-11))
         return 1;

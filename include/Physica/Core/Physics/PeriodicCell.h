@@ -478,7 +478,7 @@ namespace Physica::Core {
     void PeriodicCell<ScalarType, Dim>::normalize_direct() {
         for (auto& elem : pos) {
             elem -= floor(elem);
-            assert(ScalarType::Zero() <= elem && elem <= ScalarType::One());
+            assert(ScalarType(0) <= elem && elem <= ScalarType(1));
         }
     }
 
@@ -589,7 +589,7 @@ namespace Physica::Core {
         PositionMatrix new_pos(newNumParticle, Dim);
         size_t toFill = 0;
         size_t toCheck = 0;
-        const ScalarType one = ScalarType::One();
+        const ScalarType one = ScalarType(1);
         for (; toFill < newNumParticle; ++toFill) {
             for (; toCheck < numParticle; ++toCheck) {
                 auto rowToCheck = target.row(toCheck);

@@ -24,7 +24,7 @@
 
 using namespace Physica;
 using namespace Physica::Core;
-using ScalarType = Scalar<Float, false>;
+using ScalarType = Scalar<Float>;
 using VectorType = Vector<ScalarType>;
 
 __global__ void test_kernel(

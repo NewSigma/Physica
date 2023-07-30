@@ -36,7 +36,7 @@ constexpr double latticeSize = 512;
 constexpr double temperatureT = 2;
 constexpr double energy = numMolecular * temperatureT / 2;
 
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, ScalarType, 1, 1>;

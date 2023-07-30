@@ -52,5 +52,5 @@ namespace Physica::Core {
      * \class Scalar is a advanced float type that supports multiple precision and error track,
      * which is also compatible with float and double.
      */
-    template<ScalarOption option = MultiPrecision, bool errorTrack = true> class Scalar;
+    template<ScalarOption option = Double> class Scalar;
 }

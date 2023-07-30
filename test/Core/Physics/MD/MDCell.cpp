@@ -20,7 +20,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 using namespace Physica::Core;
-using MDCellType = MDCell<Scalar<Double, false>, Scalar<Double, false>>;
+using MDCellType = MDCell<Scalar<Double>, Scalar<Double>>;
 
 bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
     if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))

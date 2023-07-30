@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 int main() {
     {

@@ -72,7 +72,7 @@ namespace Physica::Core {
         This result{};
         result.reserve(len);
         for(size_t i = 0; i < len; ++i)
-            result.get_allocator().construct(result.data() + i, T::Zero());
+            result.get_allocator().construct(result.data() + i, T(0));
         result.setLength(len);
         return result;
     }

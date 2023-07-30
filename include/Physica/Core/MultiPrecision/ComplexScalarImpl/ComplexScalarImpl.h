@@ -21,7 +21,7 @@
 namespace Physica::Core {
     template<class T>
     ComplexScalar<T>::ComplexScalar(T real_)
-            : real(real_), imag(T::Zero()) {}
+            : real(real_), imag(0) {}
 
     template<class T>
     ComplexScalar<T>::ComplexScalar(T real_, T imag_)
@@ -82,21 +82,6 @@ namespace Physica::Core {
         if(real.isNegative() && !imag.isZero())
             result += T(M_PI);
         return result;
-    }
-
-    template<class T>
-    inline ComplexScalar<T> ComplexScalar<T>::Zero() {
-        return ComplexScalar(T::Zero(), T::Zero());
-    }
-
-    template<class T>
-    inline ComplexScalar<T> ComplexScalar<T>::One() {
-        return ComplexScalar(T::One(), T::Zero());
-    }
-
-    template<class T>
-    inline ComplexScalar<T> ComplexScalar<T>::Two() {
-        return ComplexScalar(T::Two(), T::Zero());
     }
 
     template<class T>

@@ -97,7 +97,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     ScalarType BandGrid<ScalarType, isSpinPolarized>::getTotalEnergy() const noexcept {
-        ScalarType energy = ScalarType::Zero();
+        ScalarType energy = ScalarType(0);
         for (const auto& kPoint : kPointGrid) {
             const ScalarType energyUp = kPoint.getBandEnergy(SpinState::Up).sum();
             const ScalarType energyDown = kPoint.getBandEnergy(SpinState::Down).head(electronCount / 2).sum();
@@ -115,13 +115,13 @@ namespace Physica::Core {
         auto dos = VectorType(atEnergy.getLength());
         for (size_t i = 0; i < atEnergy.getLength(); ++i) {
             const ScalarType energy = atEnergy[i];
-            ScalarType density = ScalarType::Zero();
+            ScalarType density = ScalarType(0);
             for (size_t kPointId = 0; kPointId < kPointGrid.getSize(); ++i) {
                 const ScalarType energy0 = kPointGrid[kPointId].getTotalEnergy();
                 const auto gradE = gradEnergy(kPointId);
                 const ScalarType normalizer = gradE[0] * gradE[1] * gradE[2] * ScalarType(0.5);
 
-                ScalarType deltaDensity = ScalarType::Zero();
+                ScalarType deltaDensity = ScalarType(0);
                 for (int sigma1; sigma1 < 2; ++sigma1) {
                     for (int sigma2; sigma2 < 2; ++sigma2) {
                         for (int sigma3; sigma3 < 2; ++sigma3) {

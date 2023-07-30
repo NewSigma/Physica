@@ -49,7 +49,7 @@ namespace Physica::Core {
     template<class Integrator>
     void PoissonModel<MeshType, Functor>::solve() {
         Base::A.clear();
-        Base::b = ScalarType::Zero();
+        Base::b = ScalarType(0);
         const auto& nodeTypes = mesh.getNodeTypes();
         const auto& coeffs = mesh.getCoeffs();
         for (const auto& elem : mesh.getElements()) {

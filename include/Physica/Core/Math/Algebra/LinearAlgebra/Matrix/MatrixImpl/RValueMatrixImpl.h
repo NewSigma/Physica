@@ -253,7 +253,7 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
         assert(getRow() == getColumn());
-        ScalarType result = ScalarType::Zero();
+        ScalarType result = ScalarType(0);
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
         return result;

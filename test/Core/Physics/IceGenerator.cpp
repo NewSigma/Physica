@@ -20,7 +20,7 @@
 
 using namespace Physica;
 using namespace Physica::Core;
-using ScalarType = Scalar<Double, false>;
+using ScalarType = Scalar<Double>;
 
 namespace Physica {
     class Test {

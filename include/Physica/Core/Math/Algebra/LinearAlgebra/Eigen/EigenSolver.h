@@ -220,7 +220,7 @@ namespace Physica::Core {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
             if (eigenvalues[i].getImag().isZero()) {
                 auto col = block.col(i);
-                col[i] = ScalarType::One();
+                col[i] = ScalarType(1);
                 for (size_t j = i - 1; j < i; --j) {
                     if (eigenvalues[j].getImag().isZero()) {
                         auto row = block.row(j);
@@ -250,13 +250,13 @@ namespace Physica::Core {
                     col2[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
                 }
                 else {
-                    ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(ScalarType::Zero(), -matrixT(i - 1, i)) /
+                    ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(ScalarType(0), -matrixT(i - 1, i)) /
                                                   ComplexScalar<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
                     col1[i - 1] = c.getReal();
                     col2[i - 1] = c.getImag();
                 }
-                col1[i] = ScalarType::Zero();
-                col2[i] = ScalarType::One();
+                col1[i] = ScalarType(0);
+                col2[i] = ScalarType(1);
 
                 for (size_t j = i - 2; j < i; --j) {
                     if (eigenvalues[j].getImag().isZero()) {
@@ -283,7 +283,7 @@ namespace Physica::Core {
                         const ScalarType x = matrixT(j - 1, j);
                         const ScalarType y = matrixT(j, j - 1);
                         const ScalarType vr = square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()) - square(eigenvalues[i].getImag());
-                        const ScalarType vi = ScalarType::Two() * (eigenvalues[j].getReal() - eigenvalues[i].getReal()) * eigenvalues[i].getImag();
+                        const ScalarType vi = ScalarType(2) * (eigenvalues[j].getReal() - eigenvalues[i].getReal()) * eigenvalues[i].getImag();
                         
                         const ScalarType temp1 = matrixT(j, j) - eigenvalues[i].getReal();
 
@@ -316,7 +316,7 @@ namespace Physica::Core {
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
             auto col = block.col(i);
-            col[i] = ScalarType::One();
+            col[i] = ScalarType(1);
             for (size_t j = i - 1; j < i; --j) {
                 assert(!scalarNear(eigenvalues[i], eigenvalues[j], 1E-14)); //TODO: handle degeneracy
                 auto row = block.row(j);

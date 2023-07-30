@@ -20,15 +20,15 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Float, false>;
+using ScalarType = Scalar<Float>;
 
 int main() {
     constexpr float epsilon = std::numeric_limits<float>::epsilon();
-    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({-1, -1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({-1, -1}, {0, 0}, {1, 0}), sqrt(ScalarType(2)), epsilon))
         return 1;
-    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({2, 1}, {0, 0}, {1, 0}), sqrt(ScalarType::Two()), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({2, 1}, {0, 0}, {1, 0}), sqrt(ScalarType(2)), epsilon))
         return 1;
-    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({1, -1}, {0, 0}, {1, 0}), ScalarType::One(), epsilon))
+    if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({1, -1}, {0, 0}, {1, 0}), ScalarType(1), epsilon))
         return 1;
     {
         using VectorType = Vector<ScalarType, 2>;
