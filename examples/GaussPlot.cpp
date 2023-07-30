@@ -95,8 +95,6 @@ int main(int argc, char** argv) {
     {
         VectorType moved = meanKinetic - ScalarType(temperatureT * 0.5);
         auto& scatter = plot->scatter(moved, deviaKinetic);
-        scatter.attachAxis(plot->getAxisX());
-        scatter.attachAxis(plot->getAxisY());
         scatter.setMarkerSize(10);
         scatter.setColor(Qt::red);
     }

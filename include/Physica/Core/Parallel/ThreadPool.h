@@ -71,6 +71,7 @@ namespace Physica::Core {
         template<class Function, class... Args>
         std::future<typename std::invoke_result<Function, Args...>::type> schedule(Function func, Args... args);
         std::unique_ptr<Task> steal();
+        void waitExit();
         void restart();
         /* Getters */
         [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.getLength(); }
@@ -83,7 +84,6 @@ namespace Physica::Core {
     private:
         ThreadPool(unsigned int threadCount);
         /* Operations */
-        void waitExit();
         void workerMainLoop(unsigned int thread_id);
         /* Static Members */
         [[nodiscard]] static inline unsigned int getNumProcesser() noexcept { return get_nprocs(); }

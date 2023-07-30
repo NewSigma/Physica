@@ -48,6 +48,15 @@ namespace Physica::Core {
         return std::unique_ptr<Task>(nullptr);
     }
 
+    void ThreadPool::waitExit() {
+        shouldExit();
+        for (auto& data : thread_data) {
+            auto& thread = data.thread;
+            if (thread->joinable())
+                thread->join();
+        }
+    }
+
     void ThreadPool::restart() {
         waitExit();
         exit = false;
@@ -76,15 +85,6 @@ namespace Physica::Core {
     ThreadPool& ThreadPool::getInstance() {
         static ThreadPool pool(makeNumThread());
         return pool;
-    }
-
-    void ThreadPool::waitExit() {
-        shouldExit();
-        for (auto& data : thread_data) {
-            auto& thread = data.thread;
-            if (thread->joinable())
-                thread->join();
-        }
     }
 
     void ThreadPool::workerMainLoop(unsigned int thread_id) {
