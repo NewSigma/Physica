@@ -19,8 +19,10 @@
 #pragma once
 
 #include <limits>
+#include "Scalar.h"
 
 namespace Physica::Core {
+    template<class ScalarType> class Differentiable;
     /**
      * Auto differential support for scalars
      */
@@ -36,13 +38,12 @@ namespace Physica::Core {
         ~Differentiable() = default;
         /* Operators */
         Differentiable& operator=(Differentiable obj) noexcept;
-        [[nodiscard]] inline Differentiable operator+(const Differentiable& other) const;
-        [[nodiscard]] inline Differentiable operator-(const Differentiable& other) const;
-        [[nodiscard]] inline Differentiable operator*(const Differentiable& other) const;
-        [[nodiscard]] inline Differentiable operator/(const Differentiable& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         void swap(Differentiable& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
+        [[nodiscard]] const ScalarType& getTangent() const noexcept { return tangent; }
     };
 
     template<class ScalarType>
@@ -60,6 +61,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline Differentiable<ScalarType> Differentiable<ScalarType>::operator-() const {
+        return {-value, -tangent};
+    }
+
+    template<class ScalarType>
     void Differentiable<ScalarType>::swap(Differentiable& obj) noexcept {
         value.swap(obj.value);
         tangent.swap(obj.tangent);
@@ -71,4 +77,4 @@ namespace std {
     struct numeric_limits<Physica::Core::Differentiable<ScalarType>> : public numeric_limits<ScalarType> {};
 }
 
-#include "DifferentiableImpl/DifferentiableImpl.h"
+#include "DifferentiableImpl/ElementaryFunction.h"

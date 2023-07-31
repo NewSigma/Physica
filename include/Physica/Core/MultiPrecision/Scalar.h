@@ -22,6 +22,7 @@
 #include <ostream>
 #include "MultiPrecisionType.h"
 #include "Rational.h"
+#include "Physica/Core/Exception/NotImplementedException.h"
 #include "Physica/Utils/Template/CRTPBase.h"
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
@@ -142,6 +143,9 @@ namespace Physica::Core {
             (void)index;
             this->getDerived() = ScalarType(value);
         }
+        /* Auto differential */
+        [[nodiscard]] const ScalarType& getValue() const noexcept { return this->getDerived(); }
+        [[nodiscard]] ScalarType getTangent() const noexcept { return ScalarType(0); }
     };
 
     template<class T>
