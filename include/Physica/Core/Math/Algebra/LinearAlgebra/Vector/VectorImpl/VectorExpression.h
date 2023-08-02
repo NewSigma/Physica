@@ -418,14 +418,14 @@ namespace Physica::Core {
         [[nodiscard]] PacketType packet(size_t index) const {
             PacketType result = exp.template packet<PacketType>(index);
             for (size_t i = 0; i < static_cast<size_t>(PacketType::size()); ++i)
-                result.insert(i, std::cbrt(result[i]));
+                result.insert(i, cbrt(result[i]));
             return result;
         }
         template<class PacketType>
         [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
             PacketType result = exp.template packetPartial<PacketType>(index, count);
             for (size_t i = 0; i < count; ++i)
-                result.insert(i, std::cbrt(result[i]));
+                result.insert(i, cbrt(result[i]));
             return result;
         }
         [[nodiscard]] size_t getLength() const { return exp.getLength(); }

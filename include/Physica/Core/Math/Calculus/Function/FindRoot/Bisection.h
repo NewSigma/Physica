@@ -23,8 +23,7 @@
 namespace Physica::Core {
     template<class T, class Function>
     T bisection(Function func, const T& n, const T& x1, const T& x2, const T& y1, const T& y2) {
-        constexpr double epsilon_trivial = std::numeric_limits<typename T::TrivialType>::epsilon();
-        const T epsilon = T(epsilon_trivial);
+        const T epsilon = std::numeric_limits<T>::epsilon();
         assert(T(n - y1).isPositive() ^ T(n - y2).isPositive()); //(n - y1) and (n - y2) have different sign
         if(n == y1)
             return T(x1);

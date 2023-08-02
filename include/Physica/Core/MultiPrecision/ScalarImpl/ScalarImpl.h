@@ -28,6 +28,11 @@
 namespace Physica::Core {
     //////////////////////////////////////////////Global//////////////////////////////////////////////
     template<class ScalarType>
+    inline ScalarType horizontal_add(const ScalarBase<ScalarType>& s) {
+        return s.getDerived();
+    }
+
+    template<class ScalarType>
     ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
         static_assert(Core::is_scalar<ScalarType>::value && !ScalarType::isComplex && !ScalarType::isDifferentiable, "[Error]: Invalid template param");
         const auto& s1 = scalar1.getDerived();

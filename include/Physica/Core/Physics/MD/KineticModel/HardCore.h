@@ -220,14 +220,14 @@ namespace Physica::Core {
                 size_t i = 0;
                 for (; i < to; i += PacketType::size()) {
                     const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
-                    if (horizontal_or(boolPacket)) [[unlikely]]
+                    if (boolPacket.horizontal_or()) [[unlikely]]
                         return true;
                 }
 
                 if (to != length) {
                     const size_t count = length - i;
                     const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
-                    if (horizontal_or(boolPacket)) [[unlikely]]
+                    if (boolPacket.horizontal_or()) [[unlikely]]
                         return true;
                 }
             }
@@ -246,14 +246,14 @@ namespace Physica::Core {
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
                         const auto boolPacket = pos.template packet<PacketType>(i) < zeros;
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
 
                     if (to != numReplica) {
                         const size_t count = numReplica - i;
                         const auto boolPacket = pos.template packetPartial<PacketType>(i, count) < zeros;
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
                 }
@@ -265,7 +265,7 @@ namespace Physica::Core {
                         const PacketType pack1 = pos_end.template packet<PacketType>(i) - latticeSizes;
                         const PacketType pack2 = pos.template packet<PacketType>(i);
                         const auto boolPacket = pack1 > pack2;
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
 
@@ -274,7 +274,7 @@ namespace Physica::Core {
                         const PacketType pack1 = pos_end.template packetPartial<PacketType>(i, count) - latticeSizes;
                         const PacketType pack2 = pos.template packetPartial<PacketType>(i, count);
                         const auto boolPacket = pack1 > pack2;
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
                 }
@@ -285,14 +285,14 @@ namespace Physica::Core {
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
                         const auto boolPacket = pos0.template packet<PacketType>(i) > pos.template packet<PacketType>(i);
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
 
                     if (to != numReplica) {
                         const size_t count = numReplica - i;
                         const auto boolPacket = pos0.template packetPartial<PacketType>(i, count) > pos.template packetPartial<PacketType>(i, count);
-                        if (horizontal_or(boolPacket)) [[unlikely]]
+                        if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
                 }
@@ -302,14 +302,14 @@ namespace Physica::Core {
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
                             const auto boolPacket = pos.template packet<PacketType>(i) > latticeSizes;
-                            if (horizontal_or(boolPacket)) [[unlikely]]
+                            if (boolPacket.horizontal_or()) [[unlikely]]
                                 return true;
                         }
 
                         if (to != numReplica) {
                             const size_t count = numReplica - i;
                             const auto boolPacket = pos.template packetPartial<PacketType>(i, count) > latticeSizes;
-                            if (horizontal_or(boolPacket)) [[unlikely]]
+                            if (boolPacket.horizontal_or()) [[unlikely]]
                                 return true;
                         }
                     }

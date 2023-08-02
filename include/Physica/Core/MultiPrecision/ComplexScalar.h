@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/BestPacket.h"
 
 namespace Physica::Core {
     template<class T> class ComplexScalar;

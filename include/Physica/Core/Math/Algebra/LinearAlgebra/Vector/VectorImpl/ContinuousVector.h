@@ -32,9 +32,10 @@ namespace Physica::Core {
         using Base = LValueVector<Derived>;
         using typename Base::ScalarType;
     private:
-        using TrivialType = typename ScalarType::TrivialType;
-        using ConstPointerType = typename std::add_pointer<typename std::add_const<TrivialType>::type>::type;
-        using pointer = typename std::add_pointer<TrivialType>::type;
+        constexpr static bool isFloat = ScalarType::option == Float;
+        constexpr static bool isDouble = ScalarType::option == Double;
+        using PointerType = typename std::add_pointer<ScalarType>::type;
+        using ConstPointerType = typename std::add_pointer<typename std::add_const<ScalarType>::type>::type;
     public:
         ~ContinuousVector() = default;
         /* Operators */
@@ -72,8 +73,8 @@ namespace Physica::Core {
         ContinuousVector(const ContinuousVector&) = default;
         ContinuousVector(ContinuousVector&&) noexcept = default;
     private:
-        pointer data_ptr(size_t index) { return reinterpret_cast<pointer>(&(*this)[index]); }
-        ConstPointerType data_ptr(size_t index) const { return reinterpret_cast<ConstPointerType>(&(*this)[index]); }
+        PointerType data_ptr(size_t index) { return &(*this)[index]; }
+        ConstPointerType data_ptr(size_t index) const { return &(*this)[index]; }
         /* Friends */
         template<class T>
         friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);

@@ -50,13 +50,13 @@ namespace Physica::Core {
     template<class T>
     inline typename ComplexScalar<T>::PacketType ComplexScalar<T>::packet() const {
         PacketType packet{};
-        packet.load(reinterpret_cast<TrivialType*>(const_cast<T*>(&real)));
+        packet.load(&real);
         return packet;
     }
 
     template<class T>
     inline void ComplexScalar<T>::writePacket(const PacketType packet) {
-        packet.store(reinterpret_cast<TrivialType*>(&real));
+        packet.store(&real);
     }
 
     template<class T>

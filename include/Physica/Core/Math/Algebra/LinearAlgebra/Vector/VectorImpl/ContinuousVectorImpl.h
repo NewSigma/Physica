@@ -73,7 +73,7 @@ namespace Physica::Core {
     template<class PacketType>
     inline PacketType ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + PacketType::size() <= Base::getLength());
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
+        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             packet.load(data_ptr(index));
             return packet;
@@ -85,7 +85,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline PacketType ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>) {
+        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             packet.load_partial(count, data_ptr(index));
             return packet;
@@ -97,7 +97,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
+        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>)
             packet.store(data_ptr(index));
         else
             Base::template writePacket(index, packet);
@@ -106,7 +106,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
-        if constexpr (std::is_same_v<TrivialType, typename Internal::Traits<PacketType>::ScalarType>)
+        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>)
             packet.store_partial(count, data_ptr(index));
         else
             Base::template writePacketPartial<PacketType>(index, count, packet);
@@ -152,8 +152,6 @@ namespace Physica::Core {
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
                                          const H5::DataSpace& file_space,
                                          const H5::DSetMemXferPropList& xfer_plist) {
-        constexpr bool isFloat = std::is_same<TrivialType, float>::value;
-        constexpr bool isDouble = std::is_same<TrivialType, double>::value;
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
         if constexpr (isFloat)
             dataset.read(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
@@ -167,8 +165,6 @@ namespace Physica::Core {
     void ContinuousVector<Derived>::write(H5::DataSet& dataset,
                                           const H5::DataSpace& file_space,
                                           const H5::DSetMemXferPropList& xfer_plist) const {
-        constexpr bool isFloat = std::is_same<TrivialType, float>::value;
-        constexpr bool isDouble = std::is_same<TrivialType, double>::value;
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
         if constexpr (isFloat)
             dataset.write(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);

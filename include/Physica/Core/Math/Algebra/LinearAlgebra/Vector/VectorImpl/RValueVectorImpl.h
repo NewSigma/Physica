@@ -24,7 +24,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T1, class T2, bool enableSIMD>
         struct AssignImpl {
-            static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+            inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
                 using ScalarType = typename T2::ScalarType;
                 for (size_t i = 0; i < v1.getLength(); ++i)
                     v2[i] = ScalarType(v1.calc(i));
@@ -40,7 +40,7 @@ namespace Physica::Core {
             using ScalarType = typename T1::ScalarType;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
 
-            static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+            inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                     for (size_t i = 0; i < to; i += PacketType::size())
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
             constexpr static bool enableSIMD = isSameType && isNotComplex && !isBadPacket;
         public:
-            static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
+            inline static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 if constexpr (enableSIMD) {
                     const size_t length = v1.getLength();
                     size_t i = 0;
@@ -97,7 +97,7 @@ namespace Physica::Core {
                         const size_t count = length - i;
                         buffer += v1.getDerived().template packetPartial<PacketType>(i, count) * v2.getDerived().template packetPartial<PacketType>(i, count);
                     }
-                    return ResultType(horizontal_add(buffer));
+                    return buffer.horizontal_add();
                 }
                 else {
                     auto result = ResultType(0);
@@ -125,7 +125,7 @@ namespace Physica::Core {
     template<class PacketType>
     inline PacketType RValueVector<Derived>::packet(size_t index) const {
         PacketType packet{};
-        for (int i = 0; i < PacketType::size(); ++i, ++index)
+        for (size_t i = 0; i < PacketType::size(); ++i, ++index)
             packet.insert(i, calc(index).getTrivial());
         return packet;
     }

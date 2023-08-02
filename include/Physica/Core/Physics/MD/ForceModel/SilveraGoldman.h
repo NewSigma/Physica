@@ -83,9 +83,9 @@ namespace Physica::Core {
         const PacketType rep(rep_r.getTrivial(), rep_r3.getTrivial(), rep_r4.getTrivial(), rep_r5.getTrivial());
 
         const ScalarType rep_r6 = rep_r5 * rep_r;
-        const PacketType rep1 = rep * rep_r6.getTrivial();
+        const PacketType rep1 = rep * rep_r6;
         const PacketType const1(-6 * c6, -8 * c8, 9 * c9, -10 * c10);
-        const ScalarType d_g = horizontal_add(rep1 * const1);
+        const ScalarType d_g = (rep1 * const1).horizontal_add();
         if (r < cutoff) {
             const ScalarType g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 + rep_r6 * c10) * rep_r4;
             const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));

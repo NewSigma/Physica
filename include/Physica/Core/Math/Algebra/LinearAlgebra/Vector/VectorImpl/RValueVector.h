@@ -22,7 +22,6 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
-#include "BestPacket.h"
 #include "RVectorBlock.h"
 
 namespace Physica::Core {
@@ -35,6 +34,26 @@ namespace Physica::Core {
 
     namespace Internal {
         template<class T> class Traits;
+
+        template<class ScalarType, size_t Length>
+        struct EnableSIMDHelper {
+            constexpr static bool good_scalar = false;
+            constexpr static int packet_size = 1;
+        };
+
+        template<ScalarOption option, size_t Length>
+        struct EnableSIMDHelper<Scalar<option>, Length> {
+            constexpr static bool good_scalar = true;
+            constexpr static int packet_size = BestPacket<Scalar<option>, Length>::Size;
+        };
+
+        template<class VectorType1, class VectorType2>
+        class EnableSIMD {
+            using Helper = EnableSIMDHelper<typename VectorType1::ScalarType, VectorType1::SizeAtCompile>;
+            constexpr static bool same_scalar = std::is_same<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::value;
+        public:
+            constexpr static bool value = same_scalar && Helper::good_scalar && (Helper::packet_size > 1);
+        };
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;

@@ -261,11 +261,9 @@ namespace Physica::Core {
         constexpr double xmin = 2;
         constexpr double half = 0.5;
         constexpr double pi_trivial = M_PI;
-        constexpr double epsilon_trivial = std::numeric_limits<typename T::TrivialType>::epsilon();
-        constexpr double fpmin_trivial = std::numeric_limits<typename T::TrivialType>::min() / epsilon_trivial;
         const T pi = T(pi_trivial);
-        const T epsilon = T(epsilon_trivial);
-        const T fpmin = T(fpmin_trivial);
+        const T epsilon = std::numeric_limits<T>::epsilon();
+        const T fpmin = T(std::numeric_limits<T>::min()) / epsilon;
         assert(!n.isNegative() && x.isPositive());
 
         const Integer nl = x < T(xmin)

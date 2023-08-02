@@ -101,7 +101,7 @@ namespace Physica::Core {
                 ap += T(1);
                 temp *= x / ap;
                 sum += temp;
-            } while (fabs(temp.getTrivial()) >= fabs(sum.getTrivial()) * std::numeric_limits<typename T::TrivialType>::epsilon());
+            } while (abs(temp) >= abs(sum) * std::numeric_limits<T>::epsilon());
             return sum * exp(T(-x + a * ln(x) - lnGamma(a)));
         }
         /**
@@ -114,8 +114,8 @@ namespace Physica::Core {
             using T = Scalar<option>;
             assert(a.isPositive() && !x.isNegative());
             assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
-            constexpr typename T::TrivialType epsilon = std::numeric_limits<typename T::TrivialType>::epsilon();
-            constexpr typename T::TrivialType floatMin = std::numeric_limits<typename T::TrivialType>::min() / epsilon;
+            const T epsilon = std::numeric_limits<T>::epsilon();
+            const T floatMin = T(std::numeric_limits<T>::min()) / epsilon;
 
             T b = x + T(1) - a;
             T c = reciprocal(T(floatMin));
@@ -129,17 +129,17 @@ namespace Physica::Core {
                 b += T(2);
                 d = an * d + b;
                 T copy_d(d);
-                if (copy_d.toAbs().getTrivial() < floatMin)
-                    d = T(floatMin);
+                if (copy_d.toAbs() < floatMin)
+                    d = floatMin;
 
                 c = an / c + b;
                 T copy_c(c);
-                if (copy_c.toAbs().getTrivial() < floatMin)
-                    c = T(floatMin);
+                if (copy_c.toAbs() < floatMin)
+                    c = floatMin;
                 d = reciprocal(d);
                 temp = c * d;
                 h *= temp; 
-            } while (T(temp - T(1)).toAbs().getTrivial() >= epsilon);
+            } while (T(temp - T(1)).toAbs() >= epsilon);
             return h * exp(T(-x + a * ln(x) - lnGamma(a)));
         }
     }

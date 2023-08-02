@@ -126,9 +126,7 @@ namespace Physica::Core {
                 return ScalarType(getReal().isNegative() ? -1 : 1);
         }
 
-        [[nodiscard]] RealType norm() const {
-            return sqrt(squaredNorm());
-        }
+        [[nodiscard]] RealType norm() const { return sqrt(squaredNorm()); }
 
         [[nodiscard]] RealType squaredNorm() const {
             if constexpr (isComplex)
@@ -139,30 +137,25 @@ namespace Physica::Core {
         /* SIMD support */
         constexpr static int size() { return 1; }
 
-        Derived& load(const TrivialType* p) {
+        Derived& load(const ScalarType* p) {
             this->getDerived() = *p;
             return this->getDerived();
         }
 
-        void store(TrivialType* p) const {
-            *p = this->getDerived().getTrivial();
-        }
+        void store(ScalarType* p) const { *p = this->getDerived().getTrivial(); }
 
-        Derived& load_partial(int n, const TrivialType* p) {
+        Derived& load_partial(int n, const ScalarType* p) {
             if (n)
                 load(p);
             return this->getDerived();
         }
 
-        void store_partial(int n, TrivialType* p) const {
+        void store_partial(int n, ScalarType* p) const {
             if (n)
                 store(p);
         }
 
-        void insert(int index, TrivialType value) {
-            (void)index;
-            this->getDerived() = ScalarType(value);
-        }
+        void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
         /* Auto differential support */
         [[nodiscard]] const PlainScalar& getValue() const noexcept {
             if constexpr (isDifferentiable)
@@ -178,6 +171,9 @@ namespace Physica::Core {
 
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
+
+    template<class ScalarType>
+    inline ScalarType horizontal_add(const ScalarBase<ScalarType>& s);
 
     template<class ScalarType> ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2);
     template<class ScalarType>
@@ -455,3 +451,4 @@ namespace std {
 }
 
 #include "ScalarImpl/ScalarImpl.h"
+#include "SIMD.h"
