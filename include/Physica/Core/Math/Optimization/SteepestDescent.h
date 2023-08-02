@@ -44,6 +44,7 @@ namespace Physica::Core {
         template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
         void swap(SteepestDescent& obj) noexcept;
         /* Getters */
+        [[nodiscard]] inline size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
         [[nodiscard]] ScalarType getObjectiveValue() const noexcept { return nowY; }

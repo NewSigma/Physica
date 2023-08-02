@@ -503,11 +503,11 @@ namespace Physica::Core {
         assert(type == Type::Direct);
         toSuperPosDirect<Option>(pos, x, y, z);
         auto rowX = lattice.row(0);
-        rowX *= ScalarType(x);
+        rowX.asVector() *= ScalarType(x);
         auto rowY = lattice.row(1);
-        rowY *= ScalarType(y);
+        rowY.asVector() *= ScalarType(y);
         auto rowZ = lattice.row(2);
-        rowZ *= ScalarType(z);
+        rowZ.asVector() *= ScalarType(z);
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -519,11 +519,11 @@ namespace Physica::Core {
         const ScalarType inv_z = Core::reciprocal(ScalarType(z));
 
         auto rowX = lattice.row(0);
-        rowX *= inv_x;
+        rowX.asVector() *= inv_x;
         auto rowY = lattice.row(1);
-        rowY *= inv_y;
+        rowY.asVector() *= inv_y;
         auto rowZ = lattice.row(2);
-        rowZ *= inv_z;
+        rowZ.asVector() *= inv_z;
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -578,11 +578,11 @@ namespace Physica::Core {
         assert(target.getRow() % (x * y * z) == 0);
 
         auto colX = target.col(0);
-        colX *= ScalarType(x);
+        colX.asVector() *= ScalarType(x);
         auto colY = target.col(1);
-        colY *= ScalarType(y);
+        colY.asVector() *= ScalarType(y);
         auto colZ = target.col(2);
-        colZ *= ScalarType(z);
+        colZ.asVector() *= ScalarType(z);
 
         const size_t numParticle = target.getRow();
         const size_t newNumParticle = numParticle / (x * y * z);

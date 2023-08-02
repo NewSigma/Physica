@@ -30,6 +30,8 @@ namespace Physica::Core {
     //Forward declarations
     template<class AnyScalar> class ComplexScalar;
 
+    template<class ScalarType> class Differentiable;
+
     template<ScalarOption option>
     __host__ __device__ Scalar<option> square(const Scalar<option>& s);
 
@@ -53,6 +55,7 @@ namespace Physica::Core {
             using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
             static constexpr ScalarOption option = option_;
             static constexpr bool isComplex = false;
+            static constexpr bool isDifferentiable = false;
         };
         /**
          * This class return a type that can exactly represent the two input scalars.
@@ -62,21 +65,38 @@ namespace Physica::Core {
             static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
                                                                               ? Traits<AnyScalar1>::option
                                                                               : Traits<AnyScalar2>::option;
-            static constexpr bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
+            constexpr static bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
+            constexpr static bool isDifferentiable = Traits<AnyScalar1>::isDifferentiable || Traits<AnyScalar2>::isDifferentiable;
+
+            using ComplexPacker = typename std::conditional<isComplex, ComplexScalar<Scalar<option>>, Scalar<option>>::type;
+            using DifferentiablePacker = typename std::conditional<isDifferentiable, Differentiable<ComplexPacker>, ComplexPacker>::type;
         public:
-            using Type = typename std::conditional<isComplex, ComplexScalar<Scalar<option>>, Scalar<option>>::type;
+            using Type = DifferentiablePacker;
+        };
+
+        template<class T> struct remove_differentiable {
+            using Type = T;
+        };
+
+        template<class ScalarType>
+        struct remove_differentiable<Differentiable<ScalarType>> {
+            using Type = ScalarType;
         };
     }
 
     template<class Derived>
     class ScalarBase : public Utils::CRTPBase<Derived> {
     public:
-        using ScalarType = Derived;
+        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         using TrivialType = typename Internal::Traits<Derived>::TrivialType;
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
+        using PlainScalar = typename Internal::remove_differentiable<Derived>::Type;
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
         static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
+        static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
+
+        static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
 
         [[nodiscard]] const RealType& getReal() const {
             if constexpr (isComplex)
@@ -116,7 +136,7 @@ namespace Physica::Core {
             else
                 return square(this->getDerived());
         }
-
+        /* SIMD support */
         constexpr static int size() { return 1; }
 
         Derived& load(const TrivialType* p) {
@@ -143,9 +163,17 @@ namespace Physica::Core {
             (void)index;
             this->getDerived() = ScalarType(value);
         }
-        /* Auto differential */
-        [[nodiscard]] const ScalarType& getValue() const noexcept { return this->getDerived(); }
-        [[nodiscard]] ScalarType getTangent() const noexcept { return ScalarType(0); }
+        /* Auto differential support */
+        [[nodiscard]] const PlainScalar& getValue() const noexcept {
+            if constexpr (isDifferentiable)
+                return this->getDerived().getValue();
+            else
+                return this->getDerived();
+        }
+
+        [[nodiscard]] const PlainScalar& getTangent() const noexcept {
+            return this->getDerived().getTangent();
+        }
     };
 
     template<class T>
@@ -153,19 +181,19 @@ namespace Physica::Core {
 
     template<class ScalarType> ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2);
     template<class ScalarType>
-    bool scalarNear(const ScalarBase<ScalarType>& scalar1, const ScalarBase<ScalarType>& scalar2, double precision);
+    bool scalarNear(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2, double precision);
     template<ScalarOption option>
     std::ostream& operator<<(std::ostream& os, const Scalar<option>& s);
     template<ScalarOption option>
     inline Scalar<option> operator+(const Scalar<option>& s);
-    template<ScalarOption option, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator+=(Scalar<option>& s1, const T& s2);
-    template<ScalarOption option, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator-=(Scalar<option>& s1, const T& s2);
-    template<ScalarOption option, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator*=(Scalar<option>& s1, const T& s2);
-    template<ScalarOption option, class T>
-    __host__ __device__ inline std::enable_if_t<std::is_convertible<T, Scalar<option>>::value, void> operator/=(Scalar<option>& s1, const T& s2);
+    template<class ScalarType1, class ScalarType2>
+    __host__ __device__ inline void operator+=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
+    template<class ScalarType1, class ScalarType2>
+    __host__ __device__ inline void operator-=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
+    template<class ScalarType1, class ScalarType2>
+    __host__ __device__ inline void operator*=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
+    template<class ScalarType1, class ScalarType2>
+    __host__ __device__ inline void operator/=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
     template<ScalarOption option>
     inline void operator^=(Scalar<option>& s1, const Scalar<option>& s2);
     template<ScalarOption option, bool errorTrack>
@@ -177,7 +205,7 @@ namespace Physica::Core {
     template<ScalarOption option>
     __host__ __device__ inline bool operator<=(const Scalar<option>& s1, const Scalar<option>& s2);
     template<ScalarOption option>
-    __host__ __device__ inline bool operator!= (const Scalar<option>& s1, const Scalar<option>& s2);
+    __host__ __device__ inline bool operator!=(const Scalar<option>& s1, const Scalar<option>& s2);
     template<ScalarOption option>
     inline void swap(Scalar<option>& s1, Scalar<option>& s2) noexcept;
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////

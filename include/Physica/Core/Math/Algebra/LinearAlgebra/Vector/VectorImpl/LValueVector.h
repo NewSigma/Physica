@@ -43,6 +43,10 @@ namespace Physica::Core {
         inline Derived& operator=(const ScalarBase<AnyScalar>& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
+        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
         template<class PacketType> void writePacket(size_t index, const PacketType packet);
@@ -69,18 +73,6 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     inline void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
-
-    template<class VectorType, class ScalarType>
-    inline void operator+=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
-
-    template<class VectorType, class ScalarType>
-    inline void operator-=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
-
-    template<class VectorType, class ScalarType>
-    inline void operator*=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
-
-    template<class VectorType, class ScalarType>
-    inline void operator/=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n);
 }
 
 #include "LValueVectorImpl.h"

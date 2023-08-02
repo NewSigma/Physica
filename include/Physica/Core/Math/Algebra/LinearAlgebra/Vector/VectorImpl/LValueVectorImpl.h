@@ -40,8 +40,9 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyScalar>
     inline Derived& LValueVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
+        static_assert(ScalarType::isComplex || !AnyScalar::isComplex, "[Error]: Assigning a complex number to real vector is not allowed");
         for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = s.getDerived();
+            (*this)[i] = ScalarType(s.getDerived());
         return Base::getDerived();
     }
 
@@ -101,16 +102,4 @@ namespace Physica::Core {
     inline void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
         v1.getDerived() += (-v2.getDerived());
     }
-
-    template<class VectorType, class ScalarType>
-    inline void operator+=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v + n; }
-
-    template<class VectorType, class ScalarType>
-    inline void operator-=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v - n; }
-
-    template<class VectorType, class ScalarType>
-    inline void operator*=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v * n; }
-
-    template<class VectorType, class ScalarType>
-    inline void operator/=(LValueVector<VectorType>& v, const ScalarBase<ScalarType>& n) { v = v / n; }
 }

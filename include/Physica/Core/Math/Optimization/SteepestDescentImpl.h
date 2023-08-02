@@ -58,4 +58,11 @@ namespace Physica::Core {
         nowY.swap(obj.nowY);
         lineSearch.swap(obj.lineSearch);
     }
+
+    template<class ScalarType, size_t Dim>
+    inline size_t SteepestDescent<ScalarType, Dim>::getDim() const noexcept {
+        if constexpr (Dim == Dynamic)
+            return gradG.getLength();
+        return Dim;
+    }
 }

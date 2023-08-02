@@ -133,7 +133,8 @@ namespace Physica::Core {
     class ContinuousMatrixBlock<MatrixType, 1, Column> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
                                                        , public RowContinuousVector<MatrixType, Column> {
     public:
-        using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>;
+        using This = ContinuousMatrixBlock<MatrixType, 1, Column>;
+        using Base = LValueMatrix<This>;
         using VectorBase = RowContinuousVector<MatrixType, Column>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -148,10 +149,15 @@ namespace Physica::Core {
         /* Operators */
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
         ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -179,7 +185,8 @@ namespace Physica::Core {
     class ContinuousMatrixBlock<MatrixType, Row, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
                                                     , public ColContinuousVector<MatrixType, Row> {
     public:
-        using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>;
+        using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
+        using Base = LValueMatrix<This>;
         using VectorBase = ColContinuousVector<MatrixType, Row>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -194,10 +201,15 @@ namespace Physica::Core {
         /* Operators */
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
         ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -270,7 +282,8 @@ namespace Physica::Core {
     template<class MatrixType, size_t Row, size_t Column>
     class ContinuousMatrixBlock : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, Column>> {
     public:
-        using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, Column>>;
+        using This = ContinuousMatrixBlock<MatrixType, Row, Column>;
+        using Base = LValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         MatrixType& mat;
@@ -294,6 +307,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getColumn() const noexcept { return Column == Dynamic ? colCount : Column; }
+        [[nodiscard]] This& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
 
     template<class MatrixType, size_t Row, size_t Column>

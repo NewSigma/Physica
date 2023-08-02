@@ -76,7 +76,7 @@ namespace Physica::Core {
         inline void transform(const RValueVector<VectorType>& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().rSpaceSize; }
+        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] size_t getSize() const noexcept { return getLength(); }
     };
 
@@ -87,10 +87,11 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const typename FFTRSpace<Derived, 1>::ScalarType& FFTRSpace<Derived, 1>::operator[](size_t index) const {
+        assert(index < getLength());
         if constexpr (isComplex)
-            return Base::getDerived().complex_buffer[index];
+            return Base::getDerived().asComplexBuffer()[index];
         else
-            return Base::getDerived().real_buffer[index];
+            return Base::getDerived().asRealBuffer()[index];
     }
 
     template<class Derived>
@@ -133,12 +134,14 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const typename FFTRSpace<Derived, 2>::ScalarType& FFTRSpace<Derived, 2>::operator()(size_t row, size_t col) const {
+        assert(row < getRow());
+        assert(col < getColumn());
         const size_t numColumn = getColumn();
         if constexpr (isComplex)
-            return Base::getDerived().complex_buffer[row * numColumn + col];
+            return Base::getDerived().asComplexBuffer()[row * numColumn + col];
         else {
             const size_t shift = (numColumn / 2 + 1) * 2;
-            return Base::getDerived().real_buffer[row * shift + col];
+            return Base::getDerived().asRealBuffer()[row * shift + col];
         }
     }
 
@@ -182,11 +185,14 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const typename FFTRSpace<Derived, 3>::ScalarType& FFTRSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) const {
+        assert(x < getDimX());
+        assert(y < getDimY());
+        assert(z < getDimZ());
         if constexpr (isComplex)
-            return Base::getDerived().complex_buffer[(x * getDimY() + y) * getDimZ() + z];
+            return Base::getDerived().asComplexBuffer()[(x * getDimY() + y) * getDimZ() + z];
         else {
             const size_t shift = (getDimZ() / 2 + 1) * 2;
-            return Base::getDerived().real_buffer[(x * getDimY() + y) * shift + z];
+            return Base::getDerived().asRealBuffer()[(x * getDimY() + y) * shift + z];
         }
     }
 

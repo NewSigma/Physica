@@ -63,17 +63,20 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherMatrix>
     Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
+        static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
+        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible row number");
         Base::getDerived().resize(m.getRow(), m.getColumn());
         m.getDerived().assignTo(*this);
         return Base::getDerived();
     }
     
     template<class Derived>
-    template<ScalarOption option>
-    Derived& LValueMatrix<Derived>::operator=(const Scalar<option>& s) {
+    template<class T>
+    Derived& LValueMatrix<Derived>::operator=(const ScalarBase<T>& s) {
+        static_assert(ScalarType::isComplex || !T::isComplex, "[Error]: Assigning a complex number to real matrix is not allowed");
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                refFromMajorMinor(i, j) = ScalarType(s);
+                refFromMajorMinor(i, j) = ScalarType(s.getDerived());
         return Base::getDerived();
     }
 
@@ -315,11 +318,11 @@ namespace Physica::Core {
     inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
         if constexpr (MatrixOption::isColumnMatrix<Derived>()) {
             auto c = col(v);
-            c *= factor;
+            c.asVector() *= factor;
         }
         else {
             auto r = row(v);
-            r *= factor;
+            r.asVector() *= factor;
         }
     }
 

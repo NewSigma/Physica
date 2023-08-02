@@ -177,7 +177,7 @@ public:
         Plot* plot = new Plot(0, 5, 0, 0.6001, 1, 0.2);
 
         auto eigenvectors = solver.getEigenvectors();
-        auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
+        Vector<ScalarType> real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
         real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
         plotWave(*plot, real_eigenvector);
 
@@ -282,7 +282,7 @@ public:
             }
 
             auto eigenvectors = solver.getEigenvectors();
-            auto real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
+            VectorType real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
             real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
 
             stop = VectorType(real_eigenvector - trial_solution).norm() < criteria;

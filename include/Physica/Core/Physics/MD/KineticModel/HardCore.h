@@ -26,20 +26,22 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor = SequentialExecutor>
     class HardCore : private FreeModel<ScalarType, ScalarType, 1, NumReplica> {
+        static_assert(!ScalarType::isComplex);
         using Base = FreeModel<ScalarType, ScalarType, 1, NumReplica>;
+        using PlainScalar = typename ScalarType::PlainScalar;
     public:
         using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
     private:
         ScalarType latticeSize;
-        ScalarType collideFactor;
+        PlainScalar collideFactor;
         ScalarType temperatureT;
         Vector<ScalarType> repMass;
         PhaseMatrix buffer;
         size_t maxHandleNum;
     public:
         HardCore(ScalarType latticeSize_,
-                 ScalarType collideFactor_,
+                 PlainScalar collideFactor_,
                  ScalarType temperatureT_,
                  size_t numParticle,
                  size_t numReplica,
@@ -65,14 +67,14 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
     HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::HardCore(
-            ScalarType latticeSize_, ScalarType collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t numReplica, size_t maxHandleNum_)
+            ScalarType latticeSize_, PlainScalar collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t numReplica, size_t maxHandleNum_)
             : Base(temperatureT_, numReplica)
             , latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
             , repMass(numParticle, 0)
             , buffer(numParticle * 2, numReplica)
             , maxHandleNum(maxHandleNum_) {
-        assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
+        assert(collideFactor < PlainScalar(1.0) && collideFactor.isPositive());
         assert(NumReplica == Dynamic || NumReplica == numReplica);
     }
 
@@ -142,7 +144,7 @@ namespace Physica::Core {
                 else
                     lStep = to;
             }
-            to = (lStep + rStep) * 0.5;
+            to = (lStep + rStep) * PlainScalar(0.5);
 
             const bool isDone = lStep == deltaT;
             if (isDone) {
@@ -211,10 +213,10 @@ namespace Physica::Core {
                 if (pos[length] - latticeSize > pos[0]) [[unlikely]]
                     return true;
             }
-            auto head = pos.head(length);
-            auto tail = pos.tail(1);
-            const size_t to = length / PacketType::size() * PacketType::size();
             {
+                auto head = pos.head(length);
+                auto tail = pos.tail(1);
+                const size_t to = length / PacketType::size() * PacketType::size();
                 size_t i = 0;
                 for (; i < to; i += PacketType::size()) {
                     const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
@@ -296,7 +298,7 @@ namespace Physica::Core {
                 }
                 if constexpr (IsFixedBoundary) {
                     [[unlikely]] if (id_dof == numParticle - 1) {
-                        const PacketType latticeSizes(latticeSize.getTrivial());
+                        const PacketType latticeSizes(latticeSize.getValue().getTrivial());
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
                             const auto boolPacket = pos.template packet<PacketType>(i) > latticeSizes;

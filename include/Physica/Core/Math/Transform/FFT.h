@@ -29,6 +29,13 @@
 namespace Physica::Core {
     template<class ScalarType, size_t Dim = 1> class FFT;
 
+    enum class PlanFlag {
+        Measure = FFTW_MEASURE,
+        Estimate = FFTW_ESTIMATE,
+        Patient = FFTW_PATIENT,
+        Exhaustive = FFTW_EXHAUSTIVE
+    };
+
     namespace Internal {
         template<class T, size_t dim>
         class Traits<FFT<T, dim>> {
@@ -40,19 +47,13 @@ namespace Physica::Core {
             constexpr static size_t Dim = dim;
 
             constexpr static bool isComplex = T::isComplex;
+            constexpr static bool isDifferentiable = T::isDifferentiable;
             constexpr static bool isSinglePrec = std::is_same<TrivialType, float>::value;
             using PlanType = typename std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
             using ComplexTypeFFTW = typename std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
 
-            static_assert(sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
-            static_assert(sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
-
-            enum PlanFlag {
-                Measure = FFTW_MEASURE,
-                Estimate = FFTW_ESTIMATE,
-                Patient = FFTW_PATIENT,
-                Exhaustive = FFTW_EXHAUSTIVE
-            };
+            static_assert(isDifferentiable || sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
+            static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
         };
     }
     /**
@@ -60,30 +61,24 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class FFT<ScalarType, 1>
-            : public Internal::Traits<FFT<ScalarType, 1>>
-            , public FFTRSpace<FFT<ScalarType, 1>, 1>
+            : public FFTRSpace<FFT<ScalarType, 1>, 1>
             , public FFTKSpace<FFT<ScalarType, 1>, 1> {
         using This = FFT<ScalarType, 1>;
         using Traits = Internal::Traits<This>;
-        using typename Traits::TrivialType;
-        using typename Traits::RealType;
-        using typename Traits::ComplexType;
-        using typename Traits::PlanType;
-        using typename Traits::ComplexTypeFFTW;
-        using Traits::isComplex;
-        using Traits::isSinglePrec;
+        using TrivialType = typename Traits::TrivialType;
+        using RealType = typename Traits::RealType;
+        using ComplexType = typename Traits::ComplexType;
+        using PlanType = typename Traits::PlanType;
+        using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
-    public:
-        using typename Traits::PlanFlag;
+        constexpr static bool isComplex = Traits::isComplex;
+        constexpr static bool isSinglePrec = Traits::isSinglePrec;
+        static_assert(!Traits::isDifferentiable, "[Error]: Header of differentiable fft should be included");
     private:
         PlanType forward_plan;
         PlanType backward_plan;
-        union {
-            RealType* real_buffer;
-            ComplexType* complex_buffer;
-            ComplexTypeFFTW* buffer;
-        };
+        ComplexTypeFFTW* buffer;
         int rSpaceSize;
         RealType rSpaceDelta;
         PlanFlag planFlag;
@@ -99,15 +94,17 @@ namespace Physica::Core {
         /* Operations */
         using RSpaceType::transform;
         using KSpaceType::invTransform;
-        inline void transform();
-        inline void invTransform();
+        void transform() { transform(*this, *this); }
+        void invTransform() { invTransform(*this, *this); }
         void swap(FFT& fft) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getDim() { return 1; }
-        [[nodiscard]] size_t getRSpaceSize() const noexcept { return getRSpace().getSize(); }
+        [[nodiscard]] ComplexTypeFFTW* getBuffer() { return buffer; }
+        [[nodiscard]] const ComplexTypeFFTW* getBuffer() const { return buffer; }
+        [[nodiscard]] size_t getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return getKSpace().getSize(); }
-        [[nodiscard]] const RealType& getRSpaceDelta() const noexcept { return rSpaceDelta; }
-        [[nodiscard]] RealType getKSpaceDelta() const noexcept { return reciprocal(getRSpaceDelta() * getRSpaceSize()); }
+        [[nodiscard]] RealType getRSpaceDelta() const noexcept { return rSpaceDelta; }
+        [[nodiscard]] RealType getKSpaceDelta() const noexcept { return getKSpace().getDelta(); }
         [[nodiscard]] RSpaceType& getRSpace() { return *this; }
         [[nodiscard]] KSpaceType& getKSpace() { return *this; }
         [[nodiscard]] const RSpaceType& getRSpace() const { return *this; }
@@ -122,39 +119,37 @@ namespace Physica::Core {
         FFT(size_t rSpaceSize_, RealType rSpaceDelta_);
         /* Operations */
         void initializePlan();
+        /* Getters */
+        [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard]] ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard]] const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Friends */
         friend class FFTRSpace<This, 1>;
         friend class FFTKSpace<This, 1>;
     };
 
     template<class ScalarType, size_t Dim>
-    class FFT
-            : public Internal::Traits<FFT<ScalarType, Dim>>
-            , public FFTRSpace<FFT<ScalarType, Dim>, Dim>
-            , public FFTKSpace<FFT<ScalarType, Dim>, Dim> {
+    class FFT : public FFTRSpace<FFT<ScalarType, Dim>, Dim>
+              , public FFTKSpace<FFT<ScalarType, Dim>, Dim> {
         static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
         static_assert(Dim != 0, "[Error]: Not implemented");
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
         using This = FFT<ScalarType, Dim>;
         using Traits = Internal::Traits<This>;
-        using typename Traits::TrivialType;
-        using typename Traits::RealType;
-        using typename Traits::ComplexType;
-        using typename Traits::PlanType;
-        using typename Traits::ComplexTypeFFTW;
-        using Traits::isComplex;
-        using Traits::isSinglePrec;
+        using TrivialType = typename Traits::TrivialType;
+        using RealType = typename Traits::RealType;
+        using ComplexType = typename Traits::ComplexType;
+        using PlanType = typename Traits::PlanType;
+        using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
-    public:
-        using typename Traits::PlanFlag;
+        constexpr static bool isComplex = Traits::isComplex;
+        constexpr static bool isSinglePrec = Traits::isSinglePrec;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
-        union {
-            RealType* real_buffer;
-            ComplexType* complex_buffer;
-            ComplexTypeFFTW* buffer;
-        };
+        ComplexTypeFFTW* buffer;
         Utils::Array<int, Dim> rSpaceSize;
         Utils::Array<int, Dim> kSpaceSize;
         Utils::Array<RealType, Dim> rSpaceDelta;
@@ -170,11 +165,13 @@ namespace Physica::Core {
         /* Operations */
         using RSpaceType::transform;
         using KSpaceType::invTransform;
-        void transform();
-        void invTransform();
+        void transform() { transform(*this, *this); }
+        void invTransform() { invTransform(*this, *this); }
         void swap(FFT& fft) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
+        [[nodiscard]] ComplexTypeFFTW* getBuffer() { return buffer; }
+        [[nodiscard]] const ComplexTypeFFTW* getBuffer() const { return buffer; }
         [[nodiscard]] const Utils::Array<int, Dim>& getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] const Utils::Array<int, Dim>& getKSpaceSize() const noexcept { return kSpaceSize; }
         [[nodiscard]] RealType getRSpaceDelta(size_t dim) const noexcept { return rSpaceDelta[dim]; }
@@ -200,6 +197,11 @@ namespace Physica::Core {
         [[nodiscard]] RealType mulDeltas() const;
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
         [[nodiscard]] Utils::Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
+        /* Getters */
+        [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard]] ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard]] const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Static members */
         static bool checkSize(const Utils::Array<size_t, Dim>& rSpaceSize);
         /* Friends */
@@ -209,3 +211,4 @@ namespace Physica::Core {
 }
 
 #include "FFTImpl/FFTImpl.h"
+#include "FFTImpl/DifferentiableFFT.h"

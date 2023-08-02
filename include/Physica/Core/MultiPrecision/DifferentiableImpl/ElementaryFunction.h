@@ -19,38 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator+(const Differentiable<ScalarType>& s1, const OtherScalar& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator+(const OtherScalar& s1, const Differentiable<ScalarType>& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator-(const Differentiable<ScalarType>& s1, const OtherScalar& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator-(const OtherScalar& s1, const Differentiable<ScalarType>& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator*(const Differentiable<ScalarType>& s1, const OtherScalar& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator*(const OtherScalar& s1, const Differentiable<ScalarType>& s2);
-    
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator/(const Differentiable<ScalarType>& s1, const OtherScalar& s2);
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator/(const OtherScalar& s1, const Differentiable<ScalarType>& s2);
-
     template<class ScalarType>
     __host__ __device__ inline Differentiable<ScalarType> abs(const Differentiable<ScalarType>& s);
 

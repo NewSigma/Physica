@@ -28,7 +28,7 @@ namespace Physica::Core {
                                                            ScalarType temperatureT_,
                                                            ScalarType timeStep_)
             : cell(std::move(cell_))
-            , fftContract(numContract, 1, FFT<PosScalarType, 1>::Estimate)
+            , fftContract(numContract, 1, PlanFlag::Estimate)
             , timeStep(std::move(timeStep_)) {
         assert(0 < numContract && numContract <= numReplica);
         assert(NumReplica == Dynamic || NumReplica == numReplica);
@@ -99,10 +99,10 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
         else {
-            forceStep(timeStep * 0.5);
+            forceStep(timeStep * PlainScalar(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
             updateForce<ForceModel, Executor>(forceModel);
-            forceStep(timeStep * 0.5);
+            forceStep(timeStep * PlainScalar(0.5));
         }
     }
 
@@ -254,8 +254,8 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::checkParam() const {
-        const ScalarType cycle = ScalarType(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-        bool isSmallEnough = timeStep < cycle / ScalarType(4);
+        const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+        bool isSmallEnough = timeStep < cycle / PlainScalar(4);
         if (!isSmallEnough)
             throw std::invalid_argument("[Error]: Time step is too large");
     }
@@ -376,7 +376,7 @@ namespace Physica::Core {
         assert(posID < getDOF());
         fftContract.transform(forceContract.row(posID));
         auto row = ringPolymer.getBuffer().row(0);
-        row = ScalarType(0);
+        row.asVector() = ScalarType(0);
         auto head = row.head(fftContract.getKSpaceSize());
         head = fftContract.getKSpace();
     }

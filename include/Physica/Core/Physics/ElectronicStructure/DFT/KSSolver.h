@@ -132,7 +132,7 @@ namespace Physica::Core {
                 Utils::Array<ScalarType, 3> fftDeltaTs{};
                 for (int i = 0; i < 3; ++i)
                     fftDeltaTs[i] = ScalarType(2 * M_PI) / repCell.getLattice().row(i).norm();
-                fft = FFT3D(dim, fftDeltaTs, FFT3D::PlanFlag::Estimate);
+                fft = FFT3D(dim, fftDeltaTs, PlanFlag::Estimate);
             }
         }
         initExternalPot();

@@ -1,0 +1,138 @@
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+namespace Physica::Core {
+    template<class VectorType> class RealVector;
+    template<class VectorType> class ImagVector;
+    template<class VectorType> class NormVector;
+    template<class VectorType> class ValueVector;
+    template<class VectorType> class TangentVector;
+
+    namespace Internal {
+        template<class VectorType>
+        class Traits<RealVector<VectorType>> {
+        public:
+            using ScalarType = typename VectorType::ScalarType::RealType;
+            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        };
+
+        template<class VectorType>
+        class Traits<ImagVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
+        template<class VectorType>
+        class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
+        template<class VectorType>
+        class Traits<ValueVector<VectorType>> {
+            using T = typename VectorType::ScalarType;
+            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toTangentVector() call");
+        public:
+            using ScalarType = typename T::PlainType;
+            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        };
+
+        template<class VectorType>
+        class Traits<TangentVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
+    }
+
+    template<class VectorType>
+    class RealVector : public RValueVector<RealVector<VectorType>> {
+        using Base = RValueVector<RealVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit RealVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getReal(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class ImagVector : public RValueVector<ImagVector<VectorType>> {
+        using Base = RValueVector<ImagVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit ImagVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getImag(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class NormVector : public RValueVector<NormVector<VectorType>> {
+        using Base = RValueVector<NormVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit NormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).norm(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class ValueVector : public RValueVector<ValueVector<VectorType>> {
+        using Base = RValueVector<ValueVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit ValueVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getValue(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class TangentVector : public RValueVector<TangentVector<VectorType>> {
+        using Base = RValueVector<TangentVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit TangentVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getTangent(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    [[nodiscard]] inline RealVector<VectorType> toRealVector(const RValueVector<VectorType>& v) {
+        return RealVector<VectorType>{v};
+    }
+
+    template<class VectorType>
+    [[nodiscard]] inline ImagVector<VectorType> toImagVector(const RValueVector<VectorType>& v) {
+        return ImagVector<VectorType>{v};
+    }
+
+    template<class VectorType>
+    [[nodiscard]] inline NormVector<VectorType> toNormVector(const RValueVector<VectorType>& v) {
+        return NormVector<VectorType>{v};
+    }
+
+    template<class VectorType>
+    [[nodiscard]] inline ValueVector<VectorType> toValueVector(const RValueVector<VectorType>& v) {
+        return ValueVector<VectorType>{v};
+    }
+
+    template<class VectorType>
+    [[nodiscard]] inline TangentVector<VectorType> toTangentVector(const RValueVector<VectorType>& v) {
+        return TangentVector<VectorType>{v};
+    }
+}

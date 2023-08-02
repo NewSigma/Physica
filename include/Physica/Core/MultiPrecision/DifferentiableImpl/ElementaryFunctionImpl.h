@@ -19,70 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator+(const Differentiable<ScalarType>& s1, const OtherScalar& s2) {
-        if constexpr (OtherScalar::isDifferentiable)
-            return {s1.getValue() + s2.getValue(), s1.getTangent() + s2.getTangent()};
-        else
-            return {s1.getValue() + s2.getValue(), s1.getTangent()};
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator+(const OtherScalar& s1, const Differentiable<ScalarType>& s2) {
-        return s2 + s1;
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator-(const Differentiable<ScalarType>& s1, const OtherScalar& s2) {
-        if constexpr (OtherScalar::isDifferentiable)
-            return {s1.getValue() - s2.getValue(), s1.getTangent() - s2.getTangent()};
-        else
-            return {s1.getValue() - s2.getValue(), s1.getTangent()};
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator-(const OtherScalar& s1, const Differentiable<ScalarType>& s2) {
-        return -(s2 - s1);
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator*(const Differentiable<ScalarType>& s1, const OtherScalar& s2) {
-        if constexpr (OtherScalar::isDifferentiable)
-            return {s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue()};
-        else
-            return {s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue() + s1.getValue() * s2.getTangent()};
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator*(const OtherScalar& s1, const Differentiable<ScalarType>& s2) {
-        return s2 * s1;
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>
-    operator/(const Differentiable<ScalarType>& s1, const OtherScalar& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type;
-        const ResultType rep = reciprocal(s2.getValue());
-        if constexpr (OtherScalar::isDifferentiable)
-            return {s1.getValue() * rep, s1.getTangent() * rep};
-        else
-            return {s1.getValue() * rep, (s1.getTangent() * s2.getValue() - s1.getValue() * s2.getTangent()) * square(rep)};
-    }
-
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, Differentiable<typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type>>::type
-    operator/(const OtherScalar& s1, const Differentiable<ScalarType>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type;
-        const ResultType rep = reciprocal(s2.getValue());
-        return {s1.getValue() * rep, -s1.getValue() * s2.getTangent() * square(rep)};
-    }
-
     template<class ScalarType>
     __host__ __device__ inline Differentiable<ScalarType> abs(const Differentiable<ScalarType>& s) {
         return {abs(s.getValue()), s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
@@ -95,7 +31,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     __host__ __device__ inline Differentiable<ScalarType> reciprocal(const Differentiable<ScalarType>& s) {
-        const ScalarType rep = reciprocal(s2.getValue());
+        const ScalarType rep = reciprocal(s.getValue());
         return {rep, -s.getTangent() * square(rep)};
     }
 

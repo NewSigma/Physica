@@ -118,16 +118,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void FFT<ScalarType, 1>::transform() {
-        transform(*this, *this);
-    }
-
-    template<class ScalarType>
-    inline void FFT<ScalarType, 1>::invTransform() {
-        invTransform(*this, *this);
-    }
-
-    template<class ScalarType>
     void FFT<ScalarType, 1>::swap(FFT& fft) noexcept {
         using std::swap;
         swap(forward_plan, fft.forward_plan);
@@ -158,6 +148,7 @@ namespace Physica::Core {
         const auto buffer = bufferProvider.buffer;
         assert(forward_plan != nullptr);
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(forward_plan, buffer, buffer);
@@ -178,6 +169,7 @@ namespace Physica::Core {
         const auto buffer = bufferProvider.buffer;
         assert(backward_plan != nullptr);
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(backward_plan, buffer, buffer);
@@ -213,12 +205,12 @@ namespace Physica::Core {
         }
         else {
             if constexpr (isSinglePrec) {
-                forward_plan = fftwf_plan_dft_r2c_1d(rSpaceSize, (float*)real_buffer, buffer, flag);
-                backward_plan = fftwf_plan_dft_c2r_1d(rSpaceSize, buffer, (float*)real_buffer, flag);
+                forward_plan = fftwf_plan_dft_r2c_1d(rSpaceSize, (float*)buffer, buffer, flag);
+                backward_plan = fftwf_plan_dft_c2r_1d(rSpaceSize, buffer, (float*)buffer, flag);
             }
             else {
-                forward_plan = fftw_plan_dft_r2c_1d(rSpaceSize, (double*)real_buffer, buffer, flag);
-                backward_plan = fftw_plan_dft_c2r_1d(rSpaceSize, buffer, (double*)real_buffer, flag);
+                forward_plan = fftw_plan_dft_r2c_1d(rSpaceSize, (double*)buffer, buffer, flag);
+                backward_plan = fftw_plan_dft_c2r_1d(rSpaceSize, buffer, (double*)buffer, flag);
             }
         }
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
@@ -304,16 +296,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::transform() {
-        transform(*this, *this);
-    }
-
-    template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::invTransform() {
-        invTransform(*this, *this);
-    }
-
-    template<class ScalarType, size_t Dim>
     void FFT<ScalarType, Dim>::swap(FFT& fft) noexcept {
         std::swap(forward_plan, fft.forward_plan);
         std::swap(backward_plan, fft.backward_plan);
@@ -341,6 +323,7 @@ namespace Physica::Core {
         const auto buffer = bufferProvider.buffer;
         assert(forward_plan != nullptr);
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(forward_plan, buffer, buffer);
@@ -361,6 +344,7 @@ namespace Physica::Core {
         const auto buffer = bufferProvider.buffer;
         assert(backward_plan != nullptr);
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
+        assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {
             if constexpr (isComplex)
                 fftwf_execute_dft(backward_plan, buffer, buffer);
@@ -399,9 +383,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_r2c_2d(rSpaceSize[0], rSpaceSize[1], reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
             }
         }
         else if constexpr (Dim == 3) {
@@ -413,9 +397,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_r2c_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
             }
         }
         else {
@@ -427,9 +411,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<float*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<float*>(buffer), buffer, FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<double*>(real_buffer), buffer, FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_r2c(getDim(), rSpaceSize.data(), reinterpret_cast<double*>(buffer), buffer, FFTW_ESTIMATE);
             }
         }
         return plan;
@@ -447,9 +431,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_c2r_2d(rSpaceSize[0], rSpaceSize[1], buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
             }
         }
         else if constexpr (Dim == 3) {
@@ -461,9 +445,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_c2r_3d(rSpaceSize[0], rSpaceSize[1], rSpaceSize[2], buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
             }
         }
         else {
@@ -475,9 +459,9 @@ namespace Physica::Core {
             }
             else {
                 if constexpr (isSinglePrec)
-                    plan = fftwf_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<float*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftwf_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<float*>(buffer), FFTW_ESTIMATE);
                 else
-                    plan = fftw_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<double*>(real_buffer), FFTW_ESTIMATE);
+                    plan = fftw_plan_dft_c2r(getDim(), rSpaceSize.data(), buffer, reinterpret_cast<double*>(buffer), FFTW_ESTIMATE);
             }
         }
         return plan;

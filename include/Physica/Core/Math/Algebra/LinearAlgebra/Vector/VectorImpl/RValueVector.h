@@ -109,3 +109,4 @@ namespace Physica::Core {
 
 #include "RValueVectorImpl.h"
 #include "VectorExpression.h"
+#include "VectorConvert.h"

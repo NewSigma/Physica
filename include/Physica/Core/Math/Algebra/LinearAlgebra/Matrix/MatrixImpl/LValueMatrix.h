@@ -38,6 +38,8 @@ namespace Physica::Core {
     public:
         using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
+        using Base::RowAtCompile;
+        using Base::ColumnAtCompile;
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
@@ -47,12 +49,14 @@ namespace Physica::Core {
         /* Operators */
         LValueMatrix& operator=(const LValueMatrix& m) = delete;
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
-        template<class OtherMatrix>
-        Derived& operator=(const RValueMatrix<OtherMatrix>& m);
-        template<ScalarOption option>
-        Derived& operator=(const Scalar<option>& s); //No need for complex assignment, assign a complex number to real matrix is undefined
+        template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
+        template<class T> Derived& operator=(const ScalarBase<T>& s);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;
@@ -113,19 +117,15 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     inline void operator+=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1 + m2; }
-    template<class MatrixType, ScalarOption option>
-    inline void operator+=(LValueMatrix<MatrixType>& m, const Scalar<option>& s) { m = m + s; }
+
     template<class Derived, class OtherDerived>
     inline void operator-=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1 - m2; }
-    template<class MatrixType, ScalarOption option>
-    inline void operator-=(LValueMatrix<MatrixType>& m, const Scalar<option>& s) { m = m - s; }
+
     template<class Derived, class OtherDerived>
     inline void operator*=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) {
         Derived temp = m1 * m2;
         temp.swap(m1.getDerived());
     }
-    template<class MatrixType, ScalarOption option>
-    inline void operator*=(LValueMatrix<MatrixType>& m, const Scalar<option>& s) { m = m * s; }
 }
 
 #include "LValueMatrixImpl.h"

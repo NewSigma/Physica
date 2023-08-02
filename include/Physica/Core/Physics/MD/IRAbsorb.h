@@ -65,7 +65,7 @@ namespace Physica::Core {
                                    unsigned char filterRange,
                                    size_t filterOrder)
             : dipoleCorr(std::move(dipoleCorr_))
-            , fft(2 * dipoleCorr.getLength(), deltaT, FFT<ScalarType, 1>::Estimate)
+            , fft(2 * dipoleCorr.getLength(), deltaT, PlanFlag::Estimate)
             , factor(M_PI / (3 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * volume * PhyConst<AU>::boltzmannK * double(temperatureT)))
             , filter(filterRange, filterRange, filterOrder, deltaT) {}
 

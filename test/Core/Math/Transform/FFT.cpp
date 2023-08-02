@@ -25,6 +25,59 @@ using namespace Physica::Utils;
 using RealType = Scalar<Double>;
 using ComplexType = ComplexScalar<RealType>;
 
+void test_differentiable() {
+    using PlainScalar = Scalar<Double>;
+    using ComplexPlainScalar = ComplexScalar<PlainScalar>;
+    using ScalarType = Differentiable<PlainScalar>;
+    using ComplexType = Differentiable<ComplexPlainScalar>;
+    const size_t N = 100;
+    constexpr double freq1 = 3;
+    constexpr double freq2 = 4;
+
+    Vector<PlainScalar> values(N);
+    Vector<PlainScalar> tangents(N);
+    Vector<ScalarType> data(N);
+    for (size_t i = 0; i < N; ++i) {
+        const PlainScalar x = PlainScalar(i) * 0.01;
+        values[i] = sin(PlainScalar(2 * M_PI * freq1) * x) + sin(PlainScalar(2 * M_PI * freq2) * x) * 2;
+        tangents[i] = cos(PlainScalar(2 * M_PI * freq1) * x) * 2 + cos(PlainScalar(2 * M_PI * freq2) * x);
+        data[i] = ScalarType(values[i], tangents[i]);
+    }
+    Vector<ComplexType> answer{};
+    /* Make answer */ {
+        FFT<PlainScalar> fft(N, 1, PlanFlag::Estimate);
+        fft.getRSpace() = values;
+        fft.transform();
+        Vector<ComplexPlainScalar> k_values = fft.getKSpace();
+        fft.getRSpace() = tangents;
+        fft.transform();
+        Vector<ComplexPlainScalar> k_tangents = fft.getKSpace();
+        if (k_values.getLength() != k_tangents.getLength()) [[unlikely]]
+            exit(EXIT_FAILURE);
+
+        answer.resize(k_values.getLength());
+        for (size_t i = 0; i < answer.getLength(); ++i)
+            answer[i] = ComplexType(k_values[i], k_tangents[i]);
+    }
+    FFT<ScalarType> fft(N, 1, PlanFlag::Estimate);
+    /* Test transform */ {
+        fft.getRSpace() = data;
+        fft.transform();
+        if (!vectorNear(fft.getKSpace(), answer, 1E-15))
+            exit(EXIT_FAILURE);
+    }
+    /* Test invTransform */ {
+        constexpr double precision = 1E-13;
+        fft.invTransform();
+        for (size_t i = 0; i < data.getLength(); ++i) {
+            const bool isNear = scalarNear(data[i], fft.getRSpace()[i], precision);
+            const bool isSmall = abs(data[i].getValue()) < PlainScalar(precision) && abs(fft.getRSpace()[i].getValue()) < PlainScalar(precision);
+            if(!isNear && !isSmall)
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
 int main() {
     /* 1D real */ {
         const size_t N = 100;
@@ -40,7 +93,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<RealType> fft(data, RealType(t_max / N), FFT<RealType>::Measure);
+        FFT<RealType> fft(data, RealType(t_max / N), PlanFlag::Measure);
         const Vector<RealType> intense = toNormVector(fft.getKSpace());
 
         /* Parseval theorem */ {
@@ -81,7 +134,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<ComplexType> fft(data, RealType(t_max / N), FFT<ComplexType>::Estimate);
+        FFT<ComplexType> fft(data, RealType(t_max / N), PlanFlag::Estimate);
         Vector<ComplexType> trans(N);
         for (size_t i = 0; i < N; ++i) {
             ComplexType temp(0);
@@ -108,10 +161,10 @@ int main() {
             for (size_t j = 0; j < N2; ++j)
                 data(i, j) = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
 
-        FFT<RealType, 2> fft({N1, N2}, {deltaX, deltaY}, FFT<RealType, 2>::PlanFlag::Estimate);
+        FFT<RealType, 2> fft({N1, N2}, {deltaX, deltaY}, PlanFlag::Estimate);
         fft.transform(data);
         /* Test freq */ {
-            auto intense = toNormVector(fft.getKSpace().flatten());
+            const Vector<RealType> intense = toNormVector(fft.getKSpace().flatten());
             const RealType freq1_power = intense[size_t(freq1 / double(fft.getKSpaceDelta(0))) * fft.getKSpaceSize()[1]];
             const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / double(fft.getKSpaceDelta(0)))) * fft.getKSpaceSize()[1]];
             const RealType freq2_power = intense[freq2 / double(fft.getKSpaceDelta(1))];
@@ -133,5 +186,6 @@ int main() {
             }
         }
     }
+    test_differentiable();
     return 0;
 }

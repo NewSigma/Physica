@@ -128,7 +128,8 @@ namespace Physica::Core {
     class LMatrixBlock<MatrixType, 1, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>
                                                , public RowLVector<MatrixType> {
     public:
-        using Base = LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>;
+        using This = LMatrixBlock<MatrixType, 1, Dynamic>;
+        using Base = LValueMatrix<This>;
         using VectorBase = RowLVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -137,10 +138,15 @@ namespace Physica::Core {
         LMatrixBlock(LMatrixBlock&&) noexcept = delete;
         ~LMatrixBlock() = default;
         /* Operators */
+        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -167,7 +173,8 @@ namespace Physica::Core {
     class LMatrixBlock<MatrixType, Dynamic, 1> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>
                                                , public ColLVector<MatrixType> {
     public:
-        using Base = LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>;
+        using This = LMatrixBlock<MatrixType, Dynamic, 1>;
+        using Base = LValueMatrix<This>;
         using VectorBase = ColLVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -176,10 +183,15 @@ namespace Physica::Core {
         LMatrixBlock(LMatrixBlock&&) noexcept = delete;
         ~LMatrixBlock() = default;
         /* Operators */
+        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -205,7 +217,8 @@ namespace Physica::Core {
     template<class MatrixType>
     class LMatrixBlock<MatrixType, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, Dynamic>> {
     public:
-        using Base = LValueMatrix<LMatrixBlock<MatrixType, Dynamic, Dynamic>>;
+        using This = LMatrixBlock<MatrixType, Dynamic, Dynamic>;
+        using Base = LValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         MatrixType& mat;
@@ -229,6 +242,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] This& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
 
     template<class MatrixType>

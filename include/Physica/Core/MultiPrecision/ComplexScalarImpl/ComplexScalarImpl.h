@@ -101,14 +101,6 @@ namespace Physica::Core {
     }
 
     template<class T>
-    bool scalarNear(const ComplexScalar<T>& s1,
-                    const ComplexScalar<T>& s2,
-                    double precision) {
-        assert(precision > 0);
-        return scalarNear((s1 - s2).norm(), T(0), precision);
-    }
-
-    template<class T>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c) {
         const auto& imagine = c.getImag();
         return os << std::setprecision(10) << double(c.getReal())
@@ -160,55 +152,56 @@ namespace Physica::Core {
                 , ((real_1 + imagine_1) * (real_2 - imagine_2) - ac + bd) / divisor);
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator+(
-            const ComplexScalar<ScalarType1>& c, const ScalarBase<ScalarType2>& s) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(c.getReal() + s.getDerived(), c.getImag());
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator+(
+            const ComplexScalar<ScalarType>& c,const Scalar<option>& s) {
+        return {c.getReal() + s, c.getImag()};
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator-(
-            const ComplexScalar<ScalarType1>& c, const ScalarBase<ScalarType2>& s) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(c.getReal() - s.getDerived(), c.getImag());
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator-(
+            const ComplexScalar<ScalarType>& c, const Scalar<option>& s) {
+        return {c.getReal() - s, c.getImag()};
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator*(
-            const ComplexScalar<ScalarType1>& c, const ScalarBase<ScalarType2>& s) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(c.getReal() * s.getDerived(), c.getImag() * s.getDerived());
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator*(
+            const ComplexScalar<ScalarType>& c, const Scalar<option>& s) {
+        return {c.getReal() * s, c.getImag() * s};
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator/(
-            const ComplexScalar<ScalarType1>& c, const ScalarBase<ScalarType2>& s) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(c.getReal() / s.getDerived(), c.getImag() / s.getDerived());
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator/(
+            const ComplexScalar<ScalarType>& c, const Scalar<option>& s) {
+        const auto rep = reciprocal(s);
+        return {c.getReal() * rep, c.getImag() * rep};
     }
 
-    template<class ScalarType1, class ScalarType2>
-    inline ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator+(
-            const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator+(
+            const Scalar<option>& s, const ComplexScalar<ScalarType>& c) {
         return c + s;
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator-(
-            const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(s.getDerived() - c.getReal(), c.getImag());
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator-(
+            const Scalar<option>& s, const ComplexScalar<ScalarType>& c) {
+        return {s - c.getReal(), c.getImag()};
     }
 
-    template<class ScalarType1, class ScalarType2>
-    inline ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator*(
-            const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator*(
+            const Scalar<option>& s, const ComplexScalar<ScalarType>& c) {
         return c * s;
     }
 
-    template<class ScalarType1, class ScalarType2>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type> operator/(
-            const ScalarBase<ScalarType1>& s, const ComplexScalar<ScalarType2>& c) {
+    template<class ScalarType, ScalarOption option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator/(
+            const Scalar<option>& s, const ComplexScalar<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
-        const auto divisor = s.getDerived() * reciprocal(square(real) + square(imagine));
-        return ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type>(real * divisor, -imagine * divisor);
+        const auto divisor = s * reciprocal(square(real) + square(imagine));
+        return {real * divisor, -imagine * divisor};
     }
 }
 

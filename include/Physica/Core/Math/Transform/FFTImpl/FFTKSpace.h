@@ -64,6 +64,7 @@ namespace Physica::Core {
         using This = FFTKSpace<Derived, 1>;
         using Base = Utils::CRTPBase<Derived, 1>;
         using VectorBase = ContinuousVector<This>;
+        using RealType = typename Internal::Traits<This>::ScalarType::RealType;
     public:
         using typename VectorBase::ScalarType;
     public:
@@ -78,16 +79,18 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] size_t getSize() const noexcept { return getLength(); }
+        [[nodiscard]] RealType getDelta() const noexcept { return reciprocal(Base::getDerived().getRSpaceDelta() * Base::getDerived().getRSpaceSize()); }
     };
 
     template<class Derived>
     inline typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) {
-        return Base::getDerived().complex_buffer[index];
+        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator[](index));
     }
 
     template<class Derived>
     inline const typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) const {
-        return Base::getDerived().complex_buffer[index];
+        assert(index < getLength());
+        return Base::getDerived().asComplexBuffer()[index];
     }
 
     template<class Derived>
@@ -123,12 +126,14 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename FFTKSpace<Derived, 2>::ScalarType& FFTKSpace<Derived, 2>::operator()(size_t row, size_t col) {
-        return Base::getDerived().complex_buffer[row * getColumn() + col];
+        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(row, col));
     }
 
     template<class Derived>
     inline const typename FFTKSpace<Derived, 2>::ScalarType& FFTKSpace<Derived, 2>::operator()(size_t row, size_t col) const {
-        return Base::getDerived().complex_buffer[row * getColumn() + col];
+        assert(row < getRow());
+        assert(col < getColumn());
+        return Base::getDerived().asComplexBuffer()[row * getColumn() + col];
     }
 
     template<class Derived>
@@ -164,12 +169,15 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename FFTKSpace<Derived, 3>::ScalarType& FFTKSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) {
-        return Base::getDerived().complex_buffer[(x * getDimY() + y) * getDimZ() + z];
+        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(x, y, z));
     }
 
     template<class Derived>
     inline const typename FFTKSpace<Derived, 3>::ScalarType& FFTKSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) const {
-        return Base::getDerived().complex_buffer[(x * getDimY() + y) * getDimZ() + z];
+        assert(x < getDimX());
+        assert(y < getDimY());
+        assert(z < getDimZ());
+        return Base::getDerived().asComplexBuffer()[(x * getDimY() + y) * getDimZ() + z];
     }
 
     template<class Derived>

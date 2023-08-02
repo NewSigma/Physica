@@ -23,6 +23,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class FreeModel {
+        using PlainScalar = typename ScalarType::PlainScalar;
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -74,7 +75,7 @@ namespace Physica::Core {
         omegaK.resize(kSpaceSize);
         coeffMatrixBase.resize(kSpaceSize);
         for (size_t i = 0; i < omegaK.getLength(); ++i)
-            omegaK[i] = omegaW * sin(ScalarType(M_PI * i / numReplica)) * 2;
+            omegaK[i] = omegaW * sin(PlainScalar(M_PI * i / numReplica)) * PlainScalar(2);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -148,12 +149,12 @@ namespace Physica::Core {
             const ScalarType cosine = coeffMatrixBase[j][0];
             const ScalarType sine = coeffMatrixBase[j][1];
             auto col = buffer.col(j);
-            const auto pack1 = col[0].packet();
-            const auto pack2 = col[1].packet();
-            const auto new_pack1 = cosine.getTrivial() * pack1 - (factor * sine).getTrivial() * pack2;
-            const auto new_pack2 = (sine / factor).getTrivial() * pack1 + cosine.getTrivial() * pack2;
-            col[0].writePacket(new_pack1);
-            col[1].writePacket(new_pack2);
+            const auto momentum = col[0];
+            const auto pos = col[1];
+            const auto new_momentum = cosine * momentum - (factor * sine) * pos;
+            const auto new_pos = (sine / factor) * momentum + cosine * pos;
+            col[0] = new_momentum;
+            col[1] = new_pos;
         }
         ringPolymer.toBeadRepr(id_dof, output);
     }

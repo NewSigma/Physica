@@ -27,19 +27,20 @@ namespace Physica::Core::Internal {
     class PacketHelper {
         constexpr static bool isSinglePrec = ScalarType::option == Float;
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
         constexpr static bool isDynamic = Length == Utils::Dynamic;
         using Packet128 = typename std::conditional<isSinglePrec, Vec4f, Vec2d>::type;
         using Packet256 = typename std::conditional<isSinglePrec, Vec8f, Vec4d>::type;
         using Packet512 = typename std::conditional<isSinglePrec, Vec16f, Vec8d>::type;
-        constexpr static size_t size128 = isComplex ? (isSinglePrec ? 2 : 1) : (isSinglePrec ? 4 : 2);
-        constexpr static size_t size256 = isComplex ? (isSinglePrec ? 4 : 2) : (isSinglePrec ? 8 : 4);
-        constexpr static size_t size512 = isComplex ? (isSinglePrec ? 8 : 4) : (isSinglePrec ? 16 : 8);
+        constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
+        constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
+        constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
         constexpr static bool support128 = INSTRSET >= 2;
-        constexpr static bool support256 = INSTRSET >= 7;
-        constexpr static bool support512 = INSTRSET >= 9;
-        constexpr static bool use128 = support128 && Length >= size128;
-        constexpr static bool use256 = support256 && Length >= size256;
-        constexpr static bool use512 = support512 && Length >= size512;
+        constexpr static bool support256 = INSTRSET >= 7 && support128;
+        constexpr static bool support512 = INSTRSET >= 9 && support256;
+        constexpr static bool use128 = support128 && Length >= size128 && size128 != 0;
+        constexpr static bool use256 = support256 && Length >= size256 && size256 != 0;
+        constexpr static bool use512 = support512 && Length >= size512 && size512 != 0;
 
         using SupportType1 = typename std::conditional<support128, Packet128, ScalarType>::type;
         using SupportType2 = typename std::conditional<support256, Packet256, SupportType1>::type;
@@ -63,8 +64,7 @@ namespace Physica::Core::Internal {
      */
     template<class ScalarType, size_t Length>
     class BestPacket {
-        using RealType = typename ScalarType::RealType;
-        static_assert(RealType::option == Float || RealType::option == Double, "Unsupported float type");
+        static_assert(ScalarType::option == Float || ScalarType::option == Double, "Unsupported float type");
     public:
         using Type = typename PacketHelper<ScalarType, Length>::Type;
         constexpr static size_t Size = PacketHelper<ScalarType, Length>::Size;
