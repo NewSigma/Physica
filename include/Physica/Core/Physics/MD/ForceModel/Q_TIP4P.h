@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,46 +24,10 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
-#include "PairModel.h"
+#include "LJModel.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType> class Q_TIP4P;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class ScalarType, class PosScalarType>
-        class Traits<Q_TIP4P<ScalarType, PosScalarType>> {
-        public:
-            constexpr static double sigma = PhyConst<AU>::angstormToBohr(3.1589);
-
-            static inline ScalarType force_functor(PosScalarType r, [[maybe_unused]] PosScalarType r2) {
-                return lennardJonesForce(r);
-            }
-
-            static inline ScalarType pot_functor([[maybe_unused]] PosScalarType r, PosScalarType r2) {
-                return lennardJonesPot(r2);
-            }
-        private:
-            static inline ScalarType lennardJonesForce(PosScalarType r) {
-                const ScalarType rep_r = ScalarType(sigma) / r;
-                const ScalarType rep_r2 = square(rep_r);
-                const ScalarType rep_r4 = square(rep_r2);
-                const ScalarType rep_r6 = rep_r4 * rep_r2;
-                const ScalarType rep_r7 = rep_r6 * rep_r;
-                const ScalarType rep_r13 = rep_r7 * rep_r6;
-                return rep_r13 * 2 - rep_r7;
-            }
-
-            static inline ScalarType lennardJonesPot(PosScalarType r2) {
-                const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
-                const ScalarType rep_r4 = square(rep_r2);
-                const ScalarType rep_r6 = rep_r4 * rep_r2;
-                const ScalarType rep_r12 = square(rep_r6);
-                return rep_r12 - rep_r6;
-            }
-        };
-    }
     /**
      * Reference:
      * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
@@ -74,7 +38,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
         using This = Q_TIP4P<ScalarType, PosScalarType>;
         using EwaldType = Ewald<ScalarType, PosScalarType>;
-        using LJModelType = PairModel<ScalarType, PosScalarType, Internal::Traits<This>>;
+        using LJModelType = LJModel<ScalarType, PosScalarType>;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -88,10 +52,12 @@ namespace Physica::Core {
         constexpr static double equalR = PhyConst<AU>::angstormToBohr(0.9419);
         constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
+
+        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(3.1589);
     private:
         size_t numMolecule;
         EwaldType ewald;
-        LJModelType LJModel;
+        LJModelType lj_model;
     public:
         Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_);
         Q_TIP4P(const Q_TIP4P&) = default;
@@ -130,7 +96,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     Q_TIP4P<ScalarType, PosScalarType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_)
             : numMolecule(refer_cell.getNumParticle() / 3)
-            , LJModel(std::move(cutoff_)) {
+            , lj_model(lj_sigma, std::move(cutoff_)) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         ewald = EwaldType(refer_cell.getLattice(), makeCharges());
     }
@@ -167,9 +133,9 @@ namespace Physica::Core {
         Vector<ScalarType> shortForce(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            const ScalarType factor = ScalarType(24 * epsilon / Internal::Traits<This>::sigma);
+            const ScalarType factor = ScalarType(24 * epsilon / lj_sigma);
             auto force = shortForce.tail(2 * numMolecule * Dim);
-            force = LJModel.template force<Executor, IsSmallCell>(cellWithoutH) * factor;
+            force = lj_model.template force<Executor, IsSmallCell>(cellWithoutH) * factor;
         }
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;
@@ -319,7 +285,7 @@ namespace Physica::Core {
     void Q_TIP4P<ScalarType, PosScalarType>::swap(Q_TIP4P& model) noexcept {
         std::swap(numMolecule, model.numMolecule);
         ewald.swap(model.ewald);
-        LJModel.swap(model.LJModel);
+        lj_model.swap(model.lj_model);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -455,7 +421,7 @@ namespace Physica::Core {
 
         const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
         const ScalarType factor = 4 * epsilon;
-        const ScalarType interMoleculeEnergy = LJModel.potentialEnergy(cellWithoutH) * factor;
+        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(cellWithoutH) * factor;
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;

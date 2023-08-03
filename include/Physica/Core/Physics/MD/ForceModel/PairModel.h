@@ -27,16 +27,21 @@ namespace Physica::Core {
      * References:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    class PairModel {
-        static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
+    template<class Derived>
+    class PairModel : public Utils::CRTPBase<Derived> {
     public:
+        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using PosScalarType = typename Internal::Traits<Derived>::PosScalarType;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
+        
     private:
+        static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
+        using Base = Utils::CRTPBase<Derived>;
+
         ScalarType cutoff;
         ScalarType squared_cutoff;
         ScalarType pot_shift;
@@ -48,6 +53,8 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
+        [[nodiscard]] ScalarType force_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().force_functor(r, r2); }
+        [[nodiscard]] ScalarType pot_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().pot_functor(r, r2); }
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
@@ -56,22 +63,22 @@ namespace Physica::Core {
         void swap(PairModel& pair) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    PairModel<ScalarType, PosScalarType, PairFunctor>::PairModel(ScalarType cutoff_)
+    template<class Derived>
+    PairModel<Derived>::PairModel(ScalarType cutoff_)
             : cutoff(std::move(cutoff_)) {
         squared_cutoff = square(cutoff);
-        pot_shift = PairFunctor::pot_functor(cutoff, squared_cutoff);
+        pot_shift = pot_functor(cutoff, squared_cutoff);
     }
 
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    PairModel<ScalarType, PosScalarType, PairFunctor>& PairModel<ScalarType, PosScalarType, PairFunctor>::operator=(PairModel pair) noexcept {
+    template<class Derived>
+    PairModel<Derived>& PairModel<Derived>::operator=(PairModel pair) noexcept {
         swap(pair);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, class PairFunctor>
+    template<class Derived>
     template<class Executor, bool IsSmallCell>
-    Vector<ScalarType> PairModel<ScalarType, PosScalarType, PairFunctor>::force(const MDCellType& cell) const {
+    Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
         Vector<ScalarType> force(3 * cell.getNumParticle(), 0);
         if constexpr (IsSmallCell) {
@@ -93,7 +100,7 @@ namespace Physica::Core {
                             const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                             if (isNotSelf && r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(dist, r2);
                                 r *= f_norm / dist;
                                 const Vector3D& f = r;
                                 force_i -= f;
@@ -122,7 +129,7 @@ namespace Physica::Core {
                             const ScalarType r2 = r.squaredNorm();
                             if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
@@ -149,7 +156,7 @@ namespace Physica::Core {
                             if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
                                 auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
-                                const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 f2 += r;
@@ -166,8 +173,8 @@ namespace Physica::Core {
         return force;
     }
 
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    ScalarType PairModel<ScalarType, PosScalarType, PairFunctor>::potentialEnergy(const MDCellType& cell) const {
+    template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
         const auto range = MDCellType::estimateRange(cell.getLattice(), cutoff);
         const size_t numParticle = cell.getNumParticle();
@@ -183,7 +190,7 @@ namespace Physica::Core {
                         const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
                             const ScalarType dist = sqrt(r2);
-                            temp += PairFunctor::pot_functor(dist, r2) - pot_shift;
+                            temp += pot_functor(dist, r2) - pot_shift;
                         }
                     }
                 }
@@ -195,9 +202,9 @@ namespace Physica::Core {
      * Reference:
      * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
      */
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    typename PairModel<ScalarType, PosScalarType, PairFunctor>::LatticeMatrix
-    PairModel<ScalarType, PosScalarType, PairFunctor>::virial(const MDCellType& cell) const {
+    template<class Derived>
+    typename PairModel<Derived>::LatticeMatrix
+    PairModel<Derived>::virial(const MDCellType& cell) const {
         const auto& pos = cell.getPos();
         const size_t numParticle = cell.getNumParticle();
         const CellListType cellList(cell, cutoff);
@@ -230,7 +237,7 @@ namespace Physica::Core {
                     const ScalarType r2 = r.squaredNorm();
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
-                        const ScalarType f_norm = PairFunctor::force_functor(dist, r2);
+                        const ScalarType f_norm = force_functor(dist, r2);
                         f = r * ScalarType(-f_norm / dist);
                         result += f * r.transpose();
                     }
@@ -241,8 +248,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType, class PairFunctor>
-    void PairModel<ScalarType, PosScalarType, PairFunctor>::swap(PairModel& pair) noexcept {
+    template<class Derived>
+    void PairModel<Derived>::swap(PairModel& pair) noexcept {
         cutoff.swap(pair.cutoff);
         squared_cutoff.swap(squared_cutoff);
         pot_shift.swap(pot_shift);

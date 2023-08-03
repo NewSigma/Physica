@@ -21,6 +21,16 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
+    template<class ScalarType, class PosScalarType> class SilveraGoldman;
+
+    namespace Internal {
+        template<class T, class U>
+        class Traits<SilveraGoldman<T, U>> {
+        public:
+            using ScalarType = T;
+            using PosScalarType = U;
+        };
+    }
     /**
      * Potential that suits para-hydrogen
      * 
@@ -28,7 +38,7 @@ namespace Physica::Core {
      * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
      */
     template<class ScalarType, class PosScalarType>
-    class SilveraGoldman final : public PairModel<ScalarType, PosScalarType, SilveraGoldman<ScalarType, PosScalarType>> {
+    class SilveraGoldman final : public PairModel<SilveraGoldman<ScalarType, PosScalarType>> {
         constexpr static double alpha = 1.713;
         constexpr static double beta = 1.5671;
         constexpr static double gamma = 0.00993;
@@ -39,7 +49,7 @@ namespace Physica::Core {
         constexpr static double c10 = 4813.9;
 
         using This = SilveraGoldman<ScalarType, PosScalarType>;
-        using Base = PairModel<ScalarType, PosScalarType, This>;
+        using Base = PairModel<This>;
     public:
         SilveraGoldman(ScalarType cutoff_);
         SilveraGoldman(const SilveraGoldman&) = default;
@@ -48,10 +58,9 @@ namespace Physica::Core {
         /* Operators */
         SilveraGoldman& operator=(SilveraGoldman obj) noexcept;
         /* Operations */
+        [[nodiscard]] inline ScalarType force_functor(ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType pot_functor(ScalarType r, ScalarType r2) const;
         void swap(SilveraGoldman& obj) noexcept;
-        /* Static members */
-        static inline ScalarType force_functor(ScalarType r, ScalarType r2);
-        static inline ScalarType pot_functor(ScalarType r, ScalarType r2);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -69,7 +78,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(ScalarType r, ScalarType r2) {
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(ScalarType r, ScalarType r2) const {
         using PacketType = typename Internal::BestPacket<ScalarType, 4>::Type;
         static_assert(!std::is_same<ScalarType, PacketType>::value, "[Error]: SIMD is inavailable, implementation must be revised");
 
@@ -98,7 +107,7 @@ namespace Physica::Core {
     }
     
     template<class ScalarType, class PosScalarType>
-    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(ScalarType r, ScalarType r2) {
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);

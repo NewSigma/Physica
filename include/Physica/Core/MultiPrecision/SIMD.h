@@ -150,6 +150,7 @@ namespace Physica::Core {
         inline void store_partial(int n, ScalarType* p) const;
         inline void insert(int index, const ScalarType& value);
         [[nodiscard]] inline ScalarType horizontal_add() const;
+        void swap(SIMD& other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] Base& getImpl() noexcept { return *this; }
