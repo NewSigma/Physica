@@ -25,12 +25,11 @@
 #include "Physica/Core/Exception/NotImplementedException.h"
 #include "Physica/Utils/Template/CRTPBase.h"
 #include "Physica/Utils/CUDA/device_obj.cuh"
+#include "ScalarImpl/ScalarBase.h"
 
 namespace Physica::Core {
     //Forward declarations
     template<class AnyScalar> class ComplexScalar;
-
-    template<class ScalarType> class Differentiable;
 
     template<ScalarOption option>
     __host__ __device__ Scalar<option> square(const Scalar<option>& s);
@@ -42,9 +41,6 @@ namespace Physica::Core {
     Scalar<option> ln(const Scalar<option>& s);
 
     namespace Internal {
-        template<class T>
-        class Traits;
-
         template<ScalarOption option_>
         class Traits<Scalar<option_>> {
             using Helper = typename std::conditional<option_ == Float, float, double>::type;
@@ -73,137 +69,7 @@ namespace Physica::Core {
         public:
             using Type = DifferentiablePacker;
         };
-
-        template<class T> struct remove_differentiable {
-            using Type = T;
-        };
-
-        template<class ScalarType>
-        struct remove_differentiable<Differentiable<ScalarType>> {
-            using Type = ScalarType;
-        };
     }
-
-    template<class Derived>
-    class ScalarBase : public Utils::CRTPBase<Derived> {
-    public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using TrivialType = typename Internal::Traits<Derived>::TrivialType;
-        using RealType = typename Internal::Traits<Derived>::RealType;
-        using ComplexType = typename Internal::Traits<Derived>::ComplexType;
-        using PlainScalar = typename Internal::remove_differentiable<Derived>::Type;
-        static constexpr ScalarOption option = Internal::Traits<Derived>::option;
-        static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
-        static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
-
-        static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
-
-        [[nodiscard]] const RealType& getReal() const {
-            if constexpr (isComplex)
-                return this->getDerived().getReal();
-            else
-                return this->getDerived();
-        }
-
-        [[nodiscard]] RealType getImag() const {
-            if constexpr (isComplex)
-                return this->getDerived().getImag();
-            else
-                return Derived(0);
-        }
-
-        [[nodiscard]] ScalarType conjugate() const {
-            if constexpr (isComplex)
-                return this->getDerived().conjugate();
-            else
-                return getReal();
-        }
-
-        [[nodiscard]] ScalarType unit() const {
-            if constexpr (isComplex)
-                return this->getDerived().unit();
-            else
-                return ScalarType(getReal().isNegative() ? -1 : 1);
-        }
-
-        [[nodiscard]] RealType norm() const { return sqrt(squaredNorm()); }
-
-        [[nodiscard]] RealType squaredNorm() const {
-            if constexpr (isComplex)
-                return this->getDerived().squaredNorm();
-            else
-                return square(this->getDerived());
-        }
-        /* SIMD support */
-        constexpr static int size() { return 1; }
-
-        Derived& load(const ScalarType* p) {
-            this->getDerived() = *p;
-            return this->getDerived();
-        }
-
-        void store(ScalarType* p) const { *p = this->getDerived().getTrivial(); }
-
-        Derived& load_partial(int n, const ScalarType* p) {
-            if (n)
-                load(p);
-            return this->getDerived();
-        }
-
-        void store_partial(int n, ScalarType* p) const {
-            if (n)
-                store(p);
-        }
-
-        void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
-        /* Auto differential support */
-        [[nodiscard]] const PlainScalar& getValue() const noexcept {
-            if constexpr (isDifferentiable)
-                return this->getDerived().getValue();
-            else
-                return this->getDerived();
-        }
-
-        [[nodiscard]] const PlainScalar& getTangent() const noexcept {
-            return this->getDerived().getTangent();
-        }
-    };
-
-    template<class T>
-    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
-
-    template<class ScalarType>
-    inline ScalarType horizontal_add(const ScalarBase<ScalarType>& s);
-
-    template<class ScalarType> ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2);
-    template<class ScalarType>
-    bool scalarNear(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2, double precision);
-    template<ScalarOption option>
-    std::ostream& operator<<(std::ostream& os, const Scalar<option>& s);
-    template<ScalarOption option>
-    inline Scalar<option> operator+(const Scalar<option>& s);
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator+=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator-=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator*=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator/=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2);
-    template<ScalarOption option>
-    inline void operator^=(Scalar<option>& s1, const Scalar<option>& s2);
-    template<ScalarOption option, bool errorTrack>
-    inline void operator<<=(Scalar<option>& s, int bits);
-    template<ScalarOption option, bool errorTrack>
-    inline void operator>>=(Scalar<option>& s, int bits);
-    template<ScalarOption option>
-    __host__ __device__ inline bool operator>=(const Scalar<option>& s1, const Scalar<option>& s2);
-    template<ScalarOption option>
-    __host__ __device__ inline bool operator<=(const Scalar<option>& s1, const Scalar<option>& s2);
-    template<ScalarOption option>
-    __host__ __device__ inline bool operator!=(const Scalar<option>& s1, const Scalar<option>& s2);
-    template<ScalarOption option>
-    inline void swap(Scalar<option>& s1, Scalar<option>& s2) noexcept;
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
     template<>
     class Scalar<MultiPrecision> : public ScalarBase<Scalar<MultiPrecision>> {

@@ -23,15 +23,6 @@
 #include "Physica/Core/MultiPrecision/BasicImpl/Util/ArraySupport.h"
 #include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
 #include "Physica/Core/Exception/DivideByZeroException.h"
-/*!
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
- */
-//Forward declaration
-namespace Physica::Core {
-    template<ScalarOption option>
-    inline bool operator!=(const Scalar<option>& s1, const Scalar<option>& s2);
-}
 
 namespace Physica::Core {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
