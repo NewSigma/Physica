@@ -59,6 +59,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }
         [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
+        /* Static members */
+        static void checkParam(PlainScalar collideFactor, size_t numReplica);
     private:
         bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
         void handleCollision(const RingPolymerType& ringPolymer);
@@ -74,8 +76,7 @@ namespace Physica::Core {
             , repMass(numParticle, 0)
             , buffer(numParticle * 2, numReplica)
             , maxHandleNum(maxHandleNum_) {
-        assert(collideFactor < PlainScalar(1.0) && collideFactor.isPositive());
-        assert(NumReplica == Dynamic || NumReplica == numReplica);
+        checkParam(collideFactor, numReplica);
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
@@ -89,6 +90,7 @@ namespace Physica::Core {
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = getNumParticle();
         const ScalarType collideStep = collideFactor * deltaT;
+        const PlainScalar epsilonStep = PlainScalar(std::numeric_limits<ScalarType>::epsilon()) * deltaT.getValue();
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
         assert(getNumReplica() == ringPolymer.getNumReplica());
@@ -102,34 +104,29 @@ namespace Physica::Core {
         size_t handleNum = 0;
         while (true) {
             const ScalarType step = to - from;
+            if (step < epsilonStep) [[unlikely]]
+                throw BadConvergenceException("[Error]: Step is too small, may be collide factor is too small?");
+
+            bool isCollided = false;
             if constexpr (NumReplica != 1) {
                 Base::pre_nve_step_impl(ringPolymer, step);
                 if constexpr (IsFixedBoundary) {
                     for (size_t i = 0; i < numParticle; ++i) {
                         Base::do_nve_step_impl(i, ringPolymer, buffer, phase);
-                        [[unlikely]] if (checkCollision(i, ringPolymer)) {
-                            rStep = to;
-                            goto done;
-                        }
+                        isCollided = checkCollision(i, ringPolymer);
+                        if (isCollided) [[unlikely]]
+                            break;
                     }
-                    lStep = to;
                 }
                 else {
                     Base::do_nve_step_impl(0, ringPolymer, buffer, phase);
                     for (size_t i = 1; i < numParticle; ++i) {
                         Base::do_nve_step_impl(i, ringPolymer, buffer, phase);
-                        [[unlikely]] if (checkCollision(i, ringPolymer)) {
-                            rStep = to;
-                            goto done;
-                        }
+                        isCollided = checkCollision(i, ringPolymer);
+                        if (isCollided) [[unlikely]]
+                            break;
                     }
-
-                    if (checkCollision(0, ringPolymer))
-                        rStep = to;
-                    else
-                        lStep = to;
                 }
-            done:;
             }
             else {
                 auto col = phase.col(0);
@@ -139,20 +136,16 @@ namespace Physica::Core {
                 auto pos_buffer = col1.tail(numParticle);
                 pos = pos_buffer + hadamard(momentum_buffer, repMass) * step;
                 constexpr int unused = 0;
-                if (checkCollision(unused, ringPolymer))
-                    rStep = to;
-                else
-                    lStep = to;
+                isCollided = checkCollision(unused, ringPolymer);
             }
-            to = (lStep + rStep) * PlainScalar(0.5);
 
-            const bool isDone = lStep == deltaT;
-            if (isDone) {
-                if constexpr (NumReplica == 1) {
-                    auto momentum = phase.topRows(numParticle);
-                    momentum = buffer.topRows(numParticle);
-                }
-                break;
+            if (isCollided)
+                rStep = to;
+            else {
+                lStep = to;
+                const bool isDone = lStep == deltaT;
+                if (isDone)
+                    break;
             }
 
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
@@ -178,6 +171,13 @@ namespace Physica::Core {
                 to = deltaT;
                 handleCollision(ringPolymer);
             }
+            else
+                to = (lStep + rStep) * PlainScalar(0.5);
+        }
+
+        if constexpr (NumReplica == 1) {
+            auto momentum = phase.topRows(numParticle);
+            momentum = buffer.topRows(numParticle);
         }
     }
 
@@ -197,6 +197,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkParam(PlainScalar collideFactor, size_t numReplica) {
+        if (!(collideFactor < PlainScalar(1.0) && collideFactor.isPositive())) [[unlikely]]
+            throw std::invalid_argument("[Error]: Collide factor must be in (0, 1)");
+        if (NumReplica != Dynamic && NumReplica != numReplica) [[unlikely]]
+            throw std::invalid_argument("[Error]: Number of replica is not consistent");
+        if (collideFactor <= ScalarType(std::numeric_limits<ScalarType>::epsilon())) [[unlikely]]
+            throw std::invalid_argument("[Error]: Collide factor is too small, numerical error will be large");
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
     bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
@@ -205,14 +215,6 @@ namespace Physica::Core {
             auto phase = ringPolymer.asMatrix().col(0);
             auto pos = phase.tail(numParticle);
             const size_t length = numParticle - 1;
-            if constexpr (IsFixedBoundary) {
-                if (pos[0].isNegative()) [[unlikely]]
-                    return true;
-            }
-            else {
-                if (pos[length] - latticeSize > pos[0]) [[unlikely]]
-                    return true;
-            }
             {
                 auto head = pos.head(length);
                 auto tail = pos.tail(1);
@@ -225,14 +227,17 @@ namespace Physica::Core {
                 }
 
                 if (to != length) {
-                    const size_t count = length - i;
-                    const auto boolPacket = head.template packetPartial<PacketType>(i, count) > tail.template packetPartial<PacketType>(i, count);
-                    if (boolPacket.horizontal_or()) [[unlikely]]
-                        return true;
+                    for (size_t i = to; i < length; ++i)
+                        if (head[i] > tail[i]) [[unlikely]]
+                            return true;
                 }
             }
             if constexpr (IsFixedBoundary) {
-                if (pos[length] > latticeSize) [[unlikely]]
+                if (pos[0].isNegative() || pos[length] > latticeSize) [[unlikely]]
+                    return true;
+            }
+            else {
+                if (pos[length] - latticeSize > pos[0]) [[unlikely]]
                     return true;
             }
         }
@@ -251,10 +256,9 @@ namespace Physica::Core {
                     }
 
                     if (to != numReplica) {
-                        const size_t count = numReplica - i;
-                        const auto boolPacket = pos.template packetPartial<PacketType>(i, count) < zeros;
-                        if (boolPacket.horizontal_or()) [[unlikely]]
-                            return true;
+                        for (size_t i = to; i < numReplica; ++i)
+                            if (pos[i].isNegative()) [[unlikely]]
+                                return true;
                     }
                 }
                 else {
@@ -270,12 +274,9 @@ namespace Physica::Core {
                     }
 
                     if (to != numReplica) {
-                        const size_t count = numReplica - i;
-                        const PacketType pack1 = pos_end.template packetPartial<PacketType>(i, count) - latticeSizes;
-                        const PacketType pack2 = pos.template packetPartial<PacketType>(i, count);
-                        const auto boolPacket = pack1 > pack2;
-                        if (boolPacket.horizontal_or()) [[unlikely]]
-                            return true;
+                        for (size_t i = to; i < numReplica; ++i)
+                            if (pos_end[i] > pos[i] + latticeSize) [[unlikely]]
+                                return true;
                     }
                 }
             }
@@ -290,10 +291,9 @@ namespace Physica::Core {
                     }
 
                     if (to != numReplica) {
-                        const size_t count = numReplica - i;
-                        const auto boolPacket = pos0.template packetPartial<PacketType>(i, count) > pos.template packetPartial<PacketType>(i, count);
-                        if (boolPacket.horizontal_or()) [[unlikely]]
-                            return true;
+                        for (size_t i = to; i < numReplica; ++i)
+                            if (pos0[i] > pos[i]) [[unlikely]]
+                                return true;
                     }
                 }
                 if constexpr (IsFixedBoundary) {
@@ -307,9 +307,8 @@ namespace Physica::Core {
                         }
 
                         if (to != numReplica) {
-                            const size_t count = numReplica - i;
-                            const auto boolPacket = pos.template packetPartial<PacketType>(i, count) > latticeSizes;
-                            if (boolPacket.horizontal_or()) [[unlikely]]
+                        for (size_t i = to; i < numReplica; ++i)
+                            if (pos[i] > latticeSize) [[unlikely]]
                                 return true;
                         }
                     }

@@ -72,6 +72,7 @@ namespace Physica::Core {
         __global__ void step_kernel(
                 ScalarType latticeSize,
                 ScalarType collideStep,
+                ScalarType epsilonStep,
                 ScalarType temperatureT,
                 Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> phase_,
                 const Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> mass_,
@@ -105,7 +106,10 @@ namespace Physica::Core {
                 size_t handleNum = 0;
                 while (true) {
                     /* Try step */ {
-                        const ScalarType pos1 = buffer[threadId] + velocity * (to - from);
+                        const ScalarType stepSize = to - from;
+                        if (stepSize < epsilonStep) [[unlikely]]
+                            __trap();
+                        const ScalarType pos1 = buffer[threadId] + velocity * stepSize;
                         sharedBuffer[threadId] = pos1;
                         __syncthreads();
                         bool flag = false;
@@ -163,7 +167,7 @@ namespace Physica::Core {
             , buffer(numParticle)
             , lockedBuffer(numParticle * 2)
             , maxHandleNum(maxHandleNum_) {
-        assert(collideFactor < ScalarType(1.0) && collideFactor.isPositive());
+        HardCore<ScalarType, IsFixedBoundary, NumReplica, SequentialExecutor>::checkParam(collideFactor, 1);
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
@@ -202,6 +206,7 @@ namespace Physica::Core {
         Internal::step_kernel<ScalarType, IsFixedBoundary, NumReplica><<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(
                 latticeSize,
                 collideFactor * deltaT,
+                ScalarType(std::numeric_limits<ScalarType>::epsilon()) * deltaT,
                 temperatureT,
                 asStruct(d_phase),
                 asStruct(mass),

@@ -170,7 +170,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < getDOF(); ++i) {
             const auto mass = massVec[i / Dim];
             auto row = phase.row(i);
-            row -= mass * driftVelocity[i % Dim];
+            row.asVector() -= mass * driftVelocity[i % Dim];
         }
     }
 

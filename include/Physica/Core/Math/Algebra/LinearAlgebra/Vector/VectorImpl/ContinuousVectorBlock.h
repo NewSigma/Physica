@@ -82,14 +82,14 @@ namespace Physica::Core {
     template<class VectorType, size_t Length>
     inline ContinuousVectorBlock<VectorType, Length>&
     ContinuousVectorBlock<VectorType, Length>::operator=(const ContinuousVectorBlock<VectorType, Length>& v) {
-        Base::operator=(v);
+        v.assignTo(*this);
         return *this;
     }
     
     template<class VectorType, size_t Length>
     inline ContinuousVectorBlock<VectorType, Length>&
     ContinuousVectorBlock<VectorType, Length>::operator=(ContinuousVectorBlock<VectorType, Length>&& v) noexcept {
-        Base::operator=(std::move(v));
+        v.assignTo(*this);
         return *this;
     }
 
