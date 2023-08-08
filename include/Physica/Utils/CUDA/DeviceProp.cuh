@@ -21,8 +21,15 @@
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {
+    /**
+     * Hard-coded device properties can be referenced from [1].
+     * 
+     * Reference:
+     * [1] https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
+     */
     class DeviceProp {
     public:
+        constexpr static unsigned int MaxThreadsPerBlock = 1024;
         constexpr static unsigned int WarpSize = 32;
     private:
         int driverVersion;

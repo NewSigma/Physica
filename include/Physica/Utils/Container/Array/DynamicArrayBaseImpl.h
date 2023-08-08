@@ -132,7 +132,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    typename DynamicArrayBase<Derived, Allocator>::pointer
+    inline typename DynamicArrayBase<Derived, Allocator>::pointer
     DynamicArrayBase<Derived, Allocator>::release() noexcept {
         pointer copy = arr;
         length = 0;

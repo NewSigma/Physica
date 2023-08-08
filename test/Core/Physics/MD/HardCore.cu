@@ -117,8 +117,8 @@ void testCpuGpuCompare() {
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
         cpu_data[0] = calcThermoFlux(rpmd);
         rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
-        for (size_t j = 0; j < NumData - 1; ++j) {
-            cpu_data[j + 1] = calcThermoFlux(rpmd);
+        for (size_t j = 1; j < NumData; ++j) {
+            cpu_data[j] = calcThermoFlux(rpmd);
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
             scaleVelocity(rpmd);
         }
@@ -135,8 +135,8 @@ void testCpuGpuCompare() {
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         gpu_data[0] = calcThermoFlux(rpmd);
         kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
-        for (size_t j = 0; j < NumData - 1; ++j) {
-            gpu_data[j + 1] = calcThermoFlux(rpmd);
+        for (size_t j = 1; j < NumData; ++j) {
+            gpu_data[j] = calcThermoFlux(rpmd);
             kineticModel.do_nve_step_for(1.0, timeStep);
             kineticModel.post_nve_step(rpmd.getRingPolymer());
             scaleVelocity(rpmd);

@@ -40,14 +40,12 @@ int main() {
     auto d_a = a.toDevice();
     device_obj<VectorType> d_b(4);
     d_b = d_a;
-    cudaCheck(cudaStreamSynchronize(nullptr));
     VectorType b = d_b.toHost();
     if (a != b)
         return 1;
     {
         const VectorType answer = reciprocal(a);
         d_b = reciprocal(d_b);
-        cudaCheck(cudaStreamSynchronize(nullptr));
         VectorType result;
         d_b.toHost(result);
         if (!vectorNear(result, answer, 1E-15))
@@ -64,7 +62,7 @@ int main() {
         auto d_b = b.toDevice();
         VectorType result(len);
         device_obj<VectorType> d_result(len);
-        test_kernel<<<1, len>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
+        test_kernel<<<1, len, 0, StreamPool::getStream()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
         d_result.toHostAsync(result);
         CudaExecutor::wait();
         if (!vectorNear(result, answer, 1E-7))

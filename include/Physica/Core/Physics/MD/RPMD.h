@@ -26,6 +26,15 @@
 #include "MDImpl/RingPolymer.h"
 
 namespace Physica::Core {
+    template<class ScalarType>
+    class RPMDBase {        
+    public:
+        using PlainScalar = typename ScalarType::PlainScalar;
+
+        [[nodiscard]] static uint64_t durationToStep(PlainScalar duration, PlainScalar timeStep) {
+            return double(duration / timeStep) + 0.5;
+        }
+    };
     /**
      * Reference:
      * [1] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
@@ -37,8 +46,9 @@ namespace Physica::Core {
      * TODO: replace several ScalarType to PosScalarType
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
-    class RPMD final {
-        using PlainScalar = typename ScalarType::PlainScalar;
+    class RPMD final : public RPMDBase<ScalarType> {
+        using Base = RPMDBase<ScalarType>;
+        using typename Base::PlainScalar;
     public:
         using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
@@ -113,7 +123,13 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
         [[nodiscard]] MDCellType makeAverageCell() const;
-        void checkParam() const;
+
+        template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
+        template<class ForceModel> [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
+        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalPotentialEnergy(const ForceModel& model) const;
+        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
+        [[nodiscard]] ScalarType calcClassicalElastic() const;
+        [[nodiscard]] ScalarType calcKinetic() const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
@@ -122,30 +138,17 @@ namespace Physica::Core {
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
-        [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
         [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }
-        [[nodiscard]] const PhaseMatrix& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
+        [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
         [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
+        [[nodiscard]] const PhaseMatrix& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
         [[nodiscard]] size_t getDOF() const noexcept { return ringPolymer.getDOF(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return ringPolymer.getNumReplica(); }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
+        [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
-
-        [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
-
-        template<class ForceModel>
-        [[nodiscard]] ScalarType getClassicalPotentialEnergy(const ForceModel& model) const;
-        [[nodiscard]] ScalarType getClassicalElastic() const;
-        template<class ForceModel>
-        [[nodiscard]] ScalarType getClassicalInternalEnergy(const ForceModel& model) const;
-        [[nodiscard]] ScalarType calcKinetic() const;
-        template<class ForceModel, class Executor>
-        [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
-
-        template<class ForceModel>
-        [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         /* Setters */
         void setTemperature(ScalarType temperature);
     private:
@@ -156,6 +159,7 @@ namespace Physica::Core {
         void decontract();
         void forceStep(ScalarType deltaT);
         bool checkCentroid() const;
+        void checkParam() const;
     };
 }
 

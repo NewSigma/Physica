@@ -48,11 +48,6 @@ namespace Physica::Core {
         return Scalar<option>(1) / s;
     }
 
-    template<>
-    inline Scalar<MultiPrecision> reciprocal(const Scalar<MultiPrecision>& s) {
-        return BasicConst::getInstance()._1 / s;
-    }
-
     template<ScalarOption option>
     __host__ __device__ Scalar<option> sqrt(const Scalar<option>& s) {
         return Scalar<option>(std::sqrt(s.getTrivial()));

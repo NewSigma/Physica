@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include <gperftools/profiler.h>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/MD/EnergyMinimizer.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"

@@ -60,11 +60,14 @@ if(${PHYSICA_CUDA})
     set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     set(CMAKE_CUDA_ARCHITECTURES 75)
-    # Warning 174: Avoid warnings at template explicit instantiation
     set(CMAKE_CUDA_FLAGS "\
         ${CMAKE_CUDA_FLAGS} \
+        --Wreorder \
+        --Wdefault-stream-launch \
+        --Wext-lambda-captures-this \
+        --Wno-deprecated-declarations \
+        --Wno-deprecated-gpu-targets \
         --relocatable-device-code=true \
-        --diag-suppress 174 \
         --diag-suppress 186 \
         --diag-suppress 20011 \
         --default-stream per-thread \

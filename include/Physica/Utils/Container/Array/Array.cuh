@@ -348,8 +348,7 @@ namespace Physica::Utils {
             for (size_t i = 0; i < length; ++i)
                 result[i] = buffer[i].toHost();
         }
-        if (err != cudaError_t::cudaSuccess)
-            throw Core::CudaException(err);
+        cudaCheck(err);
         return result;
     }
 

@@ -215,7 +215,7 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         /* Setters */
-        [[nodiscard]] pointer release() noexcept;
+        [[nodiscard]] inline pointer release() noexcept;
     private:
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };

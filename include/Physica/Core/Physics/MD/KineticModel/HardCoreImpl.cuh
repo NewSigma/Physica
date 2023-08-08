@@ -21,6 +21,7 @@
 #include <iostream>
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Parallel/Future/StreamFuture.cuh"
+#include "Physica/Core/Physics/MD/RPMD.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -69,7 +70,8 @@ namespace Physica::Core {
         }
 
         template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
-        __global__ void step_kernel(
+        __global__ void __launch_bounds__(Physica::Utils::DeviceProp::MaxThreadsPerBlock, 0)
+        step_kernel(
                 ScalarType latticeSize,
                 ScalarType collideStep,
                 ScalarType epsilonStep,
@@ -141,14 +143,16 @@ namespace Physica::Core {
                     if (isDeltaSmallEnough) {
                         if (handleNum == maxHandleNum) [[unlikely]]
                             __trap();
-                        handleNum += 1;
+
                         const ScalarType pos0 = buffer[threadId];
                         pos[threadId] = pos0 + velocity * (rStep - from);
                         buffer[threadId] = pos0 + velocity * (lStep - from);
+
                         from = lStep;
                         to = deltaT;
                         handleCollision<ScalarType, IsFixedBoundary, NumReplica>(phase, mass, latticeSize, sharedBuffer);
                         velocity = hadamard(momentum, repMass).calc(threadId);
+                        handleNum += 1;
                     }
                 }
             }
@@ -202,7 +206,8 @@ namespace Physica::Core {
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::do_nve_step(ScalarType deltaT, size_t numStep) {
         assert(deltaT.isPositive());
         const size_t numParticle = getNumParticle();
-        const unsigned int numThread = numParticle > 1024 ? 1024 : numParticle;
+        const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
+        const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
         Internal::step_kernel<ScalarType, IsFixedBoundary, NumReplica><<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(
                 latticeSize,
                 collideFactor * deltaT,
@@ -219,7 +224,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::do_nve_step_for(ScalarType duration, ScalarType deltaT) {
-        const uint64_t step = double(duration / deltaT) + 0.5;
+        const uint64_t step = RPMDBase<ScalarType>::durationToStep(duration, deltaT);
         do_nve_step(deltaT, step);
     }
 

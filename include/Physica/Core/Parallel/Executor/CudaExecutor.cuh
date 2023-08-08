@@ -28,6 +28,7 @@ namespace Physica::Core {
             const auto stream = StreamPool::getStream();
             while (cudaStreamQuery(stream) != cudaSuccess)
                 std::this_thread::yield();
+            cudaCheck(cudaGetLastError());
         }
     };
 }

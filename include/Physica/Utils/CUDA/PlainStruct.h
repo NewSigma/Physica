@@ -20,7 +20,7 @@
 
 namespace Physica {
     template<class Derived>
-    class PlainStruct {
+    class alignas(Derived) PlainStruct {
         char anonymous[sizeof(Derived)];
     public:
         PlainStruct() = default;

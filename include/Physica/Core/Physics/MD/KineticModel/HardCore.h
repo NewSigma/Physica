@@ -151,7 +151,7 @@ namespace Physica::Core {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
                 if (handleNum == maxHandleNum) [[unlikely]]
-                    throw BadConvergenceException("[Error]: Too many collision with in a step");
+                    throw BadConvergenceException("[Error]: Too many collision within a step");
 
                 if constexpr (NumReplica != 1) {
                     Base::nve_step_impl(ringPolymer, buffer, phase, rStep - from);
@@ -166,10 +166,10 @@ namespace Physica::Core {
                     pos = pos_buffer + hadamard(momentum_buffer, repMass) * (rStep - from);
                     pos_buffer += hadamard(momentum_buffer, repMass) * (lStep - from);
                 }
-                handleNum += 1;
                 from = lStep;
                 to = deltaT;
                 handleCollision(ringPolymer);
+                handleNum += 1;
             }
             else
                 to = (lStep + rStep) * PlainScalar(0.5);

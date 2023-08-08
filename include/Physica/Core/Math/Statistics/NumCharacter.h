@@ -174,7 +174,7 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    typename VectorType::ScalarType kurt(const LValueVector<VectorType>& x) {
+    typename VectorType::ScalarType excess_kurt(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         VectorType temp = normalize(x);
         temp = square(temp);
@@ -186,5 +186,10 @@ namespace Physica::Core {
         const ScalarType factor2 = ScalarType(length * length * 3) / ScalarType((length - 2) * (length - 3));
         const ScalarType factor1 = ScalarType(length * length * (length + 1)) / ScalarType((length - 1) * (length - 2) * (length - 3));
         return factor1 * mean1 - factor2 * mean2;
+    }
+
+    template<class VectorType>
+    inline typename VectorType::ScalarType kurt(const LValueVector<VectorType>& x) {
+        return excess_kurt(x) + 3.0;
     }
 }

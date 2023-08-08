@@ -111,7 +111,7 @@ namespace Physica::Core {
              class ForceModel,
              class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel) {
-        const uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
     }
@@ -155,7 +155,7 @@ namespace Physica::Core {
             RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        const uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, gen, kineticModel, forceModel);
     }
@@ -190,7 +190,7 @@ namespace Physica::Core {
             Barostat& barostat,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
-        const uint64_t step = double(duration / timeStep) + 0.5;
+        const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             npt_step<Thermostat, RandomGenerator, Barostat, KineticModel, ForceModel, Executor>(thermostat, gen, barostat, kineticModel, forceModel);
     }
@@ -253,14 +253,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::checkParam() const {
-        const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-        bool isSmallEnough = timeStep < cycle / PlainScalar(4);
-        if (!isSmallEnough)
-            throw std::invalid_argument("[Error]: Time step is too large");
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::swap(RPMD& obj) noexcept {
         cell.swap(obj.cell);
         ringPolymer.swap(obj.ringPolymer);
@@ -272,51 +264,6 @@ namespace Physica::Core {
 
         temperatureT.swap(obj.temperatureT);
         timeStep.swap(obj.timeStep);
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::getClassicalPotentialEnergy(const ForceModel& model) const {
-        ScalarType result = 0;
-        for (size_t i = 0; i < getNumReplica(); ++i)
-            result += model.potentialEnergy(phaseToCell(i));
-        return result;
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::getClassicalElastic() const {
-        const size_t dof = getDOF();
-        auto pos = getPhaseMatrix().bottomRows(dof);
-        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
-        ScalarType result = 0;
-        for (size_t i = 0; i < dof; ++i) {
-            const ScalarType mass = cell.getMass(i / Dim);
-            for (size_t j = 0; j < getNumReplica(); ++j)
-                result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
-        }
-        return result;
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class ForceModel>
-    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::getClassicalInternalEnergy(const ForceModel& model) const {
-        return ringPolymer.calcClassicalKinetic() + getClassicalPotentialEnergy<ForceModel>(model) + getClassicalElastic();
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcKinetic() const {
-        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
-        const size_t dof = getDOF();
-        const auto centroidPos = ringPolymer.makeCentroidPos();
-
-        ScalarType kinetic = repBeta * dof;
-        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto phase = getPhaseMatrix().col(replica);
-            auto pos = phase.tail(dof);
-            kinetic += (centroidPos.flatten() - pos) * forceBuffer.col(replica);
-        }
-        kinetic /= ScalarType(getNumReplica() * 2);
-        return kinetic;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -353,6 +300,51 @@ namespace Physica::Core {
         }
         stress *= reciprocal(getVolume());
         return stress + model.virial(makeAverageCell());
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcClassicalPotentialEnergy(const ForceModel& model) const {
+        ScalarType result = 0;
+        for (size_t i = 0; i < getNumReplica(); ++i)
+            result += model.potentialEnergy(phaseToCell(i));
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class ForceModel>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcClassicalInternalEnergy(const ForceModel& model) const {
+        return ringPolymer.calcClassicalKinetic() + calcClassicalPotentialEnergy<ForceModel>(model) + calcClassicalElastic();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcClassicalElastic() const {
+        const size_t dof = getDOF();
+        auto pos = getPhaseMatrix().bottomRows(dof);
+        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+        ScalarType result = 0;
+        for (size_t i = 0; i < dof; ++i) {
+            const ScalarType mass = cell.getMass(i / Dim);
+            for (size_t j = 0; j < getNumReplica(); ++j)
+                result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
+        }
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica>::calcKinetic() const {
+        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const size_t dof = getDOF();
+        const auto centroidPos = ringPolymer.makeCentroidPos();
+
+        ScalarType kinetic = repBeta * dof;
+        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+            auto phase = getPhaseMatrix().col(replica);
+            auto pos = phase.tail(dof);
+            kinetic += (centroidPos.flatten() - pos) * forceBuffer.col(replica);
+        }
+        kinetic /= ScalarType(getNumReplica() * 2);
+        return kinetic;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -428,5 +420,13 @@ namespace Physica::Core {
             if (!(PosScalarType(0) <= elem && elem <= PosScalarType(0)))
                 return !isGood;
         return isGood;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::checkParam() const {
+        const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+        bool isSmallEnough = timeStep < cycle / PlainScalar(4);
+        if (!isSmallEnough)
+            throw std::invalid_argument("[Error]: Time step is too large");
     }
 }

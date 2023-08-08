@@ -336,8 +336,9 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    typename Array<T, Dynamic, Dynamic, Allocator>::pointer Array<T, Dynamic, Dynamic, Allocator>::release() noexcept {
+    inline typename Array<T, Dynamic, Dynamic, Allocator>::pointer Array<T, Dynamic, Dynamic, Allocator>::release() noexcept {
+        auto p = Base::release();
         capacity = 0;
-        return Base::release();
+        return p;
     }
 }
