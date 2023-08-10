@@ -182,11 +182,11 @@ namespace Physica::Core {
     void KSSolver<ScalarType, XCProvider>::initDensity() {
         const ScalarType averageDensity = ScalarType(cell.getElectronCount()) / cell.getVolume();
         {
-            auto& rho = density[SpinState::Up].flatten();
+            auto rho = density[SpinState::Up].flatten();
             rho = averageDensity;
         }
         if constexpr (isSpinPolarized) {
-            auto& zeta = density[SpinState::Down].flatten();
+            auto zeta = density[SpinState::Down].flatten();
             zeta = ScalarType(0);
         }
     }
@@ -282,24 +282,24 @@ namespace Physica::Core {
         using SignedIndex3D = typename KSpaceGrid<ComplexType>::Index3D;
         using VectorType = typename KSpaceGrid<ComplexType>::VectorType;
 
-        FFTGrid<ScalarType> kSpaceXC_up{};
-        FFTGrid<ScalarType> kSpaceXC_down{};
-        FFTGrid<ScalarType> kSpaceDencity{};
+        RSpaceGrid<ComplexType> kSpaceXC_up{};
+        RSpaceGrid<ComplexType> kSpaceXC_down{};
+        RSpaceGrid<ComplexType> kSpaceDencity{};
         /* To kSpace */ {
             xcProvider.fill(density, xcPot);
             {
                 fft.getRSpace().flatten() = xcPot[SpinState::Up].flatten();
                 fft.transform();
-                kSpaceXC_up = FFTGrid<ScalarType>(fft);
+                kSpaceXC_up = fft.getKSpace();
             }
             if constexpr (isSpinPolarized) {
                 fft.getRSpace().flatten() = xcPot[SpinState::Down].flatten();
                 fft.transform();
-                kSpaceXC_down = FFTGrid<ScalarType>(fft);
+                kSpaceXC_down = fft.getKSpace();
             }
             fft.getRSpace().flatten() = density[SpinState::Up].flatten();
             fft.transform();
-            kSpaceDencity = FFTGrid<ScalarType>(fft);
+            kSpaceDencity = fft.getKSpace();
         }
 
         size_t row = 0;
@@ -326,13 +326,13 @@ namespace Physica::Core {
                             const VectorType deltaK = k1 - k2;
 
                             const ComplexType external = externalPot.calc(deltaX, deltaY, deltaZ);
-                            const ComplexType hartree = kSpaceDencity.calc(deltaX, deltaY, deltaZ) * coeff / deltaK.squaredNorm();
+                            const ComplexType hartree = kSpaceDencity(deltaX, deltaY, deltaZ) * coeff / deltaK.squaredNorm();
                             {
-                                const ComplexType xc_up = kSpaceXC_up.calc(deltaX, deltaY, deltaZ);
+                                const ComplexType xc_up = kSpaceXC_up(deltaX, deltaY, deltaZ);
                                 h[SpinState::Up](row, col) += (xc_up + hartree) * repVolume + external;
                             }
                             if constexpr (isSpinPolarized) {
-                                const ComplexType xc_down = kSpaceXC_down.calc(deltaX, deltaY, deltaZ);
+                                const ComplexType xc_down = kSpaceXC_down(deltaX, deltaY, deltaZ);
                                 h[SpinState::Down](row, col) += (xc_down + hartree) * repVolume + external;
                             }
                             col += 1;
@@ -387,8 +387,8 @@ namespace Physica::Core {
             density_up.flatten() *= inv_volume;
             density_down.flatten() *= inv_volume;
             /* Change format */ {
-                auto& rho = density_up.flatten();
-                auto& zeta = density_down.flatten();
+                auto rho = density_up.flatten();
+                auto zeta = density_down.flatten();
                 rho += zeta;
                 zeta = divide(rho - zeta * ScalarType(2), rho);
             }

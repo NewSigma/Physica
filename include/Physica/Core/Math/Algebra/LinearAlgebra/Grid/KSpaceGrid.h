@@ -47,8 +47,6 @@ namespace Physica::Core {
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
     public:
         using Base = typename Internal::Traits<KSpaceGrid<T>>::Base;
-        using typename Base::Container;
-        using typename Base::ValueType;
         using Index3D = Utils::Array<ssize_t, 3>;
         using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
     public:
@@ -60,10 +58,10 @@ namespace Physica::Core {
         ~KSpaceGrid() = default;
         /* Operators */
         KSpaceGrid& operator=(KSpaceGrid grid) noexcept;
-        [[nodiscard]] ValueType& operator()(ssize_t x, ssize_t y, ssize_t z);
-        [[nodiscard]] const ValueType& operator()(ssize_t x, ssize_t y, ssize_t z) const;
-        [[nodiscard]] ValueType& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const ValueType& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] T& operator()(ssize_t x, ssize_t y, ssize_t z);
+        [[nodiscard]] const T& operator()(ssize_t x, ssize_t y, ssize_t z) const;
+        [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
         template<class T1>
         friend std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid);
         template<class T1>
@@ -90,8 +88,6 @@ namespace Physica::Core {
         template<class Functor>
         static void forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         static void normalizeIndex(Index3D& index, const Index3D& range);
-    protected:
-        KSpaceGrid(Container data, size_t dimX_, size_t dimY_, size_t dimZ_);
     };
 
     template<class T>
@@ -100,17 +96,13 @@ namespace Physica::Core {
             : Base({2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1)}, std::forward<Args>(args)...) {}
 
     template<class T>
-    KSpaceGrid<T>::KSpaceGrid(Container data, size_t dimX, size_t dimY, size_t dimZ)
-            : Base(std::move(data), 2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1)) {}
-
-    template<class T>
     KSpaceGrid<T>& KSpaceGrid<T>::operator=(KSpaceGrid<T> grid) noexcept {
         swap(grid);
         return *this;
     }
 
     template<class T>
-    typename KSpaceGrid<T>::ValueType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) {
+    T& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) {
         assert(-getDimX() <= x && x <= getDimX());
         assert(-getDimY() <= y && y <= getDimY());
         assert(-getDimZ() <= z && z <= getDimZ());
@@ -123,7 +115,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    const typename KSpaceGrid<T>::ValueType& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
+    const T& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
         assert(-getDimX() <= x && x <= getDimX());
         assert(-getDimY() <= y && y <= getDimY());
         assert(-getDimZ() <= z && z <= getDimZ());

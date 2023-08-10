@@ -43,9 +43,9 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using MatrixType = DenseMatrix<ComplexType>;
-        using MatrixGrid = RSpaceGrid<MatrixType>;
+        using MatrixGrid = GridStorage<MatrixType>;
         using EigenSolverType = EigenSolver<MatrixType>;
-        using QPointGrid = RSpaceGrid<EigenSolverType>;
+        using QPointGrid = GridStorage<EigenSolverType>;
         constexpr static size_t Dim = Internal::Traits<MDCellType>::Dim;
     private:
         MDCellType unitCell;
@@ -107,7 +107,7 @@ namespace Physica::Core {
         const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
         
         MatrixGrid result(FFT3D::rSizeToKSize(superSize), unitCellDOF, unitCellDOF, ScalarType(0));
-        auto& fcMatrixes = result.flatten();
+        auto& fcMatrixes = result.asArray();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
         auto rSpace = fft.getRSpace().flatten();
         auto kSpace = fft.getKSpace().flatten();
@@ -194,7 +194,7 @@ namespace Physica::Core {
         auto kSpace = fft.getKSpace().flatten();
         for (size_t row = 0; row < unitCellDOF; ++row) {
             for (size_t col = 0; col < unitCellDOF; ++col) {
-                const auto& fcMatrixes = forceConstants.flatten();
+                const auto& fcMatrixes = forceConstants.asArray();
                 for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
                     auto& fcMatrix = fcMatrixes[i];
                     kSpace[i] = fcMatrix(row, col);
@@ -225,14 +225,14 @@ namespace Physica::Core {
         const size_t numInterpolateCell = qGridSize[0] * qGridSize[1] * qGridSize[2];
         const size_t interpolateDOF = unitCellDOF * numInterpolateCell;
         MatrixGrid result(FFT3D::rSizeToKSize(qGridSize), unitCellDOF, unitCellDOF);
-        auto& newFcMatrixes = result.flatten();
+        auto& newFcMatrixes = result.asArray();
         FFT3D superFFT(superSize, {1, 1, 1}, PlanFlag::Estimate);
         FFT3D interpolateFFT(qGridSize, {1, 1, 1}, PlanFlag::Estimate);
 
         Vector<ScalarType> forceConst(interpolateDOF, 0);
         for (size_t row = 0; row < unitCellDOF; ++row) {
             /* kSpace to rSpace */ {
-                auto& fcMatrixies = forceConstants.flatten();
+                auto& fcMatrixies = forceConstants.asArray();
                 auto kSpace = superFFT.getKSpace().flatten();
                 auto rSpace = superFFT.getRSpace().flatten();
                 for (size_t col = 0; col < unitCellDOF; ++col) {

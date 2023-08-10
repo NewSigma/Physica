@@ -183,18 +183,20 @@ namespace Physica::Core {
         using ScalarType = typename GridType::ScalarType;
         using ComplexType = typename ScalarType::ComplexType;
         using Index3D = Utils::Array<size_t, 3>;
+        using FFTType = FFT<ScalarType, 3>;
+        using KSpaceType = typename FFTType::KSpaceType;
         constexpr int Dim = 3;
 
-        FFT<ScalarType, 3> fft(data.getDim(), 1, PlanFlag::Estimate);
+        auto fft = FFTType(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
 
         auto result = GridType(newDim);
-        result.forIndexInGrid([newDim, &fft, &result](Index3D rIndex) {
+        GridType::forIndexInGrid(newDim, [newDim, &fft, &result](Index3D rIndex) {
             const auto& kSpace = fft.getKSpace();
+            const Index3D rSpaceSize = fft.getRSpaceSize();
             auto elem = ComplexType(0);
-            kSpace.forIndexInGrid([newDim, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
-                const Index3D rSpaceSize = fft.getRSpaceSize();
+            KSpaceType::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
                 const Index3D kSpaceSize = fft.getKSpaceSize();
                 ScalarType phase = 0, s, c;
                 for (int dim = 0; dim < Dim; ++dim)
@@ -203,9 +205,9 @@ namespace Physica::Core {
                 sincos(phase, s, c);
                 const auto factor = ComplexType(c, s);
                 if (kIndex[2] >= kSpaceSize[2])
-                    elem += kSpace[rSpaceSize[2] - kIndex[2]].conjugate() * factor;
+                    elem += kSpace(Index3D{kIndex[0], kIndex[1], rSpaceSize[2] - kIndex[2]}).conjugate() * factor;
                 else
-                    elem += kSpace[kIndex[2]] * factor;
+                    elem += kSpace(kIndex) * factor;
             });
 
             if constexpr (ScalarType::isComplex)
@@ -213,7 +215,7 @@ namespace Physica::Core {
             else
                 result(rIndex) = elem.getReal();
         });
-        result *= reciprocal(reciprocal(data.getSize()));
+        result *= reciprocal(ScalarType(data.getSize()));
         return result;
     }
 
@@ -225,17 +227,19 @@ namespace Physica::Core {
         using ScalarType = typename GridType::ScalarType;
         using ComplexType = typename ScalarType::ComplexType;
         using Index3D = Utils::Array<size_t, 3>;
+        using FFTType = FFT<ScalarType, 3>;
+        using KSpaceType = typename FFTType::KSpaceType;
         constexpr int Dim = 3;
         
-        FFT<ScalarType, 3> fft(data.getDim(), 1, PlanFlag::Estimate);
+        auto fft = FFTType(data.getDim(), 1, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();
 
         const Vector<ScalarType, 3> relative_r = r / period;
+        const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        kSpace.forIndexInGrid([relative_r, &fft, &kSpace, &elem](Index3D kIndex) {
-            const Index3D rSpaceSize = fft.getRSpaceSize();
+        KSpaceType::forIndexInGrid([relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
             const Index3D kSpaceSize = fft.getKSpaceSize();
             ScalarType phase = 0, s, c;
             for (int dim = 0; dim < Dim; ++dim)
@@ -254,7 +258,7 @@ namespace Physica::Core {
             result = elem;
         else
             result = elem.getReal();
-        result *= reciprocal(reciprocal(data.getSize()));
+        result *= reciprocal(ScalarType(data.getSize()));
         return result;
     }
 }

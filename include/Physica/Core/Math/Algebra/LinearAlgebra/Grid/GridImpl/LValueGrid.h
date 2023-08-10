@@ -19,16 +19,16 @@
 #pragma once
 
 #include "Physica/Utils/Template/CRTPBase.h"
+#include "GridBase.h"
 
 namespace Physica::Core {
     template<class GridType> class FlattenGrid;
 
     template<class Derived>
-    class LValueGrid : public Utils::CRTPBase<Derived> {
+    class LValueGrid : public Utils::CRTPBase<Derived>, public GridBase {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using Index3D = Utils::Array<size_t, 3>;
     public:
         template<class OtherDerived>
         Derived& operator=(const LValueGrid<OtherDerived>& other);
@@ -38,7 +38,7 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
         /* Operations */
         [[nodiscard]] FlattenGrid<Derived> flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
-        template<class Functor> inline void forIndexInGrid(Functor func);
+        void resize(Index3D size) { Base::getDerived().resize(size); }
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
@@ -46,34 +46,36 @@ namespace Physica::Core {
         [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
         [[nodiscard]] size_t getSize() const noexcept { return getDimX() * getDimY() * getDimZ(); }
         /* Static members */
-        template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
+        using GridBase::forPointInGrid;
+        using GridBase::forPointIndexInGrid;
+        using GridBase::forIndexInGrid;
+        template<bool IsUnitLattice, class Functor>
+        inline static void forPointInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func);
+        template<bool IsUnitLattice, class Functor>
+        inline static void forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func);
     };
 
     template<class Derived>
     template<class OtherDerived>
     Derived& LValueGrid<Derived>::operator=(const LValueGrid<OtherDerived>& other) {
-        assert(getDimX() == other.getDimX());
-        assert(getDimY() == other.getDimY());
-        assert(getDimZ() == other.getDimZ());
+        resize(other.getDim());
         for (size_t i = 0; i < other.getDimX(); ++i)
             for (size_t j = 0; j < other.getDimY(); ++j)
                 for (size_t k = 0; k < other.getDimZ(); ++k)
                     Base::getDerived()(i, j, k) = other.getDerived()(i, j, k);
+        return Base::getDerived();
     }
 
     template<class Derived>
-    template<class Functor>
-    inline void LValueGrid<Derived>::forIndexInGrid(Functor func) {
-        forIndexInGrid(getDim(), func);
+    template<bool IsUnitLattice, class Functor>
+    inline void LValueGrid<Derived>::forPointInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
+        return forPointInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>
-    template<class Functor>
-    void LValueGrid<Derived>::forIndexInGrid(Index3D dim, Functor func) {
-        for (size_t x = 0; x < dim[0]; ++x)
-            for (size_t y = 0; y < dim[1]; ++y)
-                for (size_t z = 0; z < dim[2]; ++z)
-                    func(Index3D{x, y, z});
+    template<bool IsUnitLattice, class Functor>
+    inline void LValueGrid<Derived>::forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
+        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>

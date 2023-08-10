@@ -307,6 +307,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
+    typename FFT<ScalarType, Dim>::IndexArray FFT<ScalarType, Dim>::getRSpaceSize() const noexcept{
+        IndexArray result{};
+        for (size_t i = 0; i < Dim; ++i)
+            result[i] = rSpaceSize[i];
+        return result;
+    }
+    template<class ScalarType, size_t Dim>
+    typename FFT<ScalarType, Dim>::IndexArray FFT<ScalarType, Dim>::getKSpaceSize() const noexcept {
+        IndexArray result{};
+        for (size_t i = 0; i < Dim; ++i)
+            result[i] = kSpaceSize[i];
+        return result;
+    }
+
+    template<class ScalarType, size_t Dim>
     template<class IndexType>
     Utils::Array<IndexType, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize) {
         Utils::Array<IndexType, Dim> result(rSize.getLength());

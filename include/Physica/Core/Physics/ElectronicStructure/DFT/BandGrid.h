@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 #include "KPoint.h"
 
 namespace Physica::Core {
@@ -27,7 +27,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     class BandGrid {
-        using KPointGrid = RSpaceGrid<KPoint<ScalarType, 0, isSpinPolarized>>;
+        using KPointGrid = GridStorage<KPoint<ScalarType, 0, isSpinPolarized>>;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
         KPointGrid kPointGrid;
@@ -85,7 +85,7 @@ namespace Physica::Core {
             for (size_t y = 1; y <= kPointY; ++y) {
                 kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPointGrid.flatten()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
+                    kPointGrid.asArray()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
                     kz += stepZ;
                     ++kPointID;
                 }

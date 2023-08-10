@@ -105,8 +105,8 @@ namespace Physica::Core {
         constexpr double factor_df = -2.5648814012420484263;
         const auto& rho = density[0].flatten();
         const auto& zeta = density[1].flatten();
-        auto& xc_up = xc[0].flatten();
-        auto& xc_down = xc[1].flatten();
+        auto xc_up = xc[0].flatten();
+        auto xc_down = xc[1].flatten();
         auto& buffer5 = xc_up;
         auto& buffer6 = xc_down;
 
@@ -138,8 +138,8 @@ namespace Physica::Core {
      */
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, true>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
-        auto& xc_up = xc[0].flatten();
-        auto& xc_down = xc[1].flatten();
+        auto xc_up = xc[0].flatten();
+        auto xc_down = xc[1].flatten();
         switch(type) {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;
@@ -210,7 +210,7 @@ namespace Physica::Core {
     void LDA<ScalarType, type, false>::fillExchange(const DensityType& density, PotType& xc) {
         constexpr double factor0 = -0.73855876638202240588;
         const auto& rho = density[0].flatten();
-        auto& V = xc[0].flatten();
+        auto V = xc[0].flatten();
 
         buffer = cbrt(rho);
         V = ScalarType(4.0 / 3 * factor0) * buffer;
@@ -221,7 +221,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, LDAType type>
     void LDA<ScalarType, type, false>::addCorreclation([[maybe_unused]] const DensityType& density, PotType& xc) {
-        auto& V = xc[0].flatten();
+        auto V = xc[0].flatten();
         switch(type) {
         case LDAType::HL:
             constexpr double factor1 = -0.045 / 2;

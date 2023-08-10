@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,24 +20,29 @@
 
 #include <type_traits>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "GridImpl/GridStorage.h"
+#include "GridImpl/LValueGrid.h"
 
 namespace Physica::Core {
+    template<class T> class RSpaceGrid;
+
+    namespace Internal {
+        template<class T>
+        class Traits<RSpaceGrid<T>> {
+        public:
+            using ScalarType = T;
+        };
+    }
+
     template<class T>
-    class RSpaceGrid {
-        constexpr static bool isScalar = is_scalar<T>::value;
+    class RSpaceGrid : public LValueGrid<RSpaceGrid<T>>, private GridStorage<T> {
+        static_assert(is_scalar<T>::value, "[Error]: Invalid template param");
+        using This = RSpaceGrid<T>;
+        using Base = LValueGrid<This>;
+        using Storage = GridStorage<T>;
     public:
-        using Container = typename std::conditional<isScalar, Vector<T>, Utils::Array<T>>::type;
-        using ValueType = T;
-        using Index3D = Utils::Array<size_t, 3>;
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
-    private:
-        Container values;
-        size_t dimX;
-        size_t dimY;
-        size_t dimZ;
+        using Index3D = typename Storage::Index3D;
     public:
         RSpaceGrid() = default;
         template<class... Args>
@@ -46,70 +51,32 @@ namespace Physica::Core {
         RSpaceGrid(RSpaceGrid&&) noexcept = default;
         ~RSpaceGrid() = default;
         /* Operators */
+        using Base::operator=;
         RSpaceGrid& operator=(RSpaceGrid grid) noexcept;
-        [[nodiscard]] T& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] const T& operator()(size_t x, size_t y, size_t z) const;
-        [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
-        template<class T1>
-        friend std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T1>& grid);
-        template<class T1>
-        friend std::istream& operator>>(std::istream& is, RSpaceGrid<T1>& grid);
+        using Storage::operator();
+        template<class U> friend std::ostream& operator<<(std::ostream& os, const RSpaceGrid<U>& grid);
+        template<class U> friend std::istream& operator>>(std::istream& is, RSpaceGrid<U>& grid);
         /* Operations */
         template<class... Args>
-        void resize(Index3D index, Args... args);
-        void swap(RSpaceGrid& grid) noexcept;
-        /* Iterator */
-        auto begin() noexcept { return values.begin(); }
-        auto begin() const noexcept { return cbegin(); }
-        auto end() noexcept { return values.end(); }
-        auto end() const noexcept { return cend(); }
-        auto cbegin() const noexcept { return values.cbegin(); }
-        auto cend() const noexcept { return values.cend(); }
-        auto rbegin() noexcept { return values.rbegin(); }
-        auto rend() noexcept { return values.rend(); }
-        auto crbegin() const noexcept { return values.crbegin(); }
-        auto crend() const noexcept { return values.crend(); }
+        inline void resize(Index3D index, Args... args);
+        inline void swap(RSpaceGrid& grid) noexcept;
         /* Getters */
-        [[nodiscard]] Container& flatten() noexcept { return values; }
-        [[nodiscard]] const Container& flatten() const noexcept { return values; }
-        [[nodiscard]] size_t getSize() const noexcept { return values.getLength(); }
-        [[nodiscard]] size_t getDimX() const noexcept { return dimX; }
-        [[nodiscard]] size_t getDimY() const noexcept { return dimY; }
-        [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
-        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
+        using Storage::getDimX;
+        using Storage::getDimY;
+        using Storage::getDimZ;
+        using Storage::getDim;
+        using Storage::getSize;
         /* Static members */
-        template<bool IsUnitLattice, class Functor>
-        static void forPointInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        static void forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
-        template<class Functor>
-        static void forIndexInGrid(Index3D dim, Functor func);
-    protected:
-        RSpaceGrid(Container values_, size_t dimX_, size_t dimY_, size_t dimZ_);
+        using Base::forPointInGrid;
+        using Base::forPointIndexInGrid;
+        using Base::forIndexInGrid;
+        template<class RandomGenerator> static RSpaceGrid random_uniform(Index3D size, RandomGenerator& gen);
+        template<class RandomGenerator> static RSpaceGrid random_normal(Index3D size, RandomGenerator& gen);
     };
 
     template<class T>
     template<class... Args>
-    RSpaceGrid<T>::RSpaceGrid(Index3D index, Args... args)
-            : dimX(index[0])
-            , dimY(index[1])
-            , dimZ(index[2]) {
-        values.resize(dimX * dimY * dimZ, std::forward<Args>(args)...);
-    }
-
-    template<class T>
-    RSpaceGrid<T>::RSpaceGrid(Container values_, size_t dimX_, size_t dimY_, size_t dimZ_)
-            : values(std::move(values_))
-            , dimX(dimX_)
-            , dimY(dimY_)
-            , dimZ(dimZ_) {
-        assert(values.getLength() == dimX * dimY * dimZ);
-    }
+    RSpaceGrid<T>::RSpaceGrid(Index3D index, Args... args) : Storage(index, std::forward<Args>(args)...) {}
 
     template<class T>
     RSpaceGrid<T>& RSpaceGrid<T>::operator=(RSpaceGrid grid) noexcept {
@@ -118,21 +85,11 @@ namespace Physica::Core {
     }
 
     template<class T>
-    T& RSpaceGrid<T>::operator()(size_t x, size_t y, size_t z) {
-        return values[x * dimY * dimZ + y * dimZ + z];
-    }
-
-    template<class T>
-    const T& RSpaceGrid<T>::operator()(size_t x, size_t y, size_t z) const {
-        return values[x * dimY * dimZ + y * dimZ + z];
-    }
-
-    template<class T>
     std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
         using Index3D = typename RSpaceGrid<T>::Index3D;
         const Index3D dim = grid.getDim();
         os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
-        os << grid.flatten();
+        os.write(reinterpret_cast<const char*>(grid.asArray().data()), grid.getSize() * sizeof(T));
         return os;
     }
 
@@ -142,105 +99,35 @@ namespace Physica::Core {
         Index3D dim;
         is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
         grid.resize(dim);
-        is >> grid.flatten();
+        is.read(reinterpret_cast<char*>(grid.asArray().data()), grid.getSize() * sizeof(T));
         return is;
     }
 
     template<class T>
     template<class... Args>
-    void RSpaceGrid<T>::resize(Index3D index, Args... args) {
-        dimX = index[0];
-        dimY = index[1];
-        dimZ = index[2];
-        values.resize(dimX * dimY * dimZ, std::forward<Args>(args)...);
+    inline void RSpaceGrid<T>::resize(Index3D index, Args... args) {
+        Storage::resize(index, std::forward<Args>(args)...);
     }
 
     template<class T>
-    void RSpaceGrid<T>::swap(RSpaceGrid& grid) noexcept {
-        using std::swap;
-        swap(values, grid.values);
-        swap(dimX, grid.dimX);
-        swap(dimY, grid.dimY);
-        swap(dimZ, grid.dimZ);
+    inline void RSpaceGrid<T>::swap(RSpaceGrid& grid) noexcept {
+        Storage::swap(grid);
     }
 
     template<class T>
-    template<bool IsUnitLattice, class Functor>
-    void RSpaceGrid<T>::forPointInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func) {
-        using ScalarType = typename VectorType::ScalarType;
-        LatticeMatrix sub_lattice{};
-        auto a1 = sub_lattice.row(0);
-        auto a2 = sub_lattice.row(1);
-        auto a3 = sub_lattice.row(2);
-        if constexpr (IsUnitLattice)
-            sub_lattice = lattice;
-        else {
-            a1 = lattice.row(0).asVector() * reciprocal(ScalarType(dim[0]));
-            a2 = lattice.row(1).asVector() * reciprocal(ScalarType(dim[1]));
-            a3 = lattice.row(2).asVector() * reciprocal(ScalarType(dim[2]));
-        }
-
-        VectorType v1, v2, v3;
-        for (size_t x = 0; x < dim[0]; ++x) {
-            v1 = ScalarType(x) * a1.asVector();
-            for (size_t y = 0; y < dim[1]; ++y) {
-                v2 = v1 + ScalarType(y) * a2.asVector();
-                for (size_t z = 0; z < dim[2]; ++z) {
-                    v3 = v2 + ScalarType(z) * a3.asVector();
-                    func(v3);
-                }
-            }
-        }
+    template<class RandomGenerator>
+    inline RSpaceGrid<T> RSpaceGrid<T>::random_uniform(Index3D size, RandomGenerator& gen) {
+        auto result = RSpaceGrid<T>(size);
+        result.flatten().random_uniform(gen);
+        return result;
     }
 
     template<class T>
-    template<bool IsUnitLattice, class Functor>
-    inline void RSpaceGrid<T>::forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func) {
-        return forPointInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
-    }
-
-    template<class T>
-    template<bool IsUnitLattice, class Functor>
-    void RSpaceGrid<T>::forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func) {
-        using ScalarType = typename VectorType::ScalarType;
-        LatticeMatrix sub_lattice{};
-        auto a1 = sub_lattice.row(0);
-        auto a2 = sub_lattice.row(1);
-        auto a3 = sub_lattice.row(2);
-        if constexpr (IsUnitLattice)
-            sub_lattice = lattice;
-        else {
-            a1 = lattice.row(0).asVector() * reciprocal(ScalarType(dim[0]));
-            a2 = lattice.row(1).asVector() * reciprocal(ScalarType(dim[1]));
-            a3 = lattice.row(2).asVector() * reciprocal(ScalarType(dim[2]));
-        }
-
-        VectorType v1, v2, v3;
-        for (size_t x = 0; x < dim[0]; ++x) {
-            v1 = ScalarType(x) * a1.asVector();
-            for (size_t y = 0; y < dim[1]; ++y) {
-                v2 = v1 + ScalarType(y) * a2.asVector();
-                for (size_t z = 0; z < dim[2]; ++z) {
-                    v3 = v2 + ScalarType(z) * a3.asVector();
-                    func(v3, Index3D{x, y, z});
-                }
-            }
-        }
-    }
-
-    template<class T>
-    template<bool IsUnitLattice, class Functor>
-    inline void RSpaceGrid<T>::forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func) {
-        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
-    }
-
-    template<class T>
-    template<class Functor>
-    void RSpaceGrid<T>::forIndexInGrid(Index3D dim, Functor func) {
-        for (size_t x = 0; x < dim[0]; ++x)
-            for (size_t y = 0; y < dim[1]; ++y)
-                for (size_t z = 0; z < dim[2]; ++z)
-                    func(Index3D{x, y, z});
+    template<class RandomGenerator>
+    inline RSpaceGrid<T> RSpaceGrid<T>::random_normal(Index3D size, RandomGenerator& gen) {
+        auto result = RSpaceGrid<T>(size);
+        result.flatten().random_normal(gen);
+        return result;
     }
 
     template<class T>

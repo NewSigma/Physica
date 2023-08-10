@@ -46,6 +46,7 @@ namespace Physica::Core {
     public:
         FlattenGrid(const LValueGrid<GridType>& grid_) : grid(grid_.getDerived()) {}
         /* Operators */
+        FlattenGrid& operator=(const FlattenGrid& obj);
         using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index);
         [[nodiscard]] const ScalarType& operator[](size_t index) const;
@@ -54,6 +55,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return grid.getSize(); }
     };
+
+    template<class GridType>
+    FlattenGrid<GridType>& FlattenGrid<GridType>::operator=(const FlattenGrid<GridType>& obj) {
+        Base::getDerived() = obj.getDerived();
+        return *this;
+    }
 
     template<class GridType>
     typename FlattenGrid<GridType>::ScalarType& FlattenGrid<GridType>::operator[](size_t index) {

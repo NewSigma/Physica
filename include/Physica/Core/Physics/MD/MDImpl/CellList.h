@@ -19,7 +19,7 @@
 #pragma once
 
 #include <forward_list>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {
@@ -29,7 +29,7 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using CellGrid = RSpaceGrid<std::forward_list<size_t>>;
+        using CellGrid = GridStorage<std::forward_list<size_t>>;
         using Vector3D = Vector<PosScalarType, 3>;
         using Index3D = typename CellGrid::Index3D;
     private:

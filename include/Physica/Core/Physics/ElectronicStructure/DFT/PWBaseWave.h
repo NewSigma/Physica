@@ -32,7 +32,6 @@ namespace Physica::Core {
         using ComplexType = ComplexScalar<ScalarType>;
         using Base = KSpaceGrid<ComplexType>;
     private:
-        using typename Base::Container;
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
         LatticeMatrix repCell;

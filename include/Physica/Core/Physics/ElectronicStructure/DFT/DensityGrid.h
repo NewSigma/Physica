@@ -112,13 +112,13 @@ namespace Physica::Core {
         };
         RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(kernel)>(Base::operator[](SpinState::Up), latt, kernel);
         {
-            auto& rho_up_new = Base::operator[](SpinState::Up).flatten();
+            auto rho_up_new = Base::operator[](SpinState::Up).flatten();
             const auto& rho_up_old = rho[SpinState::Up].flatten();
             const ScalarType factor = mean(rho_up_old) / mean(rho_up_new);
             rho_up_new *= factor;
         }
         if constexpr (isSpinPolarized) {
-            auto& rho_down_new = Base::operator[](SpinState::Down).flatten();
+            auto rho_down_new = Base::operator[](SpinState::Down).flatten();
             const auto& rho_down_old = rho[SpinState::Down].flatten();
             const ScalarType factor = mean(rho_down_old) / mean(rho_down_new);
             rho_down_new *= factor;

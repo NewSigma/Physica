@@ -22,7 +22,7 @@
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/LValueGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/LValueGrid.h"
 #include "FFTImpl/FFTRSpace.h"
 #include "FFTImpl/FFTKSpace.h"
 
@@ -70,11 +70,12 @@ namespace Physica::Core {
         using ComplexType = typename Traits::ComplexType;
         using PlanType = typename Traits::PlanType;
         using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
-        using RSpaceType = FFTRSpace<This, 1>;
-        using KSpaceType = FFTKSpace<This, 1>;
         constexpr static bool isComplex = Traits::isComplex;
         constexpr static bool isSinglePrec = Traits::isSinglePrec;
         static_assert(!Traits::isDifferentiable, "[Error]: Header of differentiable fft should be included");
+    public:
+        using RSpaceType = FFTRSpace<This, 1>;
+        using KSpaceType = FFTKSpace<This, 1>;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -142,10 +143,12 @@ namespace Physica::Core {
         using ComplexType = typename Traits::ComplexType;
         using PlanType = typename Traits::PlanType;
         using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
-        using RSpaceType = FFTRSpace<This, Dim>;
-        using KSpaceType = FFTKSpace<This, Dim>;
+        using IndexArray = Utils::Array<size_t, Dim>;
         constexpr static bool isComplex = Traits::isComplex;
         constexpr static bool isSinglePrec = Traits::isSinglePrec;
+    public:
+        using RSpaceType = FFTRSpace<This, Dim>;
+        using KSpaceType = FFTKSpace<This, Dim>;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -172,8 +175,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
         [[nodiscard]] ComplexTypeFFTW* getBuffer() { return buffer; }
         [[nodiscard]] const ComplexTypeFFTW* getBuffer() const { return buffer; }
-        [[nodiscard]] const Utils::Array<int, Dim>& getRSpaceSize() const noexcept { return rSpaceSize; }
-        [[nodiscard]] const Utils::Array<int, Dim>& getKSpaceSize() const noexcept { return kSpaceSize; }
+        [[nodiscard]] IndexArray getRSpaceSize() const noexcept;
+        [[nodiscard]] IndexArray getKSpaceSize() const noexcept;
         [[nodiscard]] RealType getRSpaceDelta(size_t dim) const noexcept { return rSpaceDelta[dim]; }
         [[nodiscard]] RealType getKSpaceDelta(size_t dim) const noexcept { return reciprocal(getRSpaceDelta(dim) * getRSpaceSize()[dim]); }
         [[nodiscard]] RSpaceType& getRSpace() { return *this; }

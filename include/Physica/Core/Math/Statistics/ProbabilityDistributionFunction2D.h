@@ -19,13 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 
 namespace Physica::Core {
     template<class ScalarType>
     class ProbabilityDistributionFunction2D {
         using This = ProbabilityDistributionFunction2D;
-        using BucketType = RSpaceGrid<size_t>;
+        using BucketType = GridStorage<size_t>;
         using VectorType = Vector<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType>;
         using MeshType = std::pair<MatrixType, MatrixType>;

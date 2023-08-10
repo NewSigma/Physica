@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Math/Transform/FFTGrid.h"
 #include "DensityGrid.h"
 
 namespace Physica::Core {
@@ -99,24 +98,23 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized>
     void ChargeMixer<ScalarType, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
+            using GridType = typename FFT3D::KSpaceType;
+            using Index3D = typename GridType::Index3D;
             const auto& deltaRho = residules[0][SpinState::Up];
             fft.getRSpace().flatten() = deltaRho.flatten();
             fft.transform();
-            FFTGrid<ScalarType> kSpaceDencity(fft);
 
-            using GridType = typename FFTGrid<ScalarType>::Base;
-            using Index3D = typename GridType::Index3D;
-            GridType::forReducedKIndexInGrid(kSpaceDencity, repCell.getLattice(),
-                [&kSpaceDencity](Vector<ScalarType, 3> k, Index3D index) {
-                    const ScalarType kNorm = k.squaredNorm();
-                    const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
-                    kSpaceDencity(index) *= factor;
-                });
-            fft.getKSpace().flatten() = kSpaceDencity.flatten();
+            auto& kSpace = fft.getKSpace();
+            auto kernel = [&kSpace](Vector<ScalarType, 3> k, Index3D index) {
+                const ScalarType kNorm = k.squaredNorm();
+                const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
+                kSpace(index) *= factor;
+            };
+            GridType::template forPointIndexInGrid<true, decltype(kernel)>(kSpace.getDim(), repCell.getLattice(), kernel);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0][SpinState::Up].flatten();
-            auto& rho_new = result[SpinState::Up].flatten();
+            auto rho_new = result[SpinState::Up].flatten();
             rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
@@ -141,7 +139,7 @@ namespace Physica::Core {
                 x = inv_A * b;
             }
 
-            auto& rho_new = result[SpinState::Up].flatten();
+            auto rho_new = result[SpinState::Up].flatten();
             rho_new = ScalarType(0);
             for (size_t i = 1; i < x.getLength(); ++i) {
                 const auto& rho_old = oldDensities[i - 1][SpinState::Up].flatten();
