@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/Container/KSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
 #include "FFT.h"
 
 namespace Physica::Core {

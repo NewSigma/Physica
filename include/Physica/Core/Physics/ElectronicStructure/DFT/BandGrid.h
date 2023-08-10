@@ -19,8 +19,8 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "KPoint.h"
-#include "Physica/Core/Physics/Container/RSpaceGrid.h"
 
 namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized> class BandGrid;

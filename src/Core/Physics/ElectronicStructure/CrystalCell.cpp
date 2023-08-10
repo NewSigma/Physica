@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
-#include "Physica/Core/Physics/Container/KSpaceGrid.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {

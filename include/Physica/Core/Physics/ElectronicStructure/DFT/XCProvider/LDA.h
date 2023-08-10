@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/Container/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 
 namespace Physica::Core {
     enum class LDAType {

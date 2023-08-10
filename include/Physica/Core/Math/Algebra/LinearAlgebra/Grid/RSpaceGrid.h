@@ -83,8 +83,10 @@ namespace Physica::Core {
         static void forPointInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
         template<bool IsUnitLattice, class Functor>
         inline static void forPointInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
-        template<class Functor>
-        static void forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
+        template<bool IsUnitLattice, class Functor>
+        static void forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
+        template<bool IsUnitLattice, class Functor>
+        inline static void forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func);
         template<class Functor>
         static void forIndexInGrid(Index3D dim, Functor func);
     protected:
@@ -198,28 +200,38 @@ namespace Physica::Core {
     }
 
     template<class T>
-    template<class Functor>
-    void RSpaceGrid<T>::forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func) {
+    template<bool IsUnitLattice, class Functor>
+    void RSpaceGrid<T>::forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func) {
         using ScalarType = typename VectorType::ScalarType;
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
-        a1 = lattice.row(0).asVector() * reciprocal(ScalarType(grid.getDimX()));
         auto a2 = sub_lattice.row(1);
-        a2 = lattice.row(1).asVector() * reciprocal(ScalarType(grid.getDimY()));
         auto a3 = sub_lattice.row(2);
-        a3 = lattice.row(2).asVector() * reciprocal(ScalarType(grid.getDimZ()));
+        if constexpr (IsUnitLattice)
+            sub_lattice = lattice;
+        else {
+            a1 = lattice.row(0).asVector() * reciprocal(ScalarType(dim[0]));
+            a2 = lattice.row(1).asVector() * reciprocal(ScalarType(dim[1]));
+            a3 = lattice.row(2).asVector() * reciprocal(ScalarType(dim[2]));
+        }
 
         VectorType v1, v2, v3;
-        for (size_t x = 0; x < grid.getDimX(); ++x) {
+        for (size_t x = 0; x < dim[0]; ++x) {
             v1 = ScalarType(x) * a1.asVector();
-            for (size_t y = 0; y < grid.getDimY(); ++y) {
+            for (size_t y = 0; y < dim[1]; ++y) {
                 v2 = v1 + ScalarType(y) * a2.asVector();
-                for (size_t z = 0; z < grid.getDimZ(); ++z) {
+                for (size_t z = 0; z < dim[2]; ++z) {
                     v3 = v2 + ScalarType(z) * a3.asVector();
                     func(v3, Index3D{x, y, z});
                 }
             }
         }
+    }
+
+    template<class T>
+    template<bool IsUnitLattice, class Functor>
+    inline void RSpaceGrid<T>::forPointIndexInGrid(const RSpaceGrid<T>& grid, const LatticeMatrix& lattice, Functor func) {
+        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class T>

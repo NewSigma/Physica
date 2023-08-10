@@ -28,18 +28,25 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using Index3D = Utils::Array<size_t, 3>;
     public:
         template<class OtherDerived>
         Derived& operator=(const LValueGrid<OtherDerived>& other);
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return Base::getDerived()(x, y, z); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return Base::getDerived()(x, y, z); }
+        [[nodiscard]] ScalarType& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] const ScalarType& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
         /* Operations */
         [[nodiscard]] FlattenGrid<Derived> flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
+        template<class Functor> inline void forIndexInGrid(Functor func);
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getDimZ(); }
+        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
         [[nodiscard]] size_t getSize() const noexcept { return getDimX() * getDimY() * getDimZ(); }
+        /* Static members */
+        template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
     };
 
     template<class Derived>
@@ -52,6 +59,21 @@ namespace Physica::Core {
             for (size_t j = 0; j < other.getDimY(); ++j)
                 for (size_t k = 0; k < other.getDimZ(); ++k)
                     Base::getDerived()(i, j, k) = other.getDerived()(i, j, k);
+    }
+
+    template<class Derived>
+    template<class Functor>
+    inline void LValueGrid<Derived>::forIndexInGrid(Functor func) {
+        forIndexInGrid(getDim(), func);
+    }
+
+    template<class Derived>
+    template<class Functor>
+    void LValueGrid<Derived>::forIndexInGrid(Index3D dim, Functor func) {
+        for (size_t x = 0; x < dim[0]; ++x)
+            for (size_t y = 0; y < dim[1]; ++y)
+                for (size_t z = 0; z < dim[2]; ++z)
+                    func(Index3D{x, y, z});
     }
 
     template<class Derived>

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "SpinPair.h"
-#include "Physica/Core/Physics/Container/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {
@@ -100,17 +100,17 @@ namespace Physica::Core {
     template<class ScalarType, bool isSpinPolarized>
     void DensityGrid<ScalarType, isSpinPolarized>::fit(const DensityGrid& rho) {
         const LatticeMatrix latt = LatticeMatrix::unitMatrix(3);
-        RSpaceGrid<ScalarType>::forPointIndexInGrid(Base::operator[](SpinState::Up), latt,
-            [this, &rho](VectorType pos, Index3D index) {
-                {
-                    auto& rho_up = Base::operator[](SpinState::Up);
-                    rho_up(index) = rho(SpinState::Up, pos);
-                }
-                if constexpr (isSpinPolarized) {
-                    auto& rho_down = Base::operator[](SpinState::Down);
-                    rho_down(index) = rho(SpinState::Down, pos);
-                }
-            });
+        auto kernel = [this, &rho](VectorType pos, Index3D index) {
+            {
+                auto& rho_up = Base::operator[](SpinState::Up);
+                rho_up(index) = rho(SpinState::Up, pos);
+            }
+            if constexpr (isSpinPolarized) {
+                auto& rho_down = Base::operator[](SpinState::Down);
+                rho_down(index) = rho(SpinState::Down, pos);
+            }
+        };
+        RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(kernel)>(Base::operator[](SpinState::Up), latt, kernel);
         {
             auto& rho_up_new = Base::operator[](SpinState::Up).flatten();
             const auto& rho_up_old = rho[SpinState::Up].flatten();

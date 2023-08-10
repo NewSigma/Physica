@@ -19,7 +19,7 @@
 #pragma once
 
 #include <forward_list>
-#include "Physica/Core/Physics/Container/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {

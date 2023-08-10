@@ -16,17 +16,48 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
+using VectorType = Vector<ScalarType>;
 
-int main() {
-    const Vector<ScalarType> x{0, 1, 2};
-    const Vector<ScalarType> y{5, -3, 2};
+void testLaglange() {
+    const VectorType x{0, 1, 2};
+    const VectorType y{5, -3, 2};
     for (size_t i = 0; i < x.getLength(); ++i)
         if (!scalarNear(lagrange(x, y, i), y[i], 1E-16))
-            return 1;
-    return 0;
+            exit(EXIT_FAILURE);
+}
+
+void testFFT1D() {
+    std::mt19937 gen{};
+    const auto data = VectorType::random_normal(20, gen);
+    const auto result = interpolate_fft(data, 100);
+
+    const size_t delta = result.getLength() / data.getLength();
+    for (size_t i = 0; i < result.getLength(); i += delta) {
+        if (!scalarNear(data[i / delta], result[i], 1E-12))
+            exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < data.getLength(); ++i) {
+        ScalarType result = interpolate_fft(data, i, data.getLength());
+        if (!scalarNear(result, data[i], 1E-13))
+            exit(EXIT_FAILURE);
+    }
+}
+
+void testFFT3D() {
+    std::mt19937 gen{};
+    const auto data = VectorType::random_normal(20, gen);
+    const auto result = interpolate_fft(data, 100);
+}
+
+int main() {
+    testLaglange();
+    testFFT1D();
+    testFFT3D();
 }

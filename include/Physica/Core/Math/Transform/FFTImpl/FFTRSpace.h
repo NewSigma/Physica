@@ -167,6 +167,7 @@ namespace Physica::Core {
         static constexpr bool isComplex = ScalarType::isComplex;
     public:
         /* Operators */
+        using GridBase::operator();
         [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
         [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Operations */

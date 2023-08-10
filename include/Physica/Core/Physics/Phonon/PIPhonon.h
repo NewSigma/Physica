@@ -19,9 +19,9 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/Physics/Container/KSpaceGrid.h"
 
 namespace Physica::Core {
     class PIPhonon final {

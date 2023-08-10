@@ -20,8 +20,9 @@
 
 #include <iostream>
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/Container/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
@@ -107,7 +108,7 @@ namespace Physica::Core {
         
         MatrixGrid result(FFT3D::rSizeToKSize(superSize), unitCellDOF, unitCellDOF, ScalarType(0));
         auto& fcMatrixes = result.flatten();
-        FFT3D fft(superSize, {1, 1, 1}, FFT3D::Estimate);
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
         auto rSpace = fft.getRSpace().flatten();
         auto kSpace = fft.getKSpace().flatten();
         /* Make symmetrize force constants matrix */ {
@@ -188,7 +189,8 @@ namespace Physica::Core {
         const size_t unitCellDOF = getUnitCellDOF();
         const Vector3D qVector = unitCell.getInvLattice() * qPoint * ScalarType(2 * M_PI);
         MatrixType result(unitCellDOF, unitCellDOF);
-        FFT3D fft(superSize, {1, 1, 1}, FFT3D::Estimate);
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        const auto& rSpace = fft.getRSpace();
         auto kSpace = fft.getKSpace().flatten();
         for (size_t row = 0; row < unitCellDOF; ++row) {
             for (size_t col = 0; col < unitCellDOF; ++col) {
@@ -200,16 +202,13 @@ namespace Physica::Core {
                 fft.invTransform();
 
                 auto elem = ComplexType(0);
-                size_t cell = 0;
-                auto functor = [qVector, &fft, &elem, &cell](Vector3D r) {
-                    const auto rSpace = fft.getRSpace().flatten();
+                auto functor = [qVector, &rSpace, &elem](Vector3D r, Index3D index) {
                     const ScalarType phase = qVector * r;
                     ScalarType s, c;
                     sincos(phase, s, c);
-                    elem += rSpace[cell] * ComplexType(c, s);
-                    cell += 1;
+                    elem += rSpace(index) * ComplexType(c, s);
                 };
-                MatrixGrid::template forPointInGrid<true, decltype(functor)>(superSize, unitCell.getLattice(), functor);
+                MatrixGrid::template forPointIndexInGrid<true, decltype(functor)>(superSize, unitCell.getLattice(), functor);
                 result(row, col) = elem;
             }
         }
@@ -227,8 +226,8 @@ namespace Physica::Core {
         const size_t interpolateDOF = unitCellDOF * numInterpolateCell;
         MatrixGrid result(FFT3D::rSizeToKSize(qGridSize), unitCellDOF, unitCellDOF);
         auto& newFcMatrixes = result.flatten();
-        FFT3D superFFT(superSize, {1, 1, 1}, FFT3D::Estimate);
-        FFT3D interpolateFFT(qGridSize, {1, 1, 1}, FFT3D::Estimate);
+        FFT3D superFFT(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        FFT3D interpolateFFT(qGridSize, {1, 1, 1}, PlanFlag::Estimate);
 
         Vector<ScalarType> forceConst(interpolateDOF, 0);
         for (size_t row = 0; row < unitCellDOF; ++row) {

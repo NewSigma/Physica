@@ -20,6 +20,11 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> abs(const SIMD<ScalarType, Size>& p) {
+        return SIMD<ScalarType, Size>(abs(p.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
     [[nodiscard]] inline SIMD<ScalarType, Size> square(const SIMD<ScalarType, Size>& p) {
         return p * p;
     }

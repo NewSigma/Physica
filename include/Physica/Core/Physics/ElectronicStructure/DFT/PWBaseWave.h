@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
-#include "Physica/Core/Physics/Container/KSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
 
 namespace Physica::Core {
     /**

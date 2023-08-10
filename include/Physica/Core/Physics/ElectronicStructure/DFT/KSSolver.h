@@ -371,19 +371,19 @@ namespace Physica::Core {
         auto& density_up = density[SpinState::Up];
         if constexpr (isSpinPolarized) {
             auto& density_down = density[SpinState::Down];
+            auto density_compute_kernel = [this, k, &density_up, &density_down](VectorType pos, UnsignedIndex3D index) {
+                ScalarType rho_up = ScalarType(0);
+                for (const auto& orbit : orbits[SpinState::Up])
+                    rho_up += orbit(k, pos).squaredNorm();
+                density_up(index) = rho_up;
 
-            RSpaceGrid<ScalarType>::forPointIndexInGrid(density_up, cell.getLattice(),
-                [this, k, &density_up, &density_down](VectorType pos, UnsignedIndex3D index) {
-                    ScalarType rho_up = ScalarType(0);
-                    for (const auto& orbit : orbits[SpinState::Up])
-                        rho_up += orbit(k, pos).squaredNorm();
-                    density_up(index) = rho_up;
-
-                    ScalarType rho_down = ScalarType(0);
-                    for (const auto& orbit : orbits[SpinState::Down])
-                        rho_down += orbit(k, pos).squaredNorm();
-                    density_down(index) = rho_down;
-                });
+                ScalarType rho_down = ScalarType(0);
+                for (const auto& orbit : orbits[SpinState::Down])
+                    rho_down += orbit(k, pos).squaredNorm();
+                density_down(index) = rho_down;
+            };
+            RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(density_compute_kernel)>(
+                density_up, cell.getLattice(), density_compute_kernel);
             density_up.flatten() *= inv_volume;
             density_down.flatten() *= inv_volume;
             /* Change format */ {
@@ -394,16 +394,17 @@ namespace Physica::Core {
             }
         }
         else {
-            RSpaceGrid<ScalarType>::forPointIndexInGrid(density_up, cell.getLattice(),
-                [this, k, &density_up](VectorType pos, UnsignedIndex3D index) {
-                    auto rho_up = ScalarType(0);
-                    const auto& orbitsUp = orbits[SpinState::Up];
-                    size_t i = 0;
-                    for (; i < orbitsUp.getLength() - 1; ++i)
-                        rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(2);
-                    rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(int(cell.getElectronCount() % 2U == 0) + 1);
-                    density_up(index) = rho_up;
-                });
+            auto density_compute_kernel = [this, k, &density_up](VectorType pos, UnsignedIndex3D index) {
+                auto rho_up = ScalarType(0);
+                const auto& orbitsUp = orbits[SpinState::Up];
+                size_t i = 0;
+                for (; i < orbitsUp.getLength() - 1; ++i)
+                    rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(2);
+                rho_up += orbitsUp[i](k, pos).squaredNorm() * ScalarType(int(cell.getElectronCount() % 2U == 0) + 1);
+                density_up(index) = rho_up;
+            };
+            RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(density_compute_kernel)>(
+                density_up, cell.getLattice(), density_compute_kernel);
             density_up.flatten() *= inv_volume;
         }
         chargeMixer.updateOutputDensity(density);

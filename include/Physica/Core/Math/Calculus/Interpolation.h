@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -102,6 +103,158 @@ namespace Physica::Core {
             }
             result += (2 * (ns + 1) < max_j) ? c[ns + 1] : d[ns--];
         }
+        return result;
+    }
+
+    template<class VectorType>
+    VectorType interpolate_fft(const LValueVector<VectorType>& data, size_t newDim) {
+        using ScalarType = typename VectorType::ScalarType;
+        using ComplexType = typename ScalarType::ComplexType;
+
+        const size_t rSpaceSize = data.getLength();
+        FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
+        fft.getRSpace() = data;
+        fft.transform();
+        const size_t kSpaceSize = fft.getKSpaceSize();
+        const auto& kSpace = fft.getKSpace();
+
+        auto result = VectorType(newDim);
+        for (size_t i = 0; i < newDim; ++i) {
+            auto elem = ComplexType(0);
+            for (size_t k = 0; k < rSpaceSize; ++k) {
+                const ScalarType phase = 2 * M_PI * (k * i) / newDim;
+                ScalarType s, c;
+                sincos(phase, s, c);
+                const auto factor = ComplexType(c, s);
+                if (k >= kSpaceSize)
+                    elem += kSpace[rSpaceSize - k].conjugate() * factor;
+                else
+                    elem += kSpace[k] * factor;
+            }
+
+            if constexpr (ScalarType::isComplex)
+                result[i] = elem;
+            else
+                result[i] = elem.getReal();
+        }
+        result *= reciprocal(ScalarType(rSpaceSize));
+        return result;
+    }
+
+    template<class VectorType>
+    typename VectorType::ScalarType interpolate_fft(
+            const LValueVector<VectorType>& data,
+            typename VectorType::ScalarType x,
+            typename VectorType::ScalarType period) {
+        using ScalarType = typename VectorType::ScalarType;
+        using ComplexType = typename ScalarType::ComplexType;
+
+        const size_t rSpaceSize = data.getLength();
+        FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
+        fft.getRSpace() = data;
+        fft.transform();
+        const size_t kSpaceSize = fft.getKSpaceSize();
+        const auto& kSpace = fft.getKSpace();
+
+        const ScalarType relative_x = x / period;
+        auto elem = ComplexType(0);
+        for (size_t k = 0; k < rSpaceSize; ++k) {
+            const ScalarType phase = ScalarType(2 * M_PI * k) * relative_x;
+            ScalarType s, c;
+            sincos(phase, s, c);
+            const auto factor = ComplexType(c, s);
+            if (k >= kSpaceSize)
+                elem += kSpace[rSpaceSize - k].conjugate() * factor;
+            else
+                elem += kSpace[k] * factor;
+        }
+
+        ScalarType result;
+        if constexpr (ScalarType::isComplex)
+            result = elem;
+        else
+            result = elem.getReal();
+        result *= reciprocal(ScalarType(rSpaceSize));
+        return result;
+    }
+
+    template<class GridType>
+    GridType interpolate_fft(const LValueGrid<GridType>& data, Utils::Array<size_t, 3> newDim) {
+        using ScalarType = typename GridType::ScalarType;
+        using ComplexType = typename ScalarType::ComplexType;
+        using Index3D = Utils::Array<size_t, 3>;
+        constexpr int Dim = 3;
+
+        FFT<ScalarType, 3> fft(data.getDim(), 1, PlanFlag::Estimate);
+        fft.getRSpace() = data;
+        fft.transform();
+
+        auto result = GridType(newDim);
+        result.forIndexInGrid([newDim, &fft, &result](Index3D rIndex) {
+            const auto& kSpace = fft.getKSpace();
+            auto elem = ComplexType(0);
+            kSpace.forIndexInGrid([newDim, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
+                const Index3D rSpaceSize = fft.getRSpaceSize();
+                const Index3D kSpaceSize = fft.getKSpaceSize();
+                ScalarType phase = 0, s, c;
+                for (int dim = 0; dim < Dim; ++dim)
+                    phase += ScalarType(kIndex[dim] * rIndex[dim]) / newDim[dim];
+                phase *= ScalarType(2 * M_PI);
+                sincos(phase, s, c);
+                const auto factor = ComplexType(c, s);
+                if (kIndex[2] >= kSpaceSize[2])
+                    elem += kSpace[rSpaceSize[2] - kIndex[2]].conjugate() * factor;
+                else
+                    elem += kSpace[kIndex[2]] * factor;
+            });
+
+            if constexpr (ScalarType::isComplex)
+                result(rIndex) = elem;
+            else
+                result(rIndex) = elem.getReal();
+        });
+        result *= reciprocal(reciprocal(data.getSize()));
+        return result;
+    }
+
+    template<class GridType>
+    typename GridType::ScalarType interpolate_fft(
+            const LValueGrid<GridType>& data,
+            Vector<typename GridType::ScalarType, 3> r,
+            Vector<typename GridType::ScalarType, 3> period) {
+        using ScalarType = typename GridType::ScalarType;
+        using ComplexType = typename ScalarType::ComplexType;
+        using Index3D = Utils::Array<size_t, 3>;
+        constexpr int Dim = 3;
+        
+        FFT<ScalarType, 3> fft(data.getDim(), 1, PlanFlag::Estimate);
+        fft.getRSpace() = data;
+        fft.transform();
+        const auto& kSpace = fft.getKSpace();
+
+        const Vector<ScalarType, 3> relative_r = r / period;
+        auto elem = ComplexType(0);
+        kSpace.forIndexInGrid([relative_r, &fft, &kSpace, &elem](Index3D kIndex) {
+            const Index3D rSpaceSize = fft.getRSpaceSize();
+            const Index3D kSpaceSize = fft.getKSpaceSize();
+            ScalarType phase = 0, s, c;
+            for (int dim = 0; dim < Dim; ++dim)
+                phase += ScalarType(kIndex[dim]) * relative_r[dim];
+            phase *= ScalarType(2 * M_PI);
+            sincos(phase, s, c);
+            const auto factor = ComplexType(c, s);
+            if (kIndex[2] >= kSpaceSize[2])
+                elem += kSpace[rSpaceSize[2] - kIndex[2]].conjugate() * factor;
+            else
+                elem += kSpace[kIndex[2]] * factor;
+        });
+
+        ScalarType result;
+        if constexpr (ScalarType::isComplex)
+            result = elem;
+        else
+            result = elem.getReal();
+        result *= reciprocal(reciprocal(data.getSize()));
         return result;
     }
 }
