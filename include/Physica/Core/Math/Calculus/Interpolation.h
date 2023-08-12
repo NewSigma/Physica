@@ -109,7 +109,9 @@ namespace Physica::Core {
     template<class VectorType>
     VectorType interpolate_fft(const LValueVector<VectorType>& data, size_t newDim) {
         using ScalarType = typename VectorType::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
+        constexpr bool isComplex = ScalarType::isComplex;
 
         const size_t rSpaceSize = data.getLength();
         FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
@@ -122,22 +124,24 @@ namespace Physica::Core {
         for (size_t i = 0; i < newDim; ++i) {
             auto elem = ComplexType(0);
             for (size_t k = 0; k < rSpaceSize; ++k) {
-                const ScalarType phase = 2 * M_PI * (k * i) / newDim;
-                ScalarType s, c;
-                sincos(phase, s, c);
-                const auto factor = ComplexType(c, s);
-                if (k >= kSpaceSize)
-                    elem += kSpace[rSpaceSize - k].conjugate() * factor;
+                const RealType phase = 2 * M_PI * (k * i) / newDim;
+                const auto factor = ComplexType::fromPhase(phase);
+                if constexpr (!isComplex) {
+                    if (k >= kSpaceSize)
+                        elem += kSpace[rSpaceSize - k].conjugate() * factor;
+                    else
+                        elem += kSpace[k] * factor;
+                }
                 else
                     elem += kSpace[k] * factor;
             }
 
-            if constexpr (ScalarType::isComplex)
+            if constexpr (isComplex)
                 result[i] = elem;
             else
                 result[i] = elem.getReal();
         }
-        result *= reciprocal(ScalarType(rSpaceSize));
+        result *= reciprocal(RealType(rSpaceSize));
         return result;
     }
 
@@ -147,7 +151,9 @@ namespace Physica::Core {
             typename VectorType::ScalarType x,
             typename VectorType::ScalarType period) {
         using ScalarType = typename VectorType::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
+        constexpr bool isComplex = ScalarType::isComplex;
 
         const size_t rSpaceSize = data.getLength();
         FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
@@ -159,106 +165,124 @@ namespace Physica::Core {
         const ScalarType relative_x = x / period;
         auto elem = ComplexType(0);
         for (size_t k = 0; k < rSpaceSize; ++k) {
-            const ScalarType phase = ScalarType(2 * M_PI * k) * relative_x;
-            ScalarType s, c;
-            sincos(phase, s, c);
-            const auto factor = ComplexType(c, s);
-            if (k >= kSpaceSize)
-                elem += kSpace[rSpaceSize - k].conjugate() * factor;
+            const RealType phase = ScalarType(2 * M_PI * k) * relative_x;
+            const auto factor = ComplexType::fromPhase(phase);
+            if constexpr (!isComplex) {
+                if (k >= kSpaceSize)
+                    elem += kSpace[rSpaceSize - k].conjugate() * factor;
+                else
+                    elem += kSpace[k] * factor;
+            }
             else
                 elem += kSpace[k] * factor;
         }
 
         ScalarType result;
-        if constexpr (ScalarType::isComplex)
+        if constexpr (isComplex)
             result = elem;
         else
             result = elem.getReal();
-        result *= reciprocal(ScalarType(rSpaceSize));
+        result *= reciprocal(RealType(rSpaceSize));
         return result;
     }
 
     template<class GridType>
-    GridType interpolate_fft(const LValueGrid<GridType>& data, Utils::Array<size_t, 3> newDim) {
+    GridType interpolate_fft(const LValueGrid<GridType>& data, typename GridBase::Index3D newDim) {
         using ScalarType = typename GridType::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
-        using Index3D = Utils::Array<size_t, 3>;
-        using FFTType = FFT<ScalarType, 3>;
-        using KSpaceType = typename FFTType::KSpaceType;
+        using Index3D = typename GridBase::Index3D;
         constexpr int Dim = 3;
+        constexpr bool isComplex = ScalarType::isComplex;
 
-        auto fft = FFTType(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
+        auto fft = FFT<ScalarType, 3>(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
 
         auto result = GridType(newDim);
-        GridType::forIndexInGrid(newDim, [newDim, &fft, &result](Index3D rIndex) {
+        GridBase::forIndexInGrid(newDim, [newDim, &fft, &result](Index3D rIndex) {
             const auto& kSpace = fft.getKSpace();
             const Index3D rSpaceSize = fft.getRSpaceSize();
             auto elem = ComplexType(0);
-            KSpaceType::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
+            GridBase::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
                 const Index3D kSpaceSize = fft.getKSpaceSize();
-                ScalarType phase = 0, s, c;
+                RealType phase(0);
                 for (int dim = 0; dim < Dim; ++dim)
-                    phase += ScalarType(kIndex[dim] * rIndex[dim]) / newDim[dim];
-                phase *= ScalarType(2 * M_PI);
-                sincos(phase, s, c);
-                const auto factor = ComplexType(c, s);
-                if (kIndex[2] >= kSpaceSize[2])
-                    elem += kSpace(Index3D{kIndex[0], kIndex[1], rSpaceSize[2] - kIndex[2]}).conjugate() * factor;
+                    phase += RealType(kIndex[dim] * rIndex[dim]) / newDim[dim];
+                phase *= RealType(2 * M_PI);
+                const auto factor = ComplexType::fromPhase(phase);
+                if constexpr (!isComplex) {
+                    if (kIndex[2] >= kSpaceSize[2]) {
+                        Index3D kIndex1;
+                        kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
+                        kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
+                        kIndex1[2] = rSpaceSize[2] - kIndex[2];
+                        elem += kSpace(kIndex1).conjugate() * factor;
+                    }
+                    else
+                        elem += kSpace(kIndex) * factor;
+                }
                 else
                     elem += kSpace(kIndex) * factor;
             });
 
-            if constexpr (ScalarType::isComplex)
+            if constexpr (isComplex)
                 result(rIndex) = elem;
             else
                 result(rIndex) = elem.getReal();
         });
-        result *= reciprocal(ScalarType(data.getSize()));
+        result *= reciprocal(RealType(data.getSize()));
         return result;
     }
 
     template<class GridType>
     typename GridType::ScalarType interpolate_fft(
             const LValueGrid<GridType>& data,
-            Vector<typename GridType::ScalarType, 3> r,
-            Vector<typename GridType::ScalarType, 3> period) {
+            Vector<typename GridType::ScalarType::RealType, 3> r,
+            Vector<typename GridType::ScalarType::RealType, 3> period) {
         using ScalarType = typename GridType::ScalarType;
+        using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
         using Index3D = Utils::Array<size_t, 3>;
-        using FFTType = FFT<ScalarType, 3>;
-        using KSpaceType = typename FFTType::KSpaceType;
         constexpr int Dim = 3;
+        constexpr bool isComplex = ScalarType::isComplex;
         
-        auto fft = FFTType(data.getDim(), 1, PlanFlag::Estimate);
+        auto fft = FFT<ScalarType, 3>(data.getDim(), 1, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();
 
-        const Vector<ScalarType, 3> relative_r = r / period;
+        const Vector<RealType, 3> relative_r = r / period;
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        KSpaceType::forIndexInGrid([relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
+        GridBase::forIndexInGrid([relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
             const Index3D kSpaceSize = fft.getKSpaceSize();
-            ScalarType phase = 0, s, c;
+            RealType phase(0);
             for (int dim = 0; dim < Dim; ++dim)
-                phase += ScalarType(kIndex[dim]) * relative_r[dim];
-            phase *= ScalarType(2 * M_PI);
-            sincos(phase, s, c);
-            const auto factor = ComplexType(c, s);
-            if (kIndex[2] >= kSpaceSize[2])
-                elem += kSpace[rSpaceSize[2] - kIndex[2]].conjugate() * factor;
+                phase += RealType(kIndex[dim]) * relative_r[dim];
+            phase *= RealType(2 * M_PI);
+            const auto factor = ComplexType::fromPhase(phase);
+            if constexpr (!isComplex) {
+                if (kIndex[2] >= kSpaceSize[2]) {
+                    Index3D kIndex1;
+                    kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
+                    kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
+                    kIndex1[2] = rSpaceSize[2] - kIndex[2];
+                    elem += kSpace(kIndex1).conjugate() * factor;
+                }
+                else
+                    elem += kSpace(kIndex) * factor;
+            }
             else
-                elem += kSpace[kIndex[2]] * factor;
+                elem += kSpace(kIndex) * factor;
         });
 
         ScalarType result;
-        if constexpr (ScalarType::isComplex)
+        if constexpr (isComplex)
             result = elem;
         else
             result = elem.getReal();
-        result *= reciprocal(ScalarType(data.getSize()));
+        result *= reciprocal(RealType(data.getSize()));
         return result;
     }
 }

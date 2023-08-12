@@ -23,6 +23,7 @@
 namespace Physica::Core {
     template<class T>
     class GridStorage : public GridBase {
+        using This = GridStorage<T>;
     public:
         using Index3D = Utils::Array<size_t, 3>;
         using ArrayType = Utils::Array<T>;
@@ -85,12 +86,15 @@ namespace Physica::Core {
 
     template<class T>
     inline T& GridStorage<T>::operator()(size_t x, size_t y, size_t z) {
-        return values[x * dimY * dimZ + y * dimZ + z];
+        assert(x < dimX);
+        assert(y < dimY);
+        assert(z < dimZ);
+        return values[(x * dimY + y) * dimZ + z];
     }
 
     template<class T>
     inline const T& GridStorage<T>::operator()(size_t x, size_t y, size_t z) const {
-        return values[x * dimY * dimZ + y * dimZ + z];
+        return const_cast<This&>(*this)(x, y, z);
     }
 
     template<class T>

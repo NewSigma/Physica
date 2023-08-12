@@ -76,12 +76,19 @@ namespace Physica::Core {
     }
 
     template<class T>
-    T ComplexScalar<T>::arg() const {
+    T ComplexScalar<T>::phase() const {
         auto result = arctan(imag / real);
         //Result of arctan is defined on [-Pi / 2, Pi / 2], Result of arg is defined on [-Pi, Pi].
         if(real.isNegative() && !imag.isZero())
             result += T(M_PI);
         return result;
+    }
+
+    template<class T>
+    inline ComplexScalar<T> ComplexScalar<T>::fromPhase(T phase) {
+        T s, c;
+        sincos(phase, s, c);
+        return ComplexScalar(c, s);
     }
 
     template<class T>

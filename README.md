@@ -36,7 +36,7 @@ Feel free to dive in! Open an issue or submit PRs.
 
 2.Tell us new features you want.  
 
-3.Provide a better algorithm with mathematical prove.  
+3.Provide a better implementation of algorithm.  
 
 4.Fix bugs, add new features, tests and examples.  
 

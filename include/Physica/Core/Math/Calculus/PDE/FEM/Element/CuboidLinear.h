@@ -1,0 +1,164 @@
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Element.h"
+
+namespace Physica::Core {
+    template<class ScalarType> class CuboidLinear;
+
+    namespace Internal {
+        template<class T>
+        class Traits<CuboidLinear<T>> {
+        public:
+            constexpr static unsigned int Dim = 3;
+            constexpr static unsigned int Order = 1;
+            constexpr static unsigned int NumPoint = 8;
+            constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
+            using ScalarType = T;
+            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
+        };
+    }
+
+    template<class ScalarType>
+    class CuboidLinear : public Element<CuboidLinear<ScalarType>> {
+        using Base = Element<CuboidLinear<ScalarType>>;
+    public:
+        using typename Base::VectorType;
+        using typename Base::MatrixType;
+        using typename Base::IndexArray;
+        enum {
+            LeftFrontBottom = 0,
+            LeftFrontTop = 1,
+            LeftBehindBottom = 2,
+            LeftBehindTop = 3,
+            RightFrontBottom = 4,
+            RightFrontTop = 5,
+            RightBehindBottom = 6,
+            RightBehindTop = 7
+        };
+    private:
+        VectorType leftFrontBottom;
+        VectorType rightBehindTop;
+    public:
+        CuboidLinear() = default;
+        CuboidLinear(VectorType leftFrontBottom_, VectorType rightBehindTop_, IndexArray globalNodes);
+        CuboidLinear(const CuboidLinear&) = default;
+        CuboidLinear(CuboidLinear&&) noexcept = default;
+        ~CuboidLinear() = default;
+        /* Operators */
+        CuboidLinear& operator=(CuboidLinear obj) noexcept;
+        /* Operations */
+        [[nodiscard]] bool contains(const VectorType& point) const;
+        [[nodiscard]] VectorType getNodePos(size_t localNode) const;
+        [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
+        [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
+        void swap(CuboidLinear& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const VectorType& getLeftFrontBottom() const noexcept { return leftFrontBottom; }
+        [[nodiscard]] const VectorType& getRightBehindTop() const noexcept { return rightBehindTop; }
+        /* Static members */
+        [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
+    };
+
+    template<class ScalarType>
+    CuboidLinear<ScalarType>::CuboidLinear(VectorType leftFrontBottom_, VectorType rightBehindTop_, IndexArray globalNodes)
+            : Base(std::move(globalNodes))
+            , leftFrontBottom(std::move(leftFrontBottom_))
+            , rightBehindTop(std::move(rightBehindTop_)) {}
+
+    template<class ScalarType>
+    CuboidLinear<ScalarType>& CuboidLinear<ScalarType>::operator=(CuboidLinear obj) noexcept {
+        swap(obj);
+        return *this;
+    }
+
+    template<class ScalarType>
+    bool CuboidLinear<ScalarType>::contains(const VectorType& point) const {
+        return leftFrontBottom[0] <= point[0]
+            && point[0] <= rightBehindTop[0]
+            && leftFrontBottom[1] <= point[1]
+            && point[1] <= rightBehindTop[1]
+            && leftFrontBottom[2] <= point[2]
+            && point[2] <= rightBehindTop[2];
+    }
+
+    template<class ScalarType>
+    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::getNodePos(size_t localNode) const {
+        switch (localNode) {
+            case LeftFrontBottom:
+                return leftFrontBottom;
+            case LeftFrontTop:
+                return {leftFrontBottom[0], leftFrontBottom[1], rightBehindTop[2]};
+            case LeftBehindBottom:
+                return {leftFrontBottom[0], rightBehindTop[1], leftFrontBottom[2]};
+            case LeftBehindTop:
+                return {leftFrontBottom[0], rightBehindTop[1], rightBehindTop[2]};
+            case RightFrontBottom:
+                return {rightBehindTop[0], leftFrontBottom[1], leftFrontBottom[2]};
+            case RightFrontTop:
+                return {rightBehindTop[0], leftFrontBottom[1], rightBehindTop[2]};
+            case RightBehindBottom:
+                return {rightBehindTop[0], rightBehindTop[1], leftFrontBottom[2]};
+            case RightBehindTop:
+                return rightBehindTop;
+        }
+        throw std::invalid_argument("[Error]: Invalid local node index");
+    }
+
+    template<class ScalarType>
+    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::toLocalPos(VectorType globalPos) const {
+        return divide(ScalarType(2) * globalPos - rightBehindTop - leftFrontBottom, rightBehindTop - leftFrontBottom);
+    }
+
+    template<class ScalarType>
+    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::toGlobalPos(VectorType localPos) const {
+        return (leftFrontBottom + rightBehindTop - hadamard(rightBehindTop - leftFrontBottom, localPos)) * ScalarType(0.5);
+    }
+
+    template<class ScalarType>
+    void CuboidLinear<ScalarType>::swap(CuboidLinear& obj) noexcept {
+        Base::swap(obj);
+        leftFrontBottom.swap(obj.leftFrontBottom);
+        rightBehindTop.swap(obj.rightBehindTop);
+    }
+
+    template<class ScalarType>
+    ScalarType CuboidLinear<ScalarType>::baseFunc(size_t localNode, VectorType p) {
+        switch (localNode) {
+            case LeftFrontBottom:
+                return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+            case LeftFrontTop:
+                return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+            case LeftBehindBottom:
+                return (ScalarType(1) - p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+            case LeftBehindTop:
+                return (ScalarType(1) - p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+            case RightFrontBottom:
+                return (ScalarType(1) + p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+            case RightFrontTop:
+                return (ScalarType(1) + p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+            case RightBehindBottom:
+                return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+            case RightBehindTop:
+                return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+        }
+        throw std::invalid_argument("[Error]: Invalid local node index");
+    }
+}

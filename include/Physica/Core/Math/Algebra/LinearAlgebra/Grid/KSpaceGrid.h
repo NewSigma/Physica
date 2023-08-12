@@ -19,237 +19,178 @@
 #pragma once
 
 #include "Physica/Core/Physics/PeriodicCell.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 #include "RSpaceGrid.h"
 
 namespace Physica::Core {
-    template<class T> class KSpaceGrid;
+    template<class GridType> class KSpaceGrid;
 
     namespace Internal {
-        template<class T>
-        class Traits<KSpaceGrid<T>> {
-            constexpr static bool isScalar = is_scalar<T>::value;
-            constexpr static bool isComplex = T::isComplex;
-            using ScalarType = typename T::ScalarType;
-            using RealType = typename ScalarType::RealType;
-            using ComplexType = ComplexScalar<RealType>;
-            using ScalarCase = typename std::conditional<isComplex, ComplexType, RealType>::type;
+        template<class GridType>
+        class Traits<KSpaceGrid<GridType>> {
+
         public:
-            using Base = RSpaceGrid<typename std::conditional<isScalar, ScalarCase, T>::type>;
+            using GridScalar = typename GridType::ScalarType;
+            using ScalarType = typename GridScalar::ComplexType;
+            constexpr static bool isComplex = GridScalar::isComplex;
         };
     }
 
-    template<class T>
-    class KSpaceGrid : private Internal::Traits<KSpaceGrid<T>>::Base {
-        constexpr static bool isComplex = T::isComplex;
-        using ScalarType = typename T::ScalarType;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = ComplexScalar<RealType>;
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+    template<class GridType>
+    class KSpaceGrid : public LValueGrid<KSpaceGrid<GridType>> {
+        using This = KSpaceGrid<GridType>;
+        using Base = LValueGrid<This>;
+        using Traits = Internal::Traits<This>;
+        using GridScalar = typename Traits::GridScalar;
+        constexpr static bool isComplex = Traits::isComplex;
     public:
-        using Base = typename Internal::Traits<KSpaceGrid<T>>::Base;
-        using Index3D = Utils::Array<ssize_t, 3>;
-        using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
+        using ScalarType = typename Base::ScalarType;
+        using RealType = typename ScalarType::RealType;
+        using Index3D = typename Base::Index3D;
+        using VectorType = typename Base::VectorType;
+        using LatticeMatrix = typename Base::LatticeMatrix;
+    private:
+        RSpaceGrid<ScalarType> values;
+        size_t rSpaceSizeZ;
     public:
         KSpaceGrid() = default;
         template<class... Args>
-        KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ, Args... args);
+        KSpaceGrid(Index3D rSpaceDim, Args... args);
+        KSpaceGrid(RSpaceGrid<ScalarType> values_, size_t rSpaceSizeZ_);
         KSpaceGrid(const KSpaceGrid&) = default;
         KSpaceGrid(KSpaceGrid&&) noexcept = default;
         ~KSpaceGrid() = default;
         /* Operators */
+        using Base::operator();
         KSpaceGrid& operator=(KSpaceGrid grid) noexcept;
-        [[nodiscard]] T& operator()(ssize_t x, ssize_t y, ssize_t z);
-        [[nodiscard]] const T& operator()(ssize_t x, ssize_t y, ssize_t z) const;
-        [[nodiscard]] T& operator()(Index3D index) { return this->operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const T& operator()(Index3D index) const { return this->operator()(index[0], index[1], index[2]); }
-        template<class T1>
-        friend std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid);
-        template<class T1>
-        friend std::istream& operator>>(std::istream& is, KSpaceGrid<T1>& grid);
+        [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
+        [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
+        template<class U>
+        friend std::ostream& operator<<(std::ostream& os, const KSpaceGrid<U>& grid);
+        template<class U>
+        friend std::istream& operator>>(std::istream& is, KSpaceGrid<U>& grid);
         /* Operations */
-        [[nodiscard]] ComplexType calc(ssize_t x, ssize_t y, ssize_t z) const;
-        void swap(KSpaceGrid& grid) noexcept { Base::swap(grid); }
+        inline void swap(KSpaceGrid& grid) noexcept;
         /* Getters */
+        [[nodiscard]] RSpaceGrid<ScalarType>& getValues() { return values; }
+        [[nodiscard]] const RSpaceGrid<ScalarType>& getValues() const { return values; }
+        [[nodiscard]] size_t getDimX() const noexcept { return values.getDimX(); }
+        [[nodiscard]] size_t getDimY() const noexcept { return values.getDimY(); }
+        [[nodiscard]] size_t getDimZ() const noexcept { return rSpaceSizeZ; }
         using Base::flatten;
-        [[nodiscard]] inline size_t getSize() const noexcept;
-        [[nodiscard]] ssize_t getDimX() const noexcept { return Base::getDimX() / 2U; }
-        [[nodiscard]] ssize_t getDimY() const noexcept { return Base::getDimY() / 2U; }
-        [[nodiscard]] ssize_t getDimZ() const noexcept { return isComplex ? (Base::getDimZ() / 2U) : (Base::getDimZ() - 1U); }
-        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
         /* Static members */
         static typename Base::Index3D makeGridDim(RealType cutEnergy, const LatticeMatrix& repCell);
-        static KSpaceGrid<T> makeGrid(RealType cutEnergy, const LatticeMatrix& repCell);
+        static KSpaceGrid<GridType> makeGrid(RealType cutEnergy, const LatticeMatrix& repCell);
         template<class Functor>
         inline static void forKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
-        static void forReducedKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
+        inline static void forReducedKInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
         inline static void forKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
         template<class Functor>
-        static void forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
-        static void normalizeIndex(Index3D& index, const Index3D& range);
+        inline static void forReducedKIndexInGrid(const KSpaceGrid& grid, const LatticeMatrix& repLatt, Functor func);
+    private:
+        using Base::forPointInGrid;
+        using Base::forPointIndexInGrid;
+        using Base::forIndexInGrid;
     };
 
-    template<class T>
+    template<class GridType>
     template<class... Args>
-    KSpaceGrid<T>::KSpaceGrid(size_t dimX, size_t dimY, size_t dimZ, Args... args)
-            : Base({2 * dimX + 1, 2 * dimY + 1, isComplex ? (2 * dimZ + 1) : (dimZ + 1)}, std::forward<Args>(args)...) {}
+    KSpaceGrid<GridType>::KSpaceGrid(Index3D rSpaceDim, Args... args)
+            : values(FFT<GridScalar, 3>::rSizeToKSize(rSpaceDim), std::forward<Args>(args)...)
+            , rSpaceSizeZ(rSpaceDim[2]) {}
 
-    template<class T>
-    KSpaceGrid<T>& KSpaceGrid<T>::operator=(KSpaceGrid<T> grid) noexcept {
+    template<class GridType>
+    KSpaceGrid<GridType>::KSpaceGrid(RSpaceGrid<ScalarType> values_, size_t rSpaceSizeZ_)
+            : values(std::move(values_)), rSpaceSizeZ(rSpaceSizeZ_) {
+        assert((FFT<GridScalar, 1>::rSizeToKSize(rSpaceSizeZ) == values.getDimZ()) && "[Error]: Incompatible size");
+    }
+
+    template<class GridType>
+    KSpaceGrid<GridType>& KSpaceGrid<GridType>::operator=(KSpaceGrid<GridType> grid) noexcept {
         swap(grid);
         return *this;
     }
 
-    template<class T>
-    T& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) {
-        assert(-getDimX() <= x && x <= getDimX());
-        assert(-getDimY() <= y && y <= getDimY());
-        assert(-getDimZ() <= z && z <= getDimZ());
+    template<class GridType>
+    inline typename KSpaceGrid<GridType>::ScalarType& KSpaceGrid<GridType>::operator()(size_t x, size_t y, size_t z) {
+        assert(x < getDimX());
+        assert(y < getDimY());
+        assert(z < getDimZ());
         if constexpr (isComplex)
-            return Base::operator()(x + getDimX(), y + getDimY(), z + getDimZ());
+            return values(x, y, z);
         else {
-            assert(z >= 0);
-            return Base::operator()(x + getDimX(), y + getDimY(), z);
+            const bool isOverflow = z >= values.getDimZ();
+            const size_t x1 = (isOverflow && x != 0) ? (getDimX() - x) : x;
+            const size_t y1 = (isOverflow && y != 0) ? (getDimY() - y) : y;
+            const size_t z1 = getDimZ() - z;
+            return values(x1, y1, z1);
         }
     }
 
-    template<class T>
-    const T& KSpaceGrid<T>::operator()(ssize_t x, ssize_t y, ssize_t z) const {
-        assert(-getDimX() <= x && x <= getDimX());
-        assert(-getDimY() <= y && y <= getDimY());
-        assert(-getDimZ() <= z && z <= getDimZ());
-        if constexpr (isComplex)
-            return Base::operator()(x + getDimX(), y + getDimY(), z + getDimZ());
-        else {
-            assert(z >= 0);
-            return Base::operator()(x + getDimX(), y + getDimY(), z);
-        }
+    template<class GridType>
+    inline const typename KSpaceGrid<GridType>::ScalarType& KSpaceGrid<GridType>::operator()(size_t x, size_t y, size_t z) const {
+        return const_cast<This&>(*this).operator()(x, y, z);
     }
 
-    template<class T1>
-    std::ostream& operator<<(std::ostream& os, const KSpaceGrid<T1>& grid) {
-        os << static_cast<const typename KSpaceGrid<T1>::Base&>(grid);
+    template<class GridType>
+    std::ostream& operator<<(std::ostream& os, const KSpaceGrid<GridType>& grid) {
+        os << grid.values;
         return os;
     }
-    template<class T1>
-    std::istream& operator>>(std::istream& is, KSpaceGrid<T1>& grid) {
-        is >> static_cast<typename KSpaceGrid<T1>::Base&>(grid);
+    template<class GridType>
+    std::istream& operator>>(std::istream& is, KSpaceGrid<GridType>& grid) {
+        is >> grid.values;
         return is;
     }
 
-    template<class T>
-    typename KSpaceGrid<T>::ComplexType KSpaceGrid<T>::calc(ssize_t x, ssize_t y, ssize_t z) const {
-        const ComplexType temp = isComplex ? this->operator()(x, y, z) : this->operator()(x, y, std::abs(z));
-        return z >= 0 ? temp : temp.conjugate();
+    template<class GridType>
+    void KSpaceGrid<GridType>::swap(KSpaceGrid& grid) noexcept {
+        values.swap(grid.values);
+        std::swap(rSpaceSizeZ, grid.rSpaceSizeZ);
     }
 
-    template<class T>
-    size_t KSpaceGrid<T>::getSize() const noexcept {
-        if constexpr (isComplex)
-            return Base::getDimX() * Base::getDimY() * Base::getDimZ();
-        return Base::getDimX() * Base::getDimY() * (Base::getDimZ() * 2 - 1);
-    }
-
-    template<class T>
-    typename KSpaceGrid<T>::Base::Index3D KSpaceGrid<T>::makeGridDim(RealType cutEnergy, const LatticeMatrix& repCell) {
+    template<class GridType>
+    typename KSpaceGrid<GridType>::Index3D KSpaceGrid<GridType>::makeGridDim(RealType cutEnergy, const LatticeMatrix& repCell) {
         constexpr double factor = 2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck;
         const RealType maxWaveVec = sqrt(RealType(factor) * cutEnergy);
         const auto range = PeriodicCell<RealType, 3>::estimateRange(repCell, maxWaveVec);
-        return {(size_t)range[0], (size_t)range[1], (size_t)range[2]};
+        return {size_t(2 * range[0] + 1), size_t(2 * range[1] + 1), size_t(range[2] + 1)};
     }
 
-    template<class T>
-    KSpaceGrid<T> KSpaceGrid<T>::makeGrid(RealType cutEnergy, const LatticeMatrix& repCell) {
-        const auto range = makeGridDim(cutEnergy, repCell);
-        return KSpaceGrid<T>(range[0], range[1], range[2]);
+    template<class GridType>
+    KSpaceGrid<GridType> KSpaceGrid<GridType>::makeGrid(RealType cutEnergy, const LatticeMatrix& repCell) {
+        return KSpaceGrid<GridType>(makeGridDim(cutEnergy, repCell));
     }
 
-    template<class T>
+    template<class GridType>
     template<class Functor>
-    inline void KSpaceGrid<T>::forKInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
-        PeriodicCell<RealType, 3>::forCellInRange(grid.getDim(), repLatt, func);
+    inline void KSpaceGrid<GridType>::forKInGrid(const KSpaceGrid<GridType>& grid, const LatticeMatrix& repLatt, Functor func) {
+        RSpaceGrid<ScalarType>::template forPointInGrid<false, Functor>(grid.getDim(), repLatt, func);
     }
 
-    template<class T>
+    template<class GridType>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
-        if constexpr (isComplex)
-            forKInGrid(grid, repLatt, func);
-        else {
-            auto a1 = repLatt.row(0);
-            auto a2 = repLatt.row(1);
-            auto a3 = repLatt.row(2);
-
-            const auto dim = grid.getDim();
-            VectorType v1, v2, v3;
-            for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
-                v1 = RealType(x) * a1.asVector();
-                for (ssize_t y = -dim[1]; y <= dim[1]; ++y) {
-                    v2 = v1 + RealType(y) * a2.asVector();
-                    for (ssize_t z = 0; z <= dim[2]; ++z) {
-                        v3 = v2 + RealType(z) * a3.asVector();
-                        func(v3);
-                    }
-                }
-            }
-        }
+    inline void KSpaceGrid<GridType>::forReducedKInGrid(const KSpaceGrid<GridType>& grid, const LatticeMatrix& repLatt, Functor func) {
+        LatticeMatrix copy = repLatt;
+        auto row = copy.row(2);
+        row *= RealType(grid.values.getDimZ()) / RealType(grid.getDimZ());
+        RSpaceGrid<ScalarType>::template forPointInGrid<false, Functor>(grid.values.getDim(), copy, func);
     }
 
-    template<class T>
+    template<class GridType>
     template<class Functor>
-    void KSpaceGrid<T>::forKIndexInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
-        auto a1 = repLatt.row(0);
-        auto a2 = repLatt.row(1);
-        auto a3 = repLatt.row(2);
-
-        const auto dim = grid.getDim();
-        VectorType v1, v2, v3;
-        for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
-            v1 = RealType(x) * a1.asVector();
-            for (ssize_t y = -dim[1]; y <= dim[1]; ++y) {
-                v2 = v1 + RealType(y) * a2.asVector();
-                for (ssize_t z = -dim[2]; z <= dim[2]; ++z) {
-                    v3 = v2 + RealType(z) * a3.asVector();
-                    func(v3, Index3D{x, y, z});
-                }
-            }
-        }
+    inline void KSpaceGrid<GridType>::forKIndexInGrid(const KSpaceGrid<GridType>& grid, const LatticeMatrix& repLatt, Functor func) {
+        RSpaceGrid<ScalarType>::template forPointIndexInGrid<false, Functor>(grid.getDim(), repLatt, func);
     }
 
-    template<class T>
+    template<class GridType>
     template<class Functor>
-    void KSpaceGrid<T>::forReducedKIndexInGrid(const KSpaceGrid<T>& grid, const LatticeMatrix& repLatt, Functor func) {
-        if constexpr (isComplex)
-            forKIndexInGrid(grid, repLatt, func);
-        else {
-            auto a1 = repLatt.row(0);
-            auto a2 = repLatt.row(1);
-            auto a3 = repLatt.row(2);
-
-            const auto dim = grid.getDim();
-            VectorType v1, v2, v3;
-            for (ssize_t x = -dim[0]; x <= dim[0]; ++x) {
-                v1 = RealType(x) * a1.asVector();
-                for (ssize_t y = -dim[1]; y <= dim[1]; ++y) {
-                    v2 = v1 + RealType(y) * a2.asVector();
-                    for (ssize_t z = 0; z <= dim[2]; ++z) {
-                        v3 = v2 + RealType(z) * a3.asVector();
-                        func(v3, Index3D{x, y, z});
-                    }
-                }
-            }
-        }
-    }
-
-    template<class T>
-    void KSpaceGrid<T>::normalizeIndex(Index3D& index, const Index3D& range) {
-        for (int i = 0; i < 3; ++i) {
-            if (index[i] > range[i])
-                index[i] -= range[i];
-            else if (index[i] < -range[i])
-                index[i] += range[i];
-            assert(0 <= index[i] && index[1] < range[i]);
-        }
+    inline void KSpaceGrid<GridType>::forReducedKIndexInGrid(const KSpaceGrid<GridType>& grid, const LatticeMatrix& repLatt, Functor func) {
+        LatticeMatrix copy = repLatt;
+        auto row = copy.row(2);
+        row *= RealType(grid.values.getDimZ()) / RealType(grid.getDimZ());
+        RSpaceGrid<ScalarType>::template forPointIndexInGrid<false, Functor>(grid.values.getDim(), repLatt, func);
     }
 }

@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 
 using namespace Physica::Core;
@@ -51,13 +52,24 @@ void testFFT1D() {
 }
 
 void testFFT3D() {
+    using GridType = RSpaceGrid<ScalarType>;
+    using Index3D = typename GridType::Index3D;
+
     std::mt19937 gen{};
-    const auto data = VectorType::random_normal(20, gen);
-    const auto result = interpolate_fft(data, 100);
+    const auto data = GridType::random_uniform({5, 5, 5}, gen);
+    const auto result = interpolate_fft(data, {10, 10, 10});
+    GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {
+        Index3D index1{index[0] * 2, index[1] * 2, index[2] * 2};
+        if (!scalarNear(data(index), result(index1), 1E-8)) {
+            std::cout << data(index) << ' ' << result(index1) << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    });
 }
 
 int main() {
     testLaglange();
     testFFT1D();
     testFFT3D();
+    return 0;
 }

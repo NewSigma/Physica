@@ -28,12 +28,14 @@ namespace Physica::Gui {
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
         using PhononType = Core::FinitePhonon<ScalarType, PosScalarType>;
+        using InterpolateMethod = typename PhononType::InterpolateMethod;
         using MatrixGrid = typename PhononType::MatrixGrid;
 
         ScalarType currentX;
     public:
         PhononPlot();
         /* Operations */
+        template<InterpolateMethod Method>
         void plotPathScatter(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
@@ -41,6 +43,7 @@ namespace Physica::Gui {
             Vector3D to,
             size_t numPoint,
             const char* label);
+        template<InterpolateMethod Method>
         void plotPathLine(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
@@ -65,6 +68,7 @@ namespace Physica::Gui {
     }
 
     template<class ScalarType, class PosScalarType>
+    template<typename PhononPlot<ScalarType, PosScalarType>::InterpolateMethod Method>
     void PhononPlot<ScalarType, PosScalarType>::plotPathScatter(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
@@ -84,7 +88,7 @@ namespace Physica::Gui {
         for (size_t i = 0; i < numPoint; ++i) {
             const ScalarType factor = factors[i];
             const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
+            auto fcMatrix = phonon.template interpolatePoint<Method>(qPoint, forceConstants);
             phonon.toDynamicMatrix(fcMatrix);
             const auto eigen = PhononType::diagonalize(fcMatrix);
             auto freq = phonon.makeFreq(eigen);
@@ -114,6 +118,7 @@ namespace Physica::Gui {
      * [1] https://github.com/phonopy/phonopy
      */
     template<class ScalarType, class PosScalarType>
+    template<typename PhononPlot<ScalarType, PosScalarType>::InterpolateMethod Method>
     void PhononPlot<ScalarType, PosScalarType>::plotPathLine(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
@@ -128,48 +133,21 @@ namespace Physica::Gui {
         const VectorType x = currentX + factors * deltaX;
 
         DenseMatrix<ScalarType> buffer(numBranch, numPoint);
-        DenseMatrix<ScalarType> lastEigenvectors;
         ScalarType minFreq = Plot::getMinY();
         ScalarType maxFreq = Plot::getMaxY();
         for (size_t i = 0; i < numPoint; ++i) {
             const ScalarType factor = factors[i];
             const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
+            auto fcMatrix = phonon.template interpolatePoint<Method>(qPoint, forceConstants);
             phonon.toDynamicMatrix(fcMatrix);
-            const auto eigen = PhononType::diagonalize(fcMatrix);
+            auto eigen = PhononType::diagonalize(fcMatrix);
+            eigen.sort();
             auto freq = phonon.makeFreq(eigen);
             freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
+            auto bufferCol = buffer.col(i);
+            bufferCol = freq;
             minFreq = std::min(minFreq, freq.min());
             maxFreq = std::max(maxFreq, freq.max());
-
-            const bool shouldInit = i == 0;
-            auto eigenvectors = phonon.makeEigenVectors(eigen);
-            auto bufferCol = buffer.col(i);
-            if (shouldInit) {
-                bufferCol = freq;
-                lastEigenvectors.swap(eigenvectors);
-            }
-            else {
-                Utils::Array<size_t> occupiedIndex{};
-                occupiedIndex.reserve(numBranch);
-                for (size_t branch = 0; branch < numBranch; ++branch) {
-                    const VectorType dots = abs(eigenvectors.transpose() * lastEigenvectors.col(branch));
-                    size_t index = numBranch;
-                    ScalarType maxDot = 0;
-                    for (size_t j = 0; j < dots.getLength(); ++j) {
-                        const ScalarType dot = abs(dots[j]);
-                        const bool isNotOccupied = std::find(occupiedIndex.cbegin(), occupiedIndex.cend(), j) == occupiedIndex.cend();
-                        if (isNotOccupied && dot > maxDot) {
-                            index = j;
-                            maxDot = dot;
-                        }
-                    }
-                    assert(index != numBranch && "[Error]: Unexpected result. Something wrong with the dynamic matrix?");
-                    occupiedIndex.append(index);
-                    bufferCol[branch] = freq[index];
-                    lastEigenvectors.asArray()[branch].swap(eigenvectors.asArray()[index]);
-                }
-            }
         }
 
         for (size_t i = 0; i < numBranch; ++i) {

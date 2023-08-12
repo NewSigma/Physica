@@ -27,10 +27,10 @@ namespace Physica::Core {
      * Plain wave base wave function
      */
     template<class ScalarType>
-    class PWBaseWave : public KSpaceGrid<ComplexScalar<ScalarType>> {
+    class PWBaseWave : public KSpaceGrid<RSpaceGrid<ComplexScalar<ScalarType>>> {
     public:
         using ComplexType = ComplexScalar<ScalarType>;
-        using Base = KSpaceGrid<ComplexType>;
+        using Base = KSpaceGrid<RSpaceGrid<ComplexType>>;
     private:
         using LatticeMatrix = typename CrystalCell::LatticeMatrix;
 
@@ -60,13 +60,13 @@ namespace Physica::Core {
         using Base::getDimZ;
         using Base::getDim;
         [[nodiscard]] size_t getNumPlaneWave() const noexcept { return Base::getSize(); }
-        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(ssize_t x, ssize_t y, ssize_t z) const noexcept;
-        [[nodiscard]] ScalarType getKinetic(ssize_t x, ssize_t y, ssize_t z) const noexcept;
+        [[nodiscard]] Vector<ScalarType, 3> getWaveVector(size_t x, size_t y, size_t z) const noexcept;
+        [[nodiscard]] ScalarType getKinetic(size_t x, size_t y, size_t z) const noexcept;
     };
 
     template<class ScalarType>
     PWBaseWave<ScalarType>::PWBaseWave(ScalarType cutEnergy, LatticeMatrix repCell_) : repCell(std::move(repCell_)) {
-        Base::operator=(KSpaceGrid<ComplexType>::makeGrid(cutEnergy, repCell));
+        Base::operator=(Base(KSpaceGrid<ComplexType>::makeGridDim(cutEnergy, repCell)));
     }
 
     template<class ScalarType>
@@ -118,14 +118,20 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType, 3> PWBaseWave<ScalarType>::getWaveVector(ssize_t x, ssize_t y, ssize_t z) const noexcept {
-        return repCell.row(0).asVector() * ScalarType(x) +
-               repCell.row(1).asVector() * ScalarType(y) +
-               repCell.row(2).asVector() * ScalarType(z);
+    Vector<ScalarType, 3> PWBaseWave<ScalarType>::getWaveVector(size_t x, size_t y, size_t z) const noexcept {
+        const ssize_t x1 = x > getDimX() / 2 ? -ssize_t(getDimX() - x) : x;
+        const ssize_t y1 = y > getDimY() / 2 ? -ssize_t(getDimY() - y) : y;
+        const ssize_t z1 = z > getDimZ() / 2 ? -ssize_t(getDimZ() - z) : z;
+        return repCell.row(0).asVector() * ScalarType(x1) +
+               repCell.row(1).asVector() * ScalarType(y1) +
+               repCell.row(2).asVector() * ScalarType(z1);
     }
 
     template<class ScalarType>
-    ScalarType PWBaseWave<ScalarType>::getKinetic(ssize_t x, ssize_t y, ssize_t z) const noexcept {
+    ScalarType PWBaseWave<ScalarType>::getKinetic(size_t x, size_t y, size_t z) const noexcept {
+        assert(x < getDimX());
+        assert(y < getDimY());
+        assert(z < getDimZ());
         constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
         return getWaveVector(x, y, z).squaredNorm() * ScalarType(factor);
     }

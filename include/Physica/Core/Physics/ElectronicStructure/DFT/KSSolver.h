@@ -45,6 +45,7 @@ namespace Physica::Core {
         using PotType = SpinPair<RSpaceGrid<ScalarType>, isSpinPolarized>;
         using FFT3D = FFT<ScalarType, 3>;
         using FFTxc = SpinPair<FFT3D, isSpinPolarized>;
+        using Index3D = typename GridBase::Index3D;
     protected:
         CrystalCell cell;
         RepCellType repCell;
@@ -266,7 +267,7 @@ namespace Physica::Core {
             h[SpinState::Down] = ScalarType(0);
 
         size_t i = 0;
-        KSpaceGrid<ComplexType>::forKInGrid(orbits[SpinState::Up][0], repCell.getLattice(), [this, &i, &k](VectorType K) {
+        PWBaseWave<ScalarType>::forKInGrid(orbits[SpinState::Up][0], repCell.getLattice(), [this, &i, &k](VectorType K) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
             const ScalarType kinetic = (k + K).squaredNorm() * factor;
             h[SpinState::Up](i, i) = kinetic;
@@ -279,7 +280,6 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::fillPotential() {
-        using SignedIndex3D = typename KSpaceGrid<ComplexType>::Index3D;
         using VectorType = typename KSpaceGrid<ComplexType>::VectorType;
 
         RSpaceGrid<ComplexType> kSpaceXC_up{};
@@ -303,29 +303,28 @@ namespace Physica::Core {
         }
 
         size_t row = 0;
-        KSpaceGrid<ComplexType>::forKIndexInGrid(orbits[SpinState::Up][0], repCell.getLattice(),
-            [this, &row, &kSpaceDencity, &kSpaceXC_up, &kSpaceXC_down](VectorType k1, SignedIndex3D index) {
+        PWBaseWave<ScalarType>::forKIndexInGrid(orbits[SpinState::Up][0], repCell.getLattice(),
+            [this, &row, &kSpaceDencity, &kSpaceXC_up, &kSpaceXC_down](VectorType k1, Index3D index) {
                 const ScalarType coeff = 1 / PhyConst<AU>::vacuumDielectric;
                 const ScalarType repVolume = reciprocal(cell.getVolume());
                 const auto any_wave = orbits[SpinState::Up][0];
-                const ssize_t x1 = index[0];
-                const ssize_t y1 = index[1];
-                const ssize_t z1 = index[2];
+                const size_t x1 = index[0];
+                const size_t y1 = index[1];
+                const size_t z1 = index[2];
                 size_t col = row + 1;
-                for (ssize_t x2 = x1; x2 < externalPot.getDimX(); ++x2) {
-                    ssize_t y2 = x2 == x1 ? y1 : -externalPot.getDimY();
+                for (size_t x2 = x1; x2 < externalPot.getDimX(); ++x2) {
+                    size_t y2 = x2 == x1 ? y1 : -externalPot.getDimY();
                     for (; y2 < externalPot.getDimY(); ++y2) {
-                        ssize_t z2 = (x1 == x2 && y1 == y2) ? z1 + 1 : -externalPot.getDimZ();
+                        size_t z2 = (x1 == x2 && y1 == y2) ? z1 + 1 : -externalPot.getDimZ();
                         for (; z2 < externalPot.getDimZ(); ++z2) {
-                            SignedIndex3D delta{x1 - x2, y1 - y2, z1 - z2};
-                            KSpaceGrid<ComplexType>::normalizeIndex(delta, externalPot.getDim());
-                            const ssize_t deltaX = delta[0];
-                            const ssize_t deltaY = delta[1];
-                            const ssize_t deltaZ = delta[2];
+                            Index3D delta{x1 - x2, y1 - y2, z1 - z2};
+                            const size_t deltaX = delta[0];
+                            const size_t deltaY = delta[1];
+                            const size_t deltaZ = delta[2];
                             const VectorType k2 = any_wave.getWaveVector(x2, y2, z2);
                             const VectorType deltaK = k1 - k2;
 
-                            const ComplexType external = externalPot.calc(deltaX, deltaY, deltaZ);
+                            const ComplexType external = externalPot(deltaX, deltaY, deltaZ);
                             const ComplexType hartree = kSpaceDencity(deltaX, deltaY, deltaZ) * coeff / deltaK.squaredNorm();
                             {
                                 const ComplexType xc_up = kSpaceXC_up(deltaX, deltaY, deltaZ);
@@ -363,7 +362,6 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::updateDensity(Vector3D k) {
-        using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
         using VectorType = Vector<ScalarType, 3>;
         chargeMixer.fetchInputDensity(density);
 
@@ -371,7 +369,7 @@ namespace Physica::Core {
         auto& density_up = density[SpinState::Up];
         if constexpr (isSpinPolarized) {
             auto& density_down = density[SpinState::Down];
-            auto density_compute_kernel = [this, k, &density_up, &density_down](VectorType pos, UnsignedIndex3D index) {
+            auto density_compute_kernel = [this, k, &density_up, &density_down](VectorType pos, Index3D index) {
                 ScalarType rho_up = ScalarType(0);
                 for (const auto& orbit : orbits[SpinState::Up])
                     rho_up += orbit(k, pos).squaredNorm();
@@ -394,7 +392,7 @@ namespace Physica::Core {
             }
         }
         else {
-            auto density_compute_kernel = [this, k, &density_up](VectorType pos, UnsignedIndex3D index) {
+            auto density_compute_kernel = [this, k, &density_up](VectorType pos, Index3D index) {
                 auto rho_up = ScalarType(0);
                 const auto& orbitsUp = orbits[SpinState::Up];
                 size_t i = 0;

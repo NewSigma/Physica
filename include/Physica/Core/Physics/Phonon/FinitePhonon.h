@@ -23,6 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
@@ -47,6 +48,11 @@ namespace Physica::Core {
         using EigenSolverType = EigenSolver<MatrixType>;
         using QPointGrid = GridStorage<EigenSolverType>;
         constexpr static size_t Dim = Internal::Traits<MDCellType>::Dim;
+
+        enum class InterpolateMethod {
+            FFT,
+            FEM
+        };
     private:
         MDCellType unitCell;
         Index3D superSize;
@@ -60,7 +66,9 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel>
         [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration) const;
+        template<InterpolateMethod Method>
         [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
+        template<InterpolateMethod Method>
         [[nodiscard]] MatrixGrid interpolateGrid(Index3D qGridSize, const MatrixGrid& forceConstants) const;
         void toDynamicMatrix(MatrixType& forceConstant) const;
         void toDynamicMatrix(MatrixGrid& forceConstants) const;
@@ -79,6 +87,8 @@ namespace Physica::Core {
         [[nodiscard]] static QPointGrid diagonalize(const MatrixGrid& dynamicMatrixes);
     private:
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
+        MatrixType interpolatePoint_FFT(Vector3D qPoint, const MatrixGrid& forceConstants) const;
+        MatrixType interpolatePoint_FEM(Vector3D qPoint, const MatrixGrid& forceConstants) const;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -184,40 +194,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    template<typename FinitePhonon<ScalarType, PosScalarType>::InterpolateMethod Method>
     typename FinitePhonon<ScalarType, PosScalarType>::MatrixType
     FinitePhonon<ScalarType, PosScalarType>::interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const {
-        const size_t unitCellDOF = getUnitCellDOF();
-        const Vector3D qVector = unitCell.getInvLattice() * qPoint * ScalarType(2 * M_PI);
-        MatrixType result(unitCellDOF, unitCellDOF);
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        const auto& rSpace = fft.getRSpace();
-        auto kSpace = fft.getKSpace().flatten();
-        for (size_t row = 0; row < unitCellDOF; ++row) {
-            for (size_t col = 0; col < unitCellDOF; ++col) {
-                const auto& fcMatrixes = forceConstants.asArray();
-                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                    auto& fcMatrix = fcMatrixes[i];
-                    kSpace[i] = fcMatrix(row, col);
-                }
-                fft.invTransform();
-
-                auto elem = ComplexType(0);
-                auto functor = [qVector, &rSpace, &elem](Vector3D r, Index3D index) {
-                    const ScalarType phase = qVector * r;
-                    ScalarType s, c;
-                    sincos(phase, s, c);
-                    elem += rSpace(index) * ComplexType(c, s);
-                };
-                MatrixGrid::template forPointIndexInGrid<true, decltype(functor)>(superSize, unitCell.getLattice(), functor);
-                result(row, col) = elem;
-            }
-        }
-        return result;
+        assert((qPoint[2] <= ScalarType(0.5)) && "[This]: This area should be unnecessary");
+        if constexpr (Method == InterpolateMethod::FFT)
+            return interpolatePoint_FFT(qPoint, forceConstants);
+        else
+            return interpolatePoint_FEM(qPoint, forceConstants);
     }
 
     template<class ScalarType, class PosScalarType>
+    template<typename FinitePhonon<ScalarType, PosScalarType>::InterpolateMethod Method>
     typename FinitePhonon<ScalarType, PosScalarType>::MatrixGrid
     FinitePhonon<ScalarType, PosScalarType>::interpolateGrid(Index3D qGridSize, const MatrixGrid& forceConstants) const {
+        static_assert(Method == InterpolateMethod::FFT, "[Error]: Interpolate grid using FEM is not implemented");
         assert(qGridSize[0] >= superSize[0]);
         assert(qGridSize[1] >= superSize[1]);
         assert(qGridSize[2] >= superSize[2]);
@@ -391,5 +382,86 @@ namespace Physica::Core {
         }
         averageDrift /= ScalarType(Dim);
         return averageDrift;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename FinitePhonon<ScalarType, PosScalarType>::MatrixType
+    FinitePhonon<ScalarType, PosScalarType>::interpolatePoint_FFT(Vector3D qPoint, const MatrixGrid& forceConstants) const {
+        const size_t unitCellDOF = getUnitCellDOF();
+        const Vector3D qVector = unitCell.getInvLattice() * qPoint * ScalarType(2 * M_PI);
+        MatrixType result(unitCellDOF, unitCellDOF);
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        const auto& rSpace = fft.getRSpace();
+        auto kSpace = fft.getKSpace().flatten();
+        for (size_t row = 0; row < unitCellDOF; ++row) {
+            for (size_t col = 0; col < unitCellDOF; ++col) {
+                const auto& fcMatrixes = forceConstants.asArray();
+                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
+                    auto& fcMatrix = fcMatrixes[i];
+                    kSpace[i] = fcMatrix(row, col);
+                }
+                fft.invTransform();
+
+                auto elem = ComplexType(0);
+                auto functor = [qVector, &rSpace, &elem](Vector3D r, Index3D index) {
+                    const ScalarType phase = qVector * r;
+                    ScalarType s, c;
+                    sincos(phase, s, c);
+                    elem += rSpace(index) * ComplexType(c, s);
+                };
+                MatrixGrid::template forPointIndexInGrid<true, decltype(functor)>(superSize, unitCell.getLattice(), functor);
+                result(row, col) = elem;
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename FinitePhonon<ScalarType, PosScalarType>::MatrixType
+    FinitePhonon<ScalarType, PosScalarType>::interpolatePoint_FEM(Vector3D qPoint, const MatrixGrid& forceConstants) const {
+        using EigenvalueVector = typename EigenSolverType::EigenvalueVector;
+        using RawEigenvectorType = typename EigenSolverType::RawEigenvectorType;
+        using ElementType = CuboidLinear<ScalarType>;
+        using IndexArray = typename ElementType::IndexArray;
+
+        const Index3D originDim = forceConstants.getDim();
+        Vector3D globalPos{};
+        for (int i = 0; i < 3; ++i)
+            globalPos[i] = qPoint[i] * ScalarType(originDim[i]);
+        const Index3D index0{size_t(double(globalPos[0])), size_t(double(globalPos[1])), size_t(double(globalPos[2]))};
+        const Vector3D point1{ScalarType(index0[0]), ScalarType(index0[1]), ScalarType(index0[2])};
+        const Vector3D point2{ScalarType(index0[0] + 1), ScalarType(index0[1] + 1), ScalarType(index0[2] + 1)};
+        const IndexArray nodeArr{
+            ElementType::LeftFrontBottom,
+            ElementType::LeftFrontTop,
+            ElementType::LeftBehindBottom,
+            ElementType::LeftBehindTop,
+            ElementType::RightFrontBottom,
+            ElementType::RightFrontTop,
+            ElementType::RightBehindBottom,
+            ElementType::RightBehindTop
+        };
+        const auto element = ElementType(point1, point2, nodeArr);
+        const Vector3D localPos = element.toLocalPos(globalPos);
+
+        const size_t unitCellDOF = getUnitCellDOF();
+        auto eigenvalues = EigenvalueVector(unitCellDOF, ScalarType(0));
+        auto eigenvectors = RawEigenvectorType(unitCellDOF, unitCellDOF, ScalarType(0));
+        auto eigenSolver = EigenSolverType(unitCellDOF);
+        size_t localNodeIndex = 0;
+        for (int x = 0; x < 2; ++x) {
+            for (int y = 0; y < 2; ++y) {
+                for (int z = 0; z < 2; ++z) {
+                    Index3D index{(index0[0] + x) % originDim[0], (index0[1] + y) % originDim[1], (index0[2] + z) % originDim[2]};
+                    eigenSolver.compute(forceConstants(index), true);
+                    eigenSolver.sort();
+                    const ScalarType factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
+                    eigenvalues += factor * eigenSolver.getEigenvalues();
+                    eigenvectors += factor * eigenSolver.getRawEigenvectors();
+                    localNodeIndex += 1;
+                }
+            }
+        }
+        return EigenSolverType(std::move(eigenvalues), std::move(eigenvectors)).reconstruct();
     }
 }

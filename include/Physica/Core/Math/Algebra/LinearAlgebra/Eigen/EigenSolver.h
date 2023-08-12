@@ -23,6 +23,9 @@
 
 namespace Physica::Core {
     /**
+     * A = XTX^{-1}
+     * where X is matrix of eigenvectors
+     * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
@@ -37,12 +40,12 @@ namespace Physica::Core {
                                               MatrixOption::Column | MatrixOption::Vector,
                                               MatrixType::RowAtCompile,
                                               MatrixType::RowAtCompile>;
-        constexpr static bool isComplex = ScalarType::isComplex;
-    private:
         using RawEigenvectorType = DenseMatrix<ScalarType,
                                                MatrixOption::Column | MatrixOption::Vector,
                                                MatrixType::RowAtCompile,
                                                MatrixType::RowAtCompile>;
+        constexpr static bool isComplex = ScalarType::isComplex;
+    private:
         using WorkingMatrix = typename Schur<MatrixType>::WorkingMatrix;
 
         EigenvalueVector eigenvalues;
@@ -53,6 +56,7 @@ namespace Physica::Core {
         EigenSolver(size_t size);
         template<class OtherMatrix>
         EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_);
         EigenSolver(const EigenSolver&) = default;
         EigenSolver(EigenSolver&& solver) noexcept = default;
         ~EigenSolver() = default;
@@ -63,7 +67,10 @@ namespace Physica::Core {
         void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         void sort();
         void resize(size_t size);
+        MatrixType reconstruct() const;
+        MatrixType reconstruct_hermite() const;
         /* Getters */
+        [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
         /**
@@ -93,6 +100,14 @@ namespace Physica::Core {
         resize(source.getRow());
         compute(source, computeEigenvectors);
     }
+    /**
+     * Reconstruct a matrix from its eigen decomposition
+     */
+    template<class MatrixType>
+    EigenSolver<MatrixType>::EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_)
+            : eigenvalues(std::move(eigenvalues_))
+            , rawEigenvectors(std::move(rawEigenvectors_))
+            , computeEigenvectors(true) {}
 
     template<class MatrixType>
     EigenSolver<MatrixType>& EigenSolver<MatrixType>::operator=(EigenSolver<MatrixType> solver) noexcept {
@@ -151,6 +166,52 @@ namespace Physica::Core {
     void EigenSolver<MatrixType>::resize(size_t size) {
         eigenvalues.resize(size);
         rawEigenvectors.resize(size, size);
+    }
+
+    template<class MatrixType>
+    MatrixType EigenSolver<MatrixType>::reconstruct() const {
+        const size_t size = getSize();
+        EigenvectorMatrix result(size, size);
+        if constexpr (isComplex) {
+            RawEigenvectorType inv = rawEigenvectors.inverse();
+            for (size_t i = 0; i < size; ++i) {
+                auto col = result.col(i);
+                col = rawEigenvectors * hadamard(eigenvalues, inv.col(i));
+            }
+            return result;
+        }
+        else {
+            const EigenvectorMatrix eigenvectors = getEigenvectors();
+            const EigenvectorMatrix inv = eigenvectors.inverse();
+            for (size_t i = 0; i < size; ++i) {
+                auto col = result.col(i);
+                col = eigenvectors * hadamard(eigenvalues, inv.col(i));
+            }
+            return toRealMatrix(result);
+        }
+    }
+    /**
+     * Faster because no inverse matrix
+     */
+    template<class MatrixType>
+    MatrixType EigenSolver<MatrixType>::reconstruct_hermite() const {
+        const size_t size = getSize();
+        EigenvectorMatrix result(size, size);
+        if constexpr (isComplex) {
+            for (size_t i = 0; i < size; ++i) {
+                auto col = result.col(i);
+                col = rawEigenvectors * hadamard(eigenvalues, rawEigenvectors.conjugate().row(i));
+            }
+            return result;
+        }
+        else {
+            const EigenvectorMatrix eigenvectors = getEigenvectors();
+            for (size_t i = 0; i < size; ++i) {
+                auto col = result.col(i);
+                col = eigenvectors * hadamard(eigenvalues, eigenvectors.conjugate().row(i));
+            }
+            return toRealMatrix(result);
+        }
     }
 
     template<class MatrixType>

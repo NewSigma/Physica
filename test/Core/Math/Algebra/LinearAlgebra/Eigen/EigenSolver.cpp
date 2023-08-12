@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 
@@ -55,6 +56,15 @@ bool eigenTest(const MatrixType& mat, double precision) {
     return true;
 }
 
+template<class MatrixType, bool IsHermite>
+bool reconstructTest(const MatrixType& mat, double precision) {
+    EigenSolver<MatrixType> solver = EigenSolver<MatrixType>(mat, true);
+    const MatrixType result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
+    if (!matrixNear(result, mat, precision))
+        return false;
+    return true;
+}
+
 int main() {
     using RealType = Scalar<Double>;
     using ComplexType = ComplexScalar<RealType>;
@@ -65,10 +75,17 @@ int main() {
                              {0.517063, -0.956614, -0.920775}};
         if (!eigenTest(mat1, 1E-14))
             return 1;
+        if (!reconstructTest<MatrixType, false>(mat1, 1E-14))
+            return 1;
+
         const MatrixType mat2{{0.354784, 0.604092, 0.557408},
                              {0.221811, 0.484944, 0.181502},
                              {0.491429, 0.0161911, 0.772586}};
         if (!eigenTest(mat2, 1E-15))
+            return 1;
+        
+        const MatrixType mat3 = mat2 + mat2.transpose();
+        if (!reconstructTest<MatrixType, true>(mat3, 1E-14))
             return 1;
     }
     {
@@ -80,6 +97,7 @@ int main() {
                               {0.569445, 0.734035, 0.816045, 0.538242, 0.302492}};
         if (!eigenTest(mat1, 1E-14))
             return 1;
+
         const MatrixType mat2 {{0.502016, 0.812053, 0.0716913, 0.180531, 0.0161382},
                                {0.54811, 0.428973, 0.997804, 0.601252, 0.0704318},
                                {0.885699, 0.0248232, 0.397405, 0.0504956, 0.423087},
@@ -94,6 +112,8 @@ int main() {
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
         if (!eigenTest(mat1, 1E-12))
+            return 1;
+        if (!reconstructTest<MatrixType, false>(mat1, 1E-12))
             return 1;
     }
     return 0;

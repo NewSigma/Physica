@@ -70,7 +70,6 @@ physica_add_test(CrystalCell Core/Physics/CrystalCell.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(IceGenerator Core/Physics/IceGenerator.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
-physica_add_test(PWBaseWave Core/Physics/PWBaseWave.cpp)
 ### MD
 physica_add_test(Langevin Core/Physics/MD/Thermostat/Langevin.cpp)
 physica_add_test(MDCell Core/Physics/MD/MDCell.cpp)

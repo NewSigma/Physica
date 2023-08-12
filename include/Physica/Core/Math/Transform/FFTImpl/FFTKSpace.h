@@ -152,9 +152,9 @@ namespace Physica::Core {
         using This = FFTKSpace<Derived, 3>;
         using Base = Utils::CRTPBase<Derived, 1>;
         using GridBase = LValueGrid<This>;
-        using Index3D = typename GridBase::Index3D;
     public:
         using typename GridBase::ScalarType;
+        using Index3D = typename GridBase::Index3D;
     public:
         /* Operators */
         using GridBase::operator=;
@@ -163,7 +163,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Operations */
         template<class GridType> inline void invTransform(const LValueGrid<GridType>& data);
-        inline void resize(Index3D size);
+        inline void resize([[maybe_unused]] Index3D size);
         using GridBase::forIndexInGrid;
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
@@ -195,7 +195,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline void FFTKSpace<Derived, 3>::resize(Index3D size) {
+    inline void FFTKSpace<Derived, 3>::resize([[maybe_unused]] Index3D size) {
         assert(getDimX() == size[0]);
         assert(getDimY() == size[1]);
         assert(getDimZ() == size[2]);

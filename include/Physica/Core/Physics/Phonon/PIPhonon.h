@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
@@ -28,7 +28,7 @@ namespace Physica::Core {
         using ScalarType = Scalar<Double>;
         using ComplexType = ComplexScalar<ScalarType>;
         using CorrMatrix = Internal::HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic, Dynamic>;
-        using UnsignedIndex3D = typename RSpaceGrid<ScalarType>::Index3D;
+        using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
         using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
         constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();
@@ -68,7 +68,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * getNumAtomUnitCell(); }
         [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSizeX * superSizeY * superSizeZ; }
-        [[nodiscard]] UnsignedIndex3D getSuperSize() const noexcept { return {superSizeX, superSizeY, superSizeZ}; }
+        [[nodiscard]] Index3D getSuperSize() const noexcept { return {superSizeX, superSizeY, superSizeZ}; }
         /* Helpers */
         void swap(PIPhonon& obj) noexcept;
     private:
@@ -101,11 +101,11 @@ namespace Physica::Core {
                 buffer1 = ScalarType(0);
                 buffer2 = ScalarType(0);
                 RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
-                    [&, this, offset_r, offset_c](UnsignedIndex3D cell1) {
+                    [&, this, offset_r, offset_c](Index3D cell1) {
                         RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
-                            [&, this, cell1, offset_r, offset_c](UnsignedIndex3D cell2) {
+                            [&, this, cell1, offset_r, offset_c](Index3D cell2) {
                                 const auto range = getSuperSize();
-                                UnsignedIndex3D delta;
+                                Index3D delta;
                                 for (int i = 0; i < 3; ++i) {
                                     ssize_t temp = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
                                     if (temp < 0)

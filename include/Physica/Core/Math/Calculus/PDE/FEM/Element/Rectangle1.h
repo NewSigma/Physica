@@ -57,6 +57,8 @@ namespace Physica::Core {
     public:
         Rectangle1() = default;
         Rectangle1(VectorType bottomLeft_, VectorType topRight_, IndexArray globalNodes);
+        Rectangle1(const Rectangle1&) = default;
+        Rectangle1(Rectangle1&&) noexcept = default;
         ~Rectangle1() = default;
         /* Operators */
         Rectangle1& operator=(Rectangle1 elem) noexcept;

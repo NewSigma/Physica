@@ -71,7 +71,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] T squaredNorm() const;
         [[nodiscard]] inline T norm() const;
-        [[nodiscard]] T arg() const;
+        [[nodiscard]] T phase() const;
         [[nodiscard]] ComplexScalar unit() const { return *this * reciprocal(norm()); }
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
         [[nodiscard]] const T& getReal() const { return real; }
@@ -81,6 +81,7 @@ namespace Physica::Core {
         void setReal(const T& s) { real = s; }
         void setImag(const T& s) { imag = s; }
         /* Static Members */
+        [[nodiscard]] inline static ComplexScalar fromPhase(T phase);
         template<class RandomGenerator>
         [[nodiscard]] static ComplexScalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
