@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
     plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
     plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
-    plot->setMaxY(800);
+    plot->setMaxY(700);
     plot->setDeltaY(200);
     plot->show();
     return QApplication::exec();

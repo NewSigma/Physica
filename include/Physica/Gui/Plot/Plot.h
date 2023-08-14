@@ -98,8 +98,10 @@ namespace Physica::Gui {
         inline void setAxisRight(QValueAxis* axis);
         inline void setMinX(double value) noexcept;
         inline void setMaxX(double value) noexcept;
+        inline void setRangeX(double minX, double maxX);
         inline void setMinY(double value) noexcept;
         inline void setMaxY(double value) noexcept;
+        inline void setRangeY(double minY, double maxY);
         inline void setDeltaX(double value) noexcept;
         inline void setDeltaY(double value) noexcept;
     private:
@@ -387,7 +389,12 @@ namespace Physica::Gui {
 
     inline void Plot::setMaxX(double value) noexcept {
         axisX->setMax(value);
-        axisTop->setMin(value);
+        axisTop->setMax(value);
+    }
+
+    inline void Plot::setRangeX(double minX, double maxX) {
+        setMinX(minX);
+        setMaxX(maxX);
     }
 
     inline void Plot::setMinY(double value) noexcept {
@@ -398,6 +405,11 @@ namespace Physica::Gui {
     inline void Plot::setMaxY(double value) noexcept {
         axisY->setMax(value);
         axisRight->setMax(value);
+    }
+
+    inline void Plot::setRangeY(double minY, double maxY) {
+        setMinY(minY);
+        setMaxY(maxY);
     }
 
     inline void Plot::setDeltaX(double value) noexcept {

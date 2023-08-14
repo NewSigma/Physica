@@ -247,15 +247,15 @@ namespace Physica::Core {
         constexpr int Dim = 3;
         constexpr bool isComplex = ScalarType::isComplex;
         
-        auto fft = FFT<ScalarType, 3>(data.getDim(), 1, PlanFlag::Estimate);
+        auto fft = FFT<ScalarType, 3>(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();
 
-        const Vector<RealType, 3> relative_r = r / period;
+        const Vector<RealType, 3> relative_r = divide(r, period);
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        GridBase::forIndexInGrid([relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
+        GridBase::forIndexInGrid(rSpaceSize, [relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
             const Index3D kSpaceSize = fft.getKSpaceSize();
             RealType phase(0);
             for (int dim = 0; dim < Dim; ++dim)

@@ -37,6 +37,11 @@ namespace Physica::Logger {
      * whose ids are 0, 1 and 2.
      *
      * The ids are arranged to equal to the file descriptors of stdio.
+     * 
+     * The implementation is based on NanaLog[1]
+     * 
+     * References:
+     * [1] Yang. Stephen,Park. Seo Jin,Ousterhout. John. NanoLog: A nanosecond scale logging system[J]. Proceedings of the 2018 USENIX Annual Technical Conference, USENIX ATC 2018:335-349
      */
     class LoggerRuntime {
     public:

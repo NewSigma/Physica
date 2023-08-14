@@ -387,33 +387,37 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     typename FinitePhonon<ScalarType, PosScalarType>::MatrixType
     FinitePhonon<ScalarType, PosScalarType>::interpolatePoint_FFT(Vector3D qPoint, const MatrixGrid& forceConstants) const {
+        using EigenvalueVector = typename EigenSolverType::EigenvalueVector;
+        using RawEigenvectorType = typename EigenSolverType::RawEigenvectorType;
+        const Index3D gridDim = forceConstants.getDim();
         const size_t unitCellDOF = getUnitCellDOF();
-        const Vector3D qVector = unitCell.getInvLattice() * qPoint * ScalarType(2 * M_PI);
-        MatrixType result(unitCellDOF, unitCellDOF);
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        const auto& rSpace = fft.getRSpace();
-        auto kSpace = fft.getKSpace().flatten();
-        for (size_t row = 0; row < unitCellDOF; ++row) {
-            for (size_t col = 0; col < unitCellDOF; ++col) {
-                const auto& fcMatrixes = forceConstants.asArray();
-                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                    auto& fcMatrix = fcMatrixes[i];
-                    kSpace[i] = fcMatrix(row, col);
-                }
-                fft.invTransform();
+        GridStorage<EigenSolverType> eigenGrid(gridDim);
+        GridBase::forIndexInGrid(gridDim, [unitCellDOF, &forceConstants, &eigenGrid](Index3D index) {
+            auto eigen = EigenSolverType(unitCellDOF);
+            eigen.compute(forceConstants(index), true);
+            eigen.sort();
+            eigenGrid(index) = std::move(eigen);
+        });
 
-                auto elem = ComplexType(0);
-                auto functor = [qVector, &rSpace, &elem](Vector3D r, Index3D index) {
-                    const ScalarType phase = qVector * r;
-                    ScalarType s, c;
-                    sincos(phase, s, c);
-                    elem += rSpace(index) * ComplexType(c, s);
-                };
-                MatrixGrid::template forPointIndexInGrid<true, decltype(functor)>(superSize, unitCell.getLattice(), functor);
-                result(row, col) = elem;
+        const Vector3D period{1, 1, 1};
+        RSpaceGrid<ComplexType> buffer(gridDim);
+        auto eigenvalues = EigenvalueVector(unitCellDOF, ScalarType(0));
+        auto eigenvectors = RawEigenvectorType(unitCellDOF, unitCellDOF, ScalarType(0));
+        for (size_t i = 0; i < unitCellDOF; ++i) {
+            GridBase::forIndexInGrid(gridDim, [i, &buffer, &eigenGrid](Index3D index) {
+                buffer(index) = eigenGrid(index).getEigenvalues()[i];
+            });
+            eigenvalues[i] = interpolate_fft(buffer, qPoint, period).getReal();
+        }
+        for (size_t c = 0; c < unitCellDOF; ++c) {
+            for (size_t r = 0; r < unitCellDOF; ++r) {
+                GridBase::forIndexInGrid(gridDim, [r, c, &buffer, &eigenGrid](Index3D index) {
+                    buffer(index) = eigenGrid(index).getRawEigenvectors()(r, c);
+                });
+                eigenvectors(r, c) = interpolate_fft(buffer, qPoint, period);
             }
         }
-        return result;
+        return EigenSolverType(std::move(eigenvalues), std::move(eigenvectors)).reconstruct();
     }
 
     template<class ScalarType, class PosScalarType>

@@ -5,4 +5,4 @@ Core
    :maxdepth: 1
 
    Math/Algebra/LinearAlgebra/index.rst
-   MultiPrecision/index.rst
+   Physics/index.rst

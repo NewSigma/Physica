@@ -6,5 +6,4 @@ Physica Implementation
 
    Core/index.rst
    Logger/index.rst
-   unsorted/index.rst
    Utils/index.rst

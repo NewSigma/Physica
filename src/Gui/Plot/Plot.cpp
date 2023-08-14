@@ -33,9 +33,10 @@ namespace Physica::Gui {
         setRenderHint(QPainter::Antialiasing);
 
         auto& chart = *Base::chart();
+        QFont font = chart.legend()->font();
+        font.setPointSize(15);
+        chart.legend()->setFont(font);
         {
-            QFont font = axisX->labelsFont();
-            font.setPointSize(15);
             axisX->setTickAnchor(0);
             axisX->setTickInterval(deltaX);
             axisX->setTickType(QValueAxis::TicksDynamic);
