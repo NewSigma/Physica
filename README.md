@@ -6,21 +6,28 @@ There will be a lot of work to do in the future
 
 ## Table of Contents
 
+- [Design concept](#concept)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Design concept
+
+1. Optimal performance and scalability: No free lunch in the world. Though controversial, ease of use is taken secondary.
+
+2. Zero overhead abstraction: Users shall not pay for what they do not need.
 
 ## Usage
 
 This project uses the following packages:  
 
 [fftw](http://www.fftw.org)  3.3.10  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1 (Optional)  
 [Qt](https://www.qt.io/)  6.2.1  (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1 (Optional)
+[CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)
 
-To use Physica, compile and link Physica to your program.
+To use Physica, simply compile and link Physica as a part of your project.
 
 ## Maintainers
 
@@ -36,7 +43,7 @@ Feel free to dive in! Open an issue or submit PRs.
 
 2.Tell us new features you want.  
 
-3.Provide a better implementation of algorithm.  
+3.Provide a better implementation of algorithms.  
 
 4.Fix bugs, add new features, tests and examples.  
 
