@@ -204,8 +204,8 @@ namespace Physica::Core {
             const auto& kSpace = fft.getKSpace();
             const Index3D rSpaceSize = fft.getRSpaceSize();
             auto elem = ComplexType(0);
-            GridBase::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &fft, &kSpace, &elem](Index3D kIndex) {
-                const Index3D kSpaceSize = fft.getKSpaceSize();
+            GridBase::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &kSpace, &elem](Index3D kIndex) {
+                const Index3D kSpaceSize = kSpace.getDim();
                 RealType phase(0);
                 for (int dim = 0; dim < Dim; ++dim)
                     phase += RealType(kIndex[dim] * rIndex[dim]) / newDim[dim];
@@ -255,8 +255,8 @@ namespace Physica::Core {
         const Vector<RealType, 3> relative_r = divide(r, period);
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        GridBase::forIndexInGrid(rSpaceSize, [relative_r, rSpaceSize, &fft, &kSpace, &elem](Index3D kIndex) {
-            const Index3D kSpaceSize = fft.getKSpaceSize();
+        GridBase::forIndexInGrid(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {
+            const Index3D kSpaceSize = kSpace.getDim();
             RealType phase(0);
             for (int dim = 0; dim < Dim; ++dim)
                 phase += RealType(kIndex[dim]) * relative_r[dim];

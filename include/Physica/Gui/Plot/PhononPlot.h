@@ -20,14 +20,14 @@
 
 #include <QtCharts/QCategoryAxis>
 #include "Plot.h"
-#include "Physica/Core/Physics/Phonon/FinitePhonon.h"
+#include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 
 namespace Physica::Gui {
     template<class ScalarType, class PosScalarType>
     class PhononPlot : public Plot {
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
-        using PhononType = Core::FinitePhonon<ScalarType, PosScalarType>;
+        using PhononType = Core::FrozenPhonon<ScalarType, PosScalarType>;
         using InterpolateMethod = typename PhononType::InterpolateMethod;
         using MatrixGrid = typename PhononType::MatrixGrid;
 

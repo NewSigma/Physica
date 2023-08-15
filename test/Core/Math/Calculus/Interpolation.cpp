@@ -49,6 +49,12 @@ void testFFT1D() {
         if (!scalarNear(result, data[i], 1E-13))
             exit(EXIT_FAILURE);
     }
+    /* Test periodicity */ {
+        const ScalarType value = interpolate_fft(data, 0.2, 1);
+        const ScalarType value1 = interpolate_fft(data, 1.2, 1);
+        if (!scalarNear(value, value1, 1E-12))
+            exit(EXIT_FAILURE);
+    }
 }
 
 void testFFT3D() {
@@ -57,14 +63,20 @@ void testFFT3D() {
 
     std::mt19937 gen{};
     const auto data = GridType::random_uniform({5, 5, 5}, gen);
-    const auto result = interpolate_fft(data, {10, 10, 10});
-    GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {
-        Index3D index1{index[0] * 2, index[1] * 2, index[2] * 2};
-        if (!scalarNear(data(index), result(index1), 1E-8)) {
-            std::cout << data(index) << ' ' << result(index1) << std::endl;
+    {
+        const auto result = interpolate_fft(data, {10, 10, 10});
+        GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {
+            Index3D index1{index[0] * 2, index[1] * 2, index[2] * 2};
+            if (!scalarNear(data(index), result(index1), 1E-8))
+                exit(EXIT_FAILURE);
+        });
+    }
+    /* Test periodicity */ {
+        const ScalarType value = interpolate_fft(data, {0.2, 0.1, 0.3}, {1, 1, 1});
+        const ScalarType value1 = interpolate_fft(data, {1.2, 0.1, 0.3}, {1, 1, 1});
+        if (!scalarNear(value, value1, 1E-12))
             exit(EXIT_FAILURE);
-        }
-    });
+    }
 }
 
 int main() {

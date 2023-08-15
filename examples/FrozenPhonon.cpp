@@ -2,7 +2,7 @@
 #include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/IO/QE_scf.h"
-#include "Physica/Core/Physics/Phonon/FinitePhonon.h"
+#include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Physica/Core/Physics/MD/EnergyMinimizer.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/EnergyMinimizer.h"
@@ -16,7 +16,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;
-using PhononType = FinitePhonon<ScalarType, ScalarType>;
+using PhononType = FrozenPhonon<ScalarType, ScalarType>;
 using InterpolateMethod = typename PhononType::InterpolateMethod;
 using MatrixType = typename PhononType::MatrixType;
 using MDCellType = typename PhononType::MDCellType;
@@ -89,9 +89,10 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     auto* plot = new PhononPlot<ScalarType, ScalarType>();
-    plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
-    plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
-    plot->plotPathLine<InterpolateMethod::FEM>(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
+    plot->chart()->legend()->setVisible(false);
+    plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
+    plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
+    plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
     plot->setMaxY(700);
     plot->setDeltaY(200);
     plot->show();
