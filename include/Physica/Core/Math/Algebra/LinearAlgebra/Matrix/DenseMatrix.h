@@ -100,10 +100,7 @@ namespace Physica::Core {
         /* Operations */
         void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
-        /* Helpers */
         void swap(DenseMatrix& m) noexcept;
-        template<class VectorType>
-        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
@@ -115,6 +112,8 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomGenerator& gen) { return random_uniform(order, order, gen); }
         template<class RandomGenerator>
         [[nodiscard]] static DenseMatrix random_uniform(size_t row, size_t column, RandomGenerator& gen);
+        template<class VectorType>
+        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
     private:
         DenseMatrix(Storage storage, size_t row, size_t column) : Storage(std::move(storage)), Dim(row, column) {}
         friend class device_obj<This>;

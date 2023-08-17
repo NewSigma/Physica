@@ -94,6 +94,24 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::unitMatrix(size_t order) {
+        DenseMatrix result(order, order);
+        result.toUnitMatrix();
+        return result;
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class RandomGenerator>
+    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
+            size_t row, size_t column, RandomGenerator& gen) {
+        DenseMatrix result(row, column);
+        for (size_t i = 0; i < result.getMaxMajor(); ++i)
+            for (size_t j = 0; j < result.getMaxMinor(); ++j)
+                result.refFromMajorMinor(i, j) = T::random_uniform(gen);
+        return result;
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class VectorType>
     std::pair<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
     DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::meshgrid(
@@ -111,24 +129,6 @@ namespace Physica::Core {
             }
         }
         return std::make_pair(std::move(x), std::move(y));
-    }
-
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::unitMatrix(size_t order) {
-        DenseMatrix result(order, order);
-        result.toUnitMatrix();
-        return result;
-    }
-
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    template<class RandomGenerator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
-            size_t row, size_t column, RandomGenerator& gen) {
-        DenseMatrix result(row, column);
-        for (size_t i = 0; i < result.getMaxMajor(); ++i)
-            for (size_t j = 0; j < result.getMaxMinor(); ++j)
-                result.refFromMajorMinor(i, j) = T::random_uniform(gen);
-        return result;
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>

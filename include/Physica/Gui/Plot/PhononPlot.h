@@ -51,6 +51,8 @@ namespace Physica::Gui {
             Vector3D to,
             size_t numPoint,
             const char* label);
+        /* Getters */
+        [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
     };
 
     template<class ScalarType, class PosScalarType>

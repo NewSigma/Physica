@@ -37,7 +37,7 @@ namespace Physica::Core {
             throw SyscallException();
 
         future = ProcessExecutor::schedule([this, fd]() {
-            int standardErr = dup(STDERR_FILENO);
+            const int standardErr = dup(STDERR_FILENO);
             close(STDOUT_FILENO);
             close(STDERR_FILENO);
             close(fd[1]);

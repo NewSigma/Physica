@@ -29,7 +29,7 @@ namespace Physica::Core {
     Poscar::Poscar()
             : Base(), elementTypes(), numOfEachType() {}
 
-    Poscar::Poscar(Base base, Utils::Array<uint8_t> elementTypes_, Utils::Array<size_t> numOfEachType_)
+    Poscar::Poscar(Base base, ElementTypeArray elementTypes_, Utils::Array<size_t> numOfEachType_)
             : Base(std::move(base))
             , elementTypes(std::move(elementTypes_))
             , numOfEachType(std::move(numOfEachType_)) {

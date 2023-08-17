@@ -1,12 +1,8 @@
 #include <fstream>
 #include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
-#include "Physica/Core/IO/QE_scf.h"
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
-#include "Physica/Core/Physics/MD/EnergyMinimizer.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/MD/EnergyMinimizer.h"
-#include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 #include "Physica/Gui/Plot/PhononPlot.h"
 #include "Physica/Utils/Unix/TempFile.h"
 
@@ -20,8 +16,6 @@ using PhononType = FrozenPhonon<ScalarType, ScalarType>;
 using InterpolateMethod = typename PhononType::InterpolateMethod;
 using MatrixType = typename PhononType::MatrixType;
 using MDCellType = typename PhononType::MDCellType;
-using Optimizer = SteepestDescent<ScalarType, Dynamic>;
-using Minimizer = EnergyMinimizer<ScalarType, ScalarType>;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double displace = PhyConst<AU>::angstormToBohr(0.001);
 

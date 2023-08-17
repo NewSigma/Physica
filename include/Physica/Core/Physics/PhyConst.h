@@ -30,10 +30,15 @@ namespace Physica::Core {
     template<UnitSystem unitSystem = SI> class PhyConst;
     /**
      * Physical constants are from [1]
-     * Relative atom mass are from internet
+     * Relative atom mass are from [2]
+     * 
+     * Note:
+     * Relative atom mass are taken to be the average value of isotopes that are common in nature as [2] does. If you are interesed in
+     * a particular isotope, modifications are necessary.
      * 
      * Reference:
      * [1] Physical constants, SI (NIST 2018) http://physics.nist.gov/constants
+     * [2] Standard Atomic Weights 2021 https://www.ciaaw.org/atomic-weights.htm
      */
     template<>
     class PhyConst<SI> {
@@ -54,7 +59,9 @@ namespace Physica::Core {
          * The first element is a space holder
          */
         constexpr static double relativeMassInKg = 1E-3 / avogadroNa;
-        constexpr static double relativeAtomMass[10]{0, 1.00794, 4.002602, 6.941, 9.012182, 10.806, 12.0096, 14.00643, 15.99903, 18.9984032};
+        constexpr static double relativeAtomMass[19]{0, 1.00798, 4.002602,
+                6.968, 9.0121831, 10.814, 12.0106, 14.00686, 15.99940, 18.998403162, 20.1797,
+                22.98976928, 24.306, 26.9815384, 28.085, 30.973761998, 32.068, 35.452, 39.878};
         constexpr static const char* elementSymbol[21]{"-", "H", "He",
                 "Li", "Be", "B", "C", "N", "O", "F", "Ne",
                 "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",

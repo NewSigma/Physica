@@ -40,12 +40,13 @@ namespace Physica::Core {
         using Base = PeriodicCell<typename CrystalCell::ScalarType, 3>;
         using ScalarType = typename CrystalCell::ScalarType;
         using Type = typename CrystalCell::Type;
+        using ElementTypeArray = Utils::Array<uint8_t>;
     private:
-        Utils::Array<uint8_t> elementTypes;
+        ElementTypeArray elementTypes;
         Utils::Array<size_t> numOfEachType;
     public:
         Poscar();
-        Poscar(Base base, Utils::Array<uint8_t> elementTypes_, Utils::Array<size_t> numOfEachType_);
+        Poscar(Base base, ElementTypeArray elementTypes_, Utils::Array<size_t> numOfEachType_);
         Poscar(CrystalCell cell);
         /* Operators */
         friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
