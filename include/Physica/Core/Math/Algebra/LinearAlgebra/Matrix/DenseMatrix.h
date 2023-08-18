@@ -101,11 +101,13 @@ namespace Physica::Core {
         /* Operations */
         void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        template<class SpaceType>
         void read(const H5::DataSet& dataset,
-                  const H5DataSpace<2>& file_space,
+                  DataSpaceBase<SpaceType>& file_space,
                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        template<class SpaceType>
         void write(H5::DataSet& dataset,
-                   const H5DataSpace<2>& file_space,
+                   DataSpaceBase<SpaceType>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         void swap(DenseMatrix& m) noexcept;
         /* Getters */
