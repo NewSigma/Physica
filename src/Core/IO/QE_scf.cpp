@@ -19,6 +19,7 @@
 #include "Physica/Core/IO/QE_scf.h"
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
     QE_scf::QE_scf(const char* path, size_t numAtom) : force(3 * numAtom) {
@@ -61,5 +62,8 @@ namespace Physica::Core {
 
         if (!fin)
             throw BadFileFormatException();
+
+        constexpr double convertFactor = PhyConst<AU>::planck / PhyConst<QE>::planck;
+        force *= ScalarType(convertFactor);
     }
 }

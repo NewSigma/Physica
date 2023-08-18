@@ -24,7 +24,8 @@ namespace Physica::Core {
     enum UnitSystem {
         SI,
         AU,
-        ESU
+        ESU,
+        QE
     };
 
     template<UnitSystem unitSystem = SI> class PhyConst;
@@ -120,5 +121,12 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double esuToCoulomb(double esu) { return esu * esuToCoulombFactor; }
         [[nodiscard]] constexpr static double debyeToDipoleAU(double debye) { return debye * debyeToDipoleAUFactor; }
         [[nodiscard]] constexpr static double dipoleAUToDebye(double dipole) { return dipole / debyeToDipoleAUFactor; }
+    };
+
+    template<>
+    class PhyConst<QE> {
+    public:
+        constexpr static double planck = M_PI * 4;
+        constexpr static double reducedPlanck = 2;
     };
 }
