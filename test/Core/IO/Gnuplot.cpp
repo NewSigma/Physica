@@ -34,7 +34,7 @@ const static char* data1 = "# Test Gnuplot\n"
                            "0 0\n";
 
 Gnuplot readTest() {
-    auto tmp = Physica::Utils::TempFile("tmpXXXXXX");
+    auto tmp = Physica::Utils::TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
     os.close();

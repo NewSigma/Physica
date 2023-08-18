@@ -30,7 +30,7 @@ int main() {
         using MatrixType = DenseMatrix<T>;
         const auto data = MatrixType::random_uniform(32, 16, gen);
 
-        TempFile tmp("tmpXXXXXX");
+        TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<2>::makeDataSpace({data.getRow(), data.getColumn()});
         auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
@@ -46,7 +46,7 @@ int main() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         const auto data = MatrixType::random_uniform(16, 20, gen);
 
-        TempFile tmp("tmpXXXXXX");
+        TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<2>::makeDataSpace({data.getRow(), data.getColumn()});
         auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
@@ -62,7 +62,7 @@ int main() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         const auto data = MatrixType::random_uniform(16, 12, gen);
 
-        TempFile tmp("tmpXXXXXX");
+        TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<2>::makeDataSpace({data.getRow(), data.getColumn()});
         auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);

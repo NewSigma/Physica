@@ -72,7 +72,7 @@ namespace Physica::Core {
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> QEModel<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumAtom());
-        auto inputTmp = Utils::TempFile("tmpXXXXXX");
+        auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
         /* Make input */ {
             std::ofstream os(inputTmp.getName());
             os << input.data();
@@ -87,7 +87,7 @@ namespace Physica::Core {
                    << row[2] << '\n';
             }
         }
-        auto outputTmp = Utils::TempFile("tmpXXXXXX");
+        auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
         run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
         QE_scf out_scf(outputTmp.getName(), getNumAtom());
         return out_scf.getForce();

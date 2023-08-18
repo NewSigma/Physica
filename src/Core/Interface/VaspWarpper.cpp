@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     typename VaspWarpper::ScalarType VaspWarpper::getPress() const {
         future.wait(errorMsg);
-        auto tmp = Utils::TempFile("tmpXXXXXX");
+        auto tmp = Utils::TempFile("/tmp/tmpXXXXXX");
         const std::string command = std::string("grep 'in kB' ") +
                                     vaspWorkingDir +
                                     std::string("/OUTCAR | tr -s ' ' | cut -d ' ' -f 4,5,6 >") +

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include <fstream>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/MD/EnergyMinimizer.h"
@@ -52,7 +53,7 @@ const static char* data1 = "\n"
                            "-7.258571434  12.59273052  17.58112335\n";
 
 Poscar makePoscar() {
-    auto tmp = Physica::Utils::TempFile("tmpXXXXXX");
+    auto tmp = Physica::Utils::TempFile("/tmp/tmpXXXXXX");
     {
         std::ofstream fout(tmp.getName());
         fout << data1;
@@ -77,9 +78,8 @@ int main() {
         minimizer.pos_step<ForceModel, SequentialExecutor, Optimizer>(model, sd);
     }
 
-    std::ofstream fout("POSCAR");
     auto optimized_cell = minimizer.getCell();
     optimized_cell.scale(PhyConst<AU>::bohrToAngstorm(1));
-    fout << Poscar(optimized_cell, poscar.getElementTypes(), poscar.getNumOfEachType());
+    std::cout << Poscar(optimized_cell, poscar.getElementTypes(), poscar.getNumOfEachType()) << '\n';
     return 0;
 }

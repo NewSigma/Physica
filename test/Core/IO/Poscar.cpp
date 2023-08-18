@@ -49,7 +49,7 @@ const static char* data2 = "Structure\n"
                            "0.25 0.25 0.25";
 
 Poscar readTest1() {
-    auto tmp = TempFile("tmpXXXXXX");
+    auto tmp = TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
     os.close();
@@ -69,7 +69,7 @@ Poscar readTest1() {
 }
 
 void readTest2() {
-    auto tmp = TempFile("tmpXXXXXX");
+    auto tmp = TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data2;
     os.close();

@@ -62,7 +62,7 @@ public:
 int main(int argc, char** argv) {
     Poscar poscar{};
     {
-        auto tmp = TempFile("tmpXXXXXX");
+        auto tmp = TempFile("/tmp/tmpXXXXXX");
         std::ofstream os(tmp.getName());
         os << data;
         os.close();

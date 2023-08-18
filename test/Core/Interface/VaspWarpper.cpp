@@ -27,7 +27,7 @@ namespace Physica::Core {
     struct Test {
         static VaspWarpper init() {
             {
-                std::ofstream fout("./OUTCAR");
+                std::ofstream fout("/tmp/OUTCAR");
                 fout << outcar;
             }
 
@@ -43,7 +43,7 @@ namespace Physica::Core {
                                                 0.734410000, 0.424230000, 0.428290000,
                                                 0.456810000, 0.939370000, 0.176470000};
             VaspWarpper vasp{};
-            vasp.vaspWorkingDir = ".";
+            vasp.vaspWorkingDir = "/tmp";
             vasp.poscar = Poscar({std::move(lattice), std::move(pos), CrystalCell::Type::Direct}, {20, 8}, {2, 6});
             vasp.future = Test::makeDummyFuture();
             return vasp;
