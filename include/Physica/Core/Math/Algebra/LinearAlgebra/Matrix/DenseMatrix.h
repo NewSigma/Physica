@@ -77,6 +77,7 @@ namespace Physica::Core {
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using InitializerType = typename Storage::InitializerType;
     public:
+        using ScalarType = typename Base::ScalarType;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
         using RealMatrix = DenseMatrix<typename T::RealType, option, Row, Column, MaxRow, MaxColumn>;
@@ -100,6 +101,12 @@ namespace Physica::Core {
         /* Operations */
         void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        void read(const H5::DataSet& dataset,
+                  const H5DataSpace<2>& file_space,
+                  const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        void write(H5::DataSet& dataset,
+                   const H5DataSpace<2>& file_space,
+                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         void swap(DenseMatrix& m) noexcept;
         /* Getters */
         using Dim::getRow;

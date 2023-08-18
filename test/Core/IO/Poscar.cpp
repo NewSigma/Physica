@@ -37,7 +37,18 @@ const static char* data1 = "Structure\n"
                            "	    0.97162     0.88296     0.02801\n"
                            "	    0.73317     0.52985     0.03865\n";
 
-Poscar readTest() {
+const static char* data2 = "Structure\n"
+                           "1\n"
+                           "-2.734285261           0 2.734285261\n"
+                           "0            2.734285261 2.734285261\n"
+                           "-2.734285261 2.734285261           0\n"
+                           "Si\n"
+                           "2\n"
+                           "Direct\n"
+                           "0.00 0.00 0.00\n"
+                           "0.25 0.25 0.25";
+
+Poscar readTest1() {
     auto tmp = TempFile("tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
@@ -57,14 +68,29 @@ Poscar readTest() {
     return poscar;
 }
 
+void readTest2() {
+    auto tmp = TempFile("tmpXXXXXX");
+    std::ofstream os(tmp.getName());
+    os << data2;
+    os.close();
+
+    Poscar poscar{};
+    std::ifstream is(tmp.getName());
+    is >> poscar;
+    is.close();
+}
+
 int main() {
     {
-        Poscar poscar = readTest();
+        Poscar poscar = readTest1();
 
         typename Poscar::LatticeMatrix mat = poscar.getLattice();
         poscar.standrizeLattice();
         if (!matrixNear(mat, poscar.getLattice(), 1E-15))
             return 1;
+    }
+    {
+        readTest2();
     }
     {
         typename CrystalCell::LatticeMatrix lattice{

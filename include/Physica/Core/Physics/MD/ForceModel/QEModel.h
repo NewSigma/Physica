@@ -34,8 +34,9 @@ namespace Physica::Core {
         std::string pathToPW;
         Utils::Array<char> input;
         ElementTypeArray elementTypes;
+        unsigned int numMPIProcess;
     public:
-        QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_);
+        QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_);
         QEModel(const QEModel&) = default;
         QEModel(QEModel&&) noexcept = default;
         ~QEModel() = default;
@@ -47,14 +48,16 @@ namespace Physica::Core {
         void swap(QEModel& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return elementTypes.getLength(); }
+        [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
     private:
         template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& input, Utils::TempFile<N>& output) const;
     };
 
     template<class ScalarType, class PosScalarType>
-    QEModel<ScalarType, PosScalarType>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_)
+    QEModel<ScalarType, PosScalarType>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_)
             : pathToPW(pathToPW_)
-            , elementTypes(std::move(elementTypes_)) {
+            , elementTypes(std::move(elementTypes_))
+            , numMPIProcess(numMPIProcess_) {
         std::ifstream fin(pathToInput);
         if (!fin)
             throw IOException();
@@ -68,19 +71,20 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> QEModel<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
+        assert(cell.getNumParticle() == getNumAtom());
         auto inputTmp = Utils::TempFile("tmpXXXXXX");
         /* Make input */ {
             std::ofstream os(inputTmp.getName());
             os << input.data();
-            os << "CELL_PARAMETERS angstrom\n";
+            os << "CELL_PARAMETERS bohr\n";
             os << cell.getLattice();
-            os << "ATOMIC_POSITIONS angstrom\n";
+            os << "ATOMIC_POSITIONS bohr\n";
             for (size_t i = 0; i < getNumAtom(); ++i) {
                 const auto row = cell.getPos().row(i);
                 os << PhyConst<SI>::elementSymbol[elementTypes[i]] << ' '
                    << row[0] << ' '
                    << row[1] << ' '
-                   << row[2] << ' ';
+                   << row[2] << '\n';
             }
         }
         auto outputTmp = Utils::TempFile("tmpXXXXXX");
@@ -100,6 +104,7 @@ namespace Physica::Core {
         pathToPW.swap(obj.pathToPW);
         input.swap(obj.input);
         elementTypes.swap(obj.elementTypes);
+        std::swap(numMPIProcess, obj.numMPIProcess);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -121,7 +126,9 @@ namespace Physica::Core {
                 throw SyscallException();
             close(fd[0]);
             /* Execute */ {
-                execlp(pathToPW.c_str(), pathToPW.c_str(), nullptr);
+                char numProcess[16]; // 16 is enough for unsigned int
+                sprintf(numProcess, "%d", getNumMPIProcess());
+                execlp("mpirun", "mpirun", "-n", numProcess, pathToPW.c_str(), "-n", numProcess, "-nk", numProcess, nullptr);
             }
             dup2(standardErr, 2);
             perror("[Error]: Failed to execute QE");

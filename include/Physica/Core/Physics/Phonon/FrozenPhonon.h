@@ -77,6 +77,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return Dim * unitCell.getNumParticle(); }
         [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
         [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
+        [[nodiscard]] Index3D getForceConstantsGridSize() const noexcept { return FFT3D::rSizeToKSize(superSize); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
         [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;
         [[nodiscard]] inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex) const;
@@ -116,7 +117,7 @@ namespace Physica::Core {
         const ScalarType factor = -reciprocal(displace);
         const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
         
-        MatrixGrid result(FFT3D::rSizeToKSize(superSize), unitCellDOF, unitCellDOF, ScalarType(0));
+        MatrixGrid result(getForceConstantsGridSize(), unitCellDOF, unitCellDOF, ScalarType(0));
         auto& fcMatrixes = result.asArray();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
         auto rSpace = fft.getRSpace().flatten();

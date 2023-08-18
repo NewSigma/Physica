@@ -22,10 +22,10 @@
 #include <ostream>
 #include "MultiPrecisionType.h"
 #include "Rational.h"
-#include "Physica/Core/Exception/NotImplementedException.h"
-#include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
 #include "ScalarImpl/ScalarBase.h"
+#include "Physica/Core/Exception/NotImplementedException.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
+#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     //Forward declarations
@@ -217,6 +217,7 @@ namespace Physica::Core {
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
     };
 
     inline Scalar<Float>& operator++(Scalar<Float>& s);
@@ -275,6 +276,7 @@ namespace Physica::Core {
         [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }
     };
 
     inline Scalar<Double>& operator++(Scalar<Double>& s);

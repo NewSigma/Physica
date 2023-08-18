@@ -42,7 +42,8 @@ namespace Physica::Core {
     class ComplexScalar : public ScalarBase<ComplexScalar<T>> {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
         static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
-        using Base = ScalarBase<ComplexScalar<T>>;
+        using This = ComplexScalar<T>;
+        using Base = ScalarBase<This>;
         using PacketType = typename Internal::BestPacket<T, 2>::Type;
     public:
         using typename Base::ScalarType;
@@ -86,6 +87,9 @@ namespace Physica::Core {
         [[nodiscard]] static ComplexScalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static ComplexScalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] static const H5::DataType& getH5DataType();
+    private:
+        [[nodiscard]] static H5::DataType* makeH5DataType();
     };
 
     template<class T>

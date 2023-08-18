@@ -37,8 +37,10 @@ namespace Physica::Core {
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         /* Getters */
-        [[nodiscard]] size_t getDim() const noexcept;
-        [[nodiscard]] size_t getSize(size_t dim) const noexcept;
+        [[nodiscard]] inline size_t getDim() const noexcept;
+        [[nodiscard]] inline size_t getSize(size_t dim) const noexcept;
+        /* Setters */
+        void setSize(size_t dim, hsize_t newSize);
         /* Static members */
         [[nodiscard]] static inline H5DataSpace makeDataSpace(const SizeArray& dims);
         [[nodiscard]] static inline H5DataSpace makeDataSpace(const SizeArray& dims, const SizeArray& maxdims);
@@ -61,7 +63,7 @@ namespace Physica::Core {
     }
 
     template<size_t Dim>
-    size_t H5DataSpace<Dim>::getDim() const noexcept {
+    inline size_t H5DataSpace<Dim>::getDim() const noexcept {
         if constexpr (Dim == Dynamic)
             return getSimpleExtentNdims();
         else
@@ -69,11 +71,20 @@ namespace Physica::Core {
     }
 
     template<size_t Dim>
-    size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
+    inline size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
         SizeArray sizes(getDim());
         [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
-        assert(d == Dim);
+        assert(d == getDim());
         return sizes[dim];
+    }
+
+    template<size_t Dim>
+    void H5DataSpace<Dim>::setSize(size_t dim, hsize_t newSize) {
+        SizeArray sizes(getDim());
+        [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
+        assert(d == getDim());
+        sizes[dim] = newSize;
+        setExtentSimple(sizes.getLength(), sizes.data());
     }
 
     template<size_t Dim>

@@ -29,6 +29,7 @@ physica_add_test(LUDecomposition Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDe
 physica_add_test(Schur Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.cpp)
 physica_add_test(SVD Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SVD.cpp)
 physica_add_test(Tridiagonalization Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Tridiagonalization.cpp)
+physica_add_test(DenseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cpp)
 physica_add_test(DenseMatrixExpression Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixExpression.cpp)
 physica_add_test(InverseMatrix Core/Math/Algebra/LinearAlgebra/Matrix/InverseMatrixTest.cpp)
 physica_add_test(MatrixProduct Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct.cpp)

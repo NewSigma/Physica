@@ -299,4 +299,17 @@ namespace Physica::Core {
         //6 is the default precision.
         return os << std::setprecision(6);
     }
+
+    template<class Derived>
+    bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) {
+        if (m1.getRow() != m2.getRow())
+            return false;
+        if (m1.getColumn() != m2.getColumn())
+            return false;
+        for (size_t major = 0; major < m1.getMaxMajor(); ++major)
+            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor)
+                if (m1.calcFromMajorMinor(major, minor) != m2.calcFromMajorMinor(major, minor))
+                    return false;
+        return true;
+    }
 }

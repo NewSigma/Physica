@@ -32,8 +32,6 @@ namespace Physica::Core {
         using Base = LValueVector<Derived>;
         using typename Base::ScalarType;
     private:
-        constexpr static bool isFloat = ScalarType::option == Float;
-        constexpr static bool isDouble = ScalarType::option == Double;
         using PointerType = typename std::add_pointer<ScalarType>::type;
         using ConstPointerType = typename std::add_pointer<typename std::add_const<ScalarType>::type>::type;
     public:
@@ -60,10 +58,10 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
 
         void read(const H5::DataSet& dataset,
-                  const H5::DataSpace& file_space = H5::DataSpace::ALL,
+                  const H5DataSpace<1>& file_space,
                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         void write(H5::DataSet& dataset, 
-                   const H5::DataSpace& file_space = H5::DataSpace::ALL,
+                   const H5DataSpace<1>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
         [[nodiscard]] ScalarType* data() { return &(*this)[0]; }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <iomanip>
+#include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
     template<class ScalarType> class Differentiable;

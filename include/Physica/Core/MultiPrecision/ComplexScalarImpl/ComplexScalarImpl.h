@@ -108,6 +108,21 @@ namespace Physica::Core {
     }
 
     template<class T>
+    const H5::DataType& ComplexScalar<T>::getH5DataType() {
+        static const auto instance = std::unique_ptr<H5::DataType>(makeH5DataType());
+        return *instance;
+    }
+
+    template<class T>
+    H5::DataType* ComplexScalar<T>::makeH5DataType() {
+        auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
+        const auto id = result->getId();
+        H5Tinsert(id, "Real", HOFFSET(This, real), T::getH5DataType().getId());
+        H5Tinsert(id, "Imag", HOFFSET(This, imag), T::getH5DataType().getId());
+        return result;
+    }
+
+    template<class T>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c) {
         const auto& imagine = c.getImag();
         return os << std::setprecision(10) << double(c.getReal())

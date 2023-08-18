@@ -88,6 +88,48 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::read(
+            const H5::DataSet& dataset,
+            const H5DataSpace<2>& file_space,
+            const H5::DSetMemXferPropList& xfer_plist) {
+        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getMaxMinor()});
+        H5DataSpace<2> target_space = file_space;
+        for (size_t i = 0; i < Base::getMaxMajor(); ++i) {
+            if constexpr (MatrixOption::isRowMatrix<This>()) {
+                auto row = Base::row(i);
+                target_space.selectHyperslab(H5S_seloper_t::H5S_SELECT_SET, {1, getColumn()}, {i, 0});
+                dataset.read(row.data(), ScalarType::getH5DataType(), mem_space, target_space, xfer_plist);
+            }
+            else {
+                auto col = Base::col(i);
+                target_space.selectHyperslab(H5S_seloper_t::H5S_SELECT_SET, {getRow(), 1}, {0, i});
+                dataset.read(col.data(), ScalarType::getH5DataType(), mem_space, target_space, xfer_plist);
+            }
+        }
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::write(
+            H5::DataSet& dataset,
+            const H5DataSpace<2>& file_space,
+            const H5::DSetMemXferPropList& xfer_plist) const {
+        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getMaxMinor()});
+        H5DataSpace<2> target_space = file_space;
+        for (size_t i = 0; i < Base::getMaxMajor(); ++i) {
+            if constexpr (MatrixOption::isRowMatrix<This>()) {
+                const auto row = Base::row(i);
+                target_space.selectHyperslab(H5S_seloper_t::H5S_SELECT_SET, {1, getColumn()}, {i, 0});
+                dataset.write(row.data(), ScalarType::getH5DataType(), mem_space, target_space, xfer_plist);
+            }
+            else {
+                const auto col = Base::col(i);
+                target_space.selectHyperslab(H5S_seloper_t::H5S_SELECT_SET, {getRow(), 1}, {0, i});
+                dataset.write(col.data(), ScalarType::getH5DataType(), mem_space, target_space, xfer_plist);
+            }
+        }
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::swap(DenseMatrix& m) noexcept {
         Storage::swap(m);
         Dim::swap(m);

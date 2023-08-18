@@ -20,7 +20,7 @@ There will be a lot of work to do in the future
 
 ## Usage
 
-This project uses the following packages:  
+Requirements:  
 
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1 (Optional)  

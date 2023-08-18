@@ -198,22 +198,31 @@ namespace Physica::Core {
         size_t count = 0;
         /* Read types */ {
             is >> count;
-            if (is.fail()) {
+            const bool hasSymbol = is.fail();
+            if (hasSymbol) {
                 is.clear();
 
-                elementTypes.reserve(8);
+                elementTypes.reserve(8); // 8 is enough for common use
                 int ch = is.peek();
-                while (ch != '\n') {
+                while (true) {
                     while (std::isspace(ch) && ch != '\n') {
                         is.get();
                         ch = is.peek();
                     }
+                    if (ch == '\n')
+                        break;
                     is.get();
 
                     const int next_ch = is.peek();
-                    const int ch1 = std::isalpha(next_ch) ? next_ch : '\0';
+                    const bool isAlpha = std::isalpha(next_ch);
+                    const int ch1 = isAlpha ? next_ch : '\0';
                     elementTypes.append(elementSymbolToNumber(ch, ch1));
-                    ch = next_ch;
+                    if (isAlpha) {
+                        is.get();
+                        ch = is.peek();
+                    }
+                    else
+                        ch = next_ch;
                 }
                 elementTypes.squeeze();
                 is.get();
@@ -275,6 +284,6 @@ namespace Physica::Core {
                 return i;
             i += 1;
         }
-        throw NotImplementedException();
+        throw NotImplementedException("Unrecognized element symbol");
     }
 }

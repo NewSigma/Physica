@@ -110,6 +110,12 @@ namespace Physica::Core {
 
     template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);
+
+    template<class Derived>
+    bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2);
+
+    template<class Derived>
+    inline bool operator!=(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) { return !(m1 == m2); }
 }
 
 #include "RValueMatrixImpl.h"

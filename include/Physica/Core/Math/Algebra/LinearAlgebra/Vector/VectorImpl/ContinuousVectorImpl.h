@@ -150,28 +150,18 @@ namespace Physica::Core {
 
     template<class Derived>
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
-                                         const H5::DataSpace& file_space,
+                                         const H5DataSpace<1>& file_space,
                                          const H5::DSetMemXferPropList& xfer_plist) {
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
-        if constexpr (isFloat)
-            dataset.read(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
-        else if constexpr (isDouble)
-            dataset.read(data(), H5::PredType::NATIVE_DOUBLE, mem_space, file_space, xfer_plist);
-        else
-            throw NotImplementedException();
+        dataset.read(data(), ScalarType::getH5DataType(), mem_space, file_space, xfer_plist);
     }
 
     template<class Derived>
     void ContinuousVector<Derived>::write(H5::DataSet& dataset,
-                                          const H5::DataSpace& file_space,
+                                          const H5DataSpace<1>& file_space,
                                           const H5::DSetMemXferPropList& xfer_plist) const {
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
-        if constexpr (isFloat)
-            dataset.write(data(), H5::PredType::NATIVE_FLOAT, mem_space, file_space, xfer_plist);
-        else if constexpr (isDouble)
-            dataset.write(data(), H5::PredType::NATIVE_DOUBLE, mem_space, file_space, xfer_plist);
-        else
-            throw NotImplementedException();
+        dataset.write(data(), ScalarType::getH5DataType(), mem_space, file_space, xfer_plist);
     }
 
     template<class Derived>
