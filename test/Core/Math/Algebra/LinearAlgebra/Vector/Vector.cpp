@@ -54,7 +54,7 @@ void hdfTest() {
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f("data", H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
+        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<1>::makeDataSpace({data.getLength()});
         auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
         data.write(dataset, space);

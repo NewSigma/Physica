@@ -32,8 +32,9 @@ namespace Physica::Core {
      * [2] Eigen https://eigen.tuxfamily.org/
      */
     template<class AnyVector, class OtherVector>
-    typename AnyVector::ScalarType::RealType householder(const RValueVector<AnyVector>& source,
-                                                         LValueVector<OtherVector>& target) {
+    typename AnyVector::ScalarType::RealType householder(
+            const RValueVector<AnyVector>& source,
+            LValueVector<OtherVector>& target) {
         using ScalarType = typename AnyVector::ScalarType;
         using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
@@ -50,6 +51,11 @@ namespace Physica::Core {
             target.tail(1) = source.tail(1) * factor2;
             target[0] = (factor1 / factor).getReal();
             return norm;
+        }
+        const bool isZeroVector = sourceNorm0 < std::numeric_limits<ScalarType>::min();
+        if (isZeroVector) {
+            target = ScalarType(0);
+            return RealType(0);
         }
         target[0] = ScalarType(2);
         target.tail(1) = ScalarType(0);

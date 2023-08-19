@@ -59,7 +59,7 @@ namespace Physica::Core {
             : space(space_.getDerived())
             , fromDim(fromDim_)
             , toDim(toDim_) {
-        assert((Dim == Dynamic || (Dim == toDim - fromDim)) && "[Error]: Inconsistent between type and its param");
+        assert((Dim == Utils::Dynamic || (Dim == toDim - fromDim)) && "[Error]: Inconsistent between type and its param");
     }
 
     template<class SpaceType, size_t Dim>

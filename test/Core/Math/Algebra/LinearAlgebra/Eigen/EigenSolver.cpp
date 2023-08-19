@@ -39,7 +39,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
-        ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
+        const ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
         if (!vectorNearZero(result, precision))
             return false;
     }
@@ -49,7 +49,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
     for (size_t i = 0; i < order; ++i) {
         if (i > 1 && solver.getEigenvalues()[i - 1].getReal() > solver.getEigenvalues()[i].getReal())
             return false;
-        ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
+        const ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * MatrixType::unitMatrix(order)) * eigenvectors.col(i);
         if (!vectorNearZero(result, precision))
             return false;
     }
@@ -106,14 +106,20 @@ int main() {
         if (!eigenTest(mat2, 1E-14))
             return 1;
     }
-    {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
-        const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
-                              {{0, -50}, {0, 180}, {-9, 17}},
-                              {{12, -154}, {546, 8}, {-25, 9}}};
-        if (!eigenTest(mat1, 1E-12))
+    /* Test degeneracy */ {
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
+                              {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
+                              {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
+                              {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
+                              {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
+                              {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
+        if (!eigenTest(mat1, 1E-15))
             return 1;
-        if (!reconstructTest<MatrixType, false>(mat1, 1E-12))
+
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const ComplexMatrix mat2 = mat1;
+        if (!eigenTest(mat2, 1E-15))
             return 1;
     }
     return 0;

@@ -73,7 +73,7 @@ namespace Physica::Core {
         [[nodiscard]] T squaredNorm() const;
         [[nodiscard]] inline T norm() const;
         [[nodiscard]] T phase() const;
-        [[nodiscard]] ComplexScalar unit() const { return *this * reciprocal(norm()); }
+        [[nodiscard]] ComplexScalar unit() const;
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
         [[nodiscard]] const T& getReal() const { return real; }
         [[nodiscard]] const T& getImag() const { return imag; }

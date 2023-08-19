@@ -85,6 +85,14 @@ namespace Physica::Core {
     }
 
     template<class T>
+    ComplexScalar<T> ComplexScalar<T>::unit() const {
+        const T temp = norm();
+        if (temp.isZero())
+            return ComplexScalar(1);
+        return *this * reciprocal(temp);
+    }
+
+    template<class T>
     inline ComplexScalar<T> ComplexScalar<T>::fromPhase(T phase) {
         T s, c;
         sincos(phase, s, c);

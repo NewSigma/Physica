@@ -6,13 +6,13 @@ There will be a lot of work to do in the future
 
 ## Table of Contents
 
-- [Design concept](#concept)
+- [Design philosophy](#philosophy)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Design concept
+## Design philosophy
 
 1. Optimal performance and scalability: No free lunch in the world. Though controversial, ease of use is taken secondary.
 

@@ -16,34 +16,59 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 using namespace Physica::Core;
+using T = Scalar<Double>;
+
+void emptyVectorTest() {
+    using VectorType = Vector<T, 4>;
+    VectorType x{0, 0, 0, 0};
+    householderInPlace(x);
+    for (auto& elem : x)
+        if (!elem.isZero())
+            exit(EXIT_FAILURE);
+}
+
+void emptyComplexVectorTest() {
+    using ComplexType = ComplexScalar<T>;
+    using ComplexVector = Vector<ComplexType, 4>;
+    const ComplexVector x = Vector<T, 4>{0, 0, 1, 0};
+    ComplexVector v(4);
+    const T norm = householder(x, v);
+    const ComplexType tau = v[0];
+    const ComplexType beta = -norm * x[0].unit();
+    v[0] = ComplexType(1);
+
+    const ComplexVector result = x - tau * (v * x) * v;
+    if (!scalarNear(result[0], beta, 1E-15))
+        exit(EXIT_FAILURE);
+    for (size_t i = 1; i < result.getLength(); ++i)
+        if (!scalarNear(result[i], ComplexType(0), 1E-15))
+            exit(EXIT_FAILURE);
+}
 
 int main() {
-    using T = Scalar<Double>;
     {
         using VectorType = Vector<T, 4>;
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
         const T norm = householder(x, v);
-
-        VectorType copy = v;
-        const T tau = copy[0];
+        const T tau = v[0];
         const T beta = x[0].isNegative() ? norm : -norm;
-        copy[0] = 1;
+        v[0] = 1;
 
-        VectorType result = x - tau * (copy * x) * copy;
+        VectorType result = x - tau * (v * x) * v;
         if (abs(T(result[0] - beta) / beta) > T(1E-15))
             return 1;
         for (size_t i = 1; i < rank; ++i)
             if (abs(result[i]) > T(1E-14)) //In debug mode, precision can reach 10^-15
                 return 1;
     }
-
     {
         using VectorType = Vector<T, 4>;
         const VectorType x{2, 3, 4, 5};
@@ -103,13 +128,7 @@ int main() {
                 return 1;
         }
     }
-    {
-        using VectorType = Vector<T, 4>;
-        const VectorType x{0, 0, 0, 0};
-        VectorType v(4);
-        const T norm = householder(x, v);
-        if (!norm.isZero())
-            return 1;
-    }
+    emptyVectorTest();
+    emptyComplexVectorTest();
     return 0;
 }

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Hessenburg.h"
 
@@ -51,6 +52,7 @@ bool hessTest(const MatrixType& source, double tolerance) {
 
 int main() {
     using RealType = Scalar<Double>;
+    using ComplexType = ComplexScalar<RealType>;
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 4, 4>;
         const MatrixType mat{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
@@ -61,6 +63,22 @@ int main() {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!hessTest(mat, 1E-15))
+            return 1;
+    }
+    /* Test degeneracy */ {
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
+                              {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
+                              {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
+                              {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
+                              {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
+                              {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
+        if (!hessTest(mat1, 1E-15))
+            return 1;
+
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const ComplexMatrix mat2 = mat1;
+        if (!hessTest(mat2, 1E-15))
             return 1;
     }
     {
@@ -77,7 +95,7 @@ int main() {
             return 1;
     }
     /* Complex case */ {
-        using MatrixType = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
         if (!hessTest(mat, 1E-12))
             return 1;

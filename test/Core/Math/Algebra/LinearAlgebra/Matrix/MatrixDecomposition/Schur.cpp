@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 
@@ -108,6 +109,22 @@ int main() {
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
         if (!schurTest(mat1, 1E-11))
+            return 1;
+    }
+    /* Test degeneracy */ {
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
+                              {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
+                              {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
+                              {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
+                              {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
+                              {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
+        if (!realSchurTest(mat1, 1E-15))
+            return 1;
+
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        const ComplexMatrix mat2 = mat1;
+        if (!schurTest(mat2, 1E-15))
             return 1;
     }
     return 0;
