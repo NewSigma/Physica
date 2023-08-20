@@ -26,7 +26,7 @@ namespace Physica::Logger {
     FileLogger::FileLogger(const char* filename)
             : fd(open(filename, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR)) {
         if (fd == -1)
-            throw Core::IOException();
+            throw Core::IOException("[Error]: Failed to open file");
     }
 
     FileLogger::~FileLogger() {

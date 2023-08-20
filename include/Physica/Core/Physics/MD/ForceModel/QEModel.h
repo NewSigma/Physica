@@ -60,12 +60,13 @@ namespace Physica::Core {
             , numMPIProcess(numMPIProcess_) {
         std::ifstream fin(pathToInput);
         if (!fin)
-            throw IOException();
+            throw IOException("[Error] No QE input file found");
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
         input.resize(size);
         fin.read(input.data(), size);
+        input[size - 1] = '\0';
     }
 
     template<class ScalarType, class PosScalarType>
@@ -75,9 +76,9 @@ namespace Physica::Core {
         auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
         /* Make input */ {
             std::ofstream os(inputTmp.getName());
-            os << input.data();
+            os << input.data() << '\n';
             os << "CELL_PARAMETERS bohr\n";
-            os << cell.getLattice();
+            os << cell.getLattice() << '\n';
             os << "ATOMIC_POSITIONS bohr\n";
             for (size_t i = 0; i < getNumAtom(); ++i) {
                 const auto row = cell.getPos().row(i);
@@ -137,8 +138,8 @@ namespace Physica::Core {
 
         close(fd[0]);
         std::ifstream fin(input.getName());
-        if (!fin)
-            throw IOException();
+        if (!fin) [[unlikely]]
+            throw IOException("[Error]: No QE input found, this is impossible");
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);

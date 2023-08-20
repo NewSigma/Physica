@@ -71,6 +71,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * relativeMassInKg; }
         [[nodiscard]] constexpr static double calorieToJoule(double calorie) { return calorie * calorieInJoule; }
+        [[nodiscard]] constexpr static double waveNumToTHz(double waveNum) { return waveNum * speedOfLight * 1E-10; }
     };
     /**
      * Hartree atomic units

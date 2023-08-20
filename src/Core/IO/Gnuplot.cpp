@@ -72,7 +72,7 @@ namespace Physica::Core {
         }
 
         if (!is)
-            throw BadFileFormatException();
+            throw BadFileFormatException("Gnuplot");
         return is;
     }
 }

@@ -23,7 +23,7 @@
 namespace Physica::Core {
     class BadFileFormatException : public IOException {
     public:
+        BadFileFormatException(const char* msg) : IOException(msg) {}
         ~BadFileFormatException() noexcept override = default;
-        const char* what() const noexcept override { return "[Error]: Bad file format"; }
     };
 }

@@ -94,11 +94,11 @@ namespace Physica::Core {
             else if (ch == 'c')
                 poscar.type = Poscar::Type::Cartesian;
             else
-                throw BadFileFormatException();
+                throw BadFileFormatException("[Error]: Failed to read format type");
         }
         poscar.readAtomPos(is);
         if (!is)
-            throw BadFileFormatException();
+            throw BadFileFormatException("[Error]: Failed to read atom pos");
         return is;
     }
 
@@ -230,7 +230,7 @@ namespace Physica::Core {
             }
 
             if (!is)
-                throw BadFileFormatException();
+                throw BadFileFormatException("[Error]: Failed to read poscar elements");
         }
         numOfEachType.reserve(8);
         do {

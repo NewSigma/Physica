@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "IOException.h"
+#include <exception>
 
 namespace Physica::Core {
-    class BadConvergenceException : public IOException {
+    class BadConvergenceException : public std::exception {
         const char* msg;
     public:
         BadConvergenceException(const char* msg_) : msg(msg_) {}
-        ~BadConvergenceException() noexcept override = default;
+        ~BadConvergenceException() override = default;
         const char* what() const noexcept override { return msg; }
     };
 }

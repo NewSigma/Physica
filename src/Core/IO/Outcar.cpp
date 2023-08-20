@@ -24,7 +24,7 @@ namespace Physica::Core {
     Outcar::Outcar(const char* path, unsigned int numAtom) : force(numAtom * 3) {
         std::ifstream fin(path);
         if (!fin)
-            throw IOException();
+            throw IOException("[Error]: No OUTCAR file found");
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
@@ -68,7 +68,7 @@ namespace Physica::Core {
         } while(bool(fin));
 
         if (!fin)
-            throw BadFileFormatException();
+            throw BadFileFormatException("[Error]: Failed to read force");
     }
 
     void Outcar::readEnergy(std::ifstream& fin, Utils::Array<char>& buffer) {
@@ -90,6 +90,6 @@ namespace Physica::Core {
         } while(bool(fin));
 
         if (!fin)
-            throw BadFileFormatException();
+            throw BadFileFormatException("[Error]: Failed to read energy");
     }
 }

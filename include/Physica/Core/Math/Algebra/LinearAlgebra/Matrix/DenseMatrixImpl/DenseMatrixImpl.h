@@ -210,7 +210,7 @@ namespace Physica::Core {
             for (size_t c = 0; c < column; ++c)
                 is >> mat(r, c);
         if (!is)
-            throw BadFileFormatException();
+            throw BadFileFormatException("[Error]: bad matrix format");
         return is;
     }
 }

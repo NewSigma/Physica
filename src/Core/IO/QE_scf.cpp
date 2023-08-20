@@ -25,7 +25,7 @@ namespace Physica::Core {
     QE_scf::QE_scf(const char* path, size_t numAtom) : force(3 * numAtom) {
         std::ifstream fin(path);
         if (!fin)
-            throw IOException();
+            throw IOException("[Error]: No QE output file found");
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
@@ -61,7 +61,7 @@ namespace Physica::Core {
         } while(bool(fin));
 
         if (!fin)
-            throw BadFileFormatException();
+            throw BadFileFormatException("[Error]: Failed to read force");
 
         constexpr double convertFactor = PhyConst<AU>::planck / PhyConst<QE>::planck;
         force *= ScalarType(convertFactor);

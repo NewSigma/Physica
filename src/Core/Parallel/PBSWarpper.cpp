@@ -59,6 +59,6 @@ namespace Physica::Core {
         }
 
         if (!fin)
-            throw BadFileFormatException();
+            throw BadFileFormatException("PBS_NODEFILE");
     }
 }
