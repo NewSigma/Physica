@@ -313,6 +313,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < getUnitCellDOF(); ++i)
             result[i] = eigenvalues[i].isNegative() ? -1 : 1;
         result = hadamard(result, sqrt(abs(eigenvalues)));
+        result *= ScalarType(1 / (2 * M_PI));
         return result;
     }
 

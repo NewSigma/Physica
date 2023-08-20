@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     MDCellType unitCell(poscar);
     unitCell.scale(PhyConst<AU>::angstormToBohr(1));
 
-    PhononType ph(unitCell, {8, 8, 1});
+    PhononType ph(unitCell, {2, 2, 1});
     MDCellType superCell = unitCell.makeSuperCell<ExtendCellOption::CellMajor>(ph.getSuperSize());
     
     ForceModel model(superCell, pair_cutoff);
@@ -87,8 +87,8 @@ int main(int argc, char** argv) {
     plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
     plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
     plot->plotPathLine<InterpolateMethod::FFT>(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
-    plot->setMaxY(700);
-    plot->setDeltaY(200);
+    plot->setMaxY(120);
+    plot->setDeltaY(50);
     plot->show();
     return QApplication::exec();
 }
