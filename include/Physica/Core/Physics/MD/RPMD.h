@@ -39,9 +39,7 @@ namespace Physica::Core {
      * Reference:
      * [1] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
-     * [3] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. J. Chem. Phys, 2016, 145(2):1291-1301.
-     * [4] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
-     * [5] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004)
+     * [3] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004)
      * 
      * TODO: replace several ScalarType to PosScalarType
      */

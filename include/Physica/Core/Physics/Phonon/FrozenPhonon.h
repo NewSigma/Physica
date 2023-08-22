@@ -198,7 +198,6 @@ namespace Physica::Core {
     template<typename FrozenPhonon<ScalarType, PosScalarType>::InterpolateMethod Method>
     typename FrozenPhonon<ScalarType, PosScalarType>::MatrixType
     FrozenPhonon<ScalarType, PosScalarType>::interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const {
-        assert((qPoint[2] <= ScalarType(0.5)) && "[This]: This area should be unnecessary");
         if constexpr (Method == InterpolateMethod::FFT)
             return interpolatePoint_FFT(qPoint, forceConstants);
         else
@@ -391,7 +390,6 @@ namespace Physica::Core {
     FrozenPhonon<ScalarType, PosScalarType>::interpolatePoint_FFT(Vector3D qPoint, const MatrixGrid& forceConstants) const {
         const Index3D gridDim = forceConstants.getDim();
         const size_t unitCellDOF = getUnitCellDOF();
-        const Vector3D period{ScalarType(superSize[0]), ScalarType(superSize[1]), ScalarType(superSize[2])};
         MatrixType result(unitCellDOF, unitCellDOF, ScalarType(0));
         RSpaceGrid<ComplexType> buffer(gridDim);
         for (size_t c = 0; c < unitCellDOF; ++c) {
@@ -399,7 +397,7 @@ namespace Physica::Core {
                 GridBase::forIndexInGrid(gridDim, [r, c, &buffer, &forceConstants](Index3D index) {
                     buffer(index) = forceConstants(index)(r, c);
                 });
-                const auto value = interpolate_fft(buffer, qPoint, period) * ScalarType(0.5);
+                const auto value = interpolate_fft(buffer, qPoint, {1, 1, 1}) * ScalarType(0.5);
                 result(r, c) += value;
                 result(c, r) += value.conjugate();
             }
@@ -412,11 +410,14 @@ namespace Physica::Core {
     FrozenPhonon<ScalarType, PosScalarType>::interpolatePoint_FEM(Vector3D qPoint, const MatrixGrid& forceConstants) const {
         using ElementType = CuboidLinear<ScalarType>;
         using IndexArray = typename ElementType::IndexArray;
+        for (size_t i = 0; i < Dim; ++i) {
+            qPoint[i] -= floor(qPoint[i]);
+            assert(!qPoint[i].isNegative());
+        }
 
-        const Index3D originDim = forceConstants.getDim();
         Vector3D globalPos{};
         for (int i = 0; i < 3; ++i)
-            globalPos[i] = qPoint[i] / ScalarType(superSize[i]) * ScalarType(originDim[i]);
+            globalPos[i] = qPoint[i] * ScalarType(superSize[i]);
         const Index3D index0{size_t(double(globalPos[0])), size_t(double(globalPos[1])), size_t(double(globalPos[2]))};
         const Vector3D point1{ScalarType(index0[0]), ScalarType(index0[1]), ScalarType(index0[2])};
         const Vector3D point2{ScalarType(index0[0] + 1), ScalarType(index0[1] + 1), ScalarType(index0[2] + 1)};
@@ -433,13 +434,19 @@ namespace Physica::Core {
         const auto element = ElementType(point1, point2, nodeArr);
         const Vector3D localPos = element.toLocalPos(globalPos);
 
+        const Index3D fcDim = forceConstants.getDim();
         const size_t unitCellDOF = getUnitCellDOF();
         MatrixType result(unitCellDOF, unitCellDOF, ScalarType(0));
         size_t localNodeIndex = 0;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
                 for (int z = 0; z < 2; ++z) {
-                    Index3D index{(index0[0] + x) % originDim[0], (index0[1] + y) % originDim[1], (index0[2] + z) % originDim[2]};
+                    Index3D index{(index0[0] + x) % fcDim[0], (index0[1] + y) % fcDim[1], index0[2] + z};
+                    if (index[2] >= fcDim[2]) {
+                        index[0] = index[0] == 0 ? index[0] : (fcDim[0] - index[0]);
+                        index[1] = index[1] == 0 ? index[1] : (fcDim[1] - index[1]);
+                        index[2] = fcDim[2] - index[2];
+                    }
                     const ScalarType factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
                     result += factor * forceConstants(index);
                     localNodeIndex += 1;

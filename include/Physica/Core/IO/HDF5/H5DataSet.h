@@ -34,7 +34,7 @@ namespace Physica::Core {
         H5DataSet& operator=(H5DataSet&&) noexcept = delete;
         using Base::operator=;
         /* Getters */
-        [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return Base::getSpace(); }
+        [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
         [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
     private:

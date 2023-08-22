@@ -51,7 +51,11 @@ namespace Physica::Core {
         swap(obj);
         return *this;
     }
-
+    /**
+     * Contract method to improve performance in [1]
+     * Reference:
+     * [1] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
+     */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::updateForce(const ForceModel& model) {
@@ -115,7 +119,11 @@ namespace Physica::Core {
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
     }
-
+    /**
+     * BAOAB integrator as introduced in [1]
+     * Reference:
+     * [1] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. J. Chem. Phys, 2016, 145(2):1291-1301.
+     */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class Thermostat,
              class RandomGenerator,
