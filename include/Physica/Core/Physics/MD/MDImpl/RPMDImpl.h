@@ -138,13 +138,13 @@ namespace Physica::Core {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.step(ringPolymer, RandomPool<RandomGenerator>::getGen(), timeStep);
+            thermostat.template step<RandomGenerator, Executor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.step(ringPolymer, RandomPool<RandomGenerator>::getGen(), timeStep);
+            thermostat.template step<RandomGenerator, Executor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);

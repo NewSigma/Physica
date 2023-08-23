@@ -41,8 +41,8 @@ namespace Physica::Core {
         /* Operators */
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
-        template<class RandomGenerator>
-        void step(RingPolymerType& ringPolymer, RandomGenerator& gen, ScalarType deltaT) const;
+        template<class RandomGenerator, class Executor>
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(Langevin& obj) noexcept;
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
@@ -69,27 +69,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator>
+    template<class RandomGenerator, class Executor>
     void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer,
-            RandomGenerator& gen,
-            ScalarType deltaT) const {
+            RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        const size_t numReplica = ringPolymer.getNumReplica();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
-            auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
-            for (size_t i = 0; i < dof; ++i) {
+            auto future = Executor::parallel_for([this, deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
+                const size_t numReplica = ringPolymer.getNumReplica();
                 const auto mass = massVec[i / Dim];
                 const ScalarType factor = sqrt(repBeta * mass);
+                auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
+                BufferType buffer(2, ringPolymer.getKSpaceSize());
 
-                auto& buffer = ringPolymer.getBuffer();
-                ringPolymer.toNormalRepr(i);
-
-                fft.getRSpace().random_normal(gen);
+                ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
+                fft.getRSpace().random_normal(RandomPool<RandomGenerator>::getGen());
                 FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
                     langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
@@ -99,15 +96,16 @@ namespace Physica::Core {
                     const ScalarType viscosityY = sin(phase) * omegaW;
                     langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
-                ringPolymer.toBeadRepr(i);
-            }
+                ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
+            }, dof, Executor::getNumThread());
+            Executor::auto_wait(future);
         }
         else {
             std::normal_distribution<> dist{};
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const ScalarType factor = sqrt(repBeta * mass);
-                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType(dist(gen)));
+                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType(dist(RandomPool<RandomGenerator>::getGen())));
             }
         }
     }
