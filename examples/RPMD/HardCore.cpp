@@ -18,12 +18,12 @@
  */
 #include <QApplication>
 #include <QtCharts/QValueAxis>
-#include "Physica/Gui/Plot/Plot.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Utils/Random.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -60,7 +60,7 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main(int argc, char** argv) {
     std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
+    RandomSeed::rdrand(seed);
     std::mt19937 gen(seed);
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, 1, timeStep);

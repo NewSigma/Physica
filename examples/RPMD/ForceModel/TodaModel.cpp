@@ -18,17 +18,17 @@
  */
 #include <iostream>
 #include <fstream>
+#include <QApplication>
+#include <QtCharts/QValueAxis>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Random.h"
-#include <QApplication>
-#include <QtCharts/QValueAxis>
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -90,7 +90,7 @@ void plotPress(const VectorType& lattices, const VectorType& density) {
     VectorType meanPress(lattices.getLength()), deviaPress(lattices.getLength());
     ThreadExecutor::parallel_for([&meanPress, &deviaPress, &lattices](unsigned int i) {
         std::mt19937::result_type seed;
-        Physica::Utils::Random::rdrand(seed);
+        RandomSeed::rdrand(seed);
         std::mt19937 gen(seed);
         auto pair = calcPress(8, 100000, lattices[i], gen);
         meanPress[i] = pair.first;
@@ -122,7 +122,7 @@ void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) 
         deltaFreeEnergy[lattices.getLength() - 1] = 0;
         ThreadExecutor::parallel_for([&deltaFreeEnergy, &density](unsigned int i) {
             std::mt19937::result_type seed;
-            Physica::Utils::Random::rdrand(seed);
+            RandomSeed::rdrand(seed);
             std::mt19937 gen(seed);
 
             Integrate<Simpson, ScalarType, 1> simpson({{density[i + 1]}, {density[i]}}, 0.0001);

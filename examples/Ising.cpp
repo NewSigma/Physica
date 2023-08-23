@@ -21,7 +21,7 @@
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Utils/Random.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -94,7 +94,7 @@ private:
 
 int main(int argc, char** argv) {
     std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
+    RandomSeed::rdrand(seed);
     std::mt19937 gen(seed);
 
     const int count = 30;

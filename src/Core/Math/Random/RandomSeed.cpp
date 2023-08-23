@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Utils/Random.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 
-namespace Physica::Utils {
-    int Random::retryLimit = 8;
+namespace Physica::Core {
+    int RandomSeed::retryLimit = 8;
 }

@@ -54,6 +54,8 @@ namespace Physica::Core {
         inline void toBeadRepr(size_t posID);
         void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase);
         void toBeadRepr(size_t posID, PhaseMatrix& outer_phase);
+        void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase, BufferType& outer_buffer, FFTType& outer_fft) const;
+        void toBeadRepr(size_t posID, PhaseMatrix& outer_phase, const BufferType& outer_buffer, FFTType& outer_fft) const;
         [[nodiscard]] PositionMatrix makeBeadPos(size_t replica) const;
         [[nodiscard]] PositionMatrix makeCentroidPos() const;
         [[nodiscard]] PositionMatrix makeBeadMomentum(size_t replica) const;
@@ -206,6 +208,40 @@ namespace Physica::Core {
         fft.invTransform(buffer.row(1));
         auto pos = outer_phase.row(posID + getDOF());
         pos = fft.getRSpace();
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toNormalRepr(
+            size_t posID, const PhaseMatrix& outer_phase, BufferType& outer_buffer, FFTType& outer_fft) const {
+        assert(posID < getDOF());
+        assert(outer_buffer.getColumn() == getNumReplica());
+        assert(outer_fft.getRSpaceSize() == getNumReplica());
+        outer_fft.getRSpace() = outer_phase.row(posID);
+        FFTType::transform(fft, outer_fft);
+        auto momentum = outer_buffer.row(0);
+        momentum = outer_fft.getKSpace();
+
+        outer_fft.getRSpace() = outer_phase.row(posID + getDOF());
+        FFTType::transform(fft, outer_fft);
+        auto pos = outer_buffer.row(1);
+        pos = outer_fft.getKSpace();
+    }
+    
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toBeadRepr(
+            size_t posID, PhaseMatrix& outer_phase, const BufferType& outer_buffer, FFTType& outer_fft) const {
+        assert(posID < getDOF());
+        assert(outer_buffer.getColumn() == getNumReplica());
+        assert(outer_fft.getRSpaceSize() == getNumReplica());
+        outer_fft.getKSpace() = outer_buffer.row(0);
+        FFTType::invTransform(fft, outer_fft);
+        auto momentum = outer_phase.row(posID);
+        momentum = outer_fft.getRSpace();
+
+        outer_fft.getKSpace() = outer_buffer.row(1);
+        FFTType::invTransform(fft, outer_fft);
+        auto pos = outer_phase.row(posID + getDOF());
+        pos = outer_fft.getRSpace();
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

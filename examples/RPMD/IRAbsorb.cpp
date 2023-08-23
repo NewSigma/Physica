@@ -26,7 +26,6 @@
 #include "Physica/Core/Physics/MD/IRAbsorb.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/IO/Poscar.h"
-#include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;

@@ -23,7 +23,6 @@
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Utils/Random.h"
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;

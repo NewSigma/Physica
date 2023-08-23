@@ -20,9 +20,9 @@
 #include <fstream>
 #include <iostream>
 #include <gperftools/profiler.h>
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
-#include "Physica/Utils/Random.h"
 #include "Physica/Utils/BenchmarkHelper.h"
 #include "Physica/Utils/Cycler.h"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
@@ -105,7 +105,7 @@ void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
 int main() {
     MatrixType record(1000, 1);
     std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
+    RandomSeed::rdrand(seed);
     std::mt19937 gen(seed);
 
     auto timeuse = Benchmark::run([&]() {

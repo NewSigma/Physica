@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,14 +22,14 @@
 #include <x86intrin.h>
 #include "Physica/Core/Exception/RdrandException.h"
 
-namespace Physica::Utils {
-    class Random {
-    public:
+namespace Physica::Core {
+    /**
+     * rdrand returns a high quality random number, in rare conditions it may fail and we should retry
+     * several times but in extremely rare conditions it can not return anything.
+     */
+    class RandomSeed {
         static int retryLimit;
-        /**
-         * rdrand returns a high quality random number, in rare conditions it may fail and we should retry
-         * several times but in extremely rare conditions it can not return anything.
-         */
+    public:
         static void rdrand(uint16_t& integer) {
             for(int i = 0; i < retryLimit; ++i) {
                 const int code = _rdrand16_step(&integer);

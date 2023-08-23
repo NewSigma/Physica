@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
@@ -50,7 +50,7 @@ int main() {
     {
         constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
         std::mt19937::result_type seed;
-        Physica::Utils::Random::rdrand(seed);
+        RandomSeed::rdrand(seed);
         std::mt19937 gen(seed);
         RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
         rpmd.initMomentum(gen);

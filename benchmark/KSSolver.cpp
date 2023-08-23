@@ -18,12 +18,12 @@
  */
 #include <iostream>
 #include <fstream>
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
 #include "Physica/Utils/Cycler.h"
-#include "Physica/Utils/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
@@ -36,7 +36,7 @@ int main() {
     ScalarType cutEnergy(4.9);
 
     std::mt19937::result_type seed;
-    Physica::Utils::Random::rdrand(seed);
+    RandomSeed::rdrand(seed);
     std::mt19937 gen{};
     {
         BandGrid<ScalarType, isSpinPolarized> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 4);
