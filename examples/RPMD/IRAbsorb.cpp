@@ -33,6 +33,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
+using RandomGenerator = std::mt19937;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -104,7 +105,8 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 }
 
 void testMD() {
-    std::mt19937 gen(16172479642808547241UL);
+    RandomPool<RandomGenerator>::FixedSeed = 16172479642808547241UL;
+    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
 
     auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
@@ -119,7 +121,7 @@ void testMD() {
     {
         KineticModel kineticModel(temperatureT, numReplica);
         for (size_t path = 0; path < 16; ++path) {
-            rpmd.nvt_step_for<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, gen, kineticModel, forceModel);
+            rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
 
             typename MDCell<ScalarType, PosScalarType>::PositionMatrix buffer(forceModel.getNumMolecule(), 3, 0);
             for (size_t i = 0; i < numReplica; ++i)
@@ -133,7 +135,7 @@ void testMD() {
                 buffer *= reciprocal(ScalarType(numReplica));
                 Vector<ScalarType, 3> dipole1{buffer.col(0).asVector().sum(), buffer.col(1).asVector().sum(), buffer.col(2).asVector().sum()};
                 toNextMean(corr[i], path, dipole0 * dipole1);
-                rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, ThreadExecutor>(thermo, gen, kineticModel, forceModel);
+                rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
             }
             rpmd.normalizeCentroid();
             std::cout << path << std::endl;

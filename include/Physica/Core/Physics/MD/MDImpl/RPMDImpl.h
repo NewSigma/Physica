@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
+#include "Physica/Core/Math/Random/RandomPool.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
@@ -132,19 +133,18 @@ namespace Physica::Core {
              class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nvt_step(
             const Thermostat& thermostat,
-            RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.step(ringPolymer, gen, timeStep);
+            thermostat.step(ringPolymer, RandomPool<RandomGenerator>::getGen(), timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.step(ringPolymer, gen, timeStep);
+            thermostat.step(ringPolymer, RandomPool<RandomGenerator>::getGen(), timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
@@ -160,12 +160,11 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nvt_step_for(
             ScalarType duration,
             const Thermostat& thermostat,
-            RandomGenerator& gen,
             KineticModel& kineticModel,
             const ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, gen, kineticModel, forceModel);
+            nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

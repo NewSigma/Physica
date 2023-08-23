@@ -32,6 +32,7 @@ using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
 using ThermostatType = Langevin<ScalarType, ScalarType, 1, Dynamic>;
 using KineticModel = HardCore<ScalarType, true, Dynamic>;
+using RandomGenerator = std::mt19937;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
@@ -64,7 +65,8 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    std::mt19937 gen(15502868121535481991UL);
+    RandomPool<RandomGenerator>::FixedSeed = 15502868121535481991UL;
+    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
 
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     ThermostatType thermo(temperatureT, thermostatTime);
@@ -83,7 +85,7 @@ int main() {
         MatrixType buffer(numMolecular, numReplica, 0);
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, SequentialExecutor>(thermo, gen, kineticModel, ForceModel());
+            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, ForceModel());
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

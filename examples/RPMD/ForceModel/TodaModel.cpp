@@ -42,6 +42,7 @@ using KineticModel = HardCore<ScalarType, false, 1>;
 using ForceModel = TodaModel<ScalarType, PosScalarType, false, 1>;
 using MDType = RPMD<ScalarType, PosScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
+using RandomGenerator = std::mt19937;
 constexpr size_t numReplica = 1;
 constexpr double temperatureT = 0.02;
 constexpr double thermostatTime = 0.01;
@@ -64,21 +65,21 @@ MDCellType makeSystem(ScalarType latticeSize) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, ScalarType latticeSize, std::mt19937& gen) {
+std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, ScalarType latticeSize) {
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     const ForceModel forceModel{};
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum(RandomPool<RandomGenerator>::getGen());
     rpmd.updateForce<ForceModel, SequentialExecutor>(forceModel);
 
     ScalarType mean = 0, variance = 0;
     for (size_t sys = 0; sys < numSystem; ++sys) {
         ScalarType temp = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, SequentialExecutor>(
-                    thermo, gen, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, SequentialExecutor>(
+                    thermo, kineticModel, forceModel);
             toNextMean(temp, i, rpmd.makeStress(forceModel)(0, 0));
         }
         toNextVariance(variance, mean, sys, temp);
@@ -89,10 +90,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
 void plotPress(const VectorType& lattices, const VectorType& density) {
     VectorType meanPress(lattices.getLength()), deviaPress(lattices.getLength());
     ThreadExecutor::parallel_for([&meanPress, &deviaPress, &lattices](unsigned int i) {
-        std::mt19937::result_type seed;
-        RandomSeed::rdrand(seed);
-        std::mt19937 gen(seed);
-        auto pair = calcPress(8, 100000, lattices[i], gen);
+        auto pair = calcPress(8, 100000, lattices[i]);
         meanPress[i] = pair.first;
         deviaPress[i] = pair.second;
     }, lattices.getLength(), 4).wait();
@@ -121,15 +119,11 @@ void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) 
     {
         deltaFreeEnergy[lattices.getLength() - 1] = 0;
         ThreadExecutor::parallel_for([&deltaFreeEnergy, &density](unsigned int i) {
-            std::mt19937::result_type seed;
-            RandomSeed::rdrand(seed);
-            std::mt19937 gen(seed);
-
             Integrate<Simpson, ScalarType, 1> simpson({{density[i + 1]}, {density[i]}}, 0.0001);
             deltaFreeEnergy[i] = simpson.solve([&](ScalarType rho) -> ScalarType {
                 const ScalarType numParticle = numMolecular;
                 const ScalarType latticeSize = numParticle / rho;
-                return calcPress(1, 10000, latticeSize, gen).first * numParticle / square(rho);
+                return calcPress(1, 10000, latticeSize).first * numParticle / square(rho);
             });
         }, lattices.getLength() - 1, 4).wait();
 

@@ -37,6 +37,7 @@ using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
 using ThermostatType = Langevin<ScalarType, ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, true, 1>;
+using RandomGenerator = std::mt19937;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
@@ -67,10 +68,7 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main(int argc, char** argv) {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-
-    std::mt19937::result_type seed;
-    RandomSeed::rdrand(seed);
-    std::mt19937 gen(seed);
+    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     rpmd.initMomentum(gen);
@@ -80,7 +78,7 @@ int main(int argc, char** argv) {
 
     ProbabilityDistributionFunction2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {
-        rpmd.nvt_step<ThermostatType, decltype(gen), KineticModel, ForceModel, SequentialExecutor>(thermo, gen, kineticModel, ForceModel());
+        rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, ForceModel());
         pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
     }
     const auto grid = pdf.makePosition();
