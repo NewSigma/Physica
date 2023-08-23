@@ -67,4 +67,28 @@ namespace Physica::Core {
     [[nodiscard]] inline bool BoolSIMD<ScalarType, Size>::horizontal_or() const {
         return Physica::horizontal_or(getImpl());
     }
+
+    template<class ScalarType>
+    class BoolSIMD<ScalarType, 1> {
+        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid template param");
+        using This = BoolSIMD<ScalarType, 1>;
+        using Traits = Internal::Traits<This>;
+    public:
+        using Base = typename Traits::BaseType;
+    private:
+        bool b;
+    public:
+        BoolSIMD() = default;
+        explicit BoolSIMD(bool value) : b(value) {}
+        BoolSIMD(const BoolSIMD&) = default;
+        BoolSIMD(BoolSIMD&&) noexcept = default;
+        /* Operators */
+        BoolSIMD& operator=(const BoolSIMD&) = default;
+        BoolSIMD& operator=(BoolSIMD&&) noexcept = default;
+        /* Operations */
+        [[nodiscard]] inline bool horizontal_or() const { return b; }
+        /* Getters */
+        [[nodiscard]] constexpr static size_t size() { return 1; }
+        [[nodiscard]] constexpr static size_t getSize() { return 1; }
+    };
 }

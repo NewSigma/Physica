@@ -70,15 +70,17 @@ namespace Physica::Core {
             static_assert(!ScalarType::isDifferentiable, "[Error]: The main template is not differentiable");
             static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
             constexpr static bool isSinglePrec = ScalarType::option == Float;
+            constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
+            constexpr static size_t PlainSize = isDifferentiable ? (Size * 2) : Size;
             
             using Size2Type = typename std::conditional<isSinglePrec, void, Vec2d>::type;
             using Size4Type = typename std::conditional<isSinglePrec, Vec4f, Vec4d>::type;
             using Size8Type = typename std::conditional<isSinglePrec, Vec8f, Vec8d>::type;
             using Size16Type = typename std::conditional<isSinglePrec, Vec16f, void>::type;
-            using Type1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
-            using Type2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
+            using Type1 = typename std::conditional<PlainSize == 2, Size2Type, Size4Type>::type;
+            using Type2 = typename std::conditional<PlainSize == 8, Size8Type, Size16Type>::type;
         public:
-            using BaseType = typename std::conditional<Size <= 4, Type1, Type2>::type;
+            using BaseType = typename std::conditional<PlainSize <= 4, Type1, Type2>::type;
             using BoolSIMDType = BoolSIMD<ScalarType, Size>;
         };
         /**
@@ -107,7 +109,7 @@ namespace Physica::Core {
             constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
         public:
             constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
-            using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+            using Type = typename std::conditional<Size == 1 || isComplex || isDifferentiable, ScalarType, SIMD<ScalarType, Size>>::type;
         };
     }
 
@@ -118,6 +120,7 @@ namespace Physica::Core {
         using Traits = Internal::Traits<This>;
         using BoolSIMDType = typename Traits::BoolSIMDType;
         using TrivialType = typename ScalarType::TrivialType;
+        constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
     public:
         using Base = typename Traits::BaseType;
     public:

@@ -79,6 +79,7 @@ if(${RUN_CHECKS})
 endif()
 ##############################################Libs################################################
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(3rdparty)
 
@@ -86,7 +87,6 @@ find_package(FFTW3 REQUIRED)
 find_package(FFTW3f REQUIRED)
 link_directories(${FFTW3_LIBRARY_DIRS})
 link_directories(${FFTW3f_LIBRARY_DIRS})
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FFTW3_LIBRARY_DIRS};${FFTW3f_LIBRARY_DIRS}")
 include_directories(${FFTW3_INCLUDE_DIRS})
 
 if(${PHYSICA_GUI})
@@ -96,14 +96,11 @@ endif()
 if(${PHYSICA_PROFILE})
     include_directories(${GPerfTools_INCLUDE_DIR})
     find_package(GPerfTools REQUIRED)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${GPerfTools_LIBRARY_DIR}")
 endif()
 
 if(${PHYSICA_TORCH})
     find_package(Torch REQUIRED)
     include_directories(${TORCH_INCLUDE_DIRS})
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${TORCH_INSTALL_PREFIX}/lib")
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CUDA_TOOLKIT_ROOT_DIR}/lib64")
 endif()
 
 if(${PHYSICA_HDF5})
@@ -111,7 +108,6 @@ if(${PHYSICA_HDF5})
     include_directories(${HDF5_INCLUDE_DIR})
     add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
     string(REPLACE include lib HDF5_LIBRARY_DIR ${HDF5_INCLUDE_DIR}) # Cmake file of HDF5-1.14.1 seems do not provide HDF5_LIBRARY_DIR
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${HDF5_LIBRARY_DIR}")
 endif()
 #############################################Project##############################################
 include_directories(./include)

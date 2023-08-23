@@ -171,7 +171,7 @@ namespace Physica::Core {
                 ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
                 for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
                     const ScalarType r2 = initialCell.minDistVector(i, indexO).squaredNorm();
-                    const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
+                    const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
                     const bool isInRange = r2 < squaredRadiusO;
                     if (isNotSelf && isInRange) {
                         const ScalarType squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();

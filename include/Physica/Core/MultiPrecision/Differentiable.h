@@ -32,6 +32,8 @@ namespace Physica::Core {
             static constexpr ScalarOption option = T::option;
             static constexpr bool isComplex = T::isComplex;
             static constexpr bool isDifferentiable = true;
+            /* SIMD */
+            using BoolSIMDType = BoolSIMD<ScalarType, 1>;
         };
     }
     /**
@@ -55,6 +57,8 @@ namespace Physica::Core {
         ~Differentiable() = default;
         /* Operators */
         Differentiable& operator=(Differentiable obj) noexcept;
+        [[nodiscard]] explicit operator float() const { return float(value); }
+        [[nodiscard]] explicit operator double() const { return double(value); }
         [[nodiscard]] inline bool operator==(const This& other);
         [[nodiscard]] bool operator!=(const This& other) { return !this->operator==(other); }
         [[nodiscard]] inline Differentiable operator-() const;
@@ -138,23 +142,8 @@ namespace Physica::Core {
     operator/(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType>& s2);
 
     template<class ScalarType>
-    [[nodiscard]] inline bool operator>(const Differentiable<ScalarType>& s1, const Differentiable<ScalarType>& s2) {
-        return s1.getValue() > s2.getValue();
-    }
-
-    template<class ScalarType>
-    [[nodiscard]] inline bool operator<(const Differentiable<ScalarType>& s1, const Differentiable<ScalarType>& s2) {
-        return s1.getValue() < s2.getValue();
-    }
-
-    template<class ScalarType>
-    [[nodiscard]] inline bool operator>=(const Differentiable<ScalarType>& s1, const Differentiable<ScalarType>& s2) {
-        return s1.getValue() >= s2.getValue();
-    }
-
-    template<class ScalarType>
-    [[nodiscard]] inline bool operator<=(const Differentiable<ScalarType>& s1, const Differentiable<ScalarType>& s2) {
-        return s1.getValue() <= s2.getValue();
+    inline std::ostream& operator<<(std::ostream& os, const Differentiable<ScalarType>& obj) {
+        return os << obj.getValue();
     }
 }
 

@@ -39,6 +39,7 @@ namespace Physica::Core {
         Vector<ScalarType> repMass;
         PhaseMatrix buffer;
         size_t maxHandleNum;
+        size_t handleNum;
     public:
         HardCore(ScalarType latticeSize_,
                  PlainScalar collideFactor_,
@@ -59,6 +60,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }
         [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
+        [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
         static void checkParam(PlainScalar collideFactor, size_t numReplica);
     private:
@@ -89,7 +91,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = getNumParticle();
-        const ScalarType collideStep = collideFactor * deltaT;
+        const PlainScalar collideStep = collideFactor * deltaT.getValue();
         const PlainScalar epsilonStep = PlainScalar(std::numeric_limits<ScalarType>::epsilon()) * deltaT.getValue();
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
@@ -101,7 +103,7 @@ namespace Physica::Core {
         ScalarType rStep = deltaT;
         ScalarType from = 0;
         ScalarType to = deltaT;
-        size_t handleNum = 0;
+        handleNum = 0;
         while (true) {
             const ScalarType step = to - from;
             if (step < epsilonStep) [[unlikely]]
@@ -194,6 +196,7 @@ namespace Physica::Core {
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
+        std::swap(handleNum, obj.handleNum);
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
@@ -202,7 +205,7 @@ namespace Physica::Core {
             throw std::invalid_argument("[Error]: Collide factor must be in (0, 1)");
         if (NumReplica != Dynamic && NumReplica != numReplica) [[unlikely]]
             throw std::invalid_argument("[Error]: Number of replica is not consistent");
-        if (collideFactor <= ScalarType(std::numeric_limits<ScalarType>::epsilon())) [[unlikely]]
+        if (collideFactor <= PlainScalar(std::numeric_limits<ScalarType>::epsilon())) [[unlikely]]
             throw std::invalid_argument("[Error]: Collide factor is too small, numerical error will be large");
     }
 
@@ -210,6 +213,7 @@ namespace Physica::Core {
     bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
+        using BoolPacketType = typename Internal::Traits<PacketType>::BoolSIMDType;
         const size_t numParticle = getNumParticle();
         if constexpr (NumReplica == 1) {
             auto phase = ringPolymer.asMatrix().col(0);
@@ -221,7 +225,7 @@ namespace Physica::Core {
                 const size_t to = length / PacketType::size() * PacketType::size();
                 size_t i = 0;
                 for (; i < to; i += PacketType::size()) {
-                    const auto boolPacket = head.template packet<PacketType>(i) > tail.template packet<PacketType>(i);
+                    const auto boolPacket = BoolPacketType(head.template packet<PacketType>(i) > tail.template packet<PacketType>(i));
                     if (boolPacket.horizontal_or()) [[unlikely]]
                         return true;
                 }
@@ -250,7 +254,7 @@ namespace Physica::Core {
                     const PacketType zeros(0);
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
-                        const auto boolPacket = pos.template packet<PacketType>(i) < zeros;
+                        const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) < zeros);
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
@@ -268,7 +272,7 @@ namespace Physica::Core {
                     for (; i < to; i += PacketType::size()) {
                         const PacketType pack1 = pos_end.template packet<PacketType>(i) - latticeSizes;
                         const PacketType pack2 = pos.template packet<PacketType>(i);
-                        const auto boolPacket = pack1 > pack2;
+                        const auto boolPacket = BoolPacketType(pack1 > pack2);
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
@@ -285,7 +289,7 @@ namespace Physica::Core {
                     auto pos0 = ringPolymer.asMatrix().row(numParticle + id_dof - 1);
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
-                        const auto boolPacket = pos0.template packet<PacketType>(i) > pos.template packet<PacketType>(i);
+                        const auto boolPacket = BoolPacketType(pos0.template packet<PacketType>(i) > pos.template packet<PacketType>(i));
                         if (boolPacket.horizontal_or()) [[unlikely]]
                             return true;
                     }
@@ -301,7 +305,7 @@ namespace Physica::Core {
                         const PacketType latticeSizes(latticeSize.getValue().getTrivial());
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
-                            const auto boolPacket = pos.template packet<PacketType>(i) > latticeSizes;
+                            const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) > latticeSizes);
                             if (boolPacket.horizontal_or()) [[unlikely]]
                                 return true;
                         }

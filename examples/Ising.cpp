@@ -66,7 +66,7 @@ public:
             const size_t j = int_dist(generator);
 
             const ScalarType deltaE = -deltaDotSpin(i, j) * couplingJ;
-            if (!deltaE.isPositive() || dist(generator) < exp(-deltaE * beta)) {
+            if (!deltaE.isPositive() || ScalarType(dist(generator)) < exp(-deltaE * beta)) {
                 lattice(i, j) = -lattice(i, j);
                 energy += deltaE;
             }

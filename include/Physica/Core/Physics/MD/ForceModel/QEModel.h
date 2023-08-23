@@ -64,9 +64,9 @@ namespace Physica::Core {
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
-        input.resize(size);
+        input.resize(size + 1);
         fin.read(input.data(), size);
-        input[size - 1] = '\0';
+        input[size] = '\0';
     }
 
     template<class ScalarType, class PosScalarType>

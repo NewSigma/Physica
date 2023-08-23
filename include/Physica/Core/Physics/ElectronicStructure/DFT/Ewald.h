@@ -114,7 +114,7 @@ namespace Physica::Core {
             PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
                 [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
                     const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
-                    const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
+                    const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
                     if (isNotGammaPoint) {
                         dots = pos * delta;
                         sincos(dots, sin_vec, cos_vec);
@@ -153,7 +153,7 @@ namespace Physica::Core {
                     for (size_t j = i; j < numParticle; ++j) {
                         const Vector3D pos_ij = pos_i - pos.row(j).asVector();
                         const ScalarType r2 = pos_ij.squaredNorm();
-                        const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                        const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < ScalarType(r2);
                         if (isNotSelf && r2 < squareMaxErfcX) {
                             const ScalarType temp = calcFromTable(sqrt(r2)) * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
@@ -167,7 +167,7 @@ namespace Physica::Core {
         const ScalarType factor = reciprocal(square(ScalarType(2) * integralLimit));
         PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
                 const ScalarType squaredNorm = delta.squaredNorm();
-                const bool isNotGammaPoint = std::numeric_limits<ScalarType>::min() < squaredNorm;
+                const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
                 if (isNotGammaPoint) {
                     ScalarType sum_cos = 0;
                     ScalarType sum_sin = 0;

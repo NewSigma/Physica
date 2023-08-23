@@ -23,6 +23,10 @@
 
 namespace Physica::Core {
     template<class ScalarType> class Differentiable;
+    template<class Derived> class ScalarBase;
+
+    template<class T>
+    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
 
     namespace Internal {
         template<class T> class Traits;
@@ -50,7 +54,17 @@ namespace Physica::Core {
         static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
 
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
+        /* Operators */
+        template<class T>
+        __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const {
+            return getValue() > s.getValue();
+        }
 
+        template<class T>
+        __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const {
+            return getValue() < s.getValue();
+        }
+        /* Getters */
         [[nodiscard]] const RealType& getReal() const {
             if constexpr (isComplex)
                 return this->getDerived().getReal();
@@ -122,9 +136,6 @@ namespace Physica::Core {
             return this->getDerived().getTangent();
         }
     };
-
-    template<class T>
-    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
 
     template<class ScalarType>
     ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {

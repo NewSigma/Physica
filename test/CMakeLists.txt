@@ -62,6 +62,7 @@ physica_add_test(NumCharacter Core/Math/Statistics/NumCharacter.cpp)
 physica_add_test(FFT Core/Math/Transform/FFT.cpp)
 ## MultiPrecision
 physica_add_test(Const Core/MultiPrecision/ConstTest.cpp)
+physica_add_test(Differentiable Core/MultiPrecision/Differentiable.cpp)
 physica_add_test(Integer Core/MultiPrecision/IntegerTest.cpp)
 physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 ## Parallel

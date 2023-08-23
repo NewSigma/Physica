@@ -74,9 +74,10 @@ namespace Physica::Core {
         void toDynamicMatrix(MatrixGrid& forceConstants) const;
         void swap(FrozenPhonon& obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getUnitCellDOF() const noexcept { return Dim * unitCell.getNumParticle(); }
-        [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
-        [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
+        [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return unitCell.getNumParticle(); }
+        [[nodiscard]] size_t getUnitCellDOF() const noexcept { return Dim * getNumUnitCellAtom(); }
+        [[nodiscard]] size_t getNumSuperCellAtom() const noexcept { return getNumUnitCellAtom() * getNumCell(); }
+        [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }        [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
         [[nodiscard]] Index3D getForceConstantsGridSize() const noexcept { return FFT3D::rSizeToKSize(superSize); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
         [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;

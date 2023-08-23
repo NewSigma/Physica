@@ -104,18 +104,6 @@ namespace Physica::Core {
         return fabsf(s1.getTrivial()) >= fabsf(s2.getTrivial());
     }
 
-    __host__ __device__ inline bool operator> (const Scalar<Float>& s1, const Scalar<Float>& s2) {
-        return s1.getTrivial() > s2.getTrivial();
-    }
-
-    __host__ __device__ inline bool operator< (const Scalar<Float>& s1, const Scalar<Float>& s2) {
-        return s1.getTrivial() < s2.getTrivial();
-    }
-
-    __host__ __device__ inline bool operator== (const Scalar<Float>& s1, const Scalar<Float>& s2) {
-        return s1.getTrivial() == s2.getTrivial();
-    }
-
     template<class RandomGenerator>
     Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
@@ -154,18 +142,6 @@ namespace Physica::Core {
 
     inline bool absCompare(const Scalar<Double>& s1, const Scalar<Double>& s2) {
         return fabs(s1.getTrivial()) >= fabs(s2.getTrivial());
-    }
-
-    __host__ __device__ inline bool operator> (const Scalar<Double>& s1, const Scalar<Double>& s2) {
-        return s1.getTrivial() > s2.getTrivial();
-    }
-
-    __host__ __device__ inline bool operator< (const Scalar<Double>& s1, const Scalar<Double>& s2) {
-        return s1.getTrivial() < s2.getTrivial();
-    }
-
-    __host__ __device__ inline bool operator== (const Scalar<Double>& s1, const Scalar<Double>& s2) {
-        return s1.getTrivial() == s2.getTrivial();
     }
 
     template<class RandomGenerator>

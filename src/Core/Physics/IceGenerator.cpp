@@ -150,7 +150,7 @@ namespace Physica::Core {
             for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
                 const Vector3D otherO = initialCell.getPos().row(i) + delta;
                 const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
-                const bool isNotSelf = std::numeric_limits<ScalarType>::epsilon() < r2;
+                const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
                 const bool isInRange = r2 < squaredRadiusO;
                 if (isNotSelf && isInRange) {
                     const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);

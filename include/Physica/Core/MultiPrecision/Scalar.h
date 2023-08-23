@@ -199,6 +199,9 @@ namespace Physica::Core {
         Scalar operator<<(int i) const { return Scalar(f * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(f / std::pow(2, i)); }
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
+        __host__ __device__ bool operator>(const Scalar& s) const { return f > s.f; }
+        __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
+        __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
         friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
@@ -226,9 +229,6 @@ namespace Physica::Core {
     inline Scalar<Float> operator--(Scalar<Float>& s, int);
     /* Compare */
     inline bool absCompare(const Scalar<Float>& s1, const Scalar<Float>& s2);
-    __host__ __device__ inline bool operator> (const Scalar<Float>& s1, const Scalar<Float>& s2);
-    __host__ __device__ inline bool operator< (const Scalar<Float>& s1, const Scalar<Float>& s2);
-    __host__ __device__ inline bool operator== (const Scalar<Float>& s1, const Scalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double> : public ScalarBase<Scalar<Double>> {
@@ -258,6 +258,9 @@ namespace Physica::Core {
         Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
+        __host__ __device__ bool operator>(const Scalar& s) const { return d > s.d; }
+        __host__ __device__ bool operator<(const Scalar& s) const { return d < s.d; }
+        __host__ __device__ bool operator==(const Scalar& s) const { return d == s.d; }
         friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
@@ -285,9 +288,6 @@ namespace Physica::Core {
     inline Scalar<Double> operator--(Scalar<Double>& s, int);
     /* Compare */
     inline bool absCompare(const Scalar<Double>& s1, const Scalar<Double>& s2);
-    __host__ __device__ inline bool operator> (const Scalar<Double>& s1, const Scalar<Double>& s2);
-    __host__ __device__ inline bool operator< (const Scalar<Double>& s1, const Scalar<Double>& s2);
-    __host__ __device__ inline bool operator== (const Scalar<Double>& s1, const Scalar<Double>& s2);
 
     template<ScalarOption option>
     inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2);

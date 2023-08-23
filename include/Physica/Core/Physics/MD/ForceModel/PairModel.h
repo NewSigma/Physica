@@ -97,7 +97,7 @@ namespace Physica::Core {
                             auto to = pos.row(j);
                             r = to.asVector() - from;
                             const ScalarType r2 = r.squaredNorm();
-                            const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                            const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
                             if (isNotSelf && r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
                                 const ScalarType f_norm = force_functor(dist, r2);
@@ -187,7 +187,7 @@ namespace Physica::Core {
                     Vector3D from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const ScalarType r2 = (from - pos.row(j)).squaredNorm();
-                        const bool isNotSelf = std::numeric_limits<ScalarType>::min() < r2;
+                        const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
                             const ScalarType dist = sqrt(r2);
                             temp += pot_functor(dist, r2) - pot_shift;
