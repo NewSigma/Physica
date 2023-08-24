@@ -1,5 +1,7 @@
 # Physica
 
+This repository has been moved to https://gitee.com/newsigma/Physica
+
 Physica provides several basic modules in computational physics.
 
 There will be a lot of work to do in the future
