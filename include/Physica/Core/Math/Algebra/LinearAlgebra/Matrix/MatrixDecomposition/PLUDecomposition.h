@@ -24,20 +24,23 @@
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
     class PLUDecomposition {
-        DenseMatrix<T, type, maxRow, maxColumn> matrix;
-        size_t* biasOrder;
     public:
-        explicit PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn> m);
-        PLUDecomposition(const PLUDecomposition& l);
-        PLUDecomposition(PLUDecomposition&& l) noexcept;
-        ~PLUDecomposition();
+        using MatrixType = DenseMatrix<T, type, maxRow, maxColumn>;
+    private:
+        MatrixType matrix;
+        Utils::Array<size_t> biasOrder; //TODO: use permutation matrix instead
+    public:
+        explicit PLUDecomposition(MatrixType m);
+        PLUDecomposition(const PLUDecomposition& l) = default;
+        PLUDecomposition(PLUDecomposition&& l) noexcept = default;
+        ~PLUDecomposition() = default;
         /* Operators */
-        PLUDecomposition& operator=(const PLUDecomposition& l);
-        PLUDecomposition& operator=(PLUDecomposition&& l) noexcept;
+        PLUDecomposition& operator=(PLUDecomposition obj) noexcept;
+        /* Operations */
+        void swap(PLUDecomposition& obj) noexcept;
         /* Getters */
-        [[nodiscard]] DenseMatrix<T, type, maxRow, maxColumn>&& release() { return std::move(matrix); }
-        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] const size_t* getOrder() { return biasOrder; }
+        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
+        [[nodiscard]] const Utils::Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
         void decompositionColumn(size_t column);
     };

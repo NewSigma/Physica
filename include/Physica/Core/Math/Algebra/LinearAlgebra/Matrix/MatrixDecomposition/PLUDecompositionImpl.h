@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
     PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn> m)
             : matrix(std::move(m)) {
-        biasOrder = reinterpret_cast<size_t*>(malloc(matrix.getRow() * sizeof(size_t)));
+        biasOrder.resize(matrix.getRow());
         const auto rank = matrix.getRow();
         for(size_t i = 0; i < rank; ++i)
             biasOrder[i] = i;
@@ -35,42 +35,16 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(const PLUDecomposition& l)
-            : matrix(l.matrix), biasOrder(reinterpret_cast<size_t*>(malloc(l.matrix.getRow() * sizeof(size_t)))) {
-        const auto rank = l.matrix.getRow();
-        for(size_t i = 0; i < rank; ++i) {
-            biasOrder[i] = l.biasOrder[i];
-        }
-    }
-
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(PLUDecomposition&& l) noexcept
-            : matrix(std::move(l.matrix)), biasOrder(l.biasOrder) {
-        l.biasOrder = nullptr;
-    }
-
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>& PLUDecomposition<T, type, maxRow, maxColumn>::operator= (
-            const PLUDecomposition& l) {
-        if(this != &l) {
-            matrix = l.matrix;
-            realloc(biasOrder, matrix.getRow() * sizeof(size_t));
-        }
+    PLUDecomposition<T, type, maxRow, maxColumn>&
+    PLUDecomposition<T, type, maxRow, maxColumn>::operator=(PLUDecomposition obj) noexcept {
+        swap(obj);
         return *this;
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>& PLUDecomposition<T, type, maxRow, maxColumn>::operator= (
-            PLUDecomposition&& l) noexcept {
-        this->~PLUDecomposition();
-        matrix = std::move(l.matrix);
-        biasOrder = l.biasOrder;
-        l.biasOrder = nullptr;
-    }
-
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>::~PLUDecomposition() {
-        free(biasOrder);
+    void PLUDecomposition<T, type, maxRow, maxColumn>::swap(PLUDecomposition& obj) noexcept {
+        matrix.swap(obj.matrix);
+        biasOrder.swap(biasOrder);
     }
     /*!
      * Apply LU Decomposition on a column of Matrix \from, save the result to Matrix \to.
@@ -82,7 +56,7 @@ namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
     void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
         const auto startAlphaIndex = column + 1;
-        for (size_t j = 1; j < startAlphaIndex; ++j) { //Start from 1, unnecessary to handle j = 1
+        for (size_t j = 1; j < startAlphaIndex; ++j) { //Start from 1, unnecessary to handle j = 0
             T temp(matrix(j, column));
             for (size_t k = 0; k < j; ++k)
                 temp -= matrix(j, k) * matrix(k, column);

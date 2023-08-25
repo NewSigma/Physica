@@ -89,25 +89,6 @@ namespace Physica::Core {
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::lu() {
-        const auto rank = working.getRow();
-        PLUDecomposition lu(std::move(working));
-        working = lu.release();
-        for (size_t i = 0; i < rank - 1; ++i) {
-            auto bottom = working.bottomRows(i + 1);
-            auto col = bottom.col(rank);
-            col -= bottom.col(i).asVector() * working(i, rank);
-        }
-        for (size_t i = rank - 1; i > 0; --i) {
-            working(i, rank) /= working(i, i);
-            auto top = working.topRows(i);
-            auto col = top.col(rank);
-            col -= top.col(i).asVector() * working(i, rank);
-        }
-        working(0, rank) /= working(0, 0);
-    }
-
-    template<class T, int type, size_t maxRow, size_t maxColumn>
     void LinearEquations<T, type, maxRow, maxColumn>::swap(LinearEquations& equ) noexcept {
         working.swap(equ.working);
     }

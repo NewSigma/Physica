@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -49,7 +49,6 @@ namespace Physica::Core {
         void gaussJordanComplete();
         void gaussEliminationPartial();
         void gaussEliminationComplete();
-        void lu();
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
