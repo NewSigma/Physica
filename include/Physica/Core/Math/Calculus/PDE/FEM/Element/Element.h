@@ -37,6 +37,7 @@ namespace Physica::Core {
         using IndexArray = Utils::Array<size_t, DegreeOfFreedom>;
         using VectorType = Vector<ScalarType, Dim>;
         using MatrixType = typename Internal::Traits<Derived>::MatrixType;
+        static_assert(!ScalarType::isComplex, "[Error]: Complex scalar is not allowed");
     protected:
         IndexArray globalNodes;
     public:

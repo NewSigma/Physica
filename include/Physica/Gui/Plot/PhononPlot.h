@@ -27,7 +27,7 @@ namespace Physica::Gui {
     template<class ScalarType, class PosScalarType>
     class PhononPlot : public Plot {
         using ComplexType = Core::ComplexScalar<ScalarType>;
-        using Interpolator = Core::BrillouInterpolate<ComplexType>;
+        using Interpolator = Core::BrillouInterpolate<ScalarType>;
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
         using PhononType = Core::FrozenPhonon<ScalarType, PosScalarType>;
@@ -56,6 +56,8 @@ namespace Physica::Gui {
             const char* label);
         /* Getters */
         [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
+    private:
+        static Utils::Array<Core::RSpaceGrid<ScalarType>> makeFreqData(const PhononType& phonon, const MatrixGrid& forceConstants);
     };
 
     template<class ScalarType, class PosScalarType>
@@ -86,25 +88,21 @@ namespace Physica::Gui {
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
+        const auto freqData = makeFreqData(phonon, forceConstants);
 
-        DenseMatrix<ScalarType> buffer(numBranch, numPoint);
+        Vector<ScalarType> buffer(numPoint);
         ScalarType minFreq = Plot::getMinY();
         ScalarType maxFreq = Plot::getMaxY();
-        for (size_t i = 0; i < numPoint; ++i) {
-            const ScalarType factor = factors[i];
-            const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = zone.template interpolateHermiteMatrix(qPoint, forceConstants);
-            phonon.toDynamicMatrix(fcMatrix);
-            const auto eigen = PhononType::diagonalize(fcMatrix);
-            auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
-            buffer.col(i) = freq;
-            minFreq = std::min(minFreq, freq.min());
-            maxFreq = std::max(maxFreq, freq.max());
-        }
-
         for (size_t i = 0; i < numBranch; ++i) {
-            auto& scatter = Plot::scatter(x, buffer.row(i));
+            for (size_t j = 0; j < numPoint; ++j) {
+                const ScalarType factor = factors[j];
+                const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
+                const ScalarType freq = zone.interpolateFEM(qPoint, freqData[i]);
+                buffer[j] = freq;
+                minFreq = std::min(minFreq, freq);
+                maxFreq = std::max(maxFreq, freq);
+            }
+            auto& scatter = Plot::scatter(x, buffer);
             auto pen = scatter.pen();
             pen.setColor(Qt::black);
             scatter.setPen(pen);
@@ -136,26 +134,21 @@ namespace Physica::Gui {
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
+        const auto freqData = makeFreqData(phonon, forceConstants);
 
-        DenseMatrix<ScalarType> buffer(numBranch, numPoint);
+        Vector<ScalarType> buffer(numPoint);
         ScalarType minFreq = Plot::getMinY();
         ScalarType maxFreq = Plot::getMaxY();
-        for (size_t i = 0; i < numPoint; ++i) {
-            const ScalarType factor = factors[i];
-            const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = zone.template interpolateHermiteMatrix(qPoint, forceConstants);
-            phonon.toDynamicMatrix(fcMatrix);
-            auto eigen = PhononType::diagonalize(fcMatrix);
-            auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
-            auto bufferCol = buffer.col(i);
-            bufferCol = freq;
-            minFreq = std::min(minFreq, freq.min());
-            maxFreq = std::max(maxFreq, freq.max());
-        }
-
         for (size_t i = 0; i < numBranch; ++i) {
-            auto& line = Plot::line(x, buffer.row(i));
+            for (size_t j = 0; j < numPoint; ++j) {
+                const ScalarType factor = factors[j];
+                const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
+                const ScalarType freq = zone.interpolateFEM(qPoint, freqData[i]);
+                buffer[j] = freq;
+                minFreq = std::min(minFreq, freq);
+                maxFreq = std::max(maxFreq, freq);
+            }
+            auto& line = Plot::line(x, buffer);
             line.setColor(Qt::black);
         }
         Plot::setMinY(double(minFreq));
@@ -163,5 +156,24 @@ namespace Physica::Gui {
         currentX += deltaX;
         Plot::setMaxX(double(currentX));
         static_cast<QCategoryAxis*>(Plot::getAxisX())->append(label, double(currentX));
+    }
+
+    template<class ScalarType, class PosScalarType>
+    Utils::Array<Core::RSpaceGrid<ScalarType>>
+    PhononPlot<ScalarType, PosScalarType>::makeFreqData(const PhononType& phonon, const MatrixGrid& forceConstants) {
+        using namespace Physica::Core;
+        const size_t numBranch = phonon.getUnitCellDOF();
+        const Index3D dataDim = forceConstants.getDim();
+        Utils::Array<RSpaceGrid<ScalarType>> freqData(numBranch, dataDim);
+        GridBase::forIndexInGrid(dataDim, [numBranch, &freqData, &phonon, &forceConstants](Index3D index) {
+            auto fcMatrix = forceConstants(index);
+            phonon.toDynamicMatrix(fcMatrix);
+            auto eigen = PhononType::diagonalize(fcMatrix);
+            auto freq = phonon.makeFreq(eigen);
+            freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
+            for (size_t i = 0; i < numBranch; ++i)
+                freqData[i](index) = freq[i];
+        });
+        return freqData;
     }
 }

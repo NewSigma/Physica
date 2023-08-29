@@ -21,9 +21,9 @@
 #include <iostream>
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
-#include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
@@ -80,6 +80,9 @@ namespace Physica::Core {
         [[nodiscard]] static QPointGrid diagonalize(const MatrixGrid& dynamicMatrixes);
     private:
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
+        PositionMatrix makeWignerSeitzRadius() const;
+        GridStorage<DenseMatrix<ScalarType>> makeWignerSeitzWeights() const;
+        ScalarType calcWignerSeitzWeight(const Vector3D r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -106,7 +109,7 @@ namespace Physica::Core {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
         const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
-        
+
         MatrixGrid result(getForceConstantsGridSize(), unitCellDOF, unitCellDOF, ScalarType(0));
         auto& fcMatrixes = result.asArray();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
@@ -303,5 +306,72 @@ namespace Physica::Core {
         }
         averageDrift /= ScalarType(Dim);
         return averageDrift;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename FrozenPhonon<ScalarType, PosScalarType>::PositionMatrix
+    FrozenPhonon<ScalarType, PosScalarType>::makeWignerSeitzRadius() const {
+        constexpr int OneSideDim = 2; // 2 is enough to generate a Wigner-Seitz cell
+        constexpr int TwoSideDim = 2 * OneSideDim + 1;
+        constexpr size_t ResultSize = TwoSideDim * TwoSideDim * TwoSideDim - 1;
+        PositionMatrix wignerSeitzRadius(ResultSize, 3);
+        size_t index = 0;
+        for (int i = -OneSideDim; i <= OneSideDim; ++i) {
+            for (int j = -OneSideDim; j <= OneSideDim; ++j) {
+                for (int k = -OneSideDim; k <= OneSideDim; ++k) {
+                    const Vector3D factor{ScalarType(i * superSize[0]), ScalarType(j * superSize[1]), ScalarType(k * superSize[2])};
+                    auto row = wignerSeitzRadius.row(index);
+                    row = unitCell.getLattice().transpose() * factor;
+                    const bool isNotGammaPoint = row.squaredNorm() > std::numeric_limits<ScalarType>::epsilon();
+                    index += isNotGammaPoint;
+                }
+            }
+        }
+        assert(index == ResultSize && "[Error]: Wrong result");
+        return wignerSeitzRadius;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    GridStorage<DenseMatrix<ScalarType>>
+    FrozenPhonon<ScalarType, PosScalarType>::makeWignerSeitzWeights() const {
+        const auto wignerSeitzRadius = makeWignerSeitzRadius();
+        const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
+        const size_t numAtom = getNumUnitCellAtom();
+        GridStorage<DenseMatrix<ScalarType>> result(gridDim, numAtom, numAtom);
+        GridBase::forIndexInGrid(gridDim, [this, numAtom, &result, &wignerSeitzRadius](Index3D index) {
+            const Vector3D factor{ScalarType(index[0]) - ScalarType(2 * superSize[0]),
+                                  ScalarType(index[1]) - ScalarType(2 * superSize[1]),
+                                  ScalarType(index[2]) - ScalarType(2 * superSize[2])};
+            const Vector3D r0 = unitCell.getLattice().transpose() * factor;
+            auto& mat = result(index);
+            for (size_t c = 0; c < result.getColumn(); ++c) {
+                for (size_t r = 0; r < result.getRow(); ++r) {
+                    const Vector3D r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
+                    mat(r, c) = calcWignerSeitzWeight(r1, wignerSeitzRadius);
+                }
+            }
+        });
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType FrozenPhonon<ScalarType, PosScalarType>::calcWignerSeitzWeight(
+            const Vector3D r, const PositionMatrix& wignerSeitzRadius) const {
+        constexpr double precision = 1E-5;
+        size_t count = 1;
+        for (size_t i = 0; i < wignerSeitzRadius.getRow(); ++i) {
+            const auto radius = wignerSeitzRadius.row(i);
+            const ScalarType dot = r * radius.asVector();
+            const ScalarType halfSquaredNorm = radius.squaredNorm() * ScalarType(0.5);
+            const bool isOnBoundary = scalarNear(dot, halfSquaredNorm, precision);
+            if (isOnBoundary) [[unlikely]]
+                count += 1;
+            else {
+                const bool isOutsideWignerSeitzCell = dot > halfSquaredNorm;
+                if (isOutsideWignerSeitzCell)
+                    return ScalarType(0);
+            }
+        }
+        return reciprocal(ScalarType(count));
     }
 }

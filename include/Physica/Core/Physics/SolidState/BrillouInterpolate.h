@@ -22,6 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/PeriodicCell.h"
 
 namespace Physica::Core {
@@ -58,6 +59,7 @@ namespace Physica::Core {
         /* Operations */
         RealType calcRoughness() const;
         void interpolate(const RSpaceGrid<ScalarType>& data);
+        ScalarType interpolateFEM(Vector3D kPoint, const RSpaceGrid<ScalarType>& data) const;
         template<class MatrixType>
         MatrixType interpolateHermiteMatrix(Vector3D qPoint, const GridStorage<MatrixType>& matrixGrid);
         void swap(BrillouInterpolate& obj) noexcept;
@@ -91,7 +93,7 @@ namespace Physica::Core {
             for (size_t dim = 0; dim < Dim; ++dim)
                 phase += RealType(index[dim]) * kPoint[dim];
             phase *= RealType(2 * M_PI);
-            const auto factor = ComplexType::fromPhase(phase);
+            const auto factor = cos(phase);
 
             if constexpr (!isComplex) {
                 PeriodIndex3D pIndex(index, baseDim);
@@ -161,6 +163,50 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType BrillouInterpolate<ScalarType>::interpolateFEM(Vector3D kPoint, const RSpaceGrid<ScalarType>& data) const {
+        using ElementType = CuboidLinear<RealType>;
+        using IndexArray = typename ElementType::IndexArray;
+        for (size_t i = 0; i < Dim; ++i) {
+            kPoint[i] -= floor(kPoint[i]);
+            assert(!kPoint[i].isNegative());
+        }
+
+        const Index3D dataDim = data.getDim();
+        Vector3D globalPos{};
+        for (int i = 0; i < 3; ++i)
+            globalPos[i] = kPoint[i] * RealType(dataDim[i]);
+        const Index3D index0{size_t(double(globalPos[0])), size_t(double(globalPos[1])), size_t(double(globalPos[2]))};
+        const Vector3D point1{RealType(index0[0]), RealType(index0[1]), RealType(index0[2])};
+        const Vector3D point2{RealType(index0[0] + 1), RealType(index0[1] + 1), RealType(index0[2] + 1)};
+        const IndexArray nodeArr{
+            ElementType::LeftFrontBottom,
+            ElementType::LeftFrontTop,
+            ElementType::LeftBehindBottom,
+            ElementType::LeftBehindTop,
+            ElementType::RightFrontBottom,
+            ElementType::RightFrontTop,
+            ElementType::RightBehindBottom,
+            ElementType::RightBehindTop
+        };
+        const auto element = ElementType(point1, point2, nodeArr);
+        const Vector3D localPos = element.toLocalPos(globalPos);
+
+        ScalarType result = 0;
+        size_t localNodeIndex = 0;
+        for (int x = 0; x < 2; ++x) {
+            for (int y = 0; y < 2; ++y) {
+                for (int z = 0; z < 2; ++z) {
+                    Index3D index{(index0[0] + x) % dataDim[0], (index0[1] + y) % dataDim[1], index0[2] + z};
+                    const RealType factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
+                    result += factor * data(index);
+                    localNodeIndex += 1;
+                }
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType>
     template<class MatrixType>
     MatrixType BrillouInterpolate<ScalarType>::interpolateHermiteMatrix(Vector3D qPoint, const GridStorage<MatrixType>& matrixGrid) {
         const Index3D gridDim = matrixGrid.getDim();
@@ -222,7 +268,7 @@ namespace Physica::Core {
                     for (size_t i = 0; i < Dim; ++i)
                         phase += RealType(rIndex[i] * kIndex[i]) / RealType(dataDim[i]);
                     phase *= RealType(2 * M_PI);
-                    const auto factor = ComplexType::fromPhase(phase);
+                    const auto factor = cos(phase);
                     elem += baseCoeff(rIndex) * factor;
                 });
                 matrixM(r, c) = matrixM(c, r) = elem;

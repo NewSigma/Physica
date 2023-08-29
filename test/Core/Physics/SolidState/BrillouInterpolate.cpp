@@ -1,24 +1,18 @@
 #include <fstream>
-#include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Gui/Plot/PhononPlot.h"
+#include "Physica/Core/Physics/SolidState/BrillouInterpolate.h"
 #include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
-using namespace Physica::Gui;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;
 using PhononType = FrozenPhonon<ScalarType, ScalarType>;
-using MatrixType = typename PhononType::MatrixType;
 using MDCellType = typename PhononType::MDCellType;
 using Index3D = typename GridBase::Index3D;
-constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
-constexpr double displace = PhyConst<AU>::angstormToBohr(0.001);
 
 const static char* data = "Structure\n"
                            "1\n"
@@ -41,26 +35,7 @@ const static char* data = "Structure\n"
                            "3.820759535  0.5593996644   0.148500219\n"
                            "3.818733454   3.418268919   3.002308846";
 
-class ForceModel : private Q_TIP4P<ScalarType, ScalarType> {
-    using Base = Q_TIP4P<ScalarType, ScalarType>;
-    using typename Base::MDCellType;
-public:
-    using Base::Base;
-    /* Operations */
-    template<class Executor, bool IsSmallCell = true>
-    [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const {
-        static_assert(IsSmallCell);
-        return Base::force_unsort<Executor, true>(cell);
-    }
-    ScalarType potentialEnergy(const MDCellType& cell) const {
-        Base base(*this);
-        base.updateLattice(cell.getLattice());
-        return base.potentialEnergy_unsort(cell);
-    }
-    using Base::getNumMolecule;
-};
-
-int main(int argc, char** argv) {
+int main() {
     Poscar poscar{};
     {
         auto tmp = TempFile("/tmp/tmpXXXXXX");
@@ -74,23 +49,21 @@ int main(int argc, char** argv) {
         poscar.normalize();
     }
     MDCellType unitCell(poscar);
-    unitCell.scale(PhyConst<AU>::angstormToBohr(1));
+    {
+        const VectorType data{0.01944055685, 0.01944982364, 0.01947054153, 0.01949142063, 0.01950011668, 0.01949142063, 0.01947054153, 0.01944982364, 0.02056772432, 0.02055863517, 0.02005045933, 0.01987060425, 0.01981818079, 0.01981866608, 0.01987191262, 0.02005321502, 0.02123840976, 0.02151070523, 0.02123340334, 0.02083860036, 0.0206245673, 0.02056524248, 0.02062685159, 0.02084260051, 0.02167299944, 0.02188787602, 0.02188538597, 0.02166774908, 0.0214625393, 0.02137046087, 0.02137231221, 0.02146722801, 0.02181802013, 0.02184351139, 0.02186800762, 0.02183939408, 0.02181225543, 0.02183939408, 0.02186800762, 0.02184351139, 0.02167299944, 0.02146722801, 0.02137231221, 0.02137046087, 0.0214625393, 0.02166774908, 0.02188538597, 0.02188787602, 0.02123840976, 0.02084260051, 0.02062685159, 0.02056524248, 0.0206245673, 0.02083860036, 0.02123340334, 0.02151070523, 0.02056772432, 0.02005321502, 0.01987191262, 0.01981866608, 0.01981818079, 0.01987060425, 0.02005045933, 0.02055863517};
+        const Index3D gridDim = {8, 8, 1};
+        RSpaceGrid<ComplexType> dataGrid(gridDim);
+        dataGrid.flatten() = data;
 
-    PhononType ph(unitCell, {8, 8, 1});
-    MDCellType superCell = unitCell.makeSuperCell<ExtendCellOption::CellMajor>(ph.getSuperSize());
-    
-    ForceModel model(superCell, pair_cutoff);
-    const auto fcMatrixGrid = ph.makeForceConstants(model, displace, 1E-10, 100);
+        BrillouInterpolate<ComplexType> zone({16, 16, 1}, unitCell.getLattice(), 0, 1E6);
+        zone.interpolate(dataGrid);
 
-    QApplication app(argc, argv);
-    auto* plot = new PhononPlot<ScalarType, ScalarType>();
-    plot->chart()->legend()->setVisible(false);
-    BrillouInterpolate<ScalarType> zone(ph.getSuperSize(), unitCell.getLattice(), 0.75, 0.75);
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
-    plot->setMaxY(120);
-    plot->setDeltaY(50);
-    plot->show();
-    return QApplication::exec();
+        const Vector<ScalarType> x1 = Vector<ScalarType>::linspace(0, 1, 40);
+        for (size_t i = 0; i < x1.getLength(); ++i) {
+            const auto value = zone(Vector3D{x1[i], 0, 0});
+            if (!scalarNear(value.getImag(), ScalarType(0), 1E-5))
+                return 1;
+        }
+    }
+    return 0;
 }

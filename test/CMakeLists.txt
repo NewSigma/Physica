@@ -69,6 +69,7 @@ physica_add_test(Scalar Core/MultiPrecision/ScalarTest.cpp)
 ## Parallel
 physica_add_test(ThreadPool Core/Parallel/ThreadPool.cpp)
 ## Physics
+physica_add_test(BrillouInterpolate Core/Physics/SolidState/BrillouInterpolate.cpp)
 physica_add_test(CrystalCell Core/Physics/CrystalCell.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(IceGenerator Core/Physics/IceGenerator.cpp)
