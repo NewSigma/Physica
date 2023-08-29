@@ -28,6 +28,7 @@ namespace Physica::Core {
     private:
         LUType lu;
     public:
+        LUSolver() = default;
         LUSolver(MatrixType A);
         LUSolver(const LUSolver&) = default;
         LUSolver(LUSolver&&) noexcept = default;
@@ -35,6 +36,7 @@ namespace Physica::Core {
         /* Operators */
         LUSolver& operator=(LUSolver obj) noexcept;
         /* Operations */
+        void decomposition(MatrixType A);
         template<class VectorType>
         Vector<T, Order> solve(const RValueVector<VectorType>& b) const;
         void swap(LUSolver& obj) noexcept;
@@ -50,6 +52,11 @@ namespace Physica::Core {
     LUSolver<T, Option, Order>::operator=(LUSolver<T, Option, Order> obj) noexcept {
         swap(obj);
         return *this;
+    }
+
+    template<class T, int Option, size_t Order>
+    void LUSolver<T, Option, Order>::decomposition(MatrixType A) {
+        lu.compute(std::move(A));
     }
 
     template<class T, int Option, size_t Order>

@@ -21,32 +21,35 @@
 #include <QtCharts/QCategoryAxis>
 #include "Plot.h"
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
+#include "Physica/Core/Physics/SolidState/BrillouInterpolate.h"
 
 namespace Physica::Gui {
     template<class ScalarType, class PosScalarType>
     class PhononPlot : public Plot {
+        using ComplexType = Core::ComplexScalar<ScalarType>;
+        using Interpolator = Core::BrillouInterpolate<ComplexType>;
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
         using PhononType = Core::FrozenPhonon<ScalarType, PosScalarType>;
-        using InterpolateMethod = typename PhononType::InterpolateMethod;
         using MatrixGrid = typename PhononType::MatrixGrid;
+        using Index3D = typename Core::GridBase::Index3D;
 
         ScalarType currentX;
     public:
         PhononPlot();
         /* Operations */
-        template<InterpolateMethod Method>
         void plotPathScatter(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
+            Interpolator& zone,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
             const char* label);
-        template<InterpolateMethod Method>
         void plotPathLine(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
+            Interpolator& zone,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -70,10 +73,10 @@ namespace Physica::Gui {
     }
 
     template<class ScalarType, class PosScalarType>
-    template<typename PhononPlot<ScalarType, PosScalarType>::InterpolateMethod Method>
     void PhononPlot<ScalarType, PosScalarType>::plotPathScatter(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
+            Interpolator& zone,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -90,7 +93,7 @@ namespace Physica::Gui {
         for (size_t i = 0; i < numPoint; ++i) {
             const ScalarType factor = factors[i];
             const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.template interpolatePoint<Method>(qPoint, forceConstants);
+            auto fcMatrix = zone.template interpolateHermiteMatrix(qPoint, forceConstants);
             phonon.toDynamicMatrix(fcMatrix);
             const auto eigen = PhononType::diagonalize(fcMatrix);
             auto freq = phonon.makeFreq(eigen);
@@ -120,10 +123,10 @@ namespace Physica::Gui {
      * [1] https://github.com/phonopy/phonopy
      */
     template<class ScalarType, class PosScalarType>
-    template<typename PhononPlot<ScalarType, PosScalarType>::InterpolateMethod Method>
     void PhononPlot<ScalarType, PosScalarType>::plotPathLine(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
+            Interpolator& zone,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -140,10 +143,9 @@ namespace Physica::Gui {
         for (size_t i = 0; i < numPoint; ++i) {
             const ScalarType factor = factors[i];
             const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.template interpolatePoint<Method>(qPoint, forceConstants);
+            auto fcMatrix = zone.template interpolateHermiteMatrix(qPoint, forceConstants);
             phonon.toDynamicMatrix(fcMatrix);
             auto eigen = PhononType::diagonalize(fcMatrix);
-            eigen.sort();
             auto freq = phonon.makeFreq(eigen);
             freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
             auto bufferCol = buffer.col(i);

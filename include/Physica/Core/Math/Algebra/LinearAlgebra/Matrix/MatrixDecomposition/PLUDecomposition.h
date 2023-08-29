@@ -30,6 +30,7 @@ namespace Physica::Core {
         MatrixType matrix;
         Utils::Array<size_t> biasOrder; //TODO: use permutation matrix instead
     public:
+        PLUDecomposition() = default;
         explicit PLUDecomposition(MatrixType m);
         PLUDecomposition(const PLUDecomposition& l) = default;
         PLUDecomposition(PLUDecomposition&& l) noexcept = default;
@@ -37,6 +38,7 @@ namespace Physica::Core {
         /* Operators */
         PLUDecomposition& operator=(PLUDecomposition obj) noexcept;
         /* Operations */
+        void compute(MatrixType m);
         void swap(PLUDecomposition& obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }

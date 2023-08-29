@@ -164,7 +164,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void FFT<ScalarType, 1>::invTransform(const This& planProvider, This& bufferProvider) {
+    void FFT<ScalarType, 1>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
         assert(backward_plan != nullptr);
@@ -182,7 +182,11 @@ namespace Physica::Core {
             else
                 fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
         }
+    }
 
+    template<class ScalarType>
+    void FFT<ScalarType, 1>::invTransform(const This& planProvider, This& bufferProvider) {
+        rawInvTransform(planProvider, bufferProvider);
         const ScalarType factor = RealType(1.0 / planProvider.getRSpaceSize());
         bufferProvider.getRSpace() *= factor;
     }
@@ -313,6 +317,7 @@ namespace Physica::Core {
             result[i] = rSpaceSize[i];
         return result;
     }
+
     template<class ScalarType, size_t Dim>
     typename FFT<ScalarType, Dim>::IndexArray FFT<ScalarType, Dim>::getKSpaceSize() const noexcept {
         IndexArray result{};
@@ -354,7 +359,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    inline void FFT<ScalarType, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
+    void FFT<ScalarType, Dim>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
         assert(backward_plan != nullptr);
@@ -372,6 +377,12 @@ namespace Physica::Core {
             else
                 fftw_execute_dft_c2r(backward_plan, buffer, reinterpret_cast<double*>(buffer));
         }
+        
+    }
+
+    template<class ScalarType, size_t Dim>
+    inline void FFT<ScalarType, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
+        rawInvTransform(planProvider, bufferProvider);
         const ScalarType factor = RealType(1.0 / planProvider.sumRSpaceSize(0));
         bufferProvider.getRSpace() *= factor;
     }

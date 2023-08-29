@@ -56,10 +56,10 @@ namespace Physica::Core {
         constexpr static double boltzmannK = 1.380649E-23;
         constexpr static double avogadroNa = 6.02214076E23;
         constexpr static double speedOfLight = 299792458;
+        constexpr static double atomicMassConst = 1.66053906660E-27;
         /**
          * The first element is a space holder
          */
-        constexpr static double relativeMassInKg = 1E-3 / avogadroNa;
         constexpr static double relativeAtomMass[19]{0, 1.00798, 4.002602,
                 6.968, 9.0121831, 10.814, 12.0106, 14.00686, 15.99940, 18.998403162, 20.1797,
                 22.98976928, 24.306, 26.9815384, 28.085, 30.973761998, 32.068, 35.452, 39.878};
@@ -69,7 +69,7 @@ namespace Physica::Core {
                 "K", "Ca"};
     
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
-        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * relativeMassInKg; }
+        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * atomicMassConst; }
         [[nodiscard]] constexpr static double calorieToJoule(double calorie) { return calorie * calorieInJoule; }
         [[nodiscard]] constexpr static double waveNumToTHz(double waveNum) { return waveNum * speedOfLight * 1E-10; }
     };

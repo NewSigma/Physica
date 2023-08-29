@@ -100,10 +100,6 @@ namespace Physica::Core {
         return temp;
     }
 
-    inline bool absCompare(const Scalar<Float>& s1, const Scalar<Float>& s2) {
-        return fabsf(s1.getTrivial()) >= fabsf(s2.getTrivial());
-    }
-
     template<class RandomGenerator>
     Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
@@ -138,10 +134,6 @@ namespace Physica::Core {
         Scalar<Double> temp(s);
         s -= Scalar<Double>(1.0);
         return temp;
-    }
-
-    inline bool absCompare(const Scalar<Double>& s1, const Scalar<Double>& s2) {
-        return fabs(s1.getTrivial()) >= fabs(s2.getTrivial());
     }
 
     template<class RandomGenerator>

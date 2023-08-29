@@ -22,8 +22,20 @@
 
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(DenseMatrix<T, type, maxRow, maxColumn> m)
-            : matrix(std::move(m)) {
+    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(MatrixType m) {
+        compute(std::move(m));
+    }
+
+    template<class T, int type, size_t maxRow, size_t maxColumn>
+    PLUDecomposition<T, type, maxRow, maxColumn>&
+    PLUDecomposition<T, type, maxRow, maxColumn>::operator=(PLUDecomposition obj) noexcept {
+        swap(obj);
+        return *this;
+    }
+
+    template<class T, int type, size_t maxRow, size_t maxColumn>
+    void PLUDecomposition<T, type, maxRow, maxColumn>::compute(MatrixType m) {
+        matrix = std::move(m);
         biasOrder.resize(matrix.getRow());
         const auto rank = matrix.getRow();
         for(size_t i = 0; i < rank; ++i)
@@ -32,13 +44,6 @@ namespace Physica::Core {
             std::swap(biasOrder[i], biasOrder[MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(matrix, i)]);
             decompositionColumn(i);
         }
-    }
-
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>&
-    PLUDecomposition<T, type, maxRow, maxColumn>::operator=(PLUDecomposition obj) noexcept {
-        swap(obj);
-        return *this;
     }
 
     template<class T, int type, size_t maxRow, size_t maxColumn>

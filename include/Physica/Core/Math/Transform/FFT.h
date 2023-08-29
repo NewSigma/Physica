@@ -96,6 +96,7 @@ namespace Physica::Core {
         using RSpaceType::transform;
         using KSpaceType::invTransform;
         void transform() { transform(*this, *this); }
+        void rawInvTransform() { rawInvTransform(*this, *this); }
         void invTransform() { invTransform(*this, *this); }
         void swap(FFT& fft) noexcept;
         /* Getters */
@@ -115,6 +116,7 @@ namespace Physica::Core {
         template<class IndexType>
         [[nodiscard]] inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
+        static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
         FFT(size_t rSpaceSize_, RealType rSpaceDelta_);
@@ -169,6 +171,7 @@ namespace Physica::Core {
         using RSpaceType::transform;
         using KSpaceType::invTransform;
         void transform() { transform(*this, *this); }
+        void rawInvTransform() { rawInvTransform(*this, *this); }
         void invTransform() { invTransform(*this, *this); }
         void swap(FFT& fft) noexcept;
         /* Getters */
@@ -187,6 +190,7 @@ namespace Physica::Core {
         template<class IndexType>
         [[nodiscard]] static Utils::Array<IndexType, Dim> rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);
+        static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
         FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, Utils::Array<RealType, Dim> rSpaceDelta_);

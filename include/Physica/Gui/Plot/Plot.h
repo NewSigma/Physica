@@ -49,17 +49,17 @@ namespace Physica::Gui {
         Plot& operator=(Plot&&) noexcept = delete;
         /* Operations */
         template<class VectorType>
-        QLineSeries& line(const Core::LValueVector<VectorType>& y);
+        QLineSeries& line(const Core::RValueVector<VectorType>& y);
         template<class VectorType1, class VectorType2>
-        QLineSeries& line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        QLineSeries& line(const Core::RValueVector<VectorType1>& x, const Core::RValueVector<VectorType2>& y);
         template<class VectorType>
         QSplineSeries& spline(const Core::LValueVector<VectorType>& y);
         template<class VectorType1, class VectorType2>
         QSplineSeries& spline(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
         template<class VectorType>
-        QScatterSeries& scatter(const Core::LValueVector<VectorType>& y);
+        QScatterSeries& scatter(const Core::RValueVector<VectorType>& y);
         template<class VectorType1, class VectorType2>
-        QScatterSeries& scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y);
+        QScatterSeries& scatter(const Core::RValueVector<VectorType1>& x, const Core::RValueVector<VectorType2>& y);
         template<class VectorType>
         QAreaSeries& hist(const Core::LValueVector<VectorType>& data, size_t binCount, bool density = false);
         template<class VectorType>
@@ -112,17 +112,17 @@ namespace Physica::Gui {
     };
 
     template<class VectorType>
-    QLineSeries& Plot::line(const Core::LValueVector<VectorType>& y) {
+    QLineSeries& Plot::line(const Core::RValueVector<VectorType>& y) {
         using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
         return line(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
     template<class VectorType1, class VectorType2>
-    QLineSeries& Plot::line(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
+    QLineSeries& Plot::line(const Core::RValueVector<VectorType1>& x, const Core::RValueVector<VectorType2>& y) {
         assert(x.getLength() == y.getLength());
         QLineSeries* series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
-            *series << QPointF(double(x[i]), double(y[i]));
+            *series << QPointF(double(x.calc(i)), double(y.calc(i)));
         chart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
@@ -152,17 +152,17 @@ namespace Physica::Gui {
     }
 
     template<class VectorType>
-    QScatterSeries& Plot::scatter(const Core::LValueVector<VectorType>& y) {
+    QScatterSeries& Plot::scatter(const Core::RValueVector<VectorType>& y) {
         using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
         return scatter(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
     template<class VectorType1, class VectorType2>
-    QScatterSeries& Plot::scatter(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& y) {
+    QScatterSeries& Plot::scatter(const Core::RValueVector<VectorType1>& x, const Core::RValueVector<VectorType2>& y) {
         assert(x.getLength() == y.getLength());
         QScatterSeries* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
-            *series << QPointF(double(x[i]), double(y[i]));
+            *series << QPointF(double(x.calc(i)), double(y.calc(i)));
         chart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);

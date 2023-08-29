@@ -231,6 +231,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    [[nodiscard]] bool absCompare(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
+        if constexpr (ScalarType::isComplex)
+            return s1.squaredNorm() >= s2.squaredNorm();
+        else
+            return abs(s1.getDerived()) >= abs(s2.getDerived());
+    }
+
+    template<class ScalarType>
     inline void swap(ScalarBase<ScalarType>& s1, ScalarBase<ScalarType>& s2) noexcept {
         s1.getDerived().swap(s2.getDerived());
     }

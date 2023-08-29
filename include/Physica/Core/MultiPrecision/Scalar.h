@@ -169,7 +169,6 @@ namespace Physica::Core {
     bool operator> (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
     bool operator< (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
     bool operator== (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
-    //IDEA: Comparisons between Scalar<MultiPrecision, true> may consider their accuracy.
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
     class Scalar<Float> : public ScalarBase<Scalar<Float>> {
@@ -227,8 +226,6 @@ namespace Physica::Core {
     inline Scalar<Float>& operator--(Scalar<Float>& s);
     inline Scalar<Float> operator++(Scalar<Float>& s, int);
     inline Scalar<Float> operator--(Scalar<Float>& s, int);
-    /* Compare */
-    inline bool absCompare(const Scalar<Float>& s1, const Scalar<Float>& s2);
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double> : public ScalarBase<Scalar<Double>> {
@@ -286,8 +283,6 @@ namespace Physica::Core {
     inline Scalar<Double>& operator--(Scalar<Double>& s);
     inline Scalar<Double> operator++(Scalar<Double>& s, int);
     inline Scalar<Double> operator--(Scalar<Double>& s, int);
-    /* Compare */
-    inline bool absCompare(const Scalar<Double>& s1, const Scalar<Double>& s2);
 
     template<ScalarOption option>
     inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2);
