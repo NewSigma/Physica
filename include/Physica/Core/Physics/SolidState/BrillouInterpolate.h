@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
-#include "Physica/Core/Physics/PeriodicCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
     /**

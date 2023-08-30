@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {

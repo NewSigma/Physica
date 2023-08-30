@@ -24,11 +24,14 @@
 
 namespace Physica::Core {
     /**
+     * Member variable pot_shift is referenced from [1]
+     * 
      * References:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class Derived>
     class PairModel : public Utils::CRTPBase<Derived> {
+        using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         using PosScalarType = typename Internal::Traits<Derived>::PosScalarType;
@@ -37,11 +40,7 @@ namespace Physica::Core {
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
-        
     private:
-        static_assert(is_scalar<ScalarType>::value && is_scalar<PosScalarType>::value, "[Error]: Invalid ScalarType");
-        using Base = Utils::CRTPBase<Derived>;
-
         ScalarType cutoff;
         ScalarType squared_cutoff;
         ScalarType pot_shift;

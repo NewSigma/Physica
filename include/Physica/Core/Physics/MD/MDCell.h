@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/PeriodicCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 

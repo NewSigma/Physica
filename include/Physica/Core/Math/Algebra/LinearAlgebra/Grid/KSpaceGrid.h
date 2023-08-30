@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/PeriodicCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "RSpaceGrid.h"
 
