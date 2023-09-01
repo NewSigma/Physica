@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -65,7 +65,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
-        [[nodiscard]] ScalarType getMass(size_t particleID) const;
+        [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
@@ -165,12 +165,6 @@ namespace Physica::Core {
         MDCell result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    inline ScalarType MDCell<ScalarType, PosScalarType, Dim>::getMass(size_t particleID) const {
-        assert(particleID < Base::getNumParticle());
-        return massVec[particleID];
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

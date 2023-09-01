@@ -46,6 +46,11 @@ namespace Physica::Core {
         v1.getDerived() = v1.getDerived() + v2.getDerived();
     }
 
+    template<class Derived, class OtherDerived>
+    __host__ __device__ inline void operator-=(device_obj<LValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
+        v1.getDerived() = v1.getDerived() - v2.getDerived();
+    }
+
     template<class VectorType, class ScalarType>
     __host__ __device__ inline void operator+=(device_obj<LValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
         v.getDerived() = v.getDerived() + s.getDerived();

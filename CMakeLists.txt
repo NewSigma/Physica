@@ -71,6 +71,7 @@ if(${PHYSICA_CUDA})
         --diag-suppress 186 \
         --diag-suppress 20011 \
         --default-stream per-thread \
+        --expt-relaxed-constexpr \
         ${CMAKE_CXX_FLAGS}")
 endif()
 
@@ -94,8 +95,8 @@ if(${PHYSICA_GUI})
 endif()
 
 if(${PHYSICA_PROFILE})
-    include_directories(${GPerfTools_INCLUDE_DIR})
     find_package(GPerfTools REQUIRED)
+    include_directories(${GPerfTools_INCLUDE_DIR})
 endif()
 
 if(${PHYSICA_TORCH})

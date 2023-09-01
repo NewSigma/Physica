@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -44,6 +44,7 @@ namespace Physica::Core {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(Dim == 1 || Dim == 2 || Dim == 3, "[Error]: Unsupported dimention");
 
+        using This = PeriodicCell<ScalarType, Dim>;
         using Base = Internal::PeriodicCellImpl;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
@@ -114,6 +115,8 @@ namespace Physica::Core {
         template<ExtendCellOption Option>
         static void toSuperPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
         static void toUnitPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z);
+
+        friend class device_obj<This>;
     };
 
     template<class ScalarType, unsigned int Dim>

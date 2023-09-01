@@ -135,7 +135,7 @@ namespace Physica::Core {
     ContinuousMatrix<Derived>::rightCols(size_t from) const {
         return {Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getColumn() - from};
     }
-////////////////////////////////////////////////////////
+
     template<class Derived>
     template<size_t Row, size_t Column>
     inline ContinuousMatrixBlock<Derived, Row, Column>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -79,7 +79,7 @@ namespace Physica::Core {
         static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
                       MatrixType1::ColumnAtCompile == Dynamic ||
                       MatrixType2::RowAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
+                      "[Error]: Row and column do not match in matrix-vector product");
     public:
         using Base = RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>;
         using typename Base::ScalarType;
@@ -199,4 +199,4 @@ namespace Physica::Core {
     }
 }
 
-#include "MatrixImpl/MatrixProductImpl.h"
+#include "MatrixProductImpl.h"

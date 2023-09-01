@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -31,14 +31,27 @@ namespace Physica::Core {
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
         constexpr static bool isComplex = ScalarType::isComplex;
+    private:
+        using RealType = typename ScalarType::RealType;
     public:
         /* Operations */
         template<class OtherDerived>
         __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        template<class OtherDerived>
+        __device__ inline void assignToImpl(OtherDerived& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __device__ inline RealType norm() const;
+        [[nodiscard]] __device__ inline RealType squaredNorm() const;
+        [[nodiscard]] __device__ ScalarType max() const;
+        [[nodiscard]] __device__ ScalarType min() const;
+        [[nodiscard]] __device__ ScalarType sum() const;
     };
+
+    template<class VectorType1, class VectorType2>
+    __device__ typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
+    operator*(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2);
 }
 
 #include "RValueVectorImpl.cuh"

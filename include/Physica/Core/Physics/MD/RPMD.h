@@ -77,28 +77,28 @@ namespace Physica::Core {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Executor> void updateForce(const ForceModel& model);
+        template<class ForceModel, class Executor> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nve_step(KineticModel& kineticModel, const ForceModel& forceModel);
+        void nve_step(KineticModel& kineticModel, ForceModel& forceModel);
         template<class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel);
+        void nve_step_for(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  class RandomGenerator,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, const ForceModel& forceModel);
+        void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  class RandomGenerator,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, KineticModel& kineticModel, const ForceModel& forceModel);
+        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  class RandomGenerator,
@@ -106,14 +106,14 @@ namespace Physica::Core {
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, const ForceModel& forceModel);
+        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  class RandomGenerator,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, const ForceModel& forceModel);
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();

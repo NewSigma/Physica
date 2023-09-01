@@ -59,7 +59,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class ForceModel, class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::updateForce(const ForceModel& model) {
+    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::updateForce(ForceModel& model) {
         if (isContractEnabled()) {
             auto kernel_short = [&](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
@@ -98,7 +98,7 @@ namespace Physica::Core {
     template<class KineticModel,
              class ForceModel,
              class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(KineticModel& kineticModel, const ForceModel& forceModel) {
+    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step(KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep);
@@ -115,7 +115,7 @@ namespace Physica::Core {
     template<class KineticModel,
              class ForceModel,
              class Executor>
-    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_for(ScalarType duration, KineticModel& kineticModel, const ForceModel& forceModel) {
+    void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nve_step_for(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
@@ -134,7 +134,7 @@ namespace Physica::Core {
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::nvt_step(
             const Thermostat& thermostat,
             KineticModel& kineticModel,
-            const ForceModel& forceModel) {
+            ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
@@ -161,7 +161,7 @@ namespace Physica::Core {
             ScalarType duration,
             const Thermostat& thermostat,
             KineticModel& kineticModel,
-            const ForceModel& forceModel) {
+            ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
@@ -179,7 +179,7 @@ namespace Physica::Core {
             RandomGenerator& gen,
             Barostat& barostat,
             KineticModel& kineticModel,
-            const ForceModel& forceModel) {
+            ForceModel& forceModel) {
         barostat.forceStep(*this, timeStep * 0.5);
         kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
         thermostat.step(ringPolymer, gen, timeStep);
@@ -196,7 +196,7 @@ namespace Physica::Core {
             RandomGenerator& gen,
             Barostat& barostat,
             KineticModel& kineticModel,
-            const ForceModel& forceModel) {
+            ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             npt_step<Thermostat, RandomGenerator, Barostat, KineticModel, ForceModel, Executor>(thermostat, gen, barostat, kineticModel, forceModel);

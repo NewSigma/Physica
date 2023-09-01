@@ -152,8 +152,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::max() const {
+    template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
         assert(getLength() != 0);
         ScalarType result = calc(0);
         for(size_t i = 1; i < getLength(); ++i) {
@@ -164,8 +164,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::min() const {
+    template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
         assert(getLength() != 0);
         ScalarType result = calc(0);
         for(size_t i = 1; i < getLength(); ++i) {
@@ -176,8 +176,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType>
-    typename RValueVector<VectorType>::ScalarType RValueVector<VectorType>::sum() const {
+    template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::sum() const {
         assert(getLength() != 0);
         auto result = ScalarType(0);
         for(size_t i = 0; i < getLength(); ++i)

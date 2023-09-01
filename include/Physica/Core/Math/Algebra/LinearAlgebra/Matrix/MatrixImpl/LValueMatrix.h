@@ -31,7 +31,7 @@ namespace Physica::Core {
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
-     * In other words, you can take the address of elements in the matrix.
+     * In other words, you can take the address of elements in a LValueMatrix.
      */
     template<class Derived>
     class LValueMatrix : public RValueMatrix<Derived> {

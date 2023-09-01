@@ -18,14 +18,14 @@
  */
 #pragma once
 
-namespace Physica::Core::Internal {
+namespace Physica::Core {
     //////////////////////////////////////////////Column-Element//////////////////////////////////////////////
     template<class Derived>
     template<size_t Length, size_t MaxLength>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
-        static_assert(Traits<Derived>::RowAtCompile == Dynamic);
+        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
+        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
 
@@ -84,8 +84,8 @@ namespace Physica::Core::Internal {
     template<size_t Length, size_t MaxLength>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
-        static_assert(Traits<Derived>::RowAtCompile == Dynamic);
+        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
+        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
         assert(v.getLength() == getDerived().getColumn());
 
@@ -141,8 +141,8 @@ namespace Physica::Core::Internal {
     template<size_t Length, size_t MaxLength>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
-        static_assert(Traits<Derived>::RowAtCompile == Dynamic);
+        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
+        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
         assert(v.getLength() == Base::getDerived().getColumn());
 
@@ -180,8 +180,8 @@ namespace Physica::Core::Internal {
     template<size_t Length, size_t MaxLength>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::appendRow(
             const Vector<T, Length, MaxLength>& v) {
-        [[maybe_unused]] constexpr size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
-        static_assert(Traits<Derived>::RowAtCompile == Dynamic);
+        [[maybe_unused]] constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
+        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
         assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
         assert(v.getLength() == Base::getDerived().getColumn());
 

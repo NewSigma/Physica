@@ -20,9 +20,13 @@
 
 #include <thread>
 #include "Physica/Core/Parallel/StreamPool.cuh"
+#include "SequentialExecutor.h"
 
 namespace Physica::Core {
-    class CudaExecutor {
+    /**
+     * Single thread with cuda support
+     */
+    class CudaExecutor : public SequentialExecutor {
     public:
         static void wait() {
             const auto stream = StreamPool::getStream();

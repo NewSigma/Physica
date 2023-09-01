@@ -18,20 +18,21 @@
  */
 #pragma once
 
-#include "MatrixImpl/LValueMatrix.cuh"
+#include "MatrixImpl/ContinuousMatrix.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
+#include "MatrixImpl/MatrixProduct.cuh"
 
 namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     class device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
-            : public device_obj<LValueMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>>
-            , public Internal::device_obj<Internal::DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, option>>
+            : public device_obj<ContinuousMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>>
+            , public device_obj<DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, option>>
             , public DenseMatrixDim<device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>, Row, Column, MaxRow, MaxColumn> {
         using host_obj = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using host_storage = typename host_obj::Storage;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
-        using Storage = Internal::device_obj<Internal::DenseMatrixStorage<host_obj, option>>;
+        using Storage = device_obj<DenseMatrixStorage<host_obj, option>>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
     public:
         device_obj() = default;
@@ -41,6 +42,8 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        using Base::operator=;
+        using Storage::operator();
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost(), Dim::getRow(), Dim::getColumn()); }
         void swap(device_obj& obj) noexcept;

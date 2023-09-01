@@ -43,10 +43,35 @@ namespace Physica::Core {
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getDerived().getLength(); }
     };
+    //////////////////////////////////////Sub//////////////////////////////////////
+    template<class VectorType1, class VectorType2>
+    class device_obj<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>
+            : public device_obj<RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>>> {
+        using DeviceVector1 = device_obj<VectorType1>;
+        using DeviceVector2 = device_obj<VectorType2>;
+    public:
+        using host_obj = VectorExpression<Utils::ExpressionType::Sub, VectorType1, VectorType2>;
+        using Base = device_obj<RValueVector<host_obj>>;
+        using typename Base::ScalarType;
+    private:
+        Physica::PlainStruct<DeviceVector1> v1;
+        Physica::PlainStruct<DeviceVector2> v2;
+    public:
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
+                : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
+            assert(v1_.getLength() == v2_.getLength());
+        }
+        /* Getters */
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+            return ScalarType(v1.getDerived().calc(index)) - ScalarType(v2.getDerived().calc(index));
+        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getDerived().getLength(); }
+    };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>
             : public device_obj<RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using DeviceVector = device_obj<VectorType>;
     public:
         using host_obj = VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>;
@@ -96,6 +121,32 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return v1.getDerived().calc(index) * v2.getDerived().calc(index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getDerived().getLength(); }
     };
+    //////////////////////////////////////Mul//////////////////////////////////////
+    template<class VectorType, class AnyScalar>
+    class device_obj<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+        using DeviceVector = device_obj<VectorType>;
+    public:
+        using host_obj = VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
+        using Base = device_obj<RValueVector<host_obj>>;
+        using typename Base::ScalarType;
+    private:
+        Physica::PlainStruct<DeviceVector> v;
+        AnyScalar s;
+    public:
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
+                : v(asStruct(v_.getDerived())), s(s_) {}
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.getDerived().calc(index)) / ScalarType(s); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+    };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
     class device_obj<VectorExpression<Utils::ExpressionType::Reciprocal, VectorType>>
@@ -132,23 +183,35 @@ namespace Physica::Core {
             operator+(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
         return {v1.getDerived(), v2.getDerived()};
     }
+    //////////////////////////////////////Sub//////////////////////////////////////
+    template<class Derived, class OtherDerived>
+    inline __host__ __device__ device_obj<VectorExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>>
+            operator-(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
+        return {v1.getDerived(), v2.getDerived()};
+    }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
     __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(const device_obj<RValueVector<VectorType>>& v, ScalarType s) {
-        return {v.getDerived(), s};
+    operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+        return {v.getDerived(), s.getDerived()};
     }
 
     template<class ScalarType, class VectorType>
     __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(ScalarType s, const device_obj<RValueVector<VectorType>>& v) {
-        return v * s;
+    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) {
+        return v * s.getDerived();
     }
     
     template<class VectorType1, class VectorType2>
     __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2>>
     hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) {
         return {v1.getDerived(), v2.getDerived()};
+    }
+    //////////////////////////////////////Div//////////////////////////////////////
+    template<class VectorType, class ScalarType>
+    __host__ __device__ inline device_obj<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
+    operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+        return {v.getDerived(), s.getDerived()};
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>

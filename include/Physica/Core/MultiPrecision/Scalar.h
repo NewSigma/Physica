@@ -58,6 +58,8 @@ namespace Physica::Core {
          */
         template<class AnyScalar1, class AnyScalar2>
         class BinaryScalarOpReturnType {
+            static_assert(Core::is_scalar<AnyScalar1>::value, "[Error]: This is not a scalar type");
+            static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
             static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
                                                                               ? Traits<AnyScalar1>::option
                                                                               : Traits<AnyScalar2>::option;

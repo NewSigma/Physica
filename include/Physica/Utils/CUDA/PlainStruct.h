@@ -19,6 +19,9 @@
 #pragma once
 
 namespace Physica {
+    /**
+     * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
+     */
     template<class Derived>
     class alignas(Derived) PlainStruct {
         char anonymous[sizeof(Derived)];

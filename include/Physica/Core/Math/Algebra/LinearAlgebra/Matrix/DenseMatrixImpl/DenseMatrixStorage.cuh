@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,17 +18,18 @@
  */
 #pragma once
 
+#include "DenseMatrixStorage.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
 
-namespace Physica::Core::Internal {
+namespace Physica::Core {
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>
-            : public device_obj<Utils::Array<typename Traits<Derived>::ScalarType,
-                                             Traits<Derived>::SizeAtCompile,
-                                             Traits<Derived>::MaxSizeAtCompile>>
+            : public Utils::device_obj<Utils::Array<typename Internal::Traits<Derived>::ScalarType,
+                                       Internal::Traits<Derived>::SizeAtCompile,
+                                       Internal::Traits<Derived>::MaxSizeAtCompile>>
             , public Utils::CRTPBase<device_obj<Derived>, 1> {
-        using T = typename Traits<Derived>::ScalarType;
-        using Base = device_obj<Utils::Array<T, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>>;
+        using T = typename Internal::Traits<Derived>::ScalarType;
+        using Base = Utils::device_obj<Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>;
         using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
     public:
@@ -71,12 +72,12 @@ namespace Physica::Core::Internal {
 
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
-            : public device_obj<Utils::Array<typename Traits<Derived>::ScalarType,
-                                             Traits<Derived>::SizeAtCompile,
-                                             Traits<Derived>::MaxSizeAtCompile>>
+            : public Utils::device_obj<Utils::Array<typename Internal::Traits<Derived>::ScalarType,
+                                       Internal::Traits<Derived>::SizeAtCompile,
+                                       Internal::Traits<Derived>::MaxSizeAtCompile>>
             , public Utils::CRTPBase<device_obj<Derived>, 1> {
-        using T = typename Traits<Derived>::ScalarType;
-        using Base = device_obj<Utils::Array<T, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>>;
+        using T = typename Internal::Traits<Derived>::ScalarType;
+        using Base = Utils::device_obj<Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>;
         using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
     public:
@@ -121,7 +122,7 @@ namespace Physica::Core::Internal {
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
             : public Utils::CRTPBase<device_obj<Derived>, 1> {
         using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
-        using T = typename Traits<Derived>::ScalarType;
+        using T = typename Internal::Traits<Derived>::ScalarType;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
@@ -170,7 +171,7 @@ namespace Physica::Core::Internal {
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>
             : public Utils::CRTPBase<device_obj<Derived>, 1> {
         using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
-        using T = typename Traits<Derived>::ScalarType;
+        using T = typename Internal::Traits<Derived>::ScalarType;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;

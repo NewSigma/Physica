@@ -108,6 +108,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
@@ -159,6 +160,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
@@ -181,6 +183,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>;
     public:
         using typename Base::ScalarType;
@@ -230,6 +233,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
@@ -302,6 +306,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::More, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
@@ -352,6 +357,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueVector<VectorExpression<Utils::ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>>;
         const VectorType& exp;
         const AnyScalar& scalar;
@@ -554,7 +560,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class VectorType>
-    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<ScalarType>> operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v + s; }
+    inline VectorExpression<Utils::ExpressionType::Add, VectorType, ScalarBase<ScalarType>> operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
+        return v + s;
+    }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class Derived, class OtherDerived>
     inline VectorExpression<Utils::ExpressionType::Sub, Derived, OtherDerived>
@@ -573,7 +581,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class VectorType>
-    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) { return v * s; }
+    inline VectorExpression<Utils::ExpressionType::Mul, VectorType, ScalarBase<ScalarType>> operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) {
+        return v * s;
+    }
     
     template<class VectorType1, class VectorType2>
     inline VectorExpression<Utils::ExpressionType::Mul, VectorType1, VectorType2> hadamard(

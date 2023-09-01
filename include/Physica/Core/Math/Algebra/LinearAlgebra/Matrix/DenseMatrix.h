@@ -21,7 +21,7 @@
 #include <memory>
 #include "MatrixImpl/ContinuousMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
-#include "MatrixProduct.h"
+#include "MatrixImpl/MatrixProduct.h"
 #include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"
 #include "DenseMatrixImpl/DenseMatrixStorage.h"
@@ -68,12 +68,12 @@ namespace Physica::Core {
      */
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
-                      , public Internal::DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, option>
+                      , public DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, option>
                       , public DenseMatrixDim<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
         static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
         using This = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = Internal::DenseMatrixStorage<This, option>;
+        using Storage = DenseMatrixStorage<This, option>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using InitializerType = typename Storage::InitializerType;
     public:

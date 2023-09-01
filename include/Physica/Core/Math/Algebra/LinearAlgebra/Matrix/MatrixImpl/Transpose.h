@@ -66,27 +66,11 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         Transpose(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row); }
         [[nodiscard]] size_t getRow() const noexcept { return matrix.getColumn(); }
         [[nodiscard]] size_t getColumn() const noexcept { return matrix.getRow(); }
     };
-
-    template<class MatrixType>
-    template<class OtherMatrix>
-    void Transpose<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        using TargetType = LValueMatrix<OtherMatrix>;
-        const size_t max_i = target.getMaxMajor();
-        const size_t mat_j = target.getMaxMinor();
-        for (size_t i = 0; i < max_i; ++i) {
-            for (size_t j = 0; j < mat_j; ++j) {
-                target.refFromMajorMinor(i, j) = calc(MatrixOption::rowFromMajorMinor<TargetType>(i, j),
-                                                      MatrixOption::columnFromMajorMinor<TargetType>(i, j));
-            }
-        }
-    }
 
     template<class VectorType>
     class TransposeVector : public RValueMatrix<TransposeVector<VectorType>> {

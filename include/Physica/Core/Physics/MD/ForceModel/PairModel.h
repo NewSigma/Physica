@@ -38,7 +38,7 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
-        using Index3D = typename CellListType::Index3D;
+        using Index3D = typename GridBase::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
     private:
         ScalarType cutoff;

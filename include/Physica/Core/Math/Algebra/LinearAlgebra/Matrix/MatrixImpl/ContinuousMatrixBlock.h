@@ -19,6 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
+    template<class Derived> class ContinuousMatrix;
     template<class MatrixType, size_t Length = Dynamic> class RowContinuousVector;
     template<class MatrixType, size_t Length = Dynamic> class ColContinuousVector;
     template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class ContinuousMatrixBlock;
@@ -79,7 +80,8 @@ namespace Physica::Core {
         size_t fromCol;
         size_t colCount;
     public:
-        RowContinuousVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
+        RowContinuousVector(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
+                : mat(mat_.getDerived()), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
@@ -87,9 +89,9 @@ namespace Physica::Core {
         RowContinuousVector(RowContinuousVector&&) noexcept = delete;
         ~RowContinuousVector() = default;
         /* Operators */
+        using Base::operator=;
         RowContinuousVector& operator=(const RowContinuousVector& v) { v.assignTo(*this); return *this; }
         RowContinuousVector& operator=(RowContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(row, fromCol + index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(row, fromCol + index); }
         /* Operations */
@@ -109,8 +111,8 @@ namespace Physica::Core {
         size_t fromRow;
         size_t rowCount;
     public:
-        ColContinuousVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
+        ColContinuousVector(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+                : mat(mat_.getDerived()), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
@@ -118,9 +120,9 @@ namespace Physica::Core {
         ColContinuousVector(ColContinuousVector&&) noexcept = delete;
         ~ColContinuousVector() = default;
         /* Operators */
+        using Base::operator=;
         ColContinuousVector& operator=(const ColContinuousVector& v) { v.assignTo(*this); return *this; }
         ColContinuousVector& operator=(ColContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        using Base::operator=;
         [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(fromRow + index, col); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(fromRow + index, col); }
         /* Operations */
@@ -132,17 +134,17 @@ namespace Physica::Core {
     template<class MatrixType, size_t Column>
     class ContinuousMatrixBlock<MatrixType, 1, Column> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
                                                        , public RowContinuousVector<MatrixType, Column> {
-    public:
         using This = ContinuousMatrixBlock<MatrixType, 1, Column>;
+    public:
         using Base = LValueMatrix<This>;
         using VectorBase = RowContinuousVector<MatrixType, Column>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
                 : ContinuousMatrixBlock(mat_, fromRow_, fromCol_, colCount_) {
             assert(rowCount_ == 1);
         }
-        ContinuousMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
@@ -184,17 +186,17 @@ namespace Physica::Core {
     template<class MatrixType, size_t Row>
     class ContinuousMatrixBlock<MatrixType, Row, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
                                                     , public ColContinuousVector<MatrixType, Row> {
-    public:
         using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
+    public:
         using Base = LValueMatrix<This>;
         using VectorBase = ColContinuousVector<MatrixType, Row>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
                 : ContinuousMatrixBlock(mat_, fromRow_, rowCount_, fromCol_) {
             assert(colCount_ == 1);
         }
-        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
@@ -241,7 +243,7 @@ namespace Physica::Core {
         using VectorBase = ColContinuousVector<MatrixType, 1>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
-        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : VectorBase(mat_, fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
@@ -292,7 +294,7 @@ namespace Physica::Core {
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
@@ -312,8 +314,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, size_t Row, size_t Column>
-    ContinuousMatrixBlock<MatrixType, Row, Column>::ContinuousMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_)
+    ContinuousMatrixBlock<MatrixType, Row, Column>::ContinuousMatrixBlock(
+            ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+            : mat(mat_.getDerived())
             , fromRow(fromRow_)
             , rowCount(rowCount_)
             , fromCol(fromCol_)
