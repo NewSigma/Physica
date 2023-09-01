@@ -108,6 +108,7 @@ public:
     inline Vec16b(Vec8fb const x0, Vec8fb const x1);  // in vectorf512.h
 #endif
 
+    Vec16b(const Vec16b& v) : mm(v.mm) {}
     // Assignment operator to convert from type __mmask16 used in intrinsics:
     Vec16b & operator = (__mmask16 x) {
         mm = x;
@@ -118,6 +119,8 @@ public:
         mm = Vec16b(b);
         return *this;
     }
+    Vec16b& operator=(const Vec16b&) = default;
+    Vec16b& operator=(Vec16b&&) noexcept = default;
     // Type cast operator to convert to __mmask16 used in intrinsics
     operator __mmask16() const {
         return mm;
@@ -203,11 +206,14 @@ public:
     inline Vec8b(Vec4db const x0, Vec4db const x1);   // in vectorf512.h
 #endif
 
+    Vec8b(const Vec8b& v) : mm(v.mm) {}
     // Assignment operator to convert from type __mmask16 used in intrinsics:
     Vec8b & operator = (Vec8b_masktype x) {
         mm = Vec8b_masktype(x);
         return *this;
     }
+    Vec8b& operator=(const Vec8b&) = default;
+    Vec8b& operator=(Vec8b&&) noexcept = default;
     // Constructor to build from all elements:
     Vec8b(bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7) {
         mm = uint8_t(

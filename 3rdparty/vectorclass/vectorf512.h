@@ -22,6 +22,24 @@
 * Apache License version 2.0 or later.
 *****************************************************************************/
 
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef VECTORF512_H
 #define VECTORF512_H
 
@@ -114,11 +132,15 @@ public:
     Vec16f(__m512 const x) {
         zmm = x;
     }
+
+    Vec16f(const Vec16f& v) : zmm(v.zmm) {}
     // Assignment operator to convert from type __m512 used in intrinsics:
     Vec16f & operator = (__m512 const x) {
         zmm = x;
         return *this;
     }
+    Vec16f& operator=(const Vec16f&) = default;
+    Vec16f& operator=(Vec16f&&) noexcept = default;
     // Type cast operator to convert to __m512 used in intrinsics
     operator __m512() const {
         return zmm;
@@ -756,6 +778,10 @@ public:
     Vec8d(__m512d const x) {
         zmm = x;
     }
+
+    Vec8d(const Vec8d& v) : zmm(v.zmm) {}
+    Vec8d& operator=(const Vec8d&) = default;
+    Vec8d& operator=(Vec8d&&) noexcept = default;
     // Assignment operator to convert from type __m512d used in intrinsics:
     Vec8d & operator = (__m512d const x) {
         zmm = x;

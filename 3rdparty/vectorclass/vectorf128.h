@@ -22,6 +22,24 @@
 * Apache License version 2.0 or later.
 *****************************************************************************/
 
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef VECTORF128_H
 #define VECTORF128_H
 
@@ -112,6 +130,8 @@ public:
     Vec4fb(bool b) {
         xmm = _mm_castsi128_ps(_mm_set1_epi32(-int32_t(b)));
     }
+
+    Vec4fb(const Vec4fb& v) : xmm(v.xmm) {}
     // Assignment operator to broadcast scalar value:
     Vec4fb & operator = (bool b) {
         *this = Vec4fb(b);
@@ -126,6 +146,8 @@ public:
         xmm = _mm_castsi128_ps(x);
         return *this;
     }
+    Vec4fb& operator=(const Vec4fb&) = default;
+    Vec4fb& operator=(Vec4fb&&) noexcept = default;
     // Type cast operator to convert to __m128 used in intrinsics
     operator __m128() const {
         return xmm;
@@ -311,11 +333,15 @@ public:
     Vec2db(__m128d const x) {
         xmm = x;
     }
+
+    Vec2db(const Vec2db& v) : xmm(v.xmm) {}
     // Assignment operator to convert from type __m128d used in intrinsics:
     Vec2db & operator = (__m128d const x) {
         xmm = x;
         return *this;
     }
+    Vec2db& operator=(const Vec2db&) = default;
+    Vec2db& operator=(Vec2db&&) noexcept = default;
     // Assignment operator to broadcast scalar value:
     Vec2db & operator = (bool b) {
         *this = Vec2db(b);
@@ -499,11 +525,15 @@ public:
     Vec4f(__m128 const x) {
         xmm = x;
     }
+
+    Vec4f(const Vec4f& v) : xmm(v.xmm) {}
     // Assignment operator to convert from type __m128 used in intrinsics:
     Vec4f & operator = (__m128 const x) {
         xmm = x;
         return *this;
     }
+    Vec4f& operator=(const Vec4f&) = default;
+    Vec4f& operator=(Vec4f&&) noexcept = default;
     // Type cast operator to convert to __m128 used in intrinsics
     operator __m128() const {
         return xmm;
@@ -1500,11 +1530,15 @@ public:
     Vec2d(__m128d const x) {
         xmm = x;
     }
+
+    Vec2d(const Vec2d& v) : xmm(v.xmm) {}
     // Assignment operator to convert from type __m128d used in intrinsics:
     Vec2d & operator = (__m128d const x) {
         xmm = x;
         return *this;
     }
+    Vec2d& operator=(const Vec2d&) = default;
+    Vec2d& operator=(Vec2d&&) noexcept = default;
     // Type cast operator to convert to __m128d used in intrinsics
     operator __m128d() const {
         return xmm;

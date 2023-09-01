@@ -22,6 +22,24 @@
 * Apache License version 2.0 or later.
 *****************************************************************************/
 
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef VECTORF256_H
 #define VECTORF256_H  1
 
@@ -101,11 +119,15 @@ public:
     Vec8fb(__m256 const x) {
         ymm = x;
     }
+
+    Vec8fb(const Vec8fb& v) : ymm(v.ymm) {}
     // Assignment operator to convert from type __m256 used in intrinsics:
     Vec8fb & operator = (__m256 const x) {
         ymm = x;
         return *this;
     }
+    Vec8fb& operator=(const Vec8fb&) = default;
+    Vec8fb& operator=(Vec8fb&&) noexcept = default;
     // Constructor to broadcast the same value into all elements:
     Vec8fb(bool b) {
 #if INSTRSET >= 8  // AVX2
@@ -362,11 +384,15 @@ public:
         ymm = _mm256_castps_pd(set_m128r(b1,b1));
 #endif
     }
+
+    Vec4db(const Vec4db& v) : ymm(v.ymm) {}
     // Assignment operator to broadcast scalar value:
     Vec4db & operator = (bool b) {
         ymm = _mm256_castsi256_pd(_mm256_set1_epi32(-int32_t(b)));
         return *this;
     }
+    Vec4db& operator=(const Vec4db&) = default;
+    Vec4db& operator=(Vec4db&&) noexcept = default;
     // Type cast operator to convert to __m256d used in intrinsics
     operator __m256d() const {
         return ymm;
@@ -597,11 +623,15 @@ public:
     Vec8f(__m256 const x) {
         ymm = x;
     }
+
+    Vec8f(const Vec8f& v) : ymm(v.ymm) {}
     // Assignment operator to convert from type __m256 used in intrinsics:
     Vec8f & operator = (__m256 const x) {
         ymm = x;
         return *this;
     }
+    Vec8f& operator=(const Vec8f&) = default;
+    Vec8f& operator=(Vec8f&&) noexcept = default;
     // Type cast operator to convert to __m256 used in intrinsics
     operator __m256() const {
         return ymm;
@@ -1455,11 +1485,15 @@ public:
     Vec4d(__m256d const x) {
         ymm = x;
     }
+
+    Vec4d(const Vec4d& v) : ymm(v.ymm) {}
     // Assignment operator to convert from type __m256d used in intrinsics:
     Vec4d & operator = (__m256d const x) {
         ymm = x;
         return *this;
     }
+    Vec4d& operator=(const Vec4d&) = default;
+    Vec4d& operator=(Vec4d&&) noexcept = default;
     // Type cast operator to convert to __m256d used in intrinsics
     operator __m256d() const {
         return ymm;
