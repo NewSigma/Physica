@@ -45,6 +45,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
+        void resize(size_t row, size_t column) { Base::resize(row * column); }
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
@@ -93,6 +94,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
+        void resize(size_t row, size_t column) { Base::resize(row * column); }
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
@@ -142,6 +144,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        void resize(size_t row, size_t column);
         void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(r, obj.r); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
@@ -159,6 +162,13 @@ namespace Physica::Core {
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
         return array[c][r];
+    }
+
+    template<class Derived>
+    void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::resize(size_t row, size_t column) {
+        array.resize(column);
+        for (auto& vector : array)
+            vector.resize(row);
     }
 
     template<class Derived>
@@ -191,6 +201,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        void resize(size_t row, size_t column);
         void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(c, obj.c); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
@@ -208,6 +219,13 @@ namespace Physica::Core {
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
         return array[r][c];
+    }
+
+    template<class Derived>
+    void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::resize(size_t row, size_t column) {
+        array.resize(row);
+        for (auto& vector : array)
+            vector.resize(column);
     }
 
     template<class Derived>

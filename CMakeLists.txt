@@ -62,6 +62,7 @@ if(${PHYSICA_CUDA})
     set(CMAKE_CUDA_ARCHITECTURES 75)
     set(CMAKE_CUDA_FLAGS "\
         ${CMAKE_CUDA_FLAGS} \
+        --Werror cross-execution-space-call \
         --Wreorder \
         --Wdefault-stream-launch \
         --Wext-lambda-captures-this \

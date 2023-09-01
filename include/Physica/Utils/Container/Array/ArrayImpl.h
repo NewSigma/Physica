@@ -25,7 +25,7 @@ namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, size_t Capacity, class Allocator>
     template<class... Args>
-    Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args... args) {
+    __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args... args) {
         assert(length_ == Length);
         for (size_t i = 0; i < Length; ++i)
             *(arr + i) = T(args...);
@@ -69,7 +69,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
+    __host__ __device__ void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
         using std::swap;
         for (size_t i = 0; i < Length; ++i)
             swap(arr[i], array[i]);

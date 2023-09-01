@@ -135,7 +135,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class IndexType>
-    IndexType FFT<ScalarType, 1>::rSizeToKSize(IndexType size_data) noexcept {
+    __host__ __device__ IndexType FFT<ScalarType, 1>::rSizeToKSize(IndexType size_data) noexcept {
         if constexpr (isComplex)
             return size_data;
         else

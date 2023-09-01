@@ -82,7 +82,7 @@ namespace Physica::Core {
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::resize(size_t row, size_t column) {
+    inline void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::resize(size_t row, size_t column) {
         Storage::resize(row, column);
         Dim::resize(row, column);
     }

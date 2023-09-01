@@ -20,7 +20,9 @@
 
 #include <type_traits>
 /**
- * \class device_obj: Provide non-invasive implementation for device
+ * \class device_obj: Provide non-invasive implementation for device, which is determined by the nature of nvcc seperate compiling.
+ * 
+ * Resource is maintained by host and can be used on device.
  * 
  * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
  */

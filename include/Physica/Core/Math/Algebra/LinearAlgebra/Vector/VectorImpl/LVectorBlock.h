@@ -63,12 +63,12 @@ namespace Physica::Core {
         using Base::operator=;
         LVectorBlock& operator=(const LVectorBlock& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
         LVectorBlock& operator=(LVectorBlock&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
-        const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
+        [[nodiscard]] __host__ __device__ ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
+        [[nodiscard]] __host__ __device__ const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Operations */
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return to - from; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
     };
 
     template<class VectorType>

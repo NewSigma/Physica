@@ -85,7 +85,8 @@ int main() {
         MatrixType buffer(numMolecular, numReplica, 0);
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, ForceModel());
+            ForceModel forceModel{};
+            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

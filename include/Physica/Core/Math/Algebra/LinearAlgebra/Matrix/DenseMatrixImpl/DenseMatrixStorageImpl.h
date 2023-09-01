@@ -132,9 +132,8 @@ namespace Physica::Core {
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::resize(size_t row, size_t column) {
         array.resize(column);
-        for (auto& vector : array) {
+        for (auto& vector : array)
             vector.resize(row);
-        }
     }
 
     template<class Derived>
@@ -171,9 +170,8 @@ namespace Physica::Core {
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::resize(size_t row, size_t column) {
         array.resize(row);
-        for (auto& vector : array) {
+        for (auto& vector : array)
             vector.resize(column);
-        }
     }
 
     template<class Derived>

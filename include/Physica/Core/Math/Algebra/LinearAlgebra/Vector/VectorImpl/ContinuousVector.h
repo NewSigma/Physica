@@ -64,15 +64,16 @@ namespace Physica::Core {
                    const H5DataSpace<1>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
-        [[nodiscard]] ScalarType* data() { return &(*this)[0]; }
-        [[nodiscard]] const ScalarType* data() const { return &(*this)[0]; }
+        [[nodiscard]] __host__ __device__ ScalarType* data() { return &(*this)[0]; }
+        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return &(*this)[0]; }
     protected:
         ContinuousVector() = default;
         ContinuousVector(const ContinuousVector&) = default;
         ContinuousVector(ContinuousVector&&) noexcept = default;
     private:
-        PointerType data_ptr(size_t index) { return &(*this)[index]; }
-        ConstPointerType data_ptr(size_t index) const { return &(*this)[index]; }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ PointerType data_ptr(size_t index) { return &(*this)[index]; }
+        [[nodiscard]] __host__ __device__ ConstPointerType data_ptr(size_t index) const { return &(*this)[index]; }
         /* Friends */
         template<class T>
         friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);

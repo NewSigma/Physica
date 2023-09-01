@@ -73,8 +73,9 @@ int main() {
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     auto timeuse = Benchmark::run([&]() {
+        ForceModel forceModel{};
         for (size_t i = 0; i < 50000; ++i)
-            rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+            rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
     }, 8, 20);
     std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     return 0;

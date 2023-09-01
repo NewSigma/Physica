@@ -68,7 +68,7 @@ MDCellType makeSystem(ScalarType latticeSize) {
 std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, ScalarType latticeSize) {
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
-    const ForceModel forceModel{};
+    ForceModel forceModel{};
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(RandomPool<RandomGenerator>::getGen());

@@ -47,6 +47,7 @@ namespace Physica::Core {
         MassVector massVec;
         InvLatticeMatrix invLattice;
     public:
+        explicit MDCell(size_t numParticle);
         MDCell(CrystalCell cell);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
@@ -78,6 +79,9 @@ namespace Physica::Core {
         using Base::getType;
         using Base::setLattice;
     };
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    MDCell<ScalarType, PosScalarType, Dim>::MDCell(size_t numParticle) : Base(numParticle), massVec(numParticle) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     MDCell<ScalarType, PosScalarType, Dim>::MDCell(CrystalCell cell) {

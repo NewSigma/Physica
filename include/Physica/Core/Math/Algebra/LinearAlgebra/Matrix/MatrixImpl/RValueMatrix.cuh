@@ -76,7 +76,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline BlockType block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         [[nodiscard]] __host__ __device__ inline const BlockType block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Operations */
-        [[nodiscard]] device_obj<Transpose<Derived>> transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ device_obj<Transpose<Derived>> transpose() const noexcept;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ ScalarType calcFromMajorMinor(size_t row, size_t col) const;

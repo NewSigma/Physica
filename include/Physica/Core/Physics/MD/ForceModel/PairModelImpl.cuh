@@ -37,6 +37,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    device_obj<PairModel<Derived>>::device_obj(size_t numParticle, ScalarType cutoff_)
+            : cutoff(std::move(cutoff_))
+            , cell(numParticle)
+            , swapBuffer(numParticle * Dim) {
+        squared_cutoff = square(cutoff_);
+        pot_shift = pot_functor(cutoff, squared_cutoff);
+    }
+
+    template<class Derived>
     template<class Executor, bool IsSmallCell>
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
@@ -72,6 +81,7 @@ namespace Physica::Core {
         factor[0] = ScalarType(int(blockIdx.x) - int(gridDim.x) / 2);
         factor[1] = ScalarType(int(blockIdx.y) - int(gridDim.y) / 2);
         factor[2] = ScalarType(int(blockIdx.z) - int(gridDim.z) / 2);
+
         const Vector3D delta = cell.getLattice().transpose() * factor;
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
@@ -93,7 +103,6 @@ namespace Physica::Core {
 
         const unsigned int blockId = (blockIdx.x * gridDim.y + blockIdx.y) * gridDim.z + blockIdx.z;
         auto bufferCol = forceBuffer.col(blockId);
-        constexpr int Dim = 3;
         for (int i = 0; i < Dim; ++i)
             bufferCol[threadId * Dim + i] = force_thread[i];
     }

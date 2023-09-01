@@ -38,6 +38,7 @@ namespace Physica::Core {
         InvLatticeMatrix invLattice;
     public:
         device_obj() = default;
+        explicit device_obj(size_t numParticle);
         device_obj(const host_obj& obj);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -55,6 +56,11 @@ namespace Physica::Core {
     private:
         using Base::getType;
     };
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    device_obj<MDCell<ScalarType, PosScalarType, Dim>>::device_obj(size_t numParticle)
+            : Base(numParticle, Base::Type::Cartesian)
+            , massVec(numParticle) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     device_obj<MDCell<ScalarType, PosScalarType, Dim>>::device_obj(const host_obj& obj)

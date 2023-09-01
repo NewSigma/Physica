@@ -60,6 +60,7 @@ namespace Physica::Core {
         Type type;
     public:
         PeriodicCell();
+        PeriodicCell(size_t numParticle, Type type_);
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
         template<class OtherScalar>  PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell);
         PeriodicCell(const PeriodicCell&) = default;
@@ -124,6 +125,13 @@ namespace Physica::Core {
             : lattice(LatticeMatrix::unitMatrix(Dim))
             , pos()
             , type(Type::Direct) {}
+
+    template<class ScalarType, unsigned int Dim>
+    PeriodicCell<ScalarType, Dim>::PeriodicCell(size_t numParticle, Type type_)
+            : PeriodicCell() {
+        pos.resize(numParticle, Dim);
+        type = type_;
+    }
 
     template<class ScalarType, unsigned int Dim>
     PeriodicCell<ScalarType, Dim>::PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_)

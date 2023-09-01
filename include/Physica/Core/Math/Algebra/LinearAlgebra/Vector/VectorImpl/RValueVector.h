@@ -81,7 +81,7 @@ namespace Physica::Core {
         template<class OtherDerived>
         void assignTo(LValueVector<OtherDerived>& v) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] __host__ __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] FormatedVector<Derived> format() const;
         template<class PacketType>
         [[nodiscard]] inline PacketType packet(size_t index) const;
@@ -89,7 +89,7 @@ namespace Physica::Core {
         [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] inline RealType norm() const;
         [[nodiscard]] inline RealType squaredNorm() const;
         [[nodiscard]] ScalarType max() const;

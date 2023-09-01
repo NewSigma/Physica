@@ -100,21 +100,21 @@ namespace Physica::Core {
         void invTransform() { invTransform(*this, *this); }
         void swap(FFT& fft) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr static size_t getDim() { return 1; }
-        [[nodiscard]] ComplexTypeFFTW* getBuffer() { return buffer; }
-        [[nodiscard]] const ComplexTypeFFTW* getBuffer() const { return buffer; }
-        [[nodiscard]] size_t getRSpaceSize() const noexcept { return rSpaceSize; }
-        [[nodiscard]] size_t getKSpaceSize() const noexcept { return getKSpace().getSize(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getDim() { return 1; }
+        [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
+        [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
+        [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return rSpaceSize; }
+        [[nodiscard]] __host__ __device__ size_t getKSpaceSize() const noexcept { return getKSpace().getSize(); }
         [[nodiscard]] RealType getRSpaceDelta() const noexcept { return rSpaceDelta; }
         [[nodiscard]] RealType getKSpaceDelta() const noexcept { return getKSpace().getDelta(); }
-        [[nodiscard]] RSpaceType& getRSpace() { return *this; }
-        [[nodiscard]] KSpaceType& getKSpace() { return *this; }
-        [[nodiscard]] const RSpaceType& getRSpace() const { return *this; }
-        [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
+        [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }
+        [[nodiscard]] __host__ __device__ KSpaceType& getKSpace() { return *this; }
+        [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
+        [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
         [[nodiscard]] inline static FFT<ScalarType, 1> makeEmptyFFT(size_t rSpaceSize, RealType rSpaceDelta);
         template<class IndexType>
-        [[nodiscard]] inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
+        [[nodiscard]] __host__ __device__ inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
         static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
@@ -123,10 +123,10 @@ namespace Physica::Core {
         /* Operations */
         void initializePlan();
         /* Getters */
-        [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard]] ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
-        [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard]] const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard]] __host__ __device__ RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard]] __host__ __device__ ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard]] __host__ __device__ const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard]] __host__ __device__ const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Friends */
         friend class FFTRSpace<This, 1>;
         friend class FFTKSpace<This, 1>;
@@ -176,16 +176,16 @@ namespace Physica::Core {
         void swap(FFT& fft) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
-        [[nodiscard]] ComplexTypeFFTW* getBuffer() { return buffer; }
-        [[nodiscard]] const ComplexTypeFFTW* getBuffer() const { return buffer; }
+        [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
+        [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
         [[nodiscard]] IndexArray getRSpaceSize() const noexcept;
         [[nodiscard]] IndexArray getKSpaceSize() const noexcept;
         [[nodiscard]] RealType getRSpaceDelta(size_t dim) const noexcept { return rSpaceDelta[dim]; }
         [[nodiscard]] RealType getKSpaceDelta(size_t dim) const noexcept { return reciprocal(getRSpaceDelta(dim) * getRSpaceSize()[dim]); }
-        [[nodiscard]] RSpaceType& getRSpace() { return *this; }
-        [[nodiscard]] KSpaceType& getKSpace() { return *this; }
-        [[nodiscard]] const RSpaceType& getRSpace() const { return *this; }
-        [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
+        [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }
+        [[nodiscard]] __host__ __device__ KSpaceType& getKSpace() { return *this; }
+        [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
+        [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
         template<class IndexType>
         [[nodiscard]] static Utils::Array<IndexType, Dim> rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize);
@@ -205,10 +205,10 @@ namespace Physica::Core {
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
         [[nodiscard]] Utils::Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
         /* Getters */
-        [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard]] ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
-        [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard]] const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard]] __host__ __device__ RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard]] __host__ __device__ ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard]] __host__ __device__ const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard]] __host__ __device__ const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Static members */
         static bool checkSize(const Utils::Array<size_t, Dim>& rSpaceSize);
         /* Friends */

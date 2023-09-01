@@ -29,6 +29,7 @@ namespace Physica::Core {
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
         using Base = Utils::CRTPBase<device_obj<Derived>>;
+        constexpr static int Dim = 3;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         using PosScalarType = typename Internal::Traits<Derived>::PosScalarType;
@@ -48,7 +49,7 @@ namespace Physica::Core {
         DeviceMatrix forceBuffer;
         PageLockedVector swapBuffer;
     public:
-        device_obj(ScalarType cutoff_);
+        device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;

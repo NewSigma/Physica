@@ -65,44 +65,44 @@ namespace Physica::Core {
             return getValue() < s.getValue();
         }
         /* Getters */
-        [[nodiscard]] const RealType& getReal() const {
+        [[nodiscard]] __host__ __device__ const RealType& getReal() const {
             if constexpr (isComplex)
                 return this->getDerived().getReal();
             else
                 return this->getDerived();
         }
 
-        [[nodiscard]] RealType getImag() const {
+        [[nodiscard]] __host__ __device__ RealType getImag() const {
             if constexpr (isComplex)
                 return this->getDerived().getImag();
             else
                 return Derived(0);
         }
 
-        [[nodiscard]] ScalarType conjugate() const {
+        [[nodiscard]] __host__ __device__ ScalarType conjugate() const {
             if constexpr (isComplex)
                 return this->getDerived().conjugate();
             else
                 return getReal();
         }
 
-        [[nodiscard]] ScalarType unit() const {
+        [[nodiscard]] __host__ __device__ ScalarType unit() const {
             if constexpr (isComplex)
                 return this->getDerived().unit();
             else
                 return ScalarType(getReal().isNegative() ? -1 : 1);
         }
 
-        [[nodiscard]] RealType norm() const { return sqrt(squaredNorm()); }
+        [[nodiscard]] __host__ __device__ RealType norm() const { return sqrt(squaredNorm()); }
 
-        [[nodiscard]] RealType squaredNorm() const {
+        [[nodiscard]] __host__ __device__ RealType squaredNorm() const {
             if constexpr (isComplex)
                 return this->getDerived().squaredNorm();
             else
                 return square(this->getDerived());
         }
         /* SIMD support */
-        constexpr static int size() { return 1; }
+        __host__ __device__ constexpr static int size() { return 1; }
 
         Derived& load(const ScalarType* p) {
             this->getDerived() = *p;

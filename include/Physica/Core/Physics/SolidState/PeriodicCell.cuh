@@ -38,7 +38,8 @@ namespace Physica::Core {
         PositionMatrix pos;
         Type type;
     public:
-        device_obj() = default;
+        device_obj();
+        device_obj(size_t numParticle, Type type_);
         device_obj(const host_obj& obj);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -54,6 +55,19 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ Type getType() const noexcept { return type; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return pos.getRow(); }
     };
+
+    template<class ScalarType, unsigned int Dim>
+    device_obj<PeriodicCell<ScalarType, Dim>>::device_obj()
+            : lattice(LatticeMatrix::unitMatrix(Dim))
+            , pos()
+            , type(Type::Direct) {}
+
+    template<class ScalarType, unsigned int Dim>
+    device_obj<PeriodicCell<ScalarType, Dim>>::device_obj(size_t numParticle, Type type_)
+            : device_obj() {
+        pos.resize(numParticle, Dim);
+        type = type_;
+    }
 
     template<class ScalarType, unsigned int Dim>
     device_obj<PeriodicCell<ScalarType, Dim>>::device_obj(const host_obj& obj)

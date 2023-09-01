@@ -92,12 +92,12 @@ namespace Physica::Core {
         using Base::operator=;
         RowContinuousVector& operator=(const RowContinuousVector& v) { v.assignTo(*this); return *this; }
         RowContinuousVector& operator=(RowContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(row, fromCol + index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(row, fromCol + index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
     };
 
     template<class MatrixType, size_t Length>
@@ -123,12 +123,12 @@ namespace Physica::Core {
         using Base::operator=;
         ColContinuousVector& operator=(const ColContinuousVector& v) { v.assignTo(*this); return *this; }
         ColContinuousVector& operator=(ColContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(fromRow + index, col); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(fromRow + index, col); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
     };
 
     template<class MatrixType, size_t Column>

@@ -46,10 +46,13 @@ namespace Physica::Core {
         using Storage::operator();
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost(), Dim::getRow(), Dim::getColumn()); }
+        inline void resize(size_t row, size_t column);
         void swap(device_obj& obj) noexcept;
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
+        /* Static members */
+        [[nodiscard]] inline static device_obj unitMatrix(size_t order);
     };
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
@@ -57,10 +60,22 @@ namespace Physica::Core {
             : Storage(static_cast<const host_storage&>(mat).toDevice()), Dim(mat.getRow(), mat.getColumn()) {}
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    inline void device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>::resize(size_t row, size_t column) {
+        Storage::resize(row, column);
+        Dim::resize(row, column);
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     void device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>::swap(
             device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>& obj) noexcept {
         Storage::swap(obj);
         Dim::swap(obj);
+    }
+
+    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    inline device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
+    device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>::unitMatrix(size_t order) {
+        return host_obj::unitMatrix(order).toDevice();
     }
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>

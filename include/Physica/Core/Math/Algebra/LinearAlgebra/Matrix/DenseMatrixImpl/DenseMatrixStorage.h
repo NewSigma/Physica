@@ -72,6 +72,8 @@ namespace Physica::Core {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
+        [[nodiscard]] Base& asArray() noexcept { return *this; }
+        [[nodiscard]] const Base& asArray() const noexcept { return *this; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
@@ -120,6 +122,8 @@ namespace Physica::Core {
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
         /* Getters */
+        [[nodiscard]] Base& asArray() noexcept { return *this; }
+        [[nodiscard]] const Base& asArray() const noexcept { return *this; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}

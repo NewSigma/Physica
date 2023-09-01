@@ -114,12 +114,13 @@ void testCpuGpuCompare() {
         kineticModel.updateMass(rpmd.getRingPolymer());
         rpmd.initMomentum(gen);
 
-        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+        ForceModel forceModel{};
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
         cpu_data[0] = calcThermoFlux(rpmd);
-        rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
+        rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, forceModel);
         for (size_t j = 1; j < NumData; ++j) {
             cpu_data[j] = calcThermoFlux(rpmd);
-            rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, ForceModel());
+            rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, forceModel);
             scaleVelocity(rpmd);
         }
     }

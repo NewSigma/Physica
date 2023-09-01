@@ -59,9 +59,9 @@ namespace Physica::Core {
         RVectorBlock(RVectorBlock&&) noexcept = delete;
         ~RVectorBlock() = default;
         /* Operators */
-        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] __host__ __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return to - from; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
     };
 
     template<class VectorType>

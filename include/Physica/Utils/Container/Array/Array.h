@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -77,8 +77,9 @@ namespace Physica::Utils {
         allocator_type alloc;
     public:
         Array() = default;
-        template<class... Args> explicit Array(size_t length_, Args... args);
-        Array(std::initializer_list<T> list);
+        template<class... Args>
+        explicit __host__ __device__ Array(size_t length_, Args... args);
+        __host__ __device__ Array(std::initializer_list<T> list);
         Array(const Array&) = default;
         Array(Array&&) noexcept = default;
         ~Array() = default;
@@ -88,9 +89,10 @@ namespace Physica::Utils {
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from, size_t to);
         Array<T, Dynamic, Dynamic, Allocator> subArray(size_t from) { return subArray(from, Length); }
         Array<T, Dynamic, Dynamic, Allocator> cut(size_t from);
-        void insert(const T&, size_t) { assert(false); }
-        void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
-        template<class... Args> void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
+        __host__ __device__ void insert(const T&, size_t) { assert(false); }
+        __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
+        template<class... Args>
+        __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;

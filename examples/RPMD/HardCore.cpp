@@ -70,7 +70,8 @@ int main(int argc, char** argv) {
 
     MatrixType record(10000, rpmd.getNumParticle());
     for (size_t i = 0; i < record.getRow(); ++i) {
-        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, ForceModel());
+        ForceModel forceModel{};
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
         record.row(i) = rpmd.getRingPolymer().makeBeadPos(0).transpose();
     }
     const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());

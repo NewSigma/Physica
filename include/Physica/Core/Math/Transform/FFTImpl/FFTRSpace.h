@@ -69,15 +69,15 @@ namespace Physica::Core {
     public:
         /* Operators */
         using VectorBase::operator=;
-        [[nodiscard]] inline ScalarType& operator[](size_t index);
-        [[nodiscard]] inline const ScalarType& operator[](size_t index) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType& operator[](size_t index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType& operator[](size_t index) const;
         /* Operations */
         template<class VectorType>
         inline void transform(const RValueVector<VectorType>& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
-        [[nodiscard]] size_t getSize() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
     };
 
     template<class Derived>

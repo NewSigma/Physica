@@ -99,7 +99,7 @@ namespace Physica::Core {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        void resize(size_t row, size_t column);
+        inline void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
         template<class SpaceType>
         void read(const H5::DataSet& dataset,

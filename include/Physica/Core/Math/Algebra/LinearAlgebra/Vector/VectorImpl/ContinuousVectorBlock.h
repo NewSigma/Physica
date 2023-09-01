@@ -55,8 +55,8 @@ namespace Physica::Core {
         using Base::operator=;
         inline ContinuousVectorBlock& operator=(const ContinuousVectorBlock& v);
         inline ContinuousVectorBlock& operator=(ContinuousVectorBlock&& v) noexcept;
-        [[nodiscard]] ScalarType& operator[](size_t index);
-        [[nodiscard]] const ScalarType& operator[](size_t index) const;
+        [[nodiscard]] __host__ __device__ ScalarType& operator[](size_t index);
+        [[nodiscard]] __host__ __device__ const ScalarType& operator[](size_t index) const;
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
@@ -64,7 +64,7 @@ namespace Physica::Core {
         template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] inline size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
     };
 
     template<class VectorType, size_t Length>

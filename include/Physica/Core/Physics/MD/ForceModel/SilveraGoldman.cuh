@@ -51,7 +51,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<PairModel<host_obj>>;
     public:
-        device_obj(ScalarType cutoff_);
+        device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -64,7 +64,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType>
-    device_obj<SilveraGoldman<ScalarType, PosScalarType>>::device_obj(ScalarType cutoff_) : Base(cutoff_) {}
+    device_obj<SilveraGoldman<ScalarType, PosScalarType>>::device_obj(size_t numParticle, ScalarType cutoff_)
+            : Base(numParticle, cutoff_) {}
 
     template<class ScalarType, class PosScalarType>
     void device_obj<SilveraGoldman<ScalarType, PosScalarType>>::swap(device_obj& obj) noexcept {
