@@ -38,8 +38,6 @@ namespace Physica::Utils {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
         static_assert(std::is_trivial<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
         using host_obj = Array<T, Length, Capacity, Allocator>;
-        using typename host_obj::pointer;
-        using typename host_obj::const_pointer;
     public:
         using host_obj::host_obj;
         device_obj() = default;
@@ -61,7 +59,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    void Array<T, Length, Capacity, Allocator>::toDevice(device_obj<Array<T, Length, Capacity, Allocator>>& obj) const {
+    inline void Array<T, Length, Capacity, Allocator>::toDevice(device_obj<Array<T, Length, Capacity, Allocator>>& obj) const {
         obj = *this;
     }
 
@@ -99,7 +97,7 @@ namespace Physica::Utils {
         device_obj& operator=(device_obj obj) noexcept;
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
-        /* Iterator */
+        /* Iterators */
         __device__ Iterator begin() noexcept { return Base::begin(); }
         __device__ ConstIterator begin() const noexcept { return Base::cbegin(); }
         __device__ ConstIterator cbegin() const noexcept { return Base::cbegin(); }
@@ -125,6 +123,17 @@ namespace Physica::Utils {
         using Base::empty;
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return d_data; }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return d_data; }
+    private:
+        using Base::operator[];
+        /* Iterators */
+        using Base::begin;
+        using Base::cbegin;
+        using Base::end;
+        using Base::cend;
+        using Base::rbegin;
+        using Base::crbegin;
+        using Base::rend;
+        using Base::crend;
     };
 
     template<class T, class Allocator>

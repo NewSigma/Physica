@@ -75,4 +75,16 @@ namespace Physica::Core {
         Internal::assignConst_kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), s.getDerived());
         return Base::getDerived();
     }
+
+    template<class Derived>
+    __host__ __device__ typename device_obj<LValueVector<Derived>>::ScalarType*
+    device_obj<LValueVector<Derived>>::data_ptr(size_t index) {
+        return Base::getDerived().data_ptr(index);
+    }
+    
+    template<class Derived>
+    __host__ __device__ const typename device_obj<LValueVector<Derived>>::ScalarType*
+    device_obj<LValueVector<Derived>>::data_ptr(size_t index) const {
+        return Base::getDerived().data_ptr(index);
+    }
 }

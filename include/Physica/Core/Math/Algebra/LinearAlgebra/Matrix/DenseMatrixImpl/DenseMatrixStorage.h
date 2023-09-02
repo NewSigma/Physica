@@ -56,12 +56,12 @@ namespace Physica::Core {
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getRow() * c + r);
+            return Base::operator[](toIndex(r, c));
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getRow() * c + r);
+            return Base::operator[](toIndex(r, c));
         }
         /* Operations */
         void resize(size_t row, size_t column) { Base::resize(row * column); }
@@ -75,8 +75,11 @@ namespace Physica::Core {
         [[nodiscard]] Base& asArray() noexcept { return *this; }
         [[nodiscard]] const Base& asArray() const noexcept { return *this; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getRow() * c + r; }
 
         using Base::getCapacity;
         friend class device_obj<This>;
@@ -106,12 +109,12 @@ namespace Physica::Core {
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getColumn() * r + c);
+            return Base::operator[](toIndex(r, c));
         }
 
         [[nodiscard]] const T& operator()(size_t r, size_t c) const  {
             assert(r < getDerived().getRow() && c < getDerived().getColumn());
-            return Base::operator[](getDerived().getColumn() * r + c);
+            return Base::operator[](toIndex(r, c));
         }
         /* Operations */
         void resize(size_t row, size_t column) { Base::resize(row * column); }
@@ -125,8 +128,11 @@ namespace Physica::Core {
         [[nodiscard]] Base& asArray() noexcept { return *this; }
         [[nodiscard]] const Base& asArray() const noexcept { return *this; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getColumn() * r + c; }
 
         using Base::getCapacity;
         friend class device_obj<This>;
@@ -178,6 +184,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
             return array.getLength() == 0 ? 0 : array.getLength() * array[0].getLength();
         }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return array[column].data() + row; }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return array[column].data() + row; }
     private:
         DenseMatrixStorage(ArrayType array_) : array(std::move(array_)) {}
 
@@ -230,6 +238,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
             return array.getLength() == 0 ? 0 : array.getLength() * array[0].getLength();
         }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return array[row].data() + column; }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return array[row].data() + column; }
     private:
         DenseMatrixStorage(ArrayType array_) : array(std::move(array_)) {}
 

@@ -7,7 +7,7 @@ endif()
 if(${PHYSICA_GUI})
     physica_add_example(CrossSection CrossSection/CrossSection.cpp)
     physica_add_example(TodaModel RPMD/ForceModel/TodaModel.cpp)
-    physica_add_example(HardCore_cuda RPMD/HardCore.cu)
+    #physica_add_example(HardCore_cuda RPMD/HardCore.cu) #nvcc internal error
     physica_add_example(HardCore RPMD/HardCore.cpp)
     physica_add_example(WaterDrop WaterDrop/WaterDrop.cpp)
     physica_add_example(DensityPlotExample DensityPlotExample.cpp)

@@ -90,6 +90,18 @@ namespace Physica::Core {
                 return false;
         return true;
     }
+    /**
+     * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
+     */
+    template<class Derived>
+    __host__ __device__ inline typename LValueVector<Derived>::ScalarType* LValueVector<Derived>::data_ptr(size_t index) {
+        return Base::getDerived().data_ptr(index);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline const typename LValueVector<Derived>::ScalarType* LValueVector<Derived>::data_ptr(size_t index) const {
+        return Base::getDerived().data_ptr(index);
+    }
 
     template<class Derived, class OtherDerived>
     inline void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {

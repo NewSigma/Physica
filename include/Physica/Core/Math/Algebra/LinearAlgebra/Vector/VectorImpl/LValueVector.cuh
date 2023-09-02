@@ -39,6 +39,9 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     };
 
     template<class Derived, class OtherDerived>

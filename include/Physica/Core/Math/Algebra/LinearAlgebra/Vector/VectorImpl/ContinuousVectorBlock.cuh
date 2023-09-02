@@ -46,8 +46,8 @@ namespace Physica::Core {
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
-        [[nodiscard]] __device__ inline ScalarType* data();
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data() const;
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
     };
 
     template<class VectorType, size_t Length>
@@ -93,17 +93,5 @@ namespace Physica::Core {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
-    }
-
-    template<class VectorType, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ScalarType*
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::data() {
-        return vec.getDerived().data() + from;
-    }
-
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline const typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ScalarType*
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::data() const {
-        return vec.getDerived().data() + from;
     }
 }

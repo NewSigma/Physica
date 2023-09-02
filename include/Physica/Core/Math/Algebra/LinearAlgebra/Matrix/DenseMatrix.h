@@ -113,6 +113,7 @@ namespace Physica::Core {
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
+        using Storage::data_ptr;
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }

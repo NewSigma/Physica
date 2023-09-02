@@ -31,11 +31,11 @@ namespace Physica::Core {
     class device_obj<Vector<T, Length, MaxLength>>
             : public device_obj<ContinuousVector<Vector<T, Length, MaxLength>>>
             , public Utils::device_obj<Utils::Array<T, Length, MaxLength>> {
+        using Storage = Utils::device_obj<Utils::Array<T, Length, MaxLength>>;
     public:
         using host_obj = Vector<T, Length, MaxLength>;
-    private:
         using Base = device_obj<ContinuousVector<host_obj>>;
-        using Storage = Utils::device_obj<Utils::Array<T, Length, MaxLength>>;
+        using typename Base::ScalarType;
     public:
         device_obj() = default;
         using Storage::Storage;
@@ -58,6 +58,8 @@ namespace Physica::Core {
         /* Getters */
         using Storage::getLength;
         using Storage::data;
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return data() + index; }
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return data() + index; }
     };
 
     template<class T, size_t Length, size_t MaxLength>

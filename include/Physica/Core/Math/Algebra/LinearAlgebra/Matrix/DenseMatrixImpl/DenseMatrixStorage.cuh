@@ -167,8 +167,11 @@ namespace Physica::Core {
     template<class Derived>
     void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::resize(size_t row, size_t column) {
         array.resize(column);
-        for (auto& vector : array)
+        auto host_array = array.toHost();
+        for (auto& vector : host_array)
             vector.resize(row);
+        host_array.toDevice(array);
+        r = row;
     }
 
     template<class Derived>
@@ -224,8 +227,11 @@ namespace Physica::Core {
     template<class Derived>
     void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::resize(size_t row, size_t column) {
         array.resize(row);
-        for (auto& vector : array)
+        auto host_array = array.toHost();
+        for (auto& vector : host_array)
             vector.resize(column);
+        host_array.toDevice(array);
+        c = column;
     }
 
     template<class Derived>

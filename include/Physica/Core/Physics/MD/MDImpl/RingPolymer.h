@@ -214,8 +214,8 @@ namespace Physica::Core {
     void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toNormalRepr(
             size_t posID, const PhaseMatrix& outer_phase, BufferType& outer_buffer, FFTType& outer_fft) const {
         assert(posID < getDOF());
-        assert(outer_buffer.getColumn() == getNumReplica());
         assert(outer_fft.getRSpaceSize() == getNumReplica());
+        assert(outer_fft.getKSpaceSize() == outer_buffer.getColumn());
         outer_fft.getRSpace() = outer_phase.row(posID);
         FFTType::transform(fft, outer_fft);
         auto momentum = outer_buffer.row(0);
@@ -231,8 +231,8 @@ namespace Physica::Core {
     void RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::toBeadRepr(
             size_t posID, PhaseMatrix& outer_phase, const BufferType& outer_buffer, FFTType& outer_fft) const {
         assert(posID < getDOF());
-        assert(outer_buffer.getColumn() == getNumReplica());
         assert(outer_fft.getRSpaceSize() == getNumReplica());
+        assert(outer_fft.getKSpaceSize() == outer_buffer.getColumn());
         outer_fft.getKSpace() = outer_buffer.row(0);
         FFTType::invTransform(fft, outer_fft);
         auto momentum = outer_phase.row(posID);

@@ -104,6 +104,8 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] ScalarType sum() const;
         [[nodiscard]] ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;

@@ -51,17 +51,21 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
         template<class PacketType> void writePacket(size_t index, const PacketType packet);
         template<class PacketType> void writePacketPartial(size_t index, size_t count, const PacketType packet);
+
         LVectorBlock<Derived> head(size_t to) { return LVectorBlock<Derived>(Base::getDerived(), 0, to); }
         const LVectorBlock<Derived> head(size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
         LVectorBlock<Derived> tail(size_t from) { return LVectorBlock<Derived>(Base::getDerived(), from); }
         const LVectorBlock<Derived> tail(size_t from) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from); }
         LVectorBlock<Derived> segment(size_t from, size_t to) { return LVectorBlock<Derived>(Base::getDerived(), from, to); }
         const LVectorBlock<Derived> segment(size_t from, size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
+
         void toUnit();
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] bool isZero() const;
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     protected:
         LValueVector() = default;
         LValueVector(const LValueVector&) = default;

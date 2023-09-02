@@ -48,8 +48,8 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType* data() { return Base::getDerived().data(); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data(); }
+        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::data_ptr(0); }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

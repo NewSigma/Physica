@@ -65,6 +65,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return vec.data() + from + index; }
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return vec.data() + from + index; }
     };
 
     template<class VectorType, size_t Length>

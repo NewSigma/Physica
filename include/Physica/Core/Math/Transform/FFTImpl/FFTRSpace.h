@@ -78,6 +78,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     };
 
     template<class Derived>
@@ -100,6 +102,20 @@ namespace Physica::Core {
         assert(data.getLength() == getLength());
         *this = data;
         Base::getDerived().transform();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename FFTRSpace<Derived, 1>::ScalarType* FFTRSpace<Derived, 1>::data_ptr(size_t index) {
+        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
+    }
+
+    template<class Derived>
+    __host__ __device__ inline const typename FFTRSpace<Derived, 1>::ScalarType* FFTRSpace<Derived, 1>::data_ptr(size_t index) const {
+        assert(index < getLength());
+        if constexpr (isComplex)
+            return Base::getDerived().asComplexBuffer() + index;
+        else
+            return Base::getDerived().asRealBuffer() + index;
     }
 
     template<class Derived>

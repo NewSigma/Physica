@@ -95,7 +95,7 @@ namespace Physica::Utils {
         __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
-        void toDevice(device_obj<This>& obj) const;
+        inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
