@@ -30,15 +30,10 @@
 namespace Physica::Core {
     //Forward declarations
     template<class AnyScalar> class ComplexScalar;
-
-    template<ScalarOption option>
-    __host__ __device__ Scalar<option> square(const Scalar<option>& s);
-
-    template<ScalarOption option>
-    __host__ __device__ Scalar<option> sqrt(const Scalar<option>& s);
-
-    template<ScalarOption option>
-    Scalar<option> ln(const Scalar<option>& s);
+    template<ScalarOption option> __host__ __device__ inline Scalar<option> abs(const Scalar<option>& s);
+    template<ScalarOption option> __host__ __device__ inline Scalar<option> square(const Scalar<option>& s);
+    template<ScalarOption option> __host__ __device__ inline Scalar<option> sqrt(const Scalar<option>& s);
+    template<ScalarOption option> __host__ __device__ inline Scalar<option> ln(const Scalar<option>& s);
 
     namespace Internal {
         template<ScalarOption option_>
@@ -206,7 +201,7 @@ namespace Physica::Core {
         friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
-        __host__ __device__ Scalar& toAbs() noexcept { f = fabsf(f); return *this; }
+        __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
@@ -263,7 +258,7 @@ namespace Physica::Core {
         friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
-        __host__ __device__ Scalar& toAbs() noexcept { d = fabs(d); return *this; }
+        __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }

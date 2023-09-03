@@ -51,6 +51,7 @@ namespace Physica::Core {
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
+        using Storage::data_ptr;
         /* Static members */
         [[nodiscard]] inline static device_obj unitMatrix(size_t order);
     };

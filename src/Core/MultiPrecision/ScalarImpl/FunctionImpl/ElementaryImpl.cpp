@@ -21,6 +21,12 @@
 
 namespace Physica::Core {
     template<>
+    Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s) {
+        Scalar<MultiPrecision> temp(s);
+        return Scalar<MultiPrecision>(std::move(temp.toAbs()));
+    }
+
+    template<>
     Scalar<MultiPrecision> square(const Scalar<MultiPrecision>& s) {
         if(s == BasicConst::getInstance()._1)
             return Scalar(s);

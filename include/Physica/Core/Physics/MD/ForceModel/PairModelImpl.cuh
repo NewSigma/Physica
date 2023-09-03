@@ -110,10 +110,10 @@ namespace Physica::Core {
     template<class Derived>
     __device__ void device_obj<PairModel<Derived>>::postForceKernelImpl() {
         const unsigned int threadId = threadIdx.x;
-        ScalarType sum = 0;
-        for (size_t i = 0; i < forceBuffer.getColumn(); ++i)
-            sum += forceBuffer(threadId, i);
-        forceBuffer(threadId, 0) = sum;
+        for (int i = 0; i < Dim; ++i) {
+            unsigned int index = threadId * Dim + i;
+            forceBuffer(index, 0) = forceBuffer.row(index).sum();
+        }
     }
 
     template<class Derived>

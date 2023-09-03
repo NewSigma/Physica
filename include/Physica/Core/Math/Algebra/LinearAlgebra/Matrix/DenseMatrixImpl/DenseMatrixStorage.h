@@ -81,6 +81,7 @@ namespace Physica::Core {
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getRow() * c + r; }
 
+        using Base::getLength;
         using Base::getCapacity;
         friend class device_obj<This>;
     };
@@ -134,6 +135,7 @@ namespace Physica::Core {
         DenseMatrixStorage(Base array) : Base(std::move(array)) {}
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getColumn() * r + c; }
 
+        using Base::getLength;
         using Base::getCapacity;
         friend class device_obj<This>;
     };

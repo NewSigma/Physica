@@ -49,6 +49,7 @@ namespace Physica::Core {
 
         using host_obj = SilveraGoldman<ScalarType, PosScalarType>;
         using This = device_obj<host_obj>;
+    public:
         using Base = device_obj<PairModel<host_obj>>;
     public:
         device_obj(size_t numParticle, ScalarType cutoff_);
@@ -73,7 +74,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::force_functor(ScalarType r, ScalarType r2) const {
+    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::force_functor(
+            ScalarType r, ScalarType r2) const {
         const ScalarType factor = r * (gamma * 2) + beta;
         ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
         const ScalarType rep_r = reciprocal(r);
@@ -97,7 +99,8 @@ namespace Physica::Core {
     }
     
     template<class ScalarType, class PosScalarType>
-    inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::pot_functor(ScalarType r, ScalarType r2) const {
+    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::pot_functor(
+            ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);

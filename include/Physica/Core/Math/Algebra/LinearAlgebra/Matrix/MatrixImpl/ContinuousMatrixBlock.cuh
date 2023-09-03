@@ -56,9 +56,9 @@ namespace Physica::Core {
 
     template<class MatrixType, size_t Length>
     class device_obj<RowContinuousVector<MatrixType, Length>> : public Internal::Traits<device_obj<RowContinuousVector<MatrixType, Length>>>::Base {
+    public:
         using host_obj = RowContinuousVector<MatrixType, Length>;
         using This = device_obj<host_obj>;
-    public:
         using Base = typename Internal::Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
@@ -85,13 +85,15 @@ namespace Physica::Core {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(row, fromCol + index); }
     };
 
     template<class MatrixType, size_t Length>
     class device_obj<ColContinuousVector<MatrixType, Length>> : public Internal::Traits<device_obj<ColContinuousVector<MatrixType, Length>>>::Base {
+    public:
         using host_obj = ColContinuousVector<MatrixType, Length>;
         using This = device_obj<host_obj>;
-    public:
         using Base = typename Internal::Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
@@ -118,6 +120,8 @@ namespace Physica::Core {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, col); }
     };
 
     template<class MatrixType, size_t Column>

@@ -49,20 +49,26 @@ namespace Physica::Core {
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
+    private:
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getRow() * c + r; }
+
+        using Base::getLength;
     };
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::operator()(size_t r, size_t c) {
         assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](getDerived().getRow() * c + r);
+        return Base::operator[](toIndex(r, c));
     }
 
     template<class Derived>
     __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::operator()(size_t r, size_t c) const {
         assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](getDerived().getRow() * c + r);
+        return Base::operator[](toIndex(r, c));
     }
 
     template<class Derived>
@@ -70,7 +76,7 @@ namespace Physica::Core {
     DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::toDevice() const {
         return device_obj<This>(*this);
     }
-
+    /////////////////////////////////////////////////////////////////////////////////
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
             : public Utils::device_obj<Utils::Array<typename Internal::Traits<Derived>::ScalarType,
@@ -98,20 +104,26 @@ namespace Physica::Core {
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
+    private:
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getColumn() * r + c; }
+
+        using Base::getLength;
     };
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::operator()(size_t r, size_t c) {
         assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](getDerived().getRow() * r + c);
+        return Base::operator[](toIndex(r, c));
     }
 
     template<class Derived>
     __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::T&
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::operator()(size_t r, size_t c) const {
         assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](getDerived().getRow() * r + c);
+        return Base::operator[](toIndex(r, c));
     }
 
     template<class Derived>
@@ -119,13 +131,14 @@ namespace Physica::Core {
     DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::toDevice() const {
         return device_obj<This>(*this);
     }
-
+    /////////////////////////////////////////////////////////////////////////////////
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
             : public Utils::CRTPBase<device_obj<Derived>, 1> {
         using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
         using T = typename Internal::Traits<Derived>::ScalarType;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
+        using This = device_obj<host_obj>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
@@ -148,6 +161,8 @@ namespace Physica::Core {
         void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(r, obj.r); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const;
     };
 
     template<class Derived>
@@ -175,17 +190,36 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    __host__ __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T*
+    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) {
+        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
+    }
+
+    template<class Derived>
+    __host__ __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T*
+    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) const {
+    #ifdef __CUDA_ARCH__
+        return array[column].data() + row;
+    #else
+        const auto host_array = array.toPlainHost();
+        const auto* p = host_array[column].getDerived().data() + row;
+        return p;
+    #endif
+    }
+
+    template<class Derived>
     device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
     DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::toDevice() const {
         return device_obj<This>(*this);
     }
-
+    /////////////////////////////////////////////////////////////////////////////////
     template<class Derived>
     class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>
             : public Utils::CRTPBase<device_obj<Derived>, 1> {
         using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
         using T = typename Internal::Traits<Derived>::ScalarType;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
+        using This = device_obj<host_obj>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
@@ -208,6 +242,8 @@ namespace Physica::Core {
         void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(c, obj.c); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const;
     };
 
     template<class Derived>
@@ -232,6 +268,24 @@ namespace Physica::Core {
             vector.resize(column);
         host_array.toDevice(array);
         c = column;
+    }
+
+    template<class Derived>
+    __host__ __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T*
+    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) {
+        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
+    }
+
+    template<class Derived>
+    __host__ __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T*
+    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) const {
+    #ifdef __CUDA_ARCH__
+        return array[row].data() + column;
+    #else
+        const auto host_array = array.toPlainHost();
+        const auto* p = host_array[row].getDerived().data() + column;
+        return p;
+    #endif
     }
 
     template<class Derived>
