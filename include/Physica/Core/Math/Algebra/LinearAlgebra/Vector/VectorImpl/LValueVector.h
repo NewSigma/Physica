@@ -41,14 +41,14 @@ namespace Physica::Core {
         inline Derived& operator=(const RValueVector<OtherVector>& v);
         template<class AnyScalar>
         inline Derived& operator=(const ScalarBase<AnyScalar>& s);
-        [[nodiscard]] __host__ __device__ ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
-        [[nodiscard]] __host__ __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
+        [[nodiscard]] ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
+        [[nodiscard]] const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
         template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
         template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
         template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
         template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
         /* Operations */
-        [[nodiscard]] __host__ __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
+        [[nodiscard]] ScalarType calc(size_t index) const { return (*this)[index]; }
         template<class PacketType> void writePacket(size_t index, const PacketType packet);
         template<class PacketType> void writePacketPartial(size_t index, size_t count, const PacketType packet);
 

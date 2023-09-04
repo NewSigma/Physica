@@ -99,12 +99,12 @@ namespace Physica::Core {
         }
 
         template<class Matrix>
-        [[nodiscard]] static size_t getMaxMajor(const Matrix& mat) noexcept {
+        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
             return isColumnMatrix<Matrix>() ? mat.getColumn() : mat.getRow();
         }
 
         template<class Matrix>
-        [[nodiscard]] static size_t getMaxMinor(const Matrix& mat) noexcept {
+        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
             return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getColumn();
         }
 

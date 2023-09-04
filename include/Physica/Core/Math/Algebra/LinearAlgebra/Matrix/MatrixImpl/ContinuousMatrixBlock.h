@@ -173,8 +173,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
@@ -225,8 +225,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
@@ -272,8 +272,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
         /**
@@ -311,8 +311,8 @@ namespace Physica::Core {
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] size_t getColumn() const noexcept { return Column == Dynamic ? colCount : Column; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? colCount : Column; }
         [[nodiscard]] This& asMatrix() noexcept { return *this; }
         [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };

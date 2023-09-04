@@ -23,6 +23,12 @@
 #include "MatrixImpl/MatrixProduct.cuh"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+        class Traits<Core::device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>>
+                : public Traits<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>> {};
+    }
+
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     class device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
             : public device_obj<ContinuousMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>>

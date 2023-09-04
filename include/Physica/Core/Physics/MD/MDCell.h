@@ -70,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
+        void setLattice(const MDCell& cell);
         void setLattice(LatticeMatrix new_lattice);
     protected:
         void toDirect() { Base::toDirect(invLattice); }
@@ -169,6 +170,12 @@ namespace Physica::Core {
         MDCell result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void MDCell<ScalarType, PosScalarType, Dim>::setLattice(const MDCell& cell) {
+        Base::setLattice(cell.getLattice());
+        invLattice = cell.invLattice();
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

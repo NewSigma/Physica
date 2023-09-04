@@ -19,13 +19,13 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType> class Flatten;
+    template<class MatrixType> class RValueFlatten;
 
     namespace Internal {
         template<class T> class Traits;
 
         template<class MatrixType>
-        class Traits<Flatten<MatrixType>> {
+        class Traits<RValueFlatten<MatrixType>> {
         public:
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColumnAtCompile;
@@ -34,29 +34,20 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    class Flatten : public RValueVector<Flatten<MatrixType>> {
+    class RValueFlatten : public RValueVector<RValueFlatten<MatrixType>> {
         const MatrixType& mat;
     public:
-        using Base = RValueVector<Flatten<MatrixType>>;
+        using Base = RValueVector<RValueFlatten<MatrixType>>;
         using typename Base::ScalarType;
     public:
-        Flatten(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        template<class OtherVector>
-        void assignTo(LValueVector<OtherVector>& target) const;
+        RValueFlatten(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
     };
 
-    template<class VectorType>
-    template<class OtherVector>
-    void Flatten<VectorType>::assignTo(LValueVector<OtherVector>& target) const {
-        for (size_t i = 0; i < getLength(); ++i)
-            target[i] = calc(i);
-    }
-
     template<class MatrixType>
-    typename Flatten<MatrixType>::ScalarType Flatten<MatrixType>::calc(size_t index) const {
+    typename RValueFlatten<MatrixType>::ScalarType RValueFlatten<MatrixType>::calc(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);

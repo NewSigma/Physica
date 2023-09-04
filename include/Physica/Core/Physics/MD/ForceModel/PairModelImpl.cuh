@@ -50,7 +50,10 @@ namespace Physica::Core {
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
-        cell = hostCell;
+        swapBuffer = hostCell.getPos().flatten();
+        auto flatten_pos = cell.getPos().flatten();
+        swapBuffer.toDeviceAsync(flatten_pos);
+        cell.setLattice(hostCell);
 
         dim3 gridDims{};
         /* Make blockDim */ {

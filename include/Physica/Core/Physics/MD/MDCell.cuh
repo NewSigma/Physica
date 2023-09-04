@@ -53,8 +53,11 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] __host__ __device__ const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] __host__ __device__ constexpr static Type getType() noexcept { return Type::Cartesian; }
+        /* Setters */
+        void setLattice(const host_obj& cell);
     private:
         using Base::getType;
+        using Base::setLattice;
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -73,5 +76,11 @@ namespace Physica::Core {
         Base::swap(obj);
         massVec.swap(obj.massVec);
         invLattice.swap(obj.invLattice);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void device_obj<MDCell<ScalarType, PosScalarType, Dim>>::setLattice(const host_obj& cell) {
+        Base::setLattice(cell.getLattice());
+        invLattice = cell.getInvLattice();
     }
 }

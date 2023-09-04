@@ -21,6 +21,7 @@
 #include "ContinuousMatrix.h"
 #include "LValueMatrix.cuh"
 #include "ContinuousMatrixBlock.cuh"
+#include "ContinuousFlatten.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -94,6 +95,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+
+        [[nodiscard]] device_obj<ContinuousFlatten<Derived>> flatten() { return {*this}; }
+        [[nodiscard]] const device_obj<ContinuousFlatten<Derived>> flatten() const { return {*this}; }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

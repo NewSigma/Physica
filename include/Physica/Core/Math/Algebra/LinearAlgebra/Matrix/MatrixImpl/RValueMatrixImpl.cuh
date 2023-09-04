@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Parallel/StreamPool.cuh"
 #include "Transpose.cuh"
+#include "RValueFlatten.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -227,13 +228,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    device_obj<Transpose<Derived>> device_obj<RValueMatrix<Derived>>::transpose() const noexcept {
+    typename device_obj<RValueMatrix<Derived>>::ScalarType
+    __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
+        return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
+    }
+
+    template<class Derived>
+    __host__ __device__ device_obj<Transpose<Derived>> device_obj<RValueMatrix<Derived>>::transpose() const noexcept {
         return device_obj<Transpose<Derived>>(*this);
     }
 
     template<class Derived>
-    typename device_obj<RValueMatrix<Derived>>::ScalarType
-    __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
+    __host__ __device__ device_obj<RValueFlatten<Derived>> device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
+        return device_obj<RValueFlatten<Derived>>(*this);
     }
 }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.cuh"
+#include "LValueFlatten.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -34,5 +35,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
+        [[nodiscard]] __host__ __device__ device_obj<LValueFlatten<Derived>> flatten() { return {*this}; }
+        [[nodiscard]] __host__ __device__ const device_obj<LValueFlatten<Derived>> flatten() const { return {*this}; }
     };
 }

@@ -117,7 +117,7 @@ namespace Physica::Core {
         else
             return Base::getDerived().asRealBuffer() + index;
     }
-
+    //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 2>
             : public Utils::CRTPBase<Derived, 0>
@@ -132,8 +132,8 @@ namespace Physica::Core {
     public:
         /* Operators */
         using MatrixBase::operator=;
-        [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col);
-        [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const;
+        [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
+        [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         /* Operations */
         template<class MatrixType>
         inline void transform(const RValueMatrix<MatrixType>& data);
@@ -141,25 +141,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
     };
-
-    template<class Derived>
-    inline typename FFTRSpace<Derived, 2>::ScalarType& FFTRSpace<Derived, 2>::operator()(size_t row, size_t col) {
-        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(row, col));
-    }
-
-    template<class Derived>
-    inline const typename FFTRSpace<Derived, 2>::ScalarType& FFTRSpace<Derived, 2>::operator()(size_t row, size_t col) const {
-        assert(row < getRow());
-        assert(col < getColumn());
-        const size_t numColumn = getColumn();
-        if constexpr (isComplex)
-            return Base::getDerived().asComplexBuffer()[row * numColumn + col];
-        else {
-            const size_t shift = (numColumn / 2 + 1) * 2;
-            return Base::getDerived().asRealBuffer()[row * shift + col];
-        }
-    }
 
     template<class Derived>
     template<class MatrixType>
@@ -170,6 +154,24 @@ namespace Physica::Core {
         Base::getDerived().transform();
     }
 
+    template<class Derived>
+    inline typename FFTRSpace<Derived, 2>::ScalarType* FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(row, col));
+    }
+
+    template<class Derived>
+    inline const typename FFTRSpace<Derived, 2>::ScalarType* FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+        assert(row < getRow());
+        assert(col < getColumn());
+        const size_t numColumn = getColumn();
+        if constexpr (isComplex)
+            return Base::getDerived().asComplexBuffer() + row * numColumn + col;
+        else {
+            const size_t shift = (numColumn / 2 + 1) * 2;
+            return Base::getDerived().asRealBuffer() + row * shift + col;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 3>
             : public Utils::CRTPBase<Derived, 0>

@@ -54,6 +54,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] __host__ __device__ Type getType() const noexcept { return type; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return pos.getRow(); }
+        /* Setters */
+        void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
     };
 
     template<class ScalarType, unsigned int Dim>

@@ -113,7 +113,7 @@ namespace Physica::Core {
         assert(index < getLength());
         return Base::getDerived().asComplexBuffer() + index;
     }
-
+    //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTKSpace<Derived, 2>
             : public Utils::CRTPBase<Derived, 1>
@@ -126,8 +126,8 @@ namespace Physica::Core {
     public:
         /* Operators */
         using MatrixBase::operator=;
-        [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col);
-        [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const;
+        [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
+        [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         /* Operations */
         template<class MatrixType>
         inline void invTransform(const RValueMatrix<MatrixType>& data);
@@ -135,19 +135,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
     };
-
-    template<class Derived>
-    inline typename FFTKSpace<Derived, 2>::ScalarType& FFTKSpace<Derived, 2>::operator()(size_t row, size_t col) {
-        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(row, col));
-    }
-
-    template<class Derived>
-    inline const typename FFTKSpace<Derived, 2>::ScalarType& FFTKSpace<Derived, 2>::operator()(size_t row, size_t col) const {
-        assert(row < getRow());
-        assert(col < getColumn());
-        return Base::getDerived().asComplexBuffer()[row * getColumn() + col];
-    }
 
     template<class Derived>
     template<class MatrixType>
@@ -158,6 +148,18 @@ namespace Physica::Core {
         Base::getDerived().invTransform();
     }
 
+    template<class Derived>
+    inline typename FFTKSpace<Derived, 2>::ScalarType* FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(row, col));
+    }
+
+    template<class Derived>
+    inline const typename FFTKSpace<Derived, 2>::ScalarType* FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+        assert(row < getRow());
+        assert(col < getColumn());
+        return Base::getDerived().asComplexBuffer() + row * getColumn() + col;
+    }
+    //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTKSpace<Derived, 3>
             : public Utils::CRTPBase<Derived, 1>

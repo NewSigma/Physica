@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class Derived> class LValueMatrix;
     template<class MatrixType> class Transpose;
     template<class MatrixType> class Conjugate;
-    template<class MatrixType> class Flatten;
+    template<class MatrixType> class RValueFlatten;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
     /**
      * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
@@ -100,13 +100,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType trace() const;
         [[nodiscard]] Transpose<Derived> transpose() const noexcept;
         [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
-        [[nodiscard]] Flatten<Derived> flatten() const noexcept;
+        [[nodiscard]] RValueFlatten<Derived> flatten() const noexcept;
         [[nodiscard]] ScalarType sum() const { return Base::getDerived().sum(); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
-        [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
-        [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
+        [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::columnFromMajorMinor<Derived>(major, minor); }
@@ -128,5 +128,5 @@ namespace Physica::Core {
 #include "RValueMatrixImpl.h"
 #include "Transpose.h"
 #include "Conjugate.h"
-#include "Flatten.h"
+#include "RValueFlatten.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "LValueFlatten.h"
+
 namespace Physica::Core {
     namespace Internal {
         /**
@@ -399,5 +401,15 @@ namespace Physica::Core {
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
                 refFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
+    }
+
+    template<class Derived>
+    LValueFlatten<Derived> LValueMatrix<Derived>::flatten() {
+        return LValueFlatten<Derived>(*this);
+    }
+
+    template<class Derived>
+    const LValueFlatten<Derived> LValueMatrix<Derived>::flatten() const {
+        return LValueFlatten<Derived>(*this);
     }
 }

@@ -270,8 +270,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    Flatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
-        return Flatten<Derived>(Base::getDerived());
+    RValueFlatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
+        return RValueFlatten<Derived>(Base::getDerived());
     }
 
     template<class MatrixType, class MatrixType2>

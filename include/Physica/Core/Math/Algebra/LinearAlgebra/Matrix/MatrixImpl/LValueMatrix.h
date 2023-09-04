@@ -23,6 +23,7 @@
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
+    template<class MatrixType> class LValueFlatten;
 
     namespace Internal {
         template<class Derived>
@@ -109,6 +110,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType sum() const;
         [[nodiscard]] ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] LValueFlatten<Derived> flatten();
+        [[nodiscard]] const LValueFlatten<Derived> flatten() const;
         /* Setters */
         void toUnitMatrix();
     protected:

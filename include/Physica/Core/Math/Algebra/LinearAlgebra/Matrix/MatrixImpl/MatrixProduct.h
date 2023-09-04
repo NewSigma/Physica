@@ -104,8 +104,8 @@ namespace Physica::Core {
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat2.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
         [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
@@ -130,8 +130,8 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
-        [[nodiscard]] size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
         [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
         [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
     };
@@ -158,7 +158,7 @@ namespace Physica::Core {
         inline void assignTo(LValueVector<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
-        [[nodiscard]] size_t getLength() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
     };

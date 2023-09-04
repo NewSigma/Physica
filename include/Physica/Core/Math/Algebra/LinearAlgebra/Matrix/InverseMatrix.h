@@ -163,8 +163,8 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getRow(); }
     };
 
     template<class MatrixType>

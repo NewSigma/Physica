@@ -85,8 +85,8 @@ namespace Physica::Core {
 
             [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
             /* Getters */
-            [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-            [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+            [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+            [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
             [[nodiscard]] ScalarType sum() const {
                 ScalarType result = 0;
                 for (size_t major = 0; major < MatrixOption::selectMajor<Derived>(getRow(), getColumn()); ++major)
@@ -109,8 +109,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_) : exp(exp_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return -exp.calc(row, col); }
-        [[nodiscard]] size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
@@ -129,8 +129,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
         }
-        [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
     };
 
     template<class MatrixType, class AnyScalar>
@@ -149,8 +149,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
         }
-        [[nodiscard]] size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
@@ -169,8 +169,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp1.calc(row, col)) - ScalarType(exp2.calc(row, col));
         }
-        [[nodiscard]] size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp1.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
     };
 
     template<class MatrixType, class AnyScalar>
@@ -187,8 +187,8 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) - ScalarType(scalar); }
-        [[nodiscard]] size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
@@ -207,8 +207,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return mat1.calc(row, col) * mat2.calc(row, col);
         }
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat1.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat1.getColumn(); }
     };
 
     template<class MatrixType, class AnyScalar>
@@ -227,8 +227,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
         }
-        [[nodiscard]] size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
@@ -245,8 +245,8 @@ namespace Physica::Core {
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) / ScalarType(scalar); }
-        [[nodiscard]] size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class MatrixType>
@@ -264,8 +264,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return reciprocal(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -283,8 +283,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sqrt(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -302,8 +302,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return abs(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -318,8 +318,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return square(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -334,8 +334,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ln(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -350,8 +350,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -366,8 +366,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sin(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
@@ -382,8 +382,8 @@ namespace Physica::Core {
         DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return cos(mat.calc(row, col)); }
-        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////

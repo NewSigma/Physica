@@ -20,6 +20,7 @@
 
 #include "LValueMatrix.h"
 #include "ContinuousMatrixBlock.h"
+#include "ContinuousFlatten.h"
 
 namespace Physica::Core {
     /**
@@ -94,6 +95,9 @@ namespace Physica::Core {
         [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Column> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Column> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+
+        [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
+        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const ContinuousMatrix&) = default;
