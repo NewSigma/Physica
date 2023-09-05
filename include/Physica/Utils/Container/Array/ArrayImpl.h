@@ -20,6 +20,9 @@
 
 #include <cassert>
 #include <cstring>
+#ifdef PHYSICA_CUDA
+    #include <thrust/swap.h>
+#endif
 
 namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Capacity, Allocator>//////////////////////////////////////////
@@ -70,9 +73,14 @@ namespace Physica::Utils {
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     __host__ __device__ void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
-        using std::swap;
-        for (size_t i = 0; i < Length; ++i)
+        for (size_t i = 0; i < Length; ++i) {
+        #ifdef __CUDA_ARCH__
+            thrust::swap(arr[i], array[i]);
+        #else
+            using std::swap;
             swap(arr[i], array[i]);
+        #endif
+        }
     }
     ///////////////////////////////////////Array<T, Dynamic, Capacity>//////////////////////////////////////////
     template<class T, size_t Capacity, class Allocator>

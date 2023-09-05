@@ -93,6 +93,12 @@ namespace Physica::Core {
         /* Operations */
         __host__ __device__ void resize(size_t row_, [[maybe_unused]] size_t column_) { r = row_; }
         /* Helper */
-        __host__ __device__ void swap(DenseMatrixDim& dim) noexcept { std::swap(r, dim.r); }
+        __host__ __device__ void swap(DenseMatrixDim& dim) noexcept {
+        #ifdef __CUDA_ARCH__
+            thrust::swap(r, dim.r);
+        #else
+            std::swap(r, dim.r);
+        #endif
+        }
     };
 }

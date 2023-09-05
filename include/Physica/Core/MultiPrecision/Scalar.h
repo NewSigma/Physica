@@ -21,6 +21,9 @@
 #include <cmath>
 #include <ostream>
 #include "MultiPrecisionType.h"
+#ifdef PHYSICA_CUDA
+    #include <cuda/std/limits>
+#endif
 #include "Rational.h"
 #include "ScalarImpl/ScalarBase.h"
 #include "Physica/Core/Exception/NotImplementedException.h"
@@ -304,10 +307,22 @@ namespace std {
     };
 
     template<>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float>> : public numeric_limits<float> {};
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float>> : 
+    #ifdef PHYSICA_CUDA
+        public ::cuda::std::numeric_limits<float>
+    #else
+        public numeric_limits<float>
+    #endif
+    {};
 
     template<>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double>> : public numeric_limits<double> {};
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double>> : 
+    #ifdef PHYSICA_CUDA
+        public ::cuda::std::numeric_limits<double>
+    #else
+        public numeric_limits<double>
+    #endif
+    {};
 }
 
 #include "ScalarImpl/ScalarImpl.h"
