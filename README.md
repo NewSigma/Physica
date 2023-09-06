@@ -18,6 +18,8 @@ There will be a lot of work to do in the future
 
 2. Zero overhead abstraction: Users shall not pay for what they do not need.
 
+3. Template meta algorithm: Making use of powerful C++ templates, the program will fit to problem at compiling time automatically.
+
 ## Usage
 
 Requirements:  

@@ -13,7 +13,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 48;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(14);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(0.1 * 1E-12);
@@ -50,7 +50,7 @@ int main() {
     Vector<ScalarType> corr_var(CorrStep, 0);
     {
         constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
-        RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
+        auto& gen = RandomPoolType::getGen();
         RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
         rpmd.initMomentum(gen);
 
@@ -64,11 +64,11 @@ int main() {
         for (unsigned int i = 0; i < 6; ++i) {
             temp = ScalarType(0);
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+                rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
                 const auto p0 = ringPolymer.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
                     toNextMean(temp[k], j, hadamard(ringPolymer.makeCentroidMomentum(), p0).sum() * factor);
-                    rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                    rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
                 }
             }
             toNextVariance(corr_var, corr, i, temp);

@@ -32,7 +32,7 @@ using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -63,12 +63,10 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    RandomPool<RandomGenerator>::FixedSeed = 3438603950906262893;
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
-
     ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
     {
+        auto& gen = RandomPoolType::getGen();
         auto rpmd = makeSystem(gen);
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
@@ -79,7 +77,7 @@ int main() {
 
         //ProfilerStart("profiler.dat");
         auto timeuse = Benchmark::run([&]() {
-            rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
                 thermo,
                 kineticModel,

@@ -46,13 +46,13 @@ namespace Physica::Core {
         /* Operators */
         DoubleThermo& operator=(DoubleThermo obj) noexcept;
         /* Operations */
-        template<class RandomGenerator, class Executor>
+        template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(DoubleThermo& obj) noexcept;
         /* Setters */
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
-        template<class RandomGenerator>
+        template<class RandomPoolType>
         ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
     };
 
@@ -69,11 +69,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator, class Executor>
+    template<class RandomPoolType, class Executor>
     void DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType factor_translational = makeTranslationalFactor<RandomGenerator>(ringPolymer, deltaT);
+        const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT);
         if constexpr (NumReplica != 1) {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
@@ -87,7 +87,7 @@ namespace Physica::Core {
                 BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                 ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                fft.getRSpace().random_normal(RandomPool<RandomGenerator>::getGen());
+                fft.getRSpace().random_normal(RandomPoolType::getGen());
                 FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
                     buffer(0, 0) *= factor_translational;
@@ -116,7 +116,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator>
+    template<class RandomPoolType>
     ScalarType DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
@@ -131,7 +131,7 @@ namespace Physica::Core {
                                     },
                                     [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
                                         std::normal_distribution dist{};
-                                        RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
+                                        auto& gen = RandomPoolType::getGen();
                                         return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
                                     });
         if (sol[0].isPositive()) [[likely]]

@@ -30,6 +30,7 @@ using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
 using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -76,9 +77,8 @@ int main() {
 
     ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
-    RandomPool<RandomGenerator>::FixedSeed = 3438603950906262893;
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
     {
+        RandomGenerator& gen = RandomPoolType::getGen();
         auto rpmd = makeSystem(gen);
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
@@ -91,14 +91,14 @@ int main() {
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic());
             }
             toNextVariance(var, mean, i, temp);

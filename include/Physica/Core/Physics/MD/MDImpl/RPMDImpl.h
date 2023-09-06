@@ -127,7 +127,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class Thermostat,
-             class RandomGenerator,
+             class RandomPoolType,
              class KineticModel,
              class ForceModel,
              class Executor>
@@ -136,15 +136,17 @@ namespace Physica::Core {
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool isSeedFixed = RandomPoolType::isSeedFixed();
+        using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomGenerator, Executor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomGenerator, Executor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
@@ -153,7 +155,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     template<class Thermostat,
-             class RandomGenerator,
+             class RandomPoolType,
              class KineticModel,
              class ForceModel,
              class Executor>
@@ -164,7 +166,7 @@ namespace Physica::Core {
             ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<Thermostat, RandomGenerator, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
+            nvt_step<Thermostat, RandomPoolType, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>

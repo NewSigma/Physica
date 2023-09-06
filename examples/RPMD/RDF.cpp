@@ -33,7 +33,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -108,8 +108,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
-
+    auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
     const ThermostatType thermo(temperatureT, thermostatTime);
@@ -132,9 +131,9 @@ int main() {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
         for (size_t i = 0; i < 1000; ++i) {
-            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
             rpmd.normalizeCentroid();
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

@@ -41,7 +41,7 @@ namespace Physica::Core {
         /* Operators */
         TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
-        template<class RandomGenerator, class Executor>
+        template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(TRPMDThermo& obj) noexcept;
     };
@@ -58,7 +58,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator, class Executor>
+    template<class RandomPoolType, class Executor>
     void TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             ScalarType deltaT) const {
@@ -78,7 +78,7 @@ namespace Physica::Core {
                 BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                 ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                fft.getRSpace().random_normal(RandomPool<RandomGenerator>::getGen());
+                fft.getRSpace().random_normal(RandomPoolType::getGen());
                 FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 for (size_t j = 1; j < buffer.getColumn(); ++j) {
                     const ScalarType phase = M_PI * j / numReplica;

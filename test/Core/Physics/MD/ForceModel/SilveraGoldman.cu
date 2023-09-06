@@ -31,7 +31,7 @@ using ScalarType = Scalar<Float>;
 using PosScalarType = ScalarType;
 using HostForceModel = SilveraGoldman<ScalarType, PosScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -61,8 +61,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    RandomPool<RandomGenerator>::FixedSeed = 10000;
-    auto& gen = RandomPool<RandomGenerator>::getGen();
+    auto& gen = RandomPoolType::getGen();
     RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
 

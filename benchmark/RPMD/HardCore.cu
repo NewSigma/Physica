@@ -16,101 +16,58 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <algorithm>
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
+#include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
+#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Utils/BenchmarkHelper.h"
-#include "Physica/Utils/Cycler.h"
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
-constexpr double timeStep = 0.1;
-constexpr double collideFactor = 0.005;
-const size_t numMolecular = 512;
-constexpr double latticeSize = 512;
-constexpr double temperatureT = 2;
-constexpr double energy = numMolecular * temperatureT / 2;
-constexpr size_t numSample = 1;
-
 using ScalarType = Scalar<Float>;
-using VectorType = Vector<ScalarType>;
-using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
-using MDCellType = typename MDType::MDCellType;
-using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, true, 1, CudaExecutor>;
+using PosScalarType = ScalarType;
+using ForceModel = device_obj<SilveraGoldman<ScalarType, PosScalarType>>;
+using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
+using RandomPoolType = RandomPool<std::mt19937, 10000>;
+constexpr size_t numReplica = 24;
+constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
+constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
+constexpr unsigned int numMolecular = 108;
+constexpr double pair_cutoff = 15;
+constexpr double molarVolume = 31.7;
+constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-MDCellType makeSystem(std::mt19937& gen) {
-    typename MDCellType::LatticeMatrix lattice{latticeSize};
-
+template<class RandomGenerator>
+RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+    typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
-    Vector<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
-    std::sort(posVec.begin(), posVec.end());
-    typename MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+    for (auto& elem : pos)
+        elem = dist(gen);
+    typename MDCellType::MassVector massVec(numMolecular, mass);
+    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    typename MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = i % 2 == 0 ? 3.0 : 1.0;
-    }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+    cell.scale(factor);
+
+    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
-
-void scaleVelocity(MDType& rpmd) {
-    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
-    auto phase = rpmd.getPhaseMatrix().col(0);
-    auto momentum = phase.head(numMolecular);
-    momentum *= sqrt(ScalarType(energy) / energy1);
-}
-
-ScalarType calcThermoFlux(MDType& rpmd) {
-    ScalarType flux = 0;
-    auto col = rpmd.getPhaseMatrix().col(0);
-    const auto& massVec = rpmd.getMassVec();
-    for (size_t i = 0; i < numMolecular; ++i)
-        flux += col[i] * square(col[i]) / square(massVec[i]);
-    return flux;
-}
-
-void run(unsigned int sys, MatrixType& record, std::mt19937& gen) {
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
-    kineticModel.updateMass(rpmd.getRingPolymer());
+/**
+ * Reference:
+ * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
+ */
+int main() {
+    auto& gen = RandomPoolType::getGen();
+    RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
 
-    Vector<ScalarType> mean(record.getRow(), 0);
-    for (size_t sample = 0; sample < numSample; ++sample) {
-        kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
-        const ScalarType flux0 = calcThermoFlux(rpmd);
-        for (size_t j = 0; j < mean.getLength(); ++j) {
-            const ScalarType flux = calcThermoFlux(rpmd);
-            toNextMean(mean[j], sample, flux0 * flux);
-            kineticModel.do_nve_step_for(1.0, timeStep);
-            kineticModel.post_nve_step(rpmd.getRingPolymer());
-            scaleVelocity(rpmd);
-            kineticModel.updateMomentum(rpmd.getRingPolymer());
-        }
-    }
-    record.asArray()[sys] = std::move(mean);
-}
-
-int main() {
-    MatrixType record(1000, 1);
-    std::mt19937::result_type seed;
-    RandomSeed::rdrand(seed);
-    std::mt19937 gen(seed);
-
-    auto timeuse = Benchmark::run([&]() {
-        run(0, record, gen);
-    }, 8, 10);
-    std::cout << "Time use(second): " << timeuse.first << '(' << timeuse.second << ")\n";
+    KineticModel kineticModel(temperatureT, numReplica);
+    ForceModel forceModel(numMolecular, pair_cutoff);
+    rpmd.nve_step_for<KineticModel, ForceModel, CudaExecutor>(PhyConst<AU>::secondToTime(1 * 1E-11), kineticModel, forceModel);
     return 0;
 }

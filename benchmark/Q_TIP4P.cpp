@@ -33,7 +33,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -105,8 +105,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 }
 
 int main() {
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
-
+    auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
@@ -116,7 +115,7 @@ int main() {
     KineticModel kineticModel(temperatureT, numReplica);
     {
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), SequentialExecutor>(
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(5 * 1E-14),
             thermo,
             kineticModel,
@@ -128,7 +127,7 @@ int main() {
         ThreadPool::numThreadRequired = 2;
         ThreadPool& pool = ThreadPool::getInstance();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
             PhyConst<AU>::secondToTime(5 * 1E-14),
             thermo,
             kineticModel,
@@ -142,7 +141,7 @@ int main() {
         ThreadPool& pool = ThreadPool::getInstance();
         pool.restart();
         const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
             PhyConst<AU>::secondToTime(5 * 1E-14),
             thermo,
             kineticModel,

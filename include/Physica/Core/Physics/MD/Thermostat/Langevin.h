@@ -41,7 +41,7 @@ namespace Physica::Core {
         /* Operators */
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
-        template<class RandomGenerator, class Executor>
+        template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(Langevin& obj) noexcept;
         /* Setters */
@@ -69,7 +69,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator, class Executor>
+    template<class RandomPoolType, class Executor>
     void Langevin<ScalarType, PosScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
@@ -86,7 +86,7 @@ namespace Physica::Core {
                 BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                 ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                fft.getRSpace().random_normal(RandomPool<RandomGenerator>::getGen());
+                fft.getRSpace().random_normal(RandomPoolType::getGen());
                 FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
                     langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
@@ -105,7 +105,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const ScalarType factor = sqrt(repBeta * mass);
-                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType(dist(RandomPool<RandomGenerator>::getGen())));
+                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType(dist(RandomPoolType::getGen())));
             }
         }
     }

@@ -29,7 +29,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -135,9 +135,7 @@ void testForce() {
 }
 
 void testMD() {
-    RandomPool<RandomGenerator>::FixedSeed = 12989825518855205292UL;
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
-
+    auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff);
@@ -151,7 +149,7 @@ void testMD() {
     {
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             kineticModel,
@@ -166,7 +164,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

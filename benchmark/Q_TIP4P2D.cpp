@@ -33,7 +33,7 @@ using PosScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
-using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 192;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -71,8 +71,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
 }
 
 int main() {
-    RandomGenerator& gen = RandomPool<RandomGenerator>::getGen();
-
+    auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
     RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
@@ -85,7 +84,7 @@ int main() {
         ThreadPool& pool = ThreadPool::getInstance();
         //ProfilerStart("profiler.dat");
         auto timeuse = Benchmark::run([&]() {
-            rpmd.nvt_step_for<ThermostatType, RandomGenerator, KineticModel, decltype(forceModel), ThreadExecutor>(
+            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-14),
                 thermo,
                 kineticModel,

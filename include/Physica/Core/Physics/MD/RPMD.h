@@ -88,13 +88,13 @@ namespace Physica::Core {
         void nve_step_for(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 class RandomGenerator,
+                 class RandomPoolType,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
         void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 class RandomGenerator,
+                 class RandomPoolType,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
