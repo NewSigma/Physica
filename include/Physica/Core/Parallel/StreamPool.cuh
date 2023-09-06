@@ -25,7 +25,5 @@ namespace Physica::Core {
         static_assert(sizeof(cudaStream_t) == 8, "[Error]: cudaStream_t is assumed to be a pointer");
     public:
         [[nodiscard]] static cudaStream_t getStream();
-    private:
-        static CudaStream makeThreadStream();
     };
 }

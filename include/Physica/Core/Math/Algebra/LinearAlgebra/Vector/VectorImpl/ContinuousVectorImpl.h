@@ -149,19 +149,21 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class SpaceType>
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
-                                         const H5DataSpace<1>& file_space,
+                                         const DataSpaceBase<SpaceType>& file_space,
                                          const H5::DSetMemXferPropList& xfer_plist) {
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
-        dataset.read(data(), ScalarType::getH5DataType(), mem_space, file_space, xfer_plist);
+        dataset.read(data(), ScalarType::getH5DataType(), mem_space, file_space.asH5Type(), xfer_plist);
     }
 
     template<class Derived>
+    template<class SpaceType>
     void ContinuousVector<Derived>::write(H5::DataSet& dataset,
-                                          const H5DataSpace<1>& file_space,
+                                          const DataSpaceBase<SpaceType>& file_space,
                                           const H5::DSetMemXferPropList& xfer_plist) const {
         const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getLength()});
-        dataset.write(data(), ScalarType::getH5DataType(), mem_space, file_space, xfer_plist);
+        dataset.write(data(), ScalarType::getH5DataType(), mem_space, file_space.asH5Type(), xfer_plist);
     }
 
     template<class Derived>

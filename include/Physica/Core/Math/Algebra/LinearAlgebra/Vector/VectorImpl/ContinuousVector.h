@@ -54,11 +54,13 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
 
+        template<class SpaceType>
         void read(const H5::DataSet& dataset,
-                  const H5DataSpace<1>& file_space,
+                  const DataSpaceBase<SpaceType>& file_space,
                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        template<class SpaceType>
         void write(H5::DataSet& dataset, 
-                   const H5DataSpace<1>& file_space,
+                   const DataSpaceBase<SpaceType>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }

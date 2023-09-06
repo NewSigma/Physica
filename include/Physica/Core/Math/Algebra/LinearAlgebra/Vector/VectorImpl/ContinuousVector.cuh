@@ -139,6 +139,6 @@ namespace Physica::Core {
     void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const {
         obj.resize(Base::getLength());
         const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
-        cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+        cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
     }
 }

@@ -42,4 +42,10 @@ namespace Physica::Core {
     void CudaStream::swap(CudaStream& obj) noexcept {
         std::swap(stream, obj.stream);
     }
+
+    CudaStream CudaStream::makeStream() {
+        cudaStream_t stream = nullptr;
+        cudaStreamCreate(&stream);
+        return CudaStream(stream);
+    }
 }

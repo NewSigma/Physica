@@ -36,6 +36,8 @@ namespace Physica::Core {
         void swap(CudaStream& obj) noexcept;
         /* Getters */
         [[nodiscard]] cudaStream_t getStream() const noexcept { return stream; }
+        /* Static members */
+        [[nodiscard]] static CudaStream makeStream();
     private:
         CudaStream(cudaStream_t stream_);
 

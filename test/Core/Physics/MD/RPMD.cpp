@@ -50,36 +50,6 @@ bool testDriftMomentum(const RPMD<ScalarType, PosScalarType>& rpmd, double preci
     return true;
 }
 
-ScalarType pot_functor(ScalarType r) {
-    constexpr double alpha = 1.713;
-    constexpr double beta = 1.5671;
-    constexpr double gamma = 0.00993;
-    constexpr double cutoff = 8.32;
-    constexpr double c6 = 12.14;
-    constexpr double c8 = 215.2;
-    constexpr double c9 = 143.1;
-    constexpr double c10 = 4813.9;
-
-    const ScalarType r2 = square(r);
-    ScalarType result = exp(-r2 * gamma - r * beta + alpha);
-    const ScalarType rep_r = reciprocal(r);
-    const ScalarType rep_r2 = square(rep_r);
-    const ScalarType rep_r4 = square(rep_r2);
-    const ScalarType rep_r6 = rep_r4 * rep_r2;
-    const ScalarType rep_r8 = square(rep_r4);
-    const ScalarType rep_r9 = rep_r8 * rep_r;
-    const ScalarType rep_r10 = rep_r6 * rep_r4;
-    const ScalarType g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
-
-    if (r < cutoff) {
-        const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
-        result -= g * f_cutoff;
-    }
-    else
-        result -= g;
-    return result;
-}
-
 template<class RandomGenerator>
 RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
