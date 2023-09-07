@@ -26,22 +26,37 @@ namespace Physica::Core {
     class SequentialExecutor {
     public:
         using FutureType = DummyFuture;
+        using Range = std::pair<unsigned int, unsigned int>;
     public:
         /* Operations */
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args... args);
+        template<class Functor>
+        static FutureGroup<FutureType> parallel_for(Functor func, [[maybe_unused]] unsigned int core);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core);
         static void auto_wait([[maybe_unused]] FutureType& future) {}
         static void auto_wait([[maybe_unused]] FutureGroup<FutureType>& group) {}
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
+        /* Static members */
+        [[nodiscard]] inline static Range splitJob(unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part);
     };
 
     template<class Functor, class... Args>
     typename SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args... args) {
         func(std::forward<Args>(args)...);
         return FutureType{};
+    }
+
+    template<class Functor>
+    FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
+            Functor func, [[maybe_unused]] unsigned int core) {
+        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+        static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
+        assert(core > 0);
+        func(0);
+        return FutureGroup<FutureType>{};
     }
 
     template<class Functor>
@@ -54,5 +69,11 @@ namespace Physica::Core {
         for (unsigned int i = 0; i < loopCount; ++i)
             func(i);
         return FutureGroup<FutureType>{};
+    }
+
+    inline typename SequentialExecutor::Range SequentialExecutor::splitJob(
+            unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part) {
+        assert(part == 0 && core == 1 && "[Error]: SequentialExecutor do not support other param");
+        return std::make_pair(0, loopCount);
     }
 }

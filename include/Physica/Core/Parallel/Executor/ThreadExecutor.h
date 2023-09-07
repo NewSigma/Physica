@@ -29,16 +29,21 @@ namespace Physica::Core {
     class ThreadExecutor {
     public:
         using FutureType = std::future<void>;
+        using Range = typename SequentialExecutor::Range;
     public:
         /* Operations */
         template<class Functor, class... Args>
         [[nodiscard]] static FutureType schedule(Functor func, Args... args);
+        template<class Functor>
+        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int core);
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
         static void auto_wait(FutureType& future);
         static void auto_wait(FutureGroup<FutureType>& group);
         /* Getters */
         [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getThreadCount(); }
+        /* Static members */
+        [[nodiscard]] inline static Range splitJob(unsigned int loopCount, unsigned int core, unsigned int part);
     };
 
     template<class Functor, class... Args>
@@ -48,24 +53,39 @@ namespace Physica::Core {
 
     template<class Functor>
     FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
+            Functor func, unsigned int core) {
+        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+        static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
+        assert(core > 0);
+        FutureGroup<FutureType> result(core);
+        for (unsigned int part = 0; part < core; ++part)
+            result.append(ThreadPool::getInstance().schedule([func, part]() -> void { func(part); }));
+        return result;
+    }
+
+    template<class Functor>
+    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
             Functor func, unsigned int loopCount, unsigned int core) {
         using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(core > 0);
-        const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
-        unsigned int from = 0; 
-        unsigned int to = maxLoopPerCore;
         FutureGroup<FutureType> result(core);
-        for (unsigned int _ = 0; _ < core; ++_) {
-            result.append(ThreadPool::getInstance().schedule(
-                [=]() -> void {
-                    for (unsigned int i = from; i < to; ++i)
-                        func(i);
-                }));
-            from += maxLoopPerCore;
-            const unsigned int next_to = to + maxLoopPerCore;
-            to = next_to > loopCount ? loopCount : next_to;
+        for (unsigned int i = 0; i < core; ++i) {
+            const auto range = splitJob(loopCount, core, i);
+            result.append(ThreadPool::getInstance().schedule([range, func]() -> void {
+                for (unsigned int loop = range.first; loop < range.second; ++loop)
+                    func(loop);
+            }));
         }
         return result;
+    }
+
+    inline typename ThreadExecutor::Range ThreadExecutor::splitJob(unsigned int loopCount, unsigned int core, unsigned int part) {
+        assert(core != 0 && "[Error]: Zero core is not allowed");
+        assert(part < core && "[Error]: More partition than core number requested");
+        const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
+        const unsigned int from = part * maxLoopPerCore; 
+        const unsigned int to = std::min(from + maxLoopPerCore, loopCount);
+        return std::make_pair(from, to);
     }
 }

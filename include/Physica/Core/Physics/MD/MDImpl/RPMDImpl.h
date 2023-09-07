@@ -61,35 +61,44 @@ namespace Physica::Core {
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica>::updateForce(ForceModel& model) {
         if (isContractEnabled()) {
-            auto kernel_short = [&](unsigned int replica) {
-                MDCellType cell = phaseToCell(replica);
-                cell.normalize();
-                auto saveTo = forceBuffer.col(replica);
-                saveTo = model.template force_short<Executor>(std::move(cell));
+            auto kernel_short = [&](unsigned int thread) {
+                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
+                for (size_t replica = range.first; replica < range.second; ++replica) {
+                    MDCellType cell = phaseToCell(replica);
+                    cell.normalize();
+                    auto saveTo = forceBuffer.col(replica);
+                    saveTo = model.template force_short<Executor>(std::move(cell));
+                }
             };
-            auto future_short = Executor::parallel_for(kernel_short, getNumReplica(), Executor::getNumThread());
+            auto future_short = Executor::parallel_for(kernel_short, Executor::getNumThread());
 
             contract();
-            auto kernel_long = [&](unsigned int contract) {
-                MDCellType cell = contractToCell(contract);
-                cell.normalize();
-                auto saveTo = forceContract.col(contract);
-                saveTo = model.template force_long<Executor>(std::move(cell));
+            auto kernel_long = [&](unsigned int thread) {
+                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
+                for (size_t contract = range.first; contract < range.second; ++contract) {
+                    MDCellType cell = contractToCell(contract);
+                    cell.normalize();
+                    auto saveTo = forceContract.col(contract);
+                    saveTo = model.template force_long<Executor>(std::move(cell));
+                }
             };
-            auto future_long = Executor::parallel_for(kernel_long, getNumContract(), Executor::getNumThread());
+            auto future_long = Executor::parallel_for(kernel_long, Executor::getNumThread());
 
             Executor::auto_wait(future_long);
             decontract();
             Executor::auto_wait(future_short);
         }
         else {
-            auto kernel = [&](unsigned int replica) {
-                MDCellType cell = phaseToCell(replica);
-                cell.normalize();
-                auto saveTo = forceBuffer.col(replica);
-                saveTo = model.template force<Executor>(std::move(cell));
+            auto kernel = [&](unsigned int thread) {
+                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
+                for (size_t replica = range.first; replica < range.second; ++replica) {
+                    MDCellType cell = phaseToCell(replica);
+                    cell.normalize();
+                    auto saveTo = forceBuffer.col(replica);
+                    saveTo = model.template force<Executor>(std::move(cell));
+                }
             };
-            auto future = Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread());
+            auto future = Executor::parallel_for(kernel, Executor::getNumThread());
             Executor::auto_wait(future);
         }
     }
