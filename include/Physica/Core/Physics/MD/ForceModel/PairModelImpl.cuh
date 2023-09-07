@@ -73,7 +73,8 @@ namespace Physica::Core {
         assert(maxThread >= numParticle && "[Error]: Too many particle in the cell, performance may be pool");
         Internal::PairModel_forceKernel<Derived><<<gridDims, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
         Internal::PairModel_postForceKernel<Derived><<<1, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
-        forceBuffer.col(0).toHost(swapBuffer);
+        forceBuffer.col(0).toHostAsync(swapBuffer);
+        CudaExecutor::wait();
         return swapBuffer;
     }
 
