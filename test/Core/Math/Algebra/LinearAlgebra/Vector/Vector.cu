@@ -47,6 +47,7 @@ int main() {
         const VectorType answer = reciprocal(a);
         d_b = reciprocal(d_b);
         VectorType result;
+        CudaExecutor::wait();
         d_b.toHost(result);
         if (!vectorNear(result, answer, 1E-15))
             return 1;

@@ -63,6 +63,11 @@ namespace Physica::Core {
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
         static void checkParam(PlainScalar collideFactor, size_t numReplica);
+        [[nodiscard]] __host__ __device__ static bool checkStepSize(
+            ScalarType latticeSize,
+            ScalarType temperatureT,
+            ScalarType collideStep,
+            ScalarType maxMass);
     private:
         bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
         void handleCollision(const RingPolymerType& ringPolymer);
@@ -75,6 +80,7 @@ namespace Physica::Core {
             : Base(temperatureT_, numReplica)
             , latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
+            , temperatureT(temperatureT_)
             , repMass(numParticle, 0)
             , buffer(numParticle * 2, numReplica)
             , maxHandleNum(maxHandleNum_) {
@@ -92,11 +98,12 @@ namespace Physica::Core {
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = getNumParticle();
         const PlainScalar collideStep = collideFactor * deltaT.getValue();
-        const PlainScalar epsilonStep = PlainScalar(std::numeric_limits<ScalarType>::epsilon()) * deltaT.getValue();
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
         assert(getNumReplica() == ringPolymer.getNumReplica());
-        assert(checkRepMass());
+        assert(checkRepMass() && "[Error]: Mass is not initialized");
+        assert(checkStepSize(latticeSize, temperatureT, collideStep, ringPolymer.getMassVec().max())
+            && "[Warning]: Stepsize is too small, add precision or adjust params is recommanded");
 
         buffer = phase;
         ScalarType lStep = 0;
@@ -106,9 +113,6 @@ namespace Physica::Core {
         handleNum = 0;
         while (true) {
             const ScalarType step = to - from;
-            if (step < epsilonStep) [[unlikely]]
-                throw BadConvergenceException("[Error]: Step is too small, may be collide factor is too small?");
-
             bool isCollided = false;
             if constexpr (NumReplica != 1) {
                 Base::pre_nve_step_impl(ringPolymer, step);
@@ -153,7 +157,7 @@ namespace Physica::Core {
             const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
             if (isDeltaSmallEnough) {
                 if (handleNum == maxHandleNum) [[unlikely]]
-                    throw BadConvergenceException("[Error]: Too many collision within a step");
+                    throw BadConvergenceException("[Error]: Too many collision within a step, possibly numerical error is large");
 
                 if constexpr (NumReplica != 1) {
                     Base::nve_step_impl(ringPolymer, buffer, phase, rStep - from);
@@ -193,6 +197,7 @@ namespace Physica::Core {
         Base::swap(obj);
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);
+        temperatureT.swap(obj.temperatureT);
         repMass.swap(obj.repMass);
         buffer.swap(obj.buffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
@@ -207,6 +212,17 @@ namespace Physica::Core {
             throw std::invalid_argument("[Error]: Number of replica is not consistent");
         if (collideFactor <= PlainScalar(std::numeric_limits<ScalarType>::epsilon())) [[unlikely]]
             throw std::invalid_argument("[Error]: Collide factor is too small, numerical error will be large");
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
+    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkStepSize(
+            ScalarType latticeSize,
+            ScalarType temperatureT,
+            ScalarType collideStep,
+            ScalarType maxMass) {
+        const PlainScalar epsilonStep = latticeSize * std::numeric_limits<PlainScalar>::epsilon();
+        const PlainScalar meanVelocity = sqrt(PlainScalar(PhyConst<AU>::boltzmannK) * temperatureT / maxMass);
+        return collideStep * meanVelocity > epsilonStep;
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>

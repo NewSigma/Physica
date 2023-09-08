@@ -65,8 +65,12 @@ namespace Physica::Core {
         void updateMomentum(RingPolymerType& ringPolymer);
         void updateMass(RingPolymerType& ringPolymer);
         void swap(HardCore& obj) noexcept;
+
+        __device__ inline void stepKernelImpl(ScalarType deltaT, size_t numStep);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return repMass.getLength(); }
+    private:
+        __device__ inline void handleCollision(__restrict__ ScalarType* sharedBuffer);
     };
 }
 

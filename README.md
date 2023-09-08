@@ -14,7 +14,7 @@ There will be a lot of work to do in the future
 
 ## Design philosophy
 
-1. Optimal performance and scalability: No free lunch in the world. Though controversial, ease of use is taken secondary.
+1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. In Physica, we target on performance and scalability. Ease of use is taken secondary.
 
 2. Zero overhead abstraction: Users shall not pay for what they do not need.
 

@@ -26,136 +26,12 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
-        __device__ inline void handleCollision(
-                typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector& phase,
-                const typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector& mass,
-                ScalarType latticeSize,
-                ScalarType* sharedBuffer) {
-            const unsigned int threadId = threadIdx.x;
-            const size_t numParticle = mass.getLength();
-            auto momentum = phase.head(numParticle);
-            auto pos = phase.tail(numParticle);
-
-            sharedBuffer[threadId] = pos[threadId];
-            __syncthreads();
-            const unsigned int threadId1 = (threadId + 1) % numParticle;
-            bool isCollided = false;
-            if (threadId != blockDim.x - 1)
-                isCollided = sharedBuffer[threadId] > sharedBuffer[threadId1];
-            else {
-                if constexpr (!IsFixedBoundary)
-                    isCollided = sharedBuffer[threadId] > sharedBuffer[0] + latticeSize;
-            }
-
-            if (isCollided) {
-                const ScalarType m1 = mass[threadId];
-                const ScalarType m2 = mass[threadId1];
-                const ScalarType p1 = momentum[threadId];
-                const ScalarType p2 = momentum[threadId1];
-                const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
-                const ScalarType next_p2 = p1 + p2 - next_p1;
-                momentum[threadId] = next_p1;
-                momentum[threadId1] = next_p2;
-            }
-            if constexpr (IsFixedBoundary) {
-                if (threadId == 0 && (!pos[0].isPositive()))
-                    momentum[0] = abs(momentum[0]);
-                __syncthreads();
-                const size_t lastParticle = numParticle - 1;
-                if (threadId == lastParticle && (pos[lastParticle] > latticeSize)) {
-                    momentum[lastParticle] = -abs(momentum[lastParticle]);
-                }
-            }
-            __syncthreads();
-        }
-
-        template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
-        __global__ void __launch_bounds__(Physica::Utils::DeviceProp::MaxThreadsPerBlock, 0)
-        step_kernel(
-                ScalarType latticeSize,
-                ScalarType collideStep,
-                ScalarType epsilonStep,
-                ScalarType temperatureT,
-                Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> phase_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> mass_,
-                const Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> repMass_,
-                Physica::PlainStruct<typename HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::DeviceVector> buffer_,
+        __global__ void __launch_bounds__(512, 0)
+        HardCore_stepKernel(
+                Physica::PlainStruct<HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>> obj,
                 ScalarType deltaT,
-                size_t numStep,
-                size_t maxHandleNum) {
-            auto& phase = phase_.getDerived();
-            const auto& mass = mass_.getDerived();
-            const auto& repMass = repMass_.getDerived();
-            auto& buffer = buffer_.getDerived();
-
-            const unsigned int threadId = threadIdx.x;
-            const size_t numParticle = buffer.getLength();
-            if (!(threadId < numParticle))
-                return;
-            assert(numParticle == 512);
-
-            auto momentum = phase.head(numParticle);
-            auto pos = phase.tail(numParticle);
-            extern __shared__ ScalarType sharedBuffer[];
-            for (size_t step = 0; step < numStep; ++step) {
-                buffer[threadId] = pos[threadId];
-                ScalarType velocity = hadamard(momentum, repMass).calc(threadId);
-                
-                ScalarType lStep = 0;
-                ScalarType rStep = deltaT;
-                ScalarType from = 0;
-                ScalarType to = deltaT;
-                size_t handleNum = 0;
-                while (true) {
-                    /* Try step */ {
-                        const ScalarType stepSize = to - from;
-                        if (stepSize < epsilonStep) [[unlikely]]
-                            __trap();
-                        const ScalarType pos1 = buffer[threadId] + velocity * stepSize;
-                        sharedBuffer[threadId] = pos1;
-                        __syncthreads();
-                        bool flag = false;
-                        if constexpr (IsFixedBoundary) {
-                            if (threadId != blockDim.x - 1)
-                                flag = pos1 > sharedBuffer[threadId + 1] || (!pos1.isPositive());
-                            else
-                                flag = pos1 > latticeSize;
-                        }
-                        else {
-                            if (threadId != blockDim.x - 1)
-                                flag = pos1 > sharedBuffer[threadId + 1];
-                            else
-                                flag = pos1 > sharedBuffer[0] + latticeSize;
-                        }
-                        const bool isCollided = __syncthreads_or(flag);
-                        if (isCollided)
-                            rStep = to;
-                        else
-                            lStep = to;
-                        to = (lStep + rStep) * 0.5;
-                        const bool isDone = lStep == deltaT;
-                        if (isDone) {
-                            pos[threadId] = pos1;
-                            break;
-                        }
-                    }
-                    const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
-                    if (isDeltaSmallEnough) {
-                        if (handleNum == maxHandleNum) [[unlikely]]
-                            __trap();
-
-                        const ScalarType pos0 = buffer[threadId];
-                        pos[threadId] = pos0 + velocity * (rStep - from);
-                        buffer[threadId] = pos0 + velocity * (lStep - from);
-
-                        from = lStep;
-                        to = deltaT;
-                        handleCollision<ScalarType, IsFixedBoundary, NumReplica>(phase, mass, latticeSize, sharedBuffer);
-                        velocity = hadamard(momentum, repMass).calc(threadId);
-                        handleNum += 1;
-                    }
-                }
-            }
+                size_t numStep) {
+            obj.getDerived().stepKernelImpl(deltaT, numStep);
         }
     }
 
@@ -208,18 +84,8 @@ namespace Physica::Core {
         const size_t numParticle = getNumParticle();
         const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
-        Internal::step_kernel<ScalarType, IsFixedBoundary, NumReplica><<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(
-                latticeSize,
-                collideFactor * deltaT,
-                ScalarType(std::numeric_limits<ScalarType>::epsilon()) * deltaT,
-                temperatureT,
-                asStruct(d_phase),
-                asStruct(mass),
-                asStruct(repMass),
-                asStruct(buffer),
-                deltaT,
-                numStep,
-                maxHandleNum);
+        Internal::HardCore_stepKernel<ScalarType, IsFixedBoundary, NumReplica>
+            <<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(asStruct(*this), deltaT, numStep);
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
@@ -269,5 +135,119 @@ namespace Physica::Core {
         buffer.swap(obj.buffer);
         lockedBuffer.swap(obj.lockedBuffer);
         std::swap(maxHandleNum, obj.maxHandleNum);
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    __device__ inline void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::stepKernelImpl(
+            ScalarType deltaT, size_t numStep) {
+        const unsigned int threadId = threadIdx.x;
+        const size_t numParticle = buffer.getLength();
+        if (!(threadId < numParticle))
+            return;
+        const ScalarType collideStep = collideFactor * deltaT;
+        assert(numParticle == 512);
+        assert(bool(HardCore<ScalarType, IsFixedBoundary, NumReplica>::checkStepSize(latticeSize, temperatureT, collideStep, mass[threadId])));
+
+        auto momentum = d_phase.head(numParticle);
+        auto pos = d_phase.tail(numParticle);
+        extern __shared__ ScalarType sharedBuffer[];
+        for (size_t step = 0; step < numStep; ++step) {
+            buffer[threadId] = pos[threadId];
+            ScalarType velocity = hadamard(momentum, repMass).calc(threadId);
+            
+            ScalarType lStep = 0;
+            ScalarType rStep = deltaT;
+            ScalarType from = 0;
+            ScalarType to = deltaT;
+            size_t handleNum = 0;
+            while (true) {
+                /* Try step */ {
+                    const ScalarType stepSize = to - from;
+                    const ScalarType pos1 = buffer[threadId] + velocity * stepSize;
+                    sharedBuffer[threadId] = pos1;
+                    __syncthreads();
+                    bool flag = false;
+                    if constexpr (IsFixedBoundary) {
+                        if (threadId != blockDim.x - 1)
+                            flag = pos1 > sharedBuffer[threadId + 1] || (!pos1.isPositive());
+                        else
+                            flag = pos1 > latticeSize;
+                    }
+                    else {
+                        if (threadId != blockDim.x - 1)
+                            flag = pos1 > sharedBuffer[threadId + 1];
+                        else
+                            flag = pos1 > sharedBuffer[0] + latticeSize;
+                    }
+                    const bool isCollided = __syncthreads_or(flag);
+                    if (isCollided)
+                        rStep = to;
+                    else
+                        lStep = to;
+                    to = (lStep + rStep) * 0.5;
+                    const bool isDone = lStep == deltaT;
+                    if (isDone) {
+                        pos[threadId] = pos1;
+                        break;
+                    }
+                }
+                const bool isDeltaSmallEnough = (rStep - lStep) < collideStep;
+                if (isDeltaSmallEnough) {
+                    if (handleNum == maxHandleNum) [[unlikely]]
+                        __trap();
+
+                    const ScalarType pos0 = buffer[threadId];
+                    pos[threadId] = pos0 + velocity * (rStep - from);
+                    buffer[threadId] = pos0 + velocity * (lStep - from);
+
+                    from = lStep;
+                    to = deltaT;
+                    handleCollision(sharedBuffer);
+                    velocity = hadamard(momentum, repMass).calc(threadId);
+                    handleNum += 1;
+                }
+            }
+        }
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
+    __device__ inline void HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor>::handleCollision(
+            __restrict__ ScalarType* sharedBuffer) {
+        const unsigned int threadId = threadIdx.x;
+        const size_t numParticle = mass.getLength();
+        auto momentum = d_phase.head(numParticle);
+        auto pos = d_phase.tail(numParticle);
+
+        sharedBuffer[threadId] = pos[threadId];
+        __syncthreads();
+        const unsigned int threadId1 = (threadId + 1) % numParticle;
+        bool isCollided = false;
+        if (threadId != blockDim.x - 1)
+            isCollided = sharedBuffer[threadId] > sharedBuffer[threadId1];
+        else {
+            if constexpr (!IsFixedBoundary)
+                isCollided = sharedBuffer[threadId] > sharedBuffer[0] + latticeSize;
+        }
+
+        if (isCollided) {
+            const ScalarType m1 = mass[threadId];
+            const ScalarType m2 = mass[threadId1];
+            const ScalarType p1 = momentum[threadId];
+            const ScalarType p2 = momentum[threadId1];
+            const ScalarType next_p1 = ((m1 - m2) * p1 + ScalarType(2) * m1 * p2) * reciprocal(m1 + m2);
+            const ScalarType next_p2 = p1 + p2 - next_p1;
+            momentum[threadId] = next_p1;
+            momentum[threadId1] = next_p2;
+        }
+        if constexpr (IsFixedBoundary) {
+            if (threadId == 0 && (!pos[0].isPositive()))
+                momentum[0] = abs(momentum[0]);
+            __syncthreads();
+            const size_t lastParticle = numParticle - 1;
+            if (threadId == lastParticle && (pos[lastParticle] > latticeSize)) {
+                momentum[lastParticle] = -abs(momentum[lastParticle]);
+            }
+        }
+        __syncthreads();
     }
 }
