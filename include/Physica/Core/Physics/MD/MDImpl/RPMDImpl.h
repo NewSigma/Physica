@@ -95,8 +95,10 @@ namespace Physica::Core {
                     MDCellType cell = phaseToCell(replica);
                     cell.normalize();
                     auto saveTo = forceBuffer.col(replica);
-                    saveTo = model.template force<Executor>(std::move(cell));
+                    using VectorType = typename decltype(saveTo)::VectorBase;
+                    model.template forceAsync<VectorType, Executor, false>(std::move(cell), saveTo);
                 }
+                Executor::wait();
             };
             auto future = Executor::parallel_for(kernel, Executor::getNumThread());
             Executor::auto_wait(future);

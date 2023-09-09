@@ -68,6 +68,8 @@ namespace Physica::Core {
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class VectorType, class Executor, bool IsSmallCell>
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
         template<class Executor, bool IsSmallCell = false>
@@ -111,9 +113,16 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
-        assert(cell.getNumParticle() % 3 == 0);
-
         Vector<ScalarType> result;
+        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void Q_TIP4P<ScalarType, PosScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
+        assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor, IsSmallCell>(cell);
         });
@@ -121,7 +130,6 @@ namespace Physica::Core {
         const Vector<ScalarType> coulomb = force_long<Executor>(cell);
         Executor::auto_wait(future);
         result += coulomb;
-        return result;
     }
 
     template<class ScalarType, class PosScalarType>

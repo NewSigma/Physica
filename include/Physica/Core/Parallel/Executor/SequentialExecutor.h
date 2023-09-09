@@ -23,6 +23,18 @@
 #include "Physica/Core/Parallel/Future/DummyFuture.h"
 
 namespace Physica::Core {
+    class SequentialExecutor;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<>
+        class Traits<SequentialExecutor> {
+        public:
+            constexpr static bool isCudaEnabled = false;
+        };
+    }
+
     class SequentialExecutor {
     public:
         using FutureType = DummyFuture;
@@ -37,6 +49,7 @@ namespace Physica::Core {
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core);
         static void auto_wait([[maybe_unused]] FutureType& future) {}
         static void auto_wait([[maybe_unused]] FutureGroup<FutureType>& group) {}
+        static void wait() {}
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
         /* Static members */

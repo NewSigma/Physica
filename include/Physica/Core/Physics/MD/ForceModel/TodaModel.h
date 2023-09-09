@@ -31,37 +31,9 @@ namespace Physica::Core {
         constexpr static double SpringLength = 1.0;
     public:
         template<class Executor, bool IsSmallCell = false>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const {
-            const size_t numParticle = cell.getNumParticle();
-            const auto& pos = cell.getPos();
-            Vector<ScalarType> force(numParticle, 0);
-            if constexpr (IsFixedBoundary) {
-                /* First */ {
-                    const ScalarType delta = pos(0, 0) - SpringLength;
-                    force[0] = ScalarType(-1.0) + exp(-delta);
-                }
-                for (size_t i = 0; i < numParticle - 1; ++i) {
-                    const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
-                    const ScalarType f = exp(-delta);
-                    force[i] -= f;
-                    force[i + 1] += f;
-                }
-                /* Last */ {
-                    const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
-                    force[numParticle - 1] += ScalarType(1.0) - exp(-delta);
-                }
-            }
-            else {
-                for (size_t i = 0; i < numParticle; ++i) {
-                    const size_t i1 = (i + 1) % numParticle;
-                    const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
-                    const ScalarType f = exp(-delta);
-                    force[i] -= f;
-                    force[i1] += f;
-                }
-            }
-            return force;
-        }
+        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class VectorType, class Executor, bool IsSmallCell>
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
@@ -95,6 +67,49 @@ namespace Physica::Core {
         }
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
     };
+
+    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    template<class Executor, bool IsSmallCell>
+    Vector<ScalarType> TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::force(const MDCellType& cell) const {
+        const size_t numParticle = cell.getNumParticle();
+        Vector<ScalarType> result(numParticle);
+        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::forceAsync(
+            const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        const size_t numParticle = cell.getNumParticle();
+        const auto& pos = cell.getPos();
+        result = ScalarType(0);
+        if constexpr (IsFixedBoundary) {
+            /* First */ {
+                const ScalarType delta = pos(0, 0) - SpringLength;
+                result[0] = ScalarType(-1.0) + exp(-delta);
+            }
+            for (size_t i = 0; i < numParticle - 1; ++i) {
+                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+                const ScalarType f = exp(-delta);
+                result[i] -= f;
+                result[i + 1] += f;
+            }
+            /* Last */ {
+                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+                result[numParticle - 1] += ScalarType(1.0) - exp(-delta);
+            }
+        }
+        else {
+            for (size_t i = 0; i < numParticle; ++i) {
+                const size_t i1 = (i + 1) % numParticle;
+                const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
+                const ScalarType f = exp(-delta);
+                result[i] -= f;
+                result[i1] += f;
+            }
+        }
+    }
 
     template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
     typename TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::LatticeMatrix

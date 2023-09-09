@@ -23,14 +23,24 @@
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
+    class CudaExecutor;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<>
+        class Traits<CudaExecutor> {
+        public:
+            constexpr static bool isCudaEnabled = true;
+        };
+    }
     /**
      * Single thread with cuda support
      */
     class CudaExecutor : public SequentialExecutor {
     public:
         static void wait() {
-            const auto stream = StreamPool::getStream();
-            while (cudaStreamQuery(stream) != cudaSuccess)
+            while (StreamPool::getStream().query() != cudaSuccess)
                 std::this_thread::yield();
             cudaCheck(cudaGetLastError());
         }

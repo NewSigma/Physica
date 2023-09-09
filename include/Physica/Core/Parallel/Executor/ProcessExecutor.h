@@ -24,6 +24,18 @@
 #include "Physica/Core/Parallel/SubProcess.h"
 
 namespace Physica::Core {
+    class ProcessExecutor;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<>
+        class Traits<ProcessExecutor> {
+        public:
+            constexpr static bool isCudaEnabled = false;
+        };
+    }
+
     class ProcessExecutor {
     public:
         using FutureType = ProcessFuture;

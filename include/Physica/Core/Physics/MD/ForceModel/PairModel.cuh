@@ -59,13 +59,16 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ScalarType force_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().force_functor(r, r2); }
         [[nodiscard]] __host__ __device__ ScalarType pot_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().pot_functor(r, r2); }
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
+        template<class VectorType, class Executor, bool IsSmallCell = false>
+        void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& hostCell) { return force<Executor>(hostCell); }
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& hostCell) const { return Vector<ScalarType>(hostCell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
+        void swap(device_obj& obj) noexcept;
+
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
-        void swap(device_obj& obj) noexcept;
         /* Getters */
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
     };

@@ -45,6 +45,8 @@ namespace Physica::Core {
          */
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        template<class VectorType, class Executor, bool IsSmallCell>
+        void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
@@ -52,4 +54,12 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
         [[nodiscard]] LatticeMatrix virial([[maybe_unused]] const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
     };
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void EmptyForceModel<ScalarType, PosScalarType, Dim>::forceAsync(
+            [[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
+        result = ScalarType(0);
+    }
 }

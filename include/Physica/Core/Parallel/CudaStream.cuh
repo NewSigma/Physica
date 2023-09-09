@@ -32,10 +32,10 @@ namespace Physica::Core {
         ~CudaStream();
         /* Operators */
         CudaStream& operator=(CudaStream obj) noexcept;
+        [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
         /* Operations */
+        [[nodiscard]] cudaError_t query() const;
         void swap(CudaStream& obj) noexcept;
-        /* Getters */
-        [[nodiscard]] cudaStream_t getStream() const noexcept { return stream; }
         /* Static members */
         [[nodiscard]] static CudaStream makeStream();
     private:

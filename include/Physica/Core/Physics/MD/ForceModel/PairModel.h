@@ -55,6 +55,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType force_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().force_functor(r, r2); }
         [[nodiscard]] ScalarType pot_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().pot_functor(r, r2); }
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class VectorType, class Executor, bool IsSmallCell>
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
@@ -78,21 +80,30 @@ namespace Physica::Core {
     template<class Derived>
     template<class Executor, bool IsSmallCell>
     Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
+        Vector<ScalarType> result(cell.getDOF());
+        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+        return result;
+    }
+
+    template<class Derived>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
         const auto& pos = cell.getPos();
-        Vector<ScalarType> force(3 * cell.getNumParticle(), 0);
+        result = ScalarType(0);
         if constexpr (IsSmallCell) {
             const auto& lattice = cell.getLattice();
             const auto range = MDCellType::estimateRange(lattice, cutoff);
             const size_t numParticle = cell.getNumParticle();
 
             MDCellType::forCellInRange(range, lattice,
-                [this, pos, numParticle, &force](Vector3D delta) {
+                [this, pos, numParticle, &result](Vector3D delta) {
                     Vector3D r, from;
                     for (size_t i = 0; i < numParticle; ++i) {
-                        auto force_i = force.segment(3 * i, 3 * i + 3);
+                        auto force_i = result.segment(3 * i, 3 * i + 3);
                         from = pos.row(i) + delta;
                         for (size_t j = i; j < numParticle; ++j) {
-                            auto force_j = force.segment(3 * j, 3 * j + 3);
+                            auto force_j = result.segment(3 * j, 3 * j + 3);
                             auto to = pos.row(j);
                             r = to.asVector() - from;
                             const ScalarType r2 = r.squaredNorm();
@@ -112,7 +123,7 @@ namespace Physica::Core {
         else {
             const CellListType cellList(cell, cutoff);
             Utils::Array<size_t> arr1{};
-            cellList.forCellInList([this, pos, &arr1, &force, &cellList](Index3D center) {
+            cellList.forCellInList([this, pos, &arr1, &result, &cellList](Index3D center) {
                 for (size_t i : cellList(center))
                     arr1.append(i);
                 /* Current cell */ {
@@ -131,16 +142,16 @@ namespace Physica::Core {
                                 const ScalarType f_norm = force_functor(dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
-                                auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
+                                auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
                                 f2 += r;
                             }
                         }
-                        auto f1 = force.template segment<3>(3 * atom1, 3 * atom1 + 3);
+                        auto f1 = result.template segment<3>(3 * atom1, 3 * atom1 + 3);
                         f1 += f;
                     }
                 }
                 Utils::Array<size_t> arr2{};
-                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &force, &cellList](Vector3D translate, Index3D neigh) {
+                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &result, &cellList](Vector3D translate, Index3D neigh) {
                     for (size_t j : cellList(neigh))
                         arr2.append(j);
                     std::sort(arr2.begin(), arr2.end());
@@ -154,14 +165,14 @@ namespace Physica::Core {
                             const ScalarType r2 = r.squaredNorm();
                             if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                auto f2 = force.template segment<3>(3 * atom2, 3 * atom2 + 3);
+                                auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
                                 const ScalarType f_norm = force_functor(dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 f2 += r;
                             }
                         }
-                        auto f1 = force.template segment<3>(3 * atom1, 3 * atom1 + 3);
+                        auto f1 = result.template segment<3>(3 * atom1, 3 * atom1 + 3);
                         f1 += f;
                     }
                     arr2.clear();
@@ -169,7 +180,6 @@ namespace Physica::Core {
                 arr1.clear();
             });
         }
-        return force;
     }
 
     template<class Derived>

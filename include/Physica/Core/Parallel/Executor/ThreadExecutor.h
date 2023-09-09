@@ -26,6 +26,18 @@
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
+    class ThreadExecutor;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<>
+        class Traits<ThreadExecutor> {
+        public:
+            constexpr static bool isCudaEnabled = false;
+        };
+    }
+
     class ThreadExecutor {
     public:
         using FutureType = std::future<void>;
@@ -40,8 +52,9 @@ namespace Physica::Core {
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
         static void auto_wait(FutureType& future);
         static void auto_wait(FutureGroup<FutureType>& group);
+        static void wait() {}
         /* Getters */
-        [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getThreadCount(); }
+        [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getNumThreads(); }
         /* Static members */
         [[nodiscard]] inline static Range splitJob(unsigned int loopCount, unsigned int core, unsigned int part);
     };

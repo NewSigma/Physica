@@ -67,7 +67,7 @@ int main() {
 
     HostForceModel hostModel(pair_cutoff);
     DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-    const auto f0 = hostModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
+    const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
     const auto f1 = deviceModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
     if (!vectorNear(f0, f1, 1E-4))
         return 1;

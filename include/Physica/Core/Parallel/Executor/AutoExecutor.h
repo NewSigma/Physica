@@ -19,23 +19,36 @@
 #pragma once
 
 #include "ThreadExecutor.h"
+#ifdef PHYSICA_CUDA
+    #include "CudaExecutor.cuh"
+#endif
 
 namespace Physica::Core {
+    class AutoExecutor;
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<>
+        class Traits<AutoExecutor> {
+        public:
+        #ifdef PHYSICA_CUDA
+            constexpr static bool isCudaEnabled = true;
+        #else
+            constexpr static bool isCudaEnabled = false;
+        #endif
+        };
+    }
     /**
      * \class AutoExecutor is devoted to provide a load balancing heterogeneous computing.
      */
     class AutoExecutor : public ThreadExecutor {
         using Base = ThreadExecutor;
-    private:
-        static unsigned int NumDeviceThread;
     public:
-        /* Getters */
-        [[nodiscard]] static unsigned int getNumHostThread() { return Base::getNumThread(); }
-        [[nodiscard]] static unsigned int getNumDeviceThread() { return NumDeviceThread; }
-        [[nodiscard]] static unsigned int getNumThread() { return getNumHostThread() + getNumDeviceThread(); }
-        /* Setters */
-        static void setNumDeviceThread(unsigned int num);
-    private:
-        using Base::getNumThread;
+        static void wait() {
+        #ifdef PHYSICA_CUDA
+            CudaExecutor::wait();
+        #endif
+        }
     };
 }

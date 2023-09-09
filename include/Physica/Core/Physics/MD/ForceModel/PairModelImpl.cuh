@@ -49,6 +49,14 @@ namespace Physica::Core {
     template<class Executor, bool IsSmallCell>
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
+        forceAsync<PageLockedVector, Executor, IsSmallCell>(hostCell, swapBuffer);
+        CudaExecutor::wait();
+        return swapBuffer;
+    }
+
+    template<class Derived>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result) {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
         swapBuffer = hostCell.getPos().flatten();
         auto flatten_pos = cell.getPos().flatten();
@@ -73,9 +81,17 @@ namespace Physica::Core {
         assert(maxThread >= numParticle && "[Error]: Too many particle in the cell, performance may be pool");
         Internal::PairModel_forceKernel<Derived><<<gridDims, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
         Internal::PairModel_postForceKernel<Derived><<<1, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
-        forceBuffer.col(0).toHostAsync(swapBuffer);
-        CudaExecutor::wait();
-        return swapBuffer;
+        forceBuffer.col(0).toHostAsync(result);
+    }
+
+    template<class Derived>
+    void device_obj<PairModel<Derived>>::swap(device_obj& obj) noexcept {
+        cutoff.swap(obj.cutoff);
+        squared_cutoff.swap(squared_cutoff);
+        pot_shift.swap(pot_shift);
+        cell.swap(obj.cell);
+        forceBuffer.swap(obj.forceBuffer);
+        swapBuffer.swap(obj.swapBuffer);
     }
 
     template<class Derived>
@@ -117,15 +133,5 @@ namespace Physica::Core {
             unsigned int index = threadId * Dim + i;
             forceBuffer(index, 0) = forceBuffer.row(index).sum();
         }
-    }
-
-    template<class Derived>
-    void device_obj<PairModel<Derived>>::swap(device_obj& obj) noexcept {
-        cutoff.swap(obj.cutoff);
-        squared_cutoff.swap(squared_cutoff);
-        pot_shift.swap(pot_shift);
-        cell.swap(obj.cell);
-        forceBuffer.swap(obj.forceBuffer);
-        swapBuffer.swap(obj.swapBuffer);
     }
 }

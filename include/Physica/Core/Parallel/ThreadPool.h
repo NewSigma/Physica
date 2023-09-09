@@ -74,7 +74,7 @@ namespace Physica::Core {
         void waitExit();
         void restart();
         /* Getters */
-        [[nodiscard]] unsigned int getThreadCount() const noexcept { return thread_data.getLength(); }
+        [[nodiscard]] unsigned int getNumThreads() const noexcept { return thread_data.getLength(); }
         /* Setters */
         void shouldExit();
         /* Static Members */
@@ -97,7 +97,7 @@ namespace Physica::Core {
         unsigned int schedule_to;
         auto& info = getThreadInfo();
         if (isMainThread())
-            schedule_to = info.numScheduled % getThreadCount();
+            schedule_to = info.numScheduled % getNumThreads();
         else
             schedule_to = info.id;
         info.numScheduled += 1;

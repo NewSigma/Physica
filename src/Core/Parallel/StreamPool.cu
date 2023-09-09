@@ -20,8 +20,8 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core {
-    cudaStream_t StreamPool::getStream() {
+    CudaStream& StreamPool::getStream() {
         thread_local static auto stream = CudaStream::makeStream();
-        return stream.getStream();
+        return stream;
     }
 }

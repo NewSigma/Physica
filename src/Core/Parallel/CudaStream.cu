@@ -39,6 +39,10 @@ namespace Physica::Core {
         return *this;
     }
 
+    cudaError_t CudaStream::query() const {
+        return cudaStreamQuery(stream);
+    }
+
     void CudaStream::swap(CudaStream& obj) noexcept {
         std::swap(stream, obj.stream);
     }

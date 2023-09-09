@@ -22,8 +22,8 @@ namespace Physica::Core {
     unsigned int ThreadPool::numThreadRequired = 0;
     thread_local std::unique_ptr<ThreadPool::ThreadInfo> ThreadPool::info = nullptr;
 
-    ThreadPool::ThreadPool(unsigned int threadCount) : thread_data(threadCount), exit(false) {
-        for (unsigned int i = 0; i < threadCount; ++i) {
+    ThreadPool::ThreadPool(unsigned int numThreads) : thread_data(numThreads), exit(false) {
+        for (unsigned int i = 0; i < numThreads; ++i) {
             thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); } ));
         }
     }
@@ -33,10 +33,10 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Task> ThreadPool::steal() {
-        const unsigned int threadCount = getThreadCount();
+        const unsigned int numThreads = getNumThreads();
         const unsigned int random = threadRand(getThreadInfo().randState);
-        for (size_t i = 0; i < threadCount; ++i) {
-            ThreadData& data = thread_data[(random + i) % threadCount];
+        for (size_t i = 0; i < numThreads; ++i) {
+            ThreadData& data = thread_data[(random + i) % numThreads];
             std::unique_lock locker(data.queueMutex);
             auto& queue = data.queue;
             if (!queue.empty()) {
