@@ -32,6 +32,7 @@ namespace Physica::Core {
         template<>
         class Traits<AutoExecutor> {
         public:
+            constexpr static bool isCPUEnabled = true;
         #ifdef PHYSICA_CUDA
             constexpr static bool isCudaEnabled = true;
         #else

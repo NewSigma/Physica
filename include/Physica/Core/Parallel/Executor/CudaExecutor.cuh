@@ -31,6 +31,7 @@ namespace Physica::Core {
         template<>
         class Traits<CudaExecutor> {
         public:
+            constexpr static bool isCPUEnabled = false;
             constexpr static bool isCudaEnabled = true;
         };
     }

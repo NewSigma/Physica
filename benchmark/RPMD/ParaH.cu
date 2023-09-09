@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,26 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <gperftools/profiler.h>
 #include <iostream>
+#include <fstream>
+#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
+#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = Scalar<Float>;
 using PosScalarType = ScalarType;
-using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
+using ForceModel = device_obj<SilveraGoldman<ScalarType, PosScalarType>>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
-using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
-using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;
+using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
-constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
@@ -63,29 +62,15 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    ThreadPool::numThreadRequired = 4;
-    ThreadPool& pool = ThreadPool::getInstance();
-    {
-        auto& gen = RandomPoolType::getGen();
-        auto rpmd = makeSystem(gen);
-        const ThermostatType thermo(temperatureT, thermostatTime);
-        KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.initMomentum(gen);
+    auto& gen = RandomPoolType::getGen();
+    RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+    rpmd.initMomentum(gen);
 
-        ForceModel forceModel(pair_cutoff);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
-
-        //ProfilerStart("profiler.dat");
-        auto timeuse = Benchmark::run([&]() {
-            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(2 * 1E-13),
-                thermo,
-                kineticModel,
-                forceModel);
-        }, 8, 20);
-        //ProfilerStop();
-        std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
-    }
-    pool.shouldExit();
+    KineticModel kineticModel(temperatureT, numReplica);
+    ForceModel forceModel(numMolecular, pair_cutoff);
+    auto timeuse = Physica::Utils::Benchmark::run([&]() {
+        rpmd.nve_step_for<KineticModel, ForceModel, CudaExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
+    }, 8, 20);
+    std::cout << "Time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     return 0;
 }

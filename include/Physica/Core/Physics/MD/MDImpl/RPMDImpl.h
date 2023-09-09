@@ -96,6 +96,8 @@ namespace Physica::Core {
                     cell.normalize();
                     auto saveTo = forceBuffer.col(replica);
                     using VectorType = typename decltype(saveTo)::VectorBase;
+                    if constexpr (!Internal::Traits<Executor>::isCPUEnabled)
+                        Executor::wait();
                     model.template forceAsync<VectorType, Executor, false>(std::move(cell), saveTo);
                 }
                 Executor::wait();

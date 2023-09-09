@@ -31,6 +31,7 @@ namespace Physica::Core {
         template<>
         class Traits<SequentialExecutor> {
         public:
+            constexpr static bool isCPUEnabled = true;
             constexpr static bool isCudaEnabled = false;
         };
     }
