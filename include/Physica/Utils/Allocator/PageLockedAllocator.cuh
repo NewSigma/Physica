@@ -53,6 +53,8 @@ namespace std {
         using rebind_alloc = Physica::Utils::PageLockedAllocator<U>;
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
+
+        constexpr static bool isPageLocked = true;
     public:
         [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
             return a.allocate(n);

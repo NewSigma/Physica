@@ -28,11 +28,13 @@
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
+using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
 using PosScalarType = ScalarType;
-using ForceModel = device_obj<SilveraGoldman<ScalarType, PosScalarType>>;
+using ForceModel = Physica::Core::device_obj<SilveraGoldman<ScalarType, PosScalarType>>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using MDType = RPMD<ScalarType, PosScalarType, 3, Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -42,8 +44,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+MDType makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename MDType::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -55,7 +57,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -63,7 +65,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
  */
 int main() {
     auto& gen = RandomPoolType::getGen();
-    RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+    MDType rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
 
     KineticModel kineticModel(temperatureT, numReplica);

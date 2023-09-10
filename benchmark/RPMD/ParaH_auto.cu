@@ -31,7 +31,8 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
 using PosScalarType = ScalarType;
-using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+using MDType = RPMD<ScalarType, PosScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDCellType = typename MDType::MDCellType;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
@@ -75,7 +76,7 @@ public:
 };
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
+MDType makeSystem(RandomGenerator& gen) {
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -87,7 +88,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -96,7 +97,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
 int main() {
     ThreadPool::numThreadRequired = 4;
     auto& gen = RandomPoolType::getGen();
-    RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+    MDType rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
 
     KineticModel kineticModel(temperatureT, numReplica);
