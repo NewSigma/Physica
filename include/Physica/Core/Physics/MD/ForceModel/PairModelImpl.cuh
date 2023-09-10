@@ -50,7 +50,7 @@ namespace Physica::Core {
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
         forceAsync<PageLockedVector, Executor, IsSmallCell>(hostCell, swapBuffer);
-        CudaExecutor::wait();
+        StreamPool::getStream().wait();
         return swapBuffer;
     }
 
@@ -58,6 +58,7 @@ namespace Physica::Core {
     template<class VectorType, class Executor, bool IsSmallCell>
     void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result) {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
+        StreamPool::getStream().wait(); //Ensure reentrancy
         swapBuffer = hostCell.getPos().flatten();
         auto flatten_pos = cell.getPos().flatten();
         swapBuffer.toDeviceAsync(flatten_pos);

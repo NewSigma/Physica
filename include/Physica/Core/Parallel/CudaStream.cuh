@@ -35,6 +35,7 @@ namespace Physica::Core {
         [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
         /* Operations */
         [[nodiscard]] cudaError_t query() const;
+        void wait() const;
         void swap(CudaStream& obj) noexcept;
         /* Static members */
         [[nodiscard]] static CudaStream makeStream();

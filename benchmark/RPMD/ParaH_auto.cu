@@ -48,24 +48,27 @@ class ForceModel {
     HostModelType hostModel;
     Physica::Utils::Array<device_obj<HostModelType>> deviceModels;
 public:
-    ForceModel(size_t numParticle, ScalarType cutoff)
+    ForceModel(size_t numParticle, ScalarType cutoff, size_t numCudaThread)
         : hostModel(cutoff)
-        , deviceModels(ThreadPool::getInstance().getNumThreads(), numParticle, cutoff) {}
+        , deviceModels(numCudaThread, numParticle, cutoff) {
+        assert(numCudaThread < ThreadPool::getInstance().getNumThreads());
+    }
+
     template<class Executor, bool IsSmallCell = false>
     [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) {
         Vector<ScalarType> result(cell.getDOF());
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
-        Executor::wait();
+        StreamPool::getStream().wait();
         return result;
     }
     template<class VectorType, class Executor, bool IsSmallCell = false>
     void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         static_assert(Internal::Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
-        const bool useCPU = ThreadPool::isMainThread() || (StreamPool::getStream().query() != cudaSuccess);
+        const auto threadId = ThreadPool::getThreadInfo().id;
+        const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCudaThread();
         if (useCPU)
             result = hostModel.template force<ThreadExecutor, IsSmallCell>(cell);
         else {
-            const auto threadId = ThreadPool::getThreadInfo().id;
             deviceModels[threadId].template forceAsync<VectorType, CudaExecutor, IsSmallCell>(cell, result);
         }
     }
@@ -73,6 +76,8 @@ public:
     [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
     template<class Executor>
     [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
+    /* Getters */
+    [[nodiscard]] size_t getNumCudaThread() const noexcept { return deviceModels.getLength(); }
 };
 
 template<class RandomGenerator>
@@ -95,13 +100,13 @@ MDType makeSystem(RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    ThreadPool::numThreadRequired = 4;
+    ThreadPool::numThreadRequired = 8;
     auto& gen = RandomPoolType::getGen();
     MDType rpmd = makeSystem(gen);
     rpmd.initMomentum(gen);
 
     KineticModel kineticModel(temperatureT, numReplica);
-    ForceModel forceModel(numMolecular, pair_cutoff);
+    ForceModel forceModel(numMolecular, pair_cutoff, 4);
     auto timeuse = Physica::Utils::Benchmark::run([&]() {
         rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
     }, 8, 20);

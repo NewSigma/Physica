@@ -99,7 +99,7 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
-        CudaExecutor::wait();
+        StreamPool::getStream().wait();
         phase = lockedBuffer;
     }
 
@@ -121,7 +121,7 @@ namespace Physica::Core {
         head = ringPolymer.getMassVec();
         head.toDeviceAsync(mass);
         repMass = reciprocal(mass);
-        CudaExecutor::wait();
+        StreamPool::getStream().wait();
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>

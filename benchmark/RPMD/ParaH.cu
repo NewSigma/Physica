@@ -71,7 +71,7 @@ int main() {
     ForceModel forceModel(numMolecular, pair_cutoff);
     auto timeuse = Physica::Utils::Benchmark::run([&]() {
         rpmd.nve_step_for<KineticModel, ForceModel, CudaExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
-    }, 8, 20);
+    }, 16, 20);
     std::cout << "Time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     return 0;
 }

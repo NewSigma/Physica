@@ -94,21 +94,16 @@ namespace Physica::Core {
             Executor::auto_wait(future_short);
         }
         else {
-            auto kernel = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
-                for (size_t replica = range.first; replica < range.second; ++replica) {
-                    MDCellType cell = phaseToCell(replica);
-                    cell.normalize();
-                    auto saveTo = forceBuffer.col(replica);
-                    using VectorType = typename decltype(saveTo)::VectorBase;
-                    if constexpr (!Internal::Traits<Executor>::isCPUEnabled)
-                        Executor::wait();
-                    model.template forceAsync<VectorType, Executor, false>(std::move(cell), saveTo);
-                }
-                Executor::wait();
+            auto kernel = [this, &model](unsigned int replica) {
+                MDCellType cell = phaseToCell(replica);
+                cell.normalize();
+                auto saveTo = forceBuffer.col(replica);
+                using VectorType = typename decltype(saveTo)::VectorBase;
+                model.template forceAsync<VectorType, Executor, false>(std::move(cell), saveTo);
             };
-            auto future = Executor::parallel_for(kernel, Executor::getNumThread());
+            auto future = Executor::parallel_for(kernel, getNumReplica());
             Executor::auto_wait(future);
+            Executor::wait();
         }
     }
 

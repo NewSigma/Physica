@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <thread>
 #include "Physica/Core/Parallel/StreamPool.cuh"
 #include "SequentialExecutor.h"
 
@@ -40,10 +39,6 @@ namespace Physica::Core {
      */
     class CudaExecutor : public SequentialExecutor {
     public:
-        static void wait() {
-            while (StreamPool::getStream().query() != cudaSuccess)
-                std::this_thread::yield();
-            cudaCheck(cudaGetLastError());
-        }
+        static void wait() { cudaCheck(cudaDeviceSynchronize()); }
     };
 }

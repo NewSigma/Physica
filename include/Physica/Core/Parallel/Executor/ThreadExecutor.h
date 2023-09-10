@@ -48,7 +48,7 @@ namespace Physica::Core {
         template<class Functor, class... Args>
         [[nodiscard]] static FutureType schedule(Functor func, Args... args);
         template<class Functor>
-        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int core);
+        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
         static void auto_wait(FutureType& future);
@@ -67,13 +67,13 @@ namespace Physica::Core {
 
     template<class Functor>
     FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
-            Functor func, unsigned int core) {
+            Functor func, unsigned int loopCount) {
         using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
-        assert(core > 0);
-        FutureGroup<FutureType> result(core);
-        for (unsigned int part = 0; part < core; ++part)
-            result.append(ThreadPool::getInstance().schedule([func, part]() -> void { func(part); }));
+        assert(loopCount > 0);
+        FutureGroup<FutureType> result(loopCount);
+        for (unsigned int i = 0; i < loopCount; ++i)
+            result.append(ThreadPool::getInstance().schedule([func, i]() -> void { func(i); }));
         return result;
     }
 

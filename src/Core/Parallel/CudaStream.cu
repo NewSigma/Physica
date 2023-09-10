@@ -16,7 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <thread>
 #include "Physica/Core/Parallel/CudaStream.cuh"
+#include "Physica/Utils/CUDA/DebugUtil.cuh"
 
 namespace Physica::Core {
     CudaStream::CudaStream() {
@@ -41,6 +43,12 @@ namespace Physica::Core {
 
     cudaError_t CudaStream::query() const {
         return cudaStreamQuery(stream);
+    }
+
+    void CudaStream::wait() const {
+        while (query() != cudaSuccess)
+            std::this_thread::yield();
+        cudaCheck(cudaGetLastError());
     }
 
     void CudaStream::swap(CudaStream& obj) noexcept {
