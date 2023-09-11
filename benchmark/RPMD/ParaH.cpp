@@ -35,13 +35,12 @@ constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
-constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
+RPMD<ScalarType, PosScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
@@ -63,24 +62,57 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
 int main() {
     ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
+
+    auto& gen = RandomPoolType::getGen();
+    KineticModel kineticModel(temperatureT, numReplica);
+    ForceModel forceModel(pair_cutoff);
     {
-        auto& gen = RandomPoolType::getGen();
-        auto rpmd = makeSystem(gen);
-        KineticModel kineticModel(temperatureT, numReplica);
+        auto rpmd = makeSystem(108, gen);
         rpmd.initMomentum(gen);
-
-        ForceModel forceModel(pair_cutoff);
         rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
-
-        //ProfilerStart("profiler.dat");
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
                 kineticModel,
                 forceModel);
         }, 8, 20);
-        //ProfilerStop();
-        std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
+        std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
+    }
+    {
+        auto rpmd = makeSystem(256, gen);
+        rpmd.initMomentum(gen);
+        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(2 * 1E-13),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
+    }
+    {
+        auto rpmd = makeSystem(500, gen);
+        rpmd.initMomentum(gen);
+        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(1 * 1E-13),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
+    }
+    {
+        auto rpmd = makeSystem(864, gen);
+        rpmd.initMomentum(gen);
+        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(5 * 1E-14),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "864 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     pool.shouldExit();
     return 0;
