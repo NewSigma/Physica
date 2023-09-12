@@ -22,7 +22,6 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class Differentiable;
     template<class Derived> class ScalarBase;
 
     template<class T>
@@ -30,15 +29,6 @@ namespace Physica::Core {
 
     namespace Internal {
         template<class T> class Traits;
-
-        template<class T> struct remove_differentiable {
-            using Type = T;
-        };
-
-        template<class ScalarType>
-        struct remove_differentiable<Differentiable<ScalarType>> {
-            using Type = ScalarType;
-        };
     }
 
     template<class Derived>
@@ -48,7 +38,7 @@ namespace Physica::Core {
         using TrivialType = typename Internal::Traits<Derived>::TrivialType;
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
-        using PlainScalar = typename Internal::remove_differentiable<Derived>::Type;
+        using PlainScalar = typename Internal::Traits<Derived>::PlainScalar;
         static constexpr ScalarOption option = Internal::Traits<Derived>::option;
         static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
         static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;

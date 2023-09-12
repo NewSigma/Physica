@@ -31,10 +31,32 @@ namespace Physica::Core {
             using RealType = T;
             using ComplexType = ComplexScalar<T>;
             using TrivialType = typename T::TrivialType;
+            using PlainScalar = ScalarType;
             static constexpr ScalarOption option = Traits<T>::option;
             static constexpr bool errorTrack = Traits<T>::errorTrack;
             static constexpr bool isComplex = true;
             static constexpr bool isDifferentiable = false;
+        };
+
+        template<class AnyScalar1, class AnyScalar2>
+        class BinaryScalarOpReturnType<ComplexScalar<AnyScalar1>, AnyScalar2> {
+            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
+        public:
+            using Type = ComplexScalar<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
+        };
+
+        template<class AnyScalar1, class AnyScalar2>
+        class BinaryScalarOpReturnType<AnyScalar1, ComplexScalar<AnyScalar2>> {
+            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
+        public:
+            using Type = ComplexScalar<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
+        };
+
+        template<class AnyScalar1, class AnyScalar2>
+        class BinaryScalarOpReturnType<ComplexScalar<AnyScalar1>, ComplexScalar<AnyScalar2>> {
+            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
+        public:
+            using Type = ComplexScalar<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
         };
     }
 

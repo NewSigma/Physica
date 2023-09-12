@@ -19,65 +19,65 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType>
-    __host__ __device__ inline Differentiable<ScalarType> abs(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    __host__ __device__ inline Differentiable<ScalarType, Mode> abs(const Differentiable<ScalarType, Mode>& s) {
         return {abs(s.getValue()), s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline Differentiable<ScalarType> square(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    __host__ __device__ inline Differentiable<ScalarType, Mode> square(const Differentiable<ScalarType, Mode>& s) {
         return {square(s.getValue()), ScalarType(2) * s.getValue() * s.getTangent()};
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline Differentiable<ScalarType> reciprocal(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    __host__ __device__ inline Differentiable<ScalarType, Mode> reciprocal(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType rep = reciprocal(s.getValue());
         return {rep, -s.getTangent() * square(rep)};
     }
 
-    template<class ScalarType>
-    __host__ __device__ Differentiable<ScalarType> sqrt(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    __host__ __device__ Differentiable<ScalarType, Mode> sqrt(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = sqrt(s.getValue());
         return {value, ScalarType(0.5) * s.getTangent() / value};
     }
 
-    template<class ScalarType>
-    Differentiable<ScalarType> cbrt(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> cbrt(const Differentiable<ScalarType, Mode>& s) {
         constexpr double Factor = 1.0 / 3;
         const ScalarType value = cbrt(s.getValue());
         return {value, ScalarType(Factor) * value * s.getTangent() / s.getValue()};
     }
 
-    template<class ScalarType>
-    Differentiable<ScalarType> ln(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> ln(const Differentiable<ScalarType, Mode>& s) {
         return {ln(s.getValue()), s.getTangent() / s.getValue()};
     }
 
-    template<class ScalarType>
-    Differentiable<ScalarType> exp(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> exp(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = exp(s.getValue());
         return {value, value * s.getTangent()};
     }
 
-    template<class ScalarType>
-    Differentiable<ScalarType> cos(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> cos(const Differentiable<ScalarType, Mode>& s) {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
         return {cos_value, -sin_value * s.getTangent()};
     }
 
-    template<class ScalarType>
-    Differentiable<ScalarType> sin(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> sin(const Differentiable<ScalarType, Mode>& s) {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
         return {sin_value, cos_value * s.getTangent()};
     }
 
-    template<class ScalarType>
-    void sincos(Differentiable<ScalarType> s, Differentiable<ScalarType>& sin_result, Differentiable<ScalarType>& cos_result) {
+    template<class ScalarType, DiffMode Mode>
+    void sincos(Differentiable<ScalarType, Mode> s, Differentiable<ScalarType, Mode>& sin_result, Differentiable<ScalarType, Mode>& cos_result) {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
-        sin_result = Differentiable<ScalarType>(cos_value, -sin_value * s.getTangent());
-        cos_result = Differentiable<ScalarType>(sin_value, cos_value * s.getTangent());
+        sin_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
+        cos_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
     }
 }

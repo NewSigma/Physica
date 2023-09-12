@@ -21,7 +21,7 @@
 #include "Physica/Core/MultiPrecision/Differentiable.h"
 
 using namespace Physica::Core;
-using ScalarType = Differentiable<Scalar<Double>>;
+using ScalarType = Differentiable<Scalar<Double>, DiffMode::Forward>;
 
 template<class T>
 T func(T x, T y) {

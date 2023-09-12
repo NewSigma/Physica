@@ -19,13 +19,13 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType>
-    inline ScalarType floor(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    inline ScalarType floor(const Differentiable<ScalarType, Mode>& s) {
         return floor(s.getValue());
     }
     
-    template<class ScalarType>
-    inline ScalarType ceil(const Differentiable<ScalarType>& s) {
+    template<class ScalarType, DiffMode Mode>
+    inline ScalarType ceil(const Differentiable<ScalarType, Mode>& s) {
         return ceil(s.getValue());
     }
 }

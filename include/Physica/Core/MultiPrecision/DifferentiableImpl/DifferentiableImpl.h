@@ -19,58 +19,58 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type
-    operator+(const Differentiable<ScalarType>& s1, const ScalarBase<OtherScalar>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type;
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
+    operator+(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         if constexpr (OtherScalar::isDifferentiable)
             return ResultType(s1.getValue() + s2.getValue(), s1.getTangent() + s2.getTangent());
         else
             return ResultType(s1.getValue() + s2.getValue(), s1.getTangent());
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type>::type
-    operator+(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType>& s2) {
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
+    operator+(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2) {
         return s2 + s1.getDerived();
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type
-    operator-(const Differentiable<ScalarType>& s1, const ScalarBase<OtherScalar>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type;
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
+    operator-(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         if constexpr (OtherScalar::isDifferentiable)
             return ResultType(s1.getValue() - s2.getValue(), s1.getTangent() - s2.getTangent());
         else
             return ResultType(s1.getValue() - s2.getValue(), s1.getTangent());
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type>::type
-    operator-(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType>& s2) {
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
+    operator-(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2) {
         return -(s2 - s1.getDerived());
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type
-    operator*(const Differentiable<ScalarType>& s1, const ScalarBase<OtherScalar>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type;
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
+    operator*(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         if constexpr (OtherScalar::isDifferentiable)
             return ResultType(s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue() + s1.getValue() * s2.getTangent());
         else
             return ResultType(s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue());
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type>::type
-    operator*(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType>& s2) {
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
+    operator*(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2) {
         return s2 * s1.getDerived();
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type
-    operator/(const Differentiable<ScalarType>& s1, const ScalarBase<OtherScalar>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type;
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
+    operator/(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         const auto rep = reciprocal(s2.getValue());
         if constexpr (OtherScalar::isDifferentiable)
             return ResultType(s1.getValue() * rep, (s1.getTangent() * s2.getValue() - s1.getValue() * s2.getTangent()) * square(rep));
@@ -78,10 +78,10 @@ namespace Physica::Core {
             return ResultType(s1.getValue() * rep, s1.getTangent() * rep);
     }
 
-    template<class ScalarType, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type>::type
-    operator/(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType>, OtherScalar>::Type;
+    template<class ScalarType, DiffMode Mode, class OtherScalar>
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
+    operator/(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         const auto rep = reciprocal(s2.getValue());
         return ResultType(s1.getValue() * rep, -s1.getValue() * s2.getTangent() * square(rep));
     }

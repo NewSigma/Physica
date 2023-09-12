@@ -23,7 +23,7 @@ namespace Physica::Core {
     class RingPolymer {
         using PlainScalar = typename ScalarType::PlainScalar;
         using PlainPosScalar = typename PosScalarType::PlainScalar;
-        using BufferScalarType = typename std::conditional<PosScalarType::isDifferentiable, Differentiable<ComplexScalar<PlainPosScalar>>, ComplexScalar<PlainPosScalar>>::type;
+        using BufferScalarType = typename PlainPosScalar::ComplexType;
         constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Column : MatrixOption::Row;
     public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;

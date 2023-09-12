@@ -32,6 +32,11 @@
 
 namespace Physica::Core {
     //Forward declarations
+    enum class DiffMode {
+        Forward,
+        Reverse
+    };
+    template<class ScalarType, DiffMode Mode> class Differentiable;
     template<class AnyScalar> class ComplexScalar;
     template<ScalarOption option> __host__ __device__ inline Scalar<option> abs(const Scalar<option>& s);
     template<ScalarOption option> __host__ __device__ inline Scalar<option> square(const Scalar<option>& s);
@@ -47,6 +52,7 @@ namespace Physica::Core {
             using RealType = ScalarType;
             using ComplexType = ComplexScalar<ScalarType>;
             using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
+            using PlainScalar = ScalarType;
             static constexpr ScalarOption option = option_;
             static constexpr bool isComplex = false;
             static constexpr bool isDifferentiable = false;
@@ -58,16 +64,12 @@ namespace Physica::Core {
         class BinaryScalarOpReturnType {
             static_assert(Core::is_scalar<AnyScalar1>::value, "[Error]: This is not a scalar type");
             static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
-            static constexpr ScalarOption option = Traits<AnyScalar1>::option > Traits<AnyScalar2>::option
-                                                                              ? Traits<AnyScalar1>::option
-                                                                              : Traits<AnyScalar2>::option;
-            constexpr static bool isComplex = Traits<AnyScalar1>::isComplex || Traits<AnyScalar2>::isComplex;
-            constexpr static bool isDifferentiable = Traits<AnyScalar1>::isDifferentiable || Traits<AnyScalar2>::isDifferentiable;
-
-            using ComplexPacker = typename std::conditional<isComplex, ComplexScalar<Scalar<option>>, Scalar<option>>::type;
-            using DifferentiablePacker = typename std::conditional<isDifferentiable, Differentiable<ComplexPacker>, ComplexPacker>::type;
+            static_assert(!AnyScalar1::isComplex && !AnyScalar2::isComplex, "[Error]: This class applies to real scalar only");
+            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
+            static constexpr ScalarOption option =
+                    Traits<AnyScalar1>::option > Traits<AnyScalar2>::option ? Traits<AnyScalar1>::option : Traits<AnyScalar2>::option;
         public:
-            using Type = DifferentiablePacker;
+            using Type = Scalar<option>;
         };
     }
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
