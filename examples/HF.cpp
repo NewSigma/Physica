@@ -95,21 +95,22 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 8, -3, 6, 2, 2);
+    auto* axisX = plot->getAxisX();
+    auto* axisY = plot->getAxisY();
+    axisX->setLabelFormat("%d");
+    axisX->setTitleText("R/Bohr radii");
+    axisY->setLabelFormat("%d");
+    axisY->setTitleText("Energy/Hartree");
 
-    auto& line1 = plot->spline(r, electronEnergy);
-    line1.setName("Electron energy");
-
-    auto& line2 = plot->spline(r, potentialEnergy);
-    line2.setName("Nuclear repulsion energy");
-
-    auto& line3 = plot->spline(r, totalEnergy);
-    line3.setName("Effective energy");
+    plot->spline(r, electronEnergy).setName("E<sub>electron</sub>");
+    plot->spline(r, potentialEnergy).setName("E<sub>nuclear</sub>");
+    plot->spline(r, totalEnergy).setName("E<sub>electron</sub> + E<sub>nuclear</sub>");
 
     auto& chart = *plot->chart();
-    chart.setTitle("Energy in hytrogen molecule");
-    chart.legend()->setAlignment(Qt::AlignTop);
-    plot->getAxisX()->setTitleText("R/Bohr radii");
-    plot->getAxisY()->setTitleText("Energy/Hartree");
+    chart.setTitle("Dissociation curve of H<sub>2</sub>");
+    auto* legend = chart.legend();
+    legend->setAlignment(Qt::AlignTop);
+    chart.setTitleFont(legend->font());
     plot->show();
     return QApplication::exec();
 }
