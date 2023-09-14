@@ -21,12 +21,28 @@
 namespace Physica::Core {
     template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> abs(const Differentiable<ScalarType, Mode>& s) {
-        return {abs(s.getValue()), s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
+        const ScalarType value = square(s.getValue());
+        if constexpr (Mode == DiffMode::Forward)
+            return {abs(s.getValue()), s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Abs);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> square(const Differentiable<ScalarType, Mode>& s) {
-        return {square(s.getValue()), ScalarType(2) * s.getValue() * s.getTangent()};
+        const ScalarType value = square(s.getValue());
+        if constexpr (Mode == DiffMode::Forward)
+            return {value, ScalarType(2) * s.getValue() * s.getTangent()};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Square);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>

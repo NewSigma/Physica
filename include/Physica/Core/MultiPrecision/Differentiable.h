@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Scalar.h"
+#include "DifferentiableImpl/DiffTracer.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -61,21 +62,21 @@ namespace Physica::Core {
         };
     }
     /**
-     * Auto differential support for scalars
+     * \class Differentiable provides auto differential support for scalars
      */
-    template<class ScalarType, DiffMode Mode>
-    class Differentiable : public ScalarBase<Differentiable<ScalarType, Mode>> {
-        using This = Differentiable<ScalarType, Mode>;
+    template<class ScalarType>
+    class Differentiable<ScalarType, DiffMode::Forward> : public ScalarBase<Differentiable<ScalarType, DiffMode::Forward>> {
+        using This = Differentiable<ScalarType, DiffMode::Forward>;
+        using DiffTracerType = DiffTracer<ScalarType>;
 
         ScalarType value;
         ScalarType tangent;
     public:
         Differentiable() = default;
-        Differentiable(ScalarType value_);
         Differentiable(double d) : This(ScalarType(d)) {}
         Differentiable(ScalarType value_, ScalarType tangent_);
         template<class AnyScalar>
-        Differentiable(const Differentiable<AnyScalar, Mode>& obj);
+        Differentiable(const ScalarBase<AnyScalar>& s);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
@@ -83,8 +84,7 @@ namespace Physica::Core {
         Differentiable& operator=(Differentiable obj) noexcept;
         [[nodiscard]] explicit operator float() const { return float(value); }
         [[nodiscard]] explicit operator double() const { return double(value); }
-        [[nodiscard]] inline bool operator==(const This& other);
-        [[nodiscard]] bool operator!=(const This& other) { return !this->operator==(other); }
+        [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         void swap(Differentiable& obj) noexcept;
@@ -93,46 +93,47 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& getTangent() noexcept { return tangent; }
         [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
         [[nodiscard]] const ScalarType& getTangent() const noexcept { return tangent; }
+        [[nodiscard]] size_t getTraceIndex() const;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
     };
+    ////////////////////////////////////////////////////////////
+    template<class ScalarType>
+    class Differentiable<ScalarType, DiffMode::Reverse> : public ScalarBase<Differentiable<ScalarType, DiffMode::Reverse>> {
+        using This = Differentiable<ScalarType, DiffMode::Reverse>;
+        using DiffTracerType = DiffTracer<ScalarType>;
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode>::Differentiable(ScalarType value_)
-        : value(std::move(value_)), tangent(0) {}
-
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode>::Differentiable(ScalarType value_, ScalarType tangent_)
-        : value(std::move(value_)), tangent(std::move(tangent_)) {}
-
-    template<class ScalarType, DiffMode Mode>
-    template<class AnyScalar>
-    Differentiable<ScalarType, Mode>::Differentiable(const Differentiable<AnyScalar, Mode>& obj)
-            : value(obj.getValue()), tangent(obj.getTangent()) {}
-
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode>& Differentiable<ScalarType, Mode>::operator=(Differentiable obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<class ScalarType, DiffMode Mode>
-    inline bool Differentiable<ScalarType, Mode>::operator==(const This& other) {
-        return value == other.value && tangent == other.tangent;
-    }
-
-    template<class ScalarType, DiffMode Mode>
-    inline Differentiable<ScalarType, Mode> Differentiable<ScalarType, Mode>::operator-() const {
-        return {-value, -tangent};
-    }
-
-    template<class ScalarType, DiffMode Mode>
-    void Differentiable<ScalarType, Mode>::swap(Differentiable& obj) noexcept {
-        value.swap(obj.value);
-        tangent.swap(obj.tangent);
-    }
-
+        ScalarType value;
+        size_t index;
+    public:
+        Differentiable() = default;
+        Differentiable(double d) : This(ScalarType(d)) {}
+        template<class AnyScalar>
+        Differentiable(const ScalarBase<AnyScalar>& s);
+        Differentiable(ScalarType value_, size_t index_);
+        Differentiable(ScalarType value_, ScalarType tangent);
+        Differentiable(const Differentiable&) = default;
+        Differentiable(Differentiable&&) noexcept = default;
+        ~Differentiable() = default;
+        /* Operators */
+        Differentiable& operator=(Differentiable obj) noexcept;
+        [[nodiscard]] explicit operator float() const { return float(value); }
+        [[nodiscard]] explicit operator double() const { return double(value); }
+        [[nodiscard]] inline bool operator==(const This& other) const;
+        [[nodiscard]] inline Differentiable operator-() const;
+        /* Operations */
+        inline void reverse();
+        void swap(Differentiable& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
+        [[nodiscard]] const ScalarType& getTangent() const noexcept;
+        [[nodiscard]] size_t getTraceIndex() const noexcept { return index; }
+        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
+        [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
+        [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
+    };
+    ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>
     [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
     operator+(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2);

@@ -21,20 +21,32 @@
 #include "Physica/Core/MultiPrecision/Differentiable.h"
 
 using namespace Physica::Core;
-using ScalarType = Differentiable<Scalar<Double>, DiffMode::Forward>;
 
 template<class T>
 T func(T x, T y) {
-    using PlainType = typename T::PlainScalar;
-    return square(x - PlainType(1.0)) + square(y - PlainType(2.0));
+    return square(x - T(1.0)) + square(y - T(2.0));
 }
 
 int main() {
-    const Scalar<Double> x = 3;
-    const Scalar<Double> y = 4;
-    const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
-    const Scalar<Double> answer = (x + y - 3.0) * 2.0;
-    if (!scalarNear(result.getTangent(), answer, 1E-15))
-        return 1;
+    using PlainScalar = Scalar<Double>;
+    {
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Forward>;
+        const PlainScalar x = 3;
+        const PlainScalar y = 4;
+        const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
+        const PlainScalar answer = (x + y - 3.0) * 2.0;
+        if (!scalarNear(result.getTangent(), answer, 1E-15))
+            return 1;
+    }
+    {
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        ScalarType x = 3, y = 4;
+        ScalarType result = func(x, y);
+        result.reverse();
+        if (!scalarNear(x.getTangent(), (x.getValue() - 1.0) * 2.0, 1E-15))
+            return 1;
+        if (!scalarNear(y.getTangent(), (y.getValue() - 2.0) * 2.0, 1E-15))
+            return 1;
+    }
     return 0;
 }

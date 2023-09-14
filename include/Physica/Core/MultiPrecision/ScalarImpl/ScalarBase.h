@@ -125,6 +125,11 @@ namespace Physica::Core {
         [[nodiscard]] const PlainScalar& getTangent() const noexcept {
             return this->getDerived().getTangent();
         }
+
+        [[nodiscard]] size_t getTraceIndex() const {
+            static_assert(isDifferentiable, "[Error]: getTraceIndex() is not defined for undifferentiable scalar");
+            return this->getDerived().getTraceIndex();
+        }
     };
 
     template<class ScalarType>
@@ -216,7 +221,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    __host__ __device__ inline bool operator!= (const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
+    __host__ __device__ inline bool operator!=(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
         return !(s1.getDerived() == s2.getDerived());
     }
 
