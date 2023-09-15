@@ -79,7 +79,7 @@ namespace Physica::Core {
 
             contract();
             auto kernel_long = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
+                const auto range = Executor::splitJob(getNumContract(), Executor::getNumThread(), thread);
                 for (size_t contract = range.first; contract < range.second; ++contract) {
                     MDCellType cell = contractToCell(contract);
                     cell.normalize();
@@ -259,6 +259,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
     RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::contractToCell(size_t contract) const {
+        assert(contract < getNumContract());
         PositionMatrix pos(getNumParticle(), Dim);
         auto phase = posContract.col(contract);
         size_t index = 0;

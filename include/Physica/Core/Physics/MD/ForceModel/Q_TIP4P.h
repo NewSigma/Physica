@@ -25,6 +25,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
+#include "Physica/Core/Physics/Molecular/WaterPolarTensor.h"
 #include "LJModel.h"
 
 namespace Physica::Core {
@@ -68,27 +69,31 @@ namespace Physica::Core {
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
         template<class VectorType, class Executor, bool IsSmallCell>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
-        template<class Executor, bool IsSmallCell = false>
-        [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
+
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
-        inline void updateLattice(LatticeMatrix lattice);
+
+        template<class Executor, bool UseDynamicPolar>
+        [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
+        void swap(Q_TIP4P& model) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
-        /* Helpers */
-        void swap(Q_TIP4P& model) noexcept;
+        /* Setters */
+        inline void updateLattice(LatticeMatrix lattice);
         /* Static members */
-        [[nodiscard]] static PositionMatrix makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell);
+        [[nodiscard]] static PositionMatrix makePermanentDipole(const PeriodicCell<PosScalarType, 3>& cell);
         static PermutationMatrix<PosScalarType> sortPosition(MDCellType& cell);
     private:
         Vector<ScalarType> makeCharges() const;
         PositionMatrix makeChargePos(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_PartialChargeRepr(const MDCellType& cell) const;
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
         static ScalarType modifiedMorsePot(ScalarType r);
@@ -116,6 +121,16 @@ namespace Physica::Core {
         Vector<ScalarType> result;
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor, bool IsSmallCell>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        const auto permute = sortPosition(copy);
+        const Vector<ScalarType> sort_f = force<Executor, IsSmallCell>(copy);
+        const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
+        return unsort_f.flatten();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -207,69 +222,23 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     template<class Executor>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long(const MDCellType& cell) const {
-        assert(cell.getNumParticle() % 3 == 0);
-        assert(isCellOrdered(cell));
-        assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");
-        using Vector3D = Vector<PosScalarType, Dim>;
-
-        Vector<ScalarType> coulomb;
-        /* Coulomb Part */ {
-            const PositionMatrix chargePos = makeChargePos(cell);
-            coulomb = ewald.template force<Executor>(chargePos);
-            PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos, cell.getType());
-            const size_t minIndexO = 2 * numMolecule;
-            const size_t maxIndexO = minIndexO + numMolecule;
-            Vector<ScalarType, 3> f;
-            Vector3D vecMH1, vecMH2, vecH1H2;
-            for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                const size_t indexH1 = 2 * (i - minIndexO);
-                const size_t indexH2 = indexH1 + 1;
-                auto forceM = coulomb.segment(3 * i, 3 * i + 3);
-                auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
-                auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
-
-                vecMH1 = chargeCell.minDistVector(i, indexH1);
-                PosScalarType r2 = vecMH1.squaredNorm();
-                f = vecMH1 * (ScalarType(-charge * charge * 0.5) / (r2 * sqrt(r2)));
-                forceM += f;
-                forceH1 -= f;
-
-                vecMH2 = chargeCell.minDistVector(i, indexH2);
-                r2 = vecMH2.squaredNorm();
-                f = vecMH2 * (ScalarType(-charge * charge * 0.5) / (r2 * sqrt(r2)));
-                forceM += f;
-                forceH2 -= f;
-
-                vecH1H2 = chargeCell.minDistVector(indexH1, indexH2);
-                r2 = vecH1H2.squaredNorm();
-                f = vecH1H2 * (ScalarType(charge * charge * 0.25) / (r2 * sqrt(r2)));
-                forceH1 += f;
-                forceH2 -= f;
-            }
-            /* Change representation: from partial charge representation to HOH representation */
-            for (size_t i = minIndexO; i < maxIndexO; ++i) {
-                const size_t indexH1 = 2 * (i - minIndexO);
-                const size_t indexH2 = indexH1 + 1;
-                auto forceO = coulomb.segment(3 * i, 3 * i + 3);
-                auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
-                auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
-                f = forceO * ScalarType((1 - gamma) * 0.5);
-                forceH1 += f;
-                forceH2 += f;
-                forceO *= ScalarType(gamma);
-            }
+        Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
+        const size_t minIndexO = 2 * numMolecule;
+        const size_t maxIndexO = minIndexO + numMolecule;
+        Vector<ScalarType, 3> f;
+        /* Change representation: from partial charge representation to HOH representation */
+        for (size_t i = minIndexO; i < maxIndexO; ++i) {
+            const size_t indexH1 = 2 * (i - minIndexO);
+            const size_t indexH2 = indexH1 + 1;
+            auto forceO = coulomb.segment(3 * i, 3 * i + 3);
+            auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
+            auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
+            f = forceO * ScalarType((1 - gamma) * 0.5);
+            forceH1 += f;
+            forceH2 += f;
+            forceO *= ScalarType(gamma);
         }
         return coulomb;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    template<class Executor, bool IsSmallCell>
-    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_unsort(const MDCellType& cell) const {
-        MDCellType copy = cell;
-        const auto permute = sortPosition(copy);
-        const Vector<ScalarType> sort_f = force<Executor, IsSmallCell>(copy);
-        const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
-        return unsort_f.flatten();
     }
 
     template<class ScalarType, class PosScalarType>
@@ -286,8 +255,26 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::updateLattice(LatticeMatrix lattice) {
-        ewald.setLattice(std::move(lattice));
+    template<class Executor, bool UseDynamicPolar>
+    typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
+    Q_TIP4P<ScalarType, PosScalarType>::makeInducedDipole(const MDCellType& cell) const {
+        assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
+        const auto& pos = cell.getPos();
+        const size_t numMolecule = cell.getNumParticle() / 3;
+        const Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
+        const ScalarType repCharge = reciprocal(ScalarType(charge));
+
+        PositionMatrix dipoles(numMolecule, 3);
+        for (size_t i = 0; i < numMolecule; ++i) {
+            const size_t indexO = 2 * numMolecule + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
+            const WaterPolarTensor<ScalarType, UseDynamicPolar> polar(pos.row(indexO), pos.row(indexH1), pos.row(indexH2));
+            const Vector<ScalarType, 3> electricField = coulomb.segment(indexO * Dim, (indexO + 1) * Dim) * repCharge;
+            auto dipole = dipoles.row(i);
+            dipole = polar * electricField;
+        }
+        return dipoles;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -298,12 +285,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::updateLattice(LatticeMatrix lattice) {
+        ewald.setLattice(std::move(lattice));
+    }
+
+    template<class ScalarType, class PosScalarType>
     typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
-    Q_TIP4P<ScalarType, PosScalarType>::makeDipoleMoments(const PeriodicCell<PosScalarType, 3>& cell) {
-        assert(cell.getNumParticle() % 3 == 0);
+    Q_TIP4P<ScalarType, PosScalarType>::makePermanentDipole(const PeriodicCell<PosScalarType, 3>& cell) {
+        assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
         PositionMatrix dipoles(numMolecule, 3);
-        for (size_t i = 0; i < dipoles.getRow(); ++i) {
+        for (size_t i = 0; i < numMolecule; ++i) {
             const size_t indexO = 2 * numMolecule + i;
             const size_t indexH1 = 2 * i;
             const size_t indexH2 = 2 * i + 1;
@@ -421,6 +413,50 @@ namespace Physica::Core {
         }
         cell.normalizePos(chargePos);
         return chargePos;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long_PartialChargeRepr(const MDCellType& cell) const {
+        assert(cell.getNumParticle() % 3 == 0);
+        assert(isCellOrdered(cell));
+        assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");
+        using Vector3D = Vector<PosScalarType, Dim>;
+
+        const PositionMatrix chargePos = makeChargePos(cell);
+        Vector<ScalarType> coulomb = ewald.template force<Executor>(chargePos);
+        PeriodicCell<PosScalarType, 3> chargeCell(cell.getLattice(), chargePos, cell.getType());
+        const size_t minIndexO = 2 * numMolecule;
+        const size_t maxIndexO = minIndexO + numMolecule;
+        Vector<ScalarType, 3> f;
+        Vector3D vecMH1, vecMH2, vecH1H2;
+        /* Remove self interaction */
+        for (size_t i = minIndexO; i < maxIndexO; ++i) {
+            const size_t indexH1 = 2 * (i - minIndexO);
+            const size_t indexH2 = indexH1 + 1;
+            auto forceM = coulomb.segment(3 * i, 3 * i + 3);
+            auto forceH1 = coulomb.segment(3 * indexH1, 3 * indexH1 + 3);
+            auto forceH2 = coulomb.segment(3 * indexH2, 3 * indexH2 + 3);
+
+            vecMH1 = chargeCell.minDistVector(i, indexH1);
+            PosScalarType r2 = vecMH1.squaredNorm();
+            f = vecMH1 * (ScalarType(-charge * charge * 0.5) / (r2 * sqrt(r2)));
+            forceM += f;
+            forceH1 -= f;
+
+            vecMH2 = chargeCell.minDistVector(i, indexH2);
+            r2 = vecMH2.squaredNorm();
+            f = vecMH2 * (ScalarType(-charge * charge * 0.5) / (r2 * sqrt(r2)));
+            forceM += f;
+            forceH2 -= f;
+
+            vecH1H2 = chargeCell.minDistVector(indexH1, indexH2);
+            r2 = vecH1H2.squaredNorm();
+            f = vecH1H2 * (ScalarType(charge * charge * 0.25) / (r2 * sqrt(r2)));
+            forceH1 += f;
+            forceH2 -= f;
+        }
+        return coulomb;
     }
 
     template<class ScalarType, class PosScalarType>

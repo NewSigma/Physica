@@ -2,8 +2,6 @@
 
 Physica is a library that provides several basic modules in computational physics.
 
-There will be a lot of work to do in the future
-
 ## Table of Contents
 
 - [Design philosophy](#philosophy)
@@ -16,9 +14,9 @@ There will be a lot of work to do in the future
 
 1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. In Physica, we target on performance and scalability. Ease of use is taken secondary.
 
-2. Zero overhead abstraction: Users shall not pay for what they do not need.
+2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is mainly composed of several sets of header files. Codes that users do not need will not be compiled.
 
-3. Template meta algorithm: Making use of powerful C++ templates, the program will fit to problem at compiling time automatically.
+3. Template meta algorithm: No seperate input file. Simulation parameters are declared as compile time constant. The program will choose best algorithm at compile time automatically making use of powerful C++ templates.
 
 ## Usage
 

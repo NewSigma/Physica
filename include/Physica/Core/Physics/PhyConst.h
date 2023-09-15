@@ -49,7 +49,7 @@ namespace Physica::Core {
         constexpr static double reducedPlanck = planck / (2 * M_PI);
         constexpr static double electroMass = 9.1093837015E-31;
         constexpr static double unitCharge = 1.602176634E-19;
-        constexpr static double bohrRadius = 5.29177210903E-11;
+        constexpr static double bohrRadius = 0.529177210903E-10;
         constexpr static double protonMass = 1.67262192369E-27;
         constexpr static double neutronMass = 1.67492749804E-27;
         constexpr static double vacuumDielectric = 8.8541878128E-12;

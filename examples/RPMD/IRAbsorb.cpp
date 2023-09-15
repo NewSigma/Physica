@@ -123,13 +123,13 @@ void testMD() {
 
             typename MDCell<ScalarType, PosScalarType>::PositionMatrix buffer(forceModel.getNumMolecule(), 3, 0);
             for (size_t i = 0; i < numReplica; ++i)
-                buffer += forceModel.makeDipoleMoments(rpmd.phaseToCell(i));
+                buffer += forceModel.makePermanentDipole(rpmd.phaseToCell(i));
             buffer *= reciprocal(ScalarType(numReplica));
             Vector<ScalarType, 3> dipole0{buffer.col(0).asVector().sum(), buffer.col(1).asVector().sum(), buffer.col(2).asVector().sum()};
             for (size_t i = 0; i < corr.getLength(); ++i) {
                 buffer = ScalarType(0);
                 for (size_t i = 0; i < numReplica; ++i)
-                    buffer += forceModel.makeDipoleMoments(rpmd.phaseToCell(i));
+                    buffer += forceModel.makePermanentDipole(rpmd.phaseToCell(i));
                 buffer *= reciprocal(ScalarType(numReplica));
                 Vector<ScalarType, 3> dipole1{buffer.col(0).asVector().sum(), buffer.col(1).asVector().sum(), buffer.col(2).asVector().sum()};
                 toNextMean(corr[i], path, dipole0 * dipole1);

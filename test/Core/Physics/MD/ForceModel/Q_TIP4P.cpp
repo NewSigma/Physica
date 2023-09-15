@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -31,6 +31,7 @@ using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;
+constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
@@ -139,7 +140,7 @@ void testMD() {
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
@@ -176,7 +177,7 @@ void testMD() {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    //testSort();
+    testSort();
     //testForce();
     testMD();
     return 0;

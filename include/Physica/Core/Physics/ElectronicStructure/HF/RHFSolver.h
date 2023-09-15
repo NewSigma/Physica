@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/Molecular.h"
+#include "Physica/Core/Physics/Molecular/Molecular.h"
 #include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
