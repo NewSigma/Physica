@@ -22,9 +22,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
 #include "BandGrid.h"
 #include "PWBaseWave.h"
-#include "Ewald.h"
 #include "ChargeMixer.h"
 
 namespace Physica::Core {

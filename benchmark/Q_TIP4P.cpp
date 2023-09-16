@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Cycler.h"
+#include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -35,6 +35,7 @@ using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
 using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
+constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.1;
@@ -108,46 +109,42 @@ int main() {
     auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-    const ThermostatType thermo(temperatureT, thermostatTime);
-    rpmd.initMomentum(gen);
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
+    ForceModel forceModel(cell, pair_cutoff);
     KineticModel kineticModel(temperatureT, numReplica);
+    const ThermostatType thermo(temperatureT, thermostatTime);
+    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
+    rpmd.initMomentum(gen);
     {
-        const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
-            PhyConst<AU>::secondToTime(5 * 1E-14),
-            thermo,
-            kineticModel,
-            forceModel);
-        const auto to = Cycler::toc();
-        std::cout << "1 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(
+                PhyConst<AU>::secondToTime(1 * 1E-14),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "1 thread time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
         ThreadPool::numThreadRequired = 2;
-        ThreadPool& pool = ThreadPool::getInstance();
-        const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
-            PhyConst<AU>::secondToTime(5 * 1E-14),
-            thermo,
-            kineticModel,
-            forceModel);
-        const auto to = Cycler::toc();
-        std::cout << "2 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
-        pool.shouldExit();
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(2 * 1E-14),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "2 thread time use: " << timeuse.first << '(' << timeuse.second << ")\n";
+        ThreadPool::getInstance().shouldExit();
     }
     {
         ThreadPool::numThreadRequired = 4;
         ThreadPool& pool = ThreadPool::getInstance();
         pool.restart();
-        const auto from = Cycler::tic();
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
-            PhyConst<AU>::secondToTime(5 * 1E-14),
-            thermo,
-            kineticModel,
-            forceModel);
-        const auto to = Cycler::toc();
-        std::cout << "4 Threads time use: " << Cycler::toSeconds(to - from) << '\n';
+        auto timeuse = Benchmark::run([&]() {
+            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(2 * 1E-14),
+                kineticModel,
+                forceModel);
+        }, 8, 20);
+        std::cout << "4 thread time use: " << timeuse.first << '(' << timeuse.second << ")\n";
         pool.shouldExit();
     }
     return 0;

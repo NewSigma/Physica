@@ -23,8 +23,9 @@
 
 namespace Physica::Core {
     /**
-     * \class PWBaseWave
-     * Plain wave base wave function
+     * \class PWBaseWave provides plain wave base
+     * 
+     * TODO: bound base class and matrix element construction
      */
     template<class ScalarType>
     class PWBaseWave : public KSpaceGrid<RSpaceGrid<ComplexScalar<ScalarType>>> {

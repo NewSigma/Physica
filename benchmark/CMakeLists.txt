@@ -5,7 +5,9 @@ physica_add_benchmark(HardCore RPMD/HardCore.cpp)
 physica_add_benchmark(HardCore_cuda RPMD/HardCore.cu)
 physica_add_benchmark(ParaH RPMD/ParaH.cpp)
 physica_add_benchmark(ParaH_cuda RPMD/ParaH.cu)
-physica_add_benchmark(ParaH_auto RPMD/ParaH_auto.cu) # nvcc 12.2 internal compiler error in debug mode
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug") # nvcc 12.2 internal compiler error in debug mode
+    physica_add_benchmark(ParaH_auto RPMD/ParaH_auto.cu)
+endif()
 # Anonymous
 physica_add_benchmark(KSSolver KSSolver.cpp)
 physica_add_benchmark(Q_TIP4P Q_TIP4P.cpp)

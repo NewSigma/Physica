@@ -24,9 +24,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/ElectronicStructure/DFT/Ewald.h"
 #include "Physica/Core/Physics/Molecular/WaterPolarTensor.h"
 #include "LJModel.h"
+#include "Ewald.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType> class Q_TIP4P;
@@ -285,7 +285,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void Q_TIP4P<ScalarType, PosScalarType>::updateLattice(LatticeMatrix lattice) {
+    inline void Q_TIP4P<ScalarType, PosScalarType>::updateLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 

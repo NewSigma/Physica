@@ -40,7 +40,7 @@ namespace Physica::Core {
         Utils::Array<Index3D> atomCellMap;
         Utils::Array<Vector3D> neighShifts;
     public:
-        CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_);
+        CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ScalarType cutoff_);
         CellList(const MDCellType& mdCell, ScalarType cutoff_);
         CellList(const CellList&) = default;
         CellList(CellList&&) noexcept = default;
@@ -74,9 +74,9 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType>
-    CellList<ScalarType, PosScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix pos, ScalarType cutoff_)
+    CellList<ScalarType, PosScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ScalarType cutoff_)
             : lattice(std::move(lattice_))
-            , directPos(std::move(pos))
+            , directPos(std::move(cartesianPos))
             , cutoff(cutoff_)
             , neighShifts(3 * 3 * 3) {
         atomCellMap.resize(directPos.getRow());

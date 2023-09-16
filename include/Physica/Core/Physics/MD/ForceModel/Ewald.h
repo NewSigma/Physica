@@ -52,13 +52,13 @@ namespace Physica::Core {
         ScalarType integralLimit;
         ScalarType selfEnergy;
         PosScalarType rSpaceCutoff;
+        PosScalarType squaredCutoff;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
         Vector<ScalarType> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
         ScalarType doubleSquareStep;
-        ScalarType squareMaxErfcX;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -154,7 +154,7 @@ namespace Physica::Core {
                         const Vector3D pos_ij = pos_i - pos.row(j).asVector();
                         const ScalarType r2 = pos_ij.squaredNorm();
                         const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < ScalarType(r2);
-                        if (isNotSelf && r2 < squareMaxErfcX) {
+                        if (isNotSelf && r2 < squaredCutoff) {
                             const ScalarType temp = calcFromTable(sqrt(r2)) * (charge_i * charges[j]);
                             sum += temp * ScalarType(i == j ? 1 : 2);
                         }
@@ -195,13 +195,13 @@ namespace Physica::Core {
         integralLimit.swap(ewald.integralLimit);
         selfEnergy.swap(ewald.selfEnergy);
         rSpaceCutoff.swap(ewald.rSpaceCutoff);
+        squaredCutoff.swap(ewald.squaredCutoff);
         rSpaceSumRange.swap(ewald.rSpaceSumRange);
         kSpaceSumRange.swap(ewald.kSpaceSumRange);
         erfc_table.swap(ewald.erfc_table);
         erfcStep.swap(ewald.erfcStep);
         repErfcStep.swap(ewald.repErfcStep);
         doubleSquareStep.swap(ewald.doubleSquareStep);
-        squareMaxErfcX.swap(ewald.squareMaxErfcX);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -212,6 +212,7 @@ namespace Physica::Core {
         inv_volume = reciprocal(ScalarType(volume));
         initIntegralLimit(volume);
         rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
+        squaredCutoff = square(rSpaceCutoff);
         rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
         kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
         selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
@@ -245,7 +246,6 @@ namespace Physica::Core {
         erfcStep = ScalarType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         doubleSquareStep = square(erfcStep) * 2;
-        squareMaxErfcX = square((ScalarType(ErfcTableSize - 1) - 0.5) * erfcStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -290,7 +290,7 @@ namespace Physica::Core {
                         delta = from - to;
                         const ScalarType charge2 = charges[atom2];
                         const ScalarType r2 = delta.squaredNorm();
-                        if (r2 < squareMaxErfcX) {
+                        if (r2 < squaredCutoff) {
                             const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
                             delta *= factor;
                             auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
@@ -316,7 +316,7 @@ namespace Physica::Core {
                         delta = from - to;
                         const ScalarType charge2 = charges[atom2];
                         const ScalarType r2 = delta.squaredNorm();
-                        if (r2 < squareMaxErfcX) {
+                        if (r2 < squaredCutoff) {
                             const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
                             delta *= factor;
                             auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
