@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -41,3 +41,21 @@
 #else
     #include <cuda_runtime_api.h>
 #endif
+
+namespace Physica {
+    constexpr static bool IsMKLEnabled() {
+    #ifndef PHYSICA_MKL
+        return false;
+    #else
+        return true;
+    #endif
+    }
+
+    constexpr static bool IsCUDAEnabled() {
+    #ifndef PHYSICA_CUDA
+        return false;
+    #else
+        return true;
+    #endif
+    }
+}

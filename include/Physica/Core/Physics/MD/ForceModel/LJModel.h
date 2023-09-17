@@ -29,6 +29,7 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             using PosScalarType = U;
+            constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
 
@@ -48,8 +49,8 @@ namespace Physica::Core {
         /* Operations */
         void swap(LJModel& obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline ScalarType force_functor(PosScalarType r, PosScalarType r2) const;
-        [[nodiscard]] inline ScalarType pot_functor(PosScalarType r, PosScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, PosScalarType r, PosScalarType r2) const;
+        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, PosScalarType r, PosScalarType r2) const;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -62,7 +63,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType LJModel<ScalarType, PosScalarType>::force_functor(PosScalarType r, [[maybe_unused]] PosScalarType r2) const {
+    inline ScalarType LJModel<ScalarType, PosScalarType>::force_functor(\
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, PosScalarType r, [[maybe_unused]] PosScalarType r2) const {
         const ScalarType rep_r = ScalarType(sigma) / r;
         const ScalarType rep_r2 = square(rep_r);
         const ScalarType rep_r4 = square(rep_r2);
@@ -73,7 +75,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType LJModel<ScalarType, PosScalarType>::pot_functor([[maybe_unused]] PosScalarType r, PosScalarType r2) const {
+    inline ScalarType LJModel<ScalarType, PosScalarType>::pot_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] PosScalarType r, PosScalarType r2) const {
         const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
         const ScalarType rep_r4 = square(rep_r2);
         const ScalarType rep_r6 = rep_r4 * rep_r2;

@@ -23,18 +23,32 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Utils/TestHelper.h"
+#include "PairModel.h"
 
 namespace Physica::Core {
+    template<class ScalarType, class PosScalarType> class Ewald;
+
+    namespace Internal {
+        template<class T, class U>
+        class Traits<Ewald<T, U>> {
+        public:
+            using ScalarType = T;
+            using PosScalarType = U;
+            constexpr static bool IsPotDependOnAtomIndex = true;
+        };
+    }
     /**
      * Reference:
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
      * [3] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
-    template<class ScalarType, class PosScalarType = ScalarType>
-    class Ewald {
+    template<class ScalarType, class PosScalarType>
+    class Ewald : public PairModel<Ewald<ScalarType, PosScalarType>> {
         constexpr static unsigned int Dim = 3;
+        using Base = PairModel<Ewald<ScalarType, PosScalarType>>;
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
         using SearchRangeType = typename PeriodicCell<PosScalarType, Dim>::SearchRangeType;
@@ -51,14 +65,12 @@ namespace Physica::Core {
         ScalarType inv_volume;
         ScalarType integralLimit;
         ScalarType selfEnergy;
-        PosScalarType rSpaceCutoff;
-        PosScalarType squaredCutoff;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
         Vector<ScalarType> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
-        ScalarType doubleSquareStep;
+        ScalarType repDoubleSquareStep;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
@@ -70,21 +82,32 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos) const;
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
+
         [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
         void swap(Ewald& ewald) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
+        [[nodiscard]] PosScalarType getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
+        [[nodiscard]] PosScalarType getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
         /* Setters */
         void setLattice(LatticeMatrix lattice_);
+    protected:
+        inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     private:
         void initIntegralLimit(PosScalarType volume);
         void makeTables();
-        inline ScalarType calcFromTable(ScalarType x) const;
-        inline ScalarType calcFromTable_diff(ScalarType x) const;
-        Vector<ScalarType> rSpaceForce(const PositionMatrix& pos) const;
+
+        using Base::getCutoff;
+        using Base::getSquaredCutoff;
 
         friend class ::Physica::Test;
+        friend class PairModel<Ewald<ScalarType, PosScalarType>>;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -105,38 +128,54 @@ namespace Physica::Core {
     Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force(const PositionMatrix& pos) const {
         Vector<ScalarType> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
-            const size_t numParticle = getNumParticle();
-            Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-            const ScalarType factor1 = reciprocal(square(ScalarType(2) * integralLimit));
-            Vector<ScalarType> dots(numParticle);
-            Vector<ScalarType> sin_vec(numParticle);
-            Vector<ScalarType> cos_vec(numParticle);
-            PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
-                [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
-                    const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
-                    const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
-                    if (isNotGammaPoint) {
-                        dots = pos * delta;
-                        sincos(dots, sin_vec, cos_vec);
-                        const ScalarType sum_cos = cos_vec * charges;
-                        const ScalarType sum_sin = sin_vec * charges;
-                        const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
-                        for (size_t i = 0; i < numParticle; ++i) {
-                            auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
-                            const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
-                            force_i[0] += temp * delta[0];
-                            force_i[1] += temp * delta[1];
-                            force_i[2] += temp * delta[2];
-                        }
-                    }
-                });
-            kSpaceSum *= ScalarType(8 * M_PI) * inv_volume;
-            result = std::move(kSpaceSum);
+            result = force_long<SequentialExecutor>(pos);
         });
-        Vector<ScalarType> rSpaceSum = rSpaceForce(pos);
+        const Vector<ScalarType> rSpaceSum = force_short<SequentialExecutor>(pos);
         Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor, bool IsSmallCell> 
+    inline Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force_short(const PositionMatrix& pos) const {
+        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
+        static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
+        const Vector<ScalarType> rSpaceSum = Base::template force<SequentialExecutor, false>(lattice, pos);
+        return rSpaceSum;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor>
+    Vector<ScalarType> Ewald<ScalarType, PosScalarType>::force_long(const PositionMatrix& pos) const {
+        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
+        const size_t numParticle = getNumParticle();
+        Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
+        const ScalarType factor1 = reciprocal(square(ScalarType(2) * integralLimit));
+        Vector<ScalarType> dots(numParticle);
+        Vector<ScalarType> sin_vec(numParticle);
+        Vector<ScalarType> cos_vec(numParticle);
+        PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
+            [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
+                const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
+                const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
+                if (isNotGammaPoint) {
+                    dots = pos * delta;
+                    sincos(dots, sin_vec, cos_vec);
+                    const ScalarType sum_cos = cos_vec * charges;
+                    const ScalarType sum_sin = sin_vec * charges;
+                    const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
+                        const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
+                        force_i[0] += temp * delta[0];
+                        force_i[1] += temp * delta[1];
+                        force_i[2] += temp * delta[2];
+                    }
+                }
+            });
+        kSpaceSum *= ScalarType(8 * M_PI) * inv_volume;
+        return kSpaceSum;
     }
     /**
      * \param pos must be in cartesian convension
@@ -144,25 +183,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     ScalarType Ewald<ScalarType, PosScalarType>::potentialEnergy(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
-        ScalarType rSpaceSum = 0;
-        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice, [this, numParticle, &pos, &rSpaceSum](Vector3D delta) {
-                ScalarType sum = 0;
-                for (size_t i = 0; i < numParticle; ++i) {
-                    const Vector3D pos_i = pos.row(i).asVector() + delta;
-                    const ScalarType charge_i = charges[i];
-                    for (size_t j = i; j < numParticle; ++j) {
-                        const Vector3D pos_ij = pos_i - pos.row(j).asVector();
-                        const ScalarType r2 = pos_ij.squaredNorm();
-                        const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < ScalarType(r2);
-                        if (isNotSelf && r2 < squaredCutoff) {
-                            const ScalarType temp = calcFromTable(sqrt(r2)) * (charge_i * charges[j]);
-                            sum += temp * ScalarType(i == j ? 1 : 2);
-                        }
-                    }
-                }
-                rSpaceSum += sum;
-            });
-        
+        const ScalarType rSpaceSum = Base::potentialEnergy(lattice, pos);
         ScalarType kSpaceSum = 0;
         const ScalarType factor = reciprocal(square(ScalarType(2) * integralLimit));
         PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
@@ -188,20 +209,19 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::swap(Ewald& ewald) noexcept {
+        Base::swap(ewald);
         lattice.swap(ewald.lattice);
         repCell.swap(ewald.repCell);
         charges.swap(ewald.charges);
         inv_volume.swap(ewald.inv_volume);
         integralLimit.swap(ewald.integralLimit);
         selfEnergy.swap(ewald.selfEnergy);
-        rSpaceCutoff.swap(ewald.rSpaceCutoff);
-        squaredCutoff.swap(ewald.squaredCutoff);
         rSpaceSumRange.swap(ewald.rSpaceSumRange);
         kSpaceSumRange.swap(ewald.kSpaceSumRange);
         erfc_table.swap(ewald.erfc_table);
         erfcStep.swap(ewald.erfcStep);
         repErfcStep.swap(ewald.repErfcStep);
-        doubleSquareStep.swap(ewald.doubleSquareStep);
+        repDoubleSquareStep.swap(ewald.repDoubleSquareStep);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -211,13 +231,36 @@ namespace Physica::Core {
         const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(ScalarType(volume));
         initIntegralLimit(volume);
-        rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
-        squaredCutoff = square(rSpaceCutoff);
+        const ScalarType rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
         rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
         kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
         selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
                    + square(charges.sum()) * ScalarType(M_PI) / (ScalarType(2) * square(integralLimit)) * inv_volume;
         makeTables();
+        Base::setCutoff(rSpaceCutoff);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    inline ScalarType Ewald<ScalarType, PosScalarType>::force_functor(
+            size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
+        const ScalarType temp = r * repErfcStep + 0.5;
+        const int index = double(temp);
+        const ScalarType x1 = erfcStep * floor(temp);
+        auto y = erfc_table.template segment<3>(index, index + 3);
+        return charges[i] * charges[j] * Internal::quadraticInterpolate_diff1(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
+    }
+    /**
+     * Optimize: make use of x1, x2, x3 are equal distance
+     */
+    template<class ScalarType, class PosScalarType>
+    inline ScalarType Ewald<ScalarType, PosScalarType>::pot_functor(
+            size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
+        const ScalarType temp = r * repErfcStep + 0.5;
+        const int index = double(temp);
+        const ScalarType x1 = erfcStep * floor(temp);
+        auto y = erfc_table.template segment<3>(index, index + 3);
+        const ScalarType interp = Internal::quadraticInterpolate(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
+        return ScalarType(i == j ? 1 : 2) * charges[i] * charges[j] * interp;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -225,13 +268,12 @@ namespace Physica::Core {
         const ScalarType averageCellSize = cbrt(ScalarType(volume));
         const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * M_PI) / averageCellSize;
 
-        constexpr double factor = 2 * M_PI;
         const auto& repLatt = repCell.getLattice();
-        const ScalarType heightX = reciprocal(repLatt.row(0).norm()) * factor;
-        const ScalarType heightY = reciprocal(repLatt.row(1).norm()) * factor;
-        const ScalarType heightZ = reciprocal(repLatt.row(2).norm()) * factor;
-        constexpr double factor1 = 0.99; //A rule of thumb
-        const ScalarType maxRSpaceCutoff = std::min(heightX, std::min(heightY, heightZ)) * factor1;
+        const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
+        const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
+        const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
+        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
+        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * factor1;
         const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
         integralLimit = std::max(estimate, minLimit);
     }
@@ -245,92 +287,6 @@ namespace Physica::Core {
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = ScalarType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
-        doubleSquareStep = square(erfcStep) * 2;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable(ScalarType x) const {
-        const ScalarType temp = x * repErfcStep + 0.5;
-        const size_t index = double(temp);
-        const ScalarType x1 = erfcStep * floor(temp);
-        auto y = erfc_table.template segment<3>(index, index + 3);
-        return Internal::quadraticInterpolate(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], x); //Optimize: make use of x1, x2, x3 are equal distance
-    }
-
-    template<class ScalarType, class PosScalarType>
-    inline ScalarType Ewald<ScalarType, PosScalarType>::calcFromTable_diff(ScalarType x) const {
-        const ScalarType temp = x * repErfcStep + 0.5;
-        const size_t index = double(temp);
-        const ScalarType x1 = erfcStep * floor(temp);
-        auto y = erfc_table.template segment<3>(index, index + 3);
-        const ScalarType factor = doubleSquareStep * x + std::numeric_limits<ScalarType>::epsilon(); // Avoid divide by zero
-        return Internal::quadraticInterpolate_diff1(factor, erfcStep, x1, y[0], y[1], y[2], x);
-    }
-
-    template<class ScalarType, class PosScalarType>
-    Vector<ScalarType> Ewald<ScalarType, PosScalarType>::rSpaceForce(const PositionMatrix& pos) const {
-        const auto numParticle = getNumParticle();
-        Vector<ScalarType> rSpaceSum(numParticle * Dim, 0);
-        const CellListType cellList(lattice, pos, rSpaceCutoff);
-        Utils::Array<size_t> arr1{};
-        cellList.forCellInList([this, pos, &arr1, &rSpaceSum, &cellList](Index3D center) {
-            for (size_t i : cellList(center))
-                arr1.append(i);
-            {
-                const size_t length = arr1.getLength();
-                for (size_t i = 0; i + 1 < length; ++i) {
-                    const size_t atom1 = arr1[i];
-                    const Vector3D from = pos.row(atom1);
-                    Vector3D delta;
-                    Vector<ScalarType, Dim> f(Dim, 0);
-                    const ScalarType charge1 = charges[atom1];
-                    for (size_t j = i + 1; j < length; ++j) {
-                        const size_t atom2 = arr1[j];
-                        const auto to = pos.row(atom2);
-                        delta = from - to;
-                        const ScalarType charge2 = charges[atom2];
-                        const ScalarType r2 = delta.squaredNorm();
-                        if (r2 < squaredCutoff) {
-                            const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
-                            delta *= factor;
-                            auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
-                            f += delta;
-                            f2 -= delta;
-                        }
-                    }
-                    auto f1 = rSpaceSum.segment(atom1 * Dim, (atom1 + 1) * Dim);
-                    f1 += f;
-                }
-            }
-            Utils::Array<size_t> arr2{};
-            cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &rSpaceSum, &cellList](Vector3D translate, Index3D neigh) {
-                for (size_t j : cellList(neigh))
-                    arr2.append(j);
-                for (size_t atom1 : arr1) {
-                    const Vector3D from = pos.row(atom1) - translate;
-                    Vector3D delta;
-                    Vector<ScalarType, Dim> f(Dim, 0);
-                    const ScalarType charge1 = charges[atom1];
-                    for (size_t atom2 : arr2) {
-                        const auto to = pos.row(atom2);
-                        delta = from - to;
-                        const ScalarType charge2 = charges[atom2];
-                        const ScalarType r2 = delta.squaredNorm();
-                        if (r2 < squaredCutoff) {
-                            const ScalarType factor = charge1 * charge2 * calcFromTable_diff(sqrt(r2));
-                            delta *= factor;
-                            auto f2 = rSpaceSum.segment(atom2 * Dim, (atom2 + 1) * Dim);
-                            f += delta;
-                            f2 -= delta;
-                        }
-                    }
-                    auto f1 = rSpaceSum.segment(atom1 * Dim, (atom1 + 1) * Dim);
-                    f1 += f;
-                }
-                arr2.clear();
-            });
-            arr1.clear();
-        });
-        return rSpaceSum;
+        repDoubleSquareStep = reciprocal(square(erfcStep) * 2);
     }
 }

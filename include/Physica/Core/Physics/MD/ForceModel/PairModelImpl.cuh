@@ -42,7 +42,8 @@ namespace Physica::Core {
             , cell(numParticle)
             , swapBuffer(numParticle * Dim) {
         squared_cutoff = square(cutoff_);
-        pot_shift = pot_functor(cutoff, squared_cutoff);
+        if constexpr (!IsPotDependOnAtomIndex)
+            pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
     }
 
     template<class Derived>
@@ -116,7 +117,7 @@ namespace Physica::Core {
             const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
             if (isNotSelf && r2 < squared_cutoff) {
                 const ScalarType dist = sqrt(r2);
-                const ScalarType f_norm = force_functor(dist, r2);
+                const ScalarType f_norm = force_functor(threadId, j, dist, r2);
                 force_thread -= r * (f_norm / dist);
             }
         }

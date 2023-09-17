@@ -29,10 +29,13 @@ namespace Physica::Core {
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
         using Base = Utils::CRTPBase<device_obj<Derived>>;
+        using TraitType = Internal::Traits<Derived>;
+
         constexpr static int Dim = 3;
+        constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using PosScalarType = typename Internal::Traits<Derived>::PosScalarType;
+        using ScalarType = typename TraitType::ScalarType;
+        using PosScalarType = typename TraitType::PosScalarType;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -49,6 +52,7 @@ namespace Physica::Core {
         DeviceMatrix forceBuffer;
         PageLockedVector swapBuffer;
     public:
+        device_obj() = default;
         device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -56,8 +60,13 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __host__ __device__ ScalarType force_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().force_functor(r, r2); }
-        [[nodiscard]] __host__ __device__ ScalarType pot_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().pot_functor(r, r2); }
+        [[nodiscard]] __host__ __device__ ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+            return Base::getDerived().force_functor(i, j, r, r2);
+        }
+        [[nodiscard]] __host__ __device__ ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+            return Base::getDerived().pot_functor(i, j, r, r2);
+        }
+
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
         template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);

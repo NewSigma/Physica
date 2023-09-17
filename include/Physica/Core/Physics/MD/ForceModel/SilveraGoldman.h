@@ -29,6 +29,7 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             using PosScalarType = U;
+            constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
     /**
@@ -58,8 +59,8 @@ namespace Physica::Core {
         /* Operators */
         SilveraGoldman& operator=(SilveraGoldman obj) noexcept;
         /* Operations */
-        [[nodiscard]] inline ScalarType force_functor(ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType pot_functor(ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         void swap(SilveraGoldman& obj) noexcept;
     };
 
@@ -78,7 +79,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(ScalarType r, ScalarType r2) const {
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::force_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         using PacketType = typename Internal::BestPacket<ScalarType, 4>::Type;
         static_assert(!std::is_same<ScalarType, PacketType>::value, "[Error]: SIMD is inavailable, implementation must be revised");
 
@@ -107,7 +109,8 @@ namespace Physica::Core {
     }
     
     template<class ScalarType, class PosScalarType>
-    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(ScalarType r, ScalarType r2) const {
+    inline ScalarType SilveraGoldman<ScalarType, PosScalarType>::pot_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);

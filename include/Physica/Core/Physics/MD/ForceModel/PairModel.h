@@ -32,11 +32,15 @@ namespace Physica::Core {
     template<class Derived>
     class PairModel : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
+        using TraitType = Internal::Traits<Derived>;
+
+        constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using PosScalarType = typename Internal::Traits<Derived>::PosScalarType;
+        using ScalarType = typename TraitType::ScalarType;
+        using PosScalarType = typename TraitType::PosScalarType;
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename GridBase::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
@@ -45,6 +49,7 @@ namespace Physica::Core {
         ScalarType squared_cutoff;
         ScalarType pot_shift;
     public:
+        PairModel() = default;
         PairModel(ScalarType cutoff_);
         PairModel(const PairModel&) = default;
         PairModel(PairModel&&) noexcept = default;
@@ -52,23 +57,35 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType force_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().force_functor(r, r2); }
-        [[nodiscard]] ScalarType pot_functor(ScalarType r, ScalarType r2) const { return Base::getDerived().pot_functor(r, r2); }
-        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
+
         template<class VectorType, class Executor, bool IsSmallCell>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
+        template<class VectorType, class Executor, bool IsSmallCell>
+        inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
+        /* Getters */
+        [[nodiscard]] const ScalarType& getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
+        /* Setters */
+        void setCutoff(ScalarType cutoff_);
     };
 
     template<class Derived>
-    PairModel<Derived>::PairModel(ScalarType cutoff_)
-            : cutoff(std::move(cutoff_)) {
-        squared_cutoff = square(cutoff);
-        pot_shift = pot_functor(cutoff, squared_cutoff);
+    PairModel<Derived>::PairModel(ScalarType cutoff_) {
+        setCutoff(std::move(cutoff_));
     }
 
     template<class Derived>
@@ -78,24 +95,41 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        return Base::getDerived().force_functor(i, j, r, r2);
+    }
+
+    template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        return Base::getDerived().pot_functor(i, j, r, r2);
+    }
+
+    template<class Derived>
     template<class Executor, bool IsSmallCell>
-    Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(cell.getDOF());
-        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+    Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
+        const size_t DOF = cartesianPos.getRow() * cartesianPos.getColumn();
+        Vector<ScalarType> result(DOF);
+        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(lattice, cartesianPos, result);
         return result;
     }
 
     template<class Derived>
+    template<class Executor, bool IsSmallCell>
+    inline Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
+        return force<Executor, IsSmallCell>(cell.getLattice(), cell.getPos());
+    }
+
+    template<class Derived>
     template<class VectorType, class Executor, bool IsSmallCell>
-    void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    void PairModel<Derived>::forceAsync(
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const {
         static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
-        const auto& pos = cell.getPos();
+        const auto& pos = cartesianPos;
         result = ScalarType(0);
         if constexpr (IsSmallCell) {
-            const auto& lattice = cell.getLattice();
             const auto range = MDCellType::estimateRange(lattice, cutoff);
-            const size_t numParticle = cell.getNumParticle();
-
+            const size_t numParticle = pos.getRow();
             MDCellType::forCellInRange(range, lattice,
                 [this, pos, numParticle, &result](Vector3D delta) {
                     Vector3D r, from;
@@ -110,7 +144,7 @@ namespace Physica::Core {
                             const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
                             if (isNotSelf && r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(i, j, dist, r2);
                                 r *= f_norm / dist;
                                 const Vector3D& f = r;
                                 force_i -= f;
@@ -121,7 +155,7 @@ namespace Physica::Core {
                 });
         }
         else {
-            const CellListType cellList(cell, cutoff);
+            const CellListType cellList(lattice, pos, cutoff);
             Utils::Array<size_t> arr1{};
             cellList.forCellInList([this, pos, &arr1, &result, &cellList](Index3D center) {
                 for (size_t i : cellList(center))
@@ -139,7 +173,7 @@ namespace Physica::Core {
                             const ScalarType r2 = r.squaredNorm();
                             if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
@@ -166,7 +200,7 @@ namespace Physica::Core {
                             if (r2 < squared_cutoff) {
                                 const ScalarType dist = sqrt(r2);
                                 auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
-                                const ScalarType f_norm = force_functor(dist, r2);
+                                const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
                                 r *= ScalarType(f_norm / dist);
                                 f -= r;
                                 f2 += r;
@@ -183,13 +217,20 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
-        const auto& pos = cell.getPos();
-        const auto range = MDCellType::estimateRange(cell.getLattice(), cutoff);
-        const size_t numParticle = cell.getNumParticle();
+    template<class VectorType, class Executor, bool IsSmallCell>
+    inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        forceAsync<VectorType, Executor, IsSmallCell>(cell.getLattice(), cell.getPos(), result);
+    }
+
+    template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
+        const auto& pos = cartesianPos;
+        const auto range = MDCellType::estimateRange(lattice, cutoff);
+        const size_t numParticle = pos.getRow();
 
         ScalarType result = 0;
-        MDCellType::forCellInRange(range, cell.getLattice(),
+        MDCellType::forCellInRange(range, lattice,
             [this, numParticle, &pos, &result](Vector3D delta) {
                 ScalarType temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
@@ -199,13 +240,21 @@ namespace Physica::Core {
                         const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
                             const ScalarType dist = sqrt(r2);
-                            temp += pot_functor(dist, r2) - pot_shift;
+                            if constexpr (IsPotDependOnAtomIndex)
+                                temp += pot_functor(i, j, dist, r2);
+                            else
+                                temp += pot_functor(i, j, dist, r2) - pot_shift;
                         }
                     }
                 }
                 result += temp;
             });
         return result;
+    }
+
+    template<class Derived>
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
+        return potentialEnergy(cell.getLattice(), cell.getPos());
     }
     /**
      * Reference:
@@ -246,7 +295,7 @@ namespace Physica::Core {
                     const ScalarType r2 = r.squaredNorm();
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
-                        const ScalarType f_norm = force_functor(dist, r2);
+                        const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
                         f = r * ScalarType(-f_norm / dist);
                         result += f * r.transpose();
                     }
@@ -260,7 +309,15 @@ namespace Physica::Core {
     template<class Derived>
     void PairModel<Derived>::swap(PairModel& pair) noexcept {
         cutoff.swap(pair.cutoff);
-        squared_cutoff.swap(squared_cutoff);
-        pot_shift.swap(pot_shift);
+        squared_cutoff.swap(pair.squared_cutoff);
+        pot_shift.swap(pair.pot_shift);
+    }
+
+    template<class Derived>
+    void PairModel<Derived>::setCutoff(ScalarType cutoff_) {
+        cutoff = std::move(cutoff_);
+        squared_cutoff = square(cutoff);
+        if constexpr (!IsPotDependOnAtomIndex)
+            pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
     }
 }

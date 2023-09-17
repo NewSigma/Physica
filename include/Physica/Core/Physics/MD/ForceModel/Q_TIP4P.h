@@ -93,9 +93,12 @@ namespace Physica::Core {
     private:
         Vector<ScalarType> makeCharges() const;
         PositionMatrix makeChargePos(const MDCellType& cell) const;
+        void force_short_intraMolecule(const MDCellType& cell, Vector<ScalarType>& shortForce) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_PartialChargeRepr(const MDCellType& cell) const;
+
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
+
         static ScalarType modifiedMorsePot(ScalarType r);
         static ScalarType modifiedMorseForce(ScalarType r);
         static bool isCellOrdered(const MDCellType& cell);
@@ -152,8 +155,6 @@ namespace Physica::Core {
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_short(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
-        using Vector3D = Vector<PosScalarType, Dim>;
-
         Vector<ScalarType> shortForce(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
@@ -161,61 +162,7 @@ namespace Physica::Core {
             auto force = shortForce.tail(2 * numMolecule * Dim);
             force = lj_model.template force<Executor, IsSmallCell>(cellWithoutH) * factor;
         }
-        /* Intra molecule */ {
-            Vector3D vecOH1, vecOH2;
-            Vector<ScalarType, 3> f;
-            const size_t offset = 2 * numMolecule;
-            for (size_t i = 0; i < numMolecule; ++i) {
-                const size_t indexO = offset + i;
-                const size_t indexH1 = 2 * i;
-                const size_t indexH2 = 2 * i + 1;
-                vecOH1 = cell.minDistVector(indexO, indexH1);
-                vecOH2 = cell.minDistVector(indexO, indexH2);
-                const PosScalarType r1 = vecOH1.norm();
-                const PosScalarType r2 = vecOH2.norm();
-                auto forceO = shortForce.segment(3 * indexO, 3 * indexO + 3);
-                auto forceH1 = shortForce.segment(3 * indexH1, 3 * indexH1 + 3);
-                auto forceH2 = shortForce.segment(3 * indexH2, 3 * indexH2 + 3);
-
-                f = vecOH1 * (modifiedMorseForce(r1) / r1);
-                forceO -= f;
-                forceH1 += f;
-                    
-                f = vecOH2 * (modifiedMorseForce(r2) / r2);
-                forceO -= f;
-                forceH2 += f;
-            }
-
-            Vector3D force1, force2;
-            for (size_t i = 0; i < numMolecule; ++i) {
-                vecOH1 = cell.minDistVector(offset + i, 2 * i);
-                vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
-                const PosScalarType rep_r1 = reciprocal(vecOH1.norm());
-                const PosScalarType rep_r2 = reciprocal(vecOH2.norm());
-                const ScalarType u = (vecOH1 * vecOH2) * (rep_r1 * rep_r2);
-                const ScalarType temp = reciprocal(sqrt(ScalarType(1) - square(u)));
-                const ScalarType factor1 = square(rep_r1) * u * temp;
-                const ScalarType factor2 = square(rep_r2) * u * temp;
-                const ScalarType factor3 = rep_r1 * rep_r2 * temp;
-
-                force1 = vecOH1 * factor1 - vecOH2 * factor3;
-                force2 = vecOH2 * factor2 - vecOH1 * factor3;
-                const ScalarType theta = arccos(u);
-                const ScalarType factor = (ScalarType(equalTheta) - theta) * kTheta;
-                force1 *= factor;
-                force2 *= factor;
-
-                const size_t indexO = offset + i;
-                const size_t indexH1 = 2 * i;
-                const size_t indexH2 = 2 * i + 1;
-                auto forceO = shortForce.segment(3 * indexO, 3 * indexO + 3);
-                auto forceH1 = shortForce.segment(3 * indexH1, 3 * indexH1 + 3);
-                auto forceH2 = shortForce.segment(3 * indexH2, 3 * indexH2 + 3);
-                forceH1 += force1;
-                forceH2 += force2;
-                forceO -= (force1 + force2);
-            }
-        }
+        force_short_intraMolecule(cell, shortForce);
         return shortForce;
     }
 
@@ -413,6 +360,64 @@ namespace Physica::Core {
         }
         cell.normalizePos(chargePos);
         return chargePos;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void Q_TIP4P<ScalarType, PosScalarType>::force_short_intraMolecule(const MDCellType& cell, Vector<ScalarType>& shortForce) const {
+        using Vector3D = Vector<PosScalarType, Dim>;
+        Vector3D vecOH1, vecOH2;
+        Vector<ScalarType, 3> f;
+        const size_t offset = 2 * numMolecule;
+        for (size_t i = 0; i < numMolecule; ++i) {
+            const size_t indexO = offset + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
+            vecOH1 = cell.minDistVector(indexO, indexH1);
+            vecOH2 = cell.minDistVector(indexO, indexH2);
+            const PosScalarType r1 = vecOH1.norm();
+            const PosScalarType r2 = vecOH2.norm();
+            auto forceO = shortForce.segment(3 * indexO, 3 * indexO + 3);
+            auto forceH1 = shortForce.segment(3 * indexH1, 3 * indexH1 + 3);
+            auto forceH2 = shortForce.segment(3 * indexH2, 3 * indexH2 + 3);
+
+            f = vecOH1 * (modifiedMorseForce(r1) / r1);
+            forceO -= f;
+            forceH1 += f;
+                    
+            f = vecOH2 * (modifiedMorseForce(r2) / r2);
+            forceO -= f;
+            forceH2 += f;
+        }
+
+        Vector3D force1, force2;
+        for (size_t i = 0; i < numMolecule; ++i) {
+            vecOH1 = cell.minDistVector(offset + i, 2 * i);
+            vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
+            const PosScalarType rep_r1 = reciprocal(vecOH1.norm());
+            const PosScalarType rep_r2 = reciprocal(vecOH2.norm());
+            const ScalarType u = (vecOH1 * vecOH2) * (rep_r1 * rep_r2);
+            const ScalarType temp = reciprocal(sqrt(ScalarType(1) - square(u)));
+            const ScalarType factor1 = square(rep_r1) * u * temp;
+            const ScalarType factor2 = square(rep_r2) * u * temp;
+            const ScalarType factor3 = rep_r1 * rep_r2 * temp;
+
+            force1 = vecOH1 * factor1 - vecOH2 * factor3;
+            force2 = vecOH2 * factor2 - vecOH1 * factor3;
+            const ScalarType theta = arccos(u);
+            const ScalarType factor = (ScalarType(equalTheta) - theta) * kTheta;
+            force1 *= factor;
+            force2 *= factor;
+
+            const size_t indexO = offset + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
+            auto forceO = shortForce.segment(3 * indexO, 3 * indexO + 3);
+            auto forceH1 = shortForce.segment(3 * indexH1, 3 * indexH1 + 3);
+            auto forceH2 = shortForce.segment(3 * indexH2, 3 * indexH2 + 3);
+            forceH1 += force1;
+            forceH2 += force2;
+            forceO -= (force1 + force2);
+        }
     }
 
     template<class ScalarType, class PosScalarType>

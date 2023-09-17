@@ -28,6 +28,7 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             using PosScalarType = U;
+            constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
     /**
@@ -59,8 +60,8 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(ScalarType r, ScalarType r2) const;
-        [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         void swap(device_obj& obj) noexcept;
     };
 
@@ -75,7 +76,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::force_functor(
-            ScalarType r, ScalarType r2) const {
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         const ScalarType factor = r * (gamma * 2) + beta;
         ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
         const ScalarType rep_r = reciprocal(r);
@@ -100,7 +101,7 @@ namespace Physica::Core {
     
     template<class ScalarType, class PosScalarType>
     __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::pot_functor(
-            ScalarType r, ScalarType r2) const {
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
         const ScalarType rep_r2 = square(rep_r);

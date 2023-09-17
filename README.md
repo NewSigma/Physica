@@ -25,6 +25,7 @@ Requirements:
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1 (Optional)  
 [Qt](https://www.qt.io/)  6.2.1  (Optional)  
+[oneMKL](https://www.intel.com/) 2023.2.0 (Optional)
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)
 
 To use Physica, simply compile and link Physica as a part of your project.
