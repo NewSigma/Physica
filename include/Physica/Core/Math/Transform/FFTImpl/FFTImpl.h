@@ -256,7 +256,7 @@ namespace Physica::Core {
     FFT<ScalarType, Dim>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
-            , buffer(reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(fft.rSpaceSize * sizeof(ComplexTypeFFTW))))
+            , buffer(reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(fft.sumKSpaceSize(0) * sizeof(ComplexTypeFFTW))))
             , rSpaceSize(fft.rSpaceSize)
             , kSpaceSize(fft.kSpaceSize)
             , rSpaceDelta(fft.rSpaceDelta)
@@ -324,6 +324,13 @@ namespace Physica::Core {
         for (size_t i = 0; i < Dim; ++i)
             result[i] = kSpaceSize[i];
         return result;
+    }
+
+    template<class ScalarType, size_t Dim>
+    inline FFT<ScalarType, Dim> FFT<ScalarType, Dim>::makeEmptyFFT(
+            const Utils::Array<size_t, Dim>& rSpaceSize,
+            Utils::Array<RealType, Dim> rSpaceDelta) {
+        return FFT(rSpaceSize, rSpaceDelta);
     }
 
     template<class ScalarType, size_t Dim>

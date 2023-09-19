@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 
 namespace Physica::Core {
     class Poscar;
-    template<class T> class KSpaceGrid;
 
     class CrystalCell final : public PeriodicCell<Scalar<Float>, 3> {
     public:
@@ -31,7 +30,6 @@ namespace Physica::Core {
         using ScalarType = Scalar<Float>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
-        using StructureFactorType = Utils::Array<KSpaceGrid<ComplexType>>;
     private:
         AtomicArray atomicNumbers;
     public:
@@ -46,7 +44,6 @@ namespace Physica::Core {
         /* Operations */
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
-        [[nodiscard]] StructureFactorType makeStructureFactor(ScalarType cutEnergy) const;
         /* Getters */
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
         [[nodiscard]] Type getType() const noexcept { return type; }

@@ -21,13 +21,13 @@
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
-    template<class T, bool isSpinPolarized> class SpinPair;
+    template<class T, bool IsSpinPolarized> class SpinPair;
 
     namespace Internal {
-        template<class T, bool isSpinPolarized>
-        class Traits<SpinPair<T, isSpinPolarized>> {
+        template<class T, bool IsSpinPolarized>
+        class Traits<SpinPair<T, IsSpinPolarized>> {
         public:
-            constexpr static unsigned char NumSpin = isSpinPolarized ? 2 : 1;
+            constexpr static unsigned char NumSpin = IsSpinPolarized ? 2 : 1;
             using Base = Utils::Array<T, NumSpin>;
         };
     }
@@ -37,9 +37,9 @@ namespace Physica::Core {
         Down = 1
     };
 
-    template<class T, bool isSpinPolarized>
-    class SpinPair : public Internal::Traits<SpinPair<T, isSpinPolarized>>::Base {
-        using Base = typename Internal::Traits<SpinPair<T, isSpinPolarized>>::Base;
+    template<class T, bool IsSpinPolarized>
+    class SpinPair : public Internal::Traits<SpinPair<T, IsSpinPolarized>>::Base {
+        using Base = typename Internal::Traits<SpinPair<T, IsSpinPolarized>>::Base;
         constexpr static unsigned char NumSpin = Base::getLength();
     public:
         using ElemType = T;
@@ -51,15 +51,15 @@ namespace Physica::Core {
         ~SpinPair() = default;
         /* Operators */
         SpinPair& operator=(SpinPair pair) noexcept { swap(pair); return *this; }
-        [[nodiscard]] T& operator[](SpinState spin) { return Base::operator[](isSpinPolarized ? int(spin) : 0); }
-        [[nodiscard]] const T& operator[](SpinState spin) const { return Base::operator[](isSpinPolarized ? int(spin) : 0); }
+        [[nodiscard]] T& operator[](SpinState spin) { return Base::operator[](IsSpinPolarized ? int(spin) : 0); }
+        [[nodiscard]] const T& operator[](SpinState spin) const { return Base::operator[](IsSpinPolarized ? int(spin) : 0); }
         /* Helpers */
         void swap(SpinPair& pair) noexcept { Base::swap(pair); }
     private:
         using Base::operator[];
     };
 
-    template<class T, bool isSpinPolarized>
+    template<class T, bool IsSpinPolarized>
     template<class... Args>
-    SpinPair<T, isSpinPolarized>::SpinPair(Args... args) : Base(NumSpin, std::forward<Args>(args)...) {}
+    SpinPair<T, IsSpinPolarized>::SpinPair(Args... args) : Base(NumSpin, std::forward<Args>(args)...) {}
 }

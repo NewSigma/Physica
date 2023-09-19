@@ -25,7 +25,7 @@ namespace Physica::Core {
         HL
     };
 
-    template<class ScalarType, LDAType type, bool isSpinPolarized> class LDA;
+    template<class ScalarType, LDAType type, bool IsSpinPolarized> class LDA;
 
     namespace Internal {
         template<class T> class Traits;
@@ -34,8 +34,8 @@ namespace Physica::Core {
         class Traits<LDA<ScalarType, type, polarized>> {
             using GridType = RSpaceGrid<ScalarType>;
         public:
-            constexpr static bool isSpinPolarized = polarized;
-            constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
+            constexpr static bool IsSpinPolarized = polarized;
+            constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;
             using DensityType = Utils::Array<GridType, NumSpin>;
             using PotType = Utils::Array<GridType, NumSpin>;
         };
@@ -45,7 +45,7 @@ namespace Physica::Core {
     class LDA<ScalarType, type, true> {
         using This = LDA<ScalarType, type, true>;
     public:
-        constexpr static bool isSpinPolarized = Internal::Traits<This>::isSpinPolarized;
+        constexpr static bool IsSpinPolarized = Internal::Traits<This>::IsSpinPolarized;
         using DensityType = typename Internal::Traits<This>::DensityType;
         using PotType = typename Internal::Traits<This>::PotType;
     private:
@@ -162,7 +162,7 @@ namespace Physica::Core {
     class LDA<ScalarType, type, false> {
         using This = LDA<ScalarType, type, false>;
     public:
-        constexpr static bool isSpinPolarized = Internal::Traits<This>::isSpinPolarized;
+        constexpr static bool IsSpinPolarized = Internal::Traits<This>::IsSpinPolarized;
         using DensityType = typename Internal::Traits<This>::DensityType;
         using PotType = typename Internal::Traits<This>::PotType;
     private:

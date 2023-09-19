@@ -57,6 +57,7 @@ namespace Physica::Core {
         template<class U> friend std::ostream& operator<<(std::ostream& os, const RSpaceGrid<U>& grid);
         template<class U> friend std::istream& operator>>(std::istream& is, RSpaceGrid<U>& grid);
         /* Operations */
+        using Base::random_normal;
         template<class... Args>
         inline void resize(Index3D index, Args... args);
         inline void swap(RSpaceGrid& grid) noexcept;

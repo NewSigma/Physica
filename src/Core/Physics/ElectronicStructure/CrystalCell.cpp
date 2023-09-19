@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/KSpaceGrid.h"
 #include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
 #include "Physica/Core/IO/Poscar.h"
 
@@ -66,36 +65,6 @@ namespace Physica::Core {
         CrystalCell result = *this;
         result.toSuperCell(x, y, z);
         return result;
-    }
-
-    typename CrystalCell::StructureFactorType CrystalCell::makeStructureFactor(ScalarType cutEnergy) const {
-        using GridType = typename StructureFactorType::ValueType;
-        using VectorType = Vector<ScalarType, 3>;
-        const auto species = getSpecies();
-        const auto repCell = Base::reciprocal();
-        const auto& lattice = repCell.getLattice();
-        auto factorGrids = Utils::Array<GridType>(species.size(), GridType::makeGrid(cutEnergy, lattice));
-
-        size_t i = 0;
-        for (uint16_t element : species) {
-            GridType& grid = factorGrids[i];
-            size_t j = 0;
-            GridType::forReducedKInGrid(grid, lattice, [this, element, &i, &j, &grid](VectorType k) {
-                auto factor = ComplexType(0);
-                for (size_t ion = 0; ion < getAtomCount(); ++ion) {
-                    if (getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
-                        const ScalarType phase = k * getPos().row(ion).asVector();
-                        ScalarType s, c;
-                        sincos(phase, s, c);
-                        factor += ComplexType(c, s);
-                    }
-                }
-                grid.flatten()[j] = factor;
-                j += 1;
-            });
-            i += 1;
-        }
-        return factorGrids;
     }
 
     std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {

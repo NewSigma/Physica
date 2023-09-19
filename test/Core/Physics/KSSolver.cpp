@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,28 +26,19 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 
+constexpr double cutEnergyPsi = 0.8;
+constexpr double cutEnergyRho = 3.5;
+
 int main() {
     std::mt19937 gen{};
     CrystalCell Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {14});
-    ScalarType cutEnergy(0.8);
     Vector<ScalarType> data{-7.792391329, -1.041100405, -1.035201289, -1.034604466, 0.6683090416, 1.089343903, 1.092870102, 1.320171657, 1.333518296, 1.338267588, 2.048168732, 2.067794503, 2.068418852, 2.279423053, 2.296210041, 2.299139794, 2.319865956, 2.599589113, 2.607027813, 2.783839081, 3.224438445, 3.230179297, 3.239812718, 3.45520247, 3.466638718, 3.467162989, 3.613037906};
     {
-        BandGrid<ScalarType, true> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14, 8);
-        auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, true>>(Si, cutEnergy, 2, std::move(grid));
-        solver.initWaveFunc(gen);
-        solver.initDensity();
-        solver.solve(1E-3, 100);
-        const auto& band = solver.getBand();
-        Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
-        for (size_t i = 0; i < delta.getLength(); ++i)
-            if (scalarNear(delta.calc(i), ComplexType(0), 1E-15))
-                return 1;
-    }
-    {
         BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14, 8);
-        auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(Si, cutEnergy, 2, std::move(grid));
-        solver.initWaveFunc(gen);
-        solver.initDensity();
+        auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(
+                Si, cutEnergyPsi, cutEnergyRho, std::move(grid), 8);
+        solver.getOrbits()[0][SpinState::Up].random_normal(gen);
+        solver.getDensity().initDensity(ScalarType(Si.getElectronCount()) / Si.getVolume());
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
         Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);

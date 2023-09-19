@@ -19,11 +19,16 @@
 #pragma once
 
 #include "Physica/Utils/Template/CRTPBase.h"
-#include "GridBase.h"
+#include "LGridBlock.h"
 
 namespace Physica::Core {
     template<class GridType> class FlattenGrid;
-
+    /**
+     * Notes:
+     * Right is positive direction of x.
+     * Back is positive direction of y.
+     * Top is positive direction of z.
+     */
     template<class Derived>
     class LValueGrid : public Utils::CRTPBase<Derived>, public GridBase {
         using Base = Utils::CRTPBase<Derived>;
@@ -32,13 +37,37 @@ namespace Physica::Core {
     public:
         template<class OtherDerived>
         Derived& operator=(const LValueGrid<OtherDerived>& other);
+        Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return Base::getDerived()(x, y, z); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return Base::getDerived()(x, y, z); }
         [[nodiscard]] ScalarType& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
         /* Operations */
+        [[nodiscard]] inline LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> rightFrontBottomCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> rightFrontBottomCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> leftBackBottomCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> leftBackBottomCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> rightBackBottomCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> rightBackBottomCorner(Index3D cornerIndex) const;
+
+        [[nodiscard]] inline LGridBlock<Derived> leftFrontTopCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> leftFrontTopCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> rightFrontTopCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> rightFrontTopCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> leftBackTopCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> leftBackTopCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LGridBlock<Derived> rightBackTopCorner(Index3D cornerIndex);
+        [[nodiscard]] inline const LGridBlock<Derived> rightBackTopCorner(Index3D cornerIndex) const;
+
+        [[nodiscard]] inline LGridBlock<Derived> block(Index3D from, Index3D count);
+        [[nodiscard]] inline const LGridBlock<Derived> block(Index3D from, Index3D count) const;
+
         [[nodiscard]] FlattenGrid<Derived> flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
         void resize(Index3D size) { Base::getDerived().resize(size); }
+        template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
@@ -54,37 +83,7 @@ namespace Physica::Core {
         template<bool IsUnitLattice, class Functor>
         inline static void forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func);
     };
-
-    template<class Derived>
-    template<class OtherDerived>
-    Derived& LValueGrid<Derived>::operator=(const LValueGrid<OtherDerived>& other) {
-        resize(other.getDim());
-        for (size_t i = 0; i < other.getDimX(); ++i)
-            for (size_t j = 0; j < other.getDimY(); ++j)
-                for (size_t k = 0; k < other.getDimZ(); ++k)
-                    Base::getDerived()(i, j, k) = other.getDerived()(i, j, k);
-        return Base::getDerived();
-    }
-
-    template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void LValueGrid<Derived>::forPointInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        return forPointInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
-    }
-
-    template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void LValueGrid<Derived>::forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
-    }
-
-    template<class Derived>
-    void operator*=(LValueGrid<Derived>& grid, typename Derived::ScalarType factor) {
-        for (size_t i = 0; i < grid.getDimX(); ++i)
-            for (size_t j = 0; j < grid.getDimY(); ++j)
-                for (size_t k = 0; k < grid.getDimZ(); ++k)
-                    grid(i, j, k) *= factor;
-    }
 }
 
+#include "LValueGridImpl.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/FlattenGrid.h"
