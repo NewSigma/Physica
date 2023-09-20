@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "GridBase.h"
-
 namespace Physica::Core {
     template<class Derived> class LValueGrid;
     template<class GridType> class LGridBlock;

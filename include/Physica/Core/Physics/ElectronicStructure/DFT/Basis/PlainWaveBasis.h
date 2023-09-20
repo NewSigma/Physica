@@ -46,7 +46,8 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline Vector3D makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
         [[nodiscard]] inline Vector3D makeWaveVector(Index3D index) const noexcept;
-        inline void toUnit();
+        inline void normalize();
+        ScalarType calcNumElectron() const;
 
         template<class RandomGenerator>
         inline void random_normal(RandomGenerator& gen);
@@ -101,8 +102,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void PlainWaveBasis<ScalarType>::toUnit() {
-        coeffGrid.flatten().toUnit();
+    inline void PlainWaveBasis<ScalarType>::normalize() {
+        auto vec = coeffGrid.flatten();
+        vec *= sqrt(ScalarType(getNumPlainWave())) / vec.norm();
+    }
+
+    template<class ScalarType>
+    ScalarType PlainWaveBasis<ScalarType>::calcNumElectron() const {
+        return coeffGrid.flatten().squaredNorm() / ScalarType(getNumPlainWave());
     }
 
     template<class ScalarType>

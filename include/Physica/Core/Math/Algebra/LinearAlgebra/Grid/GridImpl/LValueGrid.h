@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include "RValueGrid.h"
 #include "LGridBlock.h"
 
 namespace Physica::Core {
@@ -30,18 +30,23 @@ namespace Physica::Core {
      * Top is positive direction of z.
      */
     template<class Derived>
-    class LValueGrid : public Utils::CRTPBase<Derived>, public GridBase {
-        using Base = Utils::CRTPBase<Derived>;
+    class LValueGrid : public RValueGrid<Derived> {
+        using Base = RValueGrid<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::Index3D;
     public:
         template<class OtherDerived>
-        Derived& operator=(const LValueGrid<OtherDerived>& other);
+        Derived& operator=(const RValueGrid<OtherDerived>& other);
         Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return Base::getDerived()(x, y, z); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return Base::getDerived()(x, y, z); }
         [[nodiscard]] ScalarType& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
+        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
+        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
+        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
+        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
         /* Operations */
         [[nodiscard]] inline LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex);
         [[nodiscard]] inline const LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex) const;
@@ -69,20 +74,26 @@ namespace Physica::Core {
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         /* Getters */
-        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getDimZ(); }
-        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
-        [[nodiscard]] size_t getSize() const noexcept { return getDimX() * getDimY() * getDimZ(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
+        using Base::getDimX;
+        using Base::getDimY;
+        using Base::getDimZ;
+        using Base::getDim;
         /* Static members */
-        using GridBase::forPointInGrid;
-        using GridBase::forPointIndexInGrid;
-        using GridBase::forIndexInGrid;
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func);
+        using Base::forPointInGrid;
+        using Base::forPointIndexInGrid;
+        using Base::forIndexInGrid;
     };
+
+    template<class Derived, class OtherDerived>
+    inline void operator+=(LValueGrid<Derived>& g1, const RValueGrid<OtherDerived>& g2) {
+        g1.getDerived() = g1.getDerived() + g2.getDerived();
+    }
+
+    template<class Derived, class OtherDerived>
+    inline void operator-=(LValueGrid<Derived>& g1, const RValueGrid<OtherDerived>& g2) {
+        g1.getDerived() = g1.getDerived() - g2.getDerived();
+    }
 }
 
 #include "LValueGridImpl.h"

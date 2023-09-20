@@ -146,13 +146,13 @@ namespace Physica::Core {
         RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(kernel)>(getTotalDensity(), latt, kernel);
         {
             auto rho_up_new = getTotalDensity().flatten();
-            const auto& rho_up_old = rho[SpinState::Up].flatten();
+            const auto& rho_up_old = rho.getTotalDensity().flatten();
             const ScalarType factor = mean(rho_up_old) / mean(rho_up_new);
             rho_up_new *= factor;
         }
         if constexpr (IsSpinPolarized) {
             auto rho_down_new = getPolarDensity().flatten();
-            const auto& rho_down_old = rho[SpinState::Down].flatten();
+            const auto& rho_down_old = rho.getPolarDensity().flatten();
             const ScalarType factor = mean(rho_down_old) / mean(rho_down_new);
             rho_down_new *= factor;
         }

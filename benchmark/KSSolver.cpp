@@ -41,21 +41,16 @@ int main() {
     {
         BandGrid<ScalarType, isSpinPolarized> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 4);
         using SolverType = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, isSpinPolarized>>;
-        SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid));
+        SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid), 2);
 
         {
             using DensityType = typename SolverType::DensityType;
             DensityType last_rho{};
             std::ifstream fin("rho");
             fin >> last_rho;
-            solver.initDensity(last_rho);
+            solver.getDensity().initDensity(last_rho);
         }
-        {
-            PWBaseWave<ScalarType> wave{};
-            std::ifstream fin("wave");
-            fin >> wave;
-            solver.initWaveFunc(/*SpinPair<PWBaseWave<ScalarType>, isSpinPolarized>(std::move(wave)), */gen);
-        }
+        solver.getOrbits()[0][SpinState::Up].random_normal(gen);
 
         const auto from = Cycler::tic();
         solver.solve(1E-8, 100);
@@ -66,11 +61,11 @@ int main() {
 
         {
             std::ofstream fout("rho");
-            fout << solver.getDensityGrid();
+            fout << solver.getDensity();
         }
         {
             std::ofstream fout("wave");
-            fout << solver.getOrbits()[SpinState::Up][0];
+            fout << solver.getOrbits()[0][SpinState::Up].getCoeffGrid();
         }
     }
     return 0;

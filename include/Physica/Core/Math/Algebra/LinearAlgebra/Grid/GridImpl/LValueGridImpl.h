@@ -21,12 +21,9 @@
 namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
-    Derived& LValueGrid<Derived>::operator=(const LValueGrid<OtherDerived>& other) {
+    Derived& LValueGrid<Derived>::operator=(const RValueGrid<OtherDerived>& other) {
         resize(other.getDim());
-        for (size_t i = 0; i < getDimX(); ++i)
-            for (size_t j = 0; j < getDimY(); ++j)
-                for (size_t k = 0; k < getDimZ(); ++k)
-                    Base::getDerived()(i, j, k) = other.getDerived()(i, j, k);
+        other.assignTo(*this);
         return Base::getDerived();
     }
 
@@ -141,18 +138,6 @@ namespace Physica::Core {
         forIndexInGrid(getDim(), [this, &gen](Index3D index) {
             this->operator()(index) = ScalarType::random_normal(gen);
         });
-    }
-
-    template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void LValueGrid<Derived>::forPointInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        return forPointInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
-    }
-
-    template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void LValueGrid<Derived>::forPointIndexInGrid(const LValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>
