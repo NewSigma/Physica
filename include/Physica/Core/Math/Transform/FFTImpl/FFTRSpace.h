@@ -67,8 +67,10 @@ namespace Physica::Core {
     private:
         static constexpr bool isComplex = ScalarType::isComplex;
     public:
+        ~FFTRSpace() = default;
         /* Operators */
         using VectorBase::operator=;
+        FFTRSpace& operator=(const FFTRSpace& obj);
         [[nodiscard]] __host__ __device__ inline ScalarType& operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType& operator[](size_t index) const;
         /* Operations */
@@ -80,7 +82,18 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+    protected:
+        FFTRSpace() = default;
+        FFTRSpace(const FFTRSpace&) = default;
+        FFTRSpace(FFTRSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTRSpace<Derived, 1>& FFTRSpace<Derived, 1>::operator=(const FFTRSpace<Derived, 1>& obj) {
+        resize(obj.getLength());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     inline typename FFTRSpace<Derived, 1>::ScalarType& FFTRSpace<Derived, 1>::operator[](size_t index) {
@@ -130,8 +143,10 @@ namespace Physica::Core {
     private:
         static constexpr bool isComplex = ScalarType::isComplex;
     public:
+        ~FFTRSpace() = default;
         /* Operators */
         using MatrixBase::operator=;
+        FFTRSpace& operator=(const FFTRSpace& obj);
         [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
         [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         /* Operations */
@@ -143,7 +158,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
+    protected:
+        FFTRSpace() = default;
+        FFTRSpace(const FFTRSpace&) = default;
+        FFTRSpace(FFTRSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTRSpace<Derived, 2>& FFTRSpace<Derived, 2>::operator=(const FFTRSpace<Derived, 2>& obj) {
+        resize(obj.getRow(), obj.getColumn());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     template<class MatrixType>
@@ -185,8 +211,10 @@ namespace Physica::Core {
     private:
         static constexpr bool isComplex = ScalarType::isComplex;
     public:
+        ~FFTRSpace() = default;
         /* Operators */
         using GridBase::operator=;
+        FFTRSpace& operator=(const FFTRSpace& obj);
         using GridBase::operator();
         [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
         [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
@@ -198,7 +226,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
+    protected:
+        FFTRSpace() = default;
+        FFTRSpace(const FFTRSpace&) = default;
+        FFTRSpace(FFTRSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTRSpace<Derived, 3>& FFTRSpace<Derived, 3>::operator=(const FFTRSpace<Derived, 3>& obj) {
+        resize(obj.getDim());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     inline typename FFTRSpace<Derived, 3>::ScalarType& FFTRSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) {

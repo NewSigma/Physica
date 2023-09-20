@@ -354,7 +354,12 @@ namespace Physica::Core {
         }
         return result;
     }
-
+    /**
+     * Kinetic energy using virial estimator referenced from [1]
+     * 
+     * Reference:
+     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150(1982).
+     */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic() const {
         const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());

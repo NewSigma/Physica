@@ -46,14 +46,16 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline Vector3D makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
         [[nodiscard]] inline Vector3D makeWaveVector(Index3D index) const noexcept;
+        inline void toUnit();
 
         template<class RandomGenerator>
         inline void random_normal(RandomGenerator& gen);
-        void swap(PlainWaveBasis& wave) noexcept;
+        void swap(PlainWaveBasis& obj) noexcept;
         /* Getters */
         [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
         [[nodiscard]] size_t getNumPlainWave() const noexcept { return coeffGrid.getSize(); }
-        [[nodiscard]] size_t getDim() const noexcept { return coeffGrid.getDim(); }
+        [[nodiscard]] Index3D getDim() const noexcept { return coeffGrid.getDim(); }
+        [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
         [[nodiscard]] ScalarType getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
         /* Static members */
         static Index3D makeGridDim(ScalarType cutEnergy, const LatticeMatrix& repLatt);
@@ -99,16 +101,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline void PlainWaveBasis<ScalarType>::toUnit() {
+        coeffGrid.flatten().toUnit();
+    }
+
+    template<class ScalarType>
     template<class RandomGenerator>
     inline void PlainWaveBasis<ScalarType>::random_normal(RandomGenerator& gen) {
         coeffGrid.template random_normal<RandomGenerator>(gen);
     }
 
     template<class ScalarType>
-    void PlainWaveBasis<ScalarType>::swap(PlainWaveBasis& wave) noexcept {
-        coeffGrid.swap(coeffGrid);
-        repLatt.swap(wave.repLatt);
-        cutEnergyPsi.swap(wave.cutEnergyPsi);
+    void PlainWaveBasis<ScalarType>::swap(PlainWaveBasis& obj) noexcept {
+        coeffGrid.swap(obj.coeffGrid);
+        repLatt.swap(obj.repLatt);
+        cutEnergyPsi.swap(obj.cutEnergyPsi);
     }
 
     template<class ScalarType>
@@ -116,7 +123,7 @@ namespace Physica::Core {
         constexpr double factor = 2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck;
         const ScalarType maxWaveVec = sqrt(ScalarType(factor) * cutEnergy);
         const auto range = PeriodicCell<ScalarType, 3>::estimateRange(repLatt, maxWaveVec);
-        return {size_t(2 * range[0] + 1), size_t(2 * range[1] + 1), size_t(range[2] + 1)};
+        return {size_t(2 * range[0] + 1), size_t(2 * range[1] + 1), size_t(2 * range[2] + 1)};
     }
 
     template<class ScalarType>

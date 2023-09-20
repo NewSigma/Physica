@@ -65,7 +65,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::toUnit() {
+    inline void LValueVector<Derived>::toUnit() {
         Base::getDerived() *= reciprocal(Base::getDerived().norm());
     }
 

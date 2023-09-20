@@ -36,6 +36,9 @@ namespace Physica::Core {
         }
     };
     /**
+     * Refer to [1] for a general review
+     * Original literature of RPMD is [3]
+     * 
      * Reference:
      * [1] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211

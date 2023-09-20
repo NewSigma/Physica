@@ -68,8 +68,10 @@ namespace Physica::Core {
     public:
         using typename VectorBase::ScalarType;
     public:
+        ~FFTKSpace() = default;
         /* Operators */
         using VectorBase::operator=;
+        FFTKSpace& operator=(const FFTKSpace& obj);
         [[nodiscard]] __host__ __device__ inline ScalarType& operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType& operator[](size_t index) const;
         /* Operations */
@@ -82,7 +84,18 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
         [[nodiscard]] RealType getDelta() const noexcept { return reciprocal(Base::getDerived().getRSpaceDelta() * Base::getDerived().getRSpaceSize()); }
+    protected:
+        FFTKSpace() = default;
+        FFTKSpace(const FFTKSpace&) = default;
+        FFTKSpace(FFTKSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTKSpace<Derived, 1>& FFTKSpace<Derived, 1>::operator=(const FFTKSpace<Derived, 1>& obj) {
+        resize(obj.getLength());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     inline typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) {
@@ -124,8 +137,10 @@ namespace Physica::Core {
     public:
         using typename MatrixBase::ScalarType;
     public:
+        ~FFTKSpace() = default;
         /* Operators */
         using MatrixBase::operator=;
+        FFTKSpace& operator=(const FFTKSpace& obj);
         [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
         [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         /* Operations */
@@ -137,7 +152,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
+    protected:
+        FFTKSpace() = default;
+        FFTKSpace(const FFTKSpace&) = default;
+        FFTKSpace(FFTKSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTKSpace<Derived, 2>& FFTKSpace<Derived, 2>::operator=(const FFTKSpace<Derived, 2>& obj) {
+        resize(obj.getRow(), obj.getColumn());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     template<class MatrixType>
@@ -171,8 +197,10 @@ namespace Physica::Core {
         using typename GridBase::ScalarType;
         using Index3D = typename GridBase::Index3D;
     public:
+        ~FFTKSpace() = default;
         /* Operators */
         using GridBase::operator=;
+        FFTKSpace& operator=(const FFTKSpace& obj);
         using GridBase::operator();
         [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
         [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
@@ -184,7 +212,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
+    protected:
+        FFTKSpace() = default;
+        FFTKSpace(const FFTKSpace&) = default;
+        FFTKSpace(FFTKSpace&&) noexcept = default;
     };
+
+    template<class Derived>
+    FFTKSpace<Derived, 3>& FFTKSpace<Derived, 3>::operator=(const FFTKSpace<Derived, 3>& obj) {
+        resize(obj.getDim());
+        obj.assignTo(*this);
+        return *this;
+    }
 
     template<class Derived>
     inline typename FFTKSpace<Derived, 3>::ScalarType& FFTKSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) {

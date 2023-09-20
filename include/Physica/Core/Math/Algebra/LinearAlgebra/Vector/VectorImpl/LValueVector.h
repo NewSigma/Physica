@@ -59,7 +59,7 @@ namespace Physica::Core {
         LVectorBlock<Derived> segment(size_t from, size_t to) { return LVectorBlock<Derived>(Base::getDerived(), from, to); }
         const LVectorBlock<Derived> segment(size_t from, size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
 
-        void toUnit();
+        inline void toUnit();
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         /* Getters */
