@@ -31,7 +31,7 @@
 namespace Physica::Core {
     /**
      * References:
-     * [1] Dario Alfè PHON: A program to calculate phonons using the small displacement method [J]. Computer Physics Communications, 2009, 180(12), 2622-2633
+     * [1] Dario Alfè PHON: A program to calculate phonons using the small displacement method [J]. Computer Physics Communications, 2009, 180(12), 2622-2633 (DOI: 10.1016/j.cpc.2009.03.010)
      */
     template<class ScalarType, class PosScalarType>
     class FrozenPhonon {

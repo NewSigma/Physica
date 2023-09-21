@@ -76,6 +76,7 @@ namespace Physica::Core {
         T imag;
     public:
         ComplexScalar() = default;
+        ComplexScalar(double d);
         ComplexScalar(T real_);
         ComplexScalar(T real_, T imag_);
         ComplexScalar(std::initializer_list<T> list);

@@ -117,7 +117,7 @@ namespace Physica::Core {
     public:
         constexpr static double unitCharge = PhyConst<SI>::unitCharge / esuToCoulombFactor;
     private:
-        constexpr static double debyeToDipoleAUFactor = (10E-10 / unitCharge) * PhyConst<AU>::angstormToBohr(1);
+        constexpr static double debyeToDipoleAUFactor = (1E-10 / unitCharge) * PhyConst<AU>::angstormToBohr(1);
     public:
         [[nodiscard]] constexpr static double esuToCoulomb(double esu) { return esu * esuToCoulombFactor; }
         [[nodiscard]] constexpr static double debyeToDipoleAU(double debye) { return debye * debyeToDipoleAUFactor; }

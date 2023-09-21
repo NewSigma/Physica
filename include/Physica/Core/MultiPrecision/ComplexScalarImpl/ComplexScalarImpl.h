@@ -20,6 +20,9 @@
 
 namespace Physica::Core {
     template<class T>
+    ComplexScalar<T>::ComplexScalar(double d) : ComplexScalar(T(d)) {}
+
+    template<class T>
     ComplexScalar<T>::ComplexScalar(T real_)
             : real(real_), imag(0) {}
 

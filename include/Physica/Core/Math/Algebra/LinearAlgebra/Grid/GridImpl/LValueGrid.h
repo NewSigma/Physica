@@ -73,6 +73,8 @@ namespace Physica::Core {
         void resize(Index3D size) { Base::getDerived().resize(size); }
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
+
+        template<class Functor> void forIndexInGrid(Functor func) { Base::forIndexInGrid(getDim(), func); }
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
         using Base::getDimX;
