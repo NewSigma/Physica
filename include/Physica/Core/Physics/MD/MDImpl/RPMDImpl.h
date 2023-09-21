@@ -377,6 +377,45 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic(size_t dofIndex) const {
+        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
+        const ScalarType centroidPos = mean(pos);
+
+        ScalarType kinetic = repBeta - (pos.asVector() - centroidPos) * forceBuffer.row(dofIndex).asVector();
+        kinetic /= ScalarType(getNumReplica() * 2);
+        return kinetic;
+    }
+    /**
+     * Kinetic energy using primitive estimator referenced from [1]
+     * Note: Use this estimator if NumReplica is small or if force model is \class EmptyForceModel
+     * 
+     * Reference:
+     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150(1982).
+     */
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim() const {
+        ScalarType kinetic = 0;
+        for (size_t i = 0; i < getDOF(); ++i)
+            kinetic += calcKineticPrim(i);
+        return kinetic;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim(size_t dofIndex) const {
+        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+        const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
+
+        ScalarType kinetic = 0;
+        for (size_t i = 0; i < getNumReplica(); ++i)
+            kinetic += square(pos[i] - pos[(i + 1) % getNumReplica()]);
+        const ScalarType factor = getMassVec()[dofIndex / Dim] * square(omegaW) / ScalarType(getNumReplica());
+        kinetic = (-kinetic * factor + repBeta) * 0.5;
+        return kinetic;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(ScalarType temperature) {
         assert(!temperature.isNegative());
         temperatureT = temperature;

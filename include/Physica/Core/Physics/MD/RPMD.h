@@ -135,6 +135,9 @@ namespace Physica::Core {
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
         [[nodiscard]] ScalarType calcClassicalElastic() const;
         [[nodiscard]] ScalarType calcKinetic() const;
+        [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
+        [[nodiscard]] ScalarType calcKineticPrim() const;
+        [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }

@@ -51,6 +51,14 @@ bool testDriftMomentum(const RPMD<ScalarType, PosScalarType>& rpmd, double preci
     return true;
 }
 
+bool testCalcKinetic(const RPMD<ScalarType, PosScalarType>& rpmd, double precision) {
+    const ScalarType kinetic1 = rpmd.calcKinetic();
+    ScalarType kinetic2 = 0;
+    for (size_t i = 0; i < rpmd.getDOF(); ++i)
+        kinetic2 += rpmd.calcKinetic(i);
+    return scalarNear(kinetic1, kinetic2, precision);
+}
+
 template<class RandomGenerator>
 RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
@@ -88,6 +96,8 @@ int main() {
 
         ForceModel forceModel(pair_cutoff);
         rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+        if (!testCalcKinetic(rpmd, 1E-14))
+            return 1;
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;

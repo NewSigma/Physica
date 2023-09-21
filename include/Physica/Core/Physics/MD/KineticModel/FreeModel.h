@@ -128,7 +128,12 @@ namespace Physica::Core {
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
     }
-
+    /**
+     * Integrate strategy as introduced in [1]
+     * 
+     * Reference:
+     * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
+     */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     inline void FreeModel<ScalarType, PosScalarType, Dim, NumReplica>::do_nve_step_impl(
             size_t id_dof,
