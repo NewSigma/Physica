@@ -269,6 +269,7 @@ namespace Physica::Core {
     }
 
     void Scalar<MultiPrecision>::swap(Scalar<MultiPrecision>& s) noexcept {
+        assert(this != &s && "[Error]: Self swap is likely a bug");
         std::swap(byte, s.byte);
         std::swap(length, s.length);
         std::swap(power, s.power);

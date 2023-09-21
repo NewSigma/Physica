@@ -278,6 +278,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::swap(RPMD& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         cell.swap(obj.cell);
         ringPolymer.swap(obj.ringPolymer);
         forceBuffer.swap(obj.forceBuffer);

@@ -75,6 +75,7 @@ namespace Physica::Core {
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     void device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>::swap(
             device_obj<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         Storage::swap(obj);
         Dim::swap(obj);
     }

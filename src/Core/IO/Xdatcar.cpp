@@ -46,6 +46,7 @@ namespace Physica::Core {
     }
 
     void Xdatcar::swap(Xdatcar& xdatcar) noexcept {
+        assert(this != &xdatcar && "[Error]: Self swap is likely a bug");
         data.swap(xdatcar.data);
         fin.swap(xdatcar.fin);
         std::swap(stepNum, xdatcar.stepNum);

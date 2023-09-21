@@ -110,6 +110,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     void ConjugateGradient<ScalarType, Dim>::swap(ConjugateGradient& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         gradG.swap(obj.gradG);
         direction.swap(obj.direction);
         nowX.swap(obj.nowX);

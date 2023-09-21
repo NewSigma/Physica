@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include <thread>
 #include "Physica/Core/Parallel/CudaStream.cuh"
 #include "Physica/Utils/CUDA/DebugUtil.cuh"
@@ -52,6 +53,7 @@ namespace Physica::Core {
     }
 
     void CudaStream::swap(CudaStream& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(stream, obj.stream);
     }
 

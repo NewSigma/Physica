@@ -224,6 +224,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void FrozenPhonon<ScalarType, PosScalarType>::swap(This& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         unitCell.swap(obj.unitCell);
         superSize.swap(obj.superSize);
     }

@@ -53,6 +53,7 @@ namespace Physica::Core {
     }
 
     void SubProcess::swap(SubProcess& process) noexcept {
+        assert(this != &process && "[Error]: Self swap is likely a bug");
         task.swap(process.task);
         std::swap(pid, process.pid);
         std::swap(nice_incr, process.nice_incr);

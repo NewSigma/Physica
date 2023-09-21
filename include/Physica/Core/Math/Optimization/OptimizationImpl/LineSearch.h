@@ -120,6 +120,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     void LineSearch<ScalarType, Dim>::swap(LineSearch& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         maxStepSize.swap(obj.maxStepSize);
         decreaseCondNum.swap(obj.decreaseCondNum);
         curvatureCondNum.swap(obj.curvatureCondNum);

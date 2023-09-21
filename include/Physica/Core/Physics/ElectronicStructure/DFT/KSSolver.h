@@ -200,6 +200,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     void KSSolver<ScalarType, XCProvider>::swap(KSSolver& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(iteration, obj.iteration);
 
         orbits.swap(obj.orbits);

@@ -88,6 +88,7 @@ namespace Physica::Core {
     }
 
     void IceGenerator::swap(IceGenerator& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         initialCell.swap(obj.initialCell);
         std::swap(maxDistOO, obj.maxDistOO);
         std::swap(maxDistOH, obj.maxDistOH);

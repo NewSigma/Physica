@@ -156,9 +156,12 @@ namespace Physica::Core {
                 if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
                     index_min = j;
             }
-            eigenvalues[i].swap(eigenvalues[index_min]);
-            if (computeEigenvectors)
-                rawEigenvectors.asArray()[i].swap(rawEigenvectors.asArray()[index_min]);
+            const bool shouldSwap = i != index_min;
+            if (shouldSwap) {
+                eigenvalues[i].swap(eigenvalues[index_min]);
+                if (computeEigenvectors)
+                    rawEigenvectors.asArray()[i].swap(rawEigenvectors.asArray()[index_min]);
+            }
         }
     }
 
@@ -388,6 +391,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) noexcept {
+        assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         rawEigenvectors.swap(solver.rawEigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);

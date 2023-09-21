@@ -232,8 +232,11 @@ namespace Physica::Core {
                 if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
                     index_min = j;
             }
-            eigenvalues[i].swap(eigenvalues[index_min]);
-            eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
+            const bool shouldSwap = i != index_min;
+            if (shouldSwap) {
+                eigenvalues[i].swap(eigenvalues[index_min]);
+                eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
+            }
         }
     }
 
@@ -254,6 +257,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::swap(JacobiDavidson<ScalarType>& other) noexcept {
+        assert(this != &other && "[Error]: Self swap is likely a bug");
         linearSolver.swap(other.linearSolver);
         eigenSolver.swap(other.eigenSolver);
         searchSpace.swap(other.searchSpace);

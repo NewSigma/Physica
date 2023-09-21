@@ -18,6 +18,8 @@ Physica is a library that provides several basic modules in computational physic
 
 3. Template meta algorithm: No seperate input file. Simulation parameters are declared as compile time constant. The program will choose best algorithm at compile time automatically making use of powerful C++ templates.
 
+4. Self explaination: As little documents and comments as necessary. Documents and comments often lag behind codes. The Physica API are designed to match users' intuition.
+
 ## Usage
 
 Requirements:  

@@ -106,6 +106,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void IRAbsorb<ScalarType>::swap(IRAbsorb& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         dipoleCorr.swap(obj.dipoleCorr);
         fft.swap(obj.fft);
         factor.swap(obj.factor);

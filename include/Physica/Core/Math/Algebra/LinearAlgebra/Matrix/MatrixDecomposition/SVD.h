@@ -191,6 +191,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::swap(SVD<ScalarType, RowAtCompile, ColumnAtCompile>& svd) noexcept {
+        assert(this != &svd && "[Error]: Self swap is likely a bug");
         working.swap(svd.working);
         singulars.swap(svd.singulars);
         lSingularMat.swap(svd.lSingularMat);

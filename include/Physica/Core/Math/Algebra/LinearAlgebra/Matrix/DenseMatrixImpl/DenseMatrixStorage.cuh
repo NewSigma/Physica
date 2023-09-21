@@ -158,7 +158,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
         void resize(size_t row, size_t column);
-        void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(r, obj.r); }
+        inline void swap(device_obj& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
@@ -187,6 +187,13 @@ namespace Physica::Core {
             vector.resize(row);
         host_array.toDevice(array);
         r = row;
+    }
+
+    template<class Derived>
+    inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::swap(device_obj& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        array.swap(obj);
+        std::swap(r, obj.r);
     }
 
     template<class Derived>
@@ -239,7 +246,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
         void resize(size_t row, size_t column);
-        void swap(device_obj& obj) noexcept { array.swap(obj); std::swap(c, obj.c); }
+        inline void swap(device_obj& obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
@@ -268,6 +275,13 @@ namespace Physica::Core {
             vector.resize(column);
         host_array.toDevice(array);
         c = column;
+    }
+
+    template<class Derived>
+    inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::swap(device_obj& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        array.swap(obj);
+        std::swap(c, obj.c);
     }
 
     template<class Derived>

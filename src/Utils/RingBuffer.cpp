@@ -52,6 +52,7 @@ namespace Physica::Utils {
     }
 
     void RingBuffer::swap(RingBuffer& ring) noexcept {
+        assert(this != &ring && "[Error]: Self swap is likely a bug");
         std::swap(buffer, ring.buffer);
         std::swap(size, ring.size);
         std::swap(bufferReader, ring.bufferReader);

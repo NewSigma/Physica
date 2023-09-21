@@ -46,6 +46,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void Differentiable<ScalarType, DiffMode::Forward>::swap(Differentiable& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         value.swap(obj.value);
         tangent.swap(obj.tangent);
     }
@@ -96,6 +97,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         value.swap(obj.value);
         std::swap(index, obj.index);
     }

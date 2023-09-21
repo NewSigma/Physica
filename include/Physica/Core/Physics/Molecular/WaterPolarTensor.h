@@ -119,6 +119,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool UseDynamicPolar>
     void WaterPolarTensor<ScalarType, UseDynamicPolar>::swap(WaterPolarTensor& model) noexcept {
+        assert(this != &model && "[Error]: Self swap is likely a bug");
         polarTensor.swap(model.polarTensor);
         labFrame.swap(model.labFrame);
     }

@@ -73,6 +73,7 @@ namespace Physica::Utils {
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
     __host__ __device__ void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
+        assert(this != &array && "[Error]: Self swap is likely a bug");
         for (size_t i = 0; i < Length; ++i) {
         #ifdef __CUDA_ARCH__
             thrust::swap(arr[i], array[i]);

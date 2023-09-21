@@ -148,6 +148,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     void Bidiagonalization<MatrixType>::swap(Bidiagonalization& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         mainDiag.swap(obj.mainDiag);
         subDiag.swap(obj.subDiag);

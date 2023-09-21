@@ -102,6 +102,7 @@ namespace Physica::Core {
 
     template<class T>
     void Mesh<T>::swap(Mesh& mesh) noexcept {
+        assert(this != &mesh && "[Error]: Self swap is likely a bug");
         elements.swap(mesh.elements);
         coeffs.swap(mesh.coeffs);
         nodeTypes.swap(nodeTypes);

@@ -338,6 +338,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::swap(PeriodicCell& cell) noexcept {
+        assert(this != &cell && "[Error]: Self swap is likely a bug");
         lattice.swap(cell.lattice);
         pos.swap(cell.pos);
         std::swap(type, cell.type);

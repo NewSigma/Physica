@@ -189,6 +189,7 @@ namespace Physica::Core {
     }
 
     void Poscar::swap(Poscar& poscar) noexcept {
+        assert(this != &poscar && "[Error]: Self swap is likely a bug");
         Base::swap(poscar);
         elementTypes.swap(poscar.elementTypes);
         numOfEachType.swap(poscar.numOfEachType);

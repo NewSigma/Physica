@@ -57,6 +57,7 @@ namespace Physica::Core::Internal {
 
     template<class T, size_t Order, size_t MaxOrder>
     void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& storage) noexcept {
+        assert(this != &storage && "[Error]: Self swap is likely a bug");
         std::swap(order, storage.order);
         Base::swap(storage);
     }

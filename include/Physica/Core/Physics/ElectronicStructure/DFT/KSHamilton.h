@@ -94,6 +94,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSpinPolarized>
     void KSHamilton<ScalarType, IsSpinPolarized>::swap(KSHamilton& obj) {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         hamiltonH.swap(obj.hamiltonH);
         cell.swap(obj.cell);
         repLatt.swap(obj.repLatt);

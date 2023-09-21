@@ -61,7 +61,8 @@ namespace Physica::Core {
                 main_column_index = larger ? main_column_index : i;
             }
         }
-        matrix.rowSwap(column, main_row_index);
+        if (column != main_row_index)
+            matrix.rowSwap(column, main_row_index);
         return main_column_index;
     }
     /*!
@@ -79,16 +80,18 @@ namespace Physica::Core {
             DenseMatrix<T, type, maxRow, maxColumn>& matrix, size_t column) {
         const auto rank = matrix.getRow();
         assert(column < rank);
-        size_t main_index = column;
+        size_t main_col_index = column;
         const T* main = &matrix(column, column);
         for(size_t j = column + 1; j < rank; ++j) {
             const auto* temp = &matrix(j, column);
             bool larger = absCompare(*main, *temp);
             main = larger ? main : temp;
-            main_index = larger ? main_index : j;
+            main_col_index = larger ? main_col_index : j;
         }
-        matrix.rowSwap(column, main_index);
-        return main_index;
+
+        if (column != main_col_index)
+            matrix.rowSwap(column, main_col_index);
+        return main_col_index;
     }
     /*!
      * Divide the row by the element with the largest abstract value. \row is a row of a matrix.

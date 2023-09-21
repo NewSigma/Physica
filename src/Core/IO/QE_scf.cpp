@@ -40,6 +40,7 @@ namespace Physica::Core {
     }
 
     void QE_scf::swap(QE_scf& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         force.swap(obj.force);
     }
 

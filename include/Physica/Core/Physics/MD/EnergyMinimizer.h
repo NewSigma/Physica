@@ -119,6 +119,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void EnergyMinimizer<ScalarType, PosScalarType, Dim>::swap(EnergyMinimizer& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         cell.swap(obj.cell);
     }
 

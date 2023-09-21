@@ -138,6 +138,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void ProbabilityDistributionFunction2D<ScalarType>::swap(This& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
         seperatesX.swap(obj.seperatesX);
         seperatesY.swap(obj.seperatesY);

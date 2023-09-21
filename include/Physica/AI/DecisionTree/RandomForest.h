@@ -113,6 +113,7 @@ namespace Physica::AI {
 
     template<class ScalarType, DecisionTreeType Type>
     void RandomForest<ScalarType, Type>::swap(RandomForest& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         trees.swap(obj.trees);
     }
 

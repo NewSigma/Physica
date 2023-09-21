@@ -79,6 +79,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     void device_obj<PeriodicCell<ScalarType, Dim>>::swap(device_obj& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         pos.swap(obj.pos);
         std::swap(type, obj.type);

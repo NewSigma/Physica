@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 #include "Physica/Core/Parallel/CudaEvent.cuh"
 
 namespace Physica::Core {
@@ -37,6 +38,7 @@ namespace Physica::Core {
     }
 
     void CudaEvent::swap(CudaEvent& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(event, obj.event);
     }
 }

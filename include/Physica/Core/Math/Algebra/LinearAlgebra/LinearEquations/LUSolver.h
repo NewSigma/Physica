@@ -85,6 +85,7 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Order>
     void LUSolver<T, Option, Order>::swap(LUSolver& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         lu.swap(obj.lu);
     }
 }

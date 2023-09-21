@@ -133,6 +133,7 @@ namespace Physica::Core {
 
     template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::swap(DenseMatrix& m) noexcept {
+        assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
         Dim::swap(m);
     }

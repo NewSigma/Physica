@@ -100,6 +100,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void ParrinelloRahman<ScalarType, PosScalarType>::swap(ParrinelloRahman& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         latticeMass.swap(obj.latticeMass);
         latticeMomentum.swap(obj.latticeMomentum);
         targetStress.swap(obj.targetStress);

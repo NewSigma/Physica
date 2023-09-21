@@ -113,6 +113,7 @@ namespace Physica::Core {
     }
 
     void PIPhonon::swap(PIPhonon& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         std::swap(numAtomUnitCell, obj.numAtomUnitCell);
         std::swap(superSizeX, obj.superSizeX);

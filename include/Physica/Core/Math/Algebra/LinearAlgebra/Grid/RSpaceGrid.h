@@ -112,6 +112,7 @@ namespace Physica::Core {
 
     template<class T>
     inline void RSpaceGrid<T>::swap(RSpaceGrid& grid) noexcept {
+        assert(this != &grid && "[Error]: Self swap is likely a bug");
         Storage::swap(grid);
     }
 

@@ -119,6 +119,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void FFT<ScalarType, 1>::swap(FFT& fft) noexcept {
+        assert(this != &fft && "[Error]: Self swap is likely a bug");
         using std::swap;
         swap(forward_plan, fft.forward_plan);
         swap(backward_plan, fft.backward_plan);
@@ -301,6 +302,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Dim>
     void FFT<ScalarType, Dim>::swap(FFT& fft) noexcept {
+        assert(this != &fft && "[Error]: Self swap is likely a bug");
         std::swap(forward_plan, fft.forward_plan);
         std::swap(backward_plan, fft.backward_plan);
         std::swap(buffer, fft.buffer);

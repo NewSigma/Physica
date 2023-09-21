@@ -51,6 +51,7 @@ namespace Physica::AI {
 
     template<class ScalarType, DecisionTreeType Type>
     void DecisionTree<ScalarType, Type>::swap(DecisionTree& tree) noexcept {
+        assert(this != &tree && "[Error]: Self swap is likely a bug");
         std::swap(featureId, tree.featureId);
         splitPoint.swap(tree.splitPoint);
         subTrees.swap(tree.subTrees);

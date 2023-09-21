@@ -108,6 +108,7 @@ namespace Physica::Core {
 
     template<class T>
     void GridStorage<T>::swap(GridStorage& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         values.swap(obj.values);
         std::swap(dimX, obj.dimX);
         std::swap(dimY, obj.dimY);

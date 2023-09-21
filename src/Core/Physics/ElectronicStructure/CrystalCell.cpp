@@ -82,6 +82,7 @@ namespace Physica::Core {
     }
 
     void CrystalCell::swap(CrystalCell& cell) noexcept {
+        assert(this != &cell && "[Error]: Self swap is likely a bug");
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
     }

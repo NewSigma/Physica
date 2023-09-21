@@ -18,6 +18,7 @@
  */
 #include <stdexcept>
 #include <future>
+#include <cassert>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -57,6 +58,7 @@ namespace Physica::Core {
     }
 
     void ProcessFuture::swap(ProcessFuture& future) noexcept {
+        assert(this != &future && "[Error]: Self swap is likely a bug");
         std::swap(pid, future.pid);
         std::swap(finished, future.finished);
         std::swap(isValid, future.isValid);

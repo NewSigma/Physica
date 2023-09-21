@@ -73,6 +73,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     void device_obj<MDCell<ScalarType, PosScalarType, Dim>>::swap(device_obj& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massVec.swap(obj.massVec);
         invLattice.swap(obj.invLattice);

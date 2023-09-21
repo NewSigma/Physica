@@ -96,6 +96,7 @@ namespace Physica::Core {
     }
 
     inline void PeriodIndex3D::swap(PeriodIndex3D& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         index.swap(obj.index);
         dim.swap(obj.dim);
     }

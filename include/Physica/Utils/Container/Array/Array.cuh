@@ -287,6 +287,7 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::swap(device_obj& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(d_data, obj.d_data);
         std::swap(length, obj.length);
         std::swap(capacity, obj.capacity);

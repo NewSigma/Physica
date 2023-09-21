@@ -77,6 +77,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool isSpinPolarized>
     void ChargeMixer<ScalarType, isSpinPolarized>::swap(ChargeMixer& mixer) noexcept {
+        assert(this != &mixer && "[Error]: Self swap is likely a bug");
         repLatt.swap(mixer.repLatt);
         oldDensities.swap(mixer.oldDensities);
         residules.swap(mixer.residules);

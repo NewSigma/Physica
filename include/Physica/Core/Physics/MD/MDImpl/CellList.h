@@ -134,6 +134,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void CellList<ScalarType, PosScalarType>::swap(CellList& list) noexcept {
+        assert(this != &list && "[Error]: Self swap is likely a bug");
         cellGrid.swap(list.cellGrid);
         cutoff.swap(list.cutoff);
         atomCellMap.swap(list.atomCellMap);

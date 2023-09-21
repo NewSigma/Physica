@@ -100,6 +100,7 @@ namespace Physica::Core {
     }
 
     void VaspWarpper::swap(VaspWarpper& vasp) noexcept {
+        assert(this != &vasp && "[Error]: Self swap is likely a bug");
         pathToVasp.swap(vasp.pathToVasp);
         vaspWorkingDir.swap(vasp.vaspWorkingDir);
         logFilePath.swap(vasp.logFilePath);

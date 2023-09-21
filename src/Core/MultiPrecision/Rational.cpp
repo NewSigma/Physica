@@ -94,6 +94,7 @@ namespace Physica::Core {
     }
 
     void Rational::swap(Rational& r) noexcept {
+        assert(this != &r && "[Error]: Self swap is likely a bug");
         numerator.swap(r.numerator);
         denominator.swap(r.denominator);
     }

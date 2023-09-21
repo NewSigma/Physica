@@ -209,6 +209,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::swap(Ewald& ewald) noexcept {
+        assert(this != &ewald && "[Error]: Self swap is likely a bug");
         Base::swap(ewald);
         lattice.swap(ewald.lattice);
         repCell.swap(ewald.repCell);

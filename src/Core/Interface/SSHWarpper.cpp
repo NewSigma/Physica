@@ -59,6 +59,7 @@ namespace Physica::Core {
     }
 
     void SSHWarpper::swap(SSHWarpper& ssh) noexcept {
+        assert(this != &ssh && "[Error]: Self swap is likely a bug");
         hostname.swap(ssh.hostname);
         command.swap(ssh.command);
         future.swap(ssh.future);

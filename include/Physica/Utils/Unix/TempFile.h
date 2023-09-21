@@ -71,6 +71,7 @@ namespace Physica::Utils {
 
     template<size_t N>
     void TempFile<N>::swap(TempFile& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(name, obj.name);
         std::swap(fd, obj.fd);
     }

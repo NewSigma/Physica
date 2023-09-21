@@ -40,6 +40,7 @@ namespace Physica::Core {
     }
 
     void Outcar::swap(Outcar& outcar) noexcept {
+        assert(this != &outcar && "[Error]: Self swap is likely a bug");
         force.swap(outcar.force);
         internalEnergy.swap(outcar.internalEnergy);
     }

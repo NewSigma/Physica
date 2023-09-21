@@ -329,6 +329,7 @@ namespace Physica::Core {
     }
 
     void Integer::swap(Integer& i) noexcept {
+        assert(this != &i && "[Error]: Self swap is likely a bug");
         std::swap(byte, i.byte);
         std::swap(length, i.length);
     }

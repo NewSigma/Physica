@@ -48,6 +48,7 @@ namespace Physica::Core {
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
     void PLUDecomposition<T, type, maxRow, maxColumn>::swap(PLUDecomposition& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         matrix.swap(obj.matrix);
         biasOrder.swap(biasOrder);
     }

@@ -79,6 +79,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumBand, bool isSpinPolarized>
     void KPoint<ScalarType, NumBand, isSpinPolarized>::swap(KPoint& kPoint) noexcept {
+        assert(this != &kPoint && "[Error]: Self swap is likely a bug");
         pos.swap(kPoint.pos);
         weight.swap(kPoint.weight);
         bandE.swap(kPoint.bandE);

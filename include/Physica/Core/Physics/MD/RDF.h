@@ -131,6 +131,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RDF<ScalarType>::swap(RDF& rdf) noexcept {
+        assert(this != &rdf && "[Error]: Self swap is likely a bug");
         isFromParticle.swap(rdf.isFromParticle);
         isToParticle.swap(rdf.isToParticle);
         particleBucket.swap(rdf.particleBucket);

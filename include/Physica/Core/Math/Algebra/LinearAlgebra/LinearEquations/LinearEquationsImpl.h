@@ -90,6 +90,7 @@ namespace Physica::Core {
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
     void LinearEquations<T, type, maxRow, maxColumn>::swap(LinearEquations& equ) noexcept {
+        assert(this != &equ && "[Error]: Self swap is likely a bug");
         working.swap(equ.working);
     }
 }
