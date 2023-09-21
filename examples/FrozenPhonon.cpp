@@ -85,10 +85,9 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     auto* plot = new PhononPlot<ScalarType, ScalarType>();
     plot->chart()->legend()->setVisible(false);
-    BrillouInterpolate<ScalarType> zone(ph.getSuperSize(), unitCell.getLattice(), 0.75, 0.75);
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
-    plot->plotPathLine(ph, fcMatrixGrid, zone, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
+    plot->plotPathLine(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
+    plot->plotPathLine(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
+    plot->plotPathLine(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
     plot->setMaxY(120);
     plot->setDeltaY(50);
     plot->show();

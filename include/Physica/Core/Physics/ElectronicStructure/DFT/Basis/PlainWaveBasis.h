@@ -139,8 +139,10 @@ namespace Physica::Core {
     PlainWaveBasis<ScalarType>::makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept {
         Vector3D v{};
         for (int i = 0; i < 3; ++i) {
-            assert(index[i] < dim[i]);
-            v[i] = ScalarType(index[i] > dim[i] / 2 ? -ssize_t(dim[i] - index[i]) : index[i]);
+            const ssize_t index_i = index[i];
+            const ssize_t dim_i = dim[i];
+            assert(index_i < dim_i);
+            v[i] = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : index_i);
         }
         return repLatt.transpose() * v;
     }

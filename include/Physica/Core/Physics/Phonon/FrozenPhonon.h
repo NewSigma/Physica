@@ -61,6 +61,7 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel>
         [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration) const;
+        [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
         void toDynamicMatrix(MatrixType& forceConstant) const;
         void toDynamicMatrix(MatrixGrid& forceConstants) const;
         void swap(FrozenPhonon& obj) noexcept;
@@ -220,6 +221,49 @@ namespace Physica::Core {
                 }
             }
         }
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename FrozenPhonon<ScalarType, PosScalarType>::MatrixType FrozenPhonon<ScalarType, PosScalarType>::interpolatePoint(
+            Vector3D qPoint, const MatrixGrid& forceConstants) const {
+        const ReciprocalCell repCell = unitCell.reciprocal();
+        const Vector3D qVector = repCell.getLattice().transpose() * qPoint;
+        const size_t unitCellDOF = getUnitCellDOF();
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        auto& rSpace = fft.getRSpace();
+        auto& kSpace = fft.getKSpace();
+        MatrixType result(unitCellDOF, unitCellDOF);
+        for (size_t r = 0; r < unitCellDOF; ++r) {
+            for (size_t c = 0; c < unitCellDOF; ++c) {
+                kSpace.forIndexInGrid([r, c, &kSpace, &forceConstants](Index3D index) {
+                    kSpace(index) = forceConstants(index)(r, c);
+                });
+                fft.invTransform();
+                ComplexType elem = 0;
+                rSpace.forIndexInGrid([this, r, c, qVector, &rSpace, &elem](Index3D index) {
+                    const auto& lattice = unitCell.getLattice();
+                    const Index3D rSpaceDim = rSpace.getDim();
+                    ScalarType phase = 0;
+                    ScalarType coeff = 1;
+                    for (unsigned int i = 0; i < Dim; ++i) {
+                        const ssize_t index_i = index[i];
+                        const ssize_t dim_i = rSpaceDim[i];
+                        const bool isDimOdd = dim_i % 2 != 0;
+                        const bool isOnWignerSeitzBoundary = index_i == dim_i;
+                        const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
+                        const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
+                        if (isDimOdd || !isOnWignerSeitzBoundary)
+                            phase += phase_i;
+                        else
+                            coeff *= cos(phase_i);
+                    }
+                    const auto factor = ComplexType::fromPhase(phase);
+                    elem += rSpace(index) * factor * coeff;
+                });
+                result(r, c) = elem;
+            }
+        }
+        return result;
     }
 
     template<class ScalarType, class PosScalarType>
