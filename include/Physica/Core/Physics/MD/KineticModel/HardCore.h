@@ -24,10 +24,10 @@
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor = SequentialExecutor>
-    class HardCore : private FreeModel<ScalarType, ScalarType, 1, NumReplica> {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
+    class HardCore : private FreeModel<ScalarType, ScalarType, 1, NumReplica, Integrator> {
         static_assert(!ScalarType::isComplex);
-        using Base = FreeModel<ScalarType, ScalarType, 1, NumReplica>;
+        using Base = FreeModel<ScalarType, ScalarType, 1, NumReplica, Integrator>;
         using PlainScalar = typename ScalarType::PlainScalar;
     public:
         using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1, NumReplica>;
@@ -74,8 +74,8 @@ namespace Physica::Core {
         bool checkRepMass() const;
     };
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::HardCore(
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::HardCore(
             ScalarType latticeSize_, PlainScalar collideFactor_, ScalarType temperatureT_, size_t numParticle, size_t numReplica, size_t maxHandleNum_)
             : Base(temperatureT_, numReplica)
             , latticeSize(latticeSize_)
@@ -87,15 +87,15 @@ namespace Physica::Core {
         checkParam(collideFactor, numReplica);
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>&
-    HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::operator=(HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor> obj) noexcept {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>&
+    HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::operator=(HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor> obj) noexcept {
         swap(*this);
         return *this;
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         const size_t numParticle = getNumParticle();
         const PlainScalar collideStep = collideFactor * deltaT.getValue();
         auto& phase = ringPolymer.asMatrix();
@@ -187,13 +187,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::updateMass(RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::updateMass(RingPolymerType& ringPolymer) {
         repMass = reciprocal(ringPolymer.getMassVec());
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::swap(HardCore& obj) noexcept {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::swap(HardCore& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         latticeSize.swap(obj.latticeSize);
@@ -205,8 +205,8 @@ namespace Physica::Core {
         std::swap(handleNum, obj.handleNum);
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkParam(PlainScalar collideFactor, size_t numReplica) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkParam(PlainScalar collideFactor, size_t numReplica) {
         if (!(collideFactor < PlainScalar(1.0) && collideFactor.isPositive())) [[unlikely]]
             throw std::invalid_argument("[Error]: Collide factor must be in (0, 1)");
         if (NumReplica != Dynamic && NumReplica != numReplica) [[unlikely]]
@@ -215,8 +215,8 @@ namespace Physica::Core {
             throw std::invalid_argument("[Error]: Collide factor is too small, numerical error will be large");
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkStepSize(
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkStepSize(
             ScalarType latticeSize,
             ScalarType temperatureT,
             ScalarType collideStep,
@@ -226,8 +226,8 @@ namespace Physica::Core {
         return collideStep * meanVelocity > epsilonStep;
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkCollision(
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
         using BoolPacketType = typename Internal::Traits<PacketType>::BoolSIMDType;
@@ -339,8 +339,8 @@ namespace Physica::Core {
         return false;
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::handleCollision(const RingPolymerType& ringPolymer) {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::handleCollision(const RingPolymerType& ringPolymer) {
         const size_t numReplica = getNumReplica();
         const size_t numParticle = getNumParticle();
         const auto& mass = ringPolymer.getMassVec();
@@ -384,8 +384,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, class Executor>
-    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Executor>::checkRepMass() const {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkRepMass() const {
         bool isGood = true;
         for (ScalarType elem : repMass)
             isGood &= elem.isPositive();

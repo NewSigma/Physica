@@ -27,7 +27,7 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using PosScalarType = ScalarType;
 using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
+using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;

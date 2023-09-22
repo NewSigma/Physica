@@ -44,7 +44,7 @@ constexpr size_t numSystem = 8;
 using MDType = RPMD<ScalarType, ScalarType, 1, numReplica>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, true, numReplica>;
+using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};

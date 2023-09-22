@@ -27,12 +27,13 @@
 #include "HardCore.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica>
-    class HardCore<ScalarType, IsFixedBoundary, NumReplica, CudaExecutor> {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
+    class HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CudaExecutor> {
         constexpr static unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
+        static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");
     public:
-        using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica>::RingPolymerType;
+        using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<Vector<ScalarType>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:

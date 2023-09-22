@@ -32,7 +32,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
 using PosScalarType = ScalarType;
 using ForceModel = Physica::Core::device_obj<SilveraGoldman<ScalarType, PosScalarType>>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3>;
+using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 using MDType = RPMD<ScalarType, PosScalarType, 3, Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
