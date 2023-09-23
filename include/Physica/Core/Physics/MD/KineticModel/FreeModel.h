@@ -205,7 +205,7 @@ namespace Physica::Core {
             if constexpr (Integrator == RPMDIntegrator::Exact)
                 coeffMatrixBase[i] = Vector2D{cos(phase), sin(phase)};
             else {
-                const ScalarType factor = ScalarType(2) / sqrt(ScalarType(4) + square(phase));
+                const ScalarType factor = reciprocal(sqrt(ScalarType(1) + square(phase)));
                 coeffMatrixBase[i] = Vector2D{factor, factor * deltaT};
             }
         }

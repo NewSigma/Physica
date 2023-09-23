@@ -32,7 +32,7 @@ namespace Physica::Core {
     class WaterPolarTensor {
         /* Make curve pos */
         constexpr static double refBondLength = PhyConst<AU>::angstormToBohr(0.95843);
-        constexpr static double refBondAngle = 104.44;
+        constexpr static double refBondAngle = PhyConst<SI>::degreeToRadian(104.44);
         constexpr static double normalLength = PhyConst<AU>::angstormToBohr(1);
         /* Convert factors */
         constexpr static double UnitChargeSI = PhyConst<SI>::unitCharge;
@@ -56,7 +56,7 @@ namespace Physica::Core {
         Matrix3D polarTensor; //In Molecular Frame
         Matrix3D labFrame;
     public:
-        WaterPolarTensor(const Vector3D& posO, const Vector3D& posH1, const Vector3D& posH2);
+        WaterPolarTensor(Vector3D posOH1, Vector3D posOH2);
         WaterPolarTensor(const WaterPolarTensor&) = default;
         WaterPolarTensor(WaterPolarTensor&&) noexcept = default;
         ~WaterPolarTensor() = default;
@@ -77,9 +77,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool UseDynamicPolar>
     WaterPolarTensor<ScalarType, UseDynamicPolar>::WaterPolarTensor(
-            const Vector3D& posO, const Vector3D& posH1, const Vector3D& posH2) {
-        Vector3D posOH1 = posH1 - posO;
-        Vector3D posOH2 = posH2 - posO;
+            Vector3D posOH1, Vector3D posOH2) {
         const ScalarType bondLength1 = posOH1.norm();
         const ScalarType bondLength2 = posOH2.norm();
         const ScalarType bondAngle = arccos(posOH1 * posOH2 / (bondLength1 * bondLength2));

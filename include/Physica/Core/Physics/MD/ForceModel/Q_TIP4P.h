@@ -206,7 +206,6 @@ namespace Physica::Core {
     typename Q_TIP4P<ScalarType, PosScalarType>::PositionMatrix
     Q_TIP4P<ScalarType, PosScalarType>::makeInducedDipole(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
-        const auto& pos = cell.getPos();
         const size_t numMolecule = cell.getNumParticle() / 3;
         const Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
         const ScalarType repCharge = reciprocal(ScalarType(charge));
@@ -216,7 +215,9 @@ namespace Physica::Core {
             const size_t indexO = 2 * numMolecule + i;
             const size_t indexH1 = 2 * i;
             const size_t indexH2 = 2 * i + 1;
-            const WaterPolarTensor<ScalarType, UseDynamicPolar> polar(pos.row(indexO), pos.row(indexH1), pos.row(indexH2));
+            const auto posOH1 = cell.minDistVector(indexO, indexH1);
+            const auto posOH2 = cell.minDistVector(indexO, indexH2);
+            const WaterPolarTensor<ScalarType, UseDynamicPolar> polar(posOH1, posOH2);
             const Vector<ScalarType, 3> electricField = coulomb.segment(indexO * Dim, (indexO + 1) * Dim) * repCharge;
             auto dipole = dipoles.row(i);
             dipole = polar * electricField;

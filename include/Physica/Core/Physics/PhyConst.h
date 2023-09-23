@@ -69,6 +69,7 @@ namespace Physica::Core {
                 "K", "Ca"};
     
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
+        [[nodiscard]] constexpr static double radianToDegree(double radian) { return radian / M_PI * 180; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * atomicMassConst; }
         [[nodiscard]] constexpr static double calorieToJoule(double calorie) { return calorie * calorieInJoule; }
         [[nodiscard]] constexpr static double waveNumToTHz(double waveNum) { return waveNum * speedOfLight * 1E-10; }
