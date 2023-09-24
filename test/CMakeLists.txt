@@ -52,6 +52,7 @@ physica_add_test(Interpolation Core/Math/Calculus/Interpolation.cpp)
 physica_add_test(SpetialFunctions Core/Math/Calculus/SpetialFunctionsTest.cpp)
 ### Geometry
 physica_add_test(GeoBase Core/Math/Geometry/GeoBase.cpp)
+physica_add_test(CubeCross Core/Math/Geometry/CubeCross.cpp)
 ### Optimization
 physica_add_test(ConjugateGradient Core/Math/Optimization/ConjugateGradient.cpp)
 physica_add_test(EqualityQuadraticProgramming Core/Math/Optimization/EqualityQuadraticProgramming.cpp)
