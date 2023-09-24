@@ -151,7 +151,8 @@ namespace Physica::Core {
             return;
         const ScalarType collideStep = collideFactor * deltaT;
         assert(numParticle == 512);
-        assert(bool(HardCore<ScalarType, IsFixedBoundary, NumReplica>::checkStepSize(latticeSize, temperatureT, collideStep, mass[threadId])));
+        assert(bool(HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::checkStepSize(
+            latticeSize, temperatureT, collideStep, mass[threadId])));
 
         auto momentum = d_phase.head(numParticle);
         auto pos = d_phase.tail(numParticle);

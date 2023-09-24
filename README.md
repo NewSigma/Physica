@@ -1,6 +1,6 @@
 # Physica
 
-Physica is a library that provides several basic modules in computational physics.
+Physica is a high performance and scalable template library for computational physics.
 
 ## Table of Contents
 
