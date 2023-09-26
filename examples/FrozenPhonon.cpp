@@ -1,8 +1,9 @@
 #include <fstream>
 #include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
-#include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
+#include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
+#include "Physica/Core/Physics/Phonon/PhononDOS.h"
 #include "Physica/Gui/Plot/PhononPlot.h"
 #include "Physica/Utils/Unix/TempFile.h"
 
@@ -83,13 +84,39 @@ int main(int argc, char** argv) {
     const auto fcMatrixGrid = ph.makeForceConstants(model, displace, 1E-10, 100);
 
     QApplication app(argc, argv);
-    auto* plot = new PhononPlot<ScalarType, ScalarType>();
-    plot->chart()->legend()->setVisible(false);
-    plot->plotPathLine(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
-    plot->plotPathLine(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
-    plot->plotPathLine(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
-    plot->setMaxY(120);
-    plot->setDeltaY(50);
-    plot->show();
+    PhononPlot<ScalarType, ScalarType>* phPlot;
+    Plot* dosPlot;
+    {
+        phPlot = new PhononPlot<ScalarType, ScalarType>();
+        phPlot->chart()->legend()->setVisible(false);
+        phPlot->plotPathLine(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
+        phPlot->plotPathLine(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
+        phPlot->plotPathLine(ph, fcMatrixGrid, {0.5, 0.5, 0}, {0, 0, 0}, 40, " Γ ");
+        phPlot->setMaxY(120);
+        phPlot->setDeltaY(50);
+    }
+    {
+        PhononDOS<ScalarType, ScalarType> dosSolver(ph.getUnitCell(), ph.getSuperSize(), fcMatrixGrid, {32, 32, 1});
+        auto freq = Vector<ScalarType>::linspace(0, 110, 300);
+        freq *= reciprocal(ScalarType(PhononPlot<ScalarType, ScalarType>::AUToTHz));
+        Vector<ScalarType> dos(freq.getLength());
+        for (size_t i = 0; i < dos.getLength(); ++i)
+            dos[i] = dosSolver.calcDOS(freq[i]);
+        dos.toUnit();
+
+        dosPlot = new Plot(0, 0.4, 0, 120, 0.1, 50);
+        dosPlot->chart()->legend()->setVisible(false);
+        auto* axisX = dosPlot->getAxisX();
+        auto* axisY = dosPlot->getAxisY();
+        axisX->setTitleText("Normalized DOS/THz<sup>-1</sup>");
+        axisX->setLabelFormat("%.1f");
+        axisY->setTitleText("Frequency/THz");
+        axisY->setLabelFormat("%d");
+
+        freq *= ScalarType(PhononPlot<ScalarType, ScalarType>::AUToTHz);
+        dosPlot->spline(dos, freq).setColor(Qt::black);
+    }
+    phPlot->show();
+    dosPlot->show();
     return QApplication::exec();
 }

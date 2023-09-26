@@ -47,6 +47,9 @@ namespace Physica::Core {
     template<class OtherDerived>
     __host__ __device__
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
+        constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
+        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
+                "[Error]: Size mismatch between two vector");
         [[maybe_unused]] const auto _ = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
     #ifndef  __CUDA_ARCH__
         using namespace Physica;

@@ -25,28 +25,43 @@ using ScalarType = Scalar<Double>;
 int main() {
     {
         const ScalarType rep3 = reciprocal(ScalarType(3));
-        const auto cross = CubeCross<ScalarType>({rep3, rep3, rep3});
+        const auto cross = CubeCross<ScalarType>({rep3, rep3, rep3, 1});
         if (!scalarNear(cross.getArea(), ScalarType(0), 1E-15))
             return 1;
     }
     {
-        const auto cross = CubeCross<ScalarType>({2, 0, 0});
+        const auto cross = CubeCross<ScalarType>({2, 0, 0, 1});
         if (!scalarNear(cross.getArea(), ScalarType(4), 1E-15))
             return 1;
     }
     {
-        const auto cross = CubeCross<ScalarType>({-0.5, 0, 0});
+        const auto cross = CubeCross<ScalarType>({-0.5, 0, 0, 1});
         if (!scalarNear(cross.getArea(), ScalarType(0), 1E-15))
             return 1;
     }
     {
-        const auto cross = CubeCross<ScalarType>({1, 1, 0});
+        const auto cross = CubeCross<ScalarType>({1, 1, 0, 1});
         if (!scalarNear(cross.getArea(), ScalarType(2 * M_SQRT2), 1E-15))
             return 1;
     }
     {
-        const auto cross = CubeCross<ScalarType>({1, 1, 1});
+        const auto cross = CubeCross<ScalarType>({1, 1, 1, 1});
         if (!scalarNear(cross.getArea(), sqrt(ScalarType(3)) * ScalarType(2), 1E-15))
+            return 1;
+    }
+    {
+        const ScalarType rep3 = reciprocal(ScalarType(3));
+        const ScalarType sqrt3 = sqrt(ScalarType(3));
+        const auto x = Vector<ScalarType>::linspace(-1, 1, 200);
+        Vector<ScalarType> y(x.getLength());
+        for (size_t i = 0; i < y.getLength(); ++i) {
+            Vector<ScalarType, 4> plane{rep3, rep3, rep3, x[i]};
+            plane *= ScalarType(10);
+            const auto cross = CubeCross<ScalarType>(plane);
+            y[i] = cross.getArea() * sqrt3;
+        }
+        const ScalarType volume = y.sum() * (x[1] - x[0]);
+        if (!scalarNear(volume, ScalarType(8), 1E-6))
             return 1;
     }
     return 0;

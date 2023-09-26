@@ -32,7 +32,9 @@ namespace Physica::Gui {
         using PhononType = Core::FrozenPhonon<ScalarType, PosScalarType>;
         using MatrixGrid = typename PhononType::MatrixGrid;
         using Index3D = typename Core::GridBase::Index3D;
-
+    public:
+        constexpr static double AUToTHz = 1E-12 / Core::PhyConst<Core::AU>::timeToSecond(1);
+    private:
         ScalarType currentX;
     public:
         PhononPlot();
@@ -53,6 +55,8 @@ namespace Physica::Gui {
             const char* label);
         /* Getters */
         [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
+        [[nodiscard]] ScalarType getMaxFreqInAU() const noexcept { return getMaxY() / AUToTHz; }
+        [[nodiscard]] ScalarType getMinFreqInAU() const noexcept { return getMinY() / AUToTHz; }
     };
 
     template<class ScalarType, class PosScalarType>
@@ -93,7 +97,7 @@ namespace Physica::Gui {
             phonon.toDynamicMatrix(fcMatrix);
             const auto eigen = PhononType::diagonalize(fcMatrix);
             auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
+            freq *= ScalarType(AUToTHz);
             buffer.col(i) = freq;
             minFreq = std::min(minFreq, freq.min());
             maxFreq = std::max(maxFreq, freq.max());
@@ -142,7 +146,7 @@ namespace Physica::Gui {
             phonon.toDynamicMatrix(fcMatrix);
             auto eigen = PhononType::diagonalize(fcMatrix);
             auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(1E-12 / PhyConst<AU>::timeToSecond(1));
+            freq *= ScalarType(AUToTHz);
             auto bufferCol = buffer.col(i);
             bufferCol = freq;
             minFreq = std::min(minFreq, freq.min());

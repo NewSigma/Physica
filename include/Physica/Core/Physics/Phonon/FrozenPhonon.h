@@ -19,7 +19,6 @@
 #pragma once
 
 #include <iostream>
-#include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
@@ -27,6 +26,7 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "PhononSolver.h"
 
 namespace Physica::Core {
     /**
@@ -34,25 +34,21 @@ namespace Physica::Core {
      * [1] Dario Alfè PHON: A program to calculate phonons using the small displacement method [J]. Computer Physics Communications, 2009, 180(12), 2622-2633 (DOI: 10.1016/j.cpc.2009.03.010)
      */
     template<class ScalarType, class PosScalarType>
-    class FrozenPhonon {
+    class FrozenPhonon : public PhononSolver<ScalarType, PosScalarType> {
         using This = FrozenPhonon<ScalarType, PosScalarType>;
-        using ComplexType = ComplexScalar<ScalarType>;
-        using Index3D = Utils::Array<size_t, 3>;
-        using Vector3D = Vector<ScalarType, 3>;
-        using FFT3D = FFT<ScalarType, 3>;
+        using Base = PhononSolver<ScalarType, PosScalarType>;
     public:
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
-        using MatrixType = DenseMatrix<ComplexType>;
-        using MatrixGrid = GridStorage<MatrixType>;
-        using EigenSolverType = EigenSolver<MatrixType>;
-        using QPointGrid = GridStorage<EigenSolverType>;
-        constexpr static size_t Dim = Internal::Traits<MDCellType>::Dim;
-    private:
-        MDCellType unitCell;
-        Index3D superSize;
+        using typename Base::ComplexType;
+        using typename Base::Vector3D;
+        using typename Base::Index3D;
+        using typename Base::FFT3D;
+        using typename Base::MDCellType;
+        using typename Base::PositionMatrix;
+        using typename Base::MatrixType;
+        using typename Base::MatrixGrid;
+        constexpr static unsigned int Dim = Base::Dim;
     public:
-        FrozenPhonon(MDCellType unitCell_, Index3D superSize_);
+        FrozenPhonon(MDCellType unitCell, Index3D superSize);
         FrozenPhonon(const FrozenPhonon&) = default;
         FrozenPhonon(FrozenPhonon&&) noexcept = default;
         ~FrozenPhonon() = default;
@@ -61,24 +57,15 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel>
         [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration) const;
-        [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
-        void toDynamicMatrix(MatrixType& forceConstant) const;
-        void toDynamicMatrix(MatrixGrid& forceConstants) const;
         void swap(FrozenPhonon& obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return unitCell.getNumParticle(); }
-        [[nodiscard]] size_t getUnitCellDOF() const noexcept { return Dim * getNumUnitCellAtom(); }
-        [[nodiscard]] size_t getNumSuperCellAtom() const noexcept { return getNumUnitCellAtom() * getNumCell(); }
-        [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }        [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
-        [[nodiscard]] Index3D getForceConstantsGridSize() const noexcept { return FFT3D::rSizeToKSize(superSize); }
-        [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
-        [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;
-        [[nodiscard]] inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex) const;
-        [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
-        [[nodiscard]] inline DenseMatrix<ScalarType> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
-        /* Static members */
-        [[nodiscard]] static EigenSolverType diagonalize(const MatrixType& dynamicMatrix);
-        [[nodiscard]] static QPointGrid diagonalize(const MatrixGrid& dynamicMatrixes);
+        using Base::getUnitCell;
+        using Base::getNumUnitCellAtom;
+        using Base::getUnitCellDOF;
+        using Base::getSuperCellDOF;
+        using Base::getSuperSize;
+        using Base::getForceConstantsGridSize;
+        using Base::getNumCell;
     private:
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
         PositionMatrix makeWignerSeitzRadius() const;
@@ -87,9 +74,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType>
-    FrozenPhonon<ScalarType, PosScalarType>::FrozenPhonon(MDCellType unitCell_, Index3D superSize_)
-            : unitCell(std::move(unitCell_))
-            , superSize(superSize_) {}
+    FrozenPhonon<ScalarType, PosScalarType>::FrozenPhonon(MDCellType unitCell, Index3D superSize)
+            : Base(std::move(unitCell), superSize) {}
 
     template<class ScalarType, class PosScalarType>
     FrozenPhonon<ScalarType, PosScalarType>& FrozenPhonon<ScalarType, PosScalarType>::operator=(FrozenPhonon obj) noexcept {
@@ -109,7 +95,8 @@ namespace Physica::Core {
             size_t maxIteration) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
-        const MDCellType superCell = unitCell.template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
+        const Index3D superSize = Base::getSuperSize();
+        const MDCellType superCell = Base::getUnitCell().template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
 
         MatrixGrid result(getForceConstantsGridSize(), unitCellDOF, unitCellDOF, ScalarType(0));
         auto& fcMatrixes = result.asArray();
@@ -189,148 +176,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    void FrozenPhonon<ScalarType, PosScalarType>::toDynamicMatrix(MatrixType& forceConstant) const {
-        const size_t unitCellDOF = getUnitCellDOF();
-        for (size_t row = 0; row < unitCellDOF; ++row) {
-            const size_t atom1 = row / Dim;
-            const ScalarType mass1 = unitCell.getMass(atom1);
-            for (size_t col = 0; col < unitCellDOF; ++col) {
-                const size_t atom2 = col / Dim;
-                const ScalarType mass2 = unitCell.getMass(atom2);
-                const ScalarType repMass = reciprocal(sqrt(mass1 * mass2));
-                forceConstant(row, col) *= repMass;
-            }
-        }
-    }
-
-    template<class ScalarType, class PosScalarType>
-    void FrozenPhonon<ScalarType, PosScalarType>::toDynamicMatrix(MatrixGrid& forceConstants) const {
-        const size_t unitCellDOF = getUnitCellDOF();
-        auto& fcMatrixes = forceConstants.flatten();
-        for (size_t row = 0; row < unitCellDOF; ++row) {
-            const size_t atom1 = row / Dim;
-            const ScalarType mass1 = unitCell.getMass(atom1);
-            for (size_t col = 0; col < unitCellDOF; ++col) {
-                const size_t atom2 = col / Dim;
-                const ScalarType mass2 = unitCell.getMass(atom2);
-                const ScalarType repMass = reciprocal(sqrt(mass1 * mass2));
-
-                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                    auto& fcMatrix = fcMatrixes[i];
-                    fcMatrix(row, col) *= repMass;
-                }
-            }
-        }
-    }
-
-    template<class ScalarType, class PosScalarType>
-    typename FrozenPhonon<ScalarType, PosScalarType>::MatrixType FrozenPhonon<ScalarType, PosScalarType>::interpolatePoint(
-            Vector3D qPoint, const MatrixGrid& forceConstants) const {
-        const ReciprocalCell repCell = unitCell.reciprocal();
-        const Vector3D qVector = repCell.getLattice().transpose() * qPoint;
-        const size_t unitCellDOF = getUnitCellDOF();
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        auto& rSpace = fft.getRSpace();
-        auto& kSpace = fft.getKSpace();
-        MatrixType result(unitCellDOF, unitCellDOF);
-        for (size_t r = 0; r < unitCellDOF; ++r) {
-            for (size_t c = 0; c < unitCellDOF; ++c) {
-                kSpace.forIndexInGrid([r, c, &kSpace, &forceConstants](Index3D index) {
-                    kSpace(index) = forceConstants(index)(r, c);
-                });
-                fft.invTransform();
-                ComplexType elem = 0;
-                rSpace.forIndexInGrid([this, r, c, qVector, &rSpace, &elem](Index3D index) {
-                    const auto& lattice = unitCell.getLattice();
-                    const Index3D rSpaceDim = rSpace.getDim();
-                    ScalarType phase = 0;
-                    ScalarType coeff = 1;
-                    for (unsigned int i = 0; i < Dim; ++i) {
-                        const ssize_t index_i = index[i];
-                        const ssize_t dim_i = rSpaceDim[i];
-                        const bool isDimOdd = dim_i % 2 != 0;
-                        const bool isOnWignerSeitzBoundary = index_i == dim_i;
-                        const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
-                        const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
-                        if (isDimOdd || !isOnWignerSeitzBoundary)
-                            phase += phase_i;
-                        else
-                            coeff *= cos(phase_i);
-                    }
-                    const auto factor = ComplexType::fromPhase(phase);
-                    elem += rSpace(index) * factor * coeff;
-                });
-                result(r, c) = elem;
-            }
-        }
-        return result;
-    }
-
-    template<class ScalarType, class PosScalarType>
     void FrozenPhonon<ScalarType, PosScalarType>::swap(This& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        unitCell.swap(obj.unitCell);
-        superSize.swap(obj.superSize);
-    }
-
-    template<class ScalarType, class PosScalarType>
-    Vector<ScalarType> FrozenPhonon<ScalarType, PosScalarType>::makeFreq(const EigenSolverType& eigen) const {
-        Vector<ScalarType> result(getUnitCellDOF());
-        const Vector<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
-        for (size_t i = 0; i < getUnitCellDOF(); ++i)
-            result[i] = eigenvalues[i].isNegative() ? -1 : 1;
-        result = hadamard(result, sqrt(abs(eigenvalues)));
-        result *= ScalarType(1 / (2 * M_PI));
-        return result;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    inline Vector<ScalarType> FrozenPhonon<ScalarType, PosScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) const {
-        return makeFreq(qPoints(qIndex));
-    }
-
-    template<class ScalarType, class PosScalarType>
-    DenseMatrix<ScalarType> FrozenPhonon<ScalarType, PosScalarType>::makeEigenVectors(const EigenSolverType& eigen) const {
-        DenseMatrix<ScalarType> result(getUnitCellDOF(), getUnitCellDOF());
-        for (size_t i = 0; i < result.getColumn(); ++i) {
-            const auto fromCol = eigen.getRawEigenvectors().col(i);
-            auto toCol = result.col(i);
-            for (size_t j = 0; j < result.getRow(); ++j) {
-                const ScalarType repSqrtMass = reciprocal(sqrt(unitCell.getMass(j / Dim)));
-                toCol[j] = fromCol[j].getReal() * repSqrtMass;
-            }
-            toCol.toUnit(); // Optimize: repSqrtMass matrix is diagonal
-        }
-        return result;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    inline DenseMatrix<ScalarType> FrozenPhonon<ScalarType, PosScalarType>::makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const {
-        return makeEigenVectors(qPoints(qIndex));
-    }
-
-    template<class ScalarType, class PosScalarType>
-    typename FrozenPhonon<ScalarType, PosScalarType>::EigenSolverType
-    FrozenPhonon<ScalarType, PosScalarType>::diagonalize(const MatrixType& dynamicMatrix) {
-        const size_t unitCellDOF = dynamicMatrix.getRow();
-        auto eigen = EigenSolverType(unitCellDOF);
-        eigen.compute(dynamicMatrix, true);
-        eigen.sort();
-        return eigen;
-    }
-
-    template<class ScalarType, class PosScalarType>
-    typename FrozenPhonon<ScalarType, PosScalarType>::QPointGrid FrozenPhonon<ScalarType, PosScalarType>::diagonalize(
-            const MatrixGrid& dynamicMatrixes) {
-        const auto& matrixes = dynamicMatrixes.flatten();
-        const size_t unitCellDOF = matrixes[0].getRow();
-        QPointGrid qPoints(dynamicMatrixes.getDim(), unitCellDOF);
-        for (size_t i = 0; i < matrixes.getLength(); ++i) {
-            auto& eigen = qPoints.flatten()[i];
-            eigen.compute(matrixes[i], true);
-            eigen.sort();
-        }
-        return qPoints;
+        Base::swap(obj);
     }
 
     template<class ScalarType, class PosScalarType>
@@ -359,6 +207,7 @@ namespace Physica::Core {
         constexpr int OneSideDim = 2; // 2 is enough to generate a Wigner-Seitz cell
         constexpr int TwoSideDim = 2 * OneSideDim + 1;
         constexpr size_t ResultSize = TwoSideDim * TwoSideDim * TwoSideDim - 1;
+        const Index3D superSize = Base::getSuperSize();
         PositionMatrix wignerSeitzRadius(ResultSize, 3);
         size_t index = 0;
         for (int i = -OneSideDim; i <= OneSideDim; ++i) {
@@ -366,7 +215,7 @@ namespace Physica::Core {
                 for (int k = -OneSideDim; k <= OneSideDim; ++k) {
                     const Vector3D factor{ScalarType(i * superSize[0]), ScalarType(j * superSize[1]), ScalarType(k * superSize[2])};
                     auto row = wignerSeitzRadius.row(index);
-                    row = unitCell.getLattice().transpose() * factor;
+                    row = Base::getUnitCell().getLattice().transpose() * factor;
                     const bool isNotGammaPoint = row.squaredNorm() > std::numeric_limits<ScalarType>::epsilon();
                     index += isNotGammaPoint;
                 }
@@ -380,10 +229,12 @@ namespace Physica::Core {
     GridStorage<DenseMatrix<ScalarType>>
     FrozenPhonon<ScalarType, PosScalarType>::makeWignerSeitzWeights() const {
         const auto wignerSeitzRadius = makeWignerSeitzRadius();
+        const Index3D superSize = Base::getSuperSize();
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
         const size_t numAtom = getNumUnitCellAtom();
         GridStorage<DenseMatrix<ScalarType>> result(gridDim, numAtom, numAtom);
-        GridBase::forIndexInGrid(gridDim, [this, numAtom, &result, &wignerSeitzRadius](Index3D index) {
+        GridBase::forIndexInGrid(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
+            const auto& unitCell = Base::getUnitCell();
             const Vector3D factor{ScalarType(index[0]) - ScalarType(2 * superSize[0]),
                                   ScalarType(index[1]) - ScalarType(2 * superSize[1]),
                                   ScalarType(index[2]) - ScalarType(2 * superSize[2])};

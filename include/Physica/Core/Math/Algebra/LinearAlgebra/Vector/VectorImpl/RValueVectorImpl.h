@@ -112,6 +112,9 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
+        constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
+        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
+                "[Error]: Size mismatch between two vector");
         assert(v.getLength() == getLength());
         Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(*this, v);
     }

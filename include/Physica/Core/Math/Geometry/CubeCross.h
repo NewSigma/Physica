@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     /**
-     * Calculate cross section area of plain ax + by + cz - 1 = 0 and cube [-1, 1] * [-1, 1] * [-1, 1]
+     * Calculate cross section area of plain ax + by + cz + d = 0 and cube [-1, 1] * [-1, 1] * [-1, 1]
      * Algorithm introduced in [1] and its erratum [2]
      * 
      * Reference:
@@ -32,6 +32,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class CubeCross {
         using Vector3D = Vector<ScalarType, 3>;
+        using Vector4D = Vector<ScalarType, 4>;
     public:
         enum CrossType : char {
             Parallelogram,
@@ -45,7 +46,7 @@ namespace Physica::Core {
         ScalarType area;
         CrossType type;
     public:
-        CubeCross(Vector3D coeff);
+        CubeCross(Vector4D coeff);
         CubeCross(const CubeCross&) = default;
         CubeCross(CubeCross&&) noexcept = default;
         ~CubeCross() = default;
@@ -61,10 +62,12 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    CubeCross<ScalarType>::CubeCross(Vector3D coeff) {
+    CubeCross<ScalarType>::CubeCross(Vector4D coeff) {
         assert(!coeff.squaredNorm().isZero() && "[Error]: Invalid plain");
-        const ScalarType dist = reciprocal(coeff.norm());
-        const Vector3D normalVec = sortVector(abs(coeff) * dist);
+        const Vector3D coeff1 = coeff.head(3);
+        const ScalarType repNorm = reciprocal(coeff1.norm());
+        const ScalarType dist = abs(coeff[3]) * repNorm;
+        const Vector3D normalVec = sortVector(abs(coeff1) * repNorm);
 
         const ScalarType signedDist1 = normalVec[0] - normalVec[1] - normalVec[2];
         const ScalarType dist1 = abs(signedDist1);

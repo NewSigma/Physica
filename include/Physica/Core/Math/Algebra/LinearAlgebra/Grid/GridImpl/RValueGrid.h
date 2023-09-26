@@ -34,6 +34,7 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherDerived>
         void assignTo(LValueGrid<OtherDerived>& other) const;
+        template<class Functor> void forIndexInGrid(Functor func) const { GridBase::forIndexInGrid(getDim(), func); }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
         [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }

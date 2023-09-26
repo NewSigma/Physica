@@ -75,6 +75,12 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRightBehindTop() const noexcept { return rightBehindTop; }
         /* Static members */
         [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
+        [[nodiscard]] static ScalarType dBase_dr(size_t localNode);
+        [[nodiscard]] static ScalarType dBase_ds(size_t localNode);
+        [[nodiscard]] static ScalarType dBase_dt(size_t localNode);
+        [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dr(localNode); }
+        [[nodiscard]] static ScalarType dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_ds(localNode); }
+        [[nodiscard]] static ScalarType dBase_dt(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dt(localNode); }
     };
 
     template<class ScalarType>
@@ -158,6 +164,57 @@ namespace Physica::Core {
                 return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
             case RightBehindTop:
                 return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+        }
+        throw std::invalid_argument("[Error]: Invalid local node index");
+    }
+
+    template<class ScalarType>
+    ScalarType CuboidLinear<ScalarType>::dBase_dr(size_t localNode) {
+        switch (localNode) {
+            case LeftFrontBottom:
+            case LeftFrontTop:
+            case LeftBehindBottom:
+            case LeftBehindTop:
+                return ScalarType(-0.125);
+            case RightFrontBottom:
+            case RightFrontTop:
+            case RightBehindBottom:
+            case RightBehindTop:
+                return ScalarType(0.125);
+        }
+        throw std::invalid_argument("[Error]: Invalid local node index");
+    }
+
+    template<class ScalarType>
+    ScalarType CuboidLinear<ScalarType>::dBase_ds(size_t localNode) {
+        switch (localNode) {
+            case LeftFrontBottom:
+            case LeftFrontTop:
+            case RightFrontBottom:
+            case RightFrontTop:
+                return ScalarType(-0.125);
+            case LeftBehindBottom:
+            case LeftBehindTop:
+            case RightBehindBottom:
+            case RightBehindTop:
+                return ScalarType(0.125);
+        }
+        throw std::invalid_argument("[Error]: Invalid local node index");
+    }
+
+    template<class ScalarType>
+    ScalarType CuboidLinear<ScalarType>::dBase_dt(size_t localNode) {
+        switch (localNode) {
+            case LeftFrontBottom:
+            case LeftBehindBottom:
+            case RightFrontBottom:
+            case RightBehindBottom:
+                return ScalarType(-0.125);
+            case LeftFrontTop:
+            case LeftBehindTop:
+            case RightFrontTop:
+            case RightBehindTop:
+                return ScalarType(0.125);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }

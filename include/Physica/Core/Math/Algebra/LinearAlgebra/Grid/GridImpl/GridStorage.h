@@ -24,6 +24,7 @@ namespace Physica::Core {
     template<class T>
     class GridStorage : public GridBase {
         using This = GridStorage<T>;
+        using Base = GridBase;
     public:
         using Index3D = Utils::Array<size_t, 3>;
         using ArrayType = Utils::Array<T>;
@@ -46,6 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] T& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
         [[nodiscard]] const T& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
         /* Operations */
+        template<class Functor> void forIndexInGrid(Functor func) const { Base::forIndexInGrid(getDim(), func); }
         template<class... Args> void resize(Index3D index, Args... args);
         void swap(GridStorage& obj) noexcept;
         /* Iterator */
