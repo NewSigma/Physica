@@ -33,6 +33,8 @@ namespace Physica::Core {
         inline H5DataSet& operator=(const H5DataSet& obj);
         H5DataSet& operator=(H5DataSet&&) noexcept = delete;
         using Base::operator=;
+        /* Operations */
+        void readStr(char* buffer) const;
         /* Getters */
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
         [[nodiscard]] size_t getDim() const noexcept;
@@ -48,6 +50,12 @@ namespace Physica::Core {
     inline H5DataSet<Dim>& H5DataSet<Dim>::operator=(const H5DataSet& obj) {
         Base::operator=(obj);
         return *this;
+    }
+
+    template<size_t Dim>
+    void H5DataSet<Dim>::readStr(char* buffer) const {
+        Base::read(buffer, H5::PredType::NATIVE_CHAR);
+        buffer[getSize(0)] = '\0';
     }
 
     template<size_t Dim>

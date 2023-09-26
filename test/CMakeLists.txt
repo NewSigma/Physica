@@ -12,8 +12,9 @@ endif()
 ## Interface
 physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 ## IO
-physica_add_test(Poscar Core/IO/Poscar.cpp)
 physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
+physica_add_test(HDF5 Core/IO/HDF5.cpp)
+physica_add_test(Poscar Core/IO/Poscar.cpp)
 ## Math
 ### Algebra
 #### Equation Solver

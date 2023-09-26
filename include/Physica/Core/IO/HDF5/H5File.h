@@ -19,6 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
+    template<size_t Dim> class H5DataSet;
+
     class H5File : public H5::H5File {
         using Base = H5::H5File;
     public:
@@ -32,9 +34,23 @@ namespace Physica::Core {
             SingleWriteMultiRead_Read = 0x0040U
         };
     public:
-        H5File(const char* name, OpenFlag flags,
-           const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
-           const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
+        H5File(const char* name,
+               unsigned int openflag,
+               const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
+               const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
+        H5File(const H5File& obj);
+        H5File(H5File&&) noexcept = delete;
         virtual ~H5File() = default;
+        /* Operators */
+        H5File& operator=(H5File& obj);
+        H5File& operator=(H5File&&) noexcept = delete;
+        /* Operations */
+        template<size_t Dim>
+        [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
     };
+
+    template<size_t Dim>
+    H5DataSet<Dim> H5File::openDataSet(const char* name) {
+        return Base::openDataSet(name);
+    }
 }
