@@ -50,7 +50,9 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] ScalarType calcDOS(ScalarType freq) const;
         [[nodiscard]] ScalarType calcDOS(ScalarType freq, size_t band) const;
-        [[nodiscard]] ScalarType calcDiffCapacity(ScalarType omegaW, ScalarType temperatureT);
+        [[nodiscard]] ScalarType calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT);
+        [[nodiscard]] ScalarType calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT);
+        [[nodiscard]] ScalarType calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT);
         void swap(PhononDOS& obj) noexcept;
     };
 
@@ -117,10 +119,29 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffCapacity(ScalarType omegaW, ScalarType temperatureT) {
+    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT) {
         const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
-        const ScalarType factor = omegaW / temperatureT;
-        return calcDOS(freq) * factor / (ScalarType(4) * temperatureT * square(sinh(factor * 0.5)));
+        const ScalarType x = omegaW / temperatureT * 0.5;
+        return calcDOS(freq) * square(x / sinh(x));
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT) {
+        const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
+        const ScalarType dos = calcDOS(freq);
+        const ScalarType zeroPointE = omegaW * 0.5;
+        const ScalarType helmholtz1 = temperatureT * ln(ScalarType(1) - exp(-omegaW / temperatureT));
+        return (zeroPointE + helmholtz1) * dos;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT) {
+        const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
+        const ScalarType dos = calcDOS(freq);
+        const ScalarType x = omegaW / temperatureT;
+        const ScalarType exp_x = exp(x);
+        const ScalarType temp = exp_x - ScalarType(1);
+        return (ln(temp) - x * exp_x / temp) * dos;
     }
 
     template<class ScalarType, class PosScalarType>

@@ -358,7 +358,7 @@ namespace Physica::Core {
     inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::OffDiagBaseVector
     WaterPolarTensor<ScalarType, UseDynamicPolar>::makeFactorXZ() {
         if constexpr (UseDynamicPolar) {
-            DiagBaseVector result{
+            OffDiagBaseVector result{
                 1.24322 * convertFactor2,
                 -0.36918 * convertFactor3,
                 2.06801 * convertFactor3,
@@ -375,7 +375,7 @@ namespace Physica::Core {
             return result;
         }
         else {
-            DiagBaseVector result{
+            OffDiagBaseVector result{
                 1.17904 * convertFactor2,
                 -0.37700 * convertFactor3,
                 1.85559 * convertFactor3,
