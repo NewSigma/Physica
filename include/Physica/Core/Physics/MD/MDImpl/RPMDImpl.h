@@ -277,21 +277,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::swap(RPMD& obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        cell.swap(obj.cell);
-        ringPolymer.swap(obj.ringPolymer);
-        forceBuffer.swap(obj.forceBuffer);
-
-        fftContract.swap(obj.fftContract);
-        posContract.swap(obj.posContract);
-        forceContract.swap(obj.forceContract);
-
-        temperatureT.swap(obj.temperatureT);
-        timeStep.swap(obj.timeStep);
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(const ForceModel& model) const {
         Vector<ScalarType> temp(getNumReplica());
@@ -300,31 +285,6 @@ namespace Physica::Core {
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         return mean(temp);
-    }
-
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
-    typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStress(const ForceModel& model) const {
-        const size_t dof = getDOF();
-        LatticeMatrix stress(Dim, Dim, 0);
-        for (size_t replica = 0; replica < 1; ++replica) {
-            const auto col = getPhaseMatrix().col(replica);
-            const auto momentum = col.head(dof);
-            const auto pos = col.tail(dof);
-            const auto force = forceBuffer.col(replica);
-            for (size_t i = 0; i < getNumParticle(); ++i) {
-                const size_t from = i * getDim();
-                const size_t to = from + getDim();
-                const ScalarType factor = reciprocal(getMassVec()[i]);
-                const auto momentum1 = momentum.segment(from, to);
-                const auto pos1 = pos.segment(from, to);
-                const auto force1 = force.segment(from, to);
-                stress += (factor * momentum1) * momentum1.transpose();
-            }
-        }
-        stress *= reciprocal(getVolume());
-        return stress + model.virial(makeAverageCell());
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -414,6 +374,73 @@ namespace Physica::Core {
         const ScalarType factor = getMassVec()[dofIndex / Dim] * square(omegaW) / ScalarType(getNumReplica());
         kinetic = (-kinetic * factor + repBeta) * 0.5;
         return kinetic;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class ForceModel, class Executor>
+    typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStress(const ForceModel& model) const {
+        LatticeMatrix stress(Dim, Dim, 0);
+        if constexpr (NumReplica == 1) {
+            const size_t dof = getDOF();
+            const auto col = getPhaseMatrix().col(0);
+            const auto momentum = col.head(dof);
+            for (size_t i = 0; i < getNumParticle(); ++i) {
+                const size_t from = i * Dim;
+                const size_t to = from + Dim;
+                const ScalarType repMass = reciprocal(getMassVec()[i / Dim]);
+                const auto atomMomentum = momentum.segment(from, to);
+                stress += (repMass * atomMomentum) * atomMomentum.transpose();
+            }
+            stress = stress * reciprocal(getVolume()) + model.virial(phaseToCell(0));
+        }
+        else {
+            const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
+            const ScalarType repVolume = reciprocal(getVolume());
+            const size_t dof = getDOF();
+            for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+                using Vector3D = Vector<ScalarType, 3>;
+                const auto col = getPhaseMatrix().col(replica);
+                const auto momentum = col.head(dof);
+                const auto pos = col.tail(dof);
+
+                const auto col1 = getPhaseMatrix().col((replica + 1) % getNumReplica());
+                const auto pos1 = col1.tail(dof);
+                LatticeMatrix temp(Dim, Dim, 0);
+                for (size_t i = 0; i < getNumParticle(); ++i) {
+                    const size_t from = i * Dim;
+                    const size_t to = from + Dim;
+                    const ScalarType mass = getMassVec()[i / Dim];
+                    const ScalarType repMass = reciprocal(mass);
+                    const auto atomMomentum = momentum.segment(from, to);
+                    temp += (repMass * atomMomentum) * atomMomentum.transpose();
+
+                    const auto atomPos = pos.segment(from, to);
+                    const auto atomPos1 = pos1.segment(from, to);
+                    const Vector3D deltaPos = atomPos - atomPos1;
+                    const ScalarType factorK = mass * squaredOmegaW;
+                    temp += (factorK * deltaPos) * deltaPos.transpose();
+                }
+                stress += temp * repVolume + model.virial(phaseToCell(replica));
+            }
+            stress *= reciprocal(ScalarType(getNumReplica()));
+        }
+        return stress;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::swap(RPMD& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        cell.swap(obj.cell);
+        ringPolymer.swap(obj.ringPolymer);
+        forceBuffer.swap(obj.forceBuffer);
+
+        fftContract.swap(obj.fftContract);
+        posContract.swap(obj.posContract);
+        forceContract.swap(obj.forceContract);
+
+        temperatureT.swap(obj.temperatureT);
+        timeStep.swap(obj.timeStep);
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

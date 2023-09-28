@@ -12,11 +12,11 @@ Physica is a high performance and scalable template library for computational ph
 
 ## Design philosophy
 
-1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. In Physica, we target on performance and scalability. Ease of use is taken secondary.
+1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. In Physica, we target on performance and scalability. The use of templates enables Physica face the challenge of heterogeneous computing. Ease of use is taken secondary if necessary.
 
 2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is mainly composed of several sets of header files. Codes that users do not need will not be compiled.
 
-3. Template meta algorithm: No seperate input file. Simulation parameters are declared as compile time constant. The program will choose best algorithm at compile time automatically making use of powerful C++ templates.
+3. Template meta algorithm: No seperate input file. Simulation parameters are declared as compile time constant. The program will choose best algorithm and parallization strategy at compile time automatically making use of powerful C++ templates.
 
 4. Self explaination: As little documents and comments as necessary. Documents and comments often lag behind codes. The Physica API are designed to match users' intuition.
 

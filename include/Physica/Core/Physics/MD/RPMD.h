@@ -130,7 +130,6 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType makeAverageCell() const;
 
         template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
-        template<class ForceModel> [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalPotentialEnergy(const ForceModel& model) const;
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
         [[nodiscard]] ScalarType calcClassicalElastic() const;
@@ -138,6 +137,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
         [[nodiscard]] ScalarType calcKineticPrim() const;
         [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
+        template<class ForceModel, class Executor> [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
