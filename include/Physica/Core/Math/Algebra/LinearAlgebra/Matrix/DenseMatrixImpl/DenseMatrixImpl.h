@@ -94,7 +94,7 @@ namespace Physica::Core {
             DataSpaceBase<SpaceType>& file_space,
             const H5::DSetMemXferPropList& xfer_plist) {
         static_assert(SpaceType::Dim == 2 || SpaceType::Dim == Dynamic, "[Error]: This is not a matrix data space");
-        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getMaxMinor()});
+        const auto mem_space = H5DataSpace<1>({Base::getMaxMinor()});
         for (size_t i = 0; i < Base::getMaxMajor(); ++i) {
             if constexpr (MatrixOption::isRowMatrix<This>()) {
                 auto row = Base::row(i);
@@ -116,7 +116,7 @@ namespace Physica::Core {
             DataSpaceBase<SpaceType>& file_space,
             const H5::DSetMemXferPropList& xfer_plist) const {
         static_assert(SpaceType::Dim == 2 || SpaceType::Dim == Dynamic, "[Error]: This is not a matrix data space");
-        const auto mem_space = H5DataSpace<1>::makeDataSpace({Base::getMaxMinor()});
+        const auto mem_space = H5DataSpace<1>({Base::getMaxMinor()});
         for (size_t i = 0; i < Base::getMaxMajor(); ++i) {
             if constexpr (MatrixOption::isRowMatrix<This>()) {
                 const auto row = Base::row(i);

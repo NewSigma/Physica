@@ -60,7 +60,7 @@ namespace Physica::Core {
             , numMPIProcess(numMPIProcess_) {
         std::ifstream fin(pathToInput);
         if (!fin)
-            throw IOException("[Error] No QE input file found");
+            throw IOException("[Error]: No QE input file found");
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <fstream>
+
 namespace Physica::Core {
     template<size_t Dim>
     class H5DataSet : public H5::DataSet {
@@ -35,6 +37,7 @@ namespace Physica::Core {
         using Base::operator=;
         /* Operations */
         void readStr(char* buffer) const;
+        void toFile(const char* path) const;
         /* Getters */
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
         [[nodiscard]] size_t getDim() const noexcept;
@@ -62,6 +65,14 @@ namespace Physica::Core {
     void H5DataSet<Dim>::readStr(char* buffer) const {
         Base::read(buffer, H5::PredType::NATIVE_CHAR);
         buffer[getSize(0)] = '\0';
+    }
+
+    template<size_t Dim>
+    void H5DataSet<Dim>::toFile(const char* path) const {
+        std::ofstream fout(path);
+        const auto size = getDataSpace().getSize(0);
+        auto buffer = Utils::Array<char>(size);
+        fout.write(buffer.data(), size);
     }
 
     template<size_t Dim>

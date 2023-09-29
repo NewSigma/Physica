@@ -45,6 +45,8 @@ namespace Physica::Core {
         H5File& operator=(H5File& obj);
         H5File& operator=(H5File&&) noexcept = delete;
         /* Operations */
+        using Base::createDataSet;
+        H5DataSet<1> createDataSet(const char* filepath, const char* name);
         template<size_t Dim>
         [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
     };

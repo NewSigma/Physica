@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/IO/HDF5/HDF5.h"
+#include "Physica/Core/Exception/IOException.h"
 
 namespace Physica::Core {
     H5File::H5File(
@@ -30,5 +31,21 @@ namespace Physica::Core {
     H5File& H5File::operator=(H5File& obj) {
         Base::operator=(obj);
         return *this;
+    }
+
+    H5DataSet<1> H5File::createDataSet(const char* filepath, const char* name) {
+        std::ifstream fin(filepath);
+        if (!fin)
+            throw IOException("[Error]: File not found");
+        fin.seekg(0, std::ios::end);
+        const hsize_t size = fin.tellg();
+        fin.seekg(0, std::ios::beg);
+
+        auto buffer = Utils::Array<char>(size);
+        fin.read(buffer.data(), size);
+        const auto space = H5DataSpace<1>({size});
+        auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);
+        dataset.write(buffer.data(), H5::PredType::NATIVE_CHAR);
+        return dataset;
     }
 }
