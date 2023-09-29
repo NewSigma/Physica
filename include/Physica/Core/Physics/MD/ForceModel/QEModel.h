@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/IO/Poscar.h"
-#include "Physica/Core/IO/QE_scf.h"
+#include "Physica/Core/IO/QE/PWscfOut.h"
 #include "Physica/Core/Exception/SyscallException.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumAtom() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
     private:
-        template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& input, Utils::TempFile<N>& output) const;
+        template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const;
     };
 
     template<class ScalarType, class PosScalarType>
@@ -73,25 +73,28 @@ namespace Physica::Core {
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> QEModel<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumAtom());
-        auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
-        /* Make input */ {
-            std::ofstream os(inputTmp.getName());
-            os << input.data() << '\n';
-            os << "CELL_PARAMETERS bohr\n";
-            os << cell.getLattice() << '\n';
-            os << "ATOMIC_POSITIONS bohr\n";
-            for (size_t i = 0; i < getNumAtom(); ++i) {
-                const auto row = cell.getPos().row(i);
-                os << PhyConst<SI>::elementSymbol[elementTypes[i]] << ' '
-                   << row[0] << ' '
-                   << row[1] << ' '
-                   << row[2] << '\n';
+        try {
+            auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
+            /* Make input */ {
+                std::ofstream os(inputTmp.getName());
+                os << input.data() << '\n';
+                os << "CELL_PARAMETERS bohr\n";
+                os << cell.getLattice() << '\n';
+                os << "ATOMIC_POSITIONS bohr\n";
+                for (size_t i = 0; i < getNumAtom(); ++i) {
+                    const auto row = cell.getPos().row(i);
+                    os << PhyConst<SI>::elementSymbol[elementTypes[i]] << ' '
+                    << row[0] << ' '
+                    << row[1] << ' '
+                    << row[2] << '\n';
+                }
             }
+            auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
+            run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
+            PWscfOut out_scf(outputTmp.getName(), getNumAtom());
+            return out_scf.getForce();
         }
-        auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
-        run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
-        QE_scf out_scf(outputTmp.getName(), getNumAtom());
-        return out_scf.getForce();
+        catch (std::exception& e) { throw e; }
     }
 
     template<class ScalarType, class PosScalarType>
@@ -111,7 +114,8 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     template<size_t N>
-    ProcessFuture QEModel<ScalarType, PosScalarType>::run_qe(Utils::TempFile<N>& input, Utils::TempFile<N>& output) const {
+    ProcessFuture QEModel<ScalarType, PosScalarType>::run_qe(
+            Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const {
         int fd[2];
         if (pipe(fd) == -1)
             throw SyscallException();

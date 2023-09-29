@@ -22,19 +22,19 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class QE_scf {
+    class PWscfOut {
         using ScalarType = Scalar<Double>;
 
         Vector<ScalarType> force;
     public:
-        QE_scf(const char* path, size_t numAtom);
-        QE_scf(const QE_scf&) = default;
-        QE_scf(QE_scf&&) noexcept = default;
-        ~QE_scf() = default;
+        PWscfOut(const char* path, size_t numAtom);
+        PWscfOut(const PWscfOut&) = default;
+        PWscfOut(PWscfOut&&) noexcept = default;
+        ~PWscfOut() = default;
         /* Operators */
-        QE_scf& operator=(QE_scf obj) noexcept;
+        PWscfOut& operator=(PWscfOut obj) noexcept;
         /* Operations */
-        void swap(QE_scf& obj) noexcept;
+        void swap(PWscfOut& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }

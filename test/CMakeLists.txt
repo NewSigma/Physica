@@ -15,6 +15,7 @@ physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
 physica_add_test(HDF5 Core/IO/HDF5.cpp)
 physica_add_test(Poscar Core/IO/Poscar.cpp)
+physica_add_test(PWscfIn Core/IO/PWscfIn.cpp)
 ## Math
 ### Algebra
 #### Equation Solver

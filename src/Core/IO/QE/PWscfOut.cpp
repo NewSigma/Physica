@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/QE_scf.h"
+#include "Physica/Core/IO/QE/PWscfOut.h"
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    QE_scf::QE_scf(const char* path, size_t numAtom) : force(3 * numAtom) {
+    PWscfOut::PWscfOut(const char* path, size_t numAtom) : force(3 * numAtom) {
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: No QE output file found");
@@ -34,17 +34,17 @@ namespace Physica::Core {
         readForce(fin, buffer);
     }
 
-    QE_scf& QE_scf::operator=(QE_scf obj) noexcept {
+    PWscfOut& PWscfOut::operator=(PWscfOut obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    void QE_scf::swap(QE_scf& obj) noexcept {
+    void PWscfOut::swap(PWscfOut& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         force.swap(obj.force);
     }
 
-    void QE_scf::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {
+    void PWscfOut::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());
