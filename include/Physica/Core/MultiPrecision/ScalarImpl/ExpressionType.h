@@ -22,7 +22,7 @@ namespace Physica::Core {
     /**
      * \class ExpressionType is used in implementation of expression template and auto differential.
      */
-    enum class ExpressionType {
+    enum class ExpressionType : char {
         Set,
         Assign,
         Minus,

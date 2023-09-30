@@ -21,9 +21,9 @@
 namespace Physica::Core {
     template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> abs(const Differentiable<ScalarType, Mode>& s) {
-        const ScalarType value = square(s.getValue());
+        const ScalarType value = abs(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {abs(s.getValue()), s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
+            return {value, s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const size_t index = tracer.pushOperation(value, ExpressionType::Abs);
@@ -48,20 +48,42 @@ namespace Physica::Core {
     template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> reciprocal(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType rep = reciprocal(s.getValue());
-        return {rep, -s.getTangent() * square(rep)};
+        if constexpr (Mode == DiffMode::Forward)
+            return {rep, -s.getTangent() * square(rep)};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(rep, ExpressionType::Reciprocal);
+            tracer.pushOperand(s.getTraceIndex());
+            return {rep, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
     __host__ __device__ Differentiable<ScalarType, Mode> sqrt(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = sqrt(s.getValue());
-        return {value, ScalarType(0.5) * s.getTangent() / value};
+        if constexpr (Mode == DiffMode::Forward)
+            return {value, ScalarType(0.5) * s.getTangent() / value};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Sqrt);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> cbrt(const Differentiable<ScalarType, Mode>& s) {
-        constexpr double Factor = 1.0 / 3;
         const ScalarType value = cbrt(s.getValue());
-        return {value, ScalarType(Factor) * value * s.getTangent() / s.getValue()};
+        if constexpr (Mode == DiffMode::Forward) {
+            constexpr double Factor = 1.0 / 3;
+            return {value, ScalarType(Factor) * value * s.getTangent() / s.getValue()};
+        }
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Cbrt);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
@@ -72,7 +94,14 @@ namespace Physica::Core {
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> exp(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = exp(s.getValue());
-        return {value, value * s.getTangent()};
+        if constexpr (Mode == DiffMode::Forward)
+            return {value, value * s.getTangent()};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Exp);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
@@ -93,7 +122,18 @@ namespace Physica::Core {
     void sincos(Differentiable<ScalarType, Mode> s, Differentiable<ScalarType, Mode>& sin_result, Differentiable<ScalarType, Mode>& cos_result) {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
-        sin_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
-        cos_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
+        if constexpr (Mode == DiffMode::Forward) {
+            sin_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
+            cos_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
+        }
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index_s = tracer.pushOperation(sin_value, ExpressionType::Sin);
+            tracer.pushOperand(s.getTraceIndex());
+            const size_t index_c = tracer.pushOperation(cos_value, ExpressionType::Cos);
+            tracer.pushOperand(s.getTraceIndex());
+            sin_result = Differentiable<ScalarType, Mode>(cos_value, index_c);
+            cos_result = Differentiable<ScalarType, Mode>(sin_value, index_s);
+        }
     }
 }

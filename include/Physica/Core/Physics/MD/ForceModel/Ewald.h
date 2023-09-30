@@ -49,6 +49,7 @@ namespace Physica::Core {
     class Ewald : public PairModel<Ewald<ScalarType, PosScalarType>> {
         constexpr static unsigned int Dim = 3;
         using Base = PairModel<Ewald<ScalarType, PosScalarType>>;
+        using PlainScalar = typename ScalarType::PlainScalar;
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
         using SearchRangeType = typename PeriodicCell<PosScalarType, Dim>::SearchRangeType;
@@ -151,7 +152,7 @@ namespace Physica::Core {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-        const ScalarType factor1 = reciprocal(square(ScalarType(2) * integralLimit));
+        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * integralLimit));
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
@@ -185,7 +186,7 @@ namespace Physica::Core {
         const size_t numParticle = getNumParticle();
         const ScalarType rSpaceSum = Base::potentialEnergy(lattice, pos);
         ScalarType kSpaceSum = 0;
-        const ScalarType factor = reciprocal(square(ScalarType(2) * integralLimit));
+        const ScalarType factor = reciprocal(square(PlainScalar(2) * integralLimit));
         PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
@@ -204,7 +205,7 @@ namespace Physica::Core {
                 }
             });
         kSpaceSum *= ScalarType(4 * M_PI) * inv_volume;
-        return (rSpaceSum + kSpaceSum) * 0.5 - selfEnergy;
+        return (rSpaceSum + kSpaceSum) * PlainScalar(0.5) - selfEnergy;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -232,11 +233,11 @@ namespace Physica::Core {
         const PosScalarType volume = PeriodicCell<PosScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(ScalarType(volume));
         initIntegralLimit(volume);
-        const ScalarType rSpaceCutoff = ScalarType(SumPrec) / integralLimit;
+        const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PosScalarType(ScalarType(SumPrec * 2) * integralLimit));
-        selfEnergy = square(charges).sum() * integralLimit / sqrt(ScalarType(M_PI))
-                   + square(charges.sum()) * ScalarType(M_PI) / (ScalarType(2) * square(integralLimit)) * inv_volume;
+        kSpaceSumRange = PeriodicCell<PosScalarType, Dim>::estimateRange(repCell.getLattice(), PlainScalar(SumPrec * 2) * integralLimit.getValue());
+        selfEnergy = square(charges).sum() * integralLimit / sqrt(PlainScalar(M_PI))
+                   + square(charges.sum()) * PlainScalar(M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
@@ -244,7 +245,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     inline ScalarType Ewald<ScalarType, PosScalarType>::force_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + 0.5;
+        const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
         const int index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -256,7 +257,7 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     inline ScalarType Ewald<ScalarType, PosScalarType>::pot_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + 0.5;
+        const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
         const int index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -267,14 +268,14 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::initIntegralLimit(PosScalarType volume) {
         const ScalarType averageCellSize = cbrt(ScalarType(volume));
-        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * M_PI) / averageCellSize;
+        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * ScalarType(M_PI)) / averageCellSize;
 
         const auto& repLatt = repCell.getLattice();
         const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
         const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
         const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * factor1;
+        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * PlainScalar(factor1);
         const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
         integralLimit = std::max(estimate, minLimit);
     }
@@ -282,12 +283,12 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::makeTables() {
         for (size_t i = 1; i < erfc_table.getLength(); ++i) {
-            ScalarType x = ScalarType((i - 1) * ErfcTableStep);
+            const auto x = PlainScalar((i - 1) * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
-        erfcStep = ScalarType(ErfcTableStep) / integralLimit;
+        erfcStep = PlainScalar(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
-        repDoubleSquareStep = reciprocal(square(erfcStep) * 2);
+        repDoubleSquareStep = reciprocal(square(erfcStep) * PlainScalar(2));
     }
 }

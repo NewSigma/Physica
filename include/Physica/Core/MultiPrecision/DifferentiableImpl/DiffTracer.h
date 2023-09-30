@@ -42,6 +42,8 @@ namespace Physica::Core {
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] size_t pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
         void reverse(size_t index);
+        void forget();
+        void release();
         /* Getters */
         [[nodiscard]] const RecordArray& getRecords() const noexcept { return records; }
         [[nodiscard]] size_t getNumRecord() const noexcept { return records.getLength(); }
@@ -61,6 +63,7 @@ namespace Physica::Core {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(operands.getLength() < (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source)
                 && "[Error]: Not enough operand slot for new operand");
+        assert(operand < records.getLength() && "[Error]: This operand is not registered");
         operands.append(operand);
         return *this;
     }
@@ -168,6 +171,19 @@ namespace Physica::Core {
                     throw NotImplementedException("[Error]: Undefined operator for back propagation");
             }
         }
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::forget() {
+        records.resize(0);
+        operands.resize(0);
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::release() {
+        forget();
+        records.squeeze();
+        operands.squeeze();
     }
 
     template<class ScalarType>

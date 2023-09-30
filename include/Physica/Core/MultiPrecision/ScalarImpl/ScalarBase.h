@@ -99,7 +99,7 @@ namespace Physica::Core {
             return this->getDerived();
         }
 
-        void store(ScalarType* p) const { *p = this->getDerived().getTrivial(); }
+        void store(ScalarType* p) const { *p = this->getDerived().getValue(); }
 
         Derived& load_partial(int n, const ScalarType* p) {
             if (n)

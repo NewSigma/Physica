@@ -81,7 +81,7 @@ namespace Physica::Core {
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
         /* Operators */
-        Differentiable& operator=(Differentiable obj) noexcept;
+        Differentiable& operator=(Differentiable obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] explicit operator float() const { return float(value); }
         [[nodiscard]] explicit operator double() const { return double(value); }
         [[nodiscard]] inline bool operator==(const This& other) const;
@@ -117,7 +117,7 @@ namespace Physica::Core {
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
         /* Operators */
-        Differentiable& operator=(Differentiable obj) noexcept;
+        Differentiable& operator=(Differentiable obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] explicit operator float() const { return float(value); }
         [[nodiscard]] explicit operator double() const { return double(value); }
         [[nodiscard]] inline bool operator==(const This& other) const;

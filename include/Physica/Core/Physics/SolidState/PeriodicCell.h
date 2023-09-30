@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iostream>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
@@ -46,6 +47,7 @@ namespace Physica::Core {
 
         using This = PeriodicCell<ScalarType, Dim>;
         using Base = Internal::PeriodicCellImpl;
+        using PlainScalar = typename ScalarType::PlainScalar;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
@@ -99,7 +101,7 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
-        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ScalarType cutoff);
+        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, PlainScalar cutoff);
         template<class Functor> static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
         template<class Functor> static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
@@ -367,10 +369,10 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     typename PeriodicCell<ScalarType, Dim>::SearchRangeType
-    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, ScalarType cutoff) {
+    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, PlainScalar cutoff) {
         const ReciprocalCell repCell(lattice);
         const auto& repLatt = repCell.getLattice();
-        const ScalarType factor = cutoff * (1 / (2 * M_PI));
+        const PlainScalar factor = cutoff * PlainScalar(1 / (2 * M_PI));
         SearchRangeType range{};
         if constexpr (Dim == 1) {
             range[0] = static_cast<ssize_t>(double(factor * repLatt.row(0).norm()) + 1);

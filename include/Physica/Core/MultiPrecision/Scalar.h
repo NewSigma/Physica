@@ -174,6 +174,7 @@ namespace Physica::Core {
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
     class Scalar<Float> : public ScalarBase<Scalar<Float>> {
+        using Base = ScalarBase<Scalar<Float>>;
     public:
         using ScalarType = Scalar<Float>;
         using device_obj_type = device_obj<ScalarType>;
@@ -189,6 +190,8 @@ namespace Physica::Core {
         Scalar(Scalar&&) noexcept = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
+        using Base::operator>;
+        using Base::operator<;
         Scalar& operator=(const Scalar& obj) = default;
         Scalar& operator=(Scalar&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const { return f; }
@@ -231,6 +234,7 @@ namespace Physica::Core {
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double> : public ScalarBase<Scalar<Double>> {
+        using Base = ScalarBase<Scalar<Double>>;
     public:
         using ScalarType = Scalar<Double>;
         using device_obj_type = device_obj<ScalarType>;
@@ -246,6 +250,8 @@ namespace Physica::Core {
         Scalar(Scalar&&) noexcept = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
+        using Base::operator>;
+        using Base::operator<;
         Scalar& operator=(const Scalar& obj) = default;
         Scalar& operator=(Scalar&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const { return d; }

@@ -37,10 +37,12 @@ namespace Physica::Core {
     class LJModel : public PairModel<LJModel<ScalarType, PosScalarType>> {
         using This = LJModel<ScalarType, PosScalarType>;
         using Base = PairModel<This>;
+        using typename Base::PlainScalar;
 
         ScalarType sigma;
+        ScalarType sigma1;
     public:
-        LJModel(ScalarType sigma_, ScalarType cutoff_);
+        LJModel(ScalarType sigma_, PlainScalar cutoff);
         LJModel(const LJModel&) = default;
         LJModel(LJModel&&) noexcept = default;
         ~LJModel() = default;
@@ -54,7 +56,11 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class PosScalarType>
-    LJModel<ScalarType, PosScalarType>::LJModel(ScalarType sigma_, ScalarType cutoff_) : Base(cutoff_), sigma(sigma_) {}
+    LJModel<ScalarType, PosScalarType>::LJModel(ScalarType sigma_, PlainScalar cutoff)
+            : Base(), sigma(std::move(sigma_)) {
+        sigma1 = PlainScalar(6) / sigma;
+        Base::setCutoff(std::move(cutoff));
+    }
 
     template<class ScalarType, class PosScalarType>
     LJModel<ScalarType, PosScalarType>& LJModel<ScalarType, PosScalarType>::operator=(LJModel obj) noexcept {
@@ -63,15 +69,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
-    inline ScalarType LJModel<ScalarType, PosScalarType>::force_functor(\
+    inline ScalarType LJModel<ScalarType, PosScalarType>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, PosScalarType r, [[maybe_unused]] PosScalarType r2) const {
-        const ScalarType rep_r = ScalarType(sigma) / r;
+        const ScalarType rep_r = sigma / r;
         const ScalarType rep_r2 = square(rep_r);
         const ScalarType rep_r4 = square(rep_r2);
         const ScalarType rep_r6 = rep_r4 * rep_r2;
         const ScalarType rep_r7 = rep_r6 * rep_r;
         const ScalarType rep_r13 = rep_r7 * rep_r6;
-        return rep_r13 * 2 - rep_r7;
+        return (rep_r13 * PlainScalar(2) - rep_r7) * sigma1;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -89,5 +95,6 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);
+        sigma1.swap(obj.sigma1);
     }
 }

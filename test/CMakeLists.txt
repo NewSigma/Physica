@@ -76,6 +76,7 @@ physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(IceGenerator Core/Physics/IceGenerator.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
 ### MD
+physica_add_test(PairModel Core/Physics/MD/ForceModel/PairModel.cpp)
 physica_add_test(Langevin Core/Physics/MD/Thermostat/Langevin.cpp)
 physica_add_test(MDCell Core/Physics/MD/MDCell.cpp)
 ### SolidState

@@ -52,13 +52,7 @@ namespace Physica::Core {
         DeviceMatrix forceBuffer;
         PageLockedVector swapBuffer;
     public:
-        device_obj() = default;
-        device_obj(size_t numParticle, ScalarType cutoff_);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
-        /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] __host__ __device__ ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
             return Base::getDerived().force_functor(i, j, r, r2);
@@ -80,6 +74,13 @@ namespace Physica::Core {
         __device__ void postForceKernelImpl();
         /* Getters */
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
+    protected:
+        device_obj() = default;
+        device_obj(size_t numParticle, ScalarType cutoff_);
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        /* Operators */
+        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
     };
 }
 
