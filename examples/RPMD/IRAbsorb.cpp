@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
@@ -60,10 +60,10 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     PosScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
     const PosScalarType latticeFactor(cbrt(cellVolume));
-    typename CrystalCell::LatticeMatrix lattice = CrystalCell::LatticeMatrix::unitMatrix(3);
+    typename CrystalCell<PosScalarType>::LatticeMatrix lattice = CrystalCell<PosScalarType>::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
-    typename CrystalCell::PositionMatrix pos(numAtom, 3);
+    typename CrystalCell<PosScalarType>::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
@@ -93,13 +93,13 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
         posH2 = posO + randomVector(gen);
     }
 
-    typename CrystalCell::AtomicArray atomicNumbers(numAtom);
+    typename CrystalCell<PosScalarType>::AtomicArray atomicNumbers(numAtom);
     for (size_t i = 0; i < maxIndexH; ++i)
         atomicNumbers[i] = 1;
     for (size_t i = maxIndexH; i < maxIndexO; ++i)
         atomicNumbers[i] = 8;
 
-    CrystalCell cell({std::move(lattice), std::move(pos), CrystalCell::Type::Cartesian}, std::move(atomicNumbers));
+    CrystalCell<PosScalarType> cell({std::move(lattice), std::move(pos), CrystalCell<PosScalarType>::Type::Cartesian}, std::move(atomicNumbers));
     cell.toSuperCell(cellSize, cellSize, cellSize);
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }
@@ -162,7 +162,7 @@ void testMD() {
         fout.close();
     }
     {
-        Poscar poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
+        Poscar<PosScalarType> poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), CrystalCell<PosScalarType>::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
         std::ofstream fout("H2O.vasp");
         fout << poscar;
         fout.close();

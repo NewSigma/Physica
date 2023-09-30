@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
@@ -30,7 +30,7 @@ namespace Physica {
     class Test {
     public:
         static void testCalcDensity() {
-            CrystalCell silicon({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {14});
+            CrystalCell<ScalarType> silicon({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
             BandGrid<ScalarType, false> bandGrid(silicon.reciprocal().getLattice(), 1, 1, 1, 14, 8);
             KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>> solver(silicon, 1.0, 4.5, bandGrid, 8);
 
@@ -54,7 +54,7 @@ void testSi() {
     constexpr double cutEnergyPsi = 0.8;
     constexpr double cutEnergyRho = 3.5;
     std::mt19937 gen{};
-    CrystalCell Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {14});
+    CrystalCell<ScalarType> Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
     Vector<ScalarType> data{-7.792391329, -1.041100405, -1.035201289, -1.034604466, 0.6683090416, 1.089343903, 1.092870102, 1.320171657, 1.333518296, 1.338267588, 2.048168732, 2.067794503, 2.068418852, 2.279423053, 2.296210041, 2.299139794, 2.319865956, 2.599589113, 2.607027813, 2.783839081, 3.224438445, 3.230179297, 3.239812718, 3.45520247, 3.466638718, 3.467162989, 3.613037906};
     {
         BandGrid<ScalarType, false> grid(Si.reciprocal().getLattice(), 1, 1, 1, 14, 8);

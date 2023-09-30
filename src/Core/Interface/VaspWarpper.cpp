@@ -38,7 +38,7 @@ namespace Physica::Core {
                              std::string pathToVasp_,
                              std::string workingDir,
                              std::string logFilePath_,
-                             Poscar poscar_)
+                             Poscar<ScalarType> poscar_)
             : pathToVasp(std::move(pathToVasp_))
             , vaspWorkingDir(std::move(workingDir))
             , logFilePath(std::move(logFilePath_))
@@ -96,7 +96,7 @@ namespace Physica::Core {
 
     Outcar VaspWarpper::getOutcar() const {
         std::string path = vaspWorkingDir + std::string("/OUTCAR");
-        return Outcar(path.c_str(), poscar.getAtomCount());
+        return Outcar(path.c_str(), poscar.getNumParticle());
     }
 
     void VaspWarpper::swap(VaspWarpper& vasp) noexcept {

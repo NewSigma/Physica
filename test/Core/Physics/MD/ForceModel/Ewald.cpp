@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
@@ -32,7 +32,7 @@ void VASPTest() {
     constexpr double prec = isFloat ? 2E-5 : 1E-5;
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
-    CrystalCell cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {14});
+    CrystalCell<ScalarType> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
     Ewald<ScalarType, ScalarType> ewald(cell.getLattice(), {4});
     const auto energy = ewald.potentialEnergy(cell.getPos());
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
@@ -48,7 +48,7 @@ void madelungTest() {
     using EwaldType = Ewald<ScalarType, ScalarType>;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
-        CrystalCell NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell<ScalarType> NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.0, 0.5, 0.5,
                             0.5, 0.0, 0.5,
@@ -57,7 +57,7 @@ void madelungTest() {
                             0.5, 0.0, 0.0,
                             0.0, 0.5, 0.0,
                             0.0, 0.0, 0.5
-                        }, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
+                        }, CrystalCell<ScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
         NaCl.toCartesian();
         EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialEnergy(NaCl.getPos());
@@ -68,10 +68,10 @@ void madelungTest() {
     }
     {
         const double lengthInBohr = 1;
-        CrystalCell CsCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell<ScalarType> CsCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.5, 0.5, 0.5,
-                         }, CrystalCell::Type::Cartesian}, {1, 1});
+                         }, CrystalCell<ScalarType>::Type::Cartesian}, {1, 1});
         EwaldType ewald(CsCl.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
@@ -81,10 +81,10 @@ void madelungTest() {
     }
     {
         const double lengthInBohr = 0.5;
-        CrystalCell ZnS({{0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
+        CrystalCell<ScalarType> ZnS({{0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
                             0.0, 0.0, 0.0,
                             0.25, 0.25, 0.25,
-                        }, CrystalCell::Type::Direct}, {1, 1});
+                        }, CrystalCell<ScalarType>::Type::Direct}, {1, 1});
         ZnS.toCartesian();
         EwaldType ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(ZnS.getPos());
@@ -101,9 +101,8 @@ void forceTest() {
     constexpr double prec = isFloat ? 2E-1 : 1E-3; //Poor precision at single precision mode
 
     using Executor = SequentialExecutor;
-    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell::PositionMatrix;
-    using ScalarType_ = typename CrystalCell::ScalarType;
+    using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
+    using PositionMatrix = typename CrystalCell<ScalarType>::PositionMatrix;
     LatticeMatrix lattice{
         4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
         2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
@@ -123,16 +122,16 @@ void forceTest() {
         5.658125877,  4.686541080,  17.23267174,
         3.052176714,  2.816649675,  2.054240227
     };
-    lattice *= reciprocal(ScalarType_(PhyConst<SI>::bohrRadius * 1E10));
-    pos *= reciprocal(ScalarType_(PhyConst<SI>::bohrRadius * 1E10));
-    const Ewald<ScalarType, ScalarType_> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+    lattice *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
+    pos *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
+    const Ewald<ScalarType, ScalarType> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     const auto force1 = ewald.template force<Executor>(pos);
     Vector<ScalarType> force2(force1.getLength());
     /* Force from finite differential */ {
         for (size_t i = 0; i < force2.getLength(); ++i) {
             force2[i] = -Differential<ScalarType>::ridders([i, &pos, &ewald](ScalarType x) -> ScalarType {
                 PositionMatrix temp = pos;
-                *(temp.begin() + i) = ScalarType_(x);
+                *(temp.begin() + i) = ScalarType(x);
                 return ewald.potentialEnergy(temp);
             }, pos.flatten().calc(i), 0.3);
         }

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
@@ -48,7 +48,10 @@ namespace Physica::Core {
         InvLatticeMatrix invLattice;
     public:
         explicit MDCell(size_t numParticle);
-        MDCell(CrystalCell cell);
+        template<class OtherScalar>
+        MDCell(CrystalCell<OtherScalar> cell);
+        template<class OtherScalar>
+        MDCell(Poscar<OtherScalar> poscar);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
         void scale(PosScalarType factor);
@@ -85,7 +88,8 @@ namespace Physica::Core {
     MDCell<ScalarType, PosScalarType, Dim>::MDCell(size_t numParticle) : Base(numParticle), massVec(numParticle) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
-    MDCell<ScalarType, PosScalarType, Dim>::MDCell(CrystalCell cell) {
+    template<class OtherScalar>
+    MDCell<ScalarType, PosScalarType, Dim>::MDCell(CrystalCell<OtherScalar> cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
@@ -98,6 +102,10 @@ namespace Physica::Core {
         }
         normalize();
     }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class OtherScalar>
+    MDCell<ScalarType, PosScalarType, Dim>::MDCell(Poscar<OtherScalar> poscar) : MDCell(CrystalCell<OtherScalar>(poscar)) {}
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     MDCell<ScalarType, PosScalarType, Dim>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)

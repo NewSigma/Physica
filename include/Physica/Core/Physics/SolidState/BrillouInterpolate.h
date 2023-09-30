@@ -39,7 +39,7 @@ namespace Physica::Core {
         using ComplexType = typename ScalarType::ComplexType;
         using LatticeMatrix = typename PeriodicCell<RealType, Dim>::LatticeMatrix;
         using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
-        using Vector3D = typename GridBase::VectorType;
+        using Vector3D = Vector<RealType, 3>;
 
         RSpaceGrid<ComplexType> baseCoeff;
         LatticeMatrix lattice;
@@ -248,7 +248,7 @@ namespace Physica::Core {
             else
                 baseCoeff(index) = reciprocal(RealType(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
         };
-        GridBase::forPointIndexInGrid<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        GridBase::forPointIndexInGrid<RealType, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
     }
     /**
      * Matrix M as defined in [1]

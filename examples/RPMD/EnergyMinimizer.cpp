@@ -26,6 +26,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
+using PoscarType = Poscar<Scalar<Float>>;
 using Optimizer = SteepestDescent<ScalarType, Dynamic>;
 using Minimizer = EnergyMinimizer<ScalarType, ScalarType>;
 using MDCellType = typename Minimizer::MDCellType;
@@ -52,14 +53,14 @@ const static char* data1 = "\n"
                            "-1.101659656  5.738564014   2.43592453\n"
                            "-7.258571434  12.59273052  17.58112335\n";
 
-Poscar makePoscar() {
+PoscarType makePoscar() {
     auto tmp = Physica::Utils::TempFile("/tmp/tmpXXXXXX");
     {
         std::ofstream fout(tmp.getName());
         fout << data1;
     }
     std::ifstream fin(tmp.getName());
-    Poscar poscar{};
+    PoscarType poscar{};
     fin >> poscar;
     return poscar;
 }

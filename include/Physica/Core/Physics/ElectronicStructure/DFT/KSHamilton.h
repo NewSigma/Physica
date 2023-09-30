@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "DensityGrid.h"
 
 namespace Physica::Core {
@@ -37,7 +37,7 @@ namespace Physica::Core {
         using FFT3D = FFT<ScalarType, 3>;
     private:
         HermiteMatrix hamiltonH;
-        CrystalCell cell;
+        CrystalCell<ScalarType> cell;
         LatticeMatrix repLatt;
         ScalarType cutEnergyPsi;
         ScalarType cutEnergyRho;
@@ -47,7 +47,7 @@ namespace Physica::Core {
         FFT3D fft_rho;
         FFT3D fft_xc;
     public:
-        KSHamilton(CrystalCell cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_);
+        KSHamilton(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_);
         KSHamilton(const KSHamilton&) = default;
         KSHamilton(KSHamilton&&) noexcept = default;
         ~KSHamilton() = default;
@@ -65,7 +65,7 @@ namespace Physica::Core {
 
         void swap(KSHamilton& obj);
         /* Getters */
-        [[nodiscard]] const CrystalCell& getCrystalCell() const noexcept { return cell; }
+        [[nodiscard]] const CrystalCell<ScalarType>& getCrystalCell() const noexcept { return cell; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
         [[nodiscard]] ScalarType getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
@@ -79,7 +79,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool IsSpinPolarized>
-    KSHamilton<ScalarType, IsSpinPolarized>::KSHamilton(CrystalCell cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_)
+    KSHamilton<ScalarType, IsSpinPolarized>::KSHamilton(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_)
             : cell(std::move(cell_))
             , cutEnergyPsi(cutEnergyPsi_)
             , cutEnergyRho(cutEnergyRho_) {

@@ -16,11 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 using namespace Physica::Core;
-using MDCellType = MDCell<Scalar<Double>, Scalar<Double>>;
+using ScalarType = Scalar<Double>;
+using MDCellType = MDCell<ScalarType, ScalarType>;
+using CrystalCellType = CrystalCell<ScalarType>;
+using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
+using PositionMatrix = typename CrystalCellType::PositionMatrix;
 
 bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
     if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))
@@ -31,13 +35,11 @@ bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double preci
 }
 
 int main() {
-    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell::PositionMatrix;
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
 
-    const CrystalCell cell1({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 2});
-    CrystalCell cell2 = cell1;
+    const CrystalCellType cell1({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 2});
+    CrystalCellType cell2 = cell1;
     cell2.toCartesian();
 
     MDCellType md1(cell1);

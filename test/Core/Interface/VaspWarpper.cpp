@@ -21,6 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
+using PoscarType = Poscar<ScalarType>;
 extern const char* outcar;
 
 namespace Physica::Core {
@@ -31,20 +32,20 @@ namespace Physica::Core {
                 fout << outcar;
             }
 
-            typename Poscar::LatticeMatrix lattice{3.063970000, 0.000000000, 0.000000000,
-                                                  1.355640000, 5.017130000, 0.000000000,
-                                                  0.305250000,-1.140470000, 5.195960000};
-            typename Poscar::PositionMatrix pos{0.019030000, 0.733400000, 0.307890000,
-                                                0.885690000, 0.173690000, 0.053420000,
-                                                0.637770000, 0.665250000, 0.810840000,
-                                                0.325570000, 0.191560000, 0.558340000,
-                                                0.042760000, 0.898360000, 0.689770000,
-                                                0.297330000, 0.406950000, 0.941480000,
-                                                0.734410000, 0.424230000, 0.428290000,
-                                                0.456810000, 0.939370000, 0.176470000};
+            typename PoscarType::LatticeMatrix lattice{3.063970000, 0.000000000, 0.000000000,
+                                                       1.355640000, 5.017130000, 0.000000000,
+                                                       0.305250000,-1.140470000, 5.195960000};
+            typename PoscarType::PositionMatrix pos{0.019030000, 0.733400000, 0.307890000,
+                                                    0.885690000, 0.173690000, 0.053420000,
+                                                    0.637770000, 0.665250000, 0.810840000,
+                                                    0.325570000, 0.191560000, 0.558340000,
+                                                    0.042760000, 0.898360000, 0.689770000,
+                                                    0.297330000, 0.406950000, 0.941480000,
+                                                    0.734410000, 0.424230000, 0.428290000,
+                                                    0.456810000, 0.939370000, 0.176470000};
             VaspWarpper vasp{};
             vasp.vaspWorkingDir = "/tmp";
-            vasp.poscar = Poscar({std::move(lattice), std::move(pos), CrystalCell::Type::Direct}, {20, 8}, {2, 6});
+            vasp.poscar = PoscarType({std::move(lattice), std::move(pos), PoscarType::Type::Direct}, {20, 8}, {2, 6});
             vasp.future = Test::makeDummyFuture();
             return vasp;
         }

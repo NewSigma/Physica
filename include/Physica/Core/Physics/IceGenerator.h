@@ -27,34 +27,35 @@ namespace Physica::Core {
      * References:
      * [1] M. Matsumoto, T. Yagasaki, H. Tanaka. GenIce: Hydrogen-Disordered Ice Generator.[J]. J. Comput. Chem. 2017, DOI: 10.1002/jcc.25077
      */
+    template<class ScalarType>
     class IceGenerator {
-        using ScalarType = typename CrystalCell::ScalarType;
-        using PositionMatrix = typename CrystalCell::PositionMatrix;
+        using PositionMatrix = typename PeriodicCell<ScalarType, 3>::PositionMatrix;
         using Vector3D = Vector<ScalarType, 3>;
+        using CrystalCellType = CrystalCell<ScalarType>;
         constexpr static double BondLengthOH = PhyConst<AU>::angstormToBohr(1);
 
-        CrystalCell initialCell;
+        CrystalCellType initialCell;
         ScalarType maxDistOO;
         ScalarType maxDistOH;
         Utils::Array<bool> isHydrogenOccupied;
         Utils::Array<unsigned char> numHydrogenRequired;
     public:
         IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_);
-        IceGenerator(CrystalCell initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
+        IceGenerator(CrystalCellType initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
         IceGenerator(const IceGenerator&) = default;
         IceGenerator(IceGenerator&&) noexcept = default;
         ~IceGenerator() = default;
         /* Operators */
         IceGenerator& operator=(IceGenerator obj) noexcept;
         /* Operations */
-        Utils::Array<CrystalCell> exhaust();
-        template<class RandomGenerator> CrystalCell makeRand(RandomGenerator& gen);
-        template<class RandomGenerator> CrystalCell makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
+        Utils::Array<CrystalCellType> exhaust();
+        template<class RandomGenerator> CrystalCellType makeRand(RandomGenerator& gen);
+        template<class RandomGenerator> CrystalCellType makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
         template<class RandomGenerator> Utils::Array<size_t> randRing(RandomGenerator& gen) const;
-        CrystalCell makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const;
+        CrystalCellType makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const;
         void swap(IceGenerator& obj) noexcept;
         /* Setters */
-        void setInitialCell(CrystalCell cell);
+        void setInitialCell(CrystalCellType cell);
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
     private:
@@ -72,7 +73,7 @@ namespace Physica::Core {
         void searchForPairs(PositionMatrix& pos);
         size_t getIndexToPair() const;
         template<class RandomGenerator> void randUninitializedH(PositionMatrix& pos, RandomGenerator& gen);
-        void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCell>& result);
+        void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCellType>& result);
         /* Getters */
         [[nodiscard]] size_t getEndIndexH() const noexcept { return getNumMolecule() * 2U; }
         [[nodiscard]] size_t getStartIndexO() const noexcept { return getEndIndexH(); }
@@ -85,177 +86,6 @@ namespace Physica::Core {
 
         friend class ::Physica::Test;
     };
-
-    template<class RandomGenerator>
-    CrystalCell IceGenerator::makeRand(RandomGenerator& gen) {
-        PositionMatrix pos = prepareRun();;
-        searchDanglingH(pos);
-        while (!isFinished()) {
-            const size_t randO = makeRandEmptyO(gen);
-            const size_t randH = makeRandFreeH(randO, gen);
-            fetchHydrogen(pos, randO, randH);
-            searchForPairs(pos);
-        }
-        randUninitializedH(pos, gen);
-        CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-        result.normalize();
-        return result;
-    }
-
-    template<class RandomGenerator>
-    CrystalCell IceGenerator::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
-        assert(numDefect < getNumMolecule());
-        PositionMatrix pos = initialCell.getPos();
-
-        Utils::Array<size_t> permutation(getNumMolecule());
-        for (size_t i = 0; i < permutation.getLength(); ++i)
-            permutation[i] = i;
-
-        for (unsigned int i = 0; i < numDefect; ++i) {
-            size_t indexDefectO;
-            /* Random molecular */ {
-                std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1 - i);
-                const size_t randIndex = dist(gen);
-                indexDefectO = permutation[randIndex];
-                std::swap(permutation[randIndex], permutation[getNumMolecule() - 1 - i]);
-            }
-            auto otherO = findOInRadius(indexDefectO, maxDistOO);
-            const auto hydrogenInMolecular = findHydrogenInMolecule(indexDefectO);
-            {
-                std::uniform_int_distribution<size_t> dist(0, otherO.getLength() - 1);
-                const size_t randIndexO = otherO[dist(gen)];
-                const size_t randIndexH = (gen() % 2U == 0) ? hydrogenInMolecular.first : hydrogenInMolecular.second;
-                auto row = pos.row(randIndexH);
-                const Vector3D delta = initialCell.minDistVector(getStartIndexO() + indexDefectO, randIndexO);
-                row = pos.row(getStartIndexO() + indexDefectO) + delta * (ScalarType(BondLengthOH) / delta.norm());
-            }
-        }
-        CrystalCell result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCell::Type::Cartesian);
-        result.normalize();
-        return result;
-    }
-    /**
-     * Reference:
-     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
-     */
-    template<class RandomGenerator>
-    Utils::Array<size_t> IceGenerator::randRing(RandomGenerator& gen) const {
-        Utils::Array<size_t> ring{};
-        size_t ringStart = 0;
-        {
-            std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
-            const size_t randMolecule = dist(gen);
-            ring.append(randMolecule);
-        }
-
-        bool isRingGenerated = false;
-        while(!isRingGenerated) {
-            const size_t lastMolecule = ring[ring.getLength() - 1];
-            const auto pair = findHydrogenInMolecule(lastMolecule);
-            const auto bondH = findBondedH(lastMolecule);
-            const bool isBondedH1 = std::find(bondH.begin(), bondH.end(), pair.first) != bondH.end();
-            const bool isBondedH2 = std::find(bondH.begin(), bondH.end(), pair.second) != bondH.end();
-            size_t indexH = 0;
-            if (isBondedH1 && isBondedH2)
-                indexH = gen() % 2 == 0 ? pair.first : pair.second;
-            else if (isBondedH1 || isBondedH2)
-                indexH = isBondedH1 ? pair.first : pair.second;
-            else
-                return Utils::Array<size_t>{};
-            
-            size_t nextIndexO = getNumMolecule();
-            /* Find next oxygen */ {
-                const auto range = CrystalCell::estimateRange(initialCell.getLattice(), maxDistOO);
-                const ScalarType squaredRadiusO = square(maxDistOO);
-                const size_t indexO = getStartIndexO() + lastMolecule;
-                ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
-                for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
-                    const ScalarType r2 = initialCell.minDistVector(i, indexO).squaredNorm();
-                    const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
-                    const bool isInRange = r2 < squaredRadiusO;
-                    if (isNotSelf && isInRange) {
-                        const ScalarType squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();
-                        if (squaredDist < minSquaredDist) {
-                            minSquaredDist = squaredDist;
-                            nextIndexO = i;
-                        }
-                    }
-                }
-            }
-            const size_t nextMolecule = nextIndexO - getStartIndexO();
-            for (size_t i = 0; i < ring.getLength(); ++i) {
-                if (nextMolecule == ring[i]) {
-                    ringStart = i;
-                    isRingGenerated = true;
-                    goto done;
-                }
-            }
-            ring.append(nextMolecule);
-        done:;
-        }
-
-        Utils::Array<size_t> result(ring.getLength() - ringStart);
-        for (size_t i = 0; i < result.getLength(); ++i)
-            result[i] = ring[i + ringStart];
-        return result;
-    }
-
-    template<class RandomGenerator>
-    size_t IceGenerator::makeRandEmptyO(RandomGenerator& gen) const {
-        std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
-        size_t result = dist(gen);
-        for (size_t i = 0; i < getNumMolecule(); ++i) {
-            const auto hInRange = findBondedH(result);
-            const size_t numFreeH = countFreeH(hInRange);
-            const bool isOxygenEmpty = numHydrogenRequired[result] != 0;
-            if (isOxygenEmpty && numFreeH != 0)
-                break;
-            result = (result + 1U) % getNumMolecule();
-        }
-        assert(numHydrogenRequired[result] != 0);
-        return result;
-    }
-
-    template<class RandomGenerator>
-    size_t IceGenerator::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
-        assert(indexO < getNumMolecule());
-        const auto hInRange = findBondedH(indexO);
-        size_t randLogicIndex;
-        /* Rand index */ {
-            const size_t numFreeH = countFreeH(hInRange);
-            assert(numFreeH > numHydrogenRequired[indexO]);
-            std::uniform_int_distribution<size_t> dist(0, numFreeH - 1);
-            randLogicIndex = dist(gen);
-        }
-        size_t logicIndex = 0;
-        for (size_t physicalIndex = 0; physicalIndex < hInRange.getLength(); ++physicalIndex) {
-            const bool isFree = isHydrogenOccupied[hInRange[physicalIndex]] == false;
-            if (isFree && logicIndex == randLogicIndex)
-                return hInRange[physicalIndex];
-            logicIndex += isFree;
-        }
-        [[maybe_unused]] constexpr bool ShouldNotReachHere = false;
-        assert(ShouldNotReachHere);
-        return hInRange[0];
-    }
-
-    template<class RandomGenerator>
-    void IceGenerator::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
-        for (size_t i = 0; i < getNumMolecule(); ++i) {
-            while (numHydrogenRequired[i] != 0) {
-                auto row = pos.row(i * 2U + (2U - numHydrogenRequired[i]));
-                row = initialCell.getPos().row(i + getStartIndexO()).asVector() + randUnitVector(gen) * ScalarType(BondLengthOH);
-                numHydrogenRequired[i] -= 1;
-            }
-        }
-    }
-
-    template<class RandomGenerator>
-    typename IceGenerator::Vector3D IceGenerator::randUnitVector(RandomGenerator& gen) {
-        std::uniform_real_distribution dist{};
-        const ScalarType theta(dist(gen) * M_PI);
-        const ScalarType phi(dist(gen) * M_PI * 2);
-        Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-        return result;
-    }
 }
+
+#include "IceGeneratorImpl.h"

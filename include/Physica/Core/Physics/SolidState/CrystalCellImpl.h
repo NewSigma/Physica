@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,20 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/IO/Poscar.h"
 
 namespace Physica::Core {
-    CrystalCell::CrystalCell(Base base, AtomicArray atomicNumbers_)
+    template<class ScalarType>
+    CrystalCell<ScalarType>::CrystalCell(Base base, AtomicArray atomicNumbers_)
             : Base(std::move(base))
             , atomicNumbers(std::move(atomicNumbers_)) {
-        assert(pos.getRow() == atomicNumbers.getLength());
+        assert(Base::pos.getRow() == atomicNumbers.getLength());
     }
 
-    CrystalCell::CrystalCell(Poscar poscar) : Base(std::move(poscar)) {
+    template<class ScalarType>
+    template<class OtherScalar>
+    CrystalCell<ScalarType>::CrystalCell(Poscar<OtherScalar> poscar) : Base(std::move(poscar)) {
         assert(poscar.isElementTypeInitialized());
-        atomicNumbers.reserve(getNumParticle());
+        atomicNumbers.reserve(Base::getNumParticle());
         size_t index = 0;
         for (auto num : poscar.getNumOfEachType()) {
             const uint8_t type = poscar.getElementTypes()[index];
@@ -39,14 +44,16 @@ namespace Physica::Core {
         }
     }
 
-    CrystalCell& CrystalCell::operator=(CrystalCell cell) noexcept {
+    template<class ScalarType>
+    CrystalCell<ScalarType>& CrystalCell<ScalarType>::operator=(CrystalCell cell) noexcept {
         swap(cell);
         return *this;
     }
 
-    void CrystalCell::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
+    template<class ScalarType>
+    void CrystalCell<ScalarType>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        Base::toSuperCell<ExtendCellOption::DOFMajor>(x, y, z);
+        Base::template toSuperCell<ExtendCellOption::DOFMajor>(x, y, z);
         
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
@@ -61,29 +68,34 @@ namespace Physica::Core {
         atomicNumbers.swap(new_atomic);
     }
 
-    CrystalCell CrystalCell::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+    template<class ScalarType>
+    CrystalCell<ScalarType> CrystalCell<ScalarType>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         CrystalCell result = *this;
         result.toSuperCell(x, y, z);
         return result;
     }
 
-    std::unordered_set<uint16_t> CrystalCell::getSpecies() const noexcept {
+    template<class ScalarType>
+    std::unordered_set<uint16_t> CrystalCell<ScalarType>::getSpecies() const noexcept {
         std::unordered_set<uint16_t> set{};
         for (size_t i = 0; i < atomicNumbers.getLength(); ++i)
             set.emplace(atomicNumbers[i]);
         return set;
     }
 
-    size_t CrystalCell::getElectronCount() const {
+    template<class ScalarType>
+    size_t CrystalCell<ScalarType>::getElectronCount() const {
         size_t result = 0;
         for (size_t i = 0; i < getAtomCount(); ++i)
             result += getAtomicNumber(i);
         return result;
     }
 
-    void CrystalCell::swap(CrystalCell& cell) noexcept {
+    template<class ScalarType>
+    void CrystalCell<ScalarType>::swap(CrystalCell& cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
     }
 }
+

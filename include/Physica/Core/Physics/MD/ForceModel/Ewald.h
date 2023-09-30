@@ -21,7 +21,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Utils/TestHelper.h"

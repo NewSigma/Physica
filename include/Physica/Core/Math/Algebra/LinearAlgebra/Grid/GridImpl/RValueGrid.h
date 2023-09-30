@@ -29,7 +29,6 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using typename GridBase::Index3D;
     public:
         /* Operations */
         template<class OtherDerived>
@@ -47,10 +46,12 @@ namespace Physica::Core {
         using GridBase::forPointInGrid;
         using GridBase::forPointIndexInGrid;
         using GridBase::forIndexInGrid;
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointInGrid(const RValueGrid& grid, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        inline static void forPointIndexInGrid(const RValueGrid& grid, const LatticeMatrix& lattice, Functor func);
+        template<class PosScalarType, bool IsUnitLattice, class Functor>
+        inline static void forPointInGrid(
+                const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func);
+        template<class PosScalarType, bool IsUnitLattice, class Functor>
+        inline static void forPointIndexInGrid(
+                const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func);
     };
 
     template<class Derived>
@@ -62,15 +63,17 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void RValueGrid<Derived>::forPointInGrid(const RValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        return forPointInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+    template<class PosScalarType, bool IsUnitLattice, class Functor>
+    inline void RValueGrid<Derived>::forPointInGrid(
+            const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func) {
+        return forPointInGrid<PosScalarType, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>
-    template<bool IsUnitLattice, class Functor>
-    inline void RValueGrid<Derived>::forPointIndexInGrid(const RValueGrid& grid, const LatticeMatrix& lattice, Functor func) {
-        forPointIndexInGrid<IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+    template<class PosScalarType, bool IsUnitLattice, class Functor>
+    inline void RValueGrid<Derived>::forPointIndexInGrid(
+            const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func) {
+        forPointIndexInGrid<PosScalarType, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 }
 

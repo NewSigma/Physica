@@ -19,7 +19,7 @@
 #include <iostream>
 #include <fstream>
 #include "Physica/Core/IO/Poscar.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
@@ -48,13 +48,13 @@ const static char* data2 = "Structure\n"
                            "0.00 0.00 0.00\n"
                            "0.25 0.25 0.25";
 
-Poscar readTest1() {
+Poscar<Scalar<Double>> readTest1() {
     auto tmp = TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
     os.close();
 
-    Poscar poscar{};
+    Poscar<Scalar<Double>> poscar{};
     std::ifstream is(tmp.getName());
     is >> poscar;
     is.close();
@@ -74,7 +74,7 @@ void readTest2() {
     os << data2;
     os.close();
 
-    Poscar poscar{};
+    Poscar<Scalar<Float>> poscar{};
     std::ifstream is(tmp.getName());
     is >> poscar;
     is.close();
@@ -82,9 +82,10 @@ void readTest2() {
 
 int main() {
     {
-        Poscar poscar = readTest1();
+        using PoscarType = Poscar<Scalar<Double>>;
+        PoscarType poscar = readTest1();
 
-        typename Poscar::LatticeMatrix mat = poscar.getLattice();
+        typename PoscarType::LatticeMatrix mat = poscar.getLattice();
         poscar.standrizeLattice();
         if (!matrixNear(mat, poscar.getLattice(), 1E-15))
             return 1;
@@ -93,12 +94,14 @@ int main() {
         readTest2();
     }
     {
-        typename CrystalCell::LatticeMatrix lattice{
+        using ScalarType = Scalar<Float>;
+        using CrystalCellType = CrystalCell<ScalarType>;
+        typename CrystalCellType::LatticeMatrix lattice{
             -4.6635062604325164,   -0.2499522611778955,    0.0000000000000000,
             -2.1629745970109657,   -4.1943944839773311,    0.0000000000000000,
             -0.2750800827878018,   -0.4169789280520980,   18.0000000000000000
         };
-        typename CrystalCell::PositionMatrix pos {
+        typename CrystalCellType::PositionMatrix pos {
             0.4553508091084409,  0.3980437584135783,  0.1240303800896787,
             0.4937103263031835,  0.4030549988960055,  0.9488679230950712,
             0.5596918259357793,  0.8517822319914985,  0.1226285591691945,
@@ -112,8 +115,8 @@ int main() {
             0.7021261874138659,  0.9803177844871507,  0.9573706719037773,
             0.3512600170478342,  0.6392493670479714,  0.1141244566914832
         };
-        const CrystalCell unit({std::move(lattice), std::move(pos), CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-        Poscar poscar(unit);
+        const CrystalCellType unit({std::move(lattice), std::move(pos), CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+        Poscar<ScalarType> poscar(unit);
         const auto& numOfEachType = poscar.getNumOfEachType();
         if (numOfEachType[0] != 8 || numOfEachType[1] != 4)
             return 1;

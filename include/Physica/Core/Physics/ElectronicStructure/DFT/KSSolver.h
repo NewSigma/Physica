@@ -35,7 +35,7 @@ namespace Physica::Core {
         constexpr static bool IsSpinPolarized = XCProvider::IsSpinPolarized;
         using ComplexType = ComplexScalar<ScalarType>;
         using Vector3D = Vector<ScalarType, 3>;
-        using RepCellType = ReciprocalCell<typename CrystalCell::ScalarType>;
+        using RepCellType = ReciprocalCell<ScalarType>;
         using BandType = BandGrid<ScalarType, IsSpinPolarized>;
         using HamiltonType = KSHamilton<ScalarType, IsSpinPolarized>;
         using EigenSolverType = SpinPair<JacobiDavidson<ComplexType>, IsSpinPolarized>;
@@ -62,7 +62,7 @@ namespace Physica::Core {
 
         FFT3D fft;
     public:
-        KSSolver(CrystalCell cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_, BandType band_, size_t numBand);
+        KSSolver(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_, BandType band_, size_t numBand);
         KSSolver(const KSSolver&) = default;
         KSSolver(KSSolver&&) noexcept = default;
         ~KSSolver() = default;
@@ -96,7 +96,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class XCProvider>
     KSSolver<ScalarType, XCProvider>::KSSolver(
-                CrystalCell cell_,
+                CrystalCell<ScalarType> cell_,
                 ScalarType cutEnergyPsi_,
                 ScalarType cutEnergyRho_,
                 BandType band_,

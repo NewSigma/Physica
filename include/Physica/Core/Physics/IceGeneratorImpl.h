@@ -1,0 +1,527 @@
+/*
+ * Copyright 2023 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <algorithm>
+#include "Physica/Core/Physics/IceGenerator.h"
+#include "Physica/Core/Physics/PhyConst.h"
+
+namespace Physica::Core {
+    template<class ScalarType>
+    IceGenerator<ScalarType>::IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_)
+            : maxDistOO(maxDistOO_)
+            , maxDistOH(maxDistOH_) {}
+
+    template<class ScalarType>
+    IceGenerator<ScalarType>::IceGenerator(CrystalCellType initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
+            : IceGenerator(maxDistOO_, maxDistOH_) {
+        assert(initialCell.getNumParticle() % 3U == 0);
+        setInitialCell(std::move(initialCell_));
+    }
+
+    template<class ScalarType>
+    IceGenerator<ScalarType>& IceGenerator<ScalarType>::operator=(IceGenerator obj) noexcept {
+        swap(obj);
+        return *this;
+    }
+
+    template<class ScalarType>
+    Utils::Array<typename IceGenerator<ScalarType>::CrystalCellType> IceGenerator<ScalarType>::exhaust() {
+        Utils::Array<CrystalCellType> result{};
+        PositionMatrix pos = prepareRun();
+        searchDanglingH(pos);
+        exhaustImpl(0, pos, result);
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeRand(RandomGenerator& gen) {
+        PositionMatrix pos = prepareRun();;
+        searchDanglingH(pos);
+        while (!isFinished()) {
+            const size_t randO = makeRandEmptyO(gen);
+            const size_t randH = makeRandFreeH(randO, gen);
+            fetchHydrogen(pos, randO, randH);
+            searchForPairs(pos);
+        }
+        randUninitializedH(pos, gen);
+        CrystalCellType result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCellType::Type::Cartesian);
+        result.normalize();
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
+        assert(numDefect < getNumMolecule());
+        PositionMatrix pos = initialCell.getPos();
+
+        Utils::Array<size_t> permutation(getNumMolecule());
+        for (size_t i = 0; i < permutation.getLength(); ++i)
+            permutation[i] = i;
+
+        for (unsigned int i = 0; i < numDefect; ++i) {
+            size_t indexDefectO;
+            /* Random molecular */ {
+                std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1 - i);
+                const size_t randIndex = dist(gen);
+                indexDefectO = permutation[randIndex];
+                std::swap(permutation[randIndex], permutation[getNumMolecule() - 1 - i]);
+            }
+            auto otherO = findOInRadius(indexDefectO, maxDistOO);
+            const auto hydrogenInMolecular = findHydrogenInMolecule(indexDefectO);
+            {
+                std::uniform_int_distribution<size_t> dist(0, otherO.getLength() - 1);
+                const size_t randIndexO = otherO[dist(gen)];
+                const size_t randIndexH = (gen() % 2U == 0) ? hydrogenInMolecular.first : hydrogenInMolecular.second;
+                auto row = pos.row(randIndexH);
+                const Vector3D delta = initialCell.minDistVector(getStartIndexO() + indexDefectO, randIndexO);
+                row = pos.row(getStartIndexO() + indexDefectO) + delta * (ScalarType(BondLengthOH) / delta.norm());
+            }
+        }
+        CrystalCellType result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCellType::Type::Cartesian);
+        result.normalize();
+        return result;
+    }
+    /**
+     * Reference:
+     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     */
+    template<class ScalarType>
+    template<class RandomGenerator>
+    Utils::Array<size_t> IceGenerator<ScalarType>::randRing(RandomGenerator& gen) const {
+        Utils::Array<size_t> ring{};
+        size_t ringStart = 0;
+        {
+            std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
+            const size_t randMolecule = dist(gen);
+            ring.append(randMolecule);
+        }
+
+        bool isRingGenerated = false;
+        while(!isRingGenerated) {
+            const size_t lastMolecule = ring[ring.getLength() - 1];
+            const auto pair = findHydrogenInMolecule(lastMolecule);
+            const auto bondH = findBondedH(lastMolecule);
+            const bool isBondedH1 = std::find(bondH.begin(), bondH.end(), pair.first) != bondH.end();
+            const bool isBondedH2 = std::find(bondH.begin(), bondH.end(), pair.second) != bondH.end();
+            size_t indexH = 0;
+            if (isBondedH1 && isBondedH2)
+                indexH = gen() % 2 == 0 ? pair.first : pair.second;
+            else if (isBondedH1 || isBondedH2)
+                indexH = isBondedH1 ? pair.first : pair.second;
+            else
+                return Utils::Array<size_t>{};
+            
+            size_t nextIndexO = getNumMolecule();
+            /* Find next oxygen */ {
+                const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
+                const ScalarType squaredRadiusO = square(maxDistOO);
+                const size_t indexO = getStartIndexO() + lastMolecule;
+                ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
+                for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+                    const ScalarType r2 = initialCell.minDistVector(i, indexO).squaredNorm();
+                    const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
+                    const bool isInRange = r2 < squaredRadiusO;
+                    if (isNotSelf && isInRange) {
+                        const ScalarType squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();
+                        if (squaredDist < minSquaredDist) {
+                            minSquaredDist = squaredDist;
+                            nextIndexO = i;
+                        }
+                    }
+                }
+            }
+            const size_t nextMolecule = nextIndexO - getStartIndexO();
+            for (size_t i = 0; i < ring.getLength(); ++i) {
+                if (nextMolecule == ring[i]) {
+                    ringStart = i;
+                    isRingGenerated = true;
+                    goto done;
+                }
+            }
+            ring.append(nextMolecule);
+        done:;
+        }
+
+        Utils::Array<size_t> result(ring.getLength() - ringStart);
+        for (size_t i = 0; i < result.getLength(); ++i)
+            result[i] = ring[i + ringStart];
+        return result;
+    }
+    /**
+     * Reference:
+     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     */
+    template<class ScalarType>
+    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeRingMove(
+                const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const {
+        const bool isInvalidRing = ring.getLength() == 0;
+        if (isInvalidRing)
+            return initialCell;
+
+        PositionMatrix pos = initialCell.getPos();
+        for (size_t bead = 0; bead < ring.getLength(); ++bead) {
+            const size_t lastBead = bead == 0 ? ring.getLength() - 1 : bead - 1;
+            const size_t nextBead = bead == ring.getLength() - 1 ? 0 : bead + 1;
+            const size_t indexO = getStartIndexO() + ring[bead];
+            const size_t indexLastO = getStartIndexO() + ring[lastBead];
+            const size_t indexNextO = getStartIndexO() + ring[nextBead];
+            const Vector3D vecO2O1 = initialCell.minDistVector(indexO, indexLastO);
+            const Vector3D vecO2O3 = initialCell.minDistVector(indexO, indexNextO);
+
+            const auto pair = findHydrogenInMolecule(ring[bead]);
+            const size_t indexH1 = findHydrogenBetweenO(indexO, indexNextO);
+            const size_t indexH2 = pair.first == indexH1 ? pair.second : pair.first;
+            assert(indexH1 == pair.first || indexH1 == pair.second);
+
+            const Vector3D vecO2H2 = initialCell.minDistVector(indexO, indexH2);
+            ScalarType angle;
+            {
+                const Vector3D v1 = vecO2H2.crossProduct(vecO2O1);
+                const Vector3D v2 = vecO2H2.crossProduct(vecO2O3);
+                angle = v1.angleTo(v2);
+            }
+            const Vector3D vecO2H1 = initialCell.minDistVector(indexO, indexH1);
+            const Vector3D cross = vecO2O1.crossProduct(vecO2O3);
+            const ScalarType dot = cross * vecO2H2;
+            if (dot.isNegative())
+                angle = -angle;
+            pos.row(indexH1) = pos.row(indexO) + rotate(angle, vecO2H2, vecO2H1);
+            momentumMat.row(indexH1) = rotate(angle, vecO2H2, momentumMat.row(indexH1));
+        }
+        CrystalCellType result({initialCell.getLattice(), std::move(pos), CrystalCellType::Type::Cartesian}, initialCell.getAtomicNumbers());
+        result.normalize();
+        return result;
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::swap(IceGenerator& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        initialCell.swap(obj.initialCell);
+        std::swap(maxDistOO, obj.maxDistOO);
+        std::swap(maxDistOH, obj.maxDistOH);
+        isHydrogenOccupied.swap(obj.isHydrogenOccupied);
+        numHydrogenRequired.swap(obj.numHydrogenRequired);
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::setInitialCell(CrystalCellType cell) {
+        initialCell.swap(cell);
+        if (initialCell.getType() == CrystalCellType::Type::Direct)
+            initialCell.toCartesian();
+        isHydrogenOccupied.resize(getEndIndexH());
+        numHydrogenRequired.resize(getNumMolecule());
+    }
+
+    template<class ScalarType>
+    typename IceGenerator<ScalarType>::PositionMatrix IceGenerator<ScalarType>::prepareRun() {
+        for (auto& elem : isHydrogenOccupied)
+            elem = false;
+        for (auto& elem : numHydrogenRequired)
+            elem = 2U;
+        return initialCell.getPos();
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::searchDanglingH(PositionMatrix& pos) {
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            const auto pair = findHydrogenInMolecule(i);
+            const auto hInRadius = findBondedH(i);
+            const bool isDanglingH1 = std::find(hInRadius.begin(), hInRadius.end(), pair.first) == hInRadius.end();
+            const bool isDanglingH2 = std::find(hInRadius.begin(), hInRadius.end(), pair.second) == hInRadius.end();
+            if (isDanglingH1)
+                fetchHydrogen(pos, i, pair.first);
+
+            if (isDanglingH2)
+                fetchHydrogen(pos, i, pair.second);
+        }
+    }
+
+    template<class ScalarType>
+    Utils::Array<size_t> IceGenerator<ScalarType>::findOInRadius(size_t indexO, ScalarType radius) const {
+        Utils::Array<size_t> result{};
+        const ScalarType squaredRadiusO = square(radius);
+        for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+            const size_t shiftIndexO = getStartIndexO() + indexO;
+            if (i == shiftIndexO)
+                continue;
+            const bool isInRadius = initialCell.minDistVector(shiftIndexO, i).squaredNorm() < squaredRadiusO;
+            if (isInRadius)
+                result.append(i);
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    Utils::Array<size_t> IceGenerator<ScalarType>::findBondedH(size_t indexMolecule) const {
+        const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
+        Utils::Array<size_t> result{};
+        CrystalCellType::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D delta) {
+            const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
+            const ScalarType squaredRadiusO = square(maxDistOO);
+            const size_t indexO = getStartIndexO() + indexMolecule;
+
+            for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
+                const Vector3D otherO = initialCell.getPos().row(i) + delta;
+                const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
+                const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
+                const bool isInRange = r2 < squaredRadiusO;
+                if (isNotSelf && isInRange) {
+                    const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);
+                    for (size_t j = 0; j < getEndIndexH(); ++j) {
+                        const bool isHInRange = initialCell.minDistVector(middle, j).squaredNorm() < squaredRadiusH;
+                        const bool isOccupied = std::find(result.cbegin(), result.cend(), j) != result.cend();
+                        if (isHInRange && !isOccupied)
+                            result.append(j);
+                    }
+                }
+            }
+        });
+        return result;
+    }
+
+    template<class ScalarType>
+    Utils::Array<size_t> IceGenerator<ScalarType>::findFreeBondedHInRadius(size_t indexO) const {
+        Utils::Array<size_t> result{};
+        const auto hInRange = findBondedH(indexO);
+        for (auto h : hInRange)
+            if (!isHydrogenOccupied[h])
+                result.append(h);
+        return result;
+    }
+
+    template<class ScalarType>
+    std::pair<size_t, size_t> IceGenerator<ScalarType>::findHydrogenInMolecule(size_t indexMolecule) const {
+        ScalarType minSquaredDist1 = std::numeric_limits<ScalarType>::max();
+        ScalarType minSquaredDist2 = std::numeric_limits<ScalarType>::max();
+        size_t indexH1 = 0;
+        size_t indexH2 = 1;
+        for (size_t i = 0; i < getEndIndexH(); ++i) {
+            const ScalarType squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexMolecule).squaredNorm();
+            if (squaredDist < minSquaredDist1) {
+                indexH1 = i;
+                minSquaredDist1 = squaredDist;
+            }
+            else if (squaredDist < minSquaredDist2) {
+                indexH2 = i;
+                minSquaredDist2 = squaredDist;
+            }
+
+            if (minSquaredDist1 < minSquaredDist2) {
+                std::swap(minSquaredDist1, minSquaredDist2);
+                std::swap(indexH1, indexH2);
+            }
+        }
+        return {indexH1, indexH2};
+    }
+
+    template<class ScalarType>
+    size_t IceGenerator<ScalarType>::findHydrogenBetweenO(size_t indexO1, size_t indexO2) const {
+        ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
+        const Vector3D delta = initialCell.minDistVector(indexO1, indexO2);
+        const Vector3D middle = initialCell.getPos().row(indexO1) + delta * ScalarType(0.5);
+        size_t result = 0;
+        for (size_t i = 0; i < getEndIndexH(); ++i) {
+            const ScalarType squaredDist = initialCell.minDistVector(middle, i).squaredNorm();
+            if (squaredDist < minSquaredDist) {
+                minSquaredDist = squaredDist;
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    size_t IceGenerator<ScalarType>::makeRandEmptyO(RandomGenerator& gen) const {
+        std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
+        size_t result = dist(gen);
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            const auto hInRange = findBondedH(result);
+            const size_t numFreeH = countFreeH(hInRange);
+            const bool isOxygenEmpty = numHydrogenRequired[result] != 0;
+            if (isOxygenEmpty && numFreeH != 0)
+                break;
+            result = (result + 1U) % getNumMolecule();
+        }
+        assert(numHydrogenRequired[result] != 0);
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    size_t IceGenerator<ScalarType>::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
+        assert(indexO < getNumMolecule());
+        const auto hInRange = findBondedH(indexO);
+        size_t randLogicIndex;
+        /* Rand index */ {
+            const size_t numFreeH = countFreeH(hInRange);
+            assert(numFreeH > numHydrogenRequired[indexO]);
+            std::uniform_int_distribution<size_t> dist(0, numFreeH - 1);
+            randLogicIndex = dist(gen);
+        }
+        size_t logicIndex = 0;
+        for (size_t physicalIndex = 0; physicalIndex < hInRange.getLength(); ++physicalIndex) {
+            const bool isFree = isHydrogenOccupied[hInRange[physicalIndex]] == false;
+            if (isFree && logicIndex == randLogicIndex)
+                return hInRange[physicalIndex];
+            logicIndex += isFree;
+        }
+        [[maybe_unused]] constexpr bool ShouldNotReachHere = false;
+        assert(ShouldNotReachHere);
+        return hInRange[0];
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
+        assert(!isHydrogenOccupied[indexH]);
+        assert(numHydrogenRequired[indexO] > 0);
+        
+        const size_t shiftIndexO = getStartIndexO() + indexO;
+        Vector3D delta = initialCell.minDistVector(shiftIndexO, indexH);
+        delta.toUnit();
+        delta *= ScalarType(BondLengthOH);
+        auto row = pos.row(indexO * 2U + (2U - numHydrogenRequired[indexO]));
+        row = initialCell.getPos().row(shiftIndexO).asVector() + delta;
+
+        isHydrogenOccupied[indexH] = true;
+        numHydrogenRequired[indexO] -= 1;
+    }
+
+    template<class ScalarType>
+    size_t IceGenerator<ScalarType>::countFreeH(const Utils::Array<size_t>& hIndexes) const {
+        size_t numFreeH = 0;
+        for (auto h : hIndexes)
+            numFreeH += isHydrogenOccupied[h] == false;
+        return numFreeH;
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::searchForPairs(PositionMatrix& pos) {
+        size_t indexO = getIndexToPair();
+        bool isValidIndex = indexO != getNumMolecule();
+        while (isValidIndex) {
+            const auto hInRange = findBondedH(indexO);
+            for (auto h : hInRange) {
+                if (!isHydrogenOccupied[h])
+                    fetchHydrogen(pos, indexO, h);
+            }
+            indexO = getIndexToPair();
+            isValidIndex = indexO != getNumMolecule();
+        }
+    }
+
+    template<class ScalarType>
+    size_t IceGenerator<ScalarType>::getIndexToPair() const {
+        for (size_t indexO = 0; indexO < getNumMolecule(); ++indexO) {
+            const auto hInRange = findBondedH(indexO);
+            const size_t numFreeH = countFreeH(hInRange);
+            if (numFreeH > 0 && numFreeH == numHydrogenRequired[indexO])
+                return indexO;
+        }
+        return getNumMolecule();
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    void IceGenerator<ScalarType>::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            while (numHydrogenRequired[i] != 0) {
+                auto row = pos.row(i * 2U + (2U - numHydrogenRequired[i]));
+                row = initialCell.getPos().row(i + getStartIndexO()).asVector() + randUnitVector(gen) * ScalarType(BondLengthOH);
+                numHydrogenRequired[i] -= 1;
+            }
+        }
+    }
+
+    template<class ScalarType>
+    void IceGenerator<ScalarType>::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCellType>& result) {
+        const bool recursionStop = stackDepth == getNumMolecule();
+        if (recursionStop) {
+            CrystalCellType cell({initialCell.getLattice(), pos, CrystalCellType::Type::Cartesian}, initialCell.getAtomicNumbers());
+            cell.normalize();
+            result.append(std::move(cell));
+            return;
+        }
+
+        const unsigned char numNeedH = numHydrogenRequired[stackDepth];
+        if (numNeedH == 0) {
+            exhaustImpl(stackDepth + 1, pos, result);
+            return;
+        }
+
+        const auto freeH = findFreeBondedHInRadius(stackDepth);
+        if (freeH.getLength() < numNeedH)
+            return;
+
+        for (size_t j = 0; j < freeH.getLength() - 1; ++j) {
+            PositionMatrix copy = pos;
+            fetchHydrogen(copy, stackDepth, freeH[j]);
+            if (numNeedH == 2U) {
+                for (size_t k = j + 1; k < freeH.getLength(); ++k) {
+                    PositionMatrix copy1 = copy;
+                    fetchHydrogen(copy1, stackDepth, freeH[k]);
+                    exhaustImpl(stackDepth + 1, copy1, result);
+
+                    numHydrogenRequired[stackDepth] += 1;
+                    isHydrogenOccupied[freeH[k]] = false;
+                }
+            }
+            else
+                exhaustImpl(stackDepth + 1, copy, result);
+
+            numHydrogenRequired[stackDepth] += 1;
+            isHydrogenOccupied[freeH[j]] = false;
+        }
+    }
+
+    template<class ScalarType>
+    bool IceGenerator<ScalarType>::isFinished() const noexcept {
+        for (size_t i = 0; i < getNumMolecule(); ++i) {
+            const auto hInRange = findBondedH(i);
+            const size_t numFreeH = countFreeH(hInRange);
+            if (numFreeH != 0 && numHydrogenRequired[i] != 0)
+                return false;
+        }
+        return true;
+    }
+
+    template<class ScalarType>
+    typename IceGenerator<ScalarType>::Vector3D IceGenerator<ScalarType>::rotate(ScalarType angle, Vector3D axis, Vector3D target) {
+        const ScalarType factor1 = cos(angle);
+
+        const Vector3D parallel = (target * axis / axis.squaredNorm()) * axis;
+        const Vector3D verticle = target - parallel;
+        const Vector3D verticle2 = parallel.crossProduct(verticle);
+        ScalarType factor2 = sin(angle) / parallel.norm();
+        return Vector3D(parallel + factor1 * verticle + factor2 * verticle2);
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    typename IceGenerator<ScalarType>::Vector3D IceGenerator<ScalarType>::randUnitVector(RandomGenerator& gen) {
+        std::uniform_real_distribution dist{};
+        const ScalarType theta(dist(gen) * M_PI);
+        const ScalarType phi(dist(gen) * M_PI * 2);
+        Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        return result;
+    }
+}

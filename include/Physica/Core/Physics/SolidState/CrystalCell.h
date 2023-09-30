@@ -22,20 +22,22 @@
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
-    class Poscar;
+    template<class ScalarType> class Poscar;
 
-    class CrystalCell final : public PeriodicCell<Scalar<Float>, 3> {
+    template<class ScalarType>
+    class CrystalCell final : public PeriodicCell<ScalarType, 3> {
     public:
-        using Base = PeriodicCell<Scalar<Float>, 3>;
-        using ScalarType = Scalar<Float>;
+        using Base = PeriodicCell<ScalarType, 3>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
+        using typename Base::Type;
     private:
         AtomicArray atomicNumbers;
     public:
         CrystalCell() = default;
         CrystalCell(Base base, AtomicArray atomicNumbers_);
-        CrystalCell(Poscar poscar);
+        template<class OtherScalar>
+        CrystalCell(Poscar<OtherScalar> poscar);
         CrystalCell(const CrystalCell&) = default;
         CrystalCell(CrystalCell&&) noexcept = default;
         ~CrystalCell() = default;
@@ -45,8 +47,8 @@ namespace Physica::Core {
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         /* Getters */
+        using Base::getType;
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
-        [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return Base::pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
@@ -57,3 +59,5 @@ namespace Physica::Core {
         using Base::toSuperCell;
     };
 }
+
+#include "CrystalCellImpl.h"

@@ -25,8 +25,8 @@
 namespace Physica::Core {
     template<class ScalarType, bool IsSpinPolarized>
     class DensityGrid {
-        using VectorType = typename RSpaceGrid<ScalarType>::VectorType;
-        using LatticeMatrix = typename RSpaceGrid<ScalarType>::LatticeMatrix;
+        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
+        using Vector3D = Vector<ScalarType, 3>;
         using GridType = RSpaceGrid<ScalarType>;
     public:
         using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
@@ -42,7 +42,7 @@ namespace Physica::Core {
         ~DensityGrid() = default;
         /* Oprators */
         DensityGrid& operator=(DensityGrid obj) noexcept;
-        [[nodiscard]] ScalarType operator()(SpinState spin, VectorType pos) const;
+        [[nodiscard]] ScalarType operator()(SpinState spin, Vector3D pos) const;
         /* Operations */
         void initDensity(ScalarType averageRho);
         inline void initDensity(const DensityGrid& rho);
@@ -68,8 +68,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsSpinPolarized>
-    ScalarType DensityGrid<ScalarType, IsSpinPolarized>::operator()(SpinState spin, VectorType pos) const {
-        using PosScalarType = typename VectorType::ScalarType;
+    ScalarType DensityGrid<ScalarType, IsSpinPolarized>::operator()(SpinState spin, Vector3D pos) const {
+        using PosScalarType = typename Vector3D::ScalarType;
         assert(PosScalarType(0) <= pos[0] && pos[0] <= PosScalarType(1));
         assert(PosScalarType(0) <= pos[1] && pos[1] <= PosScalarType(1));
         assert(PosScalarType(0) <= pos[2] && pos[2] <= PosScalarType(1));
@@ -133,7 +133,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSpinPolarized>
     void DensityGrid<ScalarType, IsSpinPolarized>::fit(const DensityGrid& rho) {
         const LatticeMatrix latt = LatticeMatrix::unitMatrix(3);
-        auto kernel = [this, &rho](VectorType pos, Index3D index) {
+        auto kernel = [this, &rho](Vector3D pos, Index3D index) {
             {
                 auto& rho_up = getTotalDensity();
                 rho_up(index) = rho(SpinState::Up, pos);
@@ -143,7 +143,7 @@ namespace Physica::Core {
                 rho_down(index) = rho(SpinState::Down, pos);
             }
         };
-        RSpaceGrid<ScalarType>::template forPointIndexInGrid<true, decltype(kernel)>(getTotalDensity(), latt, kernel);
+        RSpaceGrid<ScalarType>::template forPointIndexInGrid<ScalarType, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
         {
             auto rho_up_new = getTotalDensity().flatten();
             const auto& rho_up_old = rho.getTotalDensity().flatten();

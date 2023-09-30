@@ -16,16 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
 using namespace Physica::Core;
+using ScalarType = Scalar<Float>;
+using CrystalCellType = CrystalCell<ScalarType>;
+using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
+using PositionMatrix = typename CrystalCellType::PositionMatrix;
 
 int main() {
-    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell::PositionMatrix;
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};
     const PositionMatrix pos{0.25, 0.25, 0.25, 0.25, 0.75, 0.75, 0.5, 0.5, 0.5};
-    const CrystalCell cell_direct({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 8});
+    const CrystalCellType cell_direct({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 8});
 
     const LatticeMatrix answer_lattice{3, 0, 0, 4, 6, 0, 4, 5, 6};
     const PositionMatrix answer_pos{
@@ -49,7 +51,7 @@ int main() {
         0.8333333333333333, 0.7500000000000000, 0.5000000000000000
     };
     const Physica::Utils::Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
-    CrystalCell supercell_direct = cell_direct.makeSuperCell(3, 2, 1);
+    CrystalCellType supercell_direct = cell_direct.makeSuperCell(3, 2, 1);
     if (!matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15))
         return 1;
     if (!matrixNear(answer_pos, supercell_direct.getPos(), 1E-15))
@@ -58,7 +60,7 @@ int main() {
         if (answer_atomic[i] != supercell_direct.getAtomicNumber(i))
             return 1;
 
-    CrystalCell supercell_cartesian = cell_direct.makeSuperCell(3, 2, 1);
+    CrystalCellType supercell_cartesian = cell_direct.makeSuperCell(3, 2, 1);
     supercell_cartesian.toCartesian();
     if (!matrixNear(answer_lattice, supercell_cartesian.getLattice(), 1E-15))
         return 1;

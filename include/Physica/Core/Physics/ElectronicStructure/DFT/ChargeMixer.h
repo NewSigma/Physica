@@ -33,7 +33,7 @@ namespace Physica::Core {
         constexpr static double bmix = 0.8; //Refer to [1]
         constexpr static double amin = 0.4; //Refer to VASP wiki
         constexpr static double pulay_mix = 0.4;
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
+        using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
         using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
         using DensityArray = Utils::Array<DensityType, DIISBufferSize>;
         using FFT3D = FFT<ScalarType, 3>;
@@ -111,7 +111,7 @@ namespace Physica::Core {
                 const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
                 kSpace(index) *= factor;
             };
-            GridType::template forPointIndexInGrid<true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
+            GridType::template forPointIndexInGrid<ScalarType, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();

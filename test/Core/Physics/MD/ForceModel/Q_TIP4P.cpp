@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
@@ -50,6 +50,7 @@ Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
 
 template<class RandomGenerator>
 MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+    using CrystalCellType = CrystalCell<PosScalarType>;
     constexpr size_t MoleculePerCell = 4;
     constexpr size_t maxIndexH = MoleculePerCell * 2;
     constexpr size_t maxIndexO = MoleculePerCell * 3;
@@ -57,10 +58,10 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     PosScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
     const PosScalarType latticeFactor(cbrt(cellVolume));
-    typename CrystalCell::LatticeMatrix lattice = CrystalCell::LatticeMatrix::unitMatrix(3);
+    typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
-    typename CrystalCell::PositionMatrix pos(numAtom, 3);
+    typename CrystalCellType::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
@@ -90,13 +91,13 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
         posH2 = posO + randomVector(gen);
     }
 
-    typename CrystalCell::AtomicArray atomicNumbers(numAtom);
+    typename CrystalCellType::AtomicArray atomicNumbers(numAtom);
     for (size_t i = 0; i < maxIndexH; ++i)
         atomicNumbers[i] = 1;
     for (size_t i = maxIndexH; i < maxIndexO; ++i)
         atomicNumbers[i] = 8;
 
-    CrystalCell cell({std::move(lattice), std::move(pos), CrystalCell::Type::Cartesian}, std::move(atomicNumbers));
+    CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
     cell.toSuperCell(cellSize, cellSize, cellSize);
     return MDCell<ScalarType, PosScalarType>(std::move(cell));
 }

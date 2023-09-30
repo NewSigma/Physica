@@ -19,13 +19,13 @@
 #pragma once
 
 #include <iosfwd>
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
 namespace Physica::Core {
     class Xdatcar;
-    class CrystalCell;
 
-    class Poscar final : public PeriodicCell<typename CrystalCell::ScalarType, 3> {
+    template<class ScalarType>
+    class Poscar final : public PeriodicCell<ScalarType, 3> {
     public:
         enum CrystalSystem : char {
             Triclinic,
@@ -37,20 +37,25 @@ namespace Physica::Core {
             Cubic
         };
 
-        using Base = PeriodicCell<typename CrystalCell::ScalarType, 3>;
-        using ScalarType = typename CrystalCell::ScalarType;
-        using Type = typename CrystalCell::Type;
+        using Base = PeriodicCell<ScalarType, 3>;
+        using LatticeMatrix = typename Base::LatticeMatrix;
+        using Type = typename Base::Type;
         using ElementTypeArray = Utils::Array<uint8_t>;
     private:
+        using Base::lattice;
+        using Base::pos;
+        using Base::type;
         ElementTypeArray elementTypes;
         Utils::Array<size_t> numOfEachType;
     public:
         Poscar();
         Poscar(Base base, ElementTypeArray elementTypes_, Utils::Array<size_t> numOfEachType_);
-        Poscar(CrystalCell cell);
+        Poscar(CrystalCell<ScalarType> cell);
         /* Operators */
-        friend std::ostream& operator<<(std::ostream& os, const Poscar& poscar);
-        friend std::istream& operator>>(std::istream& is, Poscar& poscar);
+        template<class AnyScalar>
+        friend std::ostream& operator<<(std::ostream& os, const Poscar<AnyScalar>& poscar);
+        template<class AnyScalar>
+        friend std::istream& operator>>(std::istream& is, Poscar<AnyScalar>& poscar);
         /* Operations */
         void standrizeLattice();
         void extendInZ(ScalarType factor);
@@ -60,7 +65,6 @@ namespace Physica::Core {
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
-        [[nodiscard]] size_t getAtomCount() const noexcept { return pos.getRow(); }
         /* Helpers */
         void swap(Poscar& poscar) noexcept;
     private:
@@ -76,10 +80,4 @@ namespace Physica::Core {
     };
 }
 
-namespace std {
-    template<>
-    inline void swap<Physica::Core::Poscar>(
-            Physica::Core::Poscar& car1, Physica::Core::Poscar& car2) noexcept {
-        car1.swap(car2);
-    }
-}
+#include "PoscarImpl.h"

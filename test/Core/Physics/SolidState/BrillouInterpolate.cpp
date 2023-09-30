@@ -36,7 +36,7 @@ const static char* data = "Structure\n"
                            "3.818733454   3.418268919   3.002308846";
 
 int main() {
-    Poscar poscar{};
+    Poscar<ScalarType> poscar{};
     {
         auto tmp = TempFile("/tmp/tmpXXXXXX");
         std::ofstream os(tmp.getName());

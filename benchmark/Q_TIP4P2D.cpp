@@ -19,7 +19,7 @@
 #include <iostream>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
@@ -41,8 +41,9 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 
 MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
-    using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell::PositionMatrix;
+    using CrystalCellType = CrystalCell<PosScalarType>;
+    using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
+    using PositionMatrix = typename CrystalCellType::PositionMatrix;
     const LatticeMatrix lattice{
         -4.6635062604325164,   -0.2499522611778955,    0.0000000000000000,
         -2.1629745970109657,   -4.1943944839773311,    0.0000000000000000,
@@ -63,7 +64,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
         0.3512600170478342,  0.6392493670479714,  0.1141244566914832
     };
 
-    CrystalCell cell({lattice, pos, CrystalCell::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+    CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     cell.toSuperCell(cellSize, cellSize, 1);
     cell.toCartesian();

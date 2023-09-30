@@ -19,25 +19,26 @@
 #pragma once
 
 #include "Physica/Utils/Container/Array/Array.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
     class GridBase {
     public:
         using Index3D = Utils::Array<size_t, 3>;
-        using LatticeMatrix = typename CrystalCell::LatticeMatrix;
-        using VectorType = Vector<typename LatticeMatrix::ScalarType, 3>;
         /* Static members */
-        template<bool IsUnitLattice, class Functor>
-        static void forPointInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
-        template<bool IsUnitLattice, class Functor>
-        static void forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func);
+        template<class ScalarType, bool IsUnitLattice, class Functor>
+        static void forPointInGrid(Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func);
+        template<class ScalarType, bool IsUnitLattice, class Functor>
+        static void forPointIndexInGrid(Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func);
         template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
     };
 
-    template<bool IsUnitLattice, class Functor>
-    void GridBase::forPointInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func) {
-        using ScalarType = typename VectorType::ScalarType;
+    template<class ScalarType, bool IsUnitLattice, class Functor>
+    void GridBase::forPointInGrid(
+            Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
+        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
+        using VectorType = Vector<ScalarType, 3>;
+
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
         auto a2 = sub_lattice.row(1);
@@ -63,9 +64,13 @@ namespace Physica::Core {
         }
     }
 
-    template<bool IsUnitLattice, class Functor>
-    void GridBase::forPointIndexInGrid(Index3D dim, const LatticeMatrix& lattice, Functor func) {
-        using ScalarType = typename VectorType::ScalarType;
+    template<class ScalarType, bool IsUnitLattice, class Functor>
+    void GridBase::forPointIndexInGrid(
+            Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
+        static_assert(!ScalarType::isComplex, "[Error]: Position in 3D space can not be complex number");
+        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
+        using VectorType = Vector<ScalarType, 3>;
+
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
         auto a2 = sub_lattice.row(1);

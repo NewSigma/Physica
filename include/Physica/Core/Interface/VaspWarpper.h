@@ -33,11 +33,11 @@ namespace Physica::Core {
         std::string vaspWorkingDir;
         std::string logFilePath;
         size_t core;
-        Poscar poscar;
+        Poscar<ScalarType> poscar;
         mutable ProcessFuture future;
     public:
         VaspWarpper();
-        VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, Poscar poscar_);
+        VaspWarpper(size_t core_, std::string pathToVasp_, std::string workingDir, std::string logFilePath_, Poscar<ScalarType> poscar_);
         VaspWarpper(const VaspWarpper&) = delete;
         VaspWarpper(VaspWarpper&&) noexcept = default;
         ~VaspWarpper() = default;

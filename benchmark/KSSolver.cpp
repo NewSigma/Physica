@@ -19,7 +19,7 @@
 #include <iostream>
 #include <fstream>
 #include "Physica/Core/Math/Random/RandomSeed.h"
-#include "Physica/Core/Physics/ElectronicStructure/CrystalCell.h"
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
@@ -32,7 +32,7 @@ constexpr bool isSpinPolarized = false;
 
 int main() {
     using namespace Physica::Utils;
-    CrystalCell Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell::Type::Direct}, {2});
+    CrystalCell<ScalarType> Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {2});
     ScalarType cutEnergy(4.9);
 
     std::mt19937::result_type seed;

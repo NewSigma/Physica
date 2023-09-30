@@ -24,7 +24,9 @@
 
 namespace Physica::Core {
     class Xdatcar {
-        Poscar data;
+        using ScalarType = Scalar<Double>;
+    private:
+        Poscar<ScalarType> data;
         std::ifstream fin;
         uint64_t stepNum;
         bool init;
@@ -38,7 +40,7 @@ namespace Physica::Core {
         /* Operations */
         bool step();
         /* Getters */
-        [[nodiscard]] const Poscar& getCurrent() const noexcept { return data; }
+        [[nodiscard]] const Poscar<ScalarType>& getCurrent() const noexcept { return data; }
         [[nodiscard]] uint64_t getStep() const noexcept { return stepNum; }
         /* Helpers */
         void swap(Xdatcar& xdatcar) noexcept;
