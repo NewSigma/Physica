@@ -168,7 +168,7 @@ namespace Physica::Core {
                     const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
                     for (size_t i = 0; i < numParticle; ++i) {
                         auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
-                        const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
+                        const ScalarType temp = (cos_vec[i] * sum_sin - sin_vec[i] * sum_cos) * (factor2 * charges[i]);
                         force_i[0] += temp * delta[0];
                         force_i[1] += temp * delta[1];
                         force_i[2] += temp * delta[2];
@@ -204,7 +204,7 @@ namespace Physica::Core {
                     kSpaceSum += (square(sum_cos) + square(sum_sin)) / (squaredNorm * exp(squaredNorm * factor));
                 }
             });
-        kSpaceSum *= ScalarType(4 * M_PI) * inv_volume;
+        kSpaceSum *= PlainScalar(4 * M_PI) * inv_volume;
         return (rSpaceSum + kSpaceSum) * PlainScalar(0.5) - selfEnergy;
     }
 

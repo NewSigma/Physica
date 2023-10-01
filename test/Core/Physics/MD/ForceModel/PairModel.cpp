@@ -29,9 +29,9 @@ int main() {
     LJModel<ScalarType, PosScalarType> lj(1.0, 1.0);
     ScalarType r = 1.0;
     lj.pot_functor(0, 0, r, square(r)).reverse();
-    const ScalarType f = r.getTangent();
+    const ScalarType f = -r.getTangent();
     const ScalarType f1 = lj.force_functor(0, 0, r, square(r));
-    if (!scalarNear(f, -f1, 1E-15))
+    if (!scalarNear(f, f1, 1E-15))
         return 1;
     return 0;
 }

@@ -42,7 +42,8 @@ namespace Physica::Core {
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] size_t pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
         void reverse(size_t index);
-        void forget();
+        void forget(size_t fromIndex = 0);
+        void squeeze();
         void release();
         /* Getters */
         [[nodiscard]] const RecordArray& getRecords() const noexcept { return records; }
@@ -159,12 +160,12 @@ namespace Physica::Core {
                 }
                 case ExpressionType::Sin: {
                     auto& x = records[operands[startOperandId]];
-                    x.tangent -= tangent * sin(x.value);
+                    x.tangent += tangent * cos(x.value);
                     break;
                 }
                 case ExpressionType::Cos: {
                     auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent * cos(x.value);
+                    x.tangent -= tangent * sin(x.value);
                     break;
                 }
                 default: [[unlikely]]
@@ -174,16 +175,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::forget() {
-        records.resize(0);
-        operands.resize(0);
+    void DiffTracer<ScalarType>::forget(size_t fromIndex) {
+        operands.resize(records[fromIndex].startOperandId);
+        records.resize(fromIndex);
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::squeeze() {
+        records.squeeze();
+        operands.squeeze();
     }
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::release() {
         forget();
-        records.squeeze();
-        operands.squeeze();
+        squeeze();
     }
 
     template<class ScalarType>

@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/MultiPrecision/DiffTraceGuard.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
@@ -95,14 +96,12 @@ void madelungTest() {
     }
 }
 
-template<class ScalarType>
 void forceTest() {
-    constexpr static bool isFloat = ScalarType::option == Float;
-    constexpr double prec = isFloat ? 2E-1 : 1E-3; //Poor precision at single precision mode
-
-    using Executor = SequentialExecutor;
-    using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell<ScalarType>::PositionMatrix;
+    using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
+    using PosScalarType = ScalarType;
+    using CrystalCellType = CrystalCell<ScalarType>;
+    using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
+    using PositionMatrix = typename CrystalCellType::PositionMatrix;
     LatticeMatrix lattice{
         4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
         2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
@@ -122,22 +121,19 @@ void forceTest() {
         5.658125877,  4.686541080,  17.23267174,
         3.052176714,  2.816649675,  2.054240227
     };
-    lattice *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
-    pos *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
-    const Ewald<ScalarType, ScalarType> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    const auto force1 = ewald.template force<Executor>(pos);
-    Vector<ScalarType> force2(force1.getLength());
-    /* Force from finite differential */ {
-        for (size_t i = 0; i < force2.getLength(); ++i) {
-            force2[i] = -Differential<ScalarType>::ridders([i, &pos, &ewald](ScalarType x) -> ScalarType {
-                PositionMatrix temp = pos;
-                *(temp.begin() + i) = ScalarType(x);
-                return ewald.potentialEnergy(temp);
-            }, pos.flatten().calc(i), 0.3);
-        }
+    lattice *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
+    pos *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
+    const Ewald<ScalarType, PosScalarType> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+    PositionMatrix force_diff(pos.getRow(), pos.getColumn());
+    {
+        [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+        ewald.potentialEnergy(pos).reverse();
+        for (size_t i = 0; i < pos.getRow(); ++i)
+            for (size_t j = 0; j < pos.getColumn(); ++j)
+                force_diff(i, j) = -pos(i, j).getTangent();
     }
-
-    if (!vectorNear(force1, force2, prec))
+    const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
+    if (!vectorNear(force, force_diff.flatten(), 1E-12))
         exit(EXIT_FAILURE);
 }
 
@@ -146,7 +142,6 @@ int main() {
     VASPTest<Scalar<Float>>();
     madelungTest<Scalar<Double>>();
     madelungTest<Scalar<Float>>();
-    forceTest<Scalar<Double>>();
-    //forceTest<Scalar<Float>>(); //Poor precision at single precision mode
+    forceTest();
     return 0;
 }

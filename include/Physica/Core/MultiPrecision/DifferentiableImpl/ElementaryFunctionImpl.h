@@ -106,16 +106,34 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> cos(const Differentiable<ScalarType, Mode>& s) {
-        ScalarType sin_value, cos_value;
-        sincos(s.getValue(), sin_value, cos_value);
-        return {cos_value, -sin_value * s.getTangent()};
+        if constexpr (Mode == DiffMode::Forward) {
+            ScalarType sin_value, cos_value;
+            sincos(s.getValue(), sin_value, cos_value);
+            return {cos_value, -sin_value * s.getTangent()};
+        }
+        else {
+            const ScalarType value = cos(s.getValue());
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Cos);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> sin(const Differentiable<ScalarType, Mode>& s) {
-        ScalarType sin_value, cos_value;
-        sincos(s.getValue(), sin_value, cos_value);
-        return {sin_value, cos_value * s.getTangent()};
+        if constexpr (Mode == DiffMode::Forward) {
+            ScalarType sin_value, cos_value;
+            sincos(s.getValue(), sin_value, cos_value);
+            return {sin_value, cos_value * s.getTangent()};
+        }
+        else {
+            const ScalarType value = sin(s.getValue());
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Sin);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>
