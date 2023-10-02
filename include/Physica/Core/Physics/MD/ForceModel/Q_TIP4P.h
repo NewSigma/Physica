@@ -249,7 +249,7 @@ namespace Physica::Core {
             const size_t indexH1 = 2 * i;
             const size_t indexH2 = 2 * i + 1;
             auto dipole = dipoles.row(i);
-            dipole = (cell.minDistVector(indexO, indexH1) + cell.minDistVector(indexO, indexH2)) * ScalarType(-gamma * charge);
+            dipole = (cell.minDistVector(indexO, indexH1) + cell.minDistVector(indexO, indexH2)) * ScalarType(gamma * charge * 0.5);
         }
         return dipoles;
     }

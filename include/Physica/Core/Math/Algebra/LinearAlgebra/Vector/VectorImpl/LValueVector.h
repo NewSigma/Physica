@@ -52,12 +52,12 @@ namespace Physica::Core {
         template<class PacketType> void writePacket(size_t index, const PacketType packet);
         template<class PacketType> void writePacketPartial(size_t index, size_t count, const PacketType packet);
 
-        LVectorBlock<Derived> head(size_t to) { return LVectorBlock<Derived>(Base::getDerived(), 0, to); }
-        const LVectorBlock<Derived> head(size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
-        LVectorBlock<Derived> tail(size_t from) { return LVectorBlock<Derived>(Base::getDerived(), from); }
-        const LVectorBlock<Derived> tail(size_t from) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from); }
-        LVectorBlock<Derived> segment(size_t from, size_t to) { return LVectorBlock<Derived>(Base::getDerived(), from, to); }
-        const LVectorBlock<Derived> segment(size_t from, size_t to) const { return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
+        [[nodiscard]] inline LVectorBlock<Derived> head(size_t to);
+        [[nodiscard]] inline const LVectorBlock<Derived> head(size_t to) const;
+        [[nodiscard]] inline LVectorBlock<Derived> tail(size_t from);
+        [[nodiscard]] inline const LVectorBlock<Derived> tail(size_t from) const;
+        [[nodiscard]] inline LVectorBlock<Derived> segment(size_t from, size_t to);
+        [[nodiscard]] inline const LVectorBlock<Derived> segment(size_t from, size_t to) const;
 
         inline void toUnit();
         template<class RandomGenerator> void random_uniform(RandomGenerator& gen);

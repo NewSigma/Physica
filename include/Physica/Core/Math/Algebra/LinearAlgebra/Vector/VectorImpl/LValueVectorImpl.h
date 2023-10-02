@@ -65,6 +65,36 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline LVectorBlock<Derived> LValueVector<Derived>::head(size_t to) {
+        return LVectorBlock<Derived>(Base::getDerived(), 0, to);
+    }
+
+    template<class Derived>
+    inline const LVectorBlock<Derived> LValueVector<Derived>::head(size_t to) const {
+        return LVectorBlock<Derived>(Base::getConstCastDerived(), 0, to);
+    }
+
+    template<class Derived>
+    inline LVectorBlock<Derived> LValueVector<Derived>::tail(size_t from) {
+        return LVectorBlock<Derived>(Base::getDerived(), from);
+    }
+
+    template<class Derived>
+    inline const LVectorBlock<Derived> LValueVector<Derived>::tail(size_t from) const {
+        return LVectorBlock<Derived>(Base::getConstCastDerived(), from);
+    }
+
+    template<class Derived>
+    inline LVectorBlock<Derived> LValueVector<Derived>::segment(size_t from, size_t to) {
+        return LVectorBlock<Derived>(Base::getDerived(), from, to);
+    }
+
+    template<class Derived>
+    inline const LVectorBlock<Derived> LValueVector<Derived>::segment(size_t from, size_t to) const {
+        return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to);
+    }
+
+    template<class Derived>
     inline void LValueVector<Derived>::toUnit() {
         Base::getDerived() *= reciprocal(Base::getDerived().norm());
     }

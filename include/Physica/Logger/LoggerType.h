@@ -23,7 +23,6 @@
 #include <array>
 
 namespace Physica::Logger {
-    constexpr size_t DefaultBufferSize = 1U << 20U;
     /*!
      * ArgType indicates the conversion specifier, e.g. c in %c, s in %s.
      */

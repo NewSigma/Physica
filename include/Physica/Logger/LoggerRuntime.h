@@ -48,6 +48,7 @@ namespace Physica::Logger {
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static size_t unassignedLogID = 0;
     private:
+        constexpr static size_t DefaultBufferSize = 1U << 20U;
         thread_local static LogBuffer* threadLogBuffer;
 
         LoggerTimer timer;
