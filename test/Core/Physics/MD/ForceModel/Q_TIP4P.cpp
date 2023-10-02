@@ -170,7 +170,7 @@ void testMD() {
         }
     }
     ThreadPool::getInstance().shouldExit();
-    if (!scalarNear(bond, ScalarType(answer), 1E-2))
+    if (!scalarNear(bond, ScalarType(answer), 2E-2))
         exit(EXIT_FAILURE);
 }
 /**

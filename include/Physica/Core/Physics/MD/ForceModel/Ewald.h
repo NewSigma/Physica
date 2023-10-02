@@ -68,7 +68,7 @@ namespace Physica::Core {
         ScalarType selfEnergy;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
-        Vector<ScalarType> erfc_table;
+        Vector<PlainScalar> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
         ScalarType repDoubleSquareStep;
@@ -152,11 +152,11 @@ namespace Physica::Core {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * integralLimit));
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
-        PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(),
+        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * integralLimit));
+        PeriodicCell<PosScalarType, Dim>::forReducedCellInRange(kSpaceSumRange, repCell.getLattice(), // Reduce cell using time reversal symmetry
             [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
                 const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
                 const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
@@ -168,14 +168,14 @@ namespace Physica::Core {
                     const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
                     for (size_t i = 0; i < numParticle; ++i) {
                         auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
-                        const ScalarType temp = (cos_vec[i] * sum_sin - sin_vec[i] * sum_cos) * (factor2 * charges[i]);
+                        const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
                         force_i[0] += temp * delta[0];
                         force_i[1] += temp * delta[1];
                         force_i[2] += temp * delta[2];
                     }
                 }
             });
-        kSpaceSum *= ScalarType(8 * M_PI) * inv_volume;
+        kSpaceSum *= ScalarType(8 * M_PI) * inv_volume; // 8 Pi because time reversal symmetry
         return kSpaceSum;
     }
     /**
@@ -249,7 +249,7 @@ namespace Physica::Core {
         const int index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
-        return charges[i] * charges[j] * Internal::quadraticInterpolate_diff1(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
+        return charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<ScalarType>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
@@ -261,7 +261,7 @@ namespace Physica::Core {
         const int index = double(temp);
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
-        const ScalarType interp = Internal::quadraticInterpolate(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
+        const ScalarType interp = Internal::quadraticInterpolate<ScalarType>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
         return ScalarType(i == j ? 1 : 2) * charges[i] * charges[j] * interp;
     }
 
@@ -284,7 +284,7 @@ namespace Physica::Core {
     void Ewald<ScalarType, PosScalarType>::makeTables() {
         for (size_t i = 1; i < erfc_table.getLength(); ++i) {
             const auto x = PlainScalar((i - 1) * ErfcTableStep);
-            erfc_table[i] = erfc(x) / x * integralLimit;
+            erfc_table[i] = erfc(x) / x * integralLimit.getValue();
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = PlainScalar(ErfcTableStep) / integralLimit;

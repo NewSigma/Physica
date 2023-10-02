@@ -141,8 +141,8 @@ namespace Physica::Core {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
         if constexpr (Mode == DiffMode::Forward) {
-            sin_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
-            cos_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
+            sin_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
+            cos_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
         }
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
@@ -150,8 +150,8 @@ namespace Physica::Core {
             tracer.pushOperand(s.getTraceIndex());
             const size_t index_c = tracer.pushOperation(cos_value, ExpressionType::Cos);
             tracer.pushOperand(s.getTraceIndex());
-            sin_result = Differentiable<ScalarType, Mode>(cos_value, index_c);
-            cos_result = Differentiable<ScalarType, Mode>(sin_value, index_s);
+            sin_result = Differentiable<ScalarType, Mode>(sin_value, index_s);
+            cos_result = Differentiable<ScalarType, Mode>(cos_value, index_c);
         }
     }
 }

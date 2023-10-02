@@ -63,7 +63,7 @@ public:
 
 int main(int argc, char** argv) {
     Poscar<ScalarType> poscar{};
-    {
+    try {
         auto tmp = TempFile("/tmp/tmpXXXXXX");
         std::ofstream os(tmp.getName());
         os << data;
@@ -73,6 +73,10 @@ int main(int argc, char** argv) {
         is >> poscar;
         is.close();
         poscar.normalize();
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
     }
     MDCellType unitCell(poscar);
     unitCell.scale(PhyConst<AU>::angstormToBohr(1));

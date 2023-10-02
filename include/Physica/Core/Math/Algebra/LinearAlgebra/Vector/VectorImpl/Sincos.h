@@ -27,22 +27,30 @@ namespace Physica::Core {
         constexpr static size_t Size1 = VectorType1::SizeAtCompile;
         constexpr static size_t Size2 = VectorType2::SizeAtCompile;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-        using PacketType = typename Internal::BestPacket<typename VectorType1::ScalarType, SizeAtCompile>::Type;
-
-        const size_t length = x.getLength();
-        size_t i = 0;
-        const size_t to = length / PacketType::size() * PacketType::size();
-        PacketType s_buffer, c_buffer;
-        for (; i < to; i += PacketType::size()) {
-            sincos(x.getDerived().template packet<PacketType>(i), s_buffer, c_buffer);
-            s.getDerived().writePacket(i, s_buffer);
-            c.getDerived().writePacket(i, c_buffer);
+        using ScalarType1 = typename VectorType1::ScalarType;
+        using ScalarType2 = typename VectorType2::ScalarType;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type;
+        using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        if constexpr (PacketType::size() == 1) {
+            for (size_t i = 0; i < x.getLength(); ++i)
+                sincos(x.getDerived().calc(i), s[i], c[i]);
         }
-        if (to != length) {
-            const size_t count = length - i;
-            sincos(x.getDerived().template packetPartial<PacketType>(i, count), s_buffer, c_buffer);
-            s.getDerived().writePacketPartial(i, count, s_buffer);
-            c.getDerived().writePacketPartial(i, count, c_buffer);
+        else {
+            const size_t length = x.getLength();
+            size_t i = 0;
+            const size_t to = length / PacketType::size() * PacketType::size();
+            PacketType s_buffer, c_buffer;
+            for (; i < to; i += PacketType::size()) {
+                sincos(x.getDerived().template packet<PacketType>(i), s_buffer, c_buffer);
+                s.getDerived().writePacket(i, s_buffer);
+                c.getDerived().writePacket(i, c_buffer);
+            }
+            if (to != length) {
+                const size_t count = length - i;
+                sincos(x.getDerived().template packetPartial<PacketType>(i, count), s_buffer, c_buffer);
+                s.getDerived().writePacketPartial(i, count, s_buffer);
+                c.getDerived().writePacketPartial(i, count, c_buffer);
+            }
         }
     }
 }
