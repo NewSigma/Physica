@@ -76,7 +76,6 @@ namespace Physica::Core {
         using Storage::data;
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return data() + index; }
-        [[nodiscard]] Vector reverse() const;
         /* Helpers */
         using Storage::swap;
         static Vector Zeros(size_t len);

@@ -205,7 +205,7 @@ namespace Physica::Core {
                 }
             });
         kSpaceSum *= PlainScalar(4 * M_PI) * inv_volume;
-        return (rSpaceSum + kSpaceSum) * PlainScalar(0.5) - selfEnergy;
+        return kSpaceSum * PlainScalar(0.5) + rSpaceSum - selfEnergy;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -262,7 +262,7 @@ namespace Physica::Core {
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         const ScalarType interp = Internal::quadraticInterpolate<ScalarType>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
-        return ScalarType(i == j ? 1 : 2) * charges[i] * charges[j] * interp;
+        return charges[i] * charges[j] * interp;
     }
 
     template<class ScalarType, class PosScalarType>

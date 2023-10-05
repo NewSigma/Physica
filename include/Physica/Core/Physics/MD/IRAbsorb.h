@@ -33,14 +33,14 @@ namespace Physica::Core {
         using VectorType = Vector<ScalarType>;
     public:
         VectorType dipoleCorr;
-        mutable FFT<ScalarType, 1> fft;
+        FFT<ScalarType, 1> fft;
         ScalarType factor;
         SavitzkyGolay<ScalarType> filter;
     public:
         IRAbsorb(VectorType dipoleCorr_,
                  ScalarType temperatureT,
                  ScalarType deltaT,
-                 double volume,
+                 ScalarType volume,
                  unsigned char filterRange,
                  size_t filterOrder);
         IRAbsorb(const IRAbsorb&) = default;
@@ -50,23 +50,24 @@ namespace Physica::Core {
         IRAbsorb& operator=(IRAbsorb obj) noexcept;
         /* Operations */
         [[nodiscard]] VectorType makeWaveNum() const;
-        [[nodiscard]] VectorType makeSpectrum() const;
+        [[nodiscard]] VectorType makeSpectrum();
         void swap(IRAbsorb& obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDataLength() const noexcept { return dipoleCorr.getLength(); }
-        [[nodiscard]] ScalarType getDeltaWaveNum() const { return fft.getKSpaceDelta() / ScalarType(PhyConst<AU>::speedOfLight); }
+        [[nodiscard]] ScalarType getDeltaOmegaW() const noexcept { return fft.getKSpaceDelta(); }
+        [[nodiscard]] ScalarType getDeltaWaveNum() const noexcept { return getDeltaOmegaW() / ScalarType(2 * M_PI * PhyConst<AU>::speedOfLight); }
     };
 
     template<class ScalarType>
     IRAbsorb<ScalarType>::IRAbsorb(VectorType dipoleCorr_,
                                    ScalarType temperatureT,
                                    ScalarType deltaT,
-                                   double volume,
+                                   ScalarType volume,
                                    unsigned char filterRange,
                                    size_t filterOrder)
             : dipoleCorr(std::move(dipoleCorr_))
-            , fft(2 * dipoleCorr.getLength(), deltaT, PlanFlag::Estimate)
-            , factor(M_PI / (3 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * volume * PhyConst<AU>::boltzmannK * double(temperatureT)))
+            , fft(2 * dipoleCorr.getLength() - 1, deltaT, PlanFlag::Estimate)
+            , factor(1 / (6 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * double(volume) * PhyConst<AU>::boltzmannK * double(temperatureT)))
             , filter(filterRange, filterRange, filterOrder, deltaT) {}
 
     template<class ScalarType>
@@ -77,31 +78,30 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeWaveNum() const {
-        return VectorType::linspace(0, getDeltaWaveNum() * (getDataLength() - 1), getDataLength());
+        const size_t size = fft.getKSpaceSize();
+        return VectorType::linspace(0, getDeltaWaveNum() * (size - 1), size);
     }
 
     template<class ScalarType>
-    typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeSpectrum() const {
-        Vector<ScalarType> symmCorr(2 * getDataLength());
-        const Vector<ScalarType> temp = dipoleCorr.reverse();
-        auto head = symmCorr.head(dipoleCorr.getLength());
-        head = dipoleCorr;
-        auto tail = symmCorr.tail(dipoleCorr.getLength());
-        tail = temp;
-        fft.transform(symmCorr);
-        const Vector<ScalarType> norm = toRealVector(fft.getKSpace()) * ScalarType(1 / (2 * M_PI));
-        const ScalarType step = fft.getKSpaceDelta();
+    typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeSpectrum() {
+        auto& rSpace = fft.getRSpace();
+        rSpace.head(dipoleCorr.getLength()) = dipoleCorr;
+        rSpace.tail(dipoleCorr.getLength()) = dipoleCorr.tail(1).reverse();
+        fft.transform();
 
-        Vector<ScalarType> spectrum(getDataLength() + filter.getLRange() + filter.getRRange());
+        const auto& kSpace = fft.getKSpace();
+        const size_t kSpaceSize = fft.getKSpaceSize();
+        const ScalarType deltaOmegaW = getDeltaOmegaW();
+        Vector<ScalarType> spectrum(kSpaceSize + filter.getLRange() + filter.getRRange());
         size_t index = 0;
         for (size_t i = 0; i < filter.getLRange(); ++i, ++index)
             spectrum[index] = 0.0;
-        for (size_t i = 0; i < getDataLength(); ++i, ++index)
-            spectrum[index] = factor * abs(norm[i]) * square(step * i);
+        for (size_t i = 0; i < kSpaceSize; ++i, ++index)
+            spectrum[index] = factor * abs(kSpace[i].getReal()) * square(deltaOmegaW * i);
         for (size_t i = 0; i < filter.getRRange(); ++i, ++index)
             spectrum[index] = 0.0;
         filter.smooth(spectrum);
-        return spectrum.segment(filter.getLRange(), getDataLength() + filter.getLRange());
+        return spectrum.segment(filter.getLRange(), kSpaceSize + filter.getLRange());
     }
 
     template<class ScalarType>

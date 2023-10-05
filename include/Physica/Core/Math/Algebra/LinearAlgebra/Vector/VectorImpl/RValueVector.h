@@ -28,8 +28,9 @@ namespace Physica::Core {
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
-    template<class AnyVector1, class AnyVector2> class CrossProduct;
     template<class VectorType> class FormatedVector;
+    template<class VectorType> class ReverseVector;
+    template<class AnyVector1, class AnyVector2> class CrossProduct;
     template<class Derived> class RValueMatrix;
 
     namespace Internal {
@@ -99,12 +100,14 @@ namespace Physica::Core {
         [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         template<class OtherDerived>
         [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
-        RVectorBlock<Derived> head(size_t to) { return RVectorBlock<Derived>(Base::getDerived(), 0, to); }
-        const RVectorBlock<Derived> head(size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), 0, to); }
-        RVectorBlock<Derived> tail(size_t from) { return RVectorBlock<Derived>(Base::getDerived(), from); }
-        const RVectorBlock<Derived> tail(size_t from) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from); }
-        RVectorBlock<Derived> segment(size_t from, size_t to) { return RVectorBlock<Derived>(Base::getDerived(), from, to); }
-        const RVectorBlock<Derived> segment(size_t from, size_t to) const { return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to); }
+        [[nodiscard]] inline RVectorBlock<Derived> head(size_t to);
+        [[nodiscard]] inline const RVectorBlock<Derived> head(size_t to) const;
+        [[nodiscard]] inline RVectorBlock<Derived> tail(size_t from);
+        [[nodiscard]] inline const RVectorBlock<Derived> tail(size_t from) const;
+        [[nodiscard]] inline RVectorBlock<Derived> segment(size_t from, size_t to);
+        [[nodiscard]] inline const RVectorBlock<Derived> segment(size_t from, size_t to) const;
+        [[nodiscard]] inline ReverseVector<Derived> reverse();
+        [[nodiscard]] inline const ReverseVector<Derived> reverse() const;
 
         template<class OtherDerived>
         ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
@@ -129,3 +132,4 @@ namespace Physica::Core {
 #include "RValueVectorImpl.h"
 #include "VectorExpression.h"
 #include "VectorConvert.h"
+#include "ReverseVector.h"

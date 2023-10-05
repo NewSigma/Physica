@@ -103,9 +103,9 @@ int main() {
                 return 1;
         }
         /* Test freq */ {
-            const double kSpaceDelta = double(fft.getKSpaceDelta());
-            const RealType freq1_power = intense[freq1 / kSpaceDelta];
-            const RealType freq2_power = intense[freq2 / kSpaceDelta];
+            const double deltaFreq = double(fft.getKSpaceDelta()) / (2 * M_PI);
+            const RealType freq1_power = intense[freq1 / deltaFreq];
+            const RealType freq2_power = intense[freq2 / deltaFreq];
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
                 return 1;
         }
@@ -164,10 +164,12 @@ int main() {
         FFT<RealType, 2> fft({N1, N2}, {deltaX, deltaY}, PlanFlag::Estimate);
         fft.transform(data);
         /* Test freq */ {
+            const double deltaFreq1 = double(fft.getKSpaceDelta(0)) / (2 * M_PI);
+            const double deltaFreq2 = double(fft.getKSpaceDelta(1)) / (2 * M_PI);
             const Vector<RealType> intense = toNormVector(fft.getKSpace().flatten());
-            const RealType freq1_power = intense[size_t(freq1 / double(fft.getKSpaceDelta(0))) * fft.getKSpaceSize()[1]];
-            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / double(fft.getKSpaceDelta(0)))) * fft.getKSpaceSize()[1]];
-            const RealType freq2_power = intense[freq2 / double(fft.getKSpaceDelta(1))];
+            const RealType freq1_power = intense[size_t(freq1 / deltaFreq1) * fft.getKSpaceSize()[1]];
+            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / deltaFreq1)) * fft.getKSpaceSize()[1]];
+            const RealType freq2_power = intense[freq2 / deltaFreq2];
             if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
                 return 1;
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))

@@ -202,6 +202,46 @@ namespace Physica::Core {
         return arccos(Base::getDerived() * v.getDerived() / (norm() * v.norm()));
     }
 
+    template<class Derived>
+    inline RVectorBlock<Derived> RValueVector<Derived>::head(size_t to) {
+        return RVectorBlock<Derived>(Base::getDerived(), 0, to);
+    }
+
+    template<class Derived>
+    inline const RVectorBlock<Derived> RValueVector<Derived>::head(size_t to) const {
+        return RVectorBlock<Derived>(Base::getConstCastDerived(), 0, to);
+    }
+
+    template<class Derived>
+    inline RVectorBlock<Derived> RValueVector<Derived>::tail(size_t from) {
+        return RVectorBlock<Derived>(Base::getDerived(), from);
+    }
+
+    template<class Derived>
+    inline const RVectorBlock<Derived> RValueVector<Derived>::tail(size_t from) const {
+        return RVectorBlock<Derived>(Base::getConstCastDerived(), from);
+    }
+
+    template<class Derived>
+    inline RVectorBlock<Derived> RValueVector<Derived>::segment(size_t from, size_t to) {
+        return RVectorBlock<Derived>(Base::getDerived(), from, to);
+    }
+
+    template<class Derived>
+    inline const RVectorBlock<Derived> RValueVector<Derived>::segment(size_t from, size_t to) const {
+        return RVectorBlock<Derived>(Base::getConstCastDerived(), from, to);
+    }
+
+    template<class Derived>
+    inline ReverseVector<Derived> RValueVector<Derived>::reverse() {
+        return ReverseVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    inline const ReverseVector<Derived> RValueVector<Derived>::reverse() const {
+        return ReverseVector<Derived>(Base::getConstDerived());
+    }
+
     template<class VectorType1, class VectorType2>
     typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
     operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {

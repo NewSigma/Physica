@@ -96,45 +96,68 @@ void madelungTest() {
     }
 }
 
-void forceTest() {
-    using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
-    using PosScalarType = ScalarType;
-    using CrystalCellType = CrystalCell<ScalarType>;
-    using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
-    using PositionMatrix = typename CrystalCellType::PositionMatrix;
-    LatticeMatrix lattice{
-        4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
-        2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
-        0.2750800827878018,   0.4169789280520980,   18.0000000000000000
+namespace Physica {
+    class Test {
+        using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
+        using PosScalarType = ScalarType;
+        using CrystalCellType = CrystalCell<ScalarType>;
+        using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
+        using PositionMatrix = typename CrystalCellType::PositionMatrix;
+    
+        LatticeMatrix lattice;
+        PositionMatrix pos;
+        Ewald<ScalarType, PosScalarType> ewald;
+    public:
+        Test() {
+            lattice = LatticeMatrix{
+                4.6635062604325164,   0.2499522611778955,    0.0000000000000000,
+                2.1629745970109657,   4.1943944839773311,    0.0000000000000000,
+                0.2750800827878018,   0.4169789280520980,   18.0000000000000000
+            };
+            pos = PositionMatrix{
+                3.018608093,  1.835086465,  2.232546806, 
+                3.435233593,  2.209633827,  17.07962227, 
+                4.486242294,  3.763740540,  2.207314014,
+                3.108575344,  2.784703970,  0.294100195,
+                4.877948284,  4.089979172,  17.05440140,
+                2.148158073,  3.204983473,  2.224137545, 
+                5.324354172,  4.297039032,  0.992797017,
+                6.498651505,  4.175083160,  17.06279564,
+                5.301470280,  4.300325871,  1.994232059,
+                3.399604082,  3.184972763,  17.29266357,
+                5.658125877,  4.686541080,  17.23267174,
+                3.052176714,  2.816649675,  2.054240227
+            };
+            lattice *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
+            pos *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
+            ewald = Ewald<ScalarType, PosScalarType>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+        };
+        /* Operations */
+        void forceTest() {
+            PositionMatrix force_diff(pos.getRow(), pos.getColumn());
+            {
+                [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+                ewald.potentialEnergy(pos).reverse();
+                for (size_t i = 0; i < pos.getRow(); ++i)
+                    for (size_t j = 0; j < pos.getColumn(); ++j)
+                        force_diff(i, j) = -pos(i, j).getTangent();
+            }
+            [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+            const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
+            if (!vectorNear(force, force_diff.flatten(), 1E-12))
+                exit(EXIT_FAILURE);
+        }
+
+        void functorTest() {
+            [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+            const ScalarType r = 2;
+            const ScalarType r2 = square(r);
+            ewald.pot_functor(0, 1, r, r2).reverse();
+            const ScalarType f = ewald.force_functor(0, 1, r, r2);
+            if (!scalarNear(-r.getTangent(), f.getValue(), 1E-10))
+                exit(EXIT_FAILURE);
+        }
     };
-    PositionMatrix pos {
-        3.018608093,  1.835086465,  2.232546806, 
-        3.435233593,  2.209633827,  17.07962227, 
-        4.486242294,  3.763740540,  2.207314014,
-        3.108575344,  2.784703970,  0.294100195,
-        4.877948284,  4.089979172,  17.05440140,
-        2.148158073,  3.204983473,  2.224137545, 
-        5.324354172,  4.297039032,  0.992797017,
-        6.498651505,  4.175083160,  17.06279564,
-        5.301470280,  4.300325871,  1.994232059,
-        3.399604082,  3.184972763,  17.29266357,
-        5.658125877,  4.686541080,  17.23267174,
-        3.052176714,  2.816649675,  2.054240227
-    };
-    lattice *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
-    pos *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
-    const Ewald<ScalarType, PosScalarType> ewald(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    PositionMatrix force_diff(pos.getRow(), pos.getColumn());
-    {
-        [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
-        ewald.potentialEnergy(pos).reverse();
-        for (size_t i = 0; i < pos.getRow(); ++i)
-            for (size_t j = 0; j < pos.getColumn(); ++j)
-                force_diff(i, j) = -pos(i, j).getTangent();
-    }
-    const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
-    if (!vectorNear(force, force_diff.flatten(), 1E-12))
-        exit(EXIT_FAILURE);
 }
 
 int main() {
@@ -142,6 +165,8 @@ int main() {
     VASPTest<Scalar<Float>>();
     madelungTest<Scalar<Double>>();
     madelungTest<Scalar<Float>>();
-    forceTest();
+    Physica::Test test{};
+    test.forceTest();
+    test.functorTest();
     return 0;
 }

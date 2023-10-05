@@ -181,7 +181,7 @@ namespace Physica::Core {
         [[nodiscard]] IndexArray getRSpaceSize() const noexcept;
         [[nodiscard]] IndexArray getKSpaceSize() const noexcept;
         [[nodiscard]] RealType getRSpaceDelta(size_t dim) const noexcept { return rSpaceDelta[dim]; }
-        [[nodiscard]] RealType getKSpaceDelta(size_t dim) const noexcept { return reciprocal(getRSpaceDelta(dim) * getRSpaceSize()[dim]); }
+        [[nodiscard]] RealType getKSpaceDelta(size_t dim) const noexcept { return RealType(2 * M_PI) / (getRSpaceDelta(dim) * getRSpaceSize()[dim]); }
         [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }
         [[nodiscard]] __host__ __device__ KSpaceType& getKSpace() { return *this; }
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }

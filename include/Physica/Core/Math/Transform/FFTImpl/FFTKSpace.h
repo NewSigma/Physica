@@ -83,7 +83,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
-        [[nodiscard]] RealType getDelta() const noexcept { return reciprocal(Base::getDerived().getRSpaceDelta() * Base::getDerived().getRSpaceSize()); }
+        [[nodiscard]] RealType getDelta() const noexcept { return RealType(2 * M_PI) / (Base::getDerived().getRSpaceDelta() * Base::getDerived().getRSpaceSize()); }
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
