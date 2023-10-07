@@ -19,17 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption option>
-    inline Scalar<option> floor(const Scalar<option>& s);
+    template<ScalarOption Option>
+    inline Scalar<Option> floor(const Scalar<Option>& s);
     
-    template<ScalarOption option>
-    inline Scalar<option> ceil(const Scalar<option>& s);
+    template<ScalarOption Option>
+    inline Scalar<Option> ceil(const Scalar<Option>& s);
 
-    template<ScalarOption option>
-    Scalar<option> arrangement(const Scalar<option>& s1, const Scalar<option>& s2);
+    template<ScalarOption Option>
+    Scalar<Option> arrangement(const Scalar<Option>& s1, const Scalar<Option>& s2);
 
-    template<ScalarOption option>
-    Scalar<option> combination(const Scalar<option>& s1, const Scalar<option>& s2);
+    template<ScalarOption Option>
+    Scalar<Option> combination(const Scalar<Option>& s1, const Scalar<Option>& s2);
 }
 
 #include "FunctionImpl/ProbabilityImpl.h"

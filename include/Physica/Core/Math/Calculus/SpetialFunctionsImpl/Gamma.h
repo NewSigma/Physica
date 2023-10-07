@@ -29,11 +29,11 @@ namespace Physica::Core {
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
-    template<ScalarOption option>
-    Scalar<option> lnGamma(const Scalar<option>& s) {
-        using T = Scalar<option>;
+    template<ScalarOption Option>
+    Scalar<Option> lnGamma(const Scalar<Option>& s) {
+        using T = Scalar<Option>;
         assert(s.isPositive());
-        if constexpr (option == Double) {
+        if constexpr (Option == Double) {
             /**
              * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
              * 
@@ -73,13 +73,13 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option>
-    inline Scalar<option> gamma(const Scalar<option>& s) {
+    template<ScalarOption Option>
+    inline Scalar<Option> gamma(const Scalar<Option>& s) {
         return exp(lnGamma(s));
     }
 
-    template<ScalarOption option>
-    inline Scalar<option> beta(const Scalar<option>& s1, const Scalar<option>& s2) {
+    template<ScalarOption Option>
+    inline Scalar<Option> beta(const Scalar<Option>& s1, const Scalar<Option>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
@@ -89,9 +89,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
          */
-        template<ScalarOption option>
-        Scalar<option> incompGamma1(const Scalar<option>& a, const Scalar<option>& x) {
-            using T = Scalar<option>;
+        template<ScalarOption Option>
+        Scalar<Option> incompGamma1(const Scalar<Option>& a, const Scalar<Option>& x) {
+            using T = Scalar<Option>;
             assert(a.isPositive() && !x.isNegative());
             assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
             T ap = a;
@@ -109,9 +109,9 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
          */
-        template<ScalarOption option>
-        Scalar<option> incompGamma2(const Scalar<option>& a, const Scalar<option>& x) {
-            using T = Scalar<option>;
+        template<ScalarOption Option>
+        Scalar<Option> incompGamma2(const Scalar<Option>& a, const Scalar<Option>& x) {
+            using T = Scalar<Option>;
             assert(a.isPositive() && !x.isNegative());
             assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
             const T epsilon = std::numeric_limits<T>::epsilon();
@@ -144,42 +144,42 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option>
-    Scalar<option> gammaP(const Scalar<option>& a, const Scalar<option>& x) {
+    template<ScalarOption Option>
+    Scalar<Option> gammaP(const Scalar<Option>& a, const Scalar<Option>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<option>;
+        using T = Scalar<Option>;
         return (x < a + T(1)) ? Internal::incompGamma1(a, x) : (T(1) - Internal::incompGamma2(a, x));
     }
 
-    template<ScalarOption option>
-    Scalar<option> gammaQ(const Scalar<option>& a, const Scalar<option>& x) {
+    template<ScalarOption Option>
+    Scalar<Option> gammaQ(const Scalar<Option>& a, const Scalar<Option>& x) {
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<option>;
+        using T = Scalar<Option>;
         return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
     }
 
     template<class ScalarType>
     ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step) {
-        return Differential<ScalarType>::ridders(lnGamma<ScalarType::option>, x.getDerived(), step);
+        return Differential<ScalarType>::ridders(lnGamma<ScalarType::Option>, x.getDerived(), step);
     }
 
-    template<ScalarOption option>
-    Scalar<option> erf(const Scalar<option>& x) {
-        using T = Scalar<option>;
+    template<ScalarOption Option>
+    Scalar<Option> erf(const Scalar<Option>& x) {
+        using T = Scalar<Option>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
 
-    template<ScalarOption option>
-    Scalar<option> erfc(const Scalar<option>& x) {
-        using T = Scalar<option>;
+    template<ScalarOption Option>
+    Scalar<Option> erfc(const Scalar<Option>& x) {
+        using T = Scalar<Option>;
         T x2 = square(x);
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
 
-    template<ScalarOption option>
-    Scalar<option> standardNormalDistribution(const Scalar<option>& x) {
-        using T = Scalar<option>;
+    template<ScalarOption Option>
+    Scalar<Option> standardNormalDistribution(const Scalar<Option>& x) {
+        using T = Scalar<Option>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }
 }

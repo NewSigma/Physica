@@ -42,10 +42,10 @@ namespace Physica::Core {
             constexpr static int packet_size = 1;
         };
 
-        template<ScalarOption option, size_t Length>
-        struct EnableSIMDHelper<Scalar<option>, Length> {
+        template<ScalarOption Option, size_t Length>
+        struct EnableSIMDHelper<Scalar<Option>, Length> {
             constexpr static bool good_scalar = true;
-            constexpr static int packet_size = BestPacket<Scalar<option>, Length>::Size;
+            constexpr static int packet_size = BestPacket<Scalar<Option>, Length>::Size;
         };
 
         template<class VectorType1, class VectorType2>
@@ -57,7 +57,7 @@ namespace Physica::Core {
         };
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
 
     template<class Derived> class LValueVector;
     /**

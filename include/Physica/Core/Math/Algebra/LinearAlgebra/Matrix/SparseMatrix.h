@@ -22,15 +22,15 @@
 #include "MatrixOption.h"
 
 namespace Physica::Core {
-    template<class ScalarType, int option = MatrixOption::Row | MatrixOption::Element>
+    template<class ScalarType, int Option = MatrixOption::Row | MatrixOption::Element>
     class SparseMatrix;
 
     namespace Internal {
-        template<class T, int option>
-        class Traits<SparseMatrix<T, option>> {
+        template<class T, int Op>
+        class Traits<SparseMatrix<T, Op>> {
         public:
             using ScalarType = T;
-            constexpr static int Option = option;
+            constexpr static int Option = Op;
             constexpr static size_t RowAtCompile = Utils::Dynamic;
             constexpr static size_t ColumnAtCompile = Utils::Dynamic;
             constexpr static size_t MaxRowAtCompile = Utils::Dynamic;
@@ -40,9 +40,9 @@ namespace Physica::Core {
         };
     }
 
-    template<class ScalarType, int option>
-    class SparseMatrix : public RValueMatrix<SparseMatrix<ScalarType, option>> {
-        using This = SparseMatrix<ScalarType, option>;
+    template<class ScalarType, int Option>
+    class SparseMatrix : public RValueMatrix<SparseMatrix<ScalarType, Option>> {
+        using This = SparseMatrix<ScalarType, Option>;
         using Base = RValueMatrix<This>;
         static_assert(MatrixOption::isElementMatrix<This>(), "[Error]: Sparse matrix should be element matrix");
     private:
@@ -69,24 +69,24 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }
     };
 
-    template<class ScalarType, int option>
-    SparseMatrix<ScalarType, option>::SparseMatrix()
+    template<class ScalarType, int Option>
+    SparseMatrix<ScalarType, Option>::SparseMatrix()
             : Base()
             , elements()
             , minorIndexes()
             , majorStarts()
             , maxMinor(0) {}
 
-    template<class ScalarType, int option>
-    SparseMatrix<ScalarType, option>::SparseMatrix(size_t row, size_t col)
+    template<class ScalarType, int Option>
+    SparseMatrix<ScalarType, Option>::SparseMatrix(size_t row, size_t col)
             : Base()
             , elements()
             , minorIndexes()
             , majorStarts(MatrixOption::selectMajor<This>(row, col) + 1, 0)
             , maxMinor(MatrixOption::selectMinor<This>(row, col)) {}
 
-    template<class ScalarType, int option>
-    void SparseMatrix<ScalarType, option>::insert(ScalarType x, size_t row, size_t col) {
+    template<class ScalarType, int Option>
+    void SparseMatrix<ScalarType, Option>::insert(ScalarType x, size_t row, size_t col) {
         //TODO: Inserting 0 element is useless
         assert(row < getRow());
         assert(col < getColumn());
@@ -116,24 +116,24 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, int option>
-    void SparseMatrix<ScalarType, option>::resize(size_t row, size_t col) {
+    template<class ScalarType, int Option>
+    void SparseMatrix<ScalarType, Option>::resize(size_t row, size_t col) {
         elements.resize(0);
         minorIndexes.resize(0);
         majorStarts.resize(MatrixOption::selectMajor<This>(row, col) + 1, 0);
         maxMinor = MatrixOption::selectMinor<This>(row, col);
     }
 
-    template<class ScalarType, int option>
-    void SparseMatrix<ScalarType, option>::clear() {
+    template<class ScalarType, int Option>
+    void SparseMatrix<ScalarType, Option>::clear() {
         elements.resize(0);
         minorIndexes.resize(0);
         for (auto& i : majorStarts)
             i = 0;
     }
 
-    template<class ScalarType, int option>
-    ScalarType SparseMatrix<ScalarType, option>::calc(size_t row, size_t col) const {
+    template<class ScalarType, int Option>
+    ScalarType SparseMatrix<ScalarType, Option>::calc(size_t row, size_t col) const {
         assert(row < getRow());
         assert(col < getColumn());
         const size_t major = MatrixOption::selectMajor<This>(row, col);
@@ -149,23 +149,23 @@ namespace Physica::Core {
         return ScalarType(0);
     }
 
-    template<class ScalarType, int option>
-    inline size_t SparseMatrix<ScalarType, option>::getRow() const noexcept {
+    template<class ScalarType, int Option>
+    inline size_t SparseMatrix<ScalarType, Option>::getRow() const noexcept {
         return MatrixOption::isColumnMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
-    template<class ScalarType, int option>
-    inline size_t SparseMatrix<ScalarType, option>::getColumn() const noexcept {
+    template<class ScalarType, int Option>
+    inline size_t SparseMatrix<ScalarType, Option>::getColumn() const noexcept {
         return MatrixOption::isColumnMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
-    template<class ScalarType, int option>
-    inline size_t SparseMatrix<ScalarType, option>::getMaxMajor() const noexcept {
+    template<class ScalarType, int Option>
+    inline size_t SparseMatrix<ScalarType, Option>::getMaxMajor() const noexcept {
         return majorStarts.getLength() - 1;
     }
 
-    template<class ScalarType, int option>
-    inline size_t SparseMatrix<ScalarType, option>::getMaxMinor() const noexcept {
+    template<class ScalarType, int Option>
+    inline size_t SparseMatrix<ScalarType, Option>::getMaxMinor() const noexcept {
         return maxMinor;
     }
 }

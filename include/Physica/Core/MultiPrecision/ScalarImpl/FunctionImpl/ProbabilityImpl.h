@@ -19,16 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption option>
-    Scalar<option> floor(const Scalar<option>& s) {
-        return Scalar<option>(std::floor(s.getTrivial()));
+    template<ScalarOption Option>
+    Scalar<Option> floor(const Scalar<Option>& s) {
+        return Scalar<Option>(std::floor(s.getTrivial()));
     }
 
     template<>
     Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s);
 
-    template<ScalarOption option>
-    inline Scalar<option> ceil(const Scalar<option>& s) {
-        return Scalar<option>(std::ceil(s.getTrivial()));
+    template<ScalarOption Option>
+    inline Scalar<Option> ceil(const Scalar<Option>& s) {
+        return Scalar<Option>(std::ceil(s.getTrivial()));
     }
 }

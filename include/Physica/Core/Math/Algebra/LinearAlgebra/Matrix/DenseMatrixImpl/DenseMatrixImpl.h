@@ -21,14 +21,14 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
 namespace Physica::Core {
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column) : Storage(row, column), Dim(row, column) {}
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column) : Storage(row, column), Dim(row, column) {}
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column, T value) : Storage(row, column, std::move(value)), Dim(row, column) {}
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(size_t row, size_t column, T value) : Storage(row, column, std::move(value)), Dim(row, column) {}
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(std::initializer_list<InitializerType> list) : Storage(std::move(list)) {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(std::initializer_list<InitializerType> list) : Storage(std::move(list)) {
         if constexpr (MatrixOption::isVectorMatrix<This>()) {
             const size_t length = Storage::asArray().getLength();
             const size_t size = Storage::getSize();
@@ -42,24 +42,24 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class OtherMatrix>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseMatrix(mat.getRow(), mat.getColumn()) {
         mat.getDerived().assignTo(*this);
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class VectorType>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const RValueVector<VectorType>& vec)
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const RValueVector<VectorType>& vec)
             : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.getDerived().assignTo(col);
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class MatrixIn>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(LUDecomposition<MatrixIn> lu)
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(LUDecomposition<MatrixIn> lu)
             : DenseMatrix(lu.getRow(), lu.getRow()) {
         const size_t rank = lu.getRow();
         (*this) = lu.getMatrix();
@@ -67,29 +67,29 @@ namespace Physica::Core {
             lu.decompositionColumn((*this), i);
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const DenseMatrix& m)
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(const DenseMatrix& m)
             : Base(), Storage(static_cast<const Storage&>(m)), Dim(m) {}
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)), Dim(m) {}
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)), Dim(m) {}
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>&
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::operator=(DenseMatrix m) noexcept {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>&
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::operator=(DenseMatrix m) noexcept {
         swap(m);
         return *this;
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::resize(size_t row, size_t column) {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    inline void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::resize(size_t row, size_t column) {
         Storage::resize(row, column);
         Dim::resize(row, column);
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class SpaceType>
-    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::read(
+    void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::read(
             const H5::DataSet& dataset,
             DataSpaceBase<SpaceType>& file_space,
             const H5::DSetMemXferPropList& xfer_plist) {
@@ -109,9 +109,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class SpaceType>
-    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::write(
+    void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::write(
             H5::DataSet& dataset,
             DataSpaceBase<SpaceType>& file_space,
             const H5::DSetMemXferPropList& xfer_plist) const {
@@ -131,23 +131,23 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::swap(DenseMatrix& m) noexcept {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::swap(DenseMatrix& m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
         Dim::swap(m);
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::unitMatrix(size_t order) {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class RandomGenerator>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
             size_t row, size_t column, RandomGenerator& gen) {
         DenseMatrix result(row, column);
         for (size_t i = 0; i < result.getMaxMajor(); ++i)
@@ -156,13 +156,13 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class VectorType>
-    std::pair<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
-    DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>::meshgrid(
+    std::pair<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::meshgrid(
             const LValueVector<VectorType>& vecX,
             const LValueVector<VectorType>& vecY) {
-        using MatrixType = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>;
+        using MatrixType = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         const size_t row = vecY.getLength();
         const size_t col = vecX.getLength();
         MatrixType x(row, col);
@@ -176,8 +176,8 @@ namespace Physica::Core {
         return std::make_pair(std::move(x), std::move(y));
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
         const size_t column = mat.getColumn();
         const size_t row = mat.getRow();
         size_t width = 0;
@@ -203,8 +203,8 @@ namespace Physica::Core {
         return os;
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
         const size_t column = mat.getColumn();
         const size_t row = mat.getRow();
         for (size_t r = 0; r < row; ++r)

@@ -19,8 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption option, bool errorTrack>
-    Scalar<option> lnGamma(const Scalar<option>& s);
+    template<ScalarOption Option, bool errorTrack>
+    Scalar<Option> lnGamma(const Scalar<Option>& s);
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {

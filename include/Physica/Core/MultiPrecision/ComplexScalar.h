@@ -32,7 +32,7 @@ namespace Physica::Core {
             using ComplexType = ComplexScalar<T>;
             using TrivialType = typename T::TrivialType;
             using PlainScalar = ScalarType;
-            static constexpr ScalarOption option = Traits<T>::option;
+            static constexpr ScalarOption Option = Traits<T>::Option;
             static constexpr bool errorTrack = Traits<T>::errorTrack;
             static constexpr bool isComplex = true;
             static constexpr bool isDifferentiable = false;
@@ -130,37 +130,37 @@ namespace Physica::Core {
     template<class T>
     ComplexScalar<T> operator/(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator+(
-            const ComplexScalar<ScalarType>& c,const Scalar<option>& s);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
+            const ComplexScalar<ScalarType>& c,const Scalar<Option>& s);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator-(
-            const ComplexScalar<ScalarType>& c, const Scalar<option>& s);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
+            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator*(
-            const ComplexScalar<ScalarType>& c, const Scalar<option>& s);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
+            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator/(
-            const ComplexScalar<ScalarType>& c, const Scalar<option>& s);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
+            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator+(
-            const Scalar<option>& s, const ComplexScalar<ScalarType>& c);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
+            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator-(
-            const Scalar<option>& s, const ComplexScalar<ScalarType>& c);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
+            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator*(
-            const Scalar<option>& s, const ComplexScalar<ScalarType>& c);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
+            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c);
 
-    template<class ScalarType, ScalarOption option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<option>>::Type> operator/(
-            const Scalar<option>& s, const ComplexScalar<ScalarType>& c);
+    template<class ScalarType, ScalarOption Option>
+    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
+            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c);
 
     template<class T>
     ComplexScalar<T> operator<<(const ComplexScalar<T>& c, int i) {

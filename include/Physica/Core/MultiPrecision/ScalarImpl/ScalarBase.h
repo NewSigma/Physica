@@ -39,7 +39,7 @@ namespace Physica::Core {
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
         using PlainScalar = typename Internal::Traits<Derived>::PlainScalar;
-        static constexpr ScalarOption option = Internal::Traits<Derived>::option;
+        static constexpr ScalarOption Option = Internal::Traits<Derived>::Option;
         static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
         static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
 
@@ -169,8 +169,8 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption option>
-    std::ostream& operator<<(std::ostream& os, const Scalar<option>& s) {
+    template<ScalarOption Option>
+    std::ostream& operator<<(std::ostream& os, const Scalar<Option>& s) {
         return os << std::setprecision(10) //10 is the max precision of double.
                   << double(s)
                   << std::setprecision(6); //6 is the default precision.

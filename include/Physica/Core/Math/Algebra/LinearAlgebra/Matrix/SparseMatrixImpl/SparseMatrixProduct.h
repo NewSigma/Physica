@@ -21,13 +21,13 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixProduct.h"
 
 namespace Physica::Core {
-    template<class T, int option, class VectorType>
-    class MatrixVectorProduct<SparseMatrix<T, option>, VectorType>
-            : public RValueVector<MatrixVectorProduct<SparseMatrix<T, option>, VectorType>> {
+    template<class T, int Option, class VectorType>
+    class MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>
+            : public RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>> {
     public:
-        using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, option>, VectorType>>;
+        using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>>;
         using typename Base::ScalarType;
-        using MatrixType = SparseMatrix<T, option>;
+        using MatrixType = SparseMatrix<T, Option>;
         static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile,
                       "Row and column do not match in matrix product");
     private:
@@ -48,9 +48,9 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
     };
 
-    template<class T, int option, class VectorType>
+    template<class T, int Option, class VectorType>
     template<class OtherDerived>
-    void MatrixVectorProduct<SparseMatrix<T, option>, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
+    void MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
@@ -78,9 +78,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int option, class VectorType>
-    typename MatrixVectorProduct<SparseMatrix<T, option>, VectorType>::ScalarType
-    MatrixVectorProduct<SparseMatrix<T, option>, VectorType>::calc(size_t index) const {
+    template<class T, int Option, class VectorType>
+    typename MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::ScalarType
+    MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::calc(size_t index) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();

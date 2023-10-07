@@ -34,7 +34,7 @@ namespace Physica::Core {
             using ComplexType = Differentiable<ComplexT, M>;
             using TrivialType = typename T::TrivialType;
             using PlainScalar = T;
-            constexpr static ScalarOption option = T::option;
+            constexpr static ScalarOption Option = T::Option;
             constexpr static bool isComplex = T::isComplex;
             constexpr static bool isDifferentiable = true;
             constexpr static DiffMode Mode = M;

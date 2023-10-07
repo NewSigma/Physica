@@ -154,8 +154,8 @@ namespace Physica::Core {
 #include "Operation/Pow.h"
 
 namespace Physica::Core {
-    template<ScalarOption option>
-    inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2) {
+    template<ScalarOption Option>
+    inline Scalar<Option> operator^(const Scalar<Option>& s1, const Scalar<Option>& s2) {
         return pow(s1, s2);
     }
 

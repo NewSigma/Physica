@@ -29,7 +29,7 @@
 
 namespace Physica::Core {
     template<class T = MultiScalar,
-             int option = MatrixOption::Column | MatrixOption::Vector,
+             int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
              size_t MaxRow = Row,
@@ -41,11 +41,11 @@ namespace Physica::Core {
         template<class T>
         class Traits;
 
-        template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-        class Traits<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>> {
+        template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+        class Traits<DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
         public:
             using ScalarType = T;
-            constexpr static int Option = option;
+            constexpr static int Option = Op;
             constexpr static size_t RowAtCompile = Row;
             constexpr static size_t ColumnAtCompile = Column;
             constexpr static size_t MaxRowAtCompile = MaxRow;
@@ -56,31 +56,31 @@ namespace Physica::Core {
         };
     }
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn>& mat);
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn>& mat);
     /**
      * DenseMatrix class
      * A matrix can be either fixed matrix, which have its max size defined,
      * or dynamic matrix, whose size is dynamically changed.
      * 
-     * \tparam option
-     * option is combinations of \enum MatrixOption
+     * \tparam Option
+     * Option is combinations of \enum MatrixOption
      */
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>>
-                      , public DenseMatrixStorage<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, option>
-                      , public DenseMatrixDim<DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
+                      , public DenseMatrixStorage<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Option>
+                      , public DenseMatrixDim<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
         static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
-        using This = DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>;
+        using This = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = DenseMatrixStorage<This, option>;
+        using Storage = DenseMatrixStorage<This, Option>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using InitializerType = typename Storage::InitializerType;
     public:
         using ScalarType = typename Base::ScalarType;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
-        using RealMatrix = DenseMatrix<typename T::RealType, option, Row, Column, MaxRow, MaxColumn>;
+        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Column, MaxRow, MaxColumn>;
     public:
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t column);
@@ -129,16 +129,16 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
 
-    template<class T, int option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     inline void swap(
-            DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& m1,
-            DenseMatrix<T, option, Row, Column, MaxRow, MaxColumn, Allocator>& m2) noexcept {
+            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& m1,
+            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& m2) noexcept {
         m1.swap(m2);
     }
 }

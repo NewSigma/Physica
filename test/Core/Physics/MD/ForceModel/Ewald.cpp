@@ -29,7 +29,7 @@ using namespace Physica::Utils;
 
 template<class ScalarType>
 void VASPTest() {
-    constexpr static bool isFloat = ScalarType::option == Float;
+    constexpr static bool isFloat = ScalarType::Option == Float;
     constexpr double prec = isFloat ? 2E-5 : 1E-5;
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
@@ -45,7 +45,7 @@ void VASPTest() {
  */
 template<class ScalarType>
 void madelungTest() {
-    constexpr static bool isFloat = ScalarType::option == Float;
+    constexpr static bool isFloat = ScalarType::Option == Float;
     using EwaldType = Ewald<ScalarType, ScalarType>;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);

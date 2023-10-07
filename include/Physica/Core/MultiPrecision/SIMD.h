@@ -65,11 +65,11 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
         private:
-            static_assert(ScalarType::option == Float || ScalarType::option == Double, "[Error]: Unsupported float type");
+            static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
             static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
             static_assert(!ScalarType::isDifferentiable, "[Error]: The main template is not differentiable");
             static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
-            constexpr static bool isSinglePrec = ScalarType::option == Float;
+            constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
             constexpr static size_t PlainSize = isDifferentiable ? (Size * 2) : Size;
             
@@ -88,7 +88,7 @@ namespace Physica::Core {
          */
         template<class ScalarType, size_t Length>
         class BestPacket {
-            constexpr static bool isSinglePrec = ScalarType::option == Float;
+            constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static bool isComplex = ScalarType::isComplex;
             constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
             constexpr static bool isDynamic = Length == Utils::Dynamic;

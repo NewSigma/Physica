@@ -38,10 +38,10 @@ namespace Physica::Core {
     };
     template<class ScalarType, DiffMode Mode> class Differentiable;
     template<class AnyScalar> class ComplexScalar;
-    template<ScalarOption option> __host__ __device__ inline Scalar<option> abs(const Scalar<option>& s);
-    template<ScalarOption option> __host__ __device__ inline Scalar<option> square(const Scalar<option>& s);
-    template<ScalarOption option> __host__ __device__ inline Scalar<option> sqrt(const Scalar<option>& s);
-    template<ScalarOption option> __host__ __device__ inline Scalar<option> ln(const Scalar<option>& s);
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s);
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s);
 
     namespace Internal {
         template<ScalarOption option_>
@@ -53,7 +53,7 @@ namespace Physica::Core {
             using ComplexType = ComplexScalar<ScalarType>;
             using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
             using PlainScalar = ScalarType;
-            static constexpr ScalarOption option = option_;
+            static constexpr ScalarOption Option = option_;
             static constexpr bool isComplex = false;
             static constexpr bool isDifferentiable = false;
         };
@@ -66,10 +66,10 @@ namespace Physica::Core {
             static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
             static_assert(!AnyScalar1::isComplex && !AnyScalar2::isComplex, "[Error]: This class applies to real scalar only");
             static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
-            static constexpr ScalarOption option =
-                    Traits<AnyScalar1>::option > Traits<AnyScalar2>::option ? Traits<AnyScalar1>::option : Traits<AnyScalar2>::option;
+            static constexpr ScalarOption Option =
+                    Traits<AnyScalar1>::Option > Traits<AnyScalar2>::Option ? Traits<AnyScalar1>::Option : Traits<AnyScalar2>::Option;
         public:
-            using Type = Scalar<option>;
+            using Type = Scalar<Option>;
         };
     }
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
@@ -151,9 +151,9 @@ namespace Physica::Core {
         inline void cutZero();
         /* Friends */
         friend class Integer;
-        template<ScalarOption option> __host__ __device__ friend Scalar<option> square(const Scalar<option>& s);
-        template<ScalarOption option> __host__ __device__ friend Scalar<option> sqrt(const Scalar<option>& s);
-        template<ScalarOption option> friend Scalar<option> ln(const Scalar<option>& s);
+        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> square(const Scalar<Option>& s);
+        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> sqrt(const Scalar<Option>& s);
+        template<ScalarOption Option> friend Scalar<Option> ln(const Scalar<Option>& s);
         /* Static members */
         inline static Scalar<MultiPrecision> add(const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision> sub(const Scalar& s1, const Scalar& s2);
@@ -292,8 +292,8 @@ namespace Physica::Core {
     inline Scalar<Double> operator++(Scalar<Double>& s, int);
     inline Scalar<Double> operator--(Scalar<Double>& s, int);
 
-    template<ScalarOption option>
-    inline Scalar<option> operator^(const Scalar<option>& s1, const Scalar<option>& s2);
+    template<ScalarOption Option>
+    inline Scalar<Option> operator^(const Scalar<Option>& s1, const Scalar<Option>& s2);
     /* typedefs for convenience */
     [[maybe_unused]] typedef Scalar<Float> FloatScalar;
     [[maybe_unused]] typedef Scalar<Double> DoubleScalar;

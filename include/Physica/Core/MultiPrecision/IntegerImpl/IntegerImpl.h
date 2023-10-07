@@ -21,8 +21,8 @@
 #include "IntegerArithmetic.h"
 
 namespace Physica::Core {
-    template<ScalarOption option>
-    Integer::Integer(const Scalar<option>& s) : Integer(static_cast<int>(s.getTrivial())) {}
+    template<ScalarOption Option>
+    Integer::Integer(const Scalar<Option>& s) : Integer(static_cast<int>(s.getTrivial())) {}
     /**
      * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().
