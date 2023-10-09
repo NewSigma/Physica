@@ -47,11 +47,13 @@ namespace Physica::Core {
         /* Operators */
         template<class T>
         __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const {
+            static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
             return getValue() > s.getValue();
         }
 
         template<class T>
         __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const {
+            static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
             return getValue() < s.getValue();
         }
         /* Getters */

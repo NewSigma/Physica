@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
-#include "Physica/Core/Math/Calculus/Interpolation.h"
+#include "Physica/Core/Math/Optimization/OptimizationImpl/QuadraticSearch.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
@@ -47,8 +47,10 @@ namespace Physica::Core {
         using typename Base::MatrixType;
         using typename Base::MatrixGrid;
         constexpr static unsigned int Dim = Base::Dim;
+
+        ScalarType displace;
     public:
-        FrozenPhonon(MDCellType unitCell, Index3D superSize);
+        FrozenPhonon(MDCellType unitCell, Index3D superSize, ScalarType displace_);
         FrozenPhonon(const FrozenPhonon&) = default;
         FrozenPhonon(FrozenPhonon&&) noexcept = default;
         ~FrozenPhonon() = default;
@@ -56,7 +58,13 @@ namespace Physica::Core {
         FrozenPhonon& operator=(FrozenPhonon obj) noexcept;
         /* Operations */
         template<class ForceModel>
-        [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model, ScalarType displace, ScalarType translationPrec, size_t maxIteration) const;
+        [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model) const;
+        template<class ForceModel>
+        void optimize(const ForceModel& unitCellModel,
+                      const ForceModel& superCellModel,
+                      ScalarType minFreq,
+                      unsigned int numInterpolateStep,
+                      unsigned int maxNumStep);
         void swap(FrozenPhonon& obj) noexcept;
         /* Getters */
         using Base::getUnitCell;
@@ -67,32 +75,26 @@ namespace Physica::Core {
         using Base::getForceConstantsGridSize;
         using Base::getNumCell;
     private:
-        ScalarType removeDriftForce(Vector<ScalarType>& force) const;
         PositionMatrix makeWignerSeitzRadius() const;
         GridStorage<DenseMatrix<ScalarType>> makeWignerSeitzWeights() const;
         ScalarType calcWignerSeitzWeight(const Vector3D r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
     template<class ScalarType, class PosScalarType>
-    FrozenPhonon<ScalarType, PosScalarType>::FrozenPhonon(MDCellType unitCell, Index3D superSize)
-            : Base(std::move(unitCell), superSize) {}
+    FrozenPhonon<ScalarType, PosScalarType>::FrozenPhonon(MDCellType unitCell, Index3D superSize, ScalarType displace_)
+            : Base(std::move(unitCell), superSize), displace(displace_) {}
 
     template<class ScalarType, class PosScalarType>
     FrozenPhonon<ScalarType, PosScalarType>& FrozenPhonon<ScalarType, PosScalarType>::operator=(FrozenPhonon obj) noexcept {
         swap(obj);
         return *this;
     }
-    /**
-     * Use iteration method to apply translational invariance and while keep force constant matrix symmetric as introduced in [1].
-     */
+
     template<class ScalarType, class PosScalarType>
     template<class ForceModel>
     typename FrozenPhonon<ScalarType, PosScalarType>::MatrixGrid
     FrozenPhonon<ScalarType, PosScalarType>::makeForceConstants(
-            const ForceModel& model,
-            ScalarType displace,
-            ScalarType translationPrec,
-            size_t maxIteration) const {
+            const ForceModel& model) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
         const Index3D superSize = Base::getSuperSize();
@@ -128,77 +130,47 @@ namespace Physica::Core {
                 }
             }
         }
-        /* Apply translational invariance */ {
-            Vector<ScalarType> forceConst(getSuperCellDOF());
-            MatrixType temp;
-            ScalarType averageDrift = std::numeric_limits<ScalarType>::max();
-            size_t iteration = 0;
-            while (averageDrift > translationPrec) {
-                if (iteration == maxIteration) [[unlikely]]
-                    throw BadConvergenceException("[Error]: Failed to apply translational invariance in the given steps");
-                iteration += 1;
-
-                for (size_t row = 0; row < unitCellDOF; ++row) {
-                    for (size_t col = 0; col < unitCellDOF; ++col) {
-                        for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                            auto& fcMatrix = fcMatrixes[i];
-                            kSpace[i] = fcMatrix(row, col);
-                        }
-                        fft.invTransform();
-
-                        const size_t shift = unitCellDOF;
-                        for (size_t cell = 0; cell < getNumCell(); ++cell)
-                            forceConst[col + cell * shift] = rSpace[cell];
-                    }
-                    toNextMean(averageDrift, row, removeDriftForce(forceConst));
-
-                    for (size_t col = 0; col < unitCellDOF; ++col) {
-                        const size_t shift = unitCellDOF;
-                        for (size_t cell = 0; cell < getNumCell(); ++cell)
-                            rSpace[cell] = forceConst[col + cell * shift];
-                        fft.transform();
-
-                        for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                            auto& fcMatrix = fcMatrixes[i];
-                            fcMatrix(row, col) = kSpace[i];
-                        }
-                    }
-                }
-
-                for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                    auto& fcMatrix = fcMatrixes[i];
-                    temp = (fcMatrix + fcMatrix.transpose().conjugate()) * ScalarType(0.5);
-                    fcMatrix = temp;
-                }
-            }
-        }
         return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class ForceModel>
+    void FrozenPhonon<ScalarType, PosScalarType>::optimize(
+            const ForceModel& unitCellModel,
+            const ForceModel& superCellModel,
+            ScalarType minFreq,
+            unsigned int numInterpolateStep,
+            unsigned int maxNumStep) {
+        assert(minFreq.isPositive() && "[Error]: Min frequency must be positive");
+        for (unsigned int step = 0; step < maxNumStep; ++step) {
+            const auto fcMatrixes = makeForceConstants(superCellModel);
+            auto fcMatrix = fcMatrixes(0, 0, 0);
+            Base::toDynamicMatrix(fcMatrix);
+            const auto eigen = Base::diagonalize(fcMatrix);
+            const ScalarType freq = Base::makeFreq(eigen)[0];
+            const bool isImagFreqSmallEnough = -freq < minFreq;
+            if (isImagFreqSmallEnough)
+                return;
+
+            const auto eigenvectors = Base::makeEigenVectors(eigen);
+            const ScalarType e0 = unitCellModel.potentialEnergy(Base::getUnitCell());
+            const ScalarType e1 = unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), displace));
+            const ScalarType e2 = unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), -displace));
+            QuadraticSearch<ScalarType> optimizer({0, displace, -displace}, {e0, e1, e2});
+            for (unsigned int i = 0; i < numInterpolateStep; ++i) {
+                optimizer.step([this, &unitCellModel, &eigenvectors](ScalarType dist) {
+                    return unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), dist));
+                });
+            }
+            Base::setUnitCell(Base::shiftAtom(eigenvectors.col(0), optimizer.getOptimizedX()));
+        }
     }
 
     template<class ScalarType, class PosScalarType>
     void FrozenPhonon<ScalarType, PosScalarType>::swap(This& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
-    }
-
-    template<class ScalarType, class PosScalarType>
-    ScalarType FrozenPhonon<ScalarType, PosScalarType>::removeDriftForce(Vector<ScalarType>& force) const {
-        const size_t superCellDOF = getSuperCellDOF();
-        assert(force.getLength() == superCellDOF);
-        const size_t numSuperAtom = superCellDOF / Dim;
-        const ScalarType factor = reciprocal(ScalarType(numSuperAtom));
-        ScalarType averageDrift = 0;
-        for (size_t dim = 0; dim < Dim; ++dim) {
-            ScalarType drift = 0;
-            for (size_t i = dim; i < superCellDOF; i += Dim)
-                drift += force[i];
-            drift *= factor;
-            for (size_t i = dim; i < superCellDOF; i += Dim)
-                force[i] -= drift;
-            averageDrift += abs(drift);
-        }
-        averageDrift /= ScalarType(Dim);
-        return averageDrift;
+        displace.swap(obj.displace);
     }
 
     template<class ScalarType, class PosScalarType>

@@ -47,6 +47,7 @@ namespace Physica::Core {
         /* Operators */
         PhononSolver& operator=(PhononSolver obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void applyTranslate(MatrixGrid& forceConstants, ScalarType translationPrec, size_t maxIteration);
         [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
         void toDynamicMatrix(MatrixType& forceConstant) const;
         void toDynamicMatrix(MatrixGrid& forceConstants) const;
@@ -54,6 +55,7 @@ namespace Physica::Core {
         [[nodiscard]] inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
         [[nodiscard]] inline DenseMatrix<ScalarType> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
+        [[nodiscard]] MDCellType shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance);
         void swap(PhononSolver& obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getUnitCell() const noexcept { return unitCell; }
@@ -65,21 +67,78 @@ namespace Physica::Core {
         [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
         [[nodiscard]] Index3D getForceConstantsGridSize() const noexcept { return FFT3D::rSizeToKSize(superSize); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
+        /* Setters */
+        void setUnitCell(MDCellType unitCell_) { unitCell = std::move(unitCell_); }
         /* Static members */
         [[nodiscard]] static EigenSolverType diagonalize(const MatrixType& dynamicMatrix);
         [[nodiscard]] static QPointGrid diagonalize(const MatrixGrid& dynamicMatrixes);
+    private:
+        ScalarType removeDriftForce(Vector<ScalarType>& force) const;
     };
 
     template<class ScalarType, class PosScalarType>
     PhononSolver<ScalarType, PosScalarType>::PhononSolver(MDCellType unitCell_, Index3D superSize_)
             : unitCell(std::move(unitCell_))
             , superSize(superSize_) {}
-
+    /**
+     * Use iteration method to apply translational invariance and while keep force constant matrix symmetric as introduced in [1].
+     * 
+     * References:
+     * [1] Comput. Phys. Commun., 2009, 180(12), 2622-2633; https://doi.org/10.1016/j.cpc.2009.03.010
+     */
     template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::swap(PhononSolver& obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        unitCell.swap(obj.unitCell);
-        superSize.swap(obj.superSize);
+    void PhononSolver<ScalarType, PosScalarType>::applyTranslate(
+            MatrixGrid& forceConstants,
+            ScalarType translationPrec,
+            size_t maxIteration) {
+        const size_t unitCellDOF = getUnitCellDOF();
+        auto& fcMatrixes = forceConstants.asArray();
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        auto rSpace = fft.getRSpace().flatten();
+        auto kSpace = fft.getKSpace().flatten();
+
+        Vector<ScalarType> forceConst(getSuperCellDOF());
+        MatrixType temp;
+        ScalarType averageDrift = std::numeric_limits<ScalarType>::max();
+        size_t iteration = 0;
+        while (averageDrift > translationPrec) {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Failed to apply translational invariance in the given steps");
+            iteration += 1;
+
+            for (size_t row = 0; row < unitCellDOF; ++row) {
+                for (size_t col = 0; col < unitCellDOF; ++col) {
+                    for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
+                        auto& fcMatrix = fcMatrixes[i];
+                        kSpace[i] = fcMatrix(row, col);
+                    }
+                    fft.invTransform();
+
+                    const size_t shift = unitCellDOF;
+                    for (size_t cell = 0; cell < getNumCell(); ++cell)
+                        forceConst[col + cell * shift] = rSpace[cell];
+                }
+                toNextMean(averageDrift, row, removeDriftForce(forceConst));
+
+                for (size_t col = 0; col < unitCellDOF; ++col) {
+                    const size_t shift = unitCellDOF;
+                    for (size_t cell = 0; cell < getNumCell(); ++cell)
+                        rSpace[cell] = forceConst[col + cell * shift];
+                    fft.transform();
+
+                    for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
+                        auto& fcMatrix = fcMatrixes[i];
+                        fcMatrix(row, col) = kSpace[i];
+                    }
+                }
+            }
+
+            for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
+                auto& fcMatrix = fcMatrixes[i];
+                temp = (fcMatrix + fcMatrix.transpose().conjugate()) * ScalarType(0.5);
+                fcMatrix = temp;
+            }
+        }
     }
 
     template<class ScalarType, class PosScalarType>
@@ -198,6 +257,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    typename PhononSolver<ScalarType, PosScalarType>::MDCellType
+    PhononSolver<ScalarType, PosScalarType>::shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance) {
+        assert(eigenVector.getLength() == getUnitCellDOF() && "[Error]: This is not a eigenVector of current cell");
+        PositionMatrix shiftPos = unitCell.getPos() + eigenVector.reshape_row(getNumUnitCellAtom(), 3) * distance;
+        return MDCellType(unitCell.getLattice(), std::move(shiftPos), unitCell.getMassVec());
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void PhononSolver<ScalarType, PosScalarType>::swap(PhononSolver& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        unitCell.swap(obj.unitCell);
+        superSize.swap(obj.superSize);
+    }
+
+    template<class ScalarType, class PosScalarType>
     typename PhononSolver<ScalarType, PosScalarType>::EigenSolverType
     PhononSolver<ScalarType, PosScalarType>::diagonalize(const MatrixType& dynamicMatrix) {
         const size_t unitCellDOF = dynamicMatrix.getRow();
@@ -219,5 +293,25 @@ namespace Physica::Core {
             eigen.sort();
         }
         return qPoints;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType PhononSolver<ScalarType, PosScalarType>::removeDriftForce(Vector<ScalarType>& force) const {
+        const size_t superCellDOF = getSuperCellDOF();
+        assert(force.getLength() == superCellDOF);
+        const size_t numSuperAtom = superCellDOF / Dim;
+        const ScalarType factor = reciprocal(ScalarType(numSuperAtom));
+        ScalarType averageDrift = 0;
+        for (size_t dim = 0; dim < Dim; ++dim) {
+            ScalarType drift = 0;
+            for (size_t i = dim; i < superCellDOF; i += Dim)
+                drift += force[i];
+            drift *= factor;
+            for (size_t i = dim; i < superCellDOF; i += Dim)
+                force[i] -= drift;
+            averageDrift += abs(drift);
+        }
+        averageDrift /= ScalarType(Dim);
+        return averageDrift;
     }
 }

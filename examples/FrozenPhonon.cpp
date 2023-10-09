@@ -29,18 +29,18 @@ const static char* data = "Structure\n"
                            "H O\n"
                            "8 4\n"
                            "Cartesian\n"
-                           "3.822044611    1.62606883   3.092008352\n"
-                           "3.822721243  0.6591201425   1.908767104\n"
-                           "3.817448139   2.351599932 0.05880066007\n"
-                           "3.816771507   3.318548203   1.242042065\n"
-                           "5.337373257   4.210567951 0.01213156618\n"
-                           "2.294668913   4.210659504 0.01174806431\n"
-                           "4.593580723    3.98064661   3.138677597\n"
-                           "3.043938398   3.980554581   3.139060974\n"
-                           "3.823375463  0.6846598387   2.877068996\n"
-                           "3.816117287   3.293009043  0.2737401426\n"
-                           "3.820759535  0.5593996644   0.148500219\n"
-                           "3.818733454   3.418268919   3.002308846";
+                           "3.82392771      1.627786996     3.097418093\n"
+                           "3.825170743     0.6609370111    1.91455944\n"
+                           "3.821134627     2.355310853     0.05898047382\n"
+                           "3.819906378     3.322169175     1.24183939\n"
+                           "5.340537394     4.216015464     0.01506002955\n"
+                           "2.298689371     4.216120568     0.01476307969\n"
+                           "4.595492317     3.983179478     3.141328029\n"
+                           "3.046108593     3.983091746     3.141638832\n"
+                           "3.825339204     0.6863512929    2.882796309\n"
+                           "3.819702744     3.296745616     0.2735997228\n"
+                           "3.824291156     0.562119077     0.152752783\n"
+                           "3.820790917     3.420982462     3.003610409";
 
 class ForceModel : private Q_TIP4P<ScalarType, ScalarType> {
     using Base = Q_TIP4P<ScalarType, ScalarType>;
@@ -81,11 +81,12 @@ int main(int argc, char** argv) {
     MDCellType unitCell(poscar);
     unitCell.scale(PhyConst<AU>::angstormToBohr(1));
 
-    PhononType ph(unitCell, {8, 8, 1});
+    PhononType ph(unitCell, {8, 8, 1}, displace);
     MDCellType superCell = unitCell.makeSuperCell<ExtendCellOption::CellMajor>(ph.getSuperSize());
     
     ForceModel model(superCell, pair_cutoff);
-    const auto fcMatrixGrid = ph.makeForceConstants(model, displace, 1E-10, 100);
+    auto fcMatrixGrid = ph.makeForceConstants(model);
+    ph.applyTranslate(fcMatrixGrid, 1E-10, 100);
 
     QApplication app(argc, argv);
     PhononPlot<ScalarType, ScalarType>* phPlot;
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
     {
         PhononDOS<ScalarType, ScalarType> dosSolver(ph.getUnitCell(), ph.getSuperSize(), fcMatrixGrid, {32, 32, 1});
         auto freq = Vector<ScalarType>::linspace(0, 110, 300);
-        freq *= reciprocal(ScalarType(PhononPlot<ScalarType, ScalarType>::AUToTHz));
+        freq *= ScalarType(PhyConst<AU>::THzToFreq(1));
         Vector<ScalarType> dos(freq.getLength());
         for (size_t i = 0; i < dos.getLength(); ++i)
             dos[i] = dosSolver.calcDOS(freq[i]);
@@ -117,7 +118,7 @@ int main(int argc, char** argv) {
         axisY->setTitleText("Frequency/THz");
         axisY->setLabelFormat("%d");
 
-        freq *= ScalarType(PhononPlot<ScalarType, ScalarType>::AUToTHz);
+        freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
         dosPlot->spline(dos, freq).setColor(Qt::black);
     }
     phPlot->show();

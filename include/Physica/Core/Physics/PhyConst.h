@@ -111,6 +111,8 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double pressToGPa(double atomic_press) { return atomic_press * pressInGPa; }
         [[nodiscard]] constexpr static double pressToKBar(double atomic_press) { return pressToGPa(atomic_press) * 10; }
         [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electroMass; }
+        [[nodiscard]] constexpr static double freqToTHz(double atomic_freq) { return atomic_freq * 1E-12 / timeToSecond(1); }
+        [[nodiscard]] constexpr static double THzToFreq(double thz) { return thz * timeToSecond(1) * 1E12; }
     };
 
     template<>

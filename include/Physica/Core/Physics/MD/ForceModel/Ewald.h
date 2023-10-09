@@ -49,6 +49,7 @@ namespace Physica::Core {
     class Ewald : public PairModel<Ewald<ScalarType, PosScalarType>> {
         constexpr static unsigned int Dim = 3;
         using Base = PairModel<Ewald<ScalarType, PosScalarType>>;
+        using ComplexType = ComplexScalar<ScalarType>;
         using PlainScalar = typename ScalarType::PlainScalar;
         using LatticeMatrix = typename PeriodicCell<PosScalarType, Dim>::LatticeMatrix;
         using PositionMatrix = typename PeriodicCell<PosScalarType, Dim>::PositionMatrix;
@@ -56,9 +57,9 @@ namespace Physica::Core {
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<PosScalarType, Dim>;
-        constexpr static size_t ErfcTableSize = 4096 + 512;
+        constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
-        constexpr static double SumPrec = ErfcTableSize * ErfcTableStep; // Refer to [2]
+        constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [2], minus 2 to avoid overflow
     private:
         LatticeMatrix lattice;
         ReciprocalCell<PosScalarType> repCell;
@@ -89,6 +90,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
+        [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
         void swap(Ewald& ewald) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -101,12 +103,17 @@ namespace Physica::Core {
         inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     private:
+        /* Operations */
         void initIntegralLimit(PosScalarType volume);
         void makeTables();
-
+        [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType rSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
+        [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
+        /* Getters */
         using Base::getCutoff;
         using Base::getSquaredCutoff;
-
+        /* Friends */
         friend class ::Physica::Test;
         friend class PairModel<Ewald<ScalarType, PosScalarType>>;
     };
@@ -207,6 +214,18 @@ namespace Physica::Core {
         kSpaceSum *= PlainScalar(4 * M_PI) * inv_volume;
         return kSpaceSum * PlainScalar(0.5) + rSpaceSum - selfEnergy;
     }
+    /**
+     * Reference:
+     * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
+     */
+    template<class ScalarType, class PosScalarType>
+    typename Ewald<ScalarType, PosScalarType>::ComplexType
+    Ewald<ScalarType, PosScalarType>::forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D waveQ = repCell.getLattice().transpose() * qPoint;
+        const ComplexType kSpaceSum = kSpaceForceConst(pos, waveQ, dof1, dof2);
+        const ComplexType rSpaceSum = rSpaceForceConst(pos, waveQ, dof1, dof2);
+        return kSpaceSum + rSpaceSum;
+    }
 
     template<class ScalarType, class PosScalarType>
     void Ewald<ScalarType, PosScalarType>::swap(Ewald& ewald) noexcept {
@@ -290,5 +309,116 @@ namespace Physica::Core {
         erfcStep = PlainScalar(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         repDoubleSquareStep = reciprocal(square(erfcStep) * PlainScalar(2));
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename Ewald<ScalarType, PosScalarType>::ComplexType
+    Ewald<ScalarType, PosScalarType>::kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+        const size_t atom1 = dof1 / 3;
+        const size_t atom2 = dof2 / 3;
+        const size_t direction1 = dof1 % 3U;
+        const size_t direction2 = dof2 % 3U;
+        const ScalarType charge1 = charges[atom1];
+        const ScalarType charge2 = charges[atom2];
+
+        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * integralLimit));
+        ComplexType kSpaceSum = 0;
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(kSpaceSumRange, repCell.getLattice(),
+            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, factor1, &pos, &kSpaceSum](Vector3D waveG) {
+                ComplexType temp = 0;
+                {
+                    const Vector3D waveSum = waveQ + waveG;
+                    const ScalarType squaredNorm = waveSum.squaredNorm();
+                    const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
+                    if (isNotGammaPoint) {
+                        const ScalarType factor2 = squaredNorm * exp(squaredNorm * factor1);
+                        const ScalarType phase = waveSum * (pos.row(atom1) - pos.row(atom2));
+                        const ComplexType elem = (waveSum[direction1] * waveSum[direction2]) / factor2 * ComplexType::fromPhase(phase);
+                        temp = charge1 * charge2 * elem;
+                    }
+                }
+
+                const bool isSameAtom = atom1 == atom2;
+                if (isSameAtom) {
+                    const ScalarType squaredNorm = waveG.squaredNorm();
+                    const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
+                    if (isNotGammaPoint) {
+                        const size_t numParticle = getNumParticle();
+                        const Vector<ScalarType> dots = pos * waveG;
+                        Vector<ScalarType> sin_vec(numParticle);
+                        Vector<ScalarType> cos_vec(numParticle);
+                        sincos(dots, sin_vec, cos_vec);
+                        const ScalarType sum_cos = cos_vec * charges;
+                        const ScalarType sum_sin = sin_vec * charges;
+                        const ScalarType phase = waveG * pos.row(atom1);
+                        const ComplexType elem = cos(phase) * sum_cos + sin(phase) * sum_sin;
+
+                        const ScalarType factor2 = squaredNorm * exp(squaredNorm * factor1);
+                        temp -= charge1 * elem * ((waveG[direction1] * waveG[direction2]) / factor2);
+                    }
+                }
+                kSpaceSum += temp;
+            });
+        kSpaceSum *= PlainScalar(4 * M_PI) * inv_volume;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    typename Ewald<ScalarType, PosScalarType>::ComplexType
+    Ewald<ScalarType, PosScalarType>::rSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+        const size_t atom1 = dof1 / 3;
+        const size_t atom2 = dof2 / 3;
+        const size_t direction1 = dof1 % 3U;
+        const size_t direction2 = dof2 % 3U;
+        const ScalarType charge1 = charges[atom1];
+        const ScalarType charge2 = charges[atom2];
+
+        ComplexType rSpaceSum = 0;
+        PeriodicCell<PosScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice,
+            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, &pos, &rSpaceSum](Vector3D delta) {
+                const bool isSameDirection = direction1 == direction2;
+                ComplexType temp = 0;
+                {
+                    const Vector3D x = pos.row(atom1).asVector() - pos.row(atom2).asVector() + delta;
+                    const ScalarType norm = x.norm();
+                    const ScalarType phase = waveQ * x;
+                    temp = rSpaceForceConstImpl1(x) * (x[direction1] * x[direction2]);
+                    if (isSameDirection)
+                        temp += rSpaceForceConstImpl2(x);
+                    temp *= ComplexType::fromPhase(phase) * (charge1 * charge2);
+                }
+
+                const bool isSameAtom = atom1 == atom2;
+                if (isSameAtom) {
+                    ComplexType temp1 = 0;
+                    for (size_t i = 0; i < getNumParticle(); ++i) {
+                        const Vector3D x = pos.row(atom1).asVector() - pos.row(i).asVector() + delta;
+                        const ScalarType norm = x.norm();
+                        ComplexType temp2 = rSpaceForceConstImpl1(x) * (x[direction1] * x[direction2]);
+                        if (isSameDirection)
+                            temp2 += rSpaceForceConstImpl2(x);
+                        temp1 += temp2 * charges[i];
+                    }
+                    temp -= temp1 * charge1;
+                }
+                rSpaceSum += temp;
+            });
+        return rSpaceSum;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType Ewald<ScalarType, PosScalarType>::rSpaceForceConstImpl1(ScalarType r) const {
+        const ScalarType x = integralLimit * r;
+        const ScalarType x2 = square(x);
+        const ScalarType term1 = ScalarType(3) * erfc(x);
+        const ScalarType term2 = ScalarType(2 * M_2_SQRTPI) * x * (ScalarType(1.5) + x2) / exp(x2);
+        return (term1 + term2) / (square(square(r)) * r);
+    }
+
+    template<class ScalarType, class PosScalarType>
+    ScalarType Ewald<ScalarType, PosScalarType>::rSpaceForceConstImpl2(ScalarType r) const {
+        const ScalarType x = integralLimit * r;
+        const ScalarType term1 = erfc(x);
+        const ScalarType term2 = ScalarType(M_2_SQRTPI) * x / exp(square(x));
+        return -(term1 + term2) / (square(x) * x);
     }
 }

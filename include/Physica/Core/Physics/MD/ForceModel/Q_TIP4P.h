@@ -190,6 +190,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType>
     ScalarType Q_TIP4P<ScalarType, PosScalarType>::potentialEnergy(const MDCellType& cell) const {
+        assert(cell.getNumParticle() == getNumParticle() && "[Error]: Inconsistent atom number");
         assert(isCellOrdered(cell));
         return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
     }
