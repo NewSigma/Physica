@@ -137,7 +137,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
         [[nodiscard]] ScalarType calcKineticPrim() const;
         [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
-        template<class ForceModel, class Executor> [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
+        template<class ForceModel, class Executor, bool IsClassical = false>
+        [[nodiscard]] LatticeMatrix makeStress(const ForceModel& model) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }

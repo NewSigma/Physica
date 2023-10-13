@@ -73,7 +73,9 @@ namespace Physica::Core {
         template<class VectorType, class Executor, bool IsSmallCell>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
+        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short_unsort(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell) const;
 
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
@@ -84,6 +86,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }
+        [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
         inline void updateLattice(LatticeMatrix lattice);
@@ -167,6 +170,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType>
+    template<class Executor, bool IsSmallCell>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_short_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        const auto permute = sortPosition(copy);
+        const Vector<ScalarType> sort_f = force_short<Executor, IsSmallCell>(copy);
+        const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
+        return unsort_f.flatten();
+    }
+
+    template<class ScalarType, class PosScalarType>
     template<class Executor>
     Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long(const MDCellType& cell) const {
         Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
@@ -186,6 +199,16 @@ namespace Physica::Core {
             forceO *= ScalarType(gamma);
         }
         return coulomb;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    template<class Executor>
+    Vector<ScalarType> Q_TIP4P<ScalarType, PosScalarType>::force_long_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        const auto permute = sortPosition(copy);
+        const Vector<ScalarType> sort_f = force_long<Executor>(copy);
+        const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
+        return unsort_f.flatten();
     }
 
     template<class ScalarType, class PosScalarType>

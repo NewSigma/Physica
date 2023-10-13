@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         axisY->setLabelFormat("%d");
 
         freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
-        dosPlot->spline(dos, freq).setColor(Qt::black);
+        dosPlot->line(dos, freq).setColor(Qt::black);
     }
     phPlot->show();
     dosPlot->show();

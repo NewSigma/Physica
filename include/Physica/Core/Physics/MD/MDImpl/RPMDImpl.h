@@ -352,7 +352,7 @@ namespace Physica::Core {
      * Note: Use this estimator if NumReplica is small or if force model is \class EmptyForceModel
      * 
      * Reference:
-     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150(1982).
+     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815
      */
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     ScalarType RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim() const {
@@ -377,9 +377,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, class Executor, bool IsClassical>
     typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStress(const ForceModel& model) const {
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         LatticeMatrix stress(Dim, Dim, 0);
         if constexpr (NumReplica == 1) {
             const size_t dof = getDOF();
@@ -392,19 +393,23 @@ namespace Physica::Core {
                 const auto atomMomentum = momentum.segment(from, to);
                 stress += (repMass * atomMomentum) * atomMomentum.transpose();
             }
-            stress = stress * reciprocal(getVolume()) + model.virial(phaseToCell(0));
+            if constexpr (isFreeModel)
+                stress *= reciprocal(getVolume());
+            else
+                stress = stress * reciprocal(getVolume()) + model.virial(phaseToCell(0));
         }
         else {
-            const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
+            [[maybe_unused]] const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
             const ScalarType repVolume = reciprocal(getVolume());
             const size_t dof = getDOF();
-            for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-                using Vector3D = Vector<ScalarType, 3>;
+            const size_t numReplica = getNumReplica();
+            for (size_t replica = 0; replica < numReplica; ++replica) {
+                using VectorType = Vector<ScalarType, Dim>;
                 const auto col = getPhaseMatrix().col(replica);
                 const auto momentum = col.head(dof);
                 const auto pos = col.tail(dof);
 
-                const auto col1 = getPhaseMatrix().col((replica + 1) % getNumReplica());
+                const auto col1 = getPhaseMatrix().col((replica + 1) % numReplica);
                 const auto pos1 = col1.tail(dof);
                 LatticeMatrix temp(Dim, Dim, 0);
                 for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -415,15 +420,23 @@ namespace Physica::Core {
                     const auto atomMomentum = momentum.segment(from, to);
                     temp += (repMass * atomMomentum) * atomMomentum.transpose();
 
-                    const auto atomPos = pos.segment(from, to);
-                    const auto atomPos1 = pos1.segment(from, to);
-                    const Vector3D deltaPos = atomPos - atomPos1;
-                    const ScalarType factorK = mass * squaredOmegaW;
-                    temp += (factorK * deltaPos) * deltaPos.transpose();
+                    if constexpr (!IsClassical) {
+                        const auto atomPos = pos.segment(from, to);
+                        const auto atomPos1 = pos1.segment(from, to);
+                        const VectorType deltaPos = atomPos - atomPos1;
+                        const ScalarType factorK = mass * squaredOmegaW;
+                        temp -= (factorK * deltaPos) * deltaPos.transpose();
+                    }
                 }
-                stress += temp * repVolume + model.virial(phaseToCell(replica));
+                if constexpr (isFreeModel)
+                    stress += temp * repVolume;
+                else
+                    stress += temp * repVolume + model.virial(phaseToCell(replica));
             }
-            stress *= reciprocal(ScalarType(getNumReplica()));
+            if constexpr (IsClassical)
+                stress *= reciprocal(ScalarType(numReplica * numReplica));
+            else
+                stress *= reciprocal(ScalarType(numReplica));
         }
         return stress;
     }

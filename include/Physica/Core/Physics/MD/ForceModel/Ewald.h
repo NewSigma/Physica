@@ -332,7 +332,7 @@ namespace Physica::Core {
                     const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
                     if (isNotGammaPoint) {
                         const ScalarType factor2 = squaredNorm * exp(squaredNorm * factor1);
-                        const ScalarType phase = waveSum * (pos.row(atom1) - pos.row(atom2));
+                        const ScalarType phase = waveSum * (pos.row(atom1).asVector() - pos.row(atom2).asVector());
                         const ComplexType elem = (waveSum[direction1] * waveSum[direction2]) / factor2 * ComplexType::fromPhase(phase);
                         temp = charge1 * charge2 * elem;
                     }
@@ -350,7 +350,7 @@ namespace Physica::Core {
                         sincos(dots, sin_vec, cos_vec);
                         const ScalarType sum_cos = cos_vec * charges;
                         const ScalarType sum_sin = sin_vec * charges;
-                        const ScalarType phase = waveG * pos.row(atom1);
+                        const ScalarType phase = waveG * pos.row(atom1).asVector();
                         const ComplexType elem = cos(phase) * sum_cos + sin(phase) * sum_sin;
 
                         const ScalarType factor2 = squaredNorm * exp(squaredNorm * factor1);
@@ -360,6 +360,7 @@ namespace Physica::Core {
                 kSpaceSum += temp;
             });
         kSpaceSum *= PlainScalar(4 * M_PI) * inv_volume;
+        return kSpaceSum;
     }
 
     template<class ScalarType, class PosScalarType>
@@ -380,11 +381,14 @@ namespace Physica::Core {
                 {
                     const Vector3D x = pos.row(atom1).asVector() - pos.row(atom2).asVector() + delta;
                     const ScalarType norm = x.norm();
-                    const ScalarType phase = waveQ * x;
-                    temp = rSpaceForceConstImpl1(x) * (x[direction1] * x[direction2]);
-                    if (isSameDirection)
-                        temp += rSpaceForceConstImpl2(x);
-                    temp *= ComplexType::fromPhase(phase) * (charge1 * charge2);
+                    const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
+                    if (isNotSelf) {
+                        const ScalarType phase = waveQ * delta;
+                        temp = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
+                        if (isSameDirection)
+                            temp += rSpaceForceConstImpl2(norm);
+                        temp *= ComplexType::fromPhase(phase) * (charge1 * charge2);
+                    }
                 }
 
                 const bool isSameAtom = atom1 == atom2;
@@ -393,10 +397,13 @@ namespace Physica::Core {
                     for (size_t i = 0; i < getNumParticle(); ++i) {
                         const Vector3D x = pos.row(atom1).asVector() - pos.row(i).asVector() + delta;
                         const ScalarType norm = x.norm();
-                        ComplexType temp2 = rSpaceForceConstImpl1(x) * (x[direction1] * x[direction2]);
-                        if (isSameDirection)
-                            temp2 += rSpaceForceConstImpl2(x);
-                        temp1 += temp2 * charges[i];
+                        const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
+                        if (isNotSelf) {
+                            ComplexType temp2 = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
+                            if (isSameDirection)
+                                temp2 += rSpaceForceConstImpl2(norm);
+                            temp1 += temp2 * charges[i];
+                        }
                     }
                     temp -= temp1 * charge1;
                 }
@@ -419,6 +426,6 @@ namespace Physica::Core {
         const ScalarType x = integralLimit * r;
         const ScalarType term1 = erfc(x);
         const ScalarType term2 = ScalarType(M_2_SQRTPI) * x / exp(square(x));
-        return -(term1 + term2) / (square(x) * x);
+        return -(term1 + term2) / (square(r) * r);
     }
 }

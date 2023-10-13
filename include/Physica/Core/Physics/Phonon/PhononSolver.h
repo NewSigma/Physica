@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
 
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType>
@@ -37,6 +38,8 @@ namespace Physica::Core {
         using QPointGrid = GridStorage<EigenSolverType>;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
     private:
+        using EwaldType = Ewald<ScalarType, PosScalarType>;
+
         MDCellType unitCell;
         Index3D superSize;
     public:
@@ -48,6 +51,7 @@ namespace Physica::Core {
         PhononSolver& operator=(PhononSolver obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void applyTranslate(MatrixGrid& forceConstants, ScalarType translationPrec, size_t maxIteration);
+        void applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix);
         [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
         void toDynamicMatrix(MatrixType& forceConstant) const;
         void toDynamicMatrix(MatrixGrid& forceConstants) const;
@@ -137,6 +141,20 @@ namespace Physica::Core {
                 auto& fcMatrix = fcMatrixes[i];
                 temp = (fcMatrix + fcMatrix.transpose().conjugate()) * ScalarType(0.5);
                 fcMatrix = temp;
+            }
+        }
+    }
+
+    template<class ScalarType, class PosScalarType>
+    void PhononSolver<ScalarType, PosScalarType>::applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix) {
+        assert(fcMatrix.getRow() == fcMatrix.getColumn() && "[Error]: Force constant matrix must be square");
+        const size_t size = fcMatrix.getColumn();
+        for (size_t c = 0; c < size; ++c) {
+            for (size_t r = c; r < size; ++r) {
+                const ComplexType temp = ewald.forceConst(unitCell.getPos(), qPoint, r, c);
+                fcMatrix(r, c) += temp;
+                if (r != c)
+                    fcMatrix(c, r) += temp.conjugate();
             }
         }
     }

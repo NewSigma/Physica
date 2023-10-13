@@ -64,7 +64,9 @@ namespace Physica::Gui {
             axisTop->setTickType(QValueAxis::TicksDynamic);
             axisTop->setLabelsVisible(false);
             axisTop->setGridLineVisible(false);
+            axisTop->setLabelsFont(font);
             axisTop->setRange(minX, maxX);
+            axisTop->setTitleFont(font);
             axisTop->setLinePenColor(Qt::black);
 
             axisRight->setTickAnchor(0);
@@ -74,7 +76,9 @@ namespace Physica::Gui {
             axisRight->setGridLineVisible(false);
             axisRight->setMinorGridLineVisible(false);
             axisRight->setMinorTickCount(4);
+            axisRight->setLabelsFont(font);
             axisRight->setRange(minY, maxY);
+            axisRight->setTitleFont(font);
             axisRight->setLinePenColor(Qt::black);
 
             chart.addAxis(axisX, Qt::AlignBottom);
