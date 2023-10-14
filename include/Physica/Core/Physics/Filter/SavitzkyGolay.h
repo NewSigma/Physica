@@ -33,8 +33,9 @@ namespace Physica::Core {
         unsigned char rRange;
         MatrixType coeffs;
         MatrixType inv;
+        ScalarType delta;
     public:
-        SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta);
+        SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta_);
         SavitzkyGolay(const SavitzkyGolay&) = default;
         SavitzkyGolay(SavitzkyGolay&&) noexcept = default;
         ~SavitzkyGolay() = default;
@@ -49,11 +50,16 @@ namespace Physica::Core {
         [[nodiscard]] unsigned char getRRange() const noexcept { return rRange; }
         [[nodiscard]] size_t getOrder() const noexcept { return coeffs.getRow() - 1; }
         [[nodiscard]] size_t getWindowSize() const noexcept { return coeffs.getRow(); }
+        [[nodiscard]] ScalarType getDelta() const noexcept { return delta; }
     };
 
     template<class ScalarType>
-    SavitzkyGolay<ScalarType>::SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta)
-            : lRange(lRange_), rRange(rRange_), coeffs(lRange_ + rRange_ + 1, order + 1), inv(order + 1, order + 1) {
+    SavitzkyGolay<ScalarType>::SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta_)
+            : lRange(lRange_)
+            , rRange(rRange_)
+            , coeffs(lRange_ + rRange_ + 1, order + 1)
+            , inv(order + 1, order + 1)
+            , delta(delta_) {
         for (size_t major = 0; major < coeffs.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < coeffs.getMaxMinor(); ++minor) {
                 if (major == 0 && minor == 0)
@@ -99,5 +105,6 @@ namespace Physica::Core {
         std::swap(rRange, filter.rRange);
         coeffs.swap(filter.coeffs);
         inv.swap(filter.inv);
+        delta.swap(filter.delta);
     }
 }
