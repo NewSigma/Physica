@@ -1,6 +1,6 @@
 # Physica
 
-Physica is a high performance and scalable template library for computational physics.
+Physica is a high performance and scalable template library for computational physics which devotes to provide a rapid iteration platform for new algorithms. Physica is not a textbook nor ready to use solutions. It is expected users write their own codes and usually implement ideas in less than 200 lines of code.
 
 ## Table of Contents
 

@@ -40,6 +40,7 @@ namespace Physica::Core {
         void operator+=(const This& pdf);
         /* Operations */
         void sample(ScalarType data);
+        inline void sample(VectorType datas);
         void clear();
         [[nodiscard]] VectorType makePosition() const;
         [[nodiscard]] VectorType makeDistribution() const;
@@ -66,6 +67,12 @@ namespace Physica::Core {
         const long index = double((data - getFromPoint()) * repDelta);
         if (data > getFromPoint() && 0 <= index && size_t(index) < getNumBin())
             bucket[index] += 1;
+    }
+
+    template<class ScalarType>
+    inline void ProbabilityDistributionFunction<ScalarType>::sample(VectorType datas) {
+        for (auto data : datas)
+            sample(data);
     }
 
     template<class ScalarType>

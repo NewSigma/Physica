@@ -67,10 +67,10 @@ namespace Physica::Core {
                 delete reinterpret_cast<Array<unsigned long>*>(p_array);
                 break;
             case FLOAT:
-                delete reinterpret_cast<Array<Scalar<Float>>*>(p_array);
+                delete reinterpret_cast<Vector<Scalar<Float>>*>(p_array);
                 break;
             case DOUBLE:
-                delete reinterpret_cast<Array<Scalar<Double>>*>(p_array);
+                delete reinterpret_cast<Vector<Scalar<Double>>*>(p_array);
                 break;
             case BOOL:
                 delete reinterpret_cast<Array<bool>*>(p_array);
@@ -81,6 +81,102 @@ namespace Physica::Core {
                 assert("This is impossible");
             }
         }
+    }
+
+    size_t CsvFile::countMissingValue(size_t column, const char* missingTag) const {
+        const auto datatype = datatypes[column];
+        if (datatype != DataType::STRING && !defaultValues[column].has_value())
+            return 0;
+
+        size_t result = 0;
+        switch (datatype) {
+        case CHAR: {
+            const signed char value = defaultValues[column]->char_value;
+            const auto& arr = asChars(column);
+            for (auto c : arr)
+                result += value == c;
+            break;
+        }
+        case UCHAR: {
+            const unsigned char value = defaultValues[column]->uchar_value;
+            const auto& arr = asUsignedChars(column);
+            for (auto c : arr)
+                result += value == c;
+            break;
+        }
+        case SHORT: {
+            const short value = defaultValues[column]->short_value;
+            const auto& arr = asShorts(column);
+            for (auto s : arr)
+                result += value == s;
+            break;
+        }
+        case USHORT: {
+            const unsigned short value = defaultValues[column]->ushort_value;
+            const auto& arr = asUnsignedShorts(column);
+            for (auto s : arr)
+                result += value == s;
+            break;
+        }
+        case INT: {
+            const int value = defaultValues[column]->int_value;
+            const auto& arr = asInts(column);
+            for (auto i : arr)
+                result += value == i;
+            break;
+        }
+        case UINT: {
+            const unsigned int value = defaultValues[column]->uint_value;
+            const auto& arr = asUnsignedInts(column);
+            for (auto i : arr)
+                result += value == i;
+            break;
+        }
+        case LONG: {
+            const long value = defaultValues[column]->long_value;
+            const auto& arr = asLongs(column);
+            for (auto l : arr)
+                result += value == l;
+            break;
+        }
+        case ULONG: {
+            const unsigned long value = defaultValues[column]->ulong_value;
+            const auto& arr = asUnsignedLongs(column);
+            for (auto l : arr)
+                result += value == l;
+            break;
+        }
+        case FLOAT: {
+            const Scalar<Float> value = defaultValues[column]->float_value;
+            const auto& arr = asFloats(column);
+            for (auto f : arr)
+                result += value == f;
+            break;
+        }
+        case DOUBLE: {
+            const Scalar<Double> value = defaultValues[column]->double_value;
+            const auto& arr = asDoubles(column);
+            for (auto d : arr)
+                result += value == d;
+            break;
+        }
+        case BOOL: {
+            const bool value = defaultValues[column]->bool_value;
+            const auto& arr = asBools(column);
+            for (auto b : arr)
+                result += value == b;
+            break;
+        }
+        case STRING: {
+            const auto& arr = asStrings(column);
+            for (const auto& s : arr)
+                result += s == missingTag;
+            break;
+        }
+        default: [[unlikely]]
+            assert("[Error]: This is impossible");
+        }
+        return result;
     }
 
     void CsvFile::swap(CsvFile& obj) noexcept {
@@ -155,10 +251,10 @@ namespace Physica::Core {
                 p_array = new Array<unsigned long>();
                 break;
             case FLOAT:
-                p_array = new Array<Scalar<Float>>();
+                p_array = new Vector<Scalar<Float>>();
                 break;
             case DOUBLE:
-                p_array = new Array<Scalar<Double>>();
+                p_array = new Vector<Scalar<Double>>();
                 break;
             case BOOL:
                 p_array = new Array<bool>();
@@ -297,7 +393,7 @@ namespace Physica::Core {
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         f = defaultValue->float_value;
                     }
-                    reinterpret_cast<Array<Scalar<Float>>*>(p_array)->append(f);
+                    reinterpret_cast<Vector<Scalar<Float>>*>(p_array)->append(f);
                     break;
                 }
                 case DOUBLE: {
@@ -308,7 +404,7 @@ namespace Physica::Core {
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         d = defaultValue->double_value;
                     }
-                    reinterpret_cast<Array<Scalar<Double>>*>(p_array)->append(d);
+                    reinterpret_cast<Vector<Scalar<Double>>*>(p_array)->append(d);
                     break;
                 }
                 case BOOL: {

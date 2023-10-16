@@ -20,8 +20,7 @@
 
 #include <optional>
 #include <variant>
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     class CsvFile {
@@ -50,8 +49,8 @@ namespace Physica::Core {
             unsigned int uint_value;
             long long_value;
             unsigned long ulong_value;
-            float float_value;
-            double double_value;
+            Scalar<Float> float_value;
+            Scalar<Double> double_value;
             bool bool_value;
 
             DefaultValue(signed char c) : char_value(c) {}
@@ -62,8 +61,8 @@ namespace Physica::Core {
             DefaultValue(unsigned int i) : uint_value(i) {}
             DefaultValue(long l) : long_value(l) {}
             DefaultValue(unsigned long l) : ulong_value(l) {}
-            DefaultValue(float f) : float_value(f) {}
-            DefaultValue(double d) : double_value(d) {}
+            DefaultValue(Scalar<Float> f) : float_value(std::move(f)) {}
+            DefaultValue(Scalar<Double> d) : double_value(std::move(d)) {}
             DefaultValue(bool b) : bool_value(b) {}
         };
         using DataTypeArray = Utils::Array<DataType>;
@@ -85,17 +84,140 @@ namespace Physica::Core {
         /* Operators */
         CsvFile& operator=(CsvFile obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        template<class ScalarType>
+        [[nodiscard]] Vector<ScalarType> asVector(size_t column) const;
+        size_t countMissingValue(size_t column, const char* missingTag = "NA") const;
         void swap(CsvFile& obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataTypeArray& getDatatypes() const noexcept { return datatypes; }
         [[nodiscard]] size_t getColumn() const noexcept { return datatypes.getLength(); }
+        [[nodiscard]] const Utils::Array<std::string>& getHeaders() const noexcept { return headers; }
+        [[nodiscard]] inline const Utils::Array<signed char>& asChars(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<unsigned char>& asUsignedChars(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<short>& asShorts(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<unsigned short>& asUnsignedShorts(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<int>& asInts(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<unsigned int>& asUnsignedInts(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<long>& asLongs(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<unsigned long>& asUnsignedLongs(size_t column) const noexcept;
+        [[nodiscard]] inline const Vector<Scalar<Float>>& asFloats(size_t column) const noexcept;
+        [[nodiscard]] inline const Vector<Scalar<Double>>& asDoubles(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<bool>& asBools(size_t column) const noexcept;
+        [[nodiscard]] inline const Utils::Array<std::string>& asStrings(size_t column) const noexcept;
         [[nodiscard]] inline size_t getRow() const noexcept;
+        [[nodiscard]] const Utils::Array<std::optional<DefaultValue>>& getDefaultValues() const noexcept { return defaultValues; }
         /* Static members */
         [[nodiscard]] static const char* toString(DataType type);
     private:
         void allocate();
         void readFile(const char* path);
     };
+
+    template<class ScalarType>
+    Vector<ScalarType> CsvFile::asVector(size_t column) const {
+        const DataType type = datatypes[column];
+        Vector<ScalarType> result(getRow());
+        if (type == FLOAT)
+            result = asFloats(column);
+        else if (type == DOUBLE)
+            result = asDoubles(column);
+        else {
+            for (size_t i = 0; i < result.getLength(); ++i) {
+                switch (type) {
+                case CHAR:
+                    result[i] = ScalarType(asChars(column)[i]);
+                    break;
+                case UCHAR:
+                    result[i] = ScalarType(asUsignedChars(column)[i]);
+                    break;
+                case SHORT:
+                    result[i] = ScalarType(asShorts(column)[i]);
+                    break;
+                case USHORT:
+                    result[i] = ScalarType(asUnsignedShorts(column)[i]);
+                    break;
+                case INT:
+                    result[i] = ScalarType(asInts(column)[i]);
+                    break;
+                case UINT:
+                    result[i] = ScalarType(asUnsignedInts(column)[i]);
+                    break;
+                case LONG:
+                    result[i] = ScalarType(asLongs(column)[i]);
+                    break;
+                case ULONG:
+                    result[i] = ScalarType(asUnsignedLongs(column)[i]);
+                    break;
+                case BOOL:
+                    result[i] = ScalarType(asBools(column)[i]);
+                    break;
+                default: [[unlikely]]
+                    throw std::invalid_argument("[Error]: Cannot convert string type to float type");
+                }
+            }
+        }
+        return result;
+    }
+
+    inline const Utils::Array<signed char>& CsvFile::asChars(size_t column) const noexcept {
+        assert(datatypes[column] == CHAR && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<signed char>*>(data[column]);
+    }
+
+    inline const Utils::Array<unsigned char>& CsvFile::asUsignedChars(size_t column) const noexcept {
+        assert(datatypes[column] == UCHAR && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<unsigned char>*>(data[column]);
+    }
+
+    inline const Utils::Array<short>& CsvFile::asShorts(size_t column) const noexcept {
+        assert(datatypes[column] == SHORT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<short>*>(data[column]);
+    }
+
+    inline const Utils::Array<unsigned short>& CsvFile::asUnsignedShorts(size_t column) const noexcept {
+        assert(datatypes[column] == USHORT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<unsigned short>*>(data[column]);
+    }
+
+    inline const Utils::Array<int>& CsvFile::asInts(size_t column) const noexcept {
+        assert(datatypes[column] == INT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<int>*>(data[column]);
+    }
+
+    inline const Utils::Array<unsigned int>& CsvFile::asUnsignedInts(size_t column) const noexcept {
+        assert(datatypes[column] == UINT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<unsigned int>*>(data[column]);
+    }
+
+    inline const Utils::Array<long>& CsvFile::asLongs(size_t column) const noexcept {
+        assert(datatypes[column] == LONG && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<long>*>(data[column]);
+    }
+
+    inline const Utils::Array<unsigned long>& CsvFile::asUnsignedLongs(size_t column) const noexcept {
+        assert(datatypes[column] == ULONG && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<unsigned long>*>(data[column]);
+    }
+
+    inline const Vector<Scalar<Float>>& CsvFile::asFloats(size_t column) const noexcept {
+        assert(datatypes[column] == FLOAT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Vector<Scalar<Float>>*>(data[column]);
+    }
+
+    inline const Vector<Scalar<Double>>& CsvFile::asDoubles(size_t column) const noexcept {
+        assert(datatypes[column] == DOUBLE && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Vector<Scalar<Double>>*>(data[column]);
+    }
+
+    inline const Utils::Array<bool>& CsvFile::asBools(size_t column) const noexcept {
+        assert(datatypes[column] == BOOL && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<bool>*>(data[column]);
+    }
+
+    inline const Utils::Array<std::string>& CsvFile::asStrings(size_t column) const noexcept {
+        assert(datatypes[column] == STRING && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Utils::Array<std::string>*>(data[column]);
+    }
 
     inline size_t CsvFile::getRow() const noexcept {
         //Use char here but any datatype is ok if we need length only
