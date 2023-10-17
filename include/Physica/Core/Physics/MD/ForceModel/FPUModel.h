@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     class FPUModel {
@@ -28,6 +30,8 @@ namespace Physica::Core {
     public:
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class VectorType, class Executor, bool IsSmallCell>
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
@@ -39,27 +43,34 @@ namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> FPUModel<ScalarType, PosScalarType, Dim>::force(const MDCellType& cell) const {
+        Vector<ScalarType> result(cell.getNumParticle(), 0);
+        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    void FPUModel<ScalarType, PosScalarType, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        Vector<ScalarType> force(numParticle, 0);
         /* First */ {
             const ScalarType delta = pos(0, 0) - SpringLength;
             const ScalarType delta2 = square(delta);
-            force[0] = -delta - delta * delta2;
+            result[0] = -delta - delta * delta2;
         }
         for (size_t i = 0; i < numParticle - 1; ++i) {
             const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
             const ScalarType delta2 = square(delta);
             const ScalarType f = delta + delta * delta2;
-            force[i] += f;
-            force[i + 1] -= f;
+            result[i] += f;
+            result[i + 1] -= f;
         }
         /* Last */ {
             const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
             const ScalarType delta2 = square(delta);
-            force[numParticle - 1] += delta + delta * delta2;
+            result[numParticle - 1] += delta + delta * delta2;
         }
-        return force;
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>

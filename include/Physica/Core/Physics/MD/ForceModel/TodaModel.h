@@ -38,33 +38,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const {
-            const size_t numParticle = cell.getNumParticle();
-            const auto& pos = cell.getPos();
-            ScalarType energy = 0;
-            if constexpr (IsFixedBoundary) {
-                /* First */ {
-                    const ScalarType delta = pos(0, 0) - SpringLength;
-                    energy = delta + exp(-delta);
-                }
-                    for (size_t i = 0; i < numParticle - 1; ++i) {
-                        const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
-                        energy += delta + exp(-delta);
-                    }
-                /* Last */ {
-                    const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
-                    energy += delta + exp(-delta);
-                }
-            }
-            else {
-                for (size_t i = 0; i < numParticle; ++i) {
-                    const size_t i1 = (i + 1) % numParticle;
-                    const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
-                    energy += delta + exp(-delta);
-                }
-            }
-            return energy;
-        }
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
     };
 
@@ -109,6 +83,35 @@ namespace Physica::Core {
                 result[i1] += f;
             }
         }
+    }
+
+    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    ScalarType TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::potentialEnergy(const MDCellType& cell) const {
+        const size_t numParticle = cell.getNumParticle();
+        const auto& pos = cell.getPos();
+        ScalarType energy = 0;
+        if constexpr (IsFixedBoundary) {
+            /* First */ {
+                const ScalarType delta = pos(0, 0) - SpringLength;
+                energy = delta + exp(-delta);
+            }
+            for (size_t i = 0; i < numParticle - 1; ++i) {
+                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+                energy += delta + exp(-delta);
+            }
+            /* Last */ {
+                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+                energy += delta + exp(-delta);
+            }
+        }
+        else {
+            for (size_t i = 0; i < numParticle; ++i) {
+                const size_t i1 = (i + 1) % numParticle;
+                const ScalarType delta = cell.minDistVector(i, i1).norm() - SpringLength;
+                energy += delta + exp(-delta);
+            }
+        }
+        return energy;
     }
 
     template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
