@@ -79,8 +79,8 @@ namespace Physica::Gui {
         QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
         template<class VectorType>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
-        template<class VectorType>
-        QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& x, const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
+        template<class VectorType1, class VectorType2>
+        QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& mean, const Core::LValueVector<VectorType2>& deviation);
         QScatterSeries& label(double x, double y, QString text);
         /* Getters */
         [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
@@ -302,11 +302,11 @@ namespace Physica::Gui {
         return errorBar(x, mean, deviation);
     }
 
-    template<class VectorType>
+    template<class VectorType1, class VectorType2>
     QBoxPlotSeries& Plot::errorBar(
-            const Core::LValueVector<VectorType>& x,
-            const Core::LValueVector<VectorType>& mean,
-            const Core::LValueVector<VectorType>& deviation) {
+            const Core::LValueVector<VectorType1>& x,
+            const Core::LValueVector<VectorType2>& mean,
+            const Core::LValueVector<VectorType2>& deviation) {
         assert(x.getLength() == mean.getLength() && x.getLength() == deviation.getLength());
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {

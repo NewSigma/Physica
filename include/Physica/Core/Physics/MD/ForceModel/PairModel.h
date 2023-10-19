@@ -21,6 +21,7 @@
 #include <algorithm>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
+#include "EmptyForceModel.h"
 
 namespace Physica::Core {
     /**
@@ -37,14 +38,17 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
         using ScalarType = typename TraitType::ScalarType;
-        using PlainScalar = typename ScalarType::PlainScalar;
         using PosScalarType = typename TraitType::PosScalarType;
+        constexpr static unsigned int Dim = 3;
+
+        using PlainScalar = typename ScalarType::PlainScalar;        
         using MDCellType = MDCell<ScalarType, PosScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
         using Index3D = typename GridBase::Index3D;
         using Vector3D = Vector<PosScalarType, 3>;
+        using ForceConstMatrix = typename EmptyForceModel<ScalarType, PosScalarType, Dim>::ForceConstMatrix;
     private:
         PlainScalar cutoff;
         ScalarType squared_cutoff;
@@ -52,23 +56,29 @@ namespace Physica::Core {
     public:
         ~PairModel() = default;
         /* Operations */
-        [[nodiscard]] ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType forceConst_functor(ScalarType r, ScalarType r2) const;
+
+        [[nodiscard]] ScalarType potentialEnergy(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
 
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
-
         template<class VectorType, class Executor, bool IsSmallCell>
         void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
         template<class VectorType, class Executor, bool IsSmallCell>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
 
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
-        [[nodiscard]] ScalarType potentialEnergy(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
+
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(PairModel& pair) noexcept;
         /* Getters */
@@ -83,6 +93,8 @@ namespace Physica::Core {
         PairModel(PairModel&&) noexcept = default;
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
+    private:
+        [[nodiscard]] ScalarType forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
     };
 
     template<class Derived>
@@ -97,13 +109,53 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        return Base::getDerived().pot_functor(i, j, r, r2);
+    }
+
+    template<class Derived>
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
-        return Base::getDerived().pot_functor(i, j, r, r2);
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConst_functor(ScalarType r, ScalarType r2) const {
+        return Base::getDerived().forceConst_functor(r, r2);
+    }
+
+    template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
+        const auto& pos = cartesianPos;
+        const auto range = MDCellType::estimateRange(lattice, cutoff);
+        const size_t numParticle = pos.getRow();
+
+        ScalarType result = 0;
+        MDCellType::forCellInRange(range, lattice,
+            [this, numParticle, &pos, &result](Vector3D delta) {
+                ScalarType temp = 0;
+                for (size_t i = 0; i < numParticle; ++i) {
+                    Vector3D from = pos.row(i) + delta;
+                    for (size_t j = i; j < numParticle; ++j) {
+                        const ScalarType r2 = (from - pos.row(j)).squaredNorm();
+                        const bool isNotSelf = PlainScalar(std::numeric_limits<ScalarType>::min()) < r2;
+                        if (isNotSelf && r2 < squared_cutoff) {
+                            const ScalarType dist = sqrt(r2);
+                            if constexpr (IsPotDependOnAtomIndex)
+                                temp += pot_functor(i, j, dist, r2);
+                            else
+                                temp += pot_functor(i, j, dist, r2) - pot_shift;
+                        }
+                    }
+                }
+                result += temp;
+            });
+        return result;
+    }
+
+    template<class Derived>
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
+        return potentialEnergy(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>
@@ -225,38 +277,33 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(
-            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
-        const auto& pos = cartesianPos;
-        const auto range = MDCellType::estimateRange(lattice, cutoff);
-        const size_t numParticle = pos.getRow();
-
-        ScalarType result = 0;
-        MDCellType::forCellInRange(range, lattice,
-            [this, numParticle, &pos, &result](Vector3D delta) {
-                ScalarType temp = 0;
-                for (size_t i = 0; i < numParticle; ++i) {
-                    Vector3D from = pos.row(i) + delta;
-                    for (size_t j = i; j < numParticle; ++j) {
-                        const ScalarType r2 = (from - pos.row(j)).squaredNorm();
-                        const bool isNotSelf = PlainScalar(std::numeric_limits<ScalarType>::min()) < r2;
-                        if (isNotSelf && r2 < squared_cutoff) {
-                            const ScalarType dist = sqrt(r2);
-                            if constexpr (IsPotDependOnAtomIndex)
-                                temp += pot_functor(i, j, dist, r2);
-                            else
-                                temp += pot_functor(i, j, dist, r2) - pot_shift;
-                        }
-                    }
-                }
-                result += temp;
-            });
-        return result;
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+        const size_t atom1 = dof1 / 3U;
+        const size_t atom2 = dof2 / 3U;
+        [[unlikely]] if (atom1 == atom2) {
+            const size_t dir2 = dof2 % 3U;
+            ScalarType result = 0;
+            for (size_t i = 0; i < cell.getNumParticle(); ++i) {
+                if (i == atom2)
+                    continue;
+                const size_t dof_i = 3 * i + dir2;
+                result += forceConstImpl(cell, dof1, dof_i);
+            }
+        }
+        return -forceConstImpl(cell, dof1, dof2);
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
-        return potentialEnergy(cell.getLattice(), cell.getPos());
+    typename PairModel<Derived>::ForceConstMatrix PairModel<Derived>::forceConst(const MDCellType& cell) const {
+        const size_t dof = cell.getDOF();
+        ForceConstMatrix result(dof);
+        for (size_t r = 0; r < dof; ++r) {
+            result(r, r) = 0;
+            for (size_t c = r + 1; c < dof; ++c)
+                result(r, c) = forceConst(cell, r, c);
+            result(r, r) = -result.row(r).asVector().sum();
+        }
+        return result;
     }
     /**
      * Reference:
@@ -322,5 +369,22 @@ namespace Physica::Core {
         squared_cutoff = square(cutoff);
         if constexpr (!IsPotDependOnAtomIndex)
             pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
+    }
+
+    template<class Derived>
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const {
+        static_assert(!IsPotDependOnAtomIndex, "[Error]: It is assumed force not depends on atom index");
+        constexpr int unused = 0;
+        const size_t atom1 = dof1 / 3U;
+        const size_t atom2 = dof2 / 3U;
+        const size_t dir1 = dof1 % 3U;
+        const size_t dir2 = dof2 % 3U;
+        const Vector3D delta = cell.getPos().row(atom2).asVector() - cell.getPos().row(atom1).asVector();
+        const ScalarType squaredNorm = delta.squaredNorm();
+        const ScalarType norm = sqrt(squaredNorm);
+        const ScalarType factor = delta[dir1] * delta[dir2] / squaredNorm;
+        const ScalarType term1 = forceConst_functor(norm, squaredNorm) * factor;
+        const ScalarType term2 = force_functor(unused, unused, norm, squaredNorm) / norm * (ScalarType(dir1 == dir2 ? 1.0 : 0.0) - factor);
+        return term1 - term2;
     }
 }

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+
 namespace Physica::Core {
     template<class ScalarType, class PosScalarType, unsigned int Dim> class EmptyForceModel;
 
@@ -35,10 +37,13 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
     class EmptyForceModel final {
+    public:
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using ForceConstMatrix = DenseSymmMatrix<ScalarType>;
     public:
         /* Operations */
+        [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
         /**
          * \tparam IsSmallCell
          * Suitable for small cell. Using this force in dynamics may be problematic.
@@ -51,7 +56,10 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-        [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
+
+        [[nodiscard]] ScalarType forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return ScalarType(0); }
+        [[nodiscard]] ForceConstMatrix forceConst([[maybe_unused]] const MDCellType& cell) const;
+
         [[nodiscard]] LatticeMatrix virial([[maybe_unused]] const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
     };
 
@@ -61,5 +69,11 @@ namespace Physica::Core {
             [[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
         result = ScalarType(0);
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    typename EmptyForceModel<ScalarType, PosScalarType, Dim>::ForceConstMatrix
+    EmptyForceModel<ScalarType, PosScalarType, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
+        return ForceConstMatrix(cell.getDOF(), ScalarType(0));
     }
 }

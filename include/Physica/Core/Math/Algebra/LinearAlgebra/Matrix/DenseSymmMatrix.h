@@ -54,6 +54,9 @@ namespace Physica::Core {
         template<class OtherMatrix>
         DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
+        DenseSymmMatrix(const DenseSymmMatrix&) = default;
+        DenseSymmMatrix(DenseSymmMatrix&&) noexcept = default;
+        ~DenseSymmMatrix() = default;
         /* Operators */
         DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         using Base::operator=;

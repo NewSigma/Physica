@@ -47,6 +47,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    __host__ __device__ inline typename device_obj<PairModel<Derived>>::ScalarType
+    device_obj<PairModel<Derived>>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        return Base::getDerived().pot_functor(i, j, r, r2);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename device_obj<PairModel<Derived>>::ScalarType
+    device_obj<PairModel<Derived>>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        return Base::getDerived().force_functor(i, j, r, r2);
+    }
+
+    template<class Derived>
     template<class Executor, bool IsSmallCell>
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {

@@ -128,7 +128,7 @@ namespace Physica::Core {
                     break;
                 }
                 case ExpressionType::Reciprocal:
-                    records[operands[startOperandId]].tangent -= square(value);
+                    records[operands[startOperandId]].tangent -= tangent * square(value);
                     break;
                 case ExpressionType::Sqrt: {
                     auto& x = records[operands[startOperandId]];

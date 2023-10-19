@@ -140,9 +140,11 @@ namespace Physica::Core {
         template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
         template<class ForceModel>
+        [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
+        template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStressCentroid(const ForceModel& model) const;
         template<class ForceModel>
-        [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
+        [[nodiscard]] LatticeMatrix makeStressVirial(const ForceModel& model) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }

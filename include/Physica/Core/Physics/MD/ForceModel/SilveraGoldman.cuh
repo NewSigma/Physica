@@ -60,8 +60,8 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         void swap(device_obj& obj) noexcept;
     };
 
@@ -74,31 +74,6 @@ namespace Physica::Core {
         Base::swap(obj);
     }
 
-    template<class ScalarType, class PosScalarType>
-    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
-        const ScalarType factor = r * (gamma * 2) + beta;
-        ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
-        const ScalarType rep_r = reciprocal(r);
-        const ScalarType rep_r2 = square(rep_r);
-        const ScalarType rep_r3 = rep_r * rep_r2;
-        const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r5 = rep_r2 * rep_r3;
-
-        const ScalarType rep_r6 = rep_r5 * rep_r;
-        ScalarType d_g = ScalarType(-6 * c6) * rep_r + ScalarType(-8 * c8) * rep_r3 + ScalarType(9 * c9) * rep_r4 + ScalarType(-10 * c10) * rep_r5;
-        d_g *= rep_r6;
-        if (r < cutoff) {
-            const ScalarType g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 + rep_r6 * c10) * rep_r4;
-            const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
-            result += (d_g + g * (rep_r3 * (2 * cutoff * cutoff) - rep_r2 * (2 * cutoff))) * f_cutoff;
-        }
-        else {
-            result += d_g;
-        }
-        return result;
-    }
-    
     template<class ScalarType, class PosScalarType>
     __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
@@ -118,6 +93,31 @@ namespace Physica::Core {
         }
         else
             result -= g;
+        return result;
+    }
+
+    template<class ScalarType, class PosScalarType>
+    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, PosScalarType>>::force_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
+        const ScalarType factor = r * (gamma * 2) + beta;
+        ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
+        const ScalarType rep_r = reciprocal(r);
+        const ScalarType rep_r2 = square(rep_r);
+        const ScalarType rep_r3 = rep_r * rep_r2;
+        const ScalarType rep_r4 = square(rep_r2);
+        const ScalarType rep_r5 = rep_r2 * rep_r3;
+
+        const ScalarType rep_r6 = rep_r5 * rep_r;
+        ScalarType d_g = ScalarType(-6 * c6) * rep_r + ScalarType(-8 * c8) * rep_r3 + ScalarType(9 * c9) * rep_r4 + ScalarType(-10 * c10) * rep_r5;
+        d_g *= rep_r6;
+        if (r < cutoff) {
+            const ScalarType g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 - rep_r6 * c10) * rep_r4;
+            const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
+            result += (d_g + g * (rep_r3 * (2 * cutoff * cutoff) - rep_r2 * (2 * cutoff))) * f_cutoff;
+        }
+        else {
+            result += d_g;
+        }
         return result;
     }
 }

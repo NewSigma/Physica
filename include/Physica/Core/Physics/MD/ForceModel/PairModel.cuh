@@ -54,19 +54,17 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] __host__ __device__ ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
-            return Base::getDerived().force_functor(i, j, r, r2);
-        }
-        [[nodiscard]] __host__ __device__ ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
-            return Base::getDerived().pot_functor(i, j, r, r2);
-        }
+        [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
 
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
         template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& hostCell) { return force<Executor>(hostCell); }
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& hostCell) const { return Vector<ScalarType>(hostCell.getNumParticle() * 3, 0); }
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
+
         [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
         void swap(device_obj& obj) noexcept;
 

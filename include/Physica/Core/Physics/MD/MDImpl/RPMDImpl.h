@@ -429,56 +429,6 @@ namespace Physica::Core {
         }
         return stress;
     }
-    /**
-     * Reference:
-     * [1] Comp. Phys. Comm. 185, 1019 (2013); https://doi.org/10.1016/j.cpc.2013.10.027
-     */
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
-    typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressCentroid(const ForceModel& model) const {
-        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
-        if constexpr (NumReplica == 1)
-            return makeStressClassical(model);
-
-        const size_t dof = getDOF();
-        const size_t numReplica = getNumReplica();
-        const auto centroidPos = ringPolymer.makeCentroidPos();
-        const ScalarType factor = getVolume() * square(ScalarType(numReplica));
-        LatticeMatrix kineticStress(Dim, Dim, 0);
-        LatticeMatrix potStress(Dim, Dim, 0);
-        for (size_t replica = 0; replica < numReplica; ++replica) {
-            using VectorType = Vector<ScalarType, Dim>;
-            const auto col = getPhaseMatrix().col(replica);
-            const auto momentum = col.head(dof);
-            const auto pos = col.tail(dof);
-            const auto centroid = centroidPos.flatten();
-            const auto force = forceBuffer.col(replica);
-
-            LatticeMatrix classicalKineticStress(Dim, Dim, 0);
-            LatticeMatrix quantumKineticStress(Dim, Dim, 0);
-            for (size_t i = 0; i < getNumParticle(); ++i) {
-                const size_t from = i * Dim;
-                const size_t to = from + Dim;
-                const ScalarType mass = getMassVec()[i / Dim];
-                const ScalarType factor1 = reciprocal(mass * factor);
-                const auto atomMomentum = momentum.segment(from, to);
-                classicalKineticStress += (factor1 * atomMomentum) * atomMomentum.transpose();
-
-                const auto atomPos = pos.segment(from, to);
-                const auto atomCentroid = centroid.segment(from, to);
-                const auto atomForce = force.segment(from, to);
-                const VectorType deltaPos = atomPos - atomCentroid;
-                quantumKineticStress -= deltaPos * atomForce.transpose();
-            }
-            quantumKineticStress *= reciprocal(ScalarType(2 * numReplica));
-            kineticStress += classicalKineticStress + quantumKineticStress;
-            if constexpr (!isFreeModel)
-                potStress += model.virial(phaseToCell(replica));
-        }
-        return kineticStress + potStress * reciprocal(ScalarType(numReplica));
-    }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel>
@@ -523,6 +473,111 @@ namespace Physica::Core {
         }
         stress *= reciprocal(ScalarType(numReplica));
         return stress;
+    }
+    /**
+     * Reference:
+     * [1] Comp. Phys. Comm. 185, 1019 (2013); https://doi.org/10.1016/j.cpc.2013.10.027
+     */
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class ForceModel>
+    typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressCentroid(const ForceModel& model) const {
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
+        if constexpr (NumReplica == 1)
+            return makeStressClassical(model);
+
+        const size_t dof = getDOF();
+        const size_t numReplica = getNumReplica();
+        const auto centroidPos = ringPolymer.makeCentroidPos();
+        const ScalarType factor = getVolume() * square(ScalarType(numReplica));
+        LatticeMatrix kineticStress(Dim, Dim, 0);
+        LatticeMatrix potStress(Dim, Dim, 0);
+        for (size_t replica = 0; replica < numReplica; ++replica) {
+            using VectorType = Vector<ScalarType, Dim>;
+            const auto col = getPhaseMatrix().col(replica);
+            const auto momentum = col.head(dof);
+            const auto pos = col.tail(dof);
+            const auto centroid = centroidPos.flatten();
+            const auto force = forceBuffer.col(replica);
+
+            LatticeMatrix classicalKineticStress(Dim, Dim, 0);
+            LatticeMatrix quantumKineticStress(Dim, Dim, 0);
+            for (size_t i = 0; i < getNumParticle(); ++i) {
+                const size_t from = i * Dim;
+                const size_t to = from + Dim;
+                const ScalarType mass = getMassVec()[i / Dim];
+                const ScalarType factor1 = reciprocal(mass * factor);
+                const auto atomMomentum = momentum.segment(from, to);
+                classicalKineticStress += (factor1 * atomMomentum) * atomMomentum.transpose();
+
+                const auto atomPos = pos.segment(from, to);
+                const auto atomCentroid = centroid.segment(from, to);
+                const auto atomForce = force.segment(from, to);
+                const VectorType deltaPos = atomPos - atomCentroid;
+                quantumKineticStress += deltaPos * atomForce.transpose();
+            }
+            quantumKineticStress *= reciprocal(ScalarType(2 * numReplica));
+            kineticStress += classicalKineticStress - quantumKineticStress;
+            if constexpr (!isFreeModel)
+                potStress += model.virial(phaseToCell(replica));
+        }
+        return kineticStress + potStress * reciprocal(ScalarType(numReplica));
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class ForceModel>
+    typename RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<ScalarType, PosScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(const ForceModel& model) const {
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
+        if constexpr (NumReplica == 1)
+            return makeStressClassical(model);
+
+        const size_t dof = getDOF();
+        const size_t numReplica = getNumReplica();
+        const auto centroidPos = ringPolymer.makeCentroidPos();
+        const ScalarType factor = getVolume() * square(ScalarType(numReplica));
+        LatticeMatrix kineticStress(Dim, Dim, 0);
+        LatticeMatrix potStress(Dim, Dim, 0);
+        for (size_t replica = 0; replica < numReplica; ++replica) {
+            using VectorType = Vector<ScalarType, Dim>;
+            const auto col = getPhaseMatrix().col(replica);
+            const auto momentum = col.head(dof);
+            const auto pos = col.tail(dof);
+            const auto centroid = centroidPos.flatten();
+            const auto force = forceBuffer.col(replica);
+            const auto cell = phaseToCell(replica);
+            const auto forceConst = model.forceConst(cell);
+
+            LatticeMatrix classicalKineticStress(Dim, Dim, 0);
+            LatticeMatrix quantumKineticStress(Dim, Dim, 0);
+            for (size_t i = 0; i < getNumParticle(); ++i) {
+                const size_t from = i * Dim;
+                const size_t to = from + Dim;
+                const ScalarType mass = getMassVec()[i / Dim];
+                const ScalarType factor1 = reciprocal(mass * factor);
+                const auto atomMomentum = momentum.segment(from, to);
+                classicalKineticStress += (factor1 * atomMomentum) * atomMomentum.transpose();
+
+                const auto atomPos = pos.segment(from, to);
+                const auto atomCentroid = centroid.segment(from, to);
+                const auto atomForce = force.segment(from, to);
+                const VectorType deltaPos = atomPos - atomCentroid;
+                quantumKineticStress += deltaPos * atomForce.transpose();
+
+                for (size_t j = 0; j < getNumParticle(); ++j) {
+                    const auto block = forceConst.block(3 * i, 3, 3 * j, 3);
+                    const VectorType temp = block.transpose() * deltaPos;
+                    quantumKineticStress -= atomPos * temp.transpose();
+                }
+            }
+            quantumKineticStress *= reciprocal(ScalarType(2 * numReplica));
+            kineticStress += classicalKineticStress - quantumKineticStress;
+            if constexpr (!isFreeModel)
+                potStress += model.virial(cell);
+        }
+        return kineticStress + potStress * reciprocal(ScalarType(numReplica));
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
