@@ -18,20 +18,37 @@
  */
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Differentiable.h"
+#include "Physica/Core/MultiPrecision/DiffTraceGuard.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 
 using namespace Physica::Core;
 
-using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
+using PlainScalar = Scalar<Double>;
+using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 using PosScalarType = ScalarType;
 
 int main() {
     SilveraGoldman<ScalarType, PosScalarType> sg(1.0);
-    ScalarType r = 2.0;
-    sg.pot_functor(0, 0, r, square(r)).reverse();
-    const ScalarType f = -r.getTangent();
-    const ScalarType f1 = sg.force_functor(0, 0, r, square(r));
-    if (!scalarNear(f, f1, 1E-15))
-        return 1;
+    {
+        auto guard = DiffTraceGuard<PlainScalar>::make_guard();
+        ScalarType r = 2.0;
+        const ScalarType r2 = square(r);
+        sg.pot_functor(0, 0, r, r2).reverse();
+        const ScalarType f = -r.getTangent();
+        const ScalarType f1 = sg.force_functor(0, 0, r, r2);
+        if (!scalarNear(f, f1, 1E-15))
+            return 1;
+    }
+    {
+        auto guard = DiffTraceGuard<PlainScalar>::make_guard();
+        ScalarType r = 2.0;
+        const ScalarType r2 = square(r);
+        sg.force_functor(0, 0, r, r2).reverse();
+        const ScalarType fc = -r.getTangent();
+        const ScalarType fc1 = sg.forceConst_functor(r, r2);
+        std::cout << fc << ' ' << fc1 << std::endl;
+        if (!scalarNear(fc, fc1, 1E-15))
+            return 1;
+    }
     return 0;
 }
