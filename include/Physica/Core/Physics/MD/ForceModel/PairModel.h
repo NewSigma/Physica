@@ -289,19 +289,34 @@ namespace Physica::Core {
                 const size_t dof_i = 3 * i + dir2;
                 result += forceConstImpl(cell, dof1, dof_i);
             }
+            return result;
         }
         return -forceConstImpl(cell, dof1, dof2);
     }
 
     template<class Derived>
     typename PairModel<Derived>::ForceConstMatrix PairModel<Derived>::forceConst(const MDCellType& cell) const {
+        const size_t numParticle = cell.getNumParticle();
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof);
-        for (size_t r = 0; r < dof; ++r) {
-            result(r, r) = 0;
-            for (size_t c = r + 1; c < dof; ++c)
-                result(r, c) = forceConst(cell, r, c);
-            result(r, r) = -result.row(r).asVector().sum();
+        for (size_t atom_r = 0; atom_r < numParticle; ++atom_r) {
+            for (size_t dim_r = 0; dim_r < 3; ++dim_r) {
+                const size_t r = atom_r * 3 + dim_r;
+                for (size_t c = (atom_r + 1) * Dim; c < dof; ++c)
+                    result(r, c) = forceConst(cell, r, c);
+
+                //Handle self interaction
+                for (size_t dim_c = dim_r; dim_c < 3; ++dim_c) {
+                    const size_t c = atom_r * 3 + dim_c;
+                    ScalarType temp = 0;
+                    for (size_t atom_c = 0; atom_c < numParticle; ++atom_c) {
+                        if (atom_r == atom_c)
+                            continue;
+                        temp += result(r, atom_c * 3 + dim_c);
+                    }
+                    result(r, c) = -temp;
+                }
+            }
         }
         return result;
     }
@@ -377,6 +392,7 @@ namespace Physica::Core {
         constexpr int unused = 0;
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
+        assert(atom1 != atom2 && "[Error]: The function is not responsible for this case");
         const size_t dir1 = dof1 % 3U;
         const size_t dir2 = dof2 % 3U;
         const Vector3D delta = cell.getPos().row(atom2).asVector() - cell.getPos().row(atom1).asVector();

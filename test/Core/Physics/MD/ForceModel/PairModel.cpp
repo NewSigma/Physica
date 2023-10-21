@@ -19,19 +19,69 @@
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Differentiable.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
+#include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
 
 using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
 using PosScalarType = ScalarType;
+/**
+ * Params referenced from [1]
+ * 
+ * Reference:
+ * [1] J. Chem. Phys. 122:184503 (2005); https://doi.org/10.1063/1.1893956
+ */
+class ForceConstTest {
+    using MDCellType = MDCell<ScalarType, PosScalarType>;
+    using RandomPoolType = RandomPool<std::mt19937, 12345>;
+    constexpr static unsigned int numMolecular = 32;
+    constexpr static double pair_cutoff = 15;
+    constexpr static double molarVolume = 31.7;
+    constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
+public:
+    static void run() {
+        SilveraGoldman<ScalarType, PosScalarType> sg(pair_cutoff);
+        auto& gen = RandomPoolType::getGen();
+        const auto cell = makeSystem(gen);
+        const auto fc = sg.forceConst(cell);
+        for (size_t i = 0; i < cell.getDOF(); ++i) {
+            for (size_t j = 0; j < cell.getDOF(); ++j) {
+                const ScalarType fc1 = sg.forceConst(cell, i, j);
+                if (!scalarNear(fc(i, j), fc1, 1E-15)) {
+                    std::cout << fc(i, j) << ' ' << fc1 << std::endl;
+                    exit(1);
+                }
+            }
+        }
+    }
+private:
+    template<class RandomGenerator>
+    static MDCellType makeSystem(RandomGenerator& gen) {
+        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        std::uniform_real_distribution dist{};
+        for (auto& elem : pos)
+            elem = dist(gen);
+        typename MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
+        return cell;
+    }
+};
 
 int main() {
-    LJModel<ScalarType, PosScalarType> lj(1.0, 1.0);
-    ScalarType r = 1.0;
-    lj.pot_functor(0, 0, r, square(r)).reverse();
-    const ScalarType f = -r.getTangent();
-    const ScalarType f1 = lj.force_functor(0, 0, r, square(r));
-    if (!scalarNear(f, f1, 1E-15))
-        return 1;
+    {
+        LJModel<ScalarType, PosScalarType> lj(1.0, 1.0);
+        ScalarType r = 1.0;
+        lj.pot_functor(0, 0, r, square(r)).reverse();
+        const ScalarType f = -r.getTangent();
+        const ScalarType f1 = lj.force_functor(0, 0, r, square(r));
+        if (!scalarNear(f, f1, 1E-15))
+            return 1;
+    }
+    ForceConstTest::run();
     return 0;
 }

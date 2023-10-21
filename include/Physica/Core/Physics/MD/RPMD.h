@@ -129,22 +129,26 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
         [[nodiscard]] MDCellType makeAverageCell() const;
 
-        template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
-        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalPotentialEnergy(const ForceModel& model) const;
-        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
-        [[nodiscard]] ScalarType calcClassicalElastic() const;
         [[nodiscard]] ScalarType calcKinetic() const;
         [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
         [[nodiscard]] ScalarType calcKineticPrim() const;
         [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
-        template<class ForceModel>
-        [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
+        [[nodiscard]] inline ScalarType calcKineticClassical() const;
+
+        template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
+        template<class ForceModel> [[nodiscard]] ScalarType calcPotentialClassical(const ForceModel& model) const;
+
+        [[nodiscard]] ScalarType calcClassicalElastic() const;
+        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
+
         template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
         template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStressCentroid(const ForceModel& model) const;
         template<class ForceModel>
         [[nodiscard]] LatticeMatrix makeStressVirial(const ForceModel& model) const;
+        template<class ForceModel>
+        [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }

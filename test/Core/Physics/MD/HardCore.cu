@@ -62,7 +62,7 @@ MDCellType makeSystem(std::mt19937& gen) {
 }
 
 void scaleVelocity(MDType& rpmd) {
-    const ScalarType energy1 = rpmd.getRingPolymer().calcClassicalKinetic();
+    const ScalarType energy1 = rpmd.getRingPolymer().calcKineticClassical();
     auto phase = rpmd.getPhaseMatrix().col(0);
     auto momentum = phase.head(numMolecular);
     momentum *= sqrt(ScalarType(energy) / energy1);

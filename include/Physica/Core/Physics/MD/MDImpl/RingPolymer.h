@@ -61,7 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] PositionMatrix makeBeadMomentum(size_t replica) const;
         [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
 
-        [[nodiscard]] ScalarType calcClassicalKinetic() const;
+        [[nodiscard]] ScalarType calcKineticClassical() const;
         [[nodiscard]] ScalarType calcTemperature() const;
         void swap(RingPolymer& obj) noexcept;
         /* Getters */
@@ -295,7 +295,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    ScalarType RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::calcClassicalKinetic() const {
+    ScalarType RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::calcKineticClassical() const {
         const size_t dof = getDOF();
         ScalarType result = 0;
         for (size_t i = 0; i < dof; ++i) {
@@ -308,7 +308,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>::calcTemperature() const {
-        return calcClassicalKinetic() * PlainScalar((2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica()));
+        return calcKineticClassical() * PlainScalar((2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica()));
     }
 
     template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
