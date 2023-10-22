@@ -26,8 +26,16 @@ namespace Physica::Core {
         static_assert(Dim == 1, "[Error]: FPUModel must be 1-dimensional");
         using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        constexpr static double SpringLength = 1.0;
+
+        ScalarType springLength;
     public:
+        FPUModel(ScalarType springLength_) : springLength(std::move(springLength_)) {}
+        FPUModel(const FPUModel&) = default;
+        FPUModel(FPUModel&&) noexcept = default;
+        ~FPUModel() = default;
+        /* Operators */
+        FPUModel& operator=(FPUModel obj) noexcept { swap(obj); return *this; }
+        /* Operations */
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor, bool IsSmallCell>
@@ -38,6 +46,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
+        void swap(FPUModel& obj) noexcept;
     };
 
     template<class ScalarType, class PosScalarType, unsigned int Dim>
@@ -125,5 +134,11 @@ namespace Physica::Core {
         }
         result /= (ScalarType(Dim) * cell.getVolume());
         return LatticeMatrix{result};
+    }
+
+    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    void FPUModel<ScalarType, PosScalarType, Dim>::swap(FPUModel& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        springLength.swap(obj.springLength);
     }
 }
