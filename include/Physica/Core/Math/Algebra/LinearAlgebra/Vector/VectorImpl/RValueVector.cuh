@@ -34,6 +34,7 @@ namespace Physica::Core {
     private:
         using RealType = typename ScalarType::RealType;
     public:
+        ~device_obj() = default;
         /* Operations */
         template<class OtherDerived>
         __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
@@ -47,6 +48,10 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType max() const;
         [[nodiscard]] __device__ ScalarType min() const;
         [[nodiscard]] __device__ ScalarType sum() const;
+    protected:
+        device_obj() = default;
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
     };
 
     template<class VectorType1, class VectorType2>

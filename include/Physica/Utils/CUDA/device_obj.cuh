@@ -36,6 +36,18 @@ namespace Physica {
     }
 
     namespace Utils {
+        namespace Internal {
+            template<class T, bool IsTrivial>
+            struct add_device_obj_impl {
+                using Type = T;
+            };
+
+            template<class T>
+            struct add_device_obj_impl<T, false> {
+                using Type = typename T::device_obj_type;
+            };
+        }
+
         template<class T> class device_obj;
 
         template<class T>
@@ -56,6 +68,11 @@ namespace Physica {
         template<class T>
         struct is_device_obj<Physica::Core::Internal::device_obj<T>> {
             constexpr static bool value = true;
+        };
+
+        template<class T>
+        struct add_device_obj {
+            using Type = typename Internal::add_device_obj_impl<T, std::is_trivial<T>::value>::Type;
         };
     }
 }

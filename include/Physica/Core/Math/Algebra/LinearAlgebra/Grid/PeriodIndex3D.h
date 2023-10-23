@@ -32,38 +32,38 @@ namespace Physica::Core {
         Index3D index;
         Index3D dim;
     public:
-        inline PeriodIndex3D(Index3D index_, Index3D dim_);
-        inline PeriodIndex3D(Index1D index_, Index3D dim_);
+        __host__ __device__ inline PeriodIndex3D(Index3D index_, Index3D dim_);
+        __host__ __device__ inline PeriodIndex3D(Index1D index_, Index3D dim_);
         PeriodIndex3D(const PeriodIndex3D&) = default;
         PeriodIndex3D(PeriodIndex3D&&) noexcept = default;
         ~PeriodIndex3D() = default;
         /* Operators */
-        inline PeriodIndex3D& operator=(PeriodIndex3D obj) noexcept;
-        [[nodiscard]] operator Index3D() { return index; }
-        [[nodiscard]] inline PeriodIndex3D operator+(const PeriodIndex3D& other) const;
+        __host__ __device__ inline PeriodIndex3D& operator=(PeriodIndex3D obj) noexcept;
+        [[nodiscard]] __host__ __device__ operator Index3D() { return index; }
+        [[nodiscard]] __host__ __device__ inline PeriodIndex3D operator+(const PeriodIndex3D& other) const;
         /* Operations */
-        [[nodiscard]] inline Index1D toIndex1D() const;
-        [[nodiscard]] inline bool isInReducedK() const;
-        [[nodiscard]] inline Index3D toReducedK() const;
-        inline void normalize();
-        inline void swap(PeriodIndex3D& obj) noexcept;
+        [[nodiscard]] __host__ __device__ inline Index1D toIndex1D() const;
+        [[nodiscard]] __host__ __device__ inline bool isInReducedK() const;
+        [[nodiscard]] __host__ __device__ inline Index3D toReducedK() const;
+        __host__ __device__ inline void normalize();
+        __host__ __device__ inline void swap(PeriodIndex3D& obj) noexcept;
     private:
-        static Index3D toIndex3D(Index1D index, Index3D dim);
+        __host__ __device__ static Index3D toIndex3D(Index1D index, Index3D dim);
     };
 
-    inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D dim_) : index(index_), dim(dim_) {
+    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D dim_) : index(index_), dim(dim_) {
         for (int i = 0; i < 3; ++i)
             assert(dim[i] > 0 && "[Error]: Zero dim is not allowed");
     }
 
-    inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D dim_) : PeriodIndex3D(toIndex3D(index_, dim_), dim_) {}
+    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D dim_) : PeriodIndex3D(toIndex3D(index_, dim_), dim_) {}
 
-    inline PeriodIndex3D& PeriodIndex3D::operator=(PeriodIndex3D obj) noexcept {
+    __host__ __device__ inline PeriodIndex3D& PeriodIndex3D::operator=(PeriodIndex3D obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    inline PeriodIndex3D PeriodIndex3D::operator+(const PeriodIndex3D& other) const {
+    __host__ __device__ inline PeriodIndex3D PeriodIndex3D::operator+(const PeriodIndex3D& other) const {
         assert(dim == other.dim && "[Error]: Inconsistent dimention");
         Index3D result{};
         for (int i = 0; i < 3; ++i)
@@ -71,16 +71,16 @@ namespace Physica::Core {
         return PeriodIndex3D(result, dim);
     }
 
-    inline typename PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
+    __host__ __device__ inline typename PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
         return (index[0] * dim[1] + index[1]) * dim[2] + index[2];
     }
 
-    inline bool PeriodIndex3D::isInReducedK() const {
+    __host__ __device__ inline bool PeriodIndex3D::isInReducedK() const {
         const size_t kSpaceDimZ = FFT<Scalar<>>::rSizeToKSize(dim[2]);
         return index[2] < kSpaceDimZ;
     }
 
-    inline typename PeriodIndex3D::Index3D PeriodIndex3D::toReducedK() const {
+    __host__ __device__ inline typename PeriodIndex3D::Index3D PeriodIndex3D::toReducedK() const {
         Index3D result = index;
         if (!isInReducedK()) {
             result[0] = (dim[0] - result[0]) % dim[0];
@@ -90,18 +90,18 @@ namespace Physica::Core {
         return result;
     }
 
-    inline void PeriodIndex3D::normalize() {
+    __host__ __device__ inline void PeriodIndex3D::normalize() {
         for (int i = 0; i < 3; ++i)
             index[i] %= dim[i];
     }
 
-    inline void PeriodIndex3D::swap(PeriodIndex3D& obj) noexcept {
+    __host__ __device__ inline void PeriodIndex3D::swap(PeriodIndex3D& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         index.swap(obj.index);
         dim.swap(obj.dim);
     }
 
-    typename PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
+    __host__ __device__ typename PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
         Index3D result{};
         result[0] = index / (dim[1] * dim[2]);
         const Index1D temp = index % (dim[1] * dim[2]);

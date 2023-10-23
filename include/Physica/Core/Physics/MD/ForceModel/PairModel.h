@@ -212,8 +212,9 @@ namespace Physica::Core {
             const CellListType cellList(lattice, pos, cutoff);
             Utils::Array<size_t> arr1{};
             cellList.forCellInList([this, pos, &arr1, &result, &cellList](Index3D center) {
-                for (size_t i : cellList(center))
-                    arr1.append(i);
+                cellList.forAtomInCell(center, [&arr1](size_t atom) {
+                    arr1.append(atom);
+                });
                 /* Current cell */ {
                     const size_t length = arr1.getLength();
                     for (size_t i = 0; i + 1 < length; ++i) {
@@ -240,8 +241,9 @@ namespace Physica::Core {
                 }
                 Utils::Array<size_t> arr2{};
                 cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &result, &cellList](Vector3D translate, Index3D neigh) {
-                    for (size_t j : cellList(neigh))
-                        arr2.append(j);
+                    cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
+                        arr2.append(atom);
+                    });
                     std::sort(arr2.begin(), arr2.end());
 
                     for (const size_t atom1 : arr1) {

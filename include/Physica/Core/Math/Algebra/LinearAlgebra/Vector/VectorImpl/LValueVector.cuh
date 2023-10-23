@@ -28,6 +28,7 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<Derived>>;
         using typename Base::ScalarType;
     public:
+        ~device_obj() = default;
         /* Operators */
         __host__ __device__ inline device_obj& operator=(const device_obj& obj);
         __host__ __device__ inline device_obj& operator=(device_obj&& obj) noexcept;
@@ -42,6 +43,10 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+    protected:
+        device_obj() = default;
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
     };
 
     template<class Derived, class OtherDerived>
