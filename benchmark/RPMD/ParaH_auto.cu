@@ -44,8 +44,9 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 class ForceModel {
     using HostModelType = SilveraGoldman<ScalarType, PosScalarType>;
+    using DeviceModelType = device_obj<HostModelType>;
     HostModelType hostModel;
-    Physica::Utils::Array<device_obj<HostModelType>> deviceModels;
+    Physica::Utils::Array<DeviceModelType> deviceModels;
 public:
     ForceModel(size_t numParticle, ScalarType cutoff, size_t numCudaThread)
         : hostModel(cutoff)
@@ -53,14 +54,15 @@ public:
         assert(numCudaThread < ThreadPool::getInstance().getNumThreads());
     }
 
-    template<class Executor, bool IsSmallCell = false>
+    template<class Executor, bool IsSmallCell>
     [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) {
         Vector<ScalarType> result(cell.getDOF());
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
         StreamPool::getStream().wait();
         return result;
     }
-    template<class VectorType, class Executor, bool IsSmallCell = false>
+
+    template<class VectorType, class Executor, bool IsSmallCell>
     void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         static_assert(Internal::Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
@@ -71,12 +73,34 @@ public:
             deviceModels[threadId].template forceAsync<VectorType, CudaExecutor, IsSmallCell>(cell, result);
         }
     }
+
+    template<class VectorType, class Executor>
+    void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+        if (isSmallCell(cell))
+            forceAsync<VectorType, Executor, true>(cell, result);
+        else
+            forceAsync<VectorType, Executor, false>(cell, result);
+    }
+
     template<class Executor>
-    [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
+    [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) {
+        if (isSmallCell(cell))
+            return force<Executor, true>(cell);
+        else
+            return force<Executor, false>(cell);
+    }
     template<class Executor>
     [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
     /* Getters */
     [[nodiscard]] size_t getNumCudaThread() const noexcept { return deviceModels.getLength(); }
+private:
+    /* Getters */
+    [[nodiscard]] bool shouldUseCPU() const noexcept {
+        return ThreadPool::isMainThread() || ThreadPool::getThreadInfo().id >= getNumCudaThread();
+    }
+    [[nodiscard]] bool isSmallCell(const MDCellType& cell) const noexcept {
+        return !shouldUseCPU() && DeviceModelType::isSmallCell(cell);
+    }
 };
 
 template<class RandomGenerator>

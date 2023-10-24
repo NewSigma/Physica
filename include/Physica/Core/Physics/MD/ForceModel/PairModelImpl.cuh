@@ -122,6 +122,32 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class VectorType, class Executor>
+    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+        if (isSmallCell(cell))
+            return forceAsync<VectorType, Executor, true>(cell, result);
+        else
+            return forceAsync<VectorType, Executor, false>(cell, result);
+    }
+
+    template<class Derived>
+    template<class Executor>
+    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) {
+        if (isSmallCell(cell))
+            return force<Executor, true>(cell);
+        else
+            return force<Executor, false>(cell);
+    }
+
+    template<class Derived>
+    template<class Executor>
+    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const {
+        return Vector<ScalarType>(cell.getNumParticle() * 3, 0);
+    }
+
+    template<class Derived>
     void device_obj<PairModel<Derived>>::swap(device_obj& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         cutoff.swap(obj.cutoff);

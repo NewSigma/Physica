@@ -52,6 +52,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<PairModel<host_obj>>;
+        using typename Base::MDCellType;
     public:
         device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;
@@ -63,6 +64,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         void swap(device_obj& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] static bool isSmallCell(const MDCellType& cell) { return cell.getNumParticle() <= 500U; }
     };
 
     template<class ScalarType, class PosScalarType>

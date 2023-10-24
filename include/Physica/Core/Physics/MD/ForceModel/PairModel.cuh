@@ -62,11 +62,15 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
 
-        template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
-        template<class VectorType, class Executor, bool IsSmallCell = false>
+        template<class Executor, bool IsSmallCell> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
+        template<class VectorType, class Executor, bool IsSmallCell>
         void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& hostCell) { return force<Executor>(hostCell); }
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& hostCell) const { return Vector<ScalarType>(hostCell.getNumParticle() * 3, 0); }
+        template<class VectorType, class Executor>
+        inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
+        template<class Executor>
+        [[nodiscard]] inline Vector<ScalarType> force_short(const MDCellType& cell);
+        template<class Executor>
+        [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
         void swap(device_obj& obj) noexcept;
@@ -76,6 +80,7 @@ namespace Physica::Core {
         __device__ void postForceKernelImpl();
         /* Getters */
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
+        [[nodiscard]] bool isSmallCell(const MDCellType& cell) const noexcept { return Base::getDerived().isSmallCell(cell); }
     protected:
         device_obj() = default;
         device_obj(size_t numParticle, ScalarType cutoff_);

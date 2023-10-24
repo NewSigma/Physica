@@ -99,7 +99,7 @@ namespace Physica::Core {
                 cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
                 using VectorType = typename decltype(saveTo)::VectorBase;
-                model.template forceAsync<VectorType, Executor, false>(std::move(cell), saveTo);
+                model.template forceAsync<VectorType, Executor>(std::move(cell), saveTo);
             };
             auto future = Executor::parallel_for(kernel, getNumReplica());
             Executor::auto_wait(future);

@@ -70,7 +70,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short_unsort(const MDCellType& cell) const;

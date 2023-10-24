@@ -67,9 +67,9 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor, bool IsSmallCell = false>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }

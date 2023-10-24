@@ -50,7 +50,7 @@ namespace Physica::Core {
          */
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
