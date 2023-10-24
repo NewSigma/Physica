@@ -101,6 +101,8 @@ namespace Physica::Core {
         /* Operations */
         inline void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
+        void toDevice(device_obj<This>& obj) const;
+
         template<class SpaceType>
         void read(const H5::DataSet& dataset,
                   DataSpaceBase<SpaceType>& file_space,

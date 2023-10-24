@@ -28,6 +28,11 @@ namespace Physica::Core {
     public:
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        DenseMatrixDim(const DenseMatrixDim&) = default;
+        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        ~DenseMatrixDim() = default;
+        /* Operators */
+        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
@@ -43,6 +48,11 @@ namespace Physica::Core {
     public:
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        DenseMatrixDim(const DenseMatrixDim&) = default;
+        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        ~DenseMatrixDim() = default;
+        /* Operators */
+        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept {
             const size_t size = Base::getDerived().getSize();
@@ -62,6 +72,11 @@ namespace Physica::Core {
     public:
         DenseMatrixDim() = default;
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        DenseMatrixDim(const DenseMatrixDim&) = default;
+        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        ~DenseMatrixDim() = default;
+        /* Operators */
+        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
@@ -83,6 +98,11 @@ namespace Physica::Core {
     public:
         DenseMatrixDim() : r(0) {}
         DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) : r(row_) {}
+        DenseMatrixDim(const DenseMatrixDim&) = default;
+        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        ~DenseMatrixDim() = default;
+        /* Operators */
+        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return r; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {

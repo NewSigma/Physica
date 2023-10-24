@@ -91,4 +91,10 @@ namespace Physica::Core {
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice() const {
         return device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>(*this);
     }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice(device_obj<This>& obj) const {
+        obj.resize(getRow(), getColumn());
+        Storage::toDevice(obj);
+    }
 }

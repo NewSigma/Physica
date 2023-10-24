@@ -212,7 +212,7 @@ namespace Physica::Utils {
         void swap(Array& array) noexcept;
         [[nodiscard]] inline pointer release() noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
-        inline void toDevice(device_obj<This>& obj) const;
+        void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }

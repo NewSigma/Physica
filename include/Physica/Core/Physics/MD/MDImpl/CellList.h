@@ -67,7 +67,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t calcMaxNumAtomInCell() const noexcept;
 
         [[nodiscard]] inline device_obj<This> toDevice() const;
-        inline void toDevice(device_obj<This>& obj) const;
+        void toDevice(device_obj<This>& obj) const;
         void swap(CellList& obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }

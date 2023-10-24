@@ -72,9 +72,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>
+    inline device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>
     DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::toDevice() const {
         return device_obj<This>(*this);
+    }
+
+    template<class Derived>
+    inline void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::toDevice(device_obj<This>& obj) const {
+        Base::toDevice(obj);
     }
     /////////////////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -127,9 +132,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
+    inline device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
     DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::toDevice() const {
         return device_obj<This>(*this);
+    }
+
+    template<class Derived>
+    inline void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::toDevice(device_obj<This>& obj) const {
+        Base::toDevice(obj);
     }
     /////////////////////////////////////////////////////////////////////////////////
     template<class Derived>

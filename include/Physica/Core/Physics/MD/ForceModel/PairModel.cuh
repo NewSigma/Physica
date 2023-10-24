@@ -21,6 +21,7 @@
 #include "PairModel.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Physics/MD/MDCell.cuh"
+#include "Physica/Core/Physics/MD/MDImpl/CellList.cuh"
 #include "Physica/Utils/Allocator/PageLockedAllocator.cuh"
 
 namespace Physica::Core {
@@ -40,6 +41,7 @@ namespace Physica::Core {
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using CellListType = CellList<ScalarType, PosScalarType>;
+        using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
         using Vector3D = device_obj<Vector<PosScalarType, 3>>;
         using DeviceMatrix = device_obj<DenseMatrix<ScalarType>>;
@@ -49,6 +51,7 @@ namespace Physica::Core {
         ScalarType squared_cutoff;
         ScalarType pot_shift;
         DeviceMDCell cell;
+        DeviceCellList cellList;
         DeviceMatrix forceBuffer;
         PageLockedVector swapBuffer;
     public:
@@ -68,6 +71,7 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
         void swap(device_obj& obj) noexcept;
 
+        template<bool IsSmallCell>
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
         /* Getters */

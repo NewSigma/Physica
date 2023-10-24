@@ -70,7 +70,8 @@ namespace Physica::Core {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] device_obj<This> toDevice() const;
+        [[nodiscard]] inline device_obj<This> toDevice() const;
+        inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] Base& asArray() noexcept { return *this; }
         [[nodiscard]] const Base& asArray() const noexcept { return *this; }
@@ -124,7 +125,8 @@ namespace Physica::Core {
         void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] device_obj<This> toDevice() const;
+        [[nodiscard]] inline device_obj<This> toDevice() const;
+        inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] Base& asArray() noexcept { return *this; }
         [[nodiscard]] const Base& asArray() const noexcept { return *this; }
