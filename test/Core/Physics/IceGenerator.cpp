@@ -21,18 +21,17 @@
 using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Float>;
 
 namespace Physica {
     class Test {
     public:
-        static auto findBondedH(const IceGenerator<PosScalarType>& gen, size_t indexO) { return gen.findBondedH(indexO); }
+        static auto findBondedH(const IceGenerator<ScalarType>& gen, size_t indexO) { return gen.findBondedH(indexO); }
     };
 }
 
-CrystalCell<PosScalarType> makeCell() {
-    using LatticeMatrix = typename CrystalCell<PosScalarType>::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell<PosScalarType>::PositionMatrix;
+CrystalCell<ScalarType> makeCell() {
+    using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
+    using PositionMatrix = typename CrystalCell<ScalarType>::PositionMatrix;
     const LatticeMatrix lattice{
         -5.1399889103954424,    0.0043684262340578,    0.0000000000000000,
         -0.0032117921883728,   -4.1600557380116499,    0.0000000000000000,
@@ -53,14 +52,14 @@ CrystalCell<PosScalarType> makeCell() {
         0.3570788249281732, 0.0879730900605094, 0.9388101767036668
     };
 
-    CrystalCell<PosScalarType> cell({lattice, pos, CrystalCell<PosScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+    CrystalCell<ScalarType> cell({lattice, pos, CrystalCell<ScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     cell.toCartesian();
     return cell;
 }
 
 int main() {
-    IceGenerator<PosScalarType> gen(makeCell(), 5.555, 2.08);
+    IceGenerator<ScalarType> gen(makeCell(), 5.555, 2.08);
     const auto arr = Test::findBondedH(gen, 0);
     const bool b1 = std::find(arr.cbegin(), arr.cend(), 0) != arr.cend();
     const bool b2 = std::find(arr.cbegin(), arr.cend(), 6) != arr.cend();

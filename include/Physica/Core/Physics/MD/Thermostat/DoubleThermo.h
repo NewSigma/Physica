@@ -29,11 +29,11 @@ namespace Physica::Core {
      * Reference:
      * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class DoubleThermo {
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
@@ -56,21 +56,21 @@ namespace Physica::Core {
         ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    DoubleThermo<ScalarType, Dim, NumReplica>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>&
-    DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    DoubleThermo<ScalarType, Dim, NumReplica>&
+    DoubleThermo<ScalarType, Dim, NumReplica>::operator=(DoubleThermo<ScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomPoolType, class Executor>
-    void DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
+    void DoubleThermo<ScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT);
@@ -95,7 +95,7 @@ namespace Physica::Core {
                 for (size_t j = 1; j < buffer.getColumn(); ++j) {
                     const ScalarType phase = M_PI * j / numReplica;
                     const ScalarType viscosityY = sin(phase) * omegaW;
-                    Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
+                    Langevin<ScalarType, Dim>::langevinImpl(
                             buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
@@ -109,16 +109,16 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::swap(DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>& obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    void DoubleThermo<ScalarType, Dim, NumReplica>::swap(DoubleThermo<ScalarType, Dim, NumReplica>& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomPoolType>
-    ScalarType DoubleThermo<ScalarType, PosScalarType, Dim, NumReplica>::makeTranslationalFactor(
+    ScalarType DoubleThermo<ScalarType, Dim, NumReplica>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         using VectorType = Vector<ScalarType, 1>;

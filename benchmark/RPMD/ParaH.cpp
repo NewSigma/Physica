@@ -27,9 +27,8 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
-using PosScalarType = ScalarType;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = SilveraGoldman<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -40,8 +39,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -53,7 +52,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(size_t numMolecular, RandomGenerator&
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:

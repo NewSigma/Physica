@@ -36,8 +36,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class ScalarType>
-RPMD<ScalarType, ScalarType> makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType, ScalarType>::MDCellType;
+RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -49,7 +49,7 @@ RPMD<ScalarType, ScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 
 bool testDriftMomentum(double precision) {
@@ -69,8 +69,7 @@ bool testDriftMomentum(double precision) {
 
 bool testCalcKinetic(double precision) {
     using ScalarType = Scalar<Double>;
-    using PosScalarType = ScalarType;
-    using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
+    using ForceModel = SilveraGoldman<ScalarType>;
 
     auto& gen = RandomPoolType::getGen();
     auto rpmd = makeSystem<ScalarType>(gen);
@@ -90,10 +89,9 @@ bool testCalcKinetic(double precision) {
  */
 void testMDRun() {
     using ScalarType = Scalar<Double>;
-    using PosScalarType = ScalarType;
-    using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
-    using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-    using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+    using ForceModel = SilveraGoldman<ScalarType>;
+    using ThermostatType = DoubleThermo<ScalarType>;
+    using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
     ScalarType mean = 0;
     ScalarType var = 0;
     {

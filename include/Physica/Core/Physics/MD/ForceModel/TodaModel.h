@@ -23,10 +23,10 @@ namespace Physica::Core {
      * Reference:
      * [1] T. Hatano, Phys. Rev. E 59, R1(R) (1999); https://doi.org/10.1103/PhysRevE.59.R1
      */
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
     class TodaModel {
         static_assert(Dim == 1, "[Error]: TodaModel must be 1-dimensional");
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
 
         ScalarType springLength;
@@ -53,8 +53,8 @@ namespace Physica::Core {
         void swap(TodaModel& obj) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
-    ScalarType TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::potentialEnergy(const MDCellType& cell) const {
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
+    ScalarType TodaModel<ScalarType, IsFixedBoundary, Dim>::potentialEnergy(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType energy = 0;
@@ -82,18 +82,18 @@ namespace Physica::Core {
         return energy;
     }
 
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
     template<class Executor, bool IsSmallCell>
-    Vector<ScalarType> TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::force(const MDCellType& cell) const {
+    Vector<ScalarType> TodaModel<ScalarType, IsFixedBoundary, Dim>::force(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         Vector<ScalarType> result(numParticle);
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
         return result;
     }
 
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
     template<class VectorType, class Executor, bool IsSmallCell>
-    void TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::forceAsync(
+    void TodaModel<ScalarType, IsFixedBoundary, Dim>::forceAsync(
             const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
@@ -125,9 +125,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
-    typename TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::LatticeMatrix
-    TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::virial(const MDCellType& cell) const {
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
+    typename TodaModel<ScalarType, IsFixedBoundary, Dim>::LatticeMatrix
+    TodaModel<ScalarType, IsFixedBoundary, Dim>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType result = 0;
@@ -164,8 +164,8 @@ namespace Physica::Core {
         return LatticeMatrix{result};
     }
 
-    template<class ScalarType, class PosScalarType, bool IsFixedBoundary, unsigned int Dim>
-    void TodaModel<ScalarType, PosScalarType, IsFixedBoundary, Dim>::swap(TodaModel& obj) noexcept {
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
+    void TodaModel<ScalarType, IsFixedBoundary, Dim>::swap(TodaModel& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

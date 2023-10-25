@@ -43,11 +43,8 @@ namespace Physica::Core {
      * [1] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
      * [3] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004)
-     * 
-     * TODO: replace several ScalarType to PosScalarType
      */
     template<class ScalarType,
-             class PosScalarType,
              unsigned int Dim = 3,
              size_t NumReplica = Dynamic,
              class ForceMatrixAllocator = Utils::HostAllocator<ScalarType>>
@@ -55,7 +52,7 @@ namespace Physica::Core {
         using Base = RPMDBase<ScalarType>;
         using typename Base::PlainScalar;
     public:
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, NumReplica, Dynamic, NumReplica, ForceMatrixAllocator>;
         using MDCellType = typename RingPolymerType::MDCellType;
@@ -66,7 +63,7 @@ namespace Physica::Core {
         RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
 
-        FFT<PosScalarType, 1> fftContract;
+        FFT<ScalarType, 1> fftContract;
         PhaseMatrix posContract;
         ForceMatrix forceContract;
         /* Constant */
@@ -156,7 +153,7 @@ namespace Physica::Core {
         [[nodiscard]] const typename MDCellType::InvLatticeMatrix& getInvLattice() const noexcept { return cell.getInvLattice(); }
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
-        [[nodiscard]] PosScalarType getVolume() const noexcept { return cell.getVolume(); }
+        [[nodiscard]] ScalarType getVolume() const noexcept { return cell.getVolume(); }
         [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }
         [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
         [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }

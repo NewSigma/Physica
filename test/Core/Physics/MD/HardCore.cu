@@ -39,9 +39,9 @@ constexpr double energy = numMolecular * temperatureT / 2;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
+using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
-using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
+using ForceModel = EmptyForceModel<ScalarType, 1>;
 
 MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};

@@ -28,9 +28,9 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using PoscarType = Poscar<Scalar<Float>>;
 using Optimizer = SteepestDescent<ScalarType, Dynamic>;
-using Minimizer = EnergyMinimizer<ScalarType, ScalarType>;
+using Minimizer = EnergyMinimizer<ScalarType>;
 using MDCellType = typename Minimizer::MDCellType;
-using ForceModel = Q_TIP4P<ScalarType, ScalarType>;
+using ForceModel = Q_TIP4P<ScalarType>;
 
 const static char* data1 = "\n"
                            "1.0\n"

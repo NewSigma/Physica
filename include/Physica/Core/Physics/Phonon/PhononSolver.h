@@ -22,15 +22,15 @@
 #include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     class PhononSolver {
-        using This = PhononSolver<ScalarType, PosScalarType>;
+        using This = PhononSolver<ScalarType>;
     public:
         using ComplexType = ComplexScalar<ScalarType>;
         using Index3D = Utils::Array<size_t, 3>;
         using Vector3D = Vector<ScalarType, 3>;
         using FFT3D = FFT<ScalarType, 3>;
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType>;
         using MatrixType = DenseMatrix<ComplexType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using MatrixGrid = GridStorage<MatrixType>;
@@ -38,7 +38,7 @@ namespace Physica::Core {
         using QPointGrid = GridStorage<EigenSolverType>;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
     private:
-        using EwaldType = Ewald<ScalarType, PosScalarType>;
+        using EwaldType = Ewald<ScalarType>;
 
         MDCellType unitCell;
         Index3D superSize;
@@ -80,8 +80,8 @@ namespace Physica::Core {
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
     };
 
-    template<class ScalarType, class PosScalarType>
-    PhononSolver<ScalarType, PosScalarType>::PhononSolver(MDCellType unitCell_, Index3D superSize_)
+    template<class ScalarType>
+    PhononSolver<ScalarType>::PhononSolver(MDCellType unitCell_, Index3D superSize_)
             : unitCell(std::move(unitCell_))
             , superSize(superSize_) {}
     /**
@@ -90,8 +90,8 @@ namespace Physica::Core {
      * References:
      * [1] Comput. Phys. Commun., 2009, 180(12), 2622-2633; https://doi.org/10.1016/j.cpc.2009.03.010
      */
-    template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::applyTranslate(
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::applyTranslate(
             MatrixGrid& forceConstants,
             ScalarType translationPrec,
             size_t maxIteration) {
@@ -145,8 +145,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix) {
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix) {
         assert(fcMatrix.getRow() == fcMatrix.getColumn() && "[Error]: Force constant matrix must be square");
         const size_t size = fcMatrix.getColumn();
         for (size_t c = 0; c < size; ++c) {
@@ -159,8 +159,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    typename PhononSolver<ScalarType, PosScalarType>::MatrixType PhononSolver<ScalarType, PosScalarType>::interpolatePoint(
+    template<class ScalarType>
+    typename PhononSolver<ScalarType>::MatrixType PhononSolver<ScalarType>::interpolatePoint(
             Vector3D qPoint, const MatrixGrid& forceConstants) const {
         const ReciprocalCell repCell = unitCell.reciprocal();
         const Vector3D qVector = repCell.getLattice().transpose() * qPoint;
@@ -202,8 +202,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::toDynamicMatrix(MatrixType& forceConstant) const {
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::toDynamicMatrix(MatrixType& forceConstant) const {
         const size_t unitCellDOF = getUnitCellDOF();
         for (size_t row = 0; row < unitCellDOF; ++row) {
             const size_t atom1 = row / Dim;
@@ -217,8 +217,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::toDynamicMatrix(MatrixGrid& forceConstants) const {
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::toDynamicMatrix(MatrixGrid& forceConstants) const {
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.flatten();
         for (size_t row = 0; row < unitCellDOF; ++row) {
@@ -237,8 +237,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    Vector<ScalarType> PhononSolver<ScalarType, PosScalarType>::makeFreq(const EigenSolverType& eigen) const {
+    template<class ScalarType>
+    Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const EigenSolverType& eigen) const {
         Vector<ScalarType> result(getUnitCellDOF());
         const Vector<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
         for (size_t i = 0; i < getUnitCellDOF(); ++i)
@@ -248,13 +248,13 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    inline Vector<ScalarType> PhononSolver<ScalarType, PosScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) const {
+    template<class ScalarType>
+    inline Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) const {
         return makeFreq(qPoints(qIndex));
     }
 
-    template<class ScalarType, class PosScalarType>
-    DenseMatrix<ScalarType> PhononSolver<ScalarType, PosScalarType>::makeEigenVectors(const EigenSolverType& eigen) const {
+    template<class ScalarType>
+    DenseMatrix<ScalarType> PhononSolver<ScalarType>::makeEigenVectors(const EigenSolverType& eigen) const {
         DenseMatrix<ScalarType> result(getUnitCellDOF(), getUnitCellDOF());
         for (size_t i = 0; i < result.getColumn(); ++i) {
             const auto fromCol = eigen.getRawEigenvectors().col(i);
@@ -268,30 +268,30 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    inline DenseMatrix<ScalarType> PhononSolver<ScalarType, PosScalarType>::makeEigenVectors(
+    template<class ScalarType>
+    inline DenseMatrix<ScalarType> PhononSolver<ScalarType>::makeEigenVectors(
             const QPointGrid& qPoints, Index3D qIndex) const {
         return makeEigenVectors(qPoints(qIndex));
     }
 
-    template<class ScalarType, class PosScalarType>
-    typename PhononSolver<ScalarType, PosScalarType>::MDCellType
-    PhononSolver<ScalarType, PosScalarType>::shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance) {
+    template<class ScalarType>
+    typename PhononSolver<ScalarType>::MDCellType
+    PhononSolver<ScalarType>::shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance) {
         assert(eigenVector.getLength() == getUnitCellDOF() && "[Error]: This is not a eigenVector of current cell");
         PositionMatrix shiftPos = unitCell.getPos() + eigenVector.reshape_row(getNumUnitCellAtom(), 3) * distance;
         return MDCellType(unitCell.getLattice(), std::move(shiftPos), unitCell.getMassVec());
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononSolver<ScalarType, PosScalarType>::swap(PhononSolver& obj) noexcept {
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::swap(PhononSolver& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         unitCell.swap(obj.unitCell);
         superSize.swap(obj.superSize);
     }
 
-    template<class ScalarType, class PosScalarType>
-    typename PhononSolver<ScalarType, PosScalarType>::EigenSolverType
-    PhononSolver<ScalarType, PosScalarType>::diagonalize(const MatrixType& dynamicMatrix) {
+    template<class ScalarType>
+    typename PhononSolver<ScalarType>::EigenSolverType
+    PhononSolver<ScalarType>::diagonalize(const MatrixType& dynamicMatrix) {
         const size_t unitCellDOF = dynamicMatrix.getRow();
         auto eigen = EigenSolverType(unitCellDOF);
         eigen.compute(dynamicMatrix, true);
@@ -299,8 +299,8 @@ namespace Physica::Core {
         return eigen;
     }
 
-    template<class ScalarType, class PosScalarType>
-    typename PhononSolver<ScalarType, PosScalarType>::QPointGrid PhononSolver<ScalarType, PosScalarType>::diagonalize(
+    template<class ScalarType>
+    typename PhononSolver<ScalarType>::QPointGrid PhononSolver<ScalarType>::diagonalize(
             const MatrixGrid& dynamicMatrixes) {
         const auto& matrixes = dynamicMatrixes.flatten();
         const size_t unitCellDOF = matrixes[0].getRow();
@@ -313,8 +313,8 @@ namespace Physica::Core {
         return qPoints;
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononSolver<ScalarType, PosScalarType>::removeDriftForce(Vector<ScalarType>& force) const {
+    template<class ScalarType>
+    ScalarType PhononSolver<ScalarType>::removeDriftForce(Vector<ScalarType>& force) const {
         const size_t superCellDOF = getSuperCellDOF();
         assert(force.getLength() == superCellDOF);
         const size_t numSuperAtom = superCellDOF / Dim;

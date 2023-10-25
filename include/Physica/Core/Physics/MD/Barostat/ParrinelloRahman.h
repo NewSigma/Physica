@@ -25,9 +25,9 @@ namespace Physica::Core {
      * Reference:
      * [1] M. Parrinello and A. Rahman, J. Appl. Phys. 52, 7182 (1981); doi: 10.1063/1.328693
      */
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     class ParrinelloRahman {
-        using MDType = RPMD<ScalarType, PosScalarType>;
+        using MDType = RPMD<ScalarType>;
         using LatticeMatrix = typename MDType::MDCellType::LatticeMatrix;
 
         ScalarType latticeMass;
@@ -51,8 +51,8 @@ namespace Physica::Core {
         [[nodiscard]] const LatticeMatrix& getLatticeMomentum() const noexcept { return latticeMomentum; }
     };
 
-    template<class ScalarType, class PosScalarType>
-    ParrinelloRahman<ScalarType, PosScalarType>::ParrinelloRahman(ScalarType latticeMass_, LatticeMatrix targetStress_)
+    template<class ScalarType>
+    ParrinelloRahman<ScalarType>::ParrinelloRahman(ScalarType latticeMass_, LatticeMatrix targetStress_)
             : latticeMass(latticeMass_)
             , latticeMomentum(3, 3, 0)
             , targetStress(std::move(targetStress_)) {
@@ -60,15 +60,15 @@ namespace Physica::Core {
         targetStress = (targetStress + buffer) * ScalarType(0.5);
     }
 
-    template<class ScalarType, class PosScalarType>
-    ParrinelloRahman<ScalarType, PosScalarType>&
-    ParrinelloRahman<ScalarType, PosScalarType>::operator=(ParrinelloRahman obj) noexcept {
+    template<class ScalarType>
+    ParrinelloRahman<ScalarType>&
+    ParrinelloRahman<ScalarType>::operator=(ParrinelloRahman obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType>
-    void ParrinelloRahman<ScalarType, PosScalarType>::forceStep(MDType& md, ScalarType deltaT) {
+    template<class ScalarType>
+    void ParrinelloRahman<ScalarType>::forceStep(MDType& md, ScalarType deltaT) {
         assert(md.getNumReplica() == 1);
         constexpr unsigned int Dim = md.getDim();
         /* Make lattice correction matrix */ {
@@ -98,8 +98,8 @@ namespace Physica::Core {
         latticeMomentum += factor * (md.getInvLattice().transpose() * (buffer - targetStress)).compute();
     }
 
-    template<class ScalarType, class PosScalarType>
-    void ParrinelloRahman<ScalarType, PosScalarType>::swap(ParrinelloRahman& obj) noexcept {
+    template<class ScalarType>
+    void ParrinelloRahman<ScalarType>::swap(ParrinelloRahman& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         latticeMass.swap(obj.latticeMass);
         latticeMomentum.swap(obj.latticeMomentum);

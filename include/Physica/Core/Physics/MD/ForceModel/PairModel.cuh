@@ -36,14 +36,13 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
         using ScalarType = typename TraitType::ScalarType;
-        using PosScalarType = typename TraitType::PosScalarType;
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType>;
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using CellListType = CellList<ScalarType, PosScalarType>;
+        using CellListType = CellList<ScalarType>;
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = device_obj<Vector<PosScalarType, 3>>;
+        using Vector3D = device_obj<Vector<ScalarType, 3>>;
         using DeviceMatrix = device_obj<DenseMatrix<ScalarType>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:

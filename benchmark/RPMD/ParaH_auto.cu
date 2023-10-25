@@ -30,10 +30,9 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
-using PosScalarType = ScalarType;
-using MDType = RPMD<ScalarType, PosScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<ScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
 using MDCellType = typename MDType::MDCellType;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -43,7 +42,7 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 class ForceModel {
-    using HostModelType = SilveraGoldman<ScalarType, PosScalarType>;
+    using HostModelType = SilveraGoldman<ScalarType>;
     using DeviceModelType = device_obj<HostModelType>;
     HostModelType hostModel;
     Physica::Utils::Array<DeviceModelType> deviceModels;

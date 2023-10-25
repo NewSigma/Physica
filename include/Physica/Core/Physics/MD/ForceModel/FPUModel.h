@@ -21,10 +21,10 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, unsigned int Dim>
     class FPUModel {
         static_assert(Dim == 1, "[Error]: FPUModel must be 1-dimensional");
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
 
         ScalarType springLength;
@@ -49,17 +49,17 @@ namespace Physica::Core {
         void swap(FPUModel& obj) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, unsigned int Dim>
     template<class Executor, bool IsSmallCell>
-    Vector<ScalarType> FPUModel<ScalarType, PosScalarType, Dim>::force(const MDCellType& cell) const {
+    Vector<ScalarType> FPUModel<ScalarType, Dim>::force(const MDCellType& cell) const {
         Vector<ScalarType> result(cell.getNumParticle(), 0);
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
         return result;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
+    template<class ScalarType, unsigned int Dim>
     template<class VectorType, class Executor, bool IsSmallCell>
-    void FPUModel<ScalarType, PosScalarType, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    void FPUModel<ScalarType, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
@@ -82,8 +82,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    ScalarType FPUModel<ScalarType, PosScalarType, Dim>::potentialEnergy(const MDCellType& cell) const {
+    template<class ScalarType, unsigned int Dim>
+    ScalarType FPUModel<ScalarType, Dim>::potentialEnergy(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType energy;
@@ -105,9 +105,9 @@ namespace Physica::Core {
         return energy;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    typename FPUModel<ScalarType, PosScalarType, Dim>::LatticeMatrix
-    FPUModel<ScalarType, PosScalarType, Dim>::virial(const MDCellType& cell) const {
+    template<class ScalarType, unsigned int Dim>
+    typename FPUModel<ScalarType, Dim>::LatticeMatrix
+    FPUModel<ScalarType, Dim>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType result = 0;
@@ -136,8 +136,8 @@ namespace Physica::Core {
         return LatticeMatrix{result};
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void FPUModel<ScalarType, PosScalarType, Dim>::swap(FPUModel& obj) noexcept {
+    template<class ScalarType, unsigned int Dim>
+    void FPUModel<ScalarType, Dim>::swap(FPUModel& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

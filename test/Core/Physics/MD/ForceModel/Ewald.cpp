@@ -34,7 +34,7 @@ void VASPTest() {
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
     CrystalCell<ScalarType> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
-    Ewald<ScalarType, ScalarType> ewald(cell.getLattice(), {4});
+    Ewald<ScalarType> ewald(cell.getLattice(), {4});
     const auto energy = ewald.potentialEnergy(cell.getPos());
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
         exit(EXIT_FAILURE);
@@ -46,7 +46,7 @@ void VASPTest() {
 template<class ScalarType>
 void madelungTest() {
     constexpr static bool isFloat = ScalarType::Option == Float;
-    using EwaldType = Ewald<ScalarType, ScalarType>;
+    using EwaldType = Ewald<ScalarType>;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
         CrystalCell<ScalarType> NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
@@ -99,14 +99,13 @@ void madelungTest() {
 namespace Physica {
     class Test {
         using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
-        using PosScalarType = ScalarType;
         using CrystalCellType = CrystalCell<ScalarType>;
         using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
         using PositionMatrix = typename CrystalCellType::PositionMatrix;
     
         LatticeMatrix lattice;
         PositionMatrix pos;
-        Ewald<ScalarType, PosScalarType> ewald;
+        Ewald<ScalarType> ewald;
     public:
         Test() {
             lattice = LatticeMatrix{
@@ -128,9 +127,9 @@ namespace Physica {
                 5.658125877,  4.686541080,  17.23267174,
                 3.052176714,  2.816649675,  2.054240227
             };
-            lattice *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
-            pos *= reciprocal(PosScalarType(PhyConst<SI>::bohrRadius * 1E10));
-            ewald = Ewald<ScalarType, PosScalarType>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+            lattice *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
+            pos *= reciprocal(ScalarType(PhyConst<SI>::bohrRadius * 1E10));
+            ewald = Ewald<ScalarType>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
         };
         /* Operations */
         void forceTest() {

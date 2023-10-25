@@ -29,10 +29,9 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Double>;
-using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
+using ThermostatType = DoubleThermo<ScalarType>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = Q_TIP4P<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -42,25 +41,25 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 template<class RandomGenerator>
-Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
+Vector<ScalarType, 3> randomVector(RandomGenerator& gen) {
     std::uniform_real_distribution dist{};
-    const PosScalarType theta(dist(gen) * M_PI);
-    const PosScalarType phi(dist(gen) * M_PI * 2);
-    Vector<PosScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= PosScalarType(ForceModel::equalR);
+    const ScalarType theta(dist(gen) * M_PI);
+    const ScalarType phi(dist(gen) * M_PI * 2);
+    Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+    result *= ScalarType(ForceModel::equalR);
     return result;
 }
 
 template<class RandomGenerator>
-MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
-    using CrystalCellType = CrystalCell<PosScalarType>;
+MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+    using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
     constexpr size_t maxIndexH = MoleculePerCell * 2;
     constexpr size_t maxIndexO = MoleculePerCell * 3;
     constexpr size_t numAtom = MoleculePerCell * 3;
 
-    PosScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-    const PosScalarType latticeFactor(cbrt(cellVolume));
+    ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+    const ScalarType latticeFactor(cbrt(cellVolume));
     typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
@@ -102,7 +101,7 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
     cell.toSuperCell(cellSize, cellSize, cellSize);
-    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+    return MDCell<ScalarType>(std::move(cell));
 }
 /**
  * Reference:
@@ -113,12 +112,12 @@ int main() {
     auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
     const ThermostatType thermo(temperatureT, thermostatTime);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(gen);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
     KineticModel kineticModel(temperatureT, numReplica);
 
-    RDF<PosScalarType> rdf;
+    RDF<ScalarType> rdf;
     {
         Physica::Utils::Array<bool> isFromParticle(rpmd.getNumParticle());
         Physica::Utils::Array<bool> isToParticle(rpmd.getNumParticle());
@@ -127,7 +126,7 @@ int main() {
             isFromParticle[i] = isHydrogen;
             isToParticle[i] = isHydrogen;
         }
-        rdf = RDF<PosScalarType>(std::move(isFromParticle), std::move(isToParticle), PhyConst<AU>::angstormToBohr(0.01), 700);
+        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), PhyConst<AU>::angstormToBohr(0.01), 700);
     }
 
     ThreadPool::numThreadRequired = 4;
@@ -150,7 +149,7 @@ int main() {
         fout << rdf.makeRDF(rpmd.getVolume());
     }
     {
-        Poscar<PosScalarType> poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar<PosScalarType>::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
+        Poscar<ScalarType> poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar<ScalarType>::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
         std::ofstream fout("H2O.vasp");
         fout << poscar;
         fout.close();

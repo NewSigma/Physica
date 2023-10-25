@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * Exact as introduced in [1]: Exact free ring-polymer update
      * Cayley as introduced in [2]: More accurate and efficient Cayley transform-based approximated version of BAOAB
@@ -34,15 +34,14 @@ namespace Physica::Core {
     };
 
     template<class ScalarType,
-             class PosScalarType,
              unsigned int Dim,
              size_t NumReplica,
              RPMDIntegrator Integrator>
     class FreeModel {
         using PlainScalar = typename ScalarType::PlainScalar;
         using ComplexType = ComplexScalar<ScalarType>;
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
+        using MDCellType = MDCell<ScalarType, Dim>;
+        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using MassVector = typename MDCellType::MassVector;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
@@ -82,11 +81,11 @@ namespace Physica::Core {
         void updateTimeStep(ScalarType deltaT);
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::FreeModel() : lastTimeStep(0) {}
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    FreeModel<ScalarType, Dim, NumReplica, Integrator>::FreeModel() : lastTimeStep(0) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::FreeModel(ScalarType temperatureT, size_t numReplica)
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    FreeModel<ScalarType, Dim, NumReplica, Integrator>::FreeModel(ScalarType temperatureT, size_t numReplica)
             : omegaW(RingPolymerType::calcOmegaW(temperatureT, numReplica))
             , lastTimeStep(0) {
         const size_t kSpaceSize = RingPolymerType::calcKSpaceSize(numReplica);
@@ -96,8 +95,8 @@ namespace Physica::Core {
             omegaK[i] = omegaW * sin(PlainScalar(M_PI * i / numReplica)) * PlainScalar(2);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::nve_step(RingPolymerType& ringPolymer, ScalarType deltaT) {
         if constexpr (NumReplica != 1)
             nve_step_impl(ringPolymer, ringPolymer.asMatrix(), ringPolymer.asMatrix(), deltaT);
         else {
@@ -111,9 +110,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
     template<class Barostat>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::npt_step(
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::npt_step(
             RingPolymerType& ringPolymer,
             MDCellType& cell,
             Barostat& barostat,
@@ -123,16 +122,16 @@ namespace Physica::Core {
         cell.setLattice(std::move(lattice));
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>&
-    FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::operator=(
-            FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator> obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    FreeModel<ScalarType, Dim, NumReplica, Integrator>&
+    FreeModel<ScalarType, Dim, NumReplica, Integrator>::operator=(
+            FreeModel<ScalarType, Dim, NumReplica, Integrator> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::swap(FreeModel& obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::swap(FreeModel& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         omegaK.swap(obj.omegaK);
         omegaW.swap(obj.omegaW);
@@ -140,8 +139,8 @@ namespace Physica::Core {
         lastTimeStep.swap(obj.lastTimeStep);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    inline void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::pre_nve_step_impl(
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    inline void FreeModel<ScalarType, Dim, NumReplica, Integrator>::pre_nve_step_impl(
             [[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT) {
         assert(NumReplica != 1);
         assert(omegaK.getLength() == ringPolymer.getBuffer().getColumn());
@@ -149,8 +148,8 @@ namespace Physica::Core {
             updateTimeStep(deltaT);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    inline void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::do_nve_step_impl(
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    inline void FreeModel<ScalarType, Dim, NumReplica, Integrator>::do_nve_step_impl(
             size_t id_dof,
             RingPolymerType& ringPolymer,
             const PhaseMatrix& input,
@@ -188,8 +187,8 @@ namespace Physica::Core {
         ringPolymer.toBeadRepr(id_dof, output);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::nve_step_impl(
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::nve_step_impl(
             RingPolymerType& ringPolymer, const PhaseMatrix& input, PhaseMatrix& output, ScalarType deltaT) {
         pre_nve_step_impl(ringPolymer, deltaT);
 
@@ -198,8 +197,8 @@ namespace Physica::Core {
             do_nve_step_impl(i, ringPolymer, input, output);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<ScalarType, PosScalarType, Dim, NumReplica, Integrator>::updateTimeStep(ScalarType deltaT) {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::updateTimeStep(ScalarType deltaT) {
         for (size_t i = 0; i < omegaK.getLength(); ++i) {
             const ScalarType phase = omegaK[i] * deltaT;
             if constexpr (Integrator == RPMDIntegrator::Exact)

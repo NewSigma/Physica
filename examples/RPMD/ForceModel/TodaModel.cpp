@@ -34,13 +34,12 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using ThermostatType = Langevin<ScalarType, PosScalarType, 1, 1>;
+using ThermostatType = Langevin<ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact>;
-using ForceModel = TodaModel<ScalarType, PosScalarType, false, 1>;
-using MDType = RPMD<ScalarType, PosScalarType, 1, 1>;
+using ForceModel = TodaModel<ScalarType, false, 1>;
+using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 1;

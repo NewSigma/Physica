@@ -22,9 +22,9 @@
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType>
-    class device_obj<CellList<ScalarType, PosScalarType>> {
-        using host_obj = CellList<ScalarType, PosScalarType>;
+    template<class ScalarType>
+    class device_obj<CellList<ScalarType>> {
+        using host_obj = CellList<ScalarType>;
         using This = device_obj<host_obj>;
         using Index3D = typename GridBase::Index3D;
         using Vector3D = typename host_obj::Vector3D;
@@ -65,26 +65,26 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getNumCell() const noexcept { return cellStartOffset.getLength() - 1; }
         [[nodiscard]] __device__ const DeviceNeighShift& getNeighShifts() const noexcept { return neighShifts; }
     private:
-        friend class CellList<ScalarType, PosScalarType>;
+        friend class CellList<ScalarType>;
     };
 
-    template<class ScalarType, class PosScalarType>
-    device_obj<CellList<ScalarType, PosScalarType>>::device_obj(const host_obj& obj) {
+    template<class ScalarType>
+    device_obj<CellList<ScalarType>>::device_obj(const host_obj& obj) {
         obj.toDevice(*this);
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class Functor>
-    __device__ void device_obj<CellList<ScalarType, PosScalarType>>::forCellInList(Functor func) const {
+    __device__ void device_obj<CellList<ScalarType>>::forCellInList(Functor func) const {
         for (size_t x = 0; x < getCellGridDimX(); ++x)
             for (size_t y = 0; y < getCellGridDimY(); ++y)
                 for (size_t z = 0; z < getCellGridDimZ(); ++z)
                     func(Index3D{x, y, z});
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class Functor>
-    __device__ void device_obj<CellList<ScalarType, PosScalarType>>::forNeighInRange(Index3D centerCell, Functor func) const {
+    __device__ void device_obj<CellList<ScalarType>>::forNeighInRange(Index3D centerCell, Functor func) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -110,9 +110,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class Functor>
-    __device__ inline void device_obj<CellList<ScalarType, PosScalarType>>::forAtomInCell(Index3D cellIndex, Functor func) const {
+    __device__ inline void device_obj<CellList<ScalarType>>::forAtomInCell(Index3D cellIndex, Functor func) const {
         const auto index1D = PeriodIndex3D(cellIndex, cellGridDim).toIndex1D();
         const size_t cellBegin = cellStartOffset[index1D];
         const size_t cellEnd = cellStartOffset[index1D + 1];
@@ -120,8 +120,8 @@ namespace Physica::Core {
             func(cellAtomMap[i]);
     }
 
-    template<class ScalarType, class PosScalarType>
-    void device_obj<CellList<ScalarType, PosScalarType>>::swap(device_obj& obj) noexcept {
+    template<class ScalarType>
+    void device_obj<CellList<ScalarType>>::swap(device_obj& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         cellGridDim.swap(obj.cellGridDim);
@@ -130,13 +130,13 @@ namespace Physica::Core {
         neighShifts.swap(obj.neighShifts);
     }
 
-    template<class ScalarType, class PosScalarType>
-    inline device_obj<CellList<ScalarType, PosScalarType>> CellList<ScalarType, PosScalarType>::toDevice() const {
-        return device_obj<CellList<ScalarType, PosScalarType>>(*this);
+    template<class ScalarType>
+    inline device_obj<CellList<ScalarType>> CellList<ScalarType>::toDevice() const {
+        return device_obj<CellList<ScalarType>>(*this);
     }
 
-    template<class ScalarType, class PosScalarType>
-    void CellList<ScalarType, PosScalarType>::toDevice(device_obj<CellList<ScalarType, PosScalarType>>& obj) const {
+    template<class ScalarType>
+    void CellList<ScalarType>::toDevice(device_obj<CellList<ScalarType>>& obj) const {
         lattice.toDevice(obj.lattice);
         obj.cellGridDim = cellGridDim;
         cellAtomMap.toDevice(obj.cellAtomMap);

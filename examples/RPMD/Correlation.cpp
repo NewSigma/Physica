@@ -9,10 +9,9 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Double>;
-using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = SilveraGoldman<ScalarType, PosScalarType>;
+using ThermostatType = DoubleThermo<ScalarType>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = SilveraGoldman<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 48;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(14);
@@ -25,8 +24,8 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 constexpr size_t CorrStep = 3000;
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -38,7 +37,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -51,7 +50,7 @@ int main() {
     {
         constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
         auto& gen = RandomPoolType::getGen();
-        RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+        RPMD<ScalarType> rpmd = makeSystem(gen);
         rpmd.initMomentum(gen);
 
         ForceModel forceModel(pair_cutoff);

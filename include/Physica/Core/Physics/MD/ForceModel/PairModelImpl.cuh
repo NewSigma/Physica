@@ -188,8 +188,10 @@ namespace Physica::Core {
 
             const unsigned int blockId = (blockIdx.x * gridDim.y + blockIdx.y) * gridDim.z + blockIdx.z;
             auto bufferCol = forceBuffer.col(blockId);
-            for (int i = 0; i < Dim; ++i)
-                bufferCol[atom1 * Dim + i] = force_atom1[i];
+            for (int i = 0; i < Dim; ++i) {
+                const size_t index = atom1 * Dim + i;
+                bufferCol[index] = force_atom1[i];
+            }
         }
         else {
             const Index3D centerCell{blockIdx.x, blockIdx.y, blockIdx.z};
@@ -229,7 +231,7 @@ namespace Physica::Core {
             });
 
             for (int i = 0; i < Dim; ++i) {
-                size_t index = atom1 * Dim + i;
+                const size_t index = atom1 * Dim + i;
                 forceBuffer(index, 0) = force_atom1[i];
             }
         }

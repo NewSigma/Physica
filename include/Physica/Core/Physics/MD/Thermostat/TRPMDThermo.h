@@ -25,11 +25,11 @@ namespace Physica::Core {
      * Reference:
      * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. J. Chem. Phys, 2014, 140(23):5106.
      */
-    template<class ScalarType, class PosScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class TRPMDThermo {
-        using MDCellType = MDCell<ScalarType, PosScalarType, Dim>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, PosScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
         ScalarType temperatureT;
@@ -46,20 +46,20 @@ namespace Physica::Core {
         void swap(TRPMDThermo& obj) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::TRPMDThermo(ScalarType temperatureT_)
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    TRPMDThermo<ScalarType, Dim, NumReplica>::TRPMDThermo(ScalarType temperatureT_)
             : temperatureT(temperatureT_) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>&
-    TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::operator=(TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica> obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    TRPMDThermo<ScalarType, Dim, NumReplica>&
+    TRPMDThermo<ScalarType, Dim, NumReplica>::operator=(TRPMDThermo<ScalarType, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomPoolType, class Executor>
-    void TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::step(
+    void TRPMDThermo<ScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             ScalarType deltaT) const {
         if constexpr (NumReplica == 1)
@@ -83,7 +83,7 @@ namespace Physica::Core {
                 for (size_t j = 1; j < buffer.getColumn(); ++j) {
                     const ScalarType phase = M_PI * j / numReplica;
                     const ScalarType viscosityY = sin(phase) * omegaW;
-                    Langevin<ScalarType, PosScalarType, Dim>::langevinImpl(
+                    Langevin<ScalarType, Dim>::langevinImpl(
                             buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
@@ -92,8 +92,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica>
-    void TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>::swap(TRPMDThermo<ScalarType, PosScalarType, Dim, NumReplica>& obj) noexcept {
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    void TRPMDThermo<ScalarType, Dim, NumReplica>::swap(TRPMDThermo<ScalarType, Dim, NumReplica>& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
     }

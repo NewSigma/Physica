@@ -22,15 +22,15 @@
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
-    class HardCore : private FreeModel<ScalarType, ScalarType, 1, NumReplica, Integrator> {
+    class HardCore : private FreeModel<ScalarType, 1, NumReplica, Integrator> {
         static_assert(!ScalarType::isComplex);
-        using Base = FreeModel<ScalarType, ScalarType, 1, NumReplica, Integrator>;
+        using Base = FreeModel<ScalarType, 1, NumReplica, Integrator>;
         using PlainScalar = typename ScalarType::PlainScalar;
     public:
-        using RingPolymerType = RingPolymer<ScalarType, ScalarType, 1, NumReplica>;
+        using RingPolymerType = RingPolymer<ScalarType, 1, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
     private:
         ScalarType latticeSize;

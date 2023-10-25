@@ -29,10 +29,9 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Double>;
-using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
+using ThermostatType = DoubleThermo<ScalarType>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = Q_TIP4P<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 192;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
@@ -40,8 +39,8 @@ constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 
-MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
-    using CrystalCellType = CrystalCell<PosScalarType>;
+MDCell<ScalarType> makeSystem(unsigned int cellSize) {
+    using CrystalCellType = CrystalCell<ScalarType>;
     using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
     using PositionMatrix = typename CrystalCellType::PositionMatrix;
     const LatticeMatrix lattice{
@@ -68,14 +67,14 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize) {
     cell.scale(PhyConst<AU>::angstormToBohr(1));
     cell.toSuperCell(cellSize, cellSize, 1);
     cell.toCartesian();
-    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+    return MDCell<ScalarType>(std::move(cell));
 }
 
 int main() {
     auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
+    RPMD<ScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     rpmd.initMomentum(gen);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);

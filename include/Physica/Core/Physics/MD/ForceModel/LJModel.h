@@ -21,21 +21,20 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType> class LJModel;
+    template<class ScalarType> class LJModel;
 
     namespace Internal {
-        template<class T, class U>
-        class Traits<LJModel<T, U>> {
+        template<class T>
+        class Traits<LJModel<T>> {
         public:
             using ScalarType = T;
-            using PosScalarType = U;
             constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
 
-    template<class ScalarType, class PosScalarType>
-    class LJModel : public PairModel<LJModel<ScalarType, PosScalarType>> {
-        using This = LJModel<ScalarType, PosScalarType>;
+    template<class ScalarType>
+    class LJModel : public PairModel<LJModel<ScalarType>> {
+        using This = LJModel<ScalarType>;
         using Base = PairModel<This>;
         using typename Base::PlainScalar;
 
@@ -51,26 +50,26 @@ namespace Physica::Core {
         /* Operations */
         void swap(LJModel& obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, PosScalarType r, PosScalarType r2) const;
-        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, PosScalarType r, PosScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     };
 
-    template<class ScalarType, class PosScalarType>
-    LJModel<ScalarType, PosScalarType>::LJModel(ScalarType sigma_, PlainScalar cutoff)
+    template<class ScalarType>
+    LJModel<ScalarType>::LJModel(ScalarType sigma_, PlainScalar cutoff)
             : Base(), sigma(std::move(sigma_)) {
         sigma1 = PlainScalar(6) / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
-    template<class ScalarType, class PosScalarType>
-    LJModel<ScalarType, PosScalarType>& LJModel<ScalarType, PosScalarType>::operator=(LJModel obj) noexcept {
+    template<class ScalarType>
+    LJModel<ScalarType>& LJModel<ScalarType>::operator=(LJModel obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType>
-    inline ScalarType LJModel<ScalarType, PosScalarType>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, PosScalarType r, [[maybe_unused]] PosScalarType r2) const {
+    template<class ScalarType>
+    inline ScalarType LJModel<ScalarType>::force_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType rep_r = sigma / r;
         const ScalarType rep_r2 = square(rep_r);
         const ScalarType rep_r4 = square(rep_r2);
@@ -80,9 +79,9 @@ namespace Physica::Core {
         return (rep_r13 * PlainScalar(2) - rep_r7) * sigma1;
     }
 
-    template<class ScalarType, class PosScalarType>
-    inline ScalarType LJModel<ScalarType, PosScalarType>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] PosScalarType r, PosScalarType r2) const {
+    template<class ScalarType>
+    inline ScalarType LJModel<ScalarType>::pot_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] ScalarType r, ScalarType r2) const {
         const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
         const ScalarType rep_r4 = square(rep_r2);
         const ScalarType rep_r6 = rep_r4 * rep_r2;
@@ -90,8 +89,8 @@ namespace Physica::Core {
         return rep_r12 - rep_r6;
     }
 
-    template<class ScalarType, class PosScalarType>
-    void LJModel<ScalarType, PosScalarType>::swap(LJModel& obj) noexcept {
+    template<class ScalarType>
+    void LJModel<ScalarType>::swap(LJModel& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);

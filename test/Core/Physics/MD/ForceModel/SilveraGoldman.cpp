@@ -25,10 +25,9 @@ using namespace Physica::Core;
 
 using PlainScalar = Scalar<Double>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-using PosScalarType = ScalarType;
 
 int main() {
-    SilveraGoldman<ScalarType, PosScalarType> sg(1.0);
+    SilveraGoldman<ScalarType> sg(1.0);
     {
         auto guard = DiffTraceGuard<PlainScalar>::make_guard();
         ScalarType r = 2.0;

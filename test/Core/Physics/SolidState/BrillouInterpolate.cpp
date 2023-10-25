@@ -10,7 +10,7 @@ using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;
-using PhononType = FrozenPhonon<ScalarType, ScalarType>;
+using PhononType = FrozenPhonon<ScalarType>;
 using MDCellType = typename PhononType::MDCellType;
 using Index3D = typename GridBase::Index3D;
 

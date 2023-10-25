@@ -25,10 +25,9 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using PosScalarType = Scalar<Double>;
-using ThermostatType = DoubleThermo<ScalarType, PosScalarType>;
-using ForceModel = Q_TIP4P<ScalarType, PosScalarType>;
-using KineticModel = FreeModel<ScalarType, PosScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ThermostatType = DoubleThermo<ScalarType>;
+using ForceModel = Q_TIP4P<ScalarType>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
@@ -39,25 +38,25 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 template<class RandomGenerator>
-Vector<PosScalarType, 3> randomVector(RandomGenerator& gen) {
+Vector<ScalarType, 3> randomVector(RandomGenerator& gen) {
     std::uniform_real_distribution dist{};
-    const PosScalarType theta(dist(gen) * M_PI);
-    const PosScalarType phi(dist(gen) * M_PI * 2);
-    Vector<PosScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= PosScalarType(ForceModel::equalR);
+    const ScalarType theta(dist(gen) * M_PI);
+    const ScalarType phi(dist(gen) * M_PI * 2);
+    Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+    result *= ScalarType(ForceModel::equalR);
     return result;
 }
 
 template<class RandomGenerator>
-MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
-    using CrystalCellType = CrystalCell<PosScalarType>;
+MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+    using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
     constexpr size_t maxIndexH = MoleculePerCell * 2;
     constexpr size_t maxIndexO = MoleculePerCell * 3;
     constexpr size_t numAtom = MoleculePerCell * 3;
 
-    PosScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-    const PosScalarType latticeFactor(cbrt(cellVolume));
+    ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+    const ScalarType latticeFactor(cbrt(cellVolume));
     typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
     lattice *= latticeFactor;
 
@@ -99,11 +98,11 @@ MDCell<ScalarType, PosScalarType> makeSystem(unsigned int cellSize, RandomGenera
 
     CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
     cell.toSuperCell(cellSize, cellSize, cellSize);
-    return MDCell<ScalarType, PosScalarType>(std::move(cell));
+    return MDCell<ScalarType>(std::move(cell));
 }
 
 void testSort() {
-    using CellType = MDCell<ScalarType, PosScalarType>;
+    using CellType = MDCell<ScalarType>;
     using PositionMatrix = typename CellType::PositionMatrix;
     std::mt19937 gen{};
     CellType cell = makeSystem(3, gen);
@@ -125,9 +124,9 @@ void testForce() {
     /* Force from finite differential */ {
         for (size_t i = 0; i < force2.getLength(); ++i) {
             force2[i] = -Differential<ScalarType>::ridders([i, &cell, &model](ScalarType x) -> ScalarType {
-                typename MDCell<ScalarType, PosScalarType>::PositionMatrix temp = cell.getPos();
-                *(temp.begin() + i) = PosScalarType(x);
-                MDCell<ScalarType, PosScalarType> new_cell(cell.getLattice(), std::move(temp), cell.getMassVec());
+                typename MDCell<ScalarType>::PositionMatrix temp = cell.getPos();
+                *(temp.begin() + i) = ScalarType(x);
+                MDCell<ScalarType> new_cell(cell.getLattice(), std::move(temp), cell.getMassVec());
                 return model.potentialEnergy(new_cell);
             }, pos.flatten().calc(i), 0.3);
         }
@@ -141,7 +140,7 @@ void testMD() {
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff);
-    RPMD<ScalarType, PosScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
+    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);

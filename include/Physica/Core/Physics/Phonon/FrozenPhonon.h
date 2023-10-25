@@ -33,10 +33,10 @@ namespace Physica::Core {
      * References:
      * [1] Dario Alfè PHON: A program to calculate phonons using the small displacement method [J]. Computer Physics Communications, 2009, 180(12), 2622-2633 (DOI: 10.1016/j.cpc.2009.03.010)
      */
-    template<class ScalarType, class PosScalarType>
-    class FrozenPhonon : public PhononSolver<ScalarType, PosScalarType> {
-        using This = FrozenPhonon<ScalarType, PosScalarType>;
-        using Base = PhononSolver<ScalarType, PosScalarType>;
+    template<class ScalarType>
+    class FrozenPhonon : public PhononSolver<ScalarType> {
+        using This = FrozenPhonon<ScalarType>;
+        using Base = PhononSolver<ScalarType>;
     public:
         using typename Base::ComplexType;
         using typename Base::Vector3D;
@@ -80,20 +80,20 @@ namespace Physica::Core {
         ScalarType calcWignerSeitzWeight(const Vector3D r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
-    template<class ScalarType, class PosScalarType>
-    FrozenPhonon<ScalarType, PosScalarType>::FrozenPhonon(MDCellType unitCell, Index3D superSize, ScalarType displace_)
+    template<class ScalarType>
+    FrozenPhonon<ScalarType>::FrozenPhonon(MDCellType unitCell, Index3D superSize, ScalarType displace_)
             : Base(std::move(unitCell), superSize), displace(displace_) {}
 
-    template<class ScalarType, class PosScalarType>
-    FrozenPhonon<ScalarType, PosScalarType>& FrozenPhonon<ScalarType, PosScalarType>::operator=(FrozenPhonon obj) noexcept {
+    template<class ScalarType>
+    FrozenPhonon<ScalarType>& FrozenPhonon<ScalarType>::operator=(FrozenPhonon obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class ForceModel>
-    typename FrozenPhonon<ScalarType, PosScalarType>::MatrixGrid
-    FrozenPhonon<ScalarType, PosScalarType>::makeForceConstants(
+    typename FrozenPhonon<ScalarType>::MatrixGrid
+    FrozenPhonon<ScalarType>::makeForceConstants(
             const ForceModel& model) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
@@ -133,9 +133,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class ForceModel>
-    void FrozenPhonon<ScalarType, PosScalarType>::optimize(
+    void FrozenPhonon<ScalarType>::optimize(
             const ForceModel& unitCellModel,
             const ForceModel& superCellModel,
             ScalarType minFreq,
@@ -166,16 +166,16 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    void FrozenPhonon<ScalarType, PosScalarType>::swap(This& obj) noexcept {
+    template<class ScalarType>
+    void FrozenPhonon<ScalarType>::swap(This& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         displace.swap(obj.displace);
     }
 
-    template<class ScalarType, class PosScalarType>
-    typename FrozenPhonon<ScalarType, PosScalarType>::PositionMatrix
-    FrozenPhonon<ScalarType, PosScalarType>::makeWignerSeitzRadius() const {
+    template<class ScalarType>
+    typename FrozenPhonon<ScalarType>::PositionMatrix
+    FrozenPhonon<ScalarType>::makeWignerSeitzRadius() const {
         constexpr int OneSideDim = 2; // 2 is enough to generate a Wigner-Seitz cell
         constexpr int TwoSideDim = 2 * OneSideDim + 1;
         constexpr size_t ResultSize = TwoSideDim * TwoSideDim * TwoSideDim - 1;
@@ -197,9 +197,9 @@ namespace Physica::Core {
         return wignerSeitzRadius;
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     GridStorage<DenseMatrix<ScalarType>>
-    FrozenPhonon<ScalarType, PosScalarType>::makeWignerSeitzWeights() const {
+    FrozenPhonon<ScalarType>::makeWignerSeitzWeights() const {
         const auto wignerSeitzRadius = makeWignerSeitzRadius();
         const Index3D superSize = Base::getSuperSize();
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
@@ -222,8 +222,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType FrozenPhonon<ScalarType, PosScalarType>::calcWignerSeitzWeight(
+    template<class ScalarType>
+    ScalarType FrozenPhonon<ScalarType>::calcWignerSeitzWeight(
             const Vector3D r, const PositionMatrix& wignerSeitzRadius) const {
         constexpr double precision = 1E-5;
         size_t count = 1;

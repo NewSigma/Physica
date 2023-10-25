@@ -22,12 +22,12 @@
 #include "Physica/Core/Physics/SolidState/PeriodicCell.cuh"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    class device_obj<MDCell<ScalarType, PosScalarType, Dim>> : public device_obj<PeriodicCell<PosScalarType, Dim>> {
-        using host_obj = MDCell<ScalarType, PosScalarType, Dim>;
+    template<class ScalarType, unsigned int Dim>
+    class device_obj<MDCell<ScalarType, Dim>> : public device_obj<PeriodicCell<ScalarType, Dim>> {
+        using host_obj = MDCell<ScalarType, Dim>;
         using This = device_obj<host_obj>;
     public:
-        using Base = device_obj<PeriodicCell<PosScalarType, Dim>>;
+        using Base = device_obj<PeriodicCell<ScalarType, Dim>>;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
@@ -60,27 +60,27 @@ namespace Physica::Core {
         using Base::setLattice;
     };
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    device_obj<MDCell<ScalarType, PosScalarType, Dim>>::device_obj(size_t numParticle)
+    template<class ScalarType, unsigned int Dim>
+    device_obj<MDCell<ScalarType, Dim>>::device_obj(size_t numParticle)
             : Base(numParticle, Base::Type::Cartesian)
             , massVec(numParticle) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    device_obj<MDCell<ScalarType, PosScalarType, Dim>>::device_obj(const host_obj& obj)
+    template<class ScalarType, unsigned int Dim>
+    device_obj<MDCell<ScalarType, Dim>>::device_obj(const host_obj& obj)
             : Base(obj)
             , massVec(obj.getMassVec())
             , invLattice(obj.getInvLattice()) {}
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void device_obj<MDCell<ScalarType, PosScalarType, Dim>>::swap(device_obj& obj) noexcept {
+    template<class ScalarType, unsigned int Dim>
+    void device_obj<MDCell<ScalarType, Dim>>::swap(device_obj& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massVec.swap(obj.massVec);
         invLattice.swap(obj.invLattice);
     }
 
-    template<class ScalarType, class PosScalarType, unsigned int Dim>
-    void device_obj<MDCell<ScalarType, PosScalarType, Dim>>::setLattice(const host_obj& cell) {
+    template<class ScalarType, unsigned int Dim>
+    void device_obj<MDCell<ScalarType, Dim>>::setLattice(const host_obj& cell) {
         Base::setLattice(cell.getLattice());
         invLattice = cell.getInvLattice();
     }

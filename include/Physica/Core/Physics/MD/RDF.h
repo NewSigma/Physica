@@ -45,7 +45,7 @@ namespace Physica::Core {
         RDF& operator=(RDF rdf) noexcept;
         /* Operations */
         template<class T>
-        void sample(const MDCell<T, ScalarType>& cell);
+        void sample(const MDCell<T>& cell);
         Vector<ScalarType> makeDists() const;
         Vector<ScalarType> makeRDF(ScalarType volume) const;
         void swap(RDF& rdf) noexcept;
@@ -83,8 +83,8 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     template<class T>
-    void RDF<ScalarType>::sample(const MDCell<T, ScalarType>& cell) {
-        using CellType = MDCell<T, ScalarType>;
+    void RDF<ScalarType>::sample(const MDCell<T>& cell) {
+        using CellType = MDCell<T>;
         using VectorType = Vector<ScalarType, Dim>;
 
         assert(getNumParticle() == cell.getNumParticle());

@@ -23,9 +23,9 @@
 #include "PhononSolver.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     class PhononDOS {
-        using SolverType = PhononSolver<ScalarType, PosScalarType>;
+        using SolverType = PhononSolver<ScalarType>;
         using ElementType = CuboidLinear<ScalarType>;
         using Index3D = typename SolverType::Index3D;
         using Vector3D = typename SolverType::Vector3D;
@@ -56,8 +56,8 @@ namespace Physica::Core {
         void swap(PhononDOS& obj) noexcept;
     };
 
-    template<class ScalarType, class PosScalarType>
-    PhononDOS<ScalarType, PosScalarType>::PhononDOS(
+    template<class ScalarType>
+    PhononDOS<ScalarType>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const MatrixGrid& forceConstants, Index3D gridDim)
             : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
@@ -78,16 +78,16 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDOS(ScalarType freq) const {
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcDOS(ScalarType freq) const {
         ScalarType result = 0;
         for (size_t band = 0; band < solver.getNumBand(); ++band)
             result += calcDOS(freq, band);
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDOS(ScalarType freq, size_t band) const {
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcDOS(ScalarType freq, size_t band) const {
         const ScalarType elementVolume = 8;
         const ScalarType factor = reciprocal(ScalarType(eigenvalues.getSize()) * elementVolume);
         ScalarType result = 0;
@@ -118,15 +118,15 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT) {
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT) {
         const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
         const ScalarType x = omegaW / temperatureT * 0.5;
         return calcDOS(freq) * square(x / sinh(x));
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT) {
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT) {
         const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
         const ScalarType dos = calcDOS(freq);
         const ScalarType zeroPointE = omegaW * 0.5;
@@ -134,8 +134,8 @@ namespace Physica::Core {
         return (zeroPointE + helmholtz1) * dos;
     }
 
-    template<class ScalarType, class PosScalarType>
-    ScalarType PhononDOS<ScalarType, PosScalarType>::calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT) {
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT) {
         const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
         const ScalarType dos = calcDOS(freq);
         const ScalarType x = omegaW / temperatureT;
@@ -144,8 +144,8 @@ namespace Physica::Core {
         return (ln(temp) - x * exp_x / temp) * dos;
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononDOS<ScalarType, PosScalarType>::swap(PhononDOS& obj) noexcept {
+    template<class ScalarType>
+    void PhononDOS<ScalarType>::swap(PhononDOS& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         solver.swap(obj.solver);
         eigenvalues.swap(obj.eigenvalues);

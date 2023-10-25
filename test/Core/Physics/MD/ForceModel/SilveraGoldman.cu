@@ -28,8 +28,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
-using PosScalarType = ScalarType;
-using HostForceModel = SilveraGoldman<ScalarType, PosScalarType>;
+using HostForceModel = SilveraGoldman<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
@@ -41,8 +40,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class RandomGenerator>
-RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType, PosScalarType>::MDCellType;
+RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+    using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
@@ -54,7 +53,7 @@ RPMD<ScalarType, PosScalarType> makeSystem(RandomGenerator& gen) {
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
     cell.scale(factor);
 
-    return RPMD<ScalarType, PosScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 /**
  * Reference:
@@ -65,7 +64,7 @@ int main() {
     HostForceModel hostModel(pair_cutoff);
     {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+        RPMD<ScalarType> rpmd = makeSystem(gen);
         const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))
@@ -73,7 +72,7 @@ int main() {
     }
     {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType, PosScalarType> rpmd = makeSystem(gen);
+        RPMD<ScalarType> rpmd = makeSystem(gen);
         const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CudaExecutor, false>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))

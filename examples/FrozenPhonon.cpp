@@ -14,7 +14,7 @@ using ScalarType = Scalar<Double>;
 using ComplexType = ComplexScalar<ScalarType>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;
-using PhononType = FrozenPhonon<ScalarType, ScalarType>;
+using PhononType = FrozenPhonon<ScalarType>;
 using MatrixType = typename PhononType::MatrixType;
 using MDCellType = typename PhononType::MDCellType;
 using Index3D = typename GridBase::Index3D;
@@ -42,8 +42,8 @@ const static char* data = "Structure\n"
                            "3.824291156     0.562119077     0.152752783\n"
                            "3.820790917     3.420982462     3.003610409";
 
-class ForceModel : private Q_TIP4P<ScalarType, ScalarType> {
-    using Base = Q_TIP4P<ScalarType, ScalarType>;
+class ForceModel : private Q_TIP4P<ScalarType> {
+    using Base = Q_TIP4P<ScalarType>;
     using typename Base::MDCellType;
 public:
     using Base::Base;
@@ -89,10 +89,10 @@ int main(int argc, char** argv) {
     ph.applyTranslate(fcMatrixGrid, 1E-10, 100);
 
     QApplication app(argc, argv);
-    PhononPlot<ScalarType, ScalarType>* phPlot;
+    PhononPlot<ScalarType>* phPlot;
     Plot* dosPlot;
     {
-        phPlot = new PhononPlot<ScalarType, ScalarType>();
+        phPlot = new PhononPlot<ScalarType>();
         phPlot->chart()->legend()->setVisible(false);
         phPlot->plotPathLine(ph, fcMatrixGrid, {0, 0, 0}, {0.5, 0, 0}, 40, "M");
         phPlot->plotPathLine(ph, fcMatrixGrid, {0.5, 0, 0}, {0.5, 0.5, 0}, 40, "X");
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
         phPlot->setDeltaY(50);
     }
     {
-        PhononDOS<ScalarType, ScalarType> dosSolver(ph.getUnitCell(), ph.getSuperSize(), fcMatrixGrid, {32, 32, 1});
+        PhononDOS<ScalarType> dosSolver(ph.getUnitCell(), ph.getSuperSize(), fcMatrixGrid, {32, 32, 1});
         auto freq = Vector<ScalarType>::linspace(0, 110, 300);
         freq *= ScalarType(PhyConst<AU>::THzToFreq(1));
         Vector<ScalarType> dos(freq.getLength());

@@ -47,9 +47,9 @@ constexpr bool IsComputeMode = true;
 using ScalarType = Scalar<Float>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, ScalarType, 1, 1>;
+using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
-using ForceModel = EmptyForceModel<ScalarType, ScalarType, 1>;
+using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, CudaExecutor>;
 using RandomGenerator = std::mt19937;
 

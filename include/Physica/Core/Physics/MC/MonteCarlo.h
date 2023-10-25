@@ -21,7 +21,7 @@
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim = 3>
     class MonteCarlo {
-        using MDCellType = MDCell<ScalarType, ScalarType, Dim>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using VectorType = Vector<ScalarType>;
         using TrivialType = typename ScalarType::TrivialType;

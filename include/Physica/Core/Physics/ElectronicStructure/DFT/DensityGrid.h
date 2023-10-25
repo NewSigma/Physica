@@ -69,16 +69,15 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSpinPolarized>
     ScalarType DensityGrid<ScalarType, IsSpinPolarized>::operator()(SpinState spin, Vector3D pos) const {
-        using PosScalarType = typename Vector3D::ScalarType;
-        assert(PosScalarType(0) <= pos[0] && pos[0] <= PosScalarType(1));
-        assert(PosScalarType(0) <= pos[1] && pos[1] <= PosScalarType(1));
-        assert(PosScalarType(0) <= pos[2] && pos[2] <= PosScalarType(1));
+        assert(ScalarType(0) <= pos[0] && pos[0] <= ScalarType(1));
+        assert(ScalarType(0) <= pos[1] && pos[1] <= ScalarType(1));
+        assert(ScalarType(0) <= pos[2] && pos[2] <= ScalarType(1));
         const size_t dimX = getTotalDensity().getDimX();
         const size_t dimY = getTotalDensity().getDimY();
         const size_t dimZ = getTotalDensity().getDimZ();
-        const size_t nx1 = double(PosScalarType(dimX) * pos[0]);
-        const size_t ny1 = double(PosScalarType(dimY) * pos[1]);
-        const size_t nz1 = double(PosScalarType(dimZ) * pos[2]);
+        const size_t nx1 = double(ScalarType(dimX) * pos[0]);
+        const size_t ny1 = double(ScalarType(dimY) * pos[1]);
+        const size_t nz1 = double(ScalarType(dimZ) * pos[2]);
         const size_t nx2 = (nx1 + 1) % dimX;
         const size_t ny2 = (ny1 + 1) % dimY;
         const size_t nz2 = (nz1 + 1) % dimZ;

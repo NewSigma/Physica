@@ -23,9 +23,7 @@
 #include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
-
 using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
-using PosScalarType = ScalarType;
 /**
  * Params referenced from [1]
  * 
@@ -33,7 +31,7 @@ using PosScalarType = ScalarType;
  * [1] J. Chem. Phys. 122:184503 (2005); https://doi.org/10.1063/1.1893956
  */
 class ForceConstTest {
-    using MDCellType = MDCell<ScalarType, PosScalarType>;
+    using MDCellType = MDCell<ScalarType>;
     using RandomPoolType = RandomPool<std::mt19937, 12345>;
     constexpr static unsigned int numMolecular = 32;
     constexpr static double pair_cutoff = 15;
@@ -41,7 +39,7 @@ class ForceConstTest {
     constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
 public:
     static void run() {
-        SilveraGoldman<ScalarType, PosScalarType> sg(pair_cutoff);
+        SilveraGoldman<ScalarType> sg(pair_cutoff);
         auto& gen = RandomPoolType::getGen();
         const auto cell = makeSystem(gen);
         const auto fc = sg.forceConst(cell);
@@ -74,7 +72,7 @@ private:
 
 int main() {
     {
-        LJModel<ScalarType, PosScalarType> lj(1.0, 1.0);
+        LJModel<ScalarType> lj(1.0, 1.0);
         ScalarType r = 1.0;
         lj.pot_functor(0, 0, r, square(r)).reverse();
         const ScalarType f = -r.getTangent();

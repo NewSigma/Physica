@@ -24,12 +24,12 @@
 #include "Physica/Core/Physics/SolidState/BrillouInterpolate.h"
 
 namespace Physica::Gui {
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     class PhononPlot : public Plot {
         using ComplexType = Core::ComplexScalar<ScalarType>;
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
-        using PhononType = Core::FrozenPhonon<ScalarType, PosScalarType>;
+        using PhononType = Core::FrozenPhonon<ScalarType>;
         using MatrixGrid = typename PhononType::MatrixGrid;
         using Index3D = typename Core::GridBase::Index3D;
     private:
@@ -57,8 +57,8 @@ namespace Physica::Gui {
         [[nodiscard]] ScalarType getMinFreqInAU() const noexcept { return getMinY() / ScalarType(Core::PhyConst<Core::AU>::freqToTHz(1)); }
     };
 
-    template<class ScalarType, class PosScalarType>
-    PhononPlot<ScalarType, PosScalarType>::PhononPlot() : Plot(0, 0, 0, 0, 1, 100), currentX(0) {
+    template<class ScalarType>
+    PhononPlot<ScalarType>::PhononPlot() : Plot(0, 0, 0, 0, 1, 100), currentX(0) {
         const QFont font = Plot::getAxisX()->labelsFont();
         QCategoryAxis* axisX = new QCategoryAxis();
         axisX->append("Γ", 0);
@@ -71,8 +71,8 @@ namespace Physica::Gui {
         Plot::getAxisY()->setTitleText("Frequency/THz");
     }
 
-    template<class ScalarType, class PosScalarType>
-    void PhononPlot<ScalarType, PosScalarType>::plotPathScatter(
+    template<class ScalarType>
+    void PhononPlot<ScalarType>::plotPathScatter(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
             Vector3D from,
@@ -120,8 +120,8 @@ namespace Physica::Gui {
      * Reference:
      * [1] https://github.com/phonopy/phonopy
      */
-    template<class ScalarType, class PosScalarType>
-    void PhononPlot<ScalarType, PosScalarType>::plotPathLine(
+    template<class ScalarType>
+    void PhononPlot<ScalarType>::plotPathLine(
             const PhononType& phonon,
             const MatrixGrid& forceConstants,
             Vector3D from,

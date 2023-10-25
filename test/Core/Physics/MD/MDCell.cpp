@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using MDCellType = MDCell<ScalarType, ScalarType>;
+using MDCellType = MDCell<ScalarType>;
 using CrystalCellType = CrystalCell<ScalarType>;
 using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
 using PositionMatrix = typename CrystalCellType::PositionMatrix;

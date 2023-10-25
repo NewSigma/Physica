@@ -26,9 +26,9 @@
 #include "Physica/Utils/Unix/TempFile.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     class QEModel {
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType>;
         using ElementTypeArray = typename Poscar::ElementTypeArray;
 
         std::string pathToPW;
@@ -53,8 +53,8 @@ namespace Physica::Core {
         template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const;
     };
 
-    template<class ScalarType, class PosScalarType>
-    QEModel<ScalarType, PosScalarType>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_)
+    template<class ScalarType>
+    QEModel<ScalarType>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_)
             : pathToPW(pathToPW_)
             , elementTypes(std::move(elementTypes_))
             , numMPIProcess(numMPIProcess_) {
@@ -69,9 +69,9 @@ namespace Physica::Core {
         input[size] = '\0';
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<class Executor, bool IsSmallCell>
-    Vector<ScalarType> QEModel<ScalarType, PosScalarType>::force(const MDCellType& cell) const {
+    Vector<ScalarType> QEModel<ScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumAtom());
         try {
             auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
@@ -97,14 +97,14 @@ namespace Physica::Core {
         catch (std::exception& e) { throw e; }
     }
 
-    template<class ScalarType, class PosScalarType>
-    QEModel<ScalarType, PosScalarType>& QEModel<ScalarType, PosScalarType>::operator=(QEModel obj) noexcept {
+    template<class ScalarType>
+    QEModel<ScalarType>& QEModel<ScalarType>::operator=(QEModel obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class PosScalarType>
-    void QEModel<ScalarType, PosScalarType>::swap(QEModel& obj) noexcept {
+    template<class ScalarType>
+    void QEModel<ScalarType>::swap(QEModel& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToPW.swap(obj.pathToPW);
         input.swap(obj.input);
@@ -112,9 +112,9 @@ namespace Physica::Core {
         std::swap(numMPIProcess, obj.numMPIProcess);
     }
 
-    template<class ScalarType, class PosScalarType>
+    template<class ScalarType>
     template<size_t N>
-    ProcessFuture QEModel<ScalarType, PosScalarType>::run_qe(
+    ProcessFuture QEModel<ScalarType>::run_qe(
             Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const {
         int fd[2];
         if (pipe(fd) == -1)

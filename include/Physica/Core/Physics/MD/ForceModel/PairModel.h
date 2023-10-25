@@ -38,17 +38,16 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
         using ScalarType = typename TraitType::ScalarType;
-        using PosScalarType = typename TraitType::PosScalarType;
         constexpr static unsigned int Dim = 3;
 
         using PlainScalar = typename ScalarType::PlainScalar;        
-        using MDCellType = MDCell<ScalarType, PosScalarType>;
+        using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using CellListType = CellList<ScalarType, PosScalarType>;
+        using CellListType = CellList<ScalarType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = Vector<PosScalarType, 3>;
-        using ForceConstMatrix = typename EmptyForceModel<ScalarType, PosScalarType, Dim>::ForceConstMatrix;
+        using Vector3D = Vector<ScalarType, 3>;
+        using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
     private:
         PlainScalar cutoff;
         ScalarType squared_cutoff;
