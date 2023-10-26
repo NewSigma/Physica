@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cub/cub.cuh>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
@@ -80,21 +81,22 @@ namespace Physica::Core {
         dim3 gridDims;
         unsigned int numThread;
         if constexpr (IsSmallCell) {
-            /* Make blockDim */ {
-                const auto& lattice = hostCell.getLattice();
-                const auto range = MDCellType::estimateRange(lattice, cutoff);
-                gridDims.x = static_cast<unsigned int>(2 * range[0] + 1);
-                gridDims.y = static_cast<unsigned int>(2 * range[1] + 1);
-                gridDims.z = static_cast<unsigned int>(2 * range[2] + 1);
-            }
-            const auto numBlock = gridDims.x * gridDims.y * gridDims.z;
+            const auto& lattice = hostCell.getLattice();
+            const auto range = MDCellType::estimateRange(lattice, cutoff);
+            Index3D temp;
+            for (int i = 0; i < Dim; ++i)
+                temp[i] = static_cast<size_t>(2 * range[i] + 1);
+            cellList.setCellGridDim(std::move(temp));
+
+            constexpr size_t MaxAtomPerBlock = 128;
+            const size_t numParticle = cell.getNumParticle();
+            const auto numBlock = cellList.getNumCell();
+            gridDims.x = (numParticle + MaxAtomPerBlock - 1) / MaxAtomPerBlock;
+            gridDims.y = numBlock;
+            gridDims.z = 1;
+            numThread = numParticle > MaxAtomPerBlock ? MaxAtomPerBlock : numParticle;
             if (numBlock != forceBuffer.getColumn())
                 forceBuffer.resize(cell.getDOF(), numBlock);
-
-            const size_t numParticle = cell.getNumParticle();
-            const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
-            numThread = numParticle > maxThread ? maxThread : numParticle;
-            assert(maxThread >= numParticle && "[Error]: Too many particle in the cell, performance may be pool");
         }
         else {
             [[maybe_unused]] constexpr unsigned int UintMax = std::numeric_limits<unsigned int>::max();
@@ -115,9 +117,9 @@ namespace Physica::Core {
             assert(maxThread >= maxNumAtomInCell && "[Error]: Too many particle in the cell, performance may be pool");
         }
 
-        Internal::PairModel_forceKernel<Derived, IsSmallCell><<<gridDims, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
+        Internal::PairModel_forceKernel<Derived, IsSmallCell><<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(*this));
         if constexpr (IsSmallCell)
-            Internal::PairModel_postForceKernel<Derived><<<1, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
+            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
         forceBuffer.col(0).toHostAsync(result);
     }
 
@@ -161,36 +163,50 @@ namespace Physica::Core {
     template<class Derived>
     template<bool IsSmallCell>
     __device__ void device_obj<PairModel<Derived>>::forceKernelImpl() {
+        extern __shared__ Vector3D posBuffer[];
         const auto& pos = cell.getPos();
         if constexpr (IsSmallCell) {
-            Vector3D factor{};
-            factor[0] = ScalarType(int(blockIdx.x) - int(gridDim.x) / 2);
-            factor[1] = ScalarType(int(blockIdx.y) - int(gridDim.y) / 2);
-            factor[2] = ScalarType(int(blockIdx.z) - int(gridDim.z) / 2);
+            assert(cell.getNumParticle() < std::numeric_limits<int>::max() && "[Error]: This is not a small cell");
+            const int numParticle = cell.getNumParticle();
+            const int atom1 = blockIdx.x * blockDim.x + threadIdx.x;
+            if (atom1 >= numParticle)
+                return;
 
+            const auto& cellGridDim = cellList.getCellGridDim();
+            const Index3D cellIndex = PeriodIndex3D(blockIdx.y, cellGridDim);
+            Vector3D factor{};
+            for (int i = 0; i < Dim; ++i)
+                factor[i] = ScalarType(int(cellIndex[i]) - int(cellGridDim[i]) / 2);
             const Vector3D delta = cell.getLattice().transpose() * factor;
-            const unsigned int atom1 = threadIdx.x;
             const Vector3D from = pos.row(atom1) + delta;
 
-            const size_t numParticle = cell.getNumParticle();
+            const int numActiveThread = cub::min(blockDim.x, numParticle - blockIdx.x * blockDim.x);
+            const int numBlock = (numParticle + numActiveThread - 1) / numActiveThread;
             Vector3D force_atom1(3, 0);
-            for (size_t atom2 = 0; atom2 < numParticle; ++atom2) {
-                auto to = pos.row(atom2);
-                Vector3D r = to.asVector() - from;
-                const ScalarType r2 = r.squaredNorm();
-                const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
-                if (isNotSelf && r2 < squared_cutoff) {
-                    const ScalarType dist = sqrt(r2);
-                    const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                    force_atom1 -= r * (f_norm / dist);
+            for (int block = 0; block < numBlock; ++block) {
+                const int shift = block * numActiveThread;
+                __syncthreads();
+                posBuffer[threadIdx.x] = pos.row(shift + threadIdx.x);
+                __syncthreads();
+
+                const int toThread = cub::min(numActiveThread, int(numParticle - block * numActiveThread));
+                for (int thread = 0; thread < toThread; ++thread) {
+                    const int atom2 = shift + thread;
+                    const Vector3D& to = posBuffer[thread];
+                    Vector3D r = to - from;
+                    const ScalarType r2 = r.squaredNorm();
+                    const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
+                    if (isNotSelf && r2 < squared_cutoff) {
+                        const ScalarType dist = sqrt(r2);
+                        const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
+                        force_atom1 -= r * (f_norm / dist);
+                    }
                 }
             }
 
-            const unsigned int blockId = (blockIdx.x * gridDim.y + blockIdx.y) * gridDim.z + blockIdx.z;
-            auto bufferCol = forceBuffer.col(blockId);
             for (int i = 0; i < Dim; ++i) {
-                const size_t index = atom1 * Dim + i;
-                bufferCol[index] = force_atom1[i];
+                const int index = atom1 * Dim + i;
+                forceBuffer(index, blockIdx.y) = force_atom1[i];
             }
         }
         else {
@@ -239,9 +255,9 @@ namespace Physica::Core {
 
     template<class Derived>
     __device__ void device_obj<PairModel<Derived>>::postForceKernelImpl() {
-        const unsigned int threadId = threadIdx.x;
+        const unsigned int atom = blockIdx.x * blockDim.x + threadIdx.x;
         for (int i = 0; i < Dim; ++i) {
-            unsigned int index = threadId * Dim + i;
+            const unsigned int index = atom * Dim + i;
             forceBuffer(index, 0) = forceBuffer.row(index).sum();
         }
     }

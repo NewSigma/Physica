@@ -34,13 +34,12 @@ using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
-constexpr unsigned int numMolecular = 108;
 constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 template<class RandomGenerator>
-RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
@@ -62,17 +61,18 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 int main() {
     auto& gen = RandomPoolType::getGen();
     HostForceModel hostModel(pair_cutoff);
-    {
+    for (size_t numMolecular : {108, 160}) {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType> rpmd = makeSystem(gen);
+        RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
         const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))
             return 1;
     }
     {
+        constexpr unsigned int numMolecular = 108;
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType> rpmd = makeSystem(gen);
+        RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
         const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CudaExecutor, false>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))

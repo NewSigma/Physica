@@ -18,6 +18,10 @@
  */
 #pragma once
 
+#ifndef NDEBUG
+    #error Running benchmark under debug mode is not what you usually want!
+#endif
+
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
