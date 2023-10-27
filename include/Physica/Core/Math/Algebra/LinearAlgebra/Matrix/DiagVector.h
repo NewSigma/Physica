@@ -59,8 +59,8 @@ namespace Physica::Core {
         /* Operations */
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
-        [[nodiscard]] ScalarType& operator[](size_t index) { return mat(index, index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { return mat(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(index, index); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(index, index); }
     };
 }

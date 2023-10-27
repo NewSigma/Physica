@@ -92,8 +92,6 @@ namespace Physica::Core {
         using Base::operator=;
         RowContinuousVector& operator=(const RowContinuousVector& v) { v.assignTo(*this); return *this; }
         RowContinuousVector& operator=(RowContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(row, fromCol + index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(row, fromCol + index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
@@ -125,8 +123,6 @@ namespace Physica::Core {
         using Base::operator=;
         ColContinuousVector& operator=(const ColContinuousVector& v) { v.assignTo(*this); return *this; }
         ColContinuousVector& operator=(ColContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(fromRow + index, col); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(fromRow + index, col); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
@@ -158,8 +154,6 @@ namespace Physica::Core {
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
-        [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
         template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
         template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
         template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
@@ -173,11 +167,13 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) { assert(row == 0); return VectorBase::data_ptr(column); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) const { assert(row == 0); return VectorBase::data_ptr(column); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -210,8 +206,6 @@ namespace Physica::Core {
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
         template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
         template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
         template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
@@ -225,11 +219,13 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(column == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(column == 0); return VectorBase::data_ptr(row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -257,14 +253,6 @@ namespace Physica::Core {
         ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
-            assert(row == 0 && col == 0);
-            return VectorBase::operator[](0);
-        }
-        [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) const {
-            assert(row == 0 && col == 0);
-            return VectorBase::operator[](0);
-        }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -272,10 +260,18 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+            assert(row == 0 && col == 0 && "[Error]: Index overflow");
+            return VectorBase::data_ptr(0);
+        }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) const {
+            assert(row == 0 && col == 0 && "[Error]: Index overflow");
+            return VectorBase::data_ptr(0);
+        }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -306,13 +302,13 @@ namespace Physica::Core {
         using Base::operator=;
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? colCount : Column; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t row, size_t column) const;
         [[nodiscard]] This& asMatrix() noexcept { return *this; }
         [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
@@ -330,18 +326,18 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, size_t Row, size_t Column>
-    typename ContinuousMatrixBlock<MatrixType, Row, Column>::ScalarType&
-    ContinuousMatrixBlock<MatrixType, Row, Column>::operator()(size_t row, size_t col) {
+    __host__ __device__ typename ContinuousMatrixBlock<MatrixType, Row, Column>::ScalarType*
+    ContinuousMatrixBlock<MatrixType, Row, Column>::data_ptr(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat(row + fromRow, col + fromCol);
+        return mat.data_ptr(row + fromRow, col + fromCol);
     }
 
     template<class MatrixType, size_t Row, size_t Column>
-    const typename ContinuousMatrixBlock<MatrixType, Row, Column>::ScalarType&
-    ContinuousMatrixBlock<MatrixType, Row, Column>::operator()(size_t row, size_t col) const {
+    __host__ __device__ const typename ContinuousMatrixBlock<MatrixType, Row, Column>::ScalarType*
+    ContinuousMatrixBlock<MatrixType, Row, Column>::data_ptr(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat(row + fromRow, col + fromCol);
+        return mat.data_ptr(row + fromRow, col + fromCol);
     }
 }

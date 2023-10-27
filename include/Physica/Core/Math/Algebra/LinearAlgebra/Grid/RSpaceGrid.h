@@ -67,6 +67,7 @@ namespace Physica::Core {
         using Storage::getDimZ;
         using Storage::getDim;
         using Storage::getSize;
+        using Storage::data_ptr;
         /* Static members */
         using Base::forPointInGrid;
         using Base::forPointIndexInGrid;

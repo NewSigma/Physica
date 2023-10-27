@@ -202,8 +202,6 @@ namespace Physica::Core {
         using GridBase::operator=;
         FFTKSpace& operator=(const FFTKSpace& obj);
         using GridBase::operator();
-        [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Operations */
         template<class GridType> inline void invTransform(const LValueGrid<GridType>& data);
         inline void resize([[maybe_unused]] Index3D size);
@@ -212,6 +210,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -223,19 +223,6 @@ namespace Physica::Core {
         resize(obj.getDim());
         obj.assignTo(*this);
         return *this;
-    }
-
-    template<class Derived>
-    inline typename FFTKSpace<Derived, 3>::ScalarType& FFTKSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) {
-        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(x, y, z));
-    }
-
-    template<class Derived>
-    inline const typename FFTKSpace<Derived, 3>::ScalarType& FFTKSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) const {
-        assert(x < getDimX());
-        assert(y < getDimY());
-        assert(z < getDimZ());
-        return Base::getDerived().asComplexBuffer()[(x * getDimY() + y) * getDimZ() + z];
     }
 
     template<class Derived>
@@ -253,5 +240,20 @@ namespace Physica::Core {
         assert(getDimX() == size[0]);
         assert(getDimY() == size[1]);
         assert(getDimZ() == size[2]);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename FFTKSpace<Derived, 3>::ScalarType*
+    FFTKSpace<Derived, 3>::data_ptr(Index3D index) {
+        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
+    }
+
+    template<class Derived>
+    __host__ __device__ inline const typename FFTKSpace<Derived, 3>::ScalarType*
+    FFTKSpace<Derived, 3>::data_ptr(Index3D index) const {
+        assert(index[0] < getDimX());
+        assert(index[1] < getDimY());
+        assert(index[2] < getDimZ());
+        return Base::getDerived().asComplexBuffer() + (index[0] * getDimY() + index[1]) * getDimZ() + index[2];
     }
 }

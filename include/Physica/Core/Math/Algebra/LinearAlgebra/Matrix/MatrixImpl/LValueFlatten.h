@@ -48,17 +48,19 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
-        [[nodiscard]] inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     };
 
     template<class MatrixType>
-    inline typename LValueFlatten<MatrixType>::ScalarType* LValueFlatten<MatrixType>::data_ptr(size_t index) {
+    __host__ __device__ inline typename LValueFlatten<MatrixType>::ScalarType*
+    LValueFlatten<MatrixType>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
     template<class MatrixType>
-    inline const typename LValueFlatten<MatrixType>::ScalarType* LValueFlatten<MatrixType>::data_ptr(size_t index) const {
+    __host__ __device__ inline const typename LValueFlatten<MatrixType>::ScalarType*
+    LValueFlatten<MatrixType>::data_ptr(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);

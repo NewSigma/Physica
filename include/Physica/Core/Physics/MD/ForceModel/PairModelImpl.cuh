@@ -166,7 +166,7 @@ namespace Physica::Core {
         extern __shared__ Vector3D posBuffer[];
         const auto& pos = cell.getPos();
         if constexpr (IsSmallCell) {
-            assert(cell.getNumParticle() < std::numeric_limits<int>::max() && "[Error]: This is not a small cell");
+            assert(cell.getNumParticle() < INT_MAX && "[Error]: This is not a small cell");
             const int numParticle = cell.getNumParticle();
             const int atom1 = blockIdx.x * blockDim.x + threadIdx.x;
             if (atom1 >= numParticle)

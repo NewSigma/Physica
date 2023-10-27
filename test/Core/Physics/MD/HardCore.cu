@@ -21,7 +21,6 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include "Physica/Utils/BenchmarkHelper.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Parallel/StreamPool.cuh"
 #include "Physica/Core/Physics/MD/RPMD.h"

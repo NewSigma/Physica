@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "EmptyForceModel.h"
+
 namespace Physica::Core {
     /**
      * Reference:
@@ -28,6 +30,7 @@ namespace Physica::Core {
         static_assert(Dim == 1, "[Error]: TodaModel must be 1-dimensional");
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
 
         ScalarType springLength;
     public:
@@ -49,6 +52,9 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         
+        [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
+
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(TodaModel& obj) noexcept;
     };
@@ -123,6 +129,38 @@ namespace Physica::Core {
                 result[i1] += f;
             }
         }
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
+    ScalarType TodaModel<ScalarType, IsFixedBoundary, Dim>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+        const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
+        if (isNeighbor) {
+            const ScalarType delta = cell.minDistVector(dof1, dof2).norm();
+            return exp(-delta);
+        }
+        else {
+            const size_t dof3 = dof1 == 0 ? cell.getNumParticle() : dof1;
+            const ScalarType delta1 = cell.minDistVector(dof1, dof1 + 1).norm();
+            const ScalarType delta2 = cell.minDistVector(dof1, dof3 - 1).norm();
+            return exp(-delta1) + exp(-delta2);
+        }
+        return 0;
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
+    typename TodaModel<ScalarType, IsFixedBoundary, Dim>::ForceConstMatrix
+    TodaModel<ScalarType, IsFixedBoundary, Dim>::forceConst(const MDCellType& cell) const {
+        const size_t dof = cell.getDOF();
+        ForceConstMatrix result(dof, ScalarType(0));
+        for (size_t i = 0; i < dof; ++i) {
+            const size_t i1 = (i + 1) % dof;
+            const ScalarType delta = cell.minDistVector(i, i1).norm();
+            const ScalarType temp = exp(-delta);
+            result(i, i1) = temp;
+            result(i, i) += temp;
+            result(i1, i1) += temp;
+        }
+        return result;
     }
 
     template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>

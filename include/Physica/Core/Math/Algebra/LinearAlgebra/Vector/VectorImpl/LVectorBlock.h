@@ -63,12 +63,12 @@ namespace Physica::Core {
         using Base::operator=;
         LVectorBlock& operator=(const LVectorBlock& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
         LVectorBlock& operator=(LVectorBlock&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert((index + from) < to); return vec[index + from]; }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert((index + from) < to); return vec[index + from]; }
         /* Operations */
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const;
     };
 
     template<class VectorType>
@@ -80,4 +80,18 @@ namespace Physica::Core {
 
     template<class VectorType>
     LVectorBlock<VectorType>::LVectorBlock(LValueVector<VectorType>& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
+
+    template<class VectorType>
+    __host__ __device__ inline typename LVectorBlock<VectorType>::ScalarType*
+    LVectorBlock<VectorType>::data_ptr(size_t index) {
+        assert((index + from) < to);
+        return vec.data_ptr(index + from);
+    }
+
+    template<class VectorType>
+    __host__ __device__ inline const typename LVectorBlock<VectorType>::ScalarType*
+    LVectorBlock<VectorType>::data_ptr(size_t index) const {
+        assert((index + from) < to);
+        return vec.data_ptr(index + from);
+    }
 }

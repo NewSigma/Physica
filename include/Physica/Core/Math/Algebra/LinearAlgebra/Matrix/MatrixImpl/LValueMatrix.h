@@ -52,8 +52,8 @@ namespace Physica::Core {
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
         template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         template<class T> Derived& operator=(const ScalarBase<T>& s);
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
+        [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return *data_ptr(row, column); }
+        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return *data_ptr(row, column); }
         template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
         template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
         template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
@@ -104,7 +104,7 @@ namespace Physica::Core {
         template<class OtherDerived>
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] ScalarType sum() const;

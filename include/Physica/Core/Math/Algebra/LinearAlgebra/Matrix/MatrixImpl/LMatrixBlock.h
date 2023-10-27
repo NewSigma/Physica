@@ -85,12 +85,12 @@ namespace Physica::Core {
         RowLVector& operator=(const RowLVector& v) { v.assignTo(*this); return *this; }
         RowLVector& operator=(RowLVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < colCount); return mat(row, fromCol + index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < colCount); return mat(row, fromCol + index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
     };
 
     template<class MatrixType>
@@ -116,12 +116,12 @@ namespace Physica::Core {
         ColLVector& operator=(const ColLVector& v) { v.assignTo(*this); return *this; }
         ColLVector& operator=(ColLVector&& v) noexcept { return operator=(std::cref(v)); }
         using Base::operator=;
-        [[nodiscard]] ScalarType& operator[](size_t index) { assert(index < rowCount); return mat(fromRow + index, col); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { assert(index < rowCount); return mat(fromRow + index, col); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
     };
 
     template<class MatrixType>
@@ -156,10 +156,10 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         using VectorBase::max;
         using VectorBase::min;
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -186,8 +186,6 @@ namespace Physica::Core {
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        [[nodiscard]] ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
         template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
         template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
         template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
@@ -201,10 +199,12 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
+        [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(col == 0); return VectorBase::operator[](row); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(col == 0); return VectorBase::operator[](row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -235,13 +235,13 @@ namespace Physica::Core {
         using Base::operator=;
         LMatrixBlock& operator=(const LMatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         LMatrixBlock& operator=(LMatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t row, size_t column) const;
         [[nodiscard]] This& asMatrix() noexcept { return *this; }
         [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
@@ -258,18 +258,18 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
-    LMatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) {
+    __host__ __device__ typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType*
+    LMatrixBlock<MatrixType, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat(row + fromRow, col + fromCol);
+        return mat.data_ptr(row + fromRow, col + fromCol);
     }
 
     template<class MatrixType>
-    const typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType&
-    LMatrixBlock<MatrixType, Dynamic, Dynamic>::operator()(size_t row, size_t col) const {
+    __host__ __device__ const typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType*
+    LMatrixBlock<MatrixType, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat(row + fromRow, col + fromCol);
+        return mat.data_ptr(row + fromRow, col + fromCol);
     }
 }

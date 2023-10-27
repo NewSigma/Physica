@@ -60,14 +60,13 @@ namespace Physica::Core {
         /* Operators */
         DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         using Base::operator=;
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t column);
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const;
         /* Operations */
         using Storage::resize;
         /* Getters */
         using Storage::getOrder;
         using Storage::getRow;
         using Storage::getColumn;
+        using Storage::data_ptr;
         /* Helpers */
         void swap(DenseSymmMatrix& m) noexcept;
         /* Static members */
@@ -83,7 +82,7 @@ namespace Physica::Core {
         assert(mat.getRow() == mat.getColumn());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
-                operator()(i, j) = mat.calc(i, j);
+                Base::operator()(i, j) = mat.calc(i, j);
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
@@ -91,18 +90,6 @@ namespace Physica::Core {
     DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator=(DenseSymmMatrix m) noexcept {
         swap(m);
         return *this;
-    }
-
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    ScalarType& DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t column) {
-        const size_t index = Storage::accessingIndex(row, column);
-        return Storage::operator[](index);
-    }
-
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    const ScalarType& DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator()(size_t row, size_t column) const {
-        const size_t index = Storage::accessingIndex(row, column);
-        return Storage::operator[](index);
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>

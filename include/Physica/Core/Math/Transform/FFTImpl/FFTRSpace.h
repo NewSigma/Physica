@@ -216,8 +216,6 @@ namespace Physica::Core {
         using GridBase::operator=;
         FFTRSpace& operator=(const FFTRSpace& obj);
         using GridBase::operator();
-        [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Operations */
         template<class GridType> inline void transform(const LValueGrid<GridType>& data);
         inline void resize([[maybe_unused]] Index3D size);
@@ -226,6 +224,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -237,24 +237,6 @@ namespace Physica::Core {
         resize(obj.getDim());
         obj.assignTo(*this);
         return *this;
-    }
-
-    template<class Derived>
-    inline typename FFTRSpace<Derived, 3>::ScalarType& FFTRSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) {
-        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator()(x, y, z));
-    }
-
-    template<class Derived>
-    inline const typename FFTRSpace<Derived, 3>::ScalarType& FFTRSpace<Derived, 3>::operator()(size_t x, size_t y, size_t z) const {
-        assert(x < getDimX());
-        assert(y < getDimY());
-        assert(z < getDimZ());
-        if constexpr (isComplex)
-            return Base::getDerived().asComplexBuffer()[(x * getDimY() + y) * getDimZ() + z];
-        else {
-            const size_t shift = (getDimZ() / 2 + 1) * 2;
-            return Base::getDerived().asRealBuffer()[(x * getDimY() + y) * shift + z];
-        }
     }
 
     template<class Derived>
@@ -272,5 +254,25 @@ namespace Physica::Core {
         assert(getDimX() == size[0]);
         assert(getDimY() == size[1]);
         assert(getDimZ() == size[2]);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename FFTRSpace<Derived, 3>::ScalarType*
+    FFTRSpace<Derived, 3>::data_ptr(Index3D index) {
+        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
+    }
+
+    template<class Derived>
+    __host__ __device__ inline const typename FFTRSpace<Derived, 3>::ScalarType*
+    FFTRSpace<Derived, 3>::data_ptr(Index3D index) const {
+        assert(index[0] < getDimX());
+        assert(index[1] < getDimY());
+        assert(index[2] < getDimZ());
+        if constexpr (isComplex)
+            return Base::getDerived().asComplexBuffer() + (index[0] * getDimY() + index[1]) * getDimZ() + index[2];
+        else {
+            const size_t shift = (getDimZ() / 2 + 1) * 2;
+            return Base::getDerived().asRealBuffer() + (index[0] * getDimY() + index[1]) * shift + index[2];
+        }
     }
 }

@@ -42,10 +42,10 @@ namespace Physica::Core {
         ~GridStorage() = default;
         /* Operators */
         GridStorage& operator=(GridStorage obj) noexcept;
-        [[nodiscard]] inline T& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] inline const T& operator()(size_t x, size_t y, size_t z) const;
-        [[nodiscard]] T& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const T& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] inline T& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
+        [[nodiscard]] inline const T& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
+        [[nodiscard]] T& operator()(Index3D index) { return *data_ptr(index); }
+        [[nodiscard]] const T& operator()(Index3D index) const { return *data_ptr(index); }
         /* Operations */
         template<class Functor> void forIndexInGrid(Functor func) const { Base::forIndexInGrid(getDim(), func); }
         template<class... Args> void resize(Index3D index, Args... args);
@@ -69,6 +69,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return dimZ; }
         [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
         [[nodiscard]] size_t getSize() const noexcept { return values.getLength(); }
+        [[nodiscard]] __host__ __device__ inline T* data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ inline const T* data_ptr(Index3D index) const;
     };
 
     template<class T>
@@ -87,19 +89,6 @@ namespace Physica::Core {
     }
 
     template<class T>
-    inline T& GridStorage<T>::operator()(size_t x, size_t y, size_t z) {
-        assert(x < dimX);
-        assert(y < dimY);
-        assert(z < dimZ);
-        return values[(x * dimY + y) * dimZ + z];
-    }
-
-    template<class T>
-    inline const T& GridStorage<T>::operator()(size_t x, size_t y, size_t z) const {
-        return const_cast<This&>(*this)(x, y, z);
-    }
-
-    template<class T>
     template<class... Args>
     void GridStorage<T>::resize(Index3D index, Args... args) {
         dimX = index[0];
@@ -115,5 +104,18 @@ namespace Physica::Core {
         std::swap(dimX, obj.dimX);
         std::swap(dimY, obj.dimY);
         std::swap(dimZ, obj.dimZ);
+    }
+
+    template<class T>
+    __host__ __device__ inline T* GridStorage<T>::data_ptr(Index3D index) {
+        assert(index[0] < dimX);
+        assert(index[1] < dimY);
+        assert(index[2] < dimZ);
+        return values.data() + (index[0] * dimY + index[1]) * dimZ + index[2];
+    }
+
+    template<class T>
+    __host__ __device__ inline const T* GridStorage<T>::data_ptr(Index3D index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }

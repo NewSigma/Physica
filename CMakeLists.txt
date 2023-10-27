@@ -142,8 +142,10 @@ if(${BUILD_TESTS})
     add_subdirectory(test)
 endif()
 
-if(${BUILD_BENCHMARKS})
-    add_subdirectory(benchmark)
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    if(${BUILD_BENCHMARKS})
+        add_subdirectory(benchmark)
+    endif()
 endif()
 
 if(${PHYSICA_GUI})

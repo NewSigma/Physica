@@ -39,10 +39,10 @@ namespace Physica::Core {
         template<class OtherDerived>
         Derived& operator=(const RValueGrid<OtherDerived>& other);
         Derived& operator=(const ScalarType& s);
-        [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return Base::getDerived()(x, y, z); }
-        [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return Base::getDerived()(x, y, z); }
-        [[nodiscard]] ScalarType& operator()(Index3D index) { return operator()(index[0], index[1], index[2]); }
-        [[nodiscard]] const ScalarType& operator()(Index3D index) const { return operator()(index[0], index[1], index[2]); }
+        [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
+        [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
+        [[nodiscard]] ScalarType& operator()(Index3D index) { return *data_ptr(index); }
+        [[nodiscard]] const ScalarType& operator()(Index3D index) const { return *data_ptr(index); }
         template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
         template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
         template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
@@ -75,6 +75,8 @@ namespace Physica::Core {
         template<class RandomGenerator> void random_normal(RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
         using Base::getDimX;
         using Base::getDimY;
         using Base::getDimZ;

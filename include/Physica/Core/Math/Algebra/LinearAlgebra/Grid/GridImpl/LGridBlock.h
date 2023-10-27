@@ -50,14 +50,14 @@ namespace Physica::Core {
         using Base::operator=;
         LGridBlock& operator=(const LGridBlock& b) { Base::operator=(static_cast<const typename Base::Base&>(b)); return *this; }
         LGridBlock& operator=(LGridBlock&& b) noexcept { Base::operator=(static_cast<const typename Base::Base&>(b)); return *this; }
-        [[nodiscard]] inline ScalarType& operator()(size_t x, size_t y, size_t z);
-        [[nodiscard]] inline const ScalarType& operator()(size_t x, size_t y, size_t z) const;
         /* Operations */
         void resize([[maybe_unused]] Index3D size) { assert(size == count && "[Error]: Resize part of a grid is not allowed"); }
         /* Getters */
         [[nodiscard]] size_t getDimX() const noexcept { return count[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return count[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return count[2]; }
+        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     };
 
     template<class GridType>
@@ -72,12 +72,12 @@ namespace Physica::Core {
     }
 
     template<class GridType>
-    inline typename LGridBlock<GridType>::ScalarType& LGridBlock<GridType>::operator()(size_t x, size_t y, size_t z) {
-        return grid(from[0] + x, from[1] + y, from[2] + z);
+    __host__ __device__ inline typename LGridBlock<GridType>::ScalarType* LGridBlock<GridType>::data_ptr(Index3D index) {
+        return grid.data_ptr({from[0] + index[0], from[1] + index[1], from[2] + index[2]});
     }
 
     template<class GridType>
-    inline const typename LGridBlock<GridType>::ScalarType& LGridBlock<GridType>::operator()(size_t x, size_t y, size_t z) const {
-        return const_cast<This&>(*this).operator()(x, y, z);
+    __host__ __device__ inline const typename LGridBlock<GridType>::ScalarType* LGridBlock<GridType>::data_ptr(Index3D index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
