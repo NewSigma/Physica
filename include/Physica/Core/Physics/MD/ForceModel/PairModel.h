@@ -337,34 +337,20 @@ namespace Physica::Core {
             const Index3D center = cellList.getAtomCellMap()[atom1];
             cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &result](Vector3D translate, Index3D neigh) {
                 const Vector3D from = pos.row(atom1) - translate;
-                const auto& subCell = cellList(neigh);
-
-                Vector3D r, f;
-                auto ite = subCell.cbegin();
-                bool isValid = ite != subCell.cend();
-                size_t atomToSolve;
-                if (isValid)
-                    atomToSolve = *(ite++);
-
-                while (isValid) {
-                    const size_t atom2 = atomToSolve;
-                    isValid = ite != subCell.cend();
-                    if (isValid)
-                        atomToSolve = *(ite++);
-
+                cellList.forAtomInCell(neigh, [this, atom1, pos, &from, &result](size_t atom2) {
                     const bool isSelf = atom1 == atom2;
-                    if (isSelf)
-                        continue;
+                    if (isSelf) [[unlikely]]
+                        return;
                     const auto to = pos.row(atom2);
-                    r = to.asVector() - from;
+                    const Vector3D r = to.asVector() - from;
                     const ScalarType r2 = r.squaredNorm();
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
                         const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                        f = r * ScalarType(-f_norm / dist);
+                        const Vector3D f = r * ScalarType(-f_norm / dist);
                         result += f * r.transpose();
                     }
-                }
+                });
             });
         }
         result *= reciprocal(ScalarType(cell.getVolume() * 2.0));

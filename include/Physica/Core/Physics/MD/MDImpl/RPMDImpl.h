@@ -382,73 +382,78 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
+    template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if constexpr (NumReplica == 1)
-            return makeStressClassical(model);
+            return makeStressClassical<ForceModel, Executor>(model);
 
-        const size_t dof = getDOF();
-        const size_t numReplica = getNumReplica();
+        Utils::Array<LatticeMatrix> buffer(getNumReplica());
         const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
-        LatticeMatrix kineticStress(Dim, Dim, 0);
-        LatticeMatrix potStress(Dim, Dim, 0);
-        for (size_t replica = 0; replica < numReplica; ++replica) {
+        auto kernel = [this, &model, &buffer, squaredOmegaW](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
+            const size_t dof = getDOF();
+            const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
             const auto col1 = getPhaseMatrix().col((replica + 1) % numReplica);
             const auto pos1 = col1.tail(dof);
 
-            LatticeMatrix temp(Dim, Dim, 0);
+            LatticeMatrix kineticStress(Dim, Dim, 0);
+            LatticeMatrix potStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
                 const ScalarType mass = getMassVec()[i / Dim];
                 const ScalarType repMass = reciprocal(mass);
                 const auto atomMomentum = momentum.segment(from, to);
-                temp += (repMass * atomMomentum) * atomMomentum.transpose();
+                kineticStress += (repMass * atomMomentum) * atomMomentum.transpose();
 
                 const auto atomPos = pos.segment(from, to);
                 const auto atomPos1 = pos1.segment(from, to);
                 const VectorType deltaPos = atomPos - atomPos1;
                 const ScalarType factorK = mass * squaredOmegaW;
-                temp -= (factorK * deltaPos) * deltaPos.transpose();
+                kineticStress -= (factorK * deltaPos) * deltaPos.transpose();
             }
-            kineticStress += temp;
             if constexpr (!isFreeModel)
                 potStress += model.virial(phaseToCell(replica));
-        }
-        return (kineticStress * reciprocal(getVolume()) + potStress) * reciprocal(ScalarType(numReplica));
+            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
+        };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        LatticeMatrix result(Dim, Dim, 0);
+        for (size_t i = 0; i < buffer.getLength(); ++i)
+            toNextMean(result, i, buffer[i]);
+        return result;
     }
     /**
      * Reference:
      * [1] Comp. Phys. Comm. 185, 1019 (2013); https://doi.org/10.1016/j.cpc.2013.10.027
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
+    template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressCentroid(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
-            return makeStressClassical(model);
+            return makeStressClassical<ForceModel, Executor>(model);
 
-        const size_t dof = getDOF();
-        const size_t numReplica = getNumReplica();
+        Utils::Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
-        LatticeMatrix kineticStress(Dim, Dim, 0);
-        LatticeMatrix potStress(Dim, Dim, 0);
-        for (size_t replica = 0; replica < numReplica; ++replica) {
+        auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
+            const size_t dof = getDOF();
+            const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
             const auto centroid = centroidPos.flatten();
             const auto force = forceBuffer.col(replica);
 
+            LatticeMatrix kineticStress(Dim, Dim);
+            LatticeMatrix potStress(Dim, Dim);
             LatticeMatrix classicalKineticStress(Dim, Dim, 0);
             LatticeMatrix quantumKineticStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -465,29 +470,34 @@ namespace Physica::Core {
                 const VectorType deltaPos = atomPos - atomCentroid;
                 quantumKineticStress += deltaPos * atomForce.transpose();
             }
-            kineticStress += classicalKineticStress - quantumKineticStress * ScalarType(0.5);
+            kineticStress = classicalKineticStress - quantumKineticStress * ScalarType(0.5);
             if constexpr (!isFreeModel)
-                potStress += model.virial(phaseToCell(replica));
-        }
-        return (kineticStress * reciprocal(getVolume()) + potStress) * reciprocal(ScalarType(numReplica));
+                potStress = model.virial(phaseToCell(replica));
+            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
+        };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        LatticeMatrix result(Dim, Dim, 0);
+        for (size_t i = 0; i < buffer.getLength(); ++i)
+            toNextMean(result, i, buffer[i]);
+        return result;
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
+    template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
-            return makeStressClassical(model);
+            return makeStressClassical<ForceModel, Executor>(model);
 
-        const size_t dof = getDOF();
-        const size_t numReplica = getNumReplica();
+
+        Utils::Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
-        LatticeMatrix kineticStress(Dim, Dim, 0);
-        LatticeMatrix potStress(Dim, Dim, 0);
-        for (size_t replica = 0; replica < numReplica; ++replica) {
+        auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
+            const size_t dof = getDOF();
+            const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);
             const auto momentum = col.head(dof);
             const auto pos = col.tail(dof);
@@ -496,6 +506,8 @@ namespace Physica::Core {
             const auto cell = phaseToCell(replica);
             const auto forceConst = model.forceConst(cell);
 
+            LatticeMatrix kineticStress(Dim, Dim);
+            LatticeMatrix potStress(Dim, Dim);
             LatticeMatrix classicalKineticStress(Dim, Dim, 0);
             LatticeMatrix quantumKineticStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -519,15 +531,20 @@ namespace Physica::Core {
                     quantumKineticStress -= atomPos1 * temp.transpose();
                 }
             }
-            kineticStress += classicalKineticStress - quantumKineticStress * ScalarType(0.5);
+            kineticStress = classicalKineticStress - quantumKineticStress * ScalarType(0.5);
             if constexpr (!isFreeModel)
-                potStress += model.virial(cell);
-        }
-        return (kineticStress * reciprocal(getVolume()) + potStress) * reciprocal(ScalarType(numReplica));
+                potStress = model.virial(cell);
+            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
+        };
+        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        LatticeMatrix result(Dim, Dim, 0);
+        for (size_t i = 0; i < buffer.getLength(); ++i)
+            toNextMean(result, i, buffer[i]);
+        return result;
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel>
+    template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;

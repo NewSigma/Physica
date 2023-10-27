@@ -138,13 +138,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcClassicalElastic() const;
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
 
-        template<class ForceModel>
+        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
-        template<class ForceModel>
+        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressCentroid(const ForceModel& model) const;
-        template<class ForceModel>
+        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressVirial(const ForceModel& model) const;
-        template<class ForceModel>
+        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
         void swap(RPMD& obj) noexcept;
         /* Getters */
