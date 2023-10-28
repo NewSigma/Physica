@@ -133,16 +133,50 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsFixedBoundary, unsigned int Dim>
     ScalarType TodaModel<ScalarType, IsFixedBoundary, Dim>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
-        const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
-        if (isNeighbor) {
-            const ScalarType delta = cell.minDistVector(dof1, dof2).norm();
-            return exp(-delta);
+        if constexpr (IsFixedBoundary) {
+            const auto& pos = cell.getPos();
+            const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
+            if (isNeighbor) {
+                const ScalarType delta = abs(pos(dof1, 0) - pos(dof2, 0));
+                return -exp(-delta);
+            }
+
+            if (dof1 == dof2) {
+                const size_t numParticle = cell.getNumParticle();
+                ScalarType delta1, delta2;
+                if (dof1 == 0) {
+                    const ScalarType temp = pos(0, 0);
+                    delta1 = temp;
+                    delta2 = pos(1, 0) - temp;
+                }
+                else if (dof1 == numParticle - 1) {
+                    const ScalarType temp = pos(numParticle - 1, 0);
+                    delta1 = temp - pos(numParticle - 2, 0);
+                    delta2 = cell.getLattice()(0, 0) - temp;
+                }
+                else {
+                    const ScalarType temp = pos(dof1, 0);
+                    delta1 = temp - pos(dof1 - 1, 0);
+                    delta2 = pos(dof1 + 1, 0) - temp;
+                }
+                return exp(-delta1) + exp(-delta2);
+            }
         }
         else {
-            const size_t dof3 = dof1 == 0 ? cell.getNumParticle() : dof1;
-            const ScalarType delta1 = cell.minDistVector(dof1, dof1 + 1).norm();
-            const ScalarType delta2 = cell.minDistVector(dof1, dof3 - 1).norm();
-            return exp(-delta1) + exp(-delta2);
+            const size_t dof = cell.getDOF();
+            const bool isNeighbor = ((dof1 + 1) % dof == dof2) || ((dof2 + 1) % dof == dof1);
+            if (isNeighbor) {
+                const ScalarType delta = cell.minDistVector(dof1, dof2).norm();
+                return -exp(-delta);
+            }
+
+            if (dof1 == dof2) {
+                const size_t dof3 = (dof1 + 1) % dof;
+                const size_t dof4 = (dof1 == 0 ? cell.getNumParticle() : dof1) - 1;
+                const ScalarType delta1 = cell.minDistVector(dof1, dof3).norm();
+                const ScalarType delta2 = cell.minDistVector(dof1, dof4).norm();
+                return exp(-delta1) + exp(-delta2);
+            }
         }
         return 0;
     }
@@ -152,13 +186,29 @@ namespace Physica::Core {
     TodaModel<ScalarType, IsFixedBoundary, Dim>::forceConst(const MDCellType& cell) const {
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof, ScalarType(0));
-        for (size_t i = 0; i < dof; ++i) {
-            const size_t i1 = (i + 1) % dof;
-            const ScalarType delta = cell.minDistVector(i, i1).norm();
-            const ScalarType temp = exp(-delta);
-            result(i, i1) = temp;
-            result(i, i) += temp;
-            result(i1, i1) += temp;
+        if constexpr (IsFixedBoundary) {
+            const auto& pos = cell.getPos();
+            const size_t dof1 = dof - 1;
+            for (size_t i = 0; i < dof1; ++i) {
+                const size_t i1 = i + 1;
+                const ScalarType delta = pos(i1, 0) - pos(i, 0);
+                const ScalarType temp = exp(-delta);
+                result(i, i1) = -temp;
+                result(i, i) += temp;
+                result(i1, i1) += temp;
+            }
+            result(0, 0) += exp(-pos(0, 0));
+            result(dof1, dof1) += exp(-(cell.getLattice()(0, 0) - pos(dof1, 0)));
+        }
+        else {
+            for (size_t i = 0; i < dof; ++i) {
+                const size_t i1 = (i + 1) % dof;
+                const ScalarType delta = cell.minDistVector(i, i1).norm();
+                const ScalarType temp = exp(-delta);
+                result(i, i1) = -temp;
+                result(i, i) += temp;
+                result(i1, i1) += temp;
+            }
         }
         return result;
     }

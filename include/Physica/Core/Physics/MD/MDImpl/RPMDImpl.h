@@ -491,7 +491,6 @@ namespace Physica::Core {
         if constexpr (NumReplica == 1)
             return makeStressClassical<ForceModel, Executor>(model);
 
-
         Utils::Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
         auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
@@ -526,7 +525,7 @@ namespace Physica::Core {
 
                 for (size_t j = 0; j < getNumParticle(); ++j) {
                     const auto atomPos1 = pos.segment(j * Dim, (j + 1) * Dim);
-                    const auto block = forceConst.block(3 * i, 3, 3 * j, 3);
+                    const auto block = forceConst.block(Dim * i, Dim, Dim * j, Dim);
                     const VectorType temp = block.transpose() * deltaPos;
                     quantumKineticStress -= atomPos1 * temp.transpose();
                 }

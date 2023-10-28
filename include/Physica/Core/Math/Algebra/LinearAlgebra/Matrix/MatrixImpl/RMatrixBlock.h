@@ -125,12 +125,13 @@ namespace Physica::Core {
         using Base::assignTo;
         using VectorBase::assignTo;
         /* Getters */
-        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
         using VectorBase::calc;
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
+        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -156,12 +157,13 @@ namespace Physica::Core {
         using Base::assignTo;
         using VectorBase::assignTo;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
         using VectorBase::calc;
-        [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
+        [[nodiscard]] ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
+        [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

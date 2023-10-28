@@ -33,7 +33,7 @@ namespace Physica::Core {
      * Note:
      * If you use random numbers in a single thread code, construct a generator by hand is prefered.
      */
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Dynamic>
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Physica::Utils::Dynamic>
     class RandomPool {
     public:
         using SeedType = typename RandomGenerator::result_type;

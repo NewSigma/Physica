@@ -158,6 +158,7 @@ namespace Physica::Core {
         using VectorBase::calc;
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
         /**
@@ -201,6 +202,7 @@ namespace Physica::Core {
         using VectorBase::calc;
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
         [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(col == 0); return VectorBase::operator[](row); }
