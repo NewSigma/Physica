@@ -194,9 +194,19 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x);
+
+    template<ScalarOption Option>
+    Scalar<Option> incompBeta(const Scalar<Option>& a, const Scalar<Option>& b, const Scalar<Option>& x);
+
+    template<ScalarOption Option>
+    inline Scalar<Option> studentT(size_t n, const Scalar<Option>& x);
+
+    template<ScalarOption Option>
+    inline Scalar<Option> distributionF(const Scalar<Option>& v1, const Scalar<Option>& v2, const Scalar<Option>& x);
 }
 
 #include "SpetialFunctionsImpl/Bessel.h"
 #include "SpetialFunctionsImpl/Gamma.h"
 #include "SpetialFunctionsImpl/Legendre.h"
 #include "SpetialFunctionsImpl/Hermite.h"
+#include "SpetialFunctionsImpl/IncompBeta.h"

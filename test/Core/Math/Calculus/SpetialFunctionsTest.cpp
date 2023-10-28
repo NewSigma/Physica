@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
@@ -222,7 +223,31 @@ void testHermiteH() {
     }
 }
 
+void testIncompBeta() {
+    using T = Scalar<Double>;
+    constexpr static size_t count = 3;
+    constexpr static unsigned int n[count]{5, 10, 12};
+    constexpr static double x[count]{1.2, 0.2, 2.1};
+    constexpr static double result[count]{0.7161089432938979, 0.1545108086196544, 0.94245506126504887};
+
+    for (size_t i = 0; i < count; ++i) {
+        auto temp = studentT(n[i], T(x[i]));
+        if (!scalarNear(temp, T(result[i]), 1E-13))
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main() {
+    testLnGamma();
+    testGammaPQ();
+    testBiGamma();
+    testBesselJ();
+    testBesselY();
+    testBesselJn_Yn_dJn_dYn();
+    testLegendreP();
+    testSphericalHarmomicY();
+    testHamonicRotator();
     testHermiteH();
+    testIncompBeta();
     return 0;
 }

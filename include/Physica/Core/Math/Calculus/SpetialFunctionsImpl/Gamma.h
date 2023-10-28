@@ -21,6 +21,66 @@
 #include "Physica/Core/Math/Calculus/Differential.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        /**
+         * Reference:
+         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
+         */
+        template<ScalarOption Option>
+        Scalar<Option> incompGammaImpl1(const Scalar<Option>& a, const Scalar<Option>& x) {
+            using T = Scalar<Option>;
+            assert(a.isPositive() && !x.isNegative());
+            assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
+            T ap = a;
+            T temp = reciprocal(a);
+            T sum = temp;
+            do {
+                ap += T(1);
+                temp *= x / ap;
+                sum += temp;
+            } while (abs(temp) >= abs(sum) * std::numeric_limits<T>::epsilon());
+            return sum * exp(T(-x + a * ln(x) - lnGamma(a)));
+        }
+        /**
+         * Reference:
+         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
+         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
+         */
+        template<ScalarOption Option>
+        Scalar<Option> incompGammaImpl2(const Scalar<Option>& a, const Scalar<Option>& x) {
+            using T = Scalar<Option>;
+            assert(a.isPositive() && !x.isNegative());
+            assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
+            const T epsilon = std::numeric_limits<T>::epsilon();
+            const T floatMin = T(std::numeric_limits<T>::min()) / epsilon;
+
+            T b = x + T(1) - a;
+            T c = reciprocal(T(floatMin));
+            T d = reciprocal(b);
+            T h = d;
+            T temp;
+            size_t i = 1;
+            do {
+                T an = -T(i) * (T(i) - a); //Possible to optimize use add instead of multiply
+                ++i;
+                b += T(2);
+                d = an * d + b;
+                T copy_d(d);
+                if (copy_d.toAbs() < floatMin)
+                    d = floatMin;
+
+                c = an / c + b;
+                T copy_c(c);
+                if (copy_c.toAbs() < floatMin)
+                    c = floatMin;
+                d = reciprocal(d);
+                temp = c * d;
+                h *= temp; 
+            } while (T(temp - T(1)).toAbs() >= epsilon);
+            return h * exp(T(-x + a * ln(x) - lnGamma(a)));
+        }
+    }
     /**
      * Return the logarithm of gamma(s). s must be positive.
      * 
@@ -83,79 +143,18 @@ namespace Physica::Core {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
-    namespace Internal {
-        /**
-         * Reference:
-         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
-         */
-        template<ScalarOption Option>
-        Scalar<Option> incompGamma1(const Scalar<Option>& a, const Scalar<Option>& x) {
-            using T = Scalar<Option>;
-            assert(a.isPositive() && !x.isNegative());
-            assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
-            T ap = a;
-            T temp = reciprocal(a);
-            T sum = temp;
-            do {
-                ap += T(1);
-                temp *= x / ap;
-                sum += temp;
-            } while (abs(temp) >= abs(sum) * std::numeric_limits<T>::epsilon());
-            return sum * exp(T(-x + a * ln(x) - lnGamma(a)));
-        }
-        /**
-         * Reference:
-         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
-         */
-        template<ScalarOption Option>
-        Scalar<Option> incompGamma2(const Scalar<Option>& a, const Scalar<Option>& x) {
-            using T = Scalar<Option>;
-            assert(a.isPositive() && !x.isNegative());
-            assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
-            const T epsilon = std::numeric_limits<T>::epsilon();
-            const T floatMin = T(std::numeric_limits<T>::min()) / epsilon;
-
-            T b = x + T(1) - a;
-            T c = reciprocal(T(floatMin));
-            T d = reciprocal(b);
-            T h = d;
-            T temp;
-            size_t i = 1;
-            do {
-                T an = -T(i) * (T(i) - a); //Possible to optimize use add instead of multiply
-                ++i;
-                b += T(2);
-                d = an * d + b;
-                T copy_d(d);
-                if (copy_d.toAbs() < floatMin)
-                    d = floatMin;
-
-                c = an / c + b;
-                T copy_c(c);
-                if (copy_c.toAbs() < floatMin)
-                    c = floatMin;
-                d = reciprocal(d);
-                temp = c * d;
-                h *= temp; 
-            } while (T(temp - T(1)).toAbs() >= epsilon);
-            return h * exp(T(-x + a * ln(x) - lnGamma(a)));
-        }
-    }
-
     template<ScalarOption Option>
     Scalar<Option> gammaP(const Scalar<Option>& a, const Scalar<Option>& x) {
         assert(a.isPositive() && !x.isNegative());
         using T = Scalar<Option>;
-        return (x < a + T(1)) ? Internal::incompGamma1(a, x) : (T(1) - Internal::incompGamma2(a, x));
+        return (x < a + T(1)) ? Internal::incompGammaImpl1(a, x) : (T(1) - Internal::incompGammaImpl2(a, x));
     }
 
     template<ScalarOption Option>
     Scalar<Option> gammaQ(const Scalar<Option>& a, const Scalar<Option>& x) {
         assert(a.isPositive() && !x.isNegative());
         using T = Scalar<Option>;
-        return (x < a + T(1)) ? (T(1) - Internal::incompGamma1(a, x)) : Internal::incompGamma2(a, x);
+        return (x < a + T(1)) ? (T(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
     }
 
     template<class ScalarType>
