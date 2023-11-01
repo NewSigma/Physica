@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     /**
      * Reference:
      * [1] Frey B. J., Dueck D. Clustering by Passing Messages Between Data Points[J]. Science. 2007 Feb 16;315(5814):972-6

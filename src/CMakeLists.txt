@@ -1,7 +1,4 @@
 #############################################Project##############################################
-if(${PHYSICA_TORCH})
-    add_subdirectory(AI)
-endif()
 add_subdirectory(Core)
 if(${PHYSICA_GUI})
     add_subdirectory(Gui)

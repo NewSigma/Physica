@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
-#include "Physica/AI/Metrics.h"
+#include "Physica/Core/AI/Metrics.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     double mixed_loss(double train_loss, double valid_loss) {
         return std::max(train_loss, valid_loss) + std::abs(train_loss - valid_loss);
     }

@@ -22,7 +22,7 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 #include "HyperParam/ParamSet.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     namespace Internal {
         template<class T> class Traits;
     }

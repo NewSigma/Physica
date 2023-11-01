@@ -20,9 +20,9 @@
 
 #include <random>
 #include "KFold.h"
-#include "Physica/AI/Metrics.h"
+#include "Physica/Core/AI/Metrics.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     template<class ModelType>
     class RandomSearch {
         using DataSet = typename ModelType::DataSet;

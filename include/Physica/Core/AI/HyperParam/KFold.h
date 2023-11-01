@@ -19,12 +19,12 @@
 #pragma once
 
 #include <torch/torch.h>
-#include "Physica/AI/RegressionDataset.h"
-#include "Physica/AI/Model.h"
+#include "Physica/Core/AI/RegressionDataset.h"
+#include "Physica/Core/AI/Model.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     template<class Dataset>
     class KFold {
     public:

@@ -3,12 +3,9 @@ include(../cmake/Modules/PhysicaAddTest.cmake)
 
 message(STATUS "Configuring tests.")
 
-#AI
-if(${PHYSICA_TORCH})
-    physica_add_test(AP AI/AP.cpp)
-endif()
-
-#Core
+# Core
+## AI
+physica_add_test(AP Core/AI/AP.cpp)
 ## Interface
 physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 ## IO

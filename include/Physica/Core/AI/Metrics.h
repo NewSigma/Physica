@@ -20,7 +20,7 @@
 
 #include <climits>
 
-namespace Physica::AI {
+namespace Physica::Core {
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting
      */

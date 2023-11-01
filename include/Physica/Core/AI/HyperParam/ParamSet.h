@@ -20,7 +20,7 @@
 
 #include "Physica/Utils/Template/CRTPBase.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     template<class Derived>
     class ParamSet : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;

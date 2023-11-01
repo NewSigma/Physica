@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/AI/Clustering/AP.h"
+#include "Physica/Core/AI/Clustering/AP.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
@@ -43,7 +43,7 @@ int main() {
         }
     }
 
-    Physica::AI::AP<ScalarType> ap(std::move(similar), 0.5, 10, 100);
+    AP<ScalarType> ap(std::move(similar), 0.5, 10, 100);
     auto exemplars = ap.getExemplars();
     if (exemplars.size() != 2)
         return 1;

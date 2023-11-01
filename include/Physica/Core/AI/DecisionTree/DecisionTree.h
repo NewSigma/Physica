@@ -22,7 +22,7 @@
 #include <set>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     enum class DecisionTreeType {
         Regression,
         Classify

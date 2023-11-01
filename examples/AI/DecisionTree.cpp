@@ -18,10 +18,9 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/AI/DecisionTree/DecisionTree.h"
+#include "Physica/Core/AI/DecisionTree/DecisionTree.h"
 
 using namespace Physica::Core;
-using namespace Physica::AI;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;

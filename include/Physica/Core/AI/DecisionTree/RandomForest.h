@@ -21,7 +21,7 @@
 #include "DecisionTree.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
-namespace Physica::AI {
+namespace Physica::Core {
     /*
      * Reference:
      * [1] Leo Breiman, Random forests[J]. Machine Learning, 45, 5–32, 2001

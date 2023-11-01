@@ -1,7 +1,7 @@
 get_filename_component(Physica_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
 set(Physica_INCLUDE_DIRS "${Physica_ROOT_DIR}/include")
 
-list(APPEND PhysicaModules AI Core Gui Logger Utils)
+list(APPEND PhysicaModules Core Gui Logger Utils)
 foreach (module IN LISTS PhysicaModules)
     set(Physica${module}_LIBRARIES "${Physica_ROOT_DIR}/lib/libPhysica${module}.so")
     if (EXISTS ${Physica${module}_LIBRARIES})

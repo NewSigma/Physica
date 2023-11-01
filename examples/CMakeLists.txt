@@ -1,9 +1,5 @@
 include(../cmake/Modules/PhysicaAddExample.cmake)
 
-if(${PHYSICA_TORCH})
-    physica_add_example(Regression AI/Regression.cpp)
-endif()
-
 if(${PHYSICA_GUI})
     physica_add_example(CrossSection CrossSection/CrossSection.cpp)
     physica_add_example(TodaModel RPMD/ForceModel/TodaModel.cpp)
