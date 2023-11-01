@@ -323,7 +323,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006).
+     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
      */
     template<class Derived>
     typename PairModel<Derived>::LatticeMatrix

@@ -406,7 +406,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
-                const ScalarType mass = getMassVec()[i / Dim];
+                const ScalarType mass = getMassVec()[i];
                 const ScalarType repMass = reciprocal(mass);
                 const auto atomMomentum = momentum.segment(from, to);
                 kineticStress += (repMass * atomMomentum) * atomMomentum.transpose();
@@ -459,7 +459,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
-                const ScalarType mass = getMassVec()[i / Dim];
+                const ScalarType mass = getMassVec()[i];
                 const ScalarType factor = reciprocal(mass * ScalarType(numReplica));
                 const auto atomMomentum = momentum.segment(from, to);
                 classicalKineticStress += (factor * atomMomentum) * atomMomentum.transpose();
@@ -512,7 +512,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
-                const ScalarType mass = getMassVec()[i / Dim];
+                const ScalarType mass = getMassVec()[i];
                 const ScalarType factor = reciprocal(mass * ScalarType(numReplica));
                 const auto atomMomentum = momentum.segment(from, to);
                 classicalKineticStress += (factor * atomMomentum) * atomMomentum.transpose();
@@ -556,7 +556,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
-                const ScalarType repMass = reciprocal(getMassVec()[i / Dim]);
+                const ScalarType repMass = reciprocal(getMassVec()[i]);
                 const auto atomMomentum = momentum.segment(from, to);
                 stress += (repMass * atomMomentum) * atomMomentum.transpose();
             }
@@ -580,7 +580,7 @@ namespace Physica::Core {
                 for (size_t i = 0; i < getNumParticle(); ++i) {
                     const size_t from = i * Dim;
                     const size_t to = from + Dim;
-                    const ScalarType mass = getMassVec()[i / Dim];
+                    const ScalarType mass = getMassVec()[i];
                     const ScalarType factor = reciprocal(mass * ScalarType(numReplica));
                     const auto atomMomentum = momentum.segment(from, to);
                     temp += (factor * atomMomentum) * atomMomentum.transpose();

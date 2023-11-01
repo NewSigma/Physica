@@ -307,7 +307,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcTemperature() const {
-        return calcKineticClassical() * PlainScalar((2 / PhyConst<AU>::boltzmannK) / (Dim * getNumParticle() * getNumReplica() * getNumReplica()));
+        return calcKineticClassical() * PlainScalar((2 / (Dim * PhyConst<AU>::boltzmannK)) / (getNumParticle() * getNumReplica() * getNumReplica()));
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>

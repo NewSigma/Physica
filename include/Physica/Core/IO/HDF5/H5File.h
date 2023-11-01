@@ -49,10 +49,17 @@ namespace Physica::Core {
         H5DataSet<1> createDataSet(const char* filepath, const char* name);
         template<size_t Dim>
         [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
+        template<size_t Dim>
+        [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
     };
 
     template<size_t Dim>
     H5DataSet<Dim> H5File::openDataSet(const char* name) {
+        return Base::openDataSet(name);
+    }
+
+    template<size_t Dim>
+    const H5DataSet<Dim> H5File::openDataSet(const char* name) const {
         return Base::openDataSet(name);
     }
 }
