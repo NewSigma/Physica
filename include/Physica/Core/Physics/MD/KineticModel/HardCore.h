@@ -23,8 +23,17 @@
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor> class HardCore;
 
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
+    namespace Internal {
+        template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+        class Traits<HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>> {
+        public:
+            constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
+        };
+    }
+
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     class HardCore : private FreeModel<ScalarType, 1, NumReplica, Integrator> {
         static_assert(!ScalarType::isComplex);
         using Base = FreeModel<ScalarType, 1, NumReplica, Integrator>;

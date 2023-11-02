@@ -38,7 +38,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor, bool IsSmallCell = false>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
@@ -52,7 +52,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     template<class Executor, bool IsSmallCell>
     Vector<ScalarType> FPUModel<ScalarType, Dim>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(cell.getNumParticle(), 0);
+        Vector<ScalarType> result(cell.getNumParticle());
         forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
         return result;
     }
@@ -63,20 +63,21 @@ namespace Physica::Core {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
+        result = ScalarType(0);
         /* First */ {
-            const ScalarType delta = pos(0, 0) - SpringLength;
+            const ScalarType delta = pos(0, 0) - springLength;
             const ScalarType delta2 = square(delta);
             result[0] = -delta - delta * delta2;
         }
         for (size_t i = 0; i < numParticle - 1; ++i) {
-            const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+            const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - springLength;
             const ScalarType delta2 = square(delta);
             const ScalarType f = delta + delta * delta2;
             result[i] += f;
             result[i + 1] -= f;
         }
         /* Last */ {
-            const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+            const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
             const ScalarType delta2 = square(delta);
             result[numParticle - 1] += delta + delta * delta2;
         }
@@ -88,17 +89,17 @@ namespace Physica::Core {
         const auto& pos = cell.getPos();
         ScalarType energy;
         /* First */ {
-            const ScalarType delta = pos(0, 0) - SpringLength;
+            const ScalarType delta = pos(0, 0) - springLength;
             const ScalarType delta2 = square(delta);
             energy = delta2 * 0.5 + square(delta2) * 0.25;
         }
         for (size_t i = 0; i < numParticle - 1; ++i) {
-            const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - SpringLength;
+            const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - springLength;
             const ScalarType delta2 = square(delta);
             energy += delta2 * 0.5 + square(delta2) * 0.25;
         }
         /* Last */ {
-            const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - SpringLength;
+            const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
             const ScalarType delta2 = square(delta);
             energy += delta2 * 0.5 + square(delta2) * 0.25;
         }
@@ -113,21 +114,21 @@ namespace Physica::Core {
         ScalarType result = 0;
         /* First */ {
             const ScalarType r = pos(0, 0);
-            const ScalarType delta = r - SpringLength;
+            const ScalarType delta = r - springLength;
             const ScalarType delta2 = square(delta);
             const ScalarType f = -delta - delta * delta2;
             result += r * f;
         }
         for (size_t i = 0; i < numParticle - 1; ++i) {
             const ScalarType r = pos(i + 1, 0) - pos(i, 0);
-            const ScalarType delta = r - SpringLength;
+            const ScalarType delta = r - springLength;
             const ScalarType delta2 = square(delta);
             const ScalarType f = -delta - delta * delta2;
             result += r * f;
         }
         /* Last */ {
             const ScalarType r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
-            const ScalarType delta = r - SpringLength;
+            const ScalarType delta = r - springLength;
             const ScalarType delta2 = square(delta);
             const ScalarType f = -delta - delta * delta2;
             result += r * f;

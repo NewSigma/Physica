@@ -68,7 +68,6 @@ int main() {
     {
         auto rpmd = makeSystem(108, gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
@@ -80,7 +79,6 @@ int main() {
     {
         auto rpmd = makeSystem(256, gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
@@ -92,7 +90,6 @@ int main() {
     {
         auto rpmd = makeSystem(500, gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
@@ -104,7 +101,6 @@ int main() {
     {
         auto rpmd = makeSystem(864, gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(5 * 1E-14),

@@ -19,7 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * Exact as introduced in [1]: Exact free ring-polymer update
      * Cayley as introduced in [2]: More accurate and efficient Cayley transform-based approximated version of BAOAB
@@ -32,6 +31,17 @@ namespace Physica::Core {
         Exact,
         Cayley
     };
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator> class FreeModel;
+
+    namespace Internal {
+        template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+        class Traits<FreeModel<ScalarType, Dim, NumReplica, Integrator>> {
+        public:
+            constexpr static bool IsPeriodBoundary = true;
+        };
+    }
 
     template<class ScalarType,
              unsigned int Dim,

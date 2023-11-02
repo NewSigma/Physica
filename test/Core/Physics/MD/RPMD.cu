@@ -69,7 +69,6 @@ void testMDRun() {
         RandomGenerator& gen = RandomPoolType::getGen();
         auto rpmd = makeSystem(gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, CudaExecutor>(forceModel);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;

@@ -75,7 +75,7 @@ bool testCalcKinetic(double precision) {
     auto rpmd = makeSystem<ScalarType>(gen);
     rpmd.initMomentum(gen);
     ForceModel forceModel(pair_cutoff);
-    rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+    rpmd.updateForce<true, ForceModel, ThreadExecutor>(forceModel);
 
     const ScalarType kinetic1 = rpmd.calcKinetic();
     ScalarType kinetic2 = 0;
@@ -101,7 +101,6 @@ void testMDRun() {
         RandomGenerator& gen = RandomPoolType::getGen();
         auto rpmd = makeSystem<ScalarType>(gen);
         rpmd.initMomentum(gen);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;

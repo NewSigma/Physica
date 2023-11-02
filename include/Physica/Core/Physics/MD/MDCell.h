@@ -99,7 +99,6 @@ namespace Physica::Core {
             const auto atomicNum = cell.getAtomicNumber(i);
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
-        normalize();
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -111,7 +110,6 @@ namespace Physica::Core {
             : Base(std::move(lattice), std::move(pos), Base::Type::Cartesian)
             , massVec(std::move(massVec_)) {
         invLattice = Base::makeInvLattice();
-        normalize();
     }
 
     template<class ScalarType, unsigned int Dim>

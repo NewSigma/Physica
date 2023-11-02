@@ -54,7 +54,6 @@ int main() {
         rpmd.initMomentum(gen);
 
         ForceModel forceModel(pair_cutoff);
-        rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
         KineticModel kineticModel(temperatureT, numReplica);
         const ThermostatType thermo(temperatureT, thermostatTime);
 

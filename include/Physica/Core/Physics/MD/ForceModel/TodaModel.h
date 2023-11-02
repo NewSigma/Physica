@@ -137,7 +137,7 @@ namespace Physica::Core {
             const auto& pos = cell.getPos();
             const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
             if (isNeighbor) {
-                const ScalarType delta = abs(pos(dof1, 0) - pos(dof2, 0));
+                const ScalarType delta = abs(pos(dof1, 0) - pos(dof2, 0)) - springLength;
                 return -exp(-delta);
             }
 
@@ -159,6 +159,8 @@ namespace Physica::Core {
                     delta1 = temp - pos(dof1 - 1, 0);
                     delta2 = pos(dof1 + 1, 0) - temp;
                 }
+                delta1 -= springLength;
+                delta2 -= springLength;
                 return exp(-delta1) + exp(-delta2);
             }
         }
@@ -166,15 +168,15 @@ namespace Physica::Core {
             const size_t dof = cell.getDOF();
             const bool isNeighbor = ((dof1 + 1) % dof == dof2) || ((dof2 + 1) % dof == dof1);
             if (isNeighbor) {
-                const ScalarType delta = cell.minDistVector(dof1, dof2).norm();
+                const ScalarType delta = cell.minDistVector(dof1, dof2).norm() - springLength;
                 return -exp(-delta);
             }
 
             if (dof1 == dof2) {
                 const size_t dof3 = (dof1 + 1) % dof;
                 const size_t dof4 = (dof1 == 0 ? cell.getNumParticle() : dof1) - 1;
-                const ScalarType delta1 = cell.minDistVector(dof1, dof3).norm();
-                const ScalarType delta2 = cell.minDistVector(dof1, dof4).norm();
+                const ScalarType delta1 = cell.minDistVector(dof1, dof3).norm() - springLength;
+                const ScalarType delta2 = cell.minDistVector(dof1, dof4).norm() - springLength;
                 return exp(-delta1) + exp(-delta2);
             }
         }
@@ -191,19 +193,19 @@ namespace Physica::Core {
             const size_t dof1 = dof - 1;
             for (size_t i = 0; i < dof1; ++i) {
                 const size_t i1 = i + 1;
-                const ScalarType delta = pos(i1, 0) - pos(i, 0);
+                const ScalarType delta = pos(i1, 0) - pos(i, 0) - springLength;
                 const ScalarType temp = exp(-delta);
                 result(i, i1) = -temp;
                 result(i, i) += temp;
                 result(i1, i1) += temp;
             }
-            result(0, 0) += exp(-pos(0, 0));
-            result(dof1, dof1) += exp(-(cell.getLattice()(0, 0) - pos(dof1, 0)));
+            result(0, 0) += exp(-pos(0, 0) + springLength);
+            result(dof1, dof1) += exp(-(cell.getLattice()(0, 0) - pos(dof1, 0) - springLength));
         }
         else {
             for (size_t i = 0; i < dof; ++i) {
                 const size_t i1 = (i + 1) % dof;
-                const ScalarType delta = cell.minDistVector(i, i1).norm();
+                const ScalarType delta = cell.minDistVector(i, i1).norm() - springLength;
                 const ScalarType temp = exp(-delta);
                 result(i, i1) = -temp;
                 result(i, i) += temp;

@@ -71,7 +71,6 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     rpmd.initMomentum(RandomPoolType::getGen());
-    rpmd.updateForce<ForceModel, SequentialExecutor>(forceModel);
 
     ScalarType mean = 0, variance = 0;
     for (size_t sys = 0; sys < numSystem; ++sys) {

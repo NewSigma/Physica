@@ -60,7 +60,7 @@ namespace Physica::Core {
      * [1] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<bool IsPeriodBoundary, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
         constexpr bool isCudaEnabled = Internal::Traits<Executor>::isCudaEnabled;
         static_assert(!isCudaEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
@@ -70,7 +70,8 @@ namespace Physica::Core {
                 const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
                 for (size_t replica = range.first; replica < range.second; ++replica) {
                     MDCellType cell = phaseToCell(replica);
-                    cell.normalize();
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
                     auto saveTo = forceBuffer.col(replica);
                     saveTo = model.template force_short<Executor>(std::move(cell));
                 }
@@ -82,7 +83,8 @@ namespace Physica::Core {
                 const auto range = Executor::splitJob(getNumContract(), Executor::getNumThread(), thread);
                 for (size_t contract = range.first; contract < range.second; ++contract) {
                     MDCellType cell = contractToCell(contract);
-                    cell.normalize();
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
                     auto saveTo = forceContract.col(contract);
                     saveTo = model.template force_long<Executor>(std::move(cell));
                 }
@@ -96,7 +98,8 @@ namespace Physica::Core {
         else {
             auto kernel = [this, &model](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
-                cell.normalize();
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
                 using VectorType = typename decltype(saveTo)::VectorBase;
                 model.template forceAsync<VectorType, Executor>(std::move(cell), saveTo);
@@ -113,13 +116,14 @@ namespace Physica::Core {
              class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::nve_step(KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
         else {
             forceStep(timeStep * PlainScalar(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
             forceStep(timeStep * PlainScalar(0.5));
         }
     }
@@ -150,6 +154,7 @@ namespace Physica::Core {
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
         constexpr bool isSeedFixed = RandomPoolType::isSeedFixed();
         using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
         if (isFreeModel) {
@@ -162,7 +167,7 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
@@ -196,11 +201,12 @@ namespace Physica::Core {
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
+        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
         barostat.forceStep(*this, timeStep * 0.5);
         kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
         thermostat.step(ringPolymer, gen, timeStep);
         kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
-        updateForce<ForceModel, Executor>(forceModel);
+        updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
         barostat.forceStep(*this, timeStep * 0.5);
     }
 
