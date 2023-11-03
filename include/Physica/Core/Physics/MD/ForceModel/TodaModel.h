@@ -250,7 +250,7 @@ namespace Physica::Core {
                 result += r * f;
             }
         }
-        result /= (ScalarType(Dim) * cell.getVolume());
+        result /= cell.getVolume();
         return LatticeMatrix{result};
     }
 

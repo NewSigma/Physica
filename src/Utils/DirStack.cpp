@@ -32,7 +32,7 @@ namespace Physica::Utils {
             if (ch == '/') {
                 if (dirStart == dirEnd)
                     goto ignore;
-                cutParh(path, dirStart, dirEnd);
+                cutPath(path, dirStart, dirEnd);
                 dirStart = ++dirEnd;
             }
             else {
@@ -43,7 +43,7 @@ namespace Physica::Utils {
         } while(ch != '\0');
 
         if (dirStart != dirEnd)
-            cutParh(path, dirStart, dirEnd);
+            cutPath(path, dirStart, dirEnd);
     }
 
     DirStack::~DirStack() {
@@ -76,7 +76,7 @@ namespace Physica::Utils {
         return result;
     }
 
-    void DirStack::cutParh(const char* path, size_t startPos, size_t endPos) {
+    void DirStack::cutPath(const char* path, size_t startPos, size_t endPos) {
         assert(startPos < endPos);
         const size_t dirLength = endPos - startPos + 1;
         char* __restrict dir = new char[dirLength];

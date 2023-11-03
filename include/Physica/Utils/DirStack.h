@@ -30,7 +30,7 @@ namespace Physica::Utils {
         std::unique_ptr<const char[]> pop();
         std::string toPath() const;
     private:
-        void cutParh(const char* path, size_t startPos, size_t endPos);
+        void cutPath(const char* path, size_t startPos, size_t endPos);
         friend class Test;
     };
 }

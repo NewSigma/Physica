@@ -34,15 +34,10 @@ namespace Physica::Core {
         readEnergy(fin, buffer);
     }
 
-    Outcar& Outcar::operator=(Outcar& outcar) noexcept {
-        swap(outcar);
-        return *this;
-    }
-
-    void Outcar::swap(Outcar& outcar) noexcept {
-        assert(this != &outcar && "[Error]: Self swap is likely a bug");
-        force.swap(outcar.force);
-        internalEnergy.swap(outcar.internalEnergy);
+    void Outcar::swap(Outcar& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        force.swap(obj.force);
+        internalEnergy.swap(obj.internalEnergy);
     }
 
     void Outcar::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {

@@ -67,7 +67,7 @@ namespace Physica::Core {
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor, bool IsSmallCell = false>
-        void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
+        inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
         template<class VectorType, class Executor, bool IsSmallCell = false>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
@@ -92,6 +92,9 @@ namespace Physica::Core {
         PairModel(PairModel&&) noexcept = default;
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
+        /* Operations */
+        template<bool IsSmallCell, class Functor>
+        void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const;
     private:
         [[nodiscard]] ScalarType forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
     };
@@ -175,100 +178,19 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class VectorType, class Executor, bool IsSmallCell>
-    void PairModel<Derived>::forceAsync(
+    inline void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const {
         static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
-        const auto& pos = cartesianPos;
         result = ScalarType(0);
-        if constexpr (IsSmallCell) {
-            const auto range = MDCellType::estimateRange(lattice, cutoff);
-            const size_t numParticle = pos.getRow();
-            MDCellType::forCellInRange(range, lattice,
-                [this, pos, numParticle, &result](Vector3D delta) {
-                    Vector3D r, from;
-                    for (size_t i = 0; i < numParticle; ++i) {
-                        auto force_i = result.segment(3 * i, 3 * i + 3);
-                        from = pos.row(i) + delta;
-                        for (size_t j = i; j < numParticle; ++j) {
-                            auto force_j = result.segment(3 * j, 3 * j + 3);
-                            auto to = pos.row(j);
-                            r = to.asVector() - from;
-                            const ScalarType r2 = r.squaredNorm();
-                            const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
-                            if (isNotSelf && r2 < squared_cutoff) {
-                                const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(i, j, dist, r2);
-                                r *= f_norm / dist;
-                                const Vector3D& f = r;
-                                force_i -= f;
-                                force_j += f;
-                            }
-                        }
-                    }
-                });
-        }
-        else {
-            const CellListType cellList(lattice, pos, cutoff);
-            Utils::Array<size_t> arr1{};
-            cellList.forCellInList([this, pos, &arr1, &result, &cellList](Index3D center) {
-                cellList.forAtomInCell(center, [&arr1](size_t atom) {
-                    arr1.append(atom);
-                });
-                /* Current cell */ {
-                    const size_t length = arr1.getLength();
-                    for (size_t i = 0; i + 1 < length; ++i) {
-                        const size_t atom1 = arr1[i];
-                        Vector3D f(3, 0);
-                        const auto from = pos.row(atom1);
-                        for (size_t j = i + 1; j < length; ++j) {
-                            const size_t atom2 = arr1[j];
-                            const auto to = pos.row(atom2);
-                            Vector3D r = to.asVector() - from;
-                            const ScalarType r2 = r.squaredNorm();
-                            if (r2 < squared_cutoff) {
-                                const ScalarType dist = sqrt(r2);
-                                const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                                r *= ScalarType(f_norm / dist);
-                                f -= r;
-                                auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
-                                f2 += r;
-                            }
-                        }
-                        auto f1 = result.template segment<3>(3 * atom1, 3 * atom1 + 3);
-                        f1 += f;
-                    }
-                }
-                Utils::Array<size_t> arr2{};
-                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &result, &cellList](Vector3D translate, Index3D neigh) {
-                    cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
-                        arr2.append(atom);
-                    });
-                    std::sort(arr2.begin(), arr2.end());
-
-                    for (const size_t atom1 : arr1) {
-                        const Vector3D from = pos.row(atom1) - translate;
-                        Vector3D r, f(3, 0);
-                        for (const size_t atom2 : arr2) {
-                            const auto to = pos.row(atom2);
-                            r = to.asVector() - from;
-                            const ScalarType r2 = r.squaredNorm();
-                            if (r2 < squared_cutoff) {
-                                const ScalarType dist = sqrt(r2);
-                                auto f2 = result.template segment<3>(3 * atom2, 3 * atom2 + 3);
-                                const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                                r *= ScalarType(f_norm / dist);
-                                f -= r;
-                                f2 += r;
-                            }
-                        }
-                        auto f1 = result.template segment<3>(3 * atom1, 3 * atom1 + 3);
-                        f1 += f;
-                    }
-                    arr2.clear();
-                });
-                arr1.clear();
-            });
-        }
+        auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+            const ScalarType f_norm = force_functor(i, j, norm1, norm2);
+            r *= f_norm / norm1;
+            auto force_i = result.template segment<3>(3 * i, 3 * i + 3);
+            auto force_j = result.template segment<3>(3 * j, 3 * j + 3);
+            force_i -= r;
+            force_j += r;
+        };
+        forPairInCutoff<IsSmallCell, decltype(kernel)>(lattice, cartesianPos, kernel);
     }
 
     template<class Derived>
@@ -371,6 +293,82 @@ namespace Physica::Core {
         squared_cutoff = square(cutoff);
         if constexpr (!IsPotDependOnAtomIndex)
             pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
+    }
+
+    template<class Derived>
+    template<bool IsSmallCell, class Functor>
+    void PairModel<Derived>::forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const {
+        const auto& pos = cartesianPos;
+        if constexpr (IsSmallCell) {
+            const auto range = MDCellType::estimateRange(lattice, cutoff);
+            const size_t numParticle = pos.getRow();
+            MDCellType::forCellInRange(range, lattice,
+                [this, pos, numParticle, &func](Vector3D delta) {
+                    Vector3D r, from;
+                    for (size_t i = 0; i < numParticle; ++i) {
+                        from = pos.row(i) + delta;
+                        for (size_t j = i; j < numParticle; ++j) {
+                            auto to = pos.row(j);
+                            r = to.asVector() - from;
+                            const ScalarType norm2 = r.squaredNorm();
+                            const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < norm2;
+                            if (isNotSelf && norm2 < squared_cutoff) {
+                                const ScalarType norm1 = sqrt(norm2);
+                                func(i, j, r, norm1, norm2);
+                            }
+                        }
+                    }
+                });
+        }
+        else {
+            const CellListType cellList(lattice, pos, cutoff);
+            Utils::Array<size_t> arr1{};
+            cellList.forCellInList([this, pos, &arr1, &func, &cellList](Index3D center) {
+                cellList.forAtomInCell(center, [&arr1](size_t atom) {
+                    arr1.append(atom);
+                });
+                /* Current cell */ {
+                    const size_t length = arr1.getLength();
+                    for (size_t i = 0; i + 1 < length; ++i) {
+                        const size_t atom1 = arr1[i];
+                        const auto from = pos.row(atom1);
+                        for (size_t j = i + 1; j < length; ++j) {
+                            const size_t atom2 = arr1[j];
+                            const auto to = pos.row(atom2);
+                            Vector3D r = to.asVector() - from;
+                            const ScalarType norm2 = r.squaredNorm();
+                            if (norm2 < squared_cutoff) {
+                                const ScalarType norm1 = sqrt(norm2);
+                                func(atom1, atom2, r, norm1, norm2);
+                            }
+                        }
+                    }
+                }
+                Utils::Array<size_t> arr2{};
+                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &func, &cellList](Vector3D translate, Index3D neigh) {
+                    cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
+                        arr2.append(atom);
+                    });
+                    std::sort(arr2.begin(), arr2.end());
+
+                    for (const size_t atom1 : arr1) {
+                        const Vector3D from = pos.row(atom1) - translate;
+                        Vector3D r, f(3, 0);
+                        for (const size_t atom2 : arr2) {
+                            const auto to = pos.row(atom2);
+                            r = to.asVector() - from;
+                            const ScalarType norm2 = r.squaredNorm();
+                            if (norm2 < squared_cutoff) {
+                                const ScalarType norm1 = sqrt(norm2);
+                                func(atom1, atom2, r, norm1, norm2);
+                            }
+                        }
+                    }
+                    arr2.clear();
+                });
+                arr1.clear();
+            });
+        }
     }
 
     template<class Derived>
