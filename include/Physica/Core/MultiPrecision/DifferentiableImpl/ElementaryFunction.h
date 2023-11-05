@@ -23,6 +23,9 @@ namespace Physica::Core {
     __host__ __device__ inline Differentiable<ScalarType, Mode> abs(const Differentiable<ScalarType, Mode>& s);
 
     template<class ScalarType, DiffMode Mode>
+    inline Differentiable<ScalarType, Mode> relu(const Differentiable<ScalarType, Mode>& s);
+
+    template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> square(const Differentiable<ScalarType, Mode>& s);
 
     template<class ScalarType, DiffMode Mode>

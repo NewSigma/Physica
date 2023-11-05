@@ -31,11 +31,14 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = Vector<ScalarType>;
     public:
         ~LayerBase() = default;
         /* Operations */
         [[nodiscard]] VectorType forward(const VectorType& x) const { return Base::getDerived().forward(x); }
+        template<class Optimizer>
+        void opt_step(const Optimizer& opt) { Base::getDerived().opt_step(opt); }
         /* Getters */
         [[nodiscard]] constexpr static bool isTrainMode() { return Internal::Traits<ScalarType>::isDifferentiable; }
     protected:

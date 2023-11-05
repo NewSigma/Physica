@@ -31,6 +31,8 @@ namespace Physica::Core {
         ~NetBase() = default;
         /* Operations */
         void init() { Base::getDerived().init(); }
+        template<class Dataset>
+        void train_step(const Dataset& dataset) { Base::getDerived().train_step(dataset); }
         [[nodiscard]] ScalarType loss(const VectorType& input, const VectorType& answer) { return Base::getDerived().loss(input, answer); }
     protected:
         NetBase() = default;

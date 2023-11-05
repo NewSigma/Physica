@@ -24,7 +24,6 @@ namespace Physica::Core {
      */
     enum class ExpressionType : char {
         Set,
-        Assign,
         Minus,
         Add,
         Sub,
@@ -49,7 +48,6 @@ namespace Physica::Core {
     constexpr unsigned int numOperand(ExpressionType type) {
         switch (type) {
             case ExpressionType::Set: return 0;
-            case ExpressionType::Assign: return 0;
             case ExpressionType::Minus: return 1;
             case ExpressionType::Add: return 2;
             case ExpressionType::Sub: return 2;
@@ -61,6 +59,7 @@ namespace Physica::Core {
             case ExpressionType::Sqrt: return 1;
             case ExpressionType::Cbrt: return 1;
             case ExpressionType::Abs: return 1;
+            case ExpressionType::Relu: return 1;
             case ExpressionType::Square: return 1;
             case ExpressionType::Ln: return 1;
             case ExpressionType::Exp: return 1;

@@ -18,30 +18,29 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
 #include "Physica/Core/Exception/NotImplementedException.h"
+#include "DiffRecord.h"
 
 namespace Physica::Core {
     template<class ScalarType>
     class DiffTracer {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        struct DiffRecord {
-            size_t startOperandId;
-            ScalarType value;
-            ScalarType tangent;
-            ExpressionType source;
-        };
-        using RecordArray = Utils::Array<DiffRecord>;
+        using RecordArray = Utils::Array<DiffRecord<ScalarType>>;
 
         RecordArray records;
         Utils::Array<size_t> operands;
     public:
         ~DiffTracer() = default;
+        /* Operators */
+        [[nodiscard]] DiffRecord<ScalarType>& operator[](size_t index) { return records[index]; }
+        [[nodiscard]] const DiffRecord<ScalarType>& operator[](size_t index) const { return records[index]; }
         /* Operations */
         inline DiffTracer& pushOperand(size_t operand);
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] size_t pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
         void reverse(size_t index);
+        inline void clear(size_t from);
+        void clear(size_t from, size_t to);
         void forget(size_t fromIndex = 0);
         void squeeze();
         void release();
@@ -62,7 +61,7 @@ namespace Physica::Core {
     template<class ScalarType>
     inline DiffTracer<ScalarType>& DiffTracer<ScalarType>::pushOperand(size_t operand) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
-        assert(operands.getLength() < (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source)
+        assert(operands.getLength() < (*records.crbegin()).getStartOperandId() + numOperand((*records.crbegin()).getSource())
                 && "[Error]: Not enough operand slot for new operand");
         assert(operand < records.getLength() && "[Error]: This operand is not registered");
         operands.append(operand);
@@ -77,29 +76,29 @@ namespace Physica::Core {
     template<class ScalarType>
     size_t DiffTracer<ScalarType>::pushOperation(ScalarType value, ScalarType tangent, ExpressionType source) {
         if (!records.empty()) {
-            assert(operands.getLength() == (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source)
+            assert(operands.getLength() == (*records.crbegin()).getStartOperandId() + numOperand((*records.crbegin()).getSource())
                     && "[Error]: New record cannot begin unless last record is done");
         }
         const size_t index = records.getLength();
-        records.append(DiffRecord{operands.getLength(), std::move(value), tangent, source});
+        records.append(DiffRecord(operands.getLength(), source, std::move(value), std::move(tangent)));
         return index;
     }
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::reverse(size_t index) {
-        assert(index < getNumRecord());
-        assert(records[index].tangent.isZero() && "[Error]: Last reverse result may be not cleared");
-        assert(records[0].source == ExpressionType::Set && "[Error]: Unexpected source");
+        assert(index < getNumRecord() && "[Error]: Index overflow");
+        assert(records[0].getSource() == ExpressionType::Set && "[Error]: Unexpected source");
         records[index].tangent = ScalarType(1);
         for (size_t i = index; i != 0; --i) {
             const auto& record = records[i];
-            const size_t startOperandId = record.startOperandId;
-            const ScalarType& value = record.value;
             const ScalarType& tangent = record.tangent;
-            switch (record.source) {
+            if (tangent.isZero())
+                continue;
+
+            const size_t startOperandId = record.getStartOperandId();
+            const ScalarType& value = record.value;
+            switch (record.getSource()) {
                 case ExpressionType::Set:
-                    break;
-                case ExpressionType::Assign:
                     break;
                 case ExpressionType::Minus:
                     records[operands[startOperandId]].tangent += -tangent;
@@ -143,6 +142,11 @@ namespace Physica::Core {
                     x.tangent += x.value.isPositive() ? tangent : -tangent;
                     break;
                 }
+                case ExpressionType::Relu: {
+                    auto& x = records[operands[startOperandId]];
+                    x.tangent += x.value.isPositive() ? tangent : ScalarType(0);
+                    break;
+                }
                 case ExpressionType::Square: {
                     auto& x = records[operands[startOperandId]];
                     x.tangent += tangent * x.value * ScalarType(2);
@@ -175,8 +179,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline void DiffTracer<ScalarType>::clear(size_t from) {
+        clear(from, getNumRecord());
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::clear(size_t from, size_t to) {
+        assert(from < to && "[Error]: Invalid argument");
+        assert(to <= getNumRecord() && "[Error]: Index overflow");
+        for (size_t i = from; i < to; ++i)
+            records[i].tangent = ScalarType(0);
+    }
+
+    template<class ScalarType>
     void DiffTracer<ScalarType>::forget(size_t fromIndex) {
-        operands.resize(records[fromIndex].startOperandId);
+        assert(fromIndex < getNumRecord() && "[Error]: forgeting a non existent, this may be a bug");
+        operands.resize(records[fromIndex].getStartOperandId());
         records.resize(fromIndex);
     }
 

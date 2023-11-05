@@ -26,13 +26,13 @@ namespace Physica::Core {
         Utils::DirStack dir(folder);
         dir.push("train-labels.idx1-ubyte");
         trainLabels = readLabels(dir.toPath());
-        if (getNumTrainLabel() != 60000)
+        if (trainLabels.getLength() != 60000)
             throw BadFileFormatException("[Error]: Bad label file");
         dir.pop();
 
         dir.push("t10k-labels.idx1-ubyte");
         testLabels = readLabels(dir.toPath());
-        if (getNumTestLabel() != 10000)
+        if (testLabels.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad label file");
         dir.pop();
 

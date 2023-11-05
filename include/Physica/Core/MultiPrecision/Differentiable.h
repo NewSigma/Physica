@@ -25,7 +25,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, DiffMode M>
         class Traits<Differentiable<T, M>> {
-            static_assert(!Traits<T>::isDifferentiable, "[Error]: Nested Differentiable is not allowed");
+            static_assert(!Traits<T>::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
             using RealT = typename T::RealType;
             using ComplexT = typename T::ComplexType;
         public:
@@ -97,6 +97,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
+        /* Static members */
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType>
@@ -127,11 +130,16 @@ namespace Physica::Core {
         void swap(Differentiable& obj) noexcept;
         /* Getters */
         [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
-        [[nodiscard]] const ScalarType& getTangent() const noexcept;
+        [[nodiscard]] inline const ScalarType& getTangent() const noexcept;
         [[nodiscard]] size_t getTraceIndex() const noexcept { return index; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
+        /* Setters */
+        inline void setValue(const ScalarType& x);
+        /* Static members */
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>

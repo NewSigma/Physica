@@ -49,6 +49,13 @@ namespace Physica::Core {
     size_t Differentiable<ScalarType, DiffMode::Forward>::getTraceIndex() const {
         throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
     }
+
+    template<class ScalarType>
+    template<class Distribution, class RandomGenerator>
+    [[nodiscard]] inline Differentiable<ScalarType, DiffMode::Forward>
+    Differentiable<ScalarType, DiffMode::Forward>::random_any(Distribution& dist, RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_any(dist, gen));
+    }
     ////////////////////////////////////////////////////////////
     template<class ScalarType>
     template<class AnyScalar>
@@ -97,9 +104,21 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getTangent() const noexcept {
-        const auto& records = DiffTracerType::getInstance().getRecords();
-        return records[index].tangent;
+    inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getTangent() const noexcept {
+        return DiffTracerType::getInstance()[index].tangent;
+    }
+
+    template<class ScalarType>
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::setValue(const ScalarType& x) {
+        value = x;
+        DiffTracerType::getInstance()[index].value = x;
+    }
+
+    template<class ScalarType>
+    template<class Distribution, class RandomGenerator>
+    [[nodiscard]] inline Differentiable<ScalarType, DiffMode::Reverse>
+    Differentiable<ScalarType, DiffMode::Reverse>::random_any(Distribution& dist, RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_any(dist, gen));
     }
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>

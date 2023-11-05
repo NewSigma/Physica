@@ -49,6 +49,9 @@ namespace Physica::Core {
         LinearLayer& operator=(LinearLayer obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] inline VectorType forward(const VectorType& x) const;
+        template<class Optimizer>
+        inline void opt_step(const Optimizer& opt);
+
         template<class RandomGenerator>
         void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
@@ -66,6 +69,13 @@ namespace Physica::Core {
     inline typename LinearLayer<ScalarType>::VectorType LinearLayer<ScalarType>::forward(const VectorType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         return weights * x + bias;
+    }
+
+    template<class ScalarType>
+    template<class Optimizer>
+    inline void LinearLayer<ScalarType>::opt_step(const Optimizer& opt) {
+        opt.step(weights);
+        opt.step(bias);
     }
 
     template<class ScalarType>

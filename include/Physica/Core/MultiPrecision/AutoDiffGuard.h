@@ -18,36 +18,35 @@
  */
 #pragma once
 
-#include "DifferentiableImpl/DiffTracer.h"
+#include "Differentiable.h"
 
 namespace Physica::Core {
     template<class ScalarType>
-    class DiffTraceGuard {
+    class AutoDiffGuard {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+
         size_t recordIndex;
     public:
-        DiffTraceGuard(const DiffTraceGuard&) = delete;
-        DiffTraceGuard(DiffTraceGuard&&) noexcept = default;
-        ~DiffTraceGuard();
+        AutoDiffGuard();
+        AutoDiffGuard(const AutoDiffGuard&) = delete;
+        AutoDiffGuard(AutoDiffGuard&&) noexcept = default;
+        ~AutoDiffGuard();
         /* Operators */
-        DiffTraceGuard& operator=(DiffTraceGuard obj) noexcept { swap(obj); return *this; }
+        AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(DiffTraceGuard& obj) noexcept { std::swap(recordIndex, obj.recordIndex); }
-        /* Static members */
-        [[nodiscard]] static DiffTraceGuard make_guard() noexcept;
+        void swap(AutoDiffGuard& obj) noexcept { std::swap(recordIndex, obj.recordIndex); }
     private:
-        DiffTraceGuard(size_t index);
+        AutoDiffGuard(size_t index);
     };
 
     template<class ScalarType>
-    DiffTraceGuard<ScalarType>::DiffTraceGuard(size_t index) : recordIndex(index) {}
+    AutoDiffGuard<ScalarType>::AutoDiffGuard() : recordIndex(DiffTracer<ScalarType>::getInstance().getNumRecord()) {}
 
     template<class ScalarType>
-    DiffTraceGuard<ScalarType>::~DiffTraceGuard() {
+    AutoDiffGuard<ScalarType>::AutoDiffGuard(size_t index) : recordIndex(index) {}
+
+    template<class ScalarType>
+    AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
         DiffTracer<ScalarType>::getInstance().forget(recordIndex);
-    }
-
-    template<class ScalarType>
-    DiffTraceGuard<ScalarType> DiffTraceGuard<ScalarType>::make_guard() noexcept {
-        return DiffTraceGuard(DiffTracer<ScalarType>::getInstance().getNumRecord());
     }
 }

@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Differentiable.h"
-#include "Physica/Core/MultiPrecision/DiffTraceGuard.h"
+#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 
 using namespace Physica::Core;
@@ -29,7 +29,7 @@ using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 int main() {
     SilveraGoldman<ScalarType> sg(1.0);
     {
-        auto guard = DiffTraceGuard<PlainScalar>::make_guard();
+        const AutoDiffGuard<PlainScalar> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.pot_functor(0, 0, r, r2).reverse();
@@ -39,7 +39,7 @@ int main() {
             return 1;
     }
     {
-        auto guard = DiffTraceGuard<PlainScalar>::make_guard();
+        const AutoDiffGuard<PlainScalar> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.force_functor(0, 0, r, r2).reverse();

@@ -569,7 +569,7 @@ namespace Physica::Core {
             factor = reciprocal(exp(v).sum());
         }
 
-        [[nodiscard]] ScalarType calc(size_t i) const { return v.calc(i) * factor; }
+        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i)) * factor; }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////

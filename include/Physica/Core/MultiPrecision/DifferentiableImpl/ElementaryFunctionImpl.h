@@ -33,6 +33,19 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode>
+    inline Differentiable<ScalarType, Mode> relu(const Differentiable<ScalarType, Mode>& s) {
+        const ScalarType value = relu(s.getValue());
+        if constexpr (Mode == DiffMode::Forward)
+            return {value, s.getValue().isPositive() ? s.getTangent() : ScalarType(0)};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Relu);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
+    }
+
+    template<class ScalarType, DiffMode Mode>
     __host__ __device__ inline Differentiable<ScalarType, Mode> square(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = square(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
@@ -88,7 +101,15 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> ln(const Differentiable<ScalarType, Mode>& s) {
-        return {ln(s.getValue()), s.getTangent() / s.getValue()};
+        const ScalarType value = ln(s.getValue());
+        if constexpr (Mode == DiffMode::Forward)
+            return {value, s.getTangent() / s.getValue()};
+        else {
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const size_t index = tracer.pushOperation(value, ExpressionType::Ln);
+            tracer.pushOperand(s.getTraceIndex());
+            return {value, index};
+        }
     }
 
     template<class ScalarType, DiffMode Mode>

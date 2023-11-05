@@ -20,7 +20,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
-#include "Physica/Core/MultiPrecision/DiffTraceGuard.h"
+#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
@@ -135,20 +135,20 @@ namespace Physica {
         void forceTest() {
             PositionMatrix force_diff(pos.getRow(), pos.getColumn());
             {
-                [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+                const AutoDiffGuard<Scalar<Double>> guard{};
                 ewald.potentialEnergy(pos).reverse();
                 for (size_t i = 0; i < pos.getRow(); ++i)
                     for (size_t j = 0; j < pos.getColumn(); ++j)
                         force_diff(i, j) = -pos(i, j).getTangent();
             }
-            [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+            const AutoDiffGuard<Scalar<Double>> guard{};
             const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
             if (!vectorNear(force, force_diff.flatten(), 1E-12))
                 exit(EXIT_FAILURE);
         }
 
         void functorTest() {
-            [[maybe_unused]] auto guard = DiffTraceGuard<Scalar<Double>>::make_guard();
+            const AutoDiffGuard<Scalar<Double>> guard{};
             const ScalarType r = 2;
             const ScalarType r2 = square(r);
             ewald.pot_functor(0, 1, r, r2).reverse();

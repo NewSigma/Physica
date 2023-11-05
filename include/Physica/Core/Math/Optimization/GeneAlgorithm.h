@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -64,4 +64,4 @@ namespace Physica::Core {
     };
 }
 
-#include "GeneAlgorithmImpl.h"
+#include "OptimizationImpl/GeneAlgorithmImpl.h"

@@ -32,6 +32,7 @@ namespace Physica::Core {
     public:
         constexpr static size_t ImageSize = 28;
         constexpr static size_t NumPixelInImage = ImageSize * ImageSize;
+        constexpr static size_t NumCategory = 10;
         struct ImageType {
             unsigned char pixels[NumPixelInImage];
             /* Operations */
@@ -63,10 +64,13 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LabelArray& getTrainLabels() const noexcept { return trainLabels; }
         [[nodiscard]] const LabelArray& getTestLabels() const noexcept { return testLabels; }
-        [[nodiscard]] size_t getNumTrainLabel() const noexcept { return trainLabels.getLength(); }
-        [[nodiscard]] size_t getNumTestLabel() const noexcept { return testLabels.getLength(); }
         [[nodiscard]] const DataArray& getTrainDatas() const noexcept { return trainDatas; }
         [[nodiscard]] const DataArray& getTestDatas() const noexcept { return testDatas; }
+        [[nodiscard]] size_t getNumTrainData() const noexcept { return trainDatas.getLength(); }
+        [[nodiscard]] size_t getNumTestData() const noexcept { return testDatas.getLength(); }
+        /* Static members */
+        template<class ScalarType>
+        [[nodiscard]] static Vector<ScalarType, NumCategory> makeLabelVector(unsigned char label);
     private:
         [[nodiscard]] static LabelArray readLabels(const std::string& path);
         [[nodiscard]] static DataArray readDatas(const std::string& path);
@@ -78,6 +82,14 @@ namespace Physica::Core {
         Vector<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);
+        return result;
+    }
+
+    template<class ScalarType>
+    Vector<ScalarType, Mnist::NumCategory> Mnist::makeLabelVector(unsigned char label) {
+        assert(label < NumCategory && "[Error]: Invalid category");
+        Vector<ScalarType, Mnist::NumCategory> result(NumCategory, 0);
+        result[label] = ScalarType(1);
         return result;
     }
 }
