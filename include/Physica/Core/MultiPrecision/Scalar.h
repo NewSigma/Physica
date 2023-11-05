@@ -221,9 +221,11 @@ namespace Physica::Core {
         /* Static Members */
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
         template<class RandomGenerator>
-        [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
+        [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
     };
 
@@ -281,9 +283,11 @@ namespace Physica::Core {
         /* Static Members */
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.d > 0 && s2.d > 0) || (s1.d < 0 && s2.d < 0); }
         template<class RandomGenerator>
-        [[nodiscard]] static Scalar random_uniform(RandomGenerator& gen);
+        [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static Scalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }
     };
 

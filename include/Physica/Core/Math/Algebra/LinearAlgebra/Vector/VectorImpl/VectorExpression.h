@@ -540,7 +540,38 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
 
+    template<class VectorType>
+    class VectorExpression<ExpressionType::Relu, VectorType>
+            : public RValueVector<VectorExpression<ExpressionType::Relu, VectorType>> {
+        using Base = RValueVector<VectorExpression<ExpressionType::Relu, VectorType>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
 
+        [[nodiscard]] ScalarType calc(size_t i) const { return relu(v.calc(i)); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class VectorExpression<ExpressionType::Softmax, VectorType>
+            : public RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>> {
+        using Base = RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const VectorType& v;
+        ScalarType factor;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {
+            factor = reciprocal(exp(v).sum());
+        }
+
+        [[nodiscard]] ScalarType calc(size_t i) const { return v.calc(i) * factor; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
@@ -659,6 +690,12 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
+    inline VectorExpression<ExpressionType::Relu, VectorType> relu(
+            const RValueVector<VectorType>& v) {
+        return VectorExpression<ExpressionType::Relu, VectorType>(v);
+    }
+
+    template<class VectorType>
     inline VectorExpression<ExpressionType::Square, VectorType> square(const RValueVector<VectorType>& v) {
         return VectorExpression<ExpressionType::Square, VectorType>(v);
     }
@@ -690,5 +727,11 @@ namespace Physica::Core {
     inline VectorExpression<ExpressionType::Cos, VectorType> cos(
             const RValueVector<VectorType>& v) {
         return VectorExpression<ExpressionType::Cos, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<ExpressionType::Softmax, VectorType> softmax(
+            const RValueVector<VectorType>& v) {
+        return VectorExpression<ExpressionType::Softmax, VectorType>(v);
     }
 }

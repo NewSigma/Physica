@@ -130,7 +130,7 @@ namespace Physica::Core {
     ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve(Function func, RandomGenerator& generator) const {
         ScalarType result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            VectorType x = VectorType::template random<RandomGenerator>(Base::from(), Base::to(), generator);
+            VectorType x = VectorType::template random_uniform(Base::from(), Base::to(), generator);
             toNextMean(result, i, func(x));
         }
 

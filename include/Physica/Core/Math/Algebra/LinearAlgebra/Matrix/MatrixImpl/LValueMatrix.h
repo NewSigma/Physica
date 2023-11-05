@@ -103,6 +103,13 @@ namespace Physica::Core {
 
         template<class OtherDerived>
         void assignTo(LValueMatrix<OtherDerived>& target) const;
+
+        template<class RandomGenerator>
+        void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }

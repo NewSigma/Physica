@@ -21,6 +21,7 @@
 #include <string>
 #include <fstream>
 #include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     /**
@@ -28,11 +29,16 @@ namespace Physica::Core {
      * [1] http://yann.lecun.com/exdb/mnist/
      */
     class Mnist {
+    public:
         constexpr static size_t ImageSize = 28;
+        constexpr static size_t NumPixelInImage = ImageSize * ImageSize;
         struct ImageType {
-            unsigned char pixels[ImageSize * ImageSize];
+            unsigned char pixels[NumPixelInImage];
+            /* Operations */
+            template<class ScalarType>
+            [[nodiscard]] Vector<ScalarType> asVector() const;
         };
-
+    private:
         union IntDecomp {
             char c[4];
             int32_t i;
@@ -40,7 +46,7 @@ namespace Physica::Core {
 
         using LabelArray = Utils::Array<unsigned char>;
         using DataArray = Utils::Array<ImageType>;
-    private:
+
         LabelArray trainLabels;
         LabelArray testLabels;
         DataArray trainDatas;
@@ -66,4 +72,12 @@ namespace Physica::Core {
         [[nodiscard]] static DataArray readDatas(const std::string& path);
         [[nodiscard]] static int32_t readInt(std::ifstream& fin);
     };
+
+    template<class ScalarType>
+    Vector<ScalarType> Mnist::ImageType::asVector() const {
+        Vector<ScalarType> result(NumPixelInImage);
+        for (size_t i = 0; i < NumPixelInImage; ++i)
+            result[i] = ScalarType(pixels[i]);
+        return result;
+    }
 }

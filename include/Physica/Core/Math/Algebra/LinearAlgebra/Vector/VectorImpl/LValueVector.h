@@ -60,8 +60,12 @@ namespace Physica::Core {
         [[nodiscard]] inline const LVectorBlock<Derived> segment(size_t from, size_t to) const;
 
         inline void toUnit();
-        template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> void random_normal(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        inline void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
         [[nodiscard]] bool isZero() const;
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);

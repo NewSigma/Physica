@@ -349,6 +349,36 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class RandomGenerator>
+    void LValueMatrix<Derived>::random_uniform(RandomGenerator& gen) {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t major = 0; major < maxMajor; ++major)
+            for (size_t minor = 0; minor < maxMinor; ++minor)
+                refFromMajorMinor(major, minor) = ScalarType::random_uniform(gen);
+    }
+
+    template<class Derived>
+    template<class RandomGenerator>
+    void LValueMatrix<Derived>::random_normal(RandomGenerator& gen) {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t major = 0; major < maxMajor; ++major)
+            for (size_t minor = 0; minor < maxMinor; ++minor)
+                refFromMajorMinor(major, minor) = ScalarType::random_normal(gen);
+    }
+
+    template<class Derived>
+    template<class Distribution, class RandomGenerator>
+    void LValueMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t major = 0; major < maxMajor; ++major)
+            for (size_t minor = 0; minor < maxMinor; ++minor)
+                refFromMajorMinor(major, minor) = ScalarType::random_any(dist, gen);
+    }
+
+    template<class Derived>
     typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::sum() const {
         ScalarType result;
         if constexpr (isColumnMatrix) {

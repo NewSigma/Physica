@@ -36,6 +36,11 @@ namespace Physica::Core {
     Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s);
 
     template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s) {
+        return s.isPositive() ? s : Scalar<Option>(0);
+    }
+
+    template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) {
         return s * s;
     }

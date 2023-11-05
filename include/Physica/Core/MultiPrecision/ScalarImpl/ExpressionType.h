@@ -36,12 +36,14 @@ namespace Physica::Core {
         Sqrt,
         Cbrt,
         Abs,
+        Relu,
         Square,
         Ln,
         Exp,
         Pow,
         Sin,
-        Cos
+        Cos,
+        Softmax
     };
 
     constexpr unsigned int numOperand(ExpressionType type) {

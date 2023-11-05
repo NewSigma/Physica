@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,14 +18,27 @@
  */
 #pragma once
 
-#include <climits>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
+    template<class ScalarType>
+    class Loss {
+        using VectorType = Vector<ScalarType>;
+    public:
+        [[nodiscard]] static ScalarType crossEntropy(const VectorType& result, const VectorType& answer);
+        [[nodiscard]] static ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss);
+        [[nodiscard]] static ScalarType mixed_loss(ScalarType train_loss, ScalarType valid_loss);
+    };
+
+    template<class ScalarType>
+    ScalarType Loss<ScalarType>::crossEntropy(const VectorType& result, const VectorType& answer) {
+        return -(ln(softmax(result)) * answer);
+    }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting
      */
     template<class ScalarType>
-    ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss) {
+    ScalarType Loss<ScalarType>::polar_rate(ScalarType train_loss, ScalarType valid_loss) {
         const ScalarType total = train_loss + valid_loss;
         const ScalarType delta = train_loss - valid_loss;
         if (abs(delta) * ScalarType(std::numeric_limits<ScalarType>::epsilon()) >= total)
@@ -33,5 +46,8 @@ namespace Physica::Core {
         return delta / total * ScalarType(2);
     }
 
-    double mixed_loss(double train_loss, double valid_loss);
+    template<class ScalarType>
+    ScalarType Loss<ScalarType>::mixed_loss(ScalarType train_loss, ScalarType valid_loss) {
+        return std::max(train_loss, valid_loss) + abs(train_loss - valid_loss);
+    }
 }

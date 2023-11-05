@@ -26,6 +26,9 @@ namespace Physica::Core {
     __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
 
     template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s);
+
+    template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);
 
     template<ScalarOption Option>

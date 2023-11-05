@@ -101,14 +101,19 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
+    inline Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator>
-    Scalar<Float> Scalar<Float>::random_normal(RandomGenerator& gen) {
+    inline Scalar<Float> Scalar<Float>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<float> dist{};
+        return Scalar(dist(gen));
+    }
+
+    template<class Distribution, class RandomGenerator>
+    inline Scalar<Float> Scalar<Float>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Scalar(dist(gen));
     }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
@@ -137,14 +142,19 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {
+    inline Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<double> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator>
-    Scalar<Double> Scalar<Double>::random_normal(RandomGenerator& gen) {
+    inline Scalar<Double> Scalar<Double>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
+        return Scalar(dist(gen));
+    }
+
+    template<class Distribution, class RandomGenerator>
+    inline Scalar<Double> Scalar<Double>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Scalar(dist(gen));
     }
 }

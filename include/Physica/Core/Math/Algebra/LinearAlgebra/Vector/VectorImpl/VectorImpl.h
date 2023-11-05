@@ -70,28 +70,19 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random(size_t len, RandomGenerator& gen) {
-        This result(len);
-        for (size_t i = 0; i < len; ++i)
-            result[i] = T::random_uniform(gen);
-        return result;
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    template<class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random(const Vector& v1, const Vector& v2, RandomGenerator& gen) {
-        assert(v1.getLength() == v2.getLength());
-        This result = random(v1.getLength(), gen);
-        result = v1 + hadamard((v2 - v1), result);
-        return result;
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    template<class RandomGenerator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
         This result(len);
-        for (auto& elem : result)
-            elem = T::random_uniform(gen);
+        result.random_uniform(gen);
+        return result;
+    }
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class RandomGenerator>
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(
+            const Vector& v1, const Vector& v2, RandomGenerator& gen) {
+        assert(v1.getLength() == v2.getLength());
+        This result = random_uniform(v1.getLength(), gen);
+        result = v1 + hadamard((v2 - v1), result);
         return result;
     }
 
@@ -99,17 +90,16 @@ namespace Physica::Core {
     template<class RandomGenerator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
         This result(len);
-        for (auto& elem : result)
-            elem = T::random_normal(gen);
+        result.random_normal(gen);
         return result;
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     template<class Distribution, class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_any(
+            size_t len, Distribution& dist, RandomGenerator& gen) {
         This result(len);
-        for (auto& elem : result)
-            elem = dist(gen);
+        result.random_any(gen);
         return result;
     }
     /**

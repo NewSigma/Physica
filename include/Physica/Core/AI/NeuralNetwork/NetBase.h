@@ -18,30 +18,26 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Layer/LayerBase.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
-
     template<class Derived>
-    class LayerBase : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class NetBase : public LayerBase<Derived> {
+        using Base = LayerBase<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using VectorType = Vector<ScalarType>;
+        using typename Base::ScalarType;
+        using typename Base::VectorType;
     public:
-        ~LayerBase() = default;
+        ~NetBase() = default;
         /* Operations */
-        [[nodiscard]] VectorType forward(const VectorType& x) const { return Base::getDerived().forward(x); }
+        void init() { Base::getDerived().init(); }
+        [[nodiscard]] ScalarType loss(const VectorType& input, const VectorType& answer) { return Base::getDerived().loss(input, answer); }
     protected:
-        LayerBase() = default;
-        LayerBase(const LayerBase&) = default;
-        LayerBase(LayerBase&&) noexcept = default;
+        NetBase() = default;
+        NetBase(const NetBase&) = default;
+        NetBase(NetBase&&) noexcept = default;
         /* Operators */
-        LayerBase& operator=(const LayerBase&) = default;
-        LayerBase& operator=(LayerBase&&) noexcept = default;
+        NetBase& operator=(const NetBase&) = default;
+        NetBase& operator=(NetBase&&) noexcept = default;
     };
 }

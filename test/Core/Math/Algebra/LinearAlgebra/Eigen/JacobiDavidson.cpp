@@ -31,7 +31,7 @@ int main() {
     EigenSolver<MatrixType> eig(hermite, false);
     eig.sort();
     JacobiDavidson<ComplexType> jd(hermite.getRow(), 4);
-    jd.compute(hermite, Vector<ComplexType>::random(data.getRow(), gen));
+    jd.compute(hermite, Vector<ComplexType>::random_uniform(data.getRow(), gen));
     jd.sort();
 
     if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))

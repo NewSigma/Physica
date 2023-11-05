@@ -99,6 +99,9 @@ namespace Physica::Core {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
+        using Base::random_uniform;
+        using Base::random_normal;
+        using Base::random_any;
         inline void resize(size_t row, size_t column);
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
